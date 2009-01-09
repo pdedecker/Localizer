@@ -124,6 +124,13 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	XOPNotice("Calculating");
 	
 	for (unsigned long i = 0; i < number_of_images; i++) {
+		// check if the user wants to cancel the calculation
+		status = CheckAbort(0);
+		if (status == -1) {
+			XOPNotice(" Abort requested by user\r");
+			return 0;
+		}
+		
 		current_image = image_loader->get_nth_image(i);
 		
 		thresholded_image = do_processing_and_thresholding(current_image, preprocessor, thresholder, postprocessor);
@@ -209,6 +216,13 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	XOPNotice("Calculating");
 	
 	for (unsigned long i = 0; i < number_of_images; i++) {
+		// check if the user wants to cancel the calculation
+		status = CheckAbort(0);
+		if (status == -1) {
+			XOPNotice( " Abort requested by user\r");
+			return 0;
+		}
+		
 		current_image = image_loader->get_nth_image(i);
 		
 		thresholded_image = do_processing_and_thresholding(current_image, preprocessor, thresholder, postprocessor);
