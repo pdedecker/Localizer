@@ -183,6 +183,7 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	unsigned long number_of_images;
 	int status;
 	unsigned int numberOfProcessors = boost::thread::hardware_concurrency();
+	unsigned int numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	// vector<pthread_t> threads;
@@ -243,10 +244,15 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		}
 		
 		nPositions = positions->get_x_size();
-		positionsPerThread = nPositions / numberOfProcessors;
+		numberOfThreads = nPositions / 4;	// assume that each thread needs about 4 positions in order for the parallel processing to be useful
+		if (numberOfThreads > numberOfProcessors) {
+			numberOfThreads = numberOfProcessors;	// never spawn more threads than there are processors
+		}
 		
-		if ((positionsPerThread < 5) || (numberOfProcessors == 1)) {	// there is no real reason to bother with the increased overhead of the parallel approach
-																		// use the single-threaded approach (in this frame) and move on to the next one
+		positionsPerThread = nPositions / numberOfThreads;
+		
+		if (numberOfThreads == 1) {	// there is no real reason to bother with the increased overhead of the parallel approach, or the computer has only a single core
+									// use the single-threaded approach (in this frame) and move on to the next one
 			fitted_positions = positions_fitter->fit_positions(current_image, positions);
 			
 			// now we need to pass the fitted images to the output routine
@@ -271,7 +277,7 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		threads.clear();
 		
 		endPosition = (unsigned long)-1;
-		for (unsigned long l = 0; l < numberOfProcessors - 1; ++l) {
+		for (unsigned long l = 0; l < numberOfThreads - 1; ++l) {
 			startPosition = endPosition + 1;
 			endPosition = startPosition + positionsPerThread - 1;
 			nLocalPositions = endPosition - startPosition + 1;
@@ -289,18 +295,18 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		endPositions.push_back(endPosition);
 		
 		// now set up the data that will be passed to each thread
-		for (unsigned long j = 0; j < numberOfProcessors; ++j) {
+		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			threadData.push_back(threadStartData(current_image, positions_fitter, positions, fitted_positions, startPositions.at(j), endPositions.at(j)));
 		}
 		
 		// now start the threads
-		for (unsigned long j = 0; j < numberOfProcessors; ++j) {
+		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart, threadData.at(j)));
 			threads.push_back(singleThreadPtr);
 		}
 		
 		// wait for the treads to finish
-		for (unsigned long j = 0; j < numberOfProcessors; ++j) {
+		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			threads.at(j)->join();
 		}
 			
