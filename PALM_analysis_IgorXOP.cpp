@@ -362,10 +362,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		
-		// we currently ignore this flag
-		// if the analysis software supports different camera types then we will select the camera type to use
-		// based on this flag
 		camera_type = (unsigned long)(p->camera_type + 0.5);
 	}
 	
