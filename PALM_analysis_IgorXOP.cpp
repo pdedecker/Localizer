@@ -634,6 +634,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	catch (std::range_error err) {
 		XOPNotice(err.what());
 	}
+	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
+		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+	}
 	catch (int e) {
 		return e;
 	}
@@ -768,6 +771,9 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	catch (int e) {
 		imagesAreBeingRead = 0;
 		return e;
+	}
+	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
+		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	
 	
@@ -917,6 +923,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		XOPNotice(err.what());
 		return INDEX_OUT_OF_RANGE;
 	}
+	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
+		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+	}
 	catch (int e) {
 		return e;
 	}
@@ -1055,6 +1064,9 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	catch (std::range_error err) {
 		XOPNotice(err.what());
 		return INDEX_OUT_OF_RANGE;
+	}
+	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
+		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	catch (int e) {
 		return e;
