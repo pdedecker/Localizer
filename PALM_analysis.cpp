@@ -248,6 +248,9 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		if (numberOfThreads > numberOfProcessors) {
 			numberOfThreads = numberOfProcessors;	// never spawn more threads than there are processors
 		}
+		if (numberOfThreads == 0) {
+			numberOfThreads = 1;
+		}
 		
 		positionsPerThread = nPositions / numberOfThreads;
 		
