@@ -117,8 +117,8 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	
 	IgorOutputWriter output_writer(output_wave_name);
 	
-	for (int i = 0; i < 9; i++) {
-		progress_indices[i] = floor((double)number_of_images / 100.0 * (double)(i + 1));
+	for (int i = 0; i < 9; ++i) {
+		progress_indices[i] = floor((double)(i + 1) / 10.0 * (double)number_of_images);
 	}
 	
 	XOPNotice("Calculating");
