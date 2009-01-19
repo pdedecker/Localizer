@@ -349,10 +349,6 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	unsigned int numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
-	// vector<pthread_t> threads;
-	// threads.resize(numberOfProcessors, pthread_t());
-	// vector <boost::shared_ptr<encap_gsl_matrix> > localFittedPositions;
-	// localFittedPositions.resize(numberOfProcessors, boost::shared_ptr<encap_gsl_matrix>());
 	vector<unsigned long> startPositions;
 	vector<unsigned long> endPositions;
 	vector<boost::shared_ptr<threadStartData2> > threadData;
@@ -406,7 +402,8 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 			}
 		}
 		
-		// now start the threads
+		 // now start the threads
+		threads.clear();
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart2, threadData.at(j)));
 			threads.push_back(singleThreadPtr);
@@ -415,7 +412,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 		// wait for the threads to finish
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			threads.at(j)->join();
-		}
+		} 
 		
 		// output the fitted positions
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
@@ -467,7 +464,6 @@ void fitPositionsThreadStart2(boost::shared_ptr<threadStartData2> data) {
 	thresholded_image = do_processing_and_thresholding(data->image, data->preprocessor, data->thresholder, data->postprocessor);
 		
 	positions = data->particleFinder->findPositions(data->image, thresholded_image);
-	
 	
 	if (positions.get() == NULL) {
 		// if we get back NULL and no exception has been thrown then this means that we found no positions
@@ -708,15 +704,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::
 	boost::shared_ptr<encap_gsl_matrix_uchar> postprocessed_image;
 	
 	if (preprocessor.get() != NULL) {
-		
 		preprocessed_image = preprocessor->do_preprocessing(image);
+		thresholded_image = thresholder->do_thresholding(preprocessed_image);
 		
-		image = preprocessed_image;	// this does not make for a memory leak, because the calling routine will need the original image later
-		// so that routine will still have the correct pointer to image
-		// the preprocessed image itself is only useful within this routine, so we free it at the end
+	} else {
+		thresholded_image = thresholder->do_thresholding(image);
 	}
-	
-	thresholded_image = thresholder->do_thresholding(image);
 	
 	if (postprocessor.get() != NULL) {
 		postprocessed_image = postprocessor->do_postprocessing(thresholded_image, image);
