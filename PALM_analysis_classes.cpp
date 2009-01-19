@@ -4128,6 +4128,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 		if (forwardPlanExists != 0) {
 			fftw_destroy_plan(forwardPlan);
 			fftw_destroy_plan(reversePlan);
+			reversePlanExists = 0;
 		}
 		
 		xSize = x_size1;
