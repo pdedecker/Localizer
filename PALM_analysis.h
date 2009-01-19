@@ -97,7 +97,7 @@ public:
 };
 	
 
-void fitPositionsThreadStart2(threadStartData2& data);
+void fitPositionsThreadStart2(boost::shared_ptr<threadStartData2> data);
 
 
 int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 

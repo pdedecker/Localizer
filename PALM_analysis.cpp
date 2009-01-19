@@ -355,7 +355,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	// localFittedPositions.resize(numberOfProcessors, boost::shared_ptr<encap_gsl_matrix>());
 	vector<unsigned long> startPositions;
 	vector<unsigned long> endPositions;
-	vector<threadStartData2> threadData;
+	vector<boost::shared_ptr<threadStartData2> > threadData;
 	unsigned long nFramesRemaining;
 	
 	
@@ -376,7 +376,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	
 	// set up the vector containing the data for the threads
 	for (unsigned int i = 0; i < numberOfProcessors; ++i) {
-		threadData.push_back(threadStartData2(thresholder, preprocessor, postprocessor, particle_finder, positions_fitter));
+		threadData.push_back(boost::shared_ptr<threadStartData2> (new threadStartData2(thresholder, preprocessor, postprocessor, particle_finder, positions_fitter)));
 	}
 	
 	for (unsigned long i = 0; i < number_of_images; ) {	// i is incremented when assigning the threads
@@ -398,7 +398,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
 			current_image = image_loader->get_nth_image(i);
 			++i;
-			threadData.at(j).image = current_image;
+			threadData.at(j)->image = current_image;
 			
 			if (i == progress_indices[current_progress_index]) {
 				XOPNotice(".");
@@ -419,7 +419,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 		
 		// output the fitted positions
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
-			output_writer.append_new_positions(threadData.at(j).fittedPositions);
+			output_writer.append_new_positions(threadData.at(j)->fittedPositions);
 		}
 	}
 	
@@ -458,26 +458,26 @@ void fitPositionsThreadStart(threadStartData startData) {
 	
 }
 
-void fitPositionsThreadStart2(threadStartData2& data) {
+void fitPositionsThreadStart2(boost::shared_ptr<threadStartData2> data) {
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
 	boost::shared_ptr<encap_gsl_matrix> positions;
 	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
 		
-	thresholded_image = do_processing_and_thresholding(data.image, data.preprocessor, data.thresholder, data.postprocessor);
+	thresholded_image = do_processing_and_thresholding(data->image, data->preprocessor, data->thresholder, data->postprocessor);
 		
-	positions = data.particleFinder->findPositions(data.image, thresholded_image);
+	positions = data->particleFinder->findPositions(data->image, thresholded_image);
 	
 	
 	if (positions.get() == NULL) {
 		// if we get back NULL and no exception has been thrown then this means that we found no positions
-		data.fittedPositions = positions;
+		data->fittedPositions = positions;
 		
 		return;
 	}
 	
-	fitted_positions = data.positionsFitter->fit_positions(data.image, positions);
-	data.fittedPositions = fitted_positions;
+	fitted_positions = data->positionsFitter->fit_positions(data->image, positions);
+	data->fittedPositions = fitted_positions;
 	
 	return;
 	
