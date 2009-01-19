@@ -524,25 +524,25 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold_parameter));
 				break;
 			case 1:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
 				break;
 			case 2:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
 				break;
 			case 3:	// Igor's adaptive approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
 				break;
 			case 4:	// Igor's first fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
 				break;
 			case 5:	// Igor's second fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
 				break;
 			case 6:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 				break;
 			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_MTT_FFT(threshold_parameter, initial_width));
@@ -1222,31 +1222,31 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		}
 		switch(method) {
 			case 0:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(parameter));
 				break;
 			case 1:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
 				break;
 			case 2:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
 				break;
 			case 3:	// Igor's adaptive approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
 				break;
 			case 4:	// Igor's first fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
 				break;
 			case 5:	// Igor's second fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
 				break;
 			case 6:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 				break;
 			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle(CCD_Frame, parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_MTT_FFT(CCD_Frame, parameter, parameter2));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_MTT_FFT(parameter, parameter2));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;

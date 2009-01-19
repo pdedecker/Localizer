@@ -2707,20 +2707,19 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 	}
 }
 
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+	
 	unsigned long x_size, y_size;
 	double current_value;
-	double threshold = parameter;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
-	thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	for (unsigned long i = 0; i < x_size; i++) {
 		for (unsigned long j = 0; j < y_size; j++) {
-			current_value = CCD_Frame->get(i, j);
+			current_value = image->get(i, j);
 			if (current_value >= threshold) {
 				thresholded_image->set(i, j, 255);
 			} else {
@@ -2730,22 +2729,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding
 	}
 	
 	return thresholded_image;
-}
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
 
 }
-	
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -2761,12 +2748,16 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
 	dimensionSizes[2] = 0;
+	
+	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
+	threadMutex.lock();
+	
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -2774,7 +2765,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 		throw result;
 	}
 	
-	thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -2782,7 +2773,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = CCD_Frame->get(i, j);
+			value[0] = image->get(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -2820,21 +2811,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 		throw result;
 	}
 	
+	/****** release the mutex ******/
+	threadMutex.unlock();
+	
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -2850,12 +2833,15 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
 	dimensionSizes[2] = 0;
+	
+	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
+	threadMutex.lock();
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -2863,7 +2849,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 		throw result;
 	}
 	
-	thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -2871,7 +2857,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = CCD_Frame->get(i, j);
+			value[0] = image->get(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -2909,21 +2895,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 		throw result;
 	}
 	
+	/****** release the mutex ******/
+	threadMutex.unlock();
+	
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -2942,8 +2920,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	waveHndl tmp_storage_wave;
 	waveHndl thresholded_wave;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
 	// we make two images for the original and the transposed threshold
 	original_thresholded = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
@@ -2952,6 +2930,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
 	dimensionSizes[2] = 0;
+	
+	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
+	threadMutex.lock();
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -2965,7 +2946,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = CCD_Frame->get(i, j);
+			value[0] = image->get(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -3067,21 +3048,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 		throw result;
 	}
 	
+	/****** release the mutex ******/
+	threadMutex.unlock();
+	
 	return original_thresholded;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -3097,12 +3070,15 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
 	dimensionSizes[2] = 0;
+	
+	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
+	threadMutex.lock();
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -3110,7 +3086,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 		throw result;
 	}
 	
-	thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -3118,7 +3094,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = CCD_Frame->get(i, j);
+			value[0] = image->get(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -3156,21 +3132,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 		throw result;
 	}
 	
-	return thresholded_image;
+	/****** release the mutex ******/
+	threadMutex.unlock();
+	
+	return thresholded_image;	
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -3186,12 +3154,15 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = CCD_Frame->get_x_size();
-	y_size = CCD_Frame->get_y_size();
+	x_size = image->get_x_size();
+	y_size = image->get_y_size();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
 	dimensionSizes[2] = 0;
+	
+	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
+	threadMutex.lock();
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -3199,7 +3170,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 		throw result;
 	}
 	
-	thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -3207,7 +3178,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = CCD_Frame->get(i, j);
+			value[0] = image->get(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -3245,26 +3216,18 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 		throw result;
 	}
 	
+	/****** release the mutex ******/
+	threadMutex.unlock();
+	
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholding() {
-	
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	gsl_histogram *hist;
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
 	
-	unsigned long x_size = CCD_Frame->get_x_size();
-	unsigned long y_size = CCD_Frame->get_y_size();
+	unsigned long x_size = image->get_x_size();
+	unsigned long y_size = image->get_y_size();
 	
 	unsigned long number_of_bins = 256;
 	unsigned long current_threshold_bin = 127;
@@ -3279,7 +3242,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	int converged = 0;
 	
 	// since this is a histogram-based approach we start by constructing the histogram
-	hist = make_histogram_from_matrix(CCD_Frame, number_of_bins);
+	hist = make_histogram_from_matrix(image, number_of_bins);
 	
 	// because this approach is based on thresholding it makes sense to only express the threshold in terms of bins, stored in "current_threshold_bin".
 	// a value of 0 for "current_threshold_bin" means that all bins at index 0 and higher are considered to be 'signal', not 'background'.
@@ -3295,7 +3258,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 			sum += (double)i * gsl_histogram_get(hist, i);
 			denominator_sum += gsl_histogram_get(hist, i);
 		}
-	
+		
 		lower_mean = sum / denominator_sum;
 		
 		// calculate the upper mean
@@ -3319,7 +3282,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	}
 	
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
-							// to indicate this we set everything to 'off' (0)
+		// to indicate this we set everything to 'off' (0)
 		threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 		threshold_image->set_all(0);
 		return threshold_image;
@@ -3330,10 +3293,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	intensity_threshold = lower_bin_limit;
 	
 	// get another threshold class to do the work for us
-	ThresholdImage_Direct thresholder(CCD_Frame, intensity_threshold);
+	ThresholdImage_Direct thresholder(intensity_threshold);
 	
 	try {
-		threshold_image = thresholder.do_thresholding();
+		threshold_image = thresholder.do_thresholding(image);
 	}
 	catch (OUT_OF_MEMORY) {
 		gsl_histogram_free(hist);
@@ -3347,17 +3310,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	return threshold_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholding() {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	gsl_histogram *hist;
 	unsigned long number_of_bins = 256;
 	unsigned long maximum_bin;
@@ -3372,13 +3325,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = CCD_Frame->get_x_size();
-	unsigned long y_size = CCD_Frame->get_y_size();
+	unsigned long x_size = image->get_x_size();
+	unsigned long y_size = image->get_y_size();
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
 	try {
-		hist = make_histogram_from_matrix(CCD_Frame, number_of_bins);
+		hist = make_histogram_from_matrix(image, number_of_bins);
 	}
 	catch (OUT_OF_MEMORY) {
 		string error;
@@ -3443,10 +3396,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	intensity_threshold = lower_bin_limit;
 	
 	// get another threshold class to do the work for us
-	ThresholdImage_Direct thresholder(CCD_Frame, intensity_threshold);
+	ThresholdImage_Direct thresholder(intensity_threshold);
 	
 	try {
-		threshold_image = thresholder.do_thresholding();
+		threshold_image = thresholder.do_thresholding(image);
 	}
 	catch (OUT_OF_MEMORY) {
 		string error;
@@ -3460,36 +3413,24 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	return threshold_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
 
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() {
-	
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = CCD_Frame->get_x_size();
-	unsigned long y_size = CCD_Frame->get_y_size();
+	unsigned long x_size = image->get_x_size();
+	unsigned long y_size = image->get_y_size();
 	
 	boost::shared_ptr<encap_gsl_matrix> averages(new encap_gsl_matrix (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
-	boost::shared_ptr<encap_gsl_matrix> CCD_Frame_squared(new encap_gsl_matrix (x_size, y_size));
+	boost::shared_ptr<encap_gsl_matrix> image_squared(new encap_gsl_matrix (x_size, y_size));
 	boost::shared_ptr<encap_gsl_matrix> summed_squares(new encap_gsl_matrix (x_size, y_size));
 	boost::shared_ptr<encap_gsl_matrix> null_hypothesis(new encap_gsl_matrix (x_size, y_size));
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_window(new encap_gsl_matrix (x_size, y_size));
 	boost::shared_ptr<encap_gsl_matrix> image_Gaussian_convolved(new encap_gsl_matrix (x_size, y_size));	// this is 'alpha' in the original matlab code
 	boost::shared_ptr<encap_gsl_matrix> hypothesis_test(new encap_gsl_matrix (x_size, y_size));	// this is 'test' in the original matlab code
 	
-	parameter = 13;	// TODO: test different values for the window size, and allow a way for this to be set from the command line
 	
 	double average = 0;
-	unsigned long window_size = parameter;	// this is the size of the window over which we calculate the hypotheses
+	unsigned long window_size = 13;	// this is the size of the window over which we calculate the hypotheses
 	unsigned long half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
 	unsigned long window_pixels = window_size * window_size;
 	double double_window_pixels = (double)(window_pixels);
@@ -3510,9 +3451,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() 
 	// we'll use this later
 	for (unsigned long i = 0; i < x_size; i++) {
 		for (unsigned long j = 0; j < y_size; j++) {
-			current_value = CCD_Frame->get(i, j);
+			current_value = image->get(i, j);
 			current_value = current_value * current_value;
-			CCD_Frame_squared->set(i, j, current_value);
+			image_squared->set(i, j, current_value);
 		}
 	}
 	
@@ -3530,7 +3471,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() 
 			
 			for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
 				for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
-					average += CCD_Frame->get(i, j);
+					average += image->get(i, j);
 				}
 			}
 			average /= double_window_pixels;
@@ -3546,7 +3487,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() 
 			current_value = 0;
 			for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
 				for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
-					current_value += CCD_Frame_squared->get(i, j);
+					current_value += image_squared->get(i, j);
 				}
 			}
 			summed_squares->set(k, l, current_value);	// summed_squares is now equal to "Sim2" in the orignal matlab code
@@ -3601,7 +3542,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() 
 			for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
 				for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
 					current_value = Gaussian_window->get(i - k + half_window_size, j - l + half_window_size);
-					current_value *= CCD_Frame->get(i, j);
+					current_value *= image->get(i, j);
 					sum += current_value;
 				}
 			}
@@ -3636,26 +3577,14 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding() 
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholding() {
-	
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = CCD_Frame->get_x_size();
-	unsigned long y_size = CCD_Frame->get_y_size();
+	unsigned long x_size = image->get_x_size();
+	unsigned long y_size = image->get_y_size();
 	
 	boost::shared_ptr<encap_gsl_matrix> averages;
-	boost::shared_ptr<encap_gsl_matrix> CCD_Frame_squared;
+	boost::shared_ptr<encap_gsl_matrix> image_squared;
 	boost::shared_ptr<encap_gsl_matrix> summed_squares;
 	boost::shared_ptr<encap_gsl_matrix> null_hypothesis;
 	boost::shared_ptr<encap_gsl_matrix> image_Gaussian_convolved;
@@ -3679,7 +3608,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	averages = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	averages->set_all(0);
 	
-	CCD_Frame_squared = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	image_squared = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	
 	summed_squares = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	summed_squares->set_all(0);
@@ -3697,9 +3626,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	// we'll use this later
 	for (unsigned long j = 0; j < y_size; j++) {
 		for (unsigned long i = 0; i < x_size; i++) {
-			current_value = CCD_Frame->get(i, j);
+			current_value = image->get(i, j);
 			current_value = current_value * current_value;
-			CCD_Frame_squared->set(i, j, current_value);
+			image_squared->set(i, j, current_value);
 		}
 	}
 	
@@ -3711,6 +3640,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	
 	// convolve the image with a "box function", that will get us the average
 	// if we have a lot of images then we only need to make this kernel once
+	// but we need to make sure that only a single thread at a time is making the kernel, the others should block
+	AverageKernelMutex.lock();
+	
 	if ((average_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {
 		average_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
@@ -3723,7 +3655,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 		}
 	}
 	
-	averages = convolve_matrices_using_fft(CCD_Frame, average_kernel);
+	AverageKernelMutex.unlock();
+	
+	// averages = convolve_matrices_using_fft(image, average_kernel);
+	averages = matrixConvolver.ConvolveMatricesWithFFT(image, average_kernel);
 	
 	// normalize the result, so that we get averages
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -3734,8 +3669,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 		}
 	}
 	
-	// do the same for the squared CCD_Frame
-	summed_squares = convolve_matrices_using_fft(CCD_Frame_squared, average_kernel);
+	// do the same for the squared image
+	// summed_squares = convolve_matrices_using_fft(image_squared, average_kernel);
+	summed_squares = matrixConvolver.ConvolveMatricesWithFFT(image_squared, average_kernel);
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
@@ -3747,8 +3683,11 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
-	 // create a Gaussian kernel for the convolution
+	// create a Gaussian kernel for the convolution
 	// we only need to do this once if we are looking at a series of images
+	// but make sure that only a single thread is doing this
+	GaussianKernelMutex.lock();
+	
 	if ((Gaussian_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {		
 		Gaussian_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
@@ -3791,10 +3730,13 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 		}
 	}
 	
+	GaussianKernelMutex.unlock();
+	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// we now do this using the FFT
 	
-	image_Gaussian_convolved = convolve_matrices_using_fft(CCD_Frame, Gaussian_kernel);
+	// image_Gaussian_convolved = convolve_matrices_using_fft(image, Gaussian_kernel);
+	image_Gaussian_convolved = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -3826,17 +3768,6 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	}
 	
 	return threshold_image;
-}
-
-
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
-	boost::shared_ptr<encap_gsl_matrix_uchar> result_image;
-	
-	CCD_Frame = image;
-	
-	result_image = do_thresholding();
-	
-	return result_image;
 }
 
 
@@ -3941,6 +3872,7 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothin
 	unsigned long y_size = image->get_y_size();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
+	generateKernelMutex.lock();
 	if (Gaussian_kernel.get() == NULL) {	// we don't have a kernel, we need to generate it
 		
 		generate_Gaussian_kernel(x_size, y_size);
@@ -3951,8 +3883,9 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothin
 			generate_Gaussian_kernel(x_size, y_size);
 		}
 	}
+	generateKernelMutex.unlock();
 	
-	filtered_image = convolve_matrices_using_fft(image, Gaussian_kernel);
+	filtered_image = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
 	
 	return filtered_image;
 }
@@ -4093,6 +4026,207 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePix
 	}
 	
 	return processed_thresholded_image;
+}
+
+ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
+	if (forwardPlanExists != 0) {
+		fftw_destroy_plan(forwardPlan);
+	}
+	if (reversePlanExists != 0) {
+		fftw_destroy_plan(reversePlan);
+	}
+}
+
+boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2) {
+	size_t x_size1, y_size1, x_size2, y_size2;
+	size_t half_index;
+	
+	x_size1 = image1->get_x_size();
+	y_size1 = image1->get_y_size();
+	x_size2 = image2->get_x_size();
+	y_size2 = image2->get_y_size();
+	
+	size_t n_pixels, offset;
+	size_t n_FFT_values;
+	
+	double value;
+	
+	double *array1;
+	double *array2;
+	fftw_complex *array1_FFT;
+	fftw_complex *array2_FFT;
+	fftw_complex complex_value;
+	boost::shared_ptr<encap_gsl_matrix> convolved_image;
+	boost::shared_ptr<encap_gsl_matrix> convolved_image_aligned;
+	
+	// are the dimensions equal?
+	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
+		XOPNotice("Error in 'convolve_matrices_using_fft': dimensions of the matrices are not equal.\r");
+		throw INCOMPATIBLE_DIMENSIONING;
+	}
+	
+	n_pixels = x_size1 * y_size1;
+	double normalization_factor = (double)(n_pixels);
+	
+	// convert both of the matrices to an array of doubles
+	// we allocate the memory using fftw_malloc()
+	// as this is recommended by the library
+	array1 = (double *)fftw_malloc(sizeof(double) * n_pixels);
+	if (array1 == NULL) {
+		string error;
+		error = "unable to allocate array1 in convolve_matrices_using_fft()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	array2 = (double *)fftw_malloc(sizeof(double) * n_pixels);
+	if (array2 == NULL) {
+		fftw_free(array1);
+		string error;
+		error = "unable to allocate array2 in convolve_matrices_using_fft()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	offset = 0;
+	// now copy the matrices to the arrays
+	
+	for (size_t i = 0; i < x_size1; i++) {
+		for (size_t j = 0; j < y_size1; j++) {
+			// IMPORTANT: the data in the array is assumed to be in ROW-MAJOR order, so we loop over y first
+			array1[offset] = image1->get(i, j);
+			array2[offset] = image2->get(i, j);
+			
+			offset++;
+		}
+	}
+	
+	// now allocate the arrays that will hold the transformed result
+	// the dimensions of these arrays are a bit unusual, and are x_size * (y_size / 2 + 1)
+	n_FFT_values = x_size1 * (y_size1 / 2 + 1);
+	
+	array1_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
+	if (array1_FFT == NULL) {
+		fftw_free(array1);
+		fftw_free(array2);
+		string error;
+		error = "unable to allocate array1_FFT in convolve_matrices_using_fft()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	array2_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
+	if (array2_FFT == NULL) {
+		fftw_free(array1);
+		fftw_free(array2);
+		fftw_free(array1_FFT);
+		string error;
+		error = "unable to allocate array2_FFT in convolve_matrices_using_fft()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	// prepare the transform and execute it on the first array
+	// if there is no forward plan yet then create it
+	planMutex.lock();
+	if ((forwardPlanExists == 0) || (xSize != x_size1) || (ySize != y_size1)) {
+		if (forwardPlanExists != 0) {
+			fftw_destroy_plan(forwardPlan);
+			fftw_destroy_plan(reversePlan);
+		}
+		
+		xSize = x_size1;
+		ySize = y_size1;
+		
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), array1, array1_FFT, FFTW_ESTIMATE);
+		
+		forwardPlanExists = 1;
+	}
+	planMutex.unlock();
+	
+	fftw_execute_dft_r2c(forwardPlan, array1, array1_FFT);
+	
+	// do the same on the second array
+	fftw_execute_dft_r2c(forwardPlan, array2, array2_FFT);
+	
+	// now do the convolution
+	for (size_t i = 0; i < n_FFT_values; i++) {
+		complex_value[0] = array1_FFT[i][0] * array2_FFT[i][0] - array1_FFT[i][1] * array2_FFT[i][1];
+		complex_value[1] = array1_FFT[i][0] * array2_FFT[i][1] + array1_FFT[i][1] * array2_FFT[i][0];
+		
+		// store the result in the first array
+		array1_FFT[i][0] = complex_value[0];
+		array1_FFT[i][1] = complex_value[1];
+	}
+	
+	// now do the reverse transform
+	// we overwrite the original array
+	// if there is no reverse plan yet then create it
+	planMutex.lock();
+	if ((reversePlanExists == 0) || (xSize != x_size1) || (ySize != y_size1)) {
+		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array1_FFT, array1, FFTW_ESTIMATE);
+		reversePlanExists = 1;
+	}
+	planMutex.unlock();
+	
+	fftw_execute_dft_c2r(reversePlan, array1_FFT, array1);
+	
+	// and store the result back in a new gsl_matrix (we don't overwrite the input arguments)
+	try {
+		convolved_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size1, y_size1));
+	}
+	catch(std::bad_alloc) {
+		fftw_free(array1);
+		fftw_free(array2);
+		fftw_free(array1_FFT);
+		fftw_free(array2_FFT);
+		string error;
+		error = "unable to allocate convolved_image in convolve_matrices_using_fft()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	offset = 0;
+	for (size_t i = 0; i < x_size1; i++) {
+		for (size_t j = 0; j < y_size1; j++) {
+			// the data in the array is assumed to be in ROW-MAJOR order, so we loop over x first
+			// we also normalize the result
+			convolved_image->set(i, j, (array1[offset] / normalization_factor));
+			
+			offset++;
+		}
+	}
+	
+	// cleanup
+	fftw_free(array1);
+	fftw_free(array2);
+	fftw_free(array1_FFT);
+	fftw_free(array2_FFT);
+	
+	// now shift the output matrix so that the image aligns properly, and is not shifted into quadrants
+	convolved_image_aligned = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size1, y_size1));
+	
+	// start by shifting the top and bottom half
+	half_index = y_size1 / 2;
+	for (unsigned long j = 0; j < y_size1; j++) {
+		for (unsigned long i = 0; i < x_size1; i++) {
+			value = convolved_image->get(i, ((j + half_index) % y_size1));
+			convolved_image_aligned->set(i, j, value);
+		}
+	}
+	
+	// now copy the values
+	// convolved_image->copy(*convolved_image_aligned);
+	for (unsigned long j = 0; j < y_size1; j++) {
+		for (unsigned long i = 0; i < x_size1; i++) {
+			convolved_image->set(i, j, convolved_image_aligned->get(i,j));
+		}
+	}
+	
+	// now shift the left and right part
+	half_index = x_size1 / 2;
+	for (unsigned long j = 0; j < y_size1; j++) {
+		for (unsigned long i = 0; i < x_size1; i++) {
+			value = convolved_image->get(((i + half_index) % x_size1), j);
+			convolved_image_aligned->set(i, j, value);
+		}
+	}
+	
+	return convolved_image_aligned;
 }
 				
 

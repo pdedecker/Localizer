@@ -18,6 +18,7 @@
 #include <string>
 #include <stdexcept>
 #include "boost/smart_ptr.hpp"
+#include "boost/thread/mutex.hpp"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -519,106 +520,102 @@ protected:
 class ThresholdImage {
 public:
 	ThresholdImage() {;}
-	ThresholdImage(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
 	virtual ~ThresholdImage() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding() = 0;
 	virtual boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) = 0;
-	
-protected:
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
-	boost::shared_ptr<encap_gsl_matrix> CCD_Frame;
-	
-	double parameter;
 };
 
 class ThresholdImage_Direct : public ThresholdImage {
 	// direct thresholding, based on an absolute threshold
 public:
-	ThresholdImage_Direct(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Direct(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Direct(double thresh_parameter) {threshold = thresh_parameter;}
+	~ThresholdImage_Direct() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	double threshold;
 };
 
 class ThresholdImage_Igor_Iterative : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
-	ThresholdImage_Igor_Iterative(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Igor_Iterative(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Igor_Iterative() {;}
+	~ThresholdImage_Igor_Iterative() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	boost::mutex threadMutex;
 };
 
 class ThresholdImage_Igor_Bimodal : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
-	ThresholdImage_Igor_Bimodal(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Igor_Bimodal(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Igor_Bimodal() {;}
+	~ThresholdImage_Igor_Bimodal() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	boost::mutex threadMutex;
 };
 
 class ThresholdImage_Igor_Adaptive : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
-	ThresholdImage_Igor_Adaptive(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Igor_Adaptive(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Igor_Adaptive() {;}
+	~ThresholdImage_Igor_Adaptive() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	boost::mutex threadMutex;
 };
 
 class ThresholdImage_Igor_Fuzzy1 : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
-	ThresholdImage_Igor_Fuzzy1(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Igor_Fuzzy1(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
-
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
+	ThresholdImage_Igor_Fuzzy1() {;}
+	~ThresholdImage_Igor_Fuzzy1() {;}
+	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	boost::mutex threadMutex;
 };
 
 class ThresholdImage_Igor_Fuzzy2 : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
-	ThresholdImage_Igor_Fuzzy2(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Igor_Fuzzy2(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
-
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
+	ThresholdImage_Igor_Fuzzy2() {;}
+	~ThresholdImage_Igor_Fuzzy2() {;}
+	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	
+protected:
+	boost::mutex threadMutex;
 };
 
 class ThresholdImage_Isodata : public ThresholdImage {
 public:
-	ThresholdImage_Isodata(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Isodata(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Isodata() {;}
+	~ThresholdImage_Isodata() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 };
 
 class ThresholdImage_Triangle : public ThresholdImage {
 public:
-	ThresholdImage_Triangle(double thresh_parameter) {parameter = thresh_parameter;}
-	ThresholdImage_Triangle(boost::shared_ptr<encap_gsl_matrix> image, double thresh_parameter) {CCD_Frame = image; parameter = thresh_parameter;}
+	ThresholdImage_Triangle() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 };
 
 class ThresholdImage_MTT : public ThresholdImage {
 public:
 	ThresholdImage_MTT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param;} 
-	ThresholdImage_MTT(boost::shared_ptr<encap_gsl_matrix> image, double parameter1, double parameter2) {CCD_Frame = image; PFA = parameter1, gaussianWidth = parameter2;}
 	
-	void set_PFA(double PFA_param) {PFA = PFA_param;}
-	void set_gaussianWidth(double width) {gaussianWidth = width;}
-	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
@@ -626,19 +623,36 @@ protected:
 	double gaussianWidth;
 };
 
+class ConvolveMatricesWithFFTClass {
+public:
+	ConvolveMatricesWithFFTClass() {forwardPlanExists = 0; reversePlanExists = 0; forwardPlan = NULL; reversePlan = NULL; xSize = 0; ySize = 0;}
+	~ConvolveMatricesWithFFTClass();
+	
+	boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2);
+	
+protected:
+	fftw_plan forwardPlan;
+	fftw_plan reversePlan;
+	
+	int forwardPlanExists;
+	int reversePlanExists;
+	
+	unsigned long xSize;
+	unsigned long ySize;
+	
+	boost::mutex planMutex;
+};
+
 class ThresholdImage_MTT_FFT : public ThresholdImage {
 public:
 	ThresholdImage_MTT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; kernel_x_size = 0; kernel_y_size = 0;} 
-	ThresholdImage_MTT_FFT(boost::shared_ptr<encap_gsl_matrix> image, double PFA_param, double width_param) {CCD_Frame = image; PFA = PFA_param; gaussianWidth = width_param; kernel_x_size = 0; kernel_y_size = 0;}
 	~ThresholdImage_MTT_FFT() {;}
-	
-	void set_PFA(double PFA_param) {PFA = PFA_param;}
-	void set_gaussianWidth(double width) {gaussianWidth = width;}
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
+	ConvolveMatricesWithFFTClass matrixConvolver;
 	
 	double PFA;
 	double gaussianWidth;
@@ -646,6 +660,8 @@ protected:
 	boost::shared_ptr<encap_gsl_matrix> average_kernel;
 	unsigned long kernel_x_size, kernel_y_size;
 	double sum_squared_Gaussian;
+	boost::mutex GaussianKernelMutex;
+	boost::mutex AverageKernelMutex;
 };
 
 class ThresholdImage_Preprocessor {
@@ -671,15 +687,18 @@ protected:
 class ThresholdImage_Preprocessor_GaussianSmoothing : public ThresholdImage_Preprocessor {
 public:
 	ThresholdImage_Preprocessor_GaussianSmoothing(double Gaussian_width) {width = Gaussian_width;}	// we calculate the convolution kernel once,
-																																	// at initialization
+																									// when the first image is supplied
 	~ThresholdImage_Preprocessor_GaussianSmoothing() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
 	void generate_Gaussian_kernel(unsigned long x_size, unsigned long y_size);
+	ConvolveMatricesWithFFTClass matrixConvolver;
 	
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;
+	boost::mutex generateKernelMutex;
+	
+	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;	// automatically initialized to a NULL pointer
 	double width;
 	unsigned long kernel_x_size;
 	unsigned long kernel_y_size;
