@@ -421,10 +421,13 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	}
 	
 	// write the positions to an Igor wave
+	XOPNotice(" Writing output... ");
 	status = output_writer.write_positions_to_wave();
 	if (status != 0) {
 		return status;
 	}
+	
+	XOPNotice(" Done!\r");
 	
 	return 0;
 }
