@@ -608,7 +608,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		}
 		
 		if (fitting_positions_supplied_in_wave == 0) {
-			do_analyze_images_operation_parallel(image_loader, name_of_output_wave, positions_fitter, particle_finder, preprocessor, thresholder, postprocessor);
+			do_analyze_images_operation_parallel2(image_loader, name_of_output_wave, positions_fitter, particle_finder, preprocessor, thresholder, postprocessor);
 			
 		} else {	// we need to use the positions supplied in the wave fitting_positions to do the fit
 			do_analyze_images_operation_no_positions_finding(image_loader, name_of_output_wave, fitting_positions, positions_fitter);

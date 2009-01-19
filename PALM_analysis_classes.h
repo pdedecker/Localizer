@@ -466,9 +466,6 @@ public:
 	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
 	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, unsigned long startPos, unsigned long endPos);
 	
-	void set_sigma(double rhs) {sigma = rhs;}
-	double get_sigma() const {return sigma;}
-	
 protected:
 	double sigma;
 	unsigned long cutoff_radius;

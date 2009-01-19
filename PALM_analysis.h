@@ -11,7 +11,6 @@
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_histogram.h>
-// #include "pthread.h"
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
 #include "XOPStandardHeaders.h"
@@ -33,6 +32,10 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
+
+int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
+										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
+										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 class threadStartDataOld {
 public:
@@ -73,6 +76,29 @@ public:
 };
 
 void fitPositionsThreadStart(threadStartData data);
+
+class threadStartData2 {
+public:
+	threadStartData2(boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor_rhs,
+					 boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor_rhs,
+					 boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> positionsFitter_rhs) {
+		thresholder = thresholder_rhs; preprocessor = preprocessor_rhs; postprocessor = postprocessor_rhs; particleFinder = particleFinder_rhs, positionsFitter = positionsFitter_rhs;
+	}
+	
+	~threadStartData2() {;}
+	
+	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<ThresholdImage> thresholder;
+	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
+	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
+	boost::shared_ptr<ParticleFinder> particleFinder;
+	boost::shared_ptr<FitPositions> positionsFitter;
+	boost::shared_ptr<encap_gsl_matrix> fittedPositions;	// the positions will be returned here
+};
+	
+
+void fitPositionsThreadStart2(threadStartData2& data);
+
 
 int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 
 													 boost::shared_ptr<FitPositions> positions_fitter);
