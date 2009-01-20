@@ -329,7 +329,7 @@ public:
 	// the wave is only created at this point, and WILL overwrite previous waves of the same name
 	
 private:
-	vector<boost::shared_ptr<encap_gsl_matrix> > positions_array;
+	list <boost::shared_ptr<encap_gsl_matrix> > positionsList;
 	unsigned long total_number_of_positions;
 	string wave_name;
 };

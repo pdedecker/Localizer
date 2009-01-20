@@ -5482,18 +5482,14 @@ IgorOutputWriter::IgorOutputWriter(const string rhs) {
 }
 
 IgorOutputWriter::~IgorOutputWriter() {
-	/* unsigned long number_of_matrices = positions_array.size();
-	boost::shared_ptr<encap_gsl_matrix> current_array;
-	
-	for (unsigned long i = 0; i < number_of_matrices; i++) {
-		current_array = positions_array[i];
-		if (current_array != NULL)
-			gsl_matrix_free(current_array);
-	}*/
+	// if some positions were passed on then write the output
+	if (positionsList.size() > 0) {
+		write_positions_to_wave();
+	}
 }
 
 int IgorOutputWriter::append_new_positions(boost::shared_ptr<encap_gsl_matrix> positions) {
-	positions_array.push_back(positions);
+	positionsList.push_back(positions);
 	if (positions != NULL) {	// if it NULL then this no positions were found
 		total_number_of_positions += positions->get_x_size();
 	}
@@ -5504,11 +5500,11 @@ int IgorOutputWriter::write_positions_to_wave() {
 	waveHndl output_wave;
 	long dim_size[3];
 	long indices[2];
-	unsigned long vector_size = positions_array.size();
 	int status;
 	double value;
 	boost::shared_ptr<encap_gsl_matrix> positions;
 	long number_of_positions_in_matrix, offset = 0;
+	unsigned long frameNumber = 0;
 	
 	dim_size[0] = (long)total_number_of_positions;
 	dim_size[1] = 12;
@@ -5524,12 +5520,14 @@ int IgorOutputWriter::write_positions_to_wave() {
 	if (status != 0)
 		return status;
 	
-	for (long i = 0; i < vector_size; i++) {
+	while (positionsList.size() > 0) {
 		
-		positions = positions_array[i];
+		positions = positionsList.front();
 		
 		if (positions.get() == NULL) {
 			// no positions were found in this frame
+			++frameNumber;
+			positionsList.pop_front();
 			continue;
 		}
 		
@@ -5540,7 +5538,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 			// so we can tell what image the positions correspond to
 			indices[0] = offset;
 			indices[1] = 0;
-			value = (double)i;
+			value = (double)frameNumber;
 			MDSetNumericWavePointValue(output_wave, indices, &value);
 			
 			for (long k = 0; k < 11; ++k) {
@@ -5550,6 +5548,8 @@ int IgorOutputWriter::write_positions_to_wave() {
 			}
 			offset++;
 		}
+		++frameNumber;
+		positionsList.pop_front();
 	}
 	return 0;
 }
