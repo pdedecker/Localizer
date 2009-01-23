@@ -3624,8 +3624,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (unsigned long i = 0; i < x_size; i++) {
+		for (unsigned long j = 0; j < y_size; j++) {
 			current_value = image->get(i, j);
 			current_value = current_value * current_value;
 			image_squared->set(i, j, current_value);
@@ -3644,6 +3644,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	AverageKernelMutex.lock();
 	
 	if ((average_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {
+		averageCalculationMutex.lock();	// get a unique lock
+		
 		average_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
 		average_kernel->set_all(0);
@@ -3653,12 +3655,18 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 				average_kernel->set(i, j, 1);
 			}
 		}
+		averageCalculationMutex.unlock();
 	}
 	
+	averageCalculationMutex.lock_shared();
 	AverageKernelMutex.unlock();
 	
-	// averages = convolve_matrices_using_fft(image, average_kernel);
 	averages = matrixConvolver.ConvolveMatricesWithFFT(image, average_kernel);
+	
+	// do the same for the squared image
+	summed_squares = matrixConvolver.ConvolveMatricesWithFFT(image_squared, average_kernel);
+	
+	averageCalculationMutex.unlock_shared();
 	
 	// normalize the result, so that we get averages
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -3668,10 +3676,6 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 			averages->set(i, j, current_value);
 		}
 	}
-	
-	// do the same for the squared image
-	// summed_squares = convolve_matrices_using_fft(image_squared, average_kernel);
-	summed_squares = matrixConvolver.ConvolveMatricesWithFFT(image_squared, average_kernel);
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
@@ -3688,7 +3692,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	// but make sure that only a single thread is doing this
 	GaussianKernelMutex.lock();
 	
-	if ((Gaussian_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {		
+	if ((Gaussian_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {
+		gaussianCalculationMutex.lock();	// get a unique lock
 		Gaussian_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
 		Gaussian_window = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(window_size, window_size));
@@ -3728,15 +3733,17 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 				Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
 			}
 		}
+		gaussianCalculationMutex.unlock();
 	}
-	
-	GaussianKernelMutex.unlock();
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// we now do this using the FFT
 	
-	// image_Gaussian_convolved = convolve_matrices_using_fft(image, Gaussian_kernel);
+	gaussianCalculationMutex.lock_shared();
+	GaussianKernelMutex.unlock();
+	
 	image_Gaussian_convolved = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
+	gaussianCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	for (unsigned long i = 0; i < x_size; i++) {
@@ -4029,10 +4036,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePix
 }
 
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
-	if (forwardPlanExists != 0) {
+	if (forwardPlan != NULL) {
 		fftw_destroy_plan(forwardPlan);
 	}
-	if (reversePlanExists != 0) {
+	if (reversePlan != NULL) {
 		fftw_destroy_plan(reversePlan);
 	}
 }
@@ -4123,27 +4130,29 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	// prepare the transform and execute it on the first array
 	// if there is no forward plan yet then create it
-	planMutex.lock();
-	if ((forwardPlanExists == 0) || (xSize != x_size1) || (ySize != y_size1)) {
-		if (forwardPlanExists != 0) {
+	forwardPlanMutex.lock();
+	if ((forwardPlan == NULL) || (forwardPlanXSize != x_size1) || (forwardPlanYSize != y_size1)) {
+		forwardCalculationMutex.lock();	// require exclusive ownership
+		if (forwardPlan != NULL) {
 			fftw_destroy_plan(forwardPlan);
-			fftw_destroy_plan(reversePlan);
-			reversePlanExists = 0;
 		}
 		
-		xSize = x_size1;
-		ySize = y_size1;
+		forwardPlanXSize = x_size1;
+		forwardPlanYSize = y_size1;
 		
-		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), array1, array1_FFT, FFTW_ESTIMATE);
-		
-		forwardPlanExists = 1;
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(x_size1), (int)(y_size1), array1, array1_FFT, FFTW_ESTIMATE);
+		forwardCalculationMutex.unlock();
 	}
-	planMutex.unlock();
+	
+	forwardCalculationMutex.lock_shared();
+	forwardPlanMutex.unlock();
 	
 	fftw_execute_dft_r2c(forwardPlan, array1, array1_FFT);
 	
 	// do the same on the second array
 	fftw_execute_dft_r2c(forwardPlan, array2, array2_FFT);
+	
+	forwardCalculationMutex.unlock_shared();
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
@@ -4158,14 +4167,26 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	// now do the reverse transform
 	// we overwrite the original array
 	// if there is no reverse plan yet then create it
-	planMutex.lock();
-	if ((reversePlanExists == 0) || (xSize != x_size1) || (ySize != y_size1)) {
-		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array1_FFT, array1, FFTW_ESTIMATE);
-		reversePlanExists = 1;
+	reversePlanMutex.lock();
+	if ((reversePlan == NULL) || (reversePlanXSize != x_size1) || (reversePlanYSize != y_size1)) {
+		reverseCalculationMutex.lock();	// require exclusive ownership
+		if (reversePlan != NULL) {
+			fftw_destroy_plan(reversePlan);
+		}
+		
+		reversePlanXSize = x_size1;
+		reversePlanYSize = y_size1;
+		
+		reversePlan = fftw_plan_dft_c2r_2d((int)(x_size1), (int)(y_size1), array1_FFT, array1, FFTW_ESTIMATE);
+		reverseCalculationMutex.unlock();
 	}
-	planMutex.unlock();
+	
+	reverseCalculationMutex.lock_shared();
+	reversePlanMutex.unlock();
 	
 	fftw_execute_dft_c2r(reversePlan, array1_FFT, array1);
+	
+	reverseCalculationMutex.unlock_shared();
 	
 	// and store the result back in a new gsl_matrix (we don't overwrite the input arguments)
 	try {
@@ -4212,8 +4233,8 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	// now copy the values
 	// convolved_image->copy(*convolved_image_aligned);
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
+	for (unsigned long i = 0; i < x_size1; i++) {
+		for (unsigned long j = 0; j < y_size1; j++) {
 			convolved_image->set(i, j, convolved_image_aligned->get(i,j));
 		}
 	}

@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
+#include "boost/thread/shared_mutex.hpp"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -622,7 +623,7 @@ protected:
 
 class ConvolveMatricesWithFFTClass {
 public:
-	ConvolveMatricesWithFFTClass() {forwardPlanExists = 0; reversePlanExists = 0; forwardPlan = NULL; reversePlan = NULL; xSize = 0; ySize = 0;}
+	ConvolveMatricesWithFFTClass() {forwardPlan = NULL; reversePlan = NULL; forwardPlanXSize = 0; forwardPlanYSize = 0; reversePlanXSize = 0; reversePlanYSize = 0;}
 	~ConvolveMatricesWithFFTClass();
 	
 	boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2);
@@ -631,13 +632,25 @@ protected:
 	fftw_plan forwardPlan;
 	fftw_plan reversePlan;
 	
-	int forwardPlanExists;
-	int reversePlanExists;
+	unsigned long forwardPlanXSize;
+	unsigned long forwardPlanYSize;
+	unsigned long reversePlanXSize;
+	unsigned long reversePlanYSize;
 	
-	unsigned long xSize;
-	unsigned long ySize;
+	boost::mutex forwardPlanMutex;
+	boost::mutex reversePlanMutex;
 	
-	boost::mutex planMutex;
+	boost::shared_mutex forwardCalculationMutex;
+	boost::shared_mutex reverseCalculationMutex;
+	
+	/** the reason for the many mutexes is for thread safety: because the creation of fftw plans is not thread safe, only a single thread can create a plan
+	 at any given time. This is assured by exclusively locking the planMutexes. 
+	 But it's possible that one thread wants to create a plan, while another thread is already running a calculation with the previous one (for example images with different
+	 sizes are being passed). In that case we need to make sure that the calculations with the previous plan are finished before we make a new one. We could do this with a 
+	 standard mutex, but at the same time we need to allow different calculations with the same plan to proceed in parallel. So we use a shared mutex: every thread that enters
+	 a calculation does a shared_lock() on the mutex, which is unlocked when the calculation is finished. But to create a plan we require exclusive ownership. This means that
+	 when we get the lock all the calculation threads have finished, and it is safe to create a different plan
+	 ***/
 };
 
 class ThresholdImage_MTT_FFT : public ThresholdImage {
@@ -659,6 +672,11 @@ protected:
 	double sum_squared_Gaussian;
 	boost::mutex GaussianKernelMutex;
 	boost::mutex AverageKernelMutex;
+	
+	boost::shared_mutex gaussianCalculationMutex;
+	boost::shared_mutex averageCalculationMutex;
+	
+	// for an explanation of the many mutexes see ConvolveMatricesWithFFTClass
 };
 
 class ThresholdImage_Preprocessor {

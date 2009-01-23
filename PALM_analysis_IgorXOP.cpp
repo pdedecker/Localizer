@@ -561,7 +561,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
 			case 2:	// reject 'on' pixels that have values below the intensity mean of the image
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemovePixelsBelowMean());
 				break;
 			default:
 				return UNKNOWN_THRESHOLD_POSTPROCESSING_METHOD;
@@ -1263,7 +1263,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
 			case 2:	// reject 'on' pixels that have values below the intensity mean of the image
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemovePixelsBelowMean());
 				break;
 			default:
 				return UNKNOWN_THRESHOLD_POSTPROCESSING_METHOD;
