@@ -3598,7 +3598,6 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	unsigned long window_pixels = window_size * window_size;
 	double double_window_pixels = (double)(window_pixels);
 	double current_value;
-	double sum_squared_Gaussian;
 	double distance_x, distance_y;
 	double sum;
 	
@@ -3643,7 +3642,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	// but we need to make sure that only a single thread at a time is making the kernel, the others should block
 	AverageKernelMutex.lock();
 	
-	if ((average_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {
+	if ((average_kernel.get() == NULL) || (averageKernelXSize != x_size) || (averageKernelYSize != y_size)) {
 		averageCalculationMutex.lock();	// get a unique lock
 		
 		average_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
@@ -3655,6 +3654,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 				average_kernel->set(i, j, 1);
 			}
 		}
+		
+		averageKernelXSize = x_size;
+		averageKernelYSize = y_size;
+		
 		averageCalculationMutex.unlock();
 	}
 	
@@ -3692,7 +3695,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 	// but make sure that only a single thread is doing this
 	GaussianKernelMutex.lock();
 	
-	if ((Gaussian_kernel.get() == NULL) || (kernel_x_size != x_size) || (kernel_y_size != y_size)) {
+	if ((Gaussian_kernel.get() == NULL) || (GaussianKernelXSize != x_size) || (GaussianKernelYSize != y_size)) {
 		gaussianCalculationMutex.lock();	// get a unique lock
 		Gaussian_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
@@ -3733,6 +3736,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholdin
 				Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
 			}
 		}
+		
+		GaussianKernelXSize = x_size;
+		GaussianKernelYSize = y_size;
+		
 		gaussianCalculationMutex.unlock();
 	}
 	

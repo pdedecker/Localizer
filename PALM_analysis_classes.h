@@ -655,7 +655,7 @@ protected:
 
 class ThresholdImage_MTT_FFT : public ThresholdImage {
 public:
-	ThresholdImage_MTT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; kernel_x_size = 0; kernel_y_size = 0;} 
+	ThresholdImage_MTT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; averageKernelXSize = 0; averageKernelYSize = 0; GaussianKernelXSize = 0; GaussianKernelYSize = 0;} 
 	~ThresholdImage_MTT_FFT() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
@@ -668,8 +668,10 @@ protected:
 	double gaussianWidth;
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;
 	boost::shared_ptr<encap_gsl_matrix> average_kernel;
-	unsigned long kernel_x_size, kernel_y_size;
+	unsigned long averageKernelXSize, averageKernelYSize;
+	unsigned long GaussianKernelXSize, GaussianKernelYSize;
 	double sum_squared_Gaussian;
+	
 	boost::mutex GaussianKernelMutex;
 	boost::mutex AverageKernelMutex;
 	
