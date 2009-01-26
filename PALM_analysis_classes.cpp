@@ -4071,7 +4071,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	// are the dimensions equal?
 	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
-		XOPNotice("Error in 'convolve_matrices_using_fft': dimensions of the matrices are not equal.\r");
+		XOPNotice("Error while convolving the images: the dimensions of the images are not equal.\r");
 		throw INCOMPATIBLE_DIMENSIONING;
 	}
 	
@@ -4084,7 +4084,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	array1 = (double *)fftw_malloc(sizeof(double) * n_pixels);
 	if (array1 == NULL) {
 		string error;
-		error = "unable to allocate array1 in convolve_matrices_using_fft()\r";
+		error = "Error while convolving the images: unable to allocate array1\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	
@@ -4092,7 +4092,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	if (array2 == NULL) {
 		fftw_free(array1);
 		string error;
-		error = "unable to allocate array2 in convolve_matrices_using_fft()\r";
+		error = "Error while convolving the images: unable to allocate array2\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	
@@ -4119,7 +4119,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 		fftw_free(array1);
 		fftw_free(array2);
 		string error;
-		error = "unable to allocate array1_FFT in convolve_matrices_using_fft()\r";
+		error = "Error while convolving the images: unable to allocate array1_FFT\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	array2_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
@@ -4128,7 +4128,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 		fftw_free(array2);
 		fftw_free(array1_FFT);
 		string error;
-		error = "unable to allocate array2_FFT in convolve_matrices_using_fft()\r";
+		error = "Error while convolving the images: unable to allocate array2_FFT\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	
