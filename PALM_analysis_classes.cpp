@@ -4053,7 +4053,6 @@ ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 
 boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
-	size_t half_index;
 	
 	x_size1 = image1->get_x_size();
 	y_size1 = image1->get_y_size();
@@ -4061,17 +4060,14 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	y_size2 = image2->get_y_size();
 	
 	size_t n_pixels, offset;
-	size_t n_FFT_values;
-	
-	double value;
+	size_t n_FFT_values, nColumns;
 	
 	double *array1;
 	double *array2;
 	fftw_complex *array1_FFT;
 	fftw_complex *array2_FFT;
 	fftw_complex complex_value;
-	boost::shared_ptr<encap_gsl_matrix> convolved_image;
-	boost::shared_ptr<encap_gsl_matrix> convolved_image_aligned;
+	boost::shared_ptr<encap_gsl_matrix> convolved_image(new encap_gsl_matrix(x_size1, y_size1));
 	
 	// are the dimensions equal?
 	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
@@ -4116,6 +4112,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	// now allocate the arrays that will hold the transformed result
 	// the dimensions of these arrays are a bit unusual, and are x_size * (y_size / 2 + 1)
 	n_FFT_values = x_size1 * (y_size1 / 2 + 1);
+	nColumns = y_size1 / 2 + 1;
 	
 	array1_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
 	if (array1_FFT == NULL) {
@@ -4167,8 +4164,9 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 		complex_value[1] = array1_FFT[i][0] * array2_FFT[i][1] + array1_FFT[i][1] * array2_FFT[i][0];
 		
 		// store the result in the first array
-		array1_FFT[i][0] = complex_value[0];
-		array1_FFT[i][1] = complex_value[1];
+		// we add in a comb function so the origin is at the center of the image
+		array1_FFT[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+		array1_FFT[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
 	// now do the reverse transform
@@ -4195,20 +4193,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	reverseCalculationMutex.unlock_shared();
 	
-	// and store the result back in a new gsl_matrix (we don't overwrite the input arguments)
-	try {
-		convolved_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size1, y_size1));
-	}
-	catch(std::bad_alloc) {
-		fftw_free(array1);
-		fftw_free(array2);
-		fftw_free(array1_FFT);
-		fftw_free(array2_FFT);
-		string error;
-		error = "unable to allocate convolved_image in convolve_matrices_using_fft()\r";
-		throw OUT_OF_MEMORY(error);
-	}
-	
+	// and store the result (we don't overwrite the input arguments)
 	offset = 0;
 	for (size_t i = 0; i < x_size1; i++) {
 		for (size_t j = 0; j < y_size1; j++) {
@@ -4226,43 +4211,14 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	fftw_free(array1_FFT);
 	fftw_free(array2_FFT);
 	
-	// now shift the output matrix so that the image aligns properly, and is not shifted into quadrants
-	convolved_image_aligned = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size1, y_size1));
+	return convolved_image;
 	
-	// start by shifting the top and bottom half
-	half_index = y_size1 / 2;
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
-			value = convolved_image->get(i, ((j + half_index) % y_size1));
-			convolved_image_aligned->set(i, j, value);
-		}
-	}
-	
-	// now copy the values
-	// convolved_image->copy(*convolved_image_aligned);
-	for (unsigned long i = 0; i < x_size1; i++) {
-		for (unsigned long j = 0; j < y_size1; j++) {
-			convolved_image->set(i, j, convolved_image_aligned->get(i,j));
-		}
-	}
-	
-	// now shift the left and right part
-	half_index = x_size1 / 2;
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
-			value = convolved_image->get(((i + half_index) % x_size1), j);
-			convolved_image_aligned->set(i, j, value);
-		}
-	}
-	
-	return convolved_image_aligned;
 }
 				
 
 
 boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
-	size_t half_index;
 	
 	x_size1 = image1->get_x_size();
 	y_size1 = image1->get_y_size();
@@ -4272,7 +4228,7 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 	size_t n_pixels, offset;
 	size_t n_FFT_values;
 	
-	double value;
+	size_t nColumns;
 	
 	double *array1;
 	double *array2;
@@ -4316,6 +4272,8 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 	for (size_t i = 0; i < x_size1; i++) {
 		for (size_t j = 0; j < y_size1; j++) {
 			// IMPORTANT: the data in the array is assumed to be in ROW-MAJOR order, so we loop over y first
+			
+			// test: multiply image 1 by a comb (2.0 * (double)((i + j) % 2) - 1.0) * 
 			array1[offset] = image1->get(i, j);
 			array2[offset] = image2->get(i, j);
 			
@@ -4326,6 +4284,7 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 	// now allocate the arrays that will hold the transformed result
 	// the dimensions of these arrays are a bit unusual, and are x_size * (y_size / 2 + 1)
 	n_FFT_values = x_size1 * (y_size1 / 2 + 1);
+	nColumns = y_size1 / 2 + 1;
 	
 	array1_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
 	if (array1_FFT == NULL) {
@@ -4363,8 +4322,10 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 		complex_value[1] = array1_FFT[i][0] * array2_FFT[i][1] + array1_FFT[i][1] * array2_FFT[i][0];
 		
 		// store the result in the first array
-		array1_FFT[i][0] = complex_value[0];
-		array1_FFT[i][1] = complex_value[1];
+		// add in the comb function
+		
+		array1_FFT[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+		array1_FFT[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
 	// now do the reverse transform
@@ -4393,7 +4354,6 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 			// the data in the array is assumed to be in ROW-MAJOR order, so we loop over x first
 			// we also normalize the result
 			convolved_image->set(i, j, (array1[offset] / normalization_factor));
-			
 			offset++;
 		}
 	}
@@ -4404,36 +4364,8 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 	fftw_free(array1_FFT);
 	fftw_free(array2_FFT);
 	
-	// now shift the output matrix so that the image aligns properly, and is not shifted into quadrants
-	convolved_image_aligned = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size1, y_size1));
 	
-	// start by shifting the top and bottom half
-	half_index = y_size1 / 2;
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
-			value = convolved_image->get(i, ((j + half_index) % y_size1));
-			convolved_image_aligned->set(i, j, value);
-		}
-	}
-	
-	// now copy the values
-	// convolved_image->copy(*convolved_image_aligned);
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
-			convolved_image->set(i, j, convolved_image_aligned->get(i,j));
-		}
-	}
-	
-	// now shift the left and right part
-	half_index = x_size1 / 2;
-	for (unsigned long j = 0; j < y_size1; j++) {
-		for (unsigned long i = 0; i < x_size1; i++) {
-			value = convolved_image->get(((i + half_index) % x_size1), j);
-			convolved_image_aligned->set(i, j, value);
-		}
-	}
-	
-	return convolved_image_aligned;
+	return convolved_image;
 }
 	
 	

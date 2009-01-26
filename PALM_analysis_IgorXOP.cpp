@@ -1365,7 +1365,6 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;
-	size_t x_size, y_size;
 	
 	// Main parameters.
 	
@@ -1392,11 +1391,9 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	try {
 		firstImage = copy_IgorDPWave_to_gsl_matrix(firstWave);
 		secondImage = copy_IgorDPWave_to_gsl_matrix(secondWave);
+		ConvolveMatricesWithFFTClass matrixConvolver;
 		
-		x_size = firstImage->get_x_size();
-		y_size = firstImage->get_y_size();
-		
-		outputImage = convolve_matrices_using_fft(firstImage,secondImage);
+		outputImage = matrixConvolver.ConvolveMatricesWithFFT(firstImage,secondImage);
 		
 		outputWave = copy_gsl_matrix_to_IgorDPWave(outputImage, "M_Convolved");
 		
