@@ -4371,17 +4371,20 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 	
 	
 
-int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
+int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+	// params contains the current values of the parameters - amplitude, width, etc.
+	// fitData is an object that contains the experimental data
 	
-	measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities_struct;
 	
-	unsigned long number_of_intensities = intensities_local->get_number_of_intensities();
-	double *measured_intensities = intensities_local->get_intensities();
-	double *sigma = intensities_local->get_sigma();
-	unsigned long x_size = intensities_local->get_x_size();
-	unsigned long y_size = intensities_local->get_y_size();
-	double x_offset = intensities_local->get_x_offset();
-	double y_offset = intensities_local->get_y_offset();
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
+	
+	unsigned long xSize = imageSubset->get_x_size();
+	unsigned long ySize = imageSubset->get_x_size();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
 	
 	double amplitude = gsl_vector_get(params, 0);
 	double r = gsl_vector_get(params, 1);
@@ -4395,33 +4398,35 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities_s
 		return GSL_FAILURE;
 	}
 	
-	for (unsigned long i = 0; i < number_of_intensities; i++) {
-		return_xy_from_array(i, x_size, y_size, x_offset, y_offset, x, y);
-		
-		function_value = offset + amplitude * exp(- (((x0 - x)/ r) * ((x0 - x)/ r) + ((y0 - y) / r) * ((y0 - y) / r)));
-		square_deviation = (function_value - measured_intensities[i]) / sigma[i];
-		gsl_vector_set(model_values, i, square_deviation);
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			function_value = offset + amplitude * exp(- (((x0 - x)/ r) * ((x0 - x)/ r) + ((y0 - y) / r) * ((y0 - y) / r)));
+			square_deviation = (function_value - imageSubset->get(i, j)) / sigma;
+			gsl_vector_set(deviations, arrayOffset, square_deviation);
+			++arrayOffset;
+		}
 	}
 	return GSL_SUCCESS;
 }
 
-int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian) {
+int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
 	
-	measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities;
-	
-	unsigned long number_of_intensities = intensities_local->get_number_of_intensities();
-	//	double *measured_intensities = intensities_local->get_intensities();
-	double *sigma = intensities_local->get_sigma();
-	unsigned long x_size = intensities_local->get_x_size();
-	unsigned long y_size = intensities_local->get_y_size();
-	double x_offset = intensities_local->get_x_offset();
-	double y_offset = intensities_local->get_y_offset();
+	unsigned long xSize = imageSubset->get_x_size();
+	unsigned long ySize = imageSubset->get_x_size();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
 	
 	double amplitude = gsl_vector_get(params, 0);
 	double r = gsl_vector_get(params, 1);
 	double x0 = gsl_vector_get(params, 2);
 	double y0 = gsl_vector_get(params, 3);
-	//	double offset = gsl_vector_get(params, 4);
+	// double offset = gsl_vector_get(params, 4);
 	
 	double x,y, exp_factor;
 	double dfdA, dfdr, dfdx0, dfdy0,dfdoffset;
@@ -4430,22 +4435,26 @@ int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_inte
 		return GSL_FAILURE;
 	}
 	
-	for (unsigned long i = 0; i < number_of_intensities; i++) {
-		return_xy_from_array(i, x_size, y_size, x_offset, y_offset, x, y);
-		
-		exp_factor = exp(- ((x0 - x)/ r) * ((x0 - x)/ r) - ((y0 - y) / r) * ((y0 - y) / r));
-		
-		dfdA = exp_factor / sigma[i];
-		dfdr = (2 * (y - y0) * (y - y0) / r / r / r + 2 * (x - x0) * (x - x0) / r / r / r) * exp_factor * amplitude / sigma[i];
-		dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / (r * r *sigma[i]);
-		dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / (r * r *sigma[i]);
-		dfdoffset = 1/sigma[i];
-		
-		gsl_matrix_set(jacobian, i, 0, dfdA);
-		gsl_matrix_set(jacobian, i, 1, dfdr);
-		gsl_matrix_set(jacobian, i, 2, dfdx0);
-		gsl_matrix_set(jacobian, i, 3, dfdy0);
-		gsl_matrix_set(jacobian, i, 4, dfdoffset);
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			
+			exp_factor = exp(- ((x0 - x)/ r) * ((x0 - x)/ r) - ((y0 - y) / r) * ((y0 - y) / r));
+			
+			dfdA = exp_factor / sigma;
+			dfdr = (2 * (y - y0) * (y - y0) / r / r / r + 2 * (x - x0) * (x - x0) / r / r / r) * exp_factor * amplitude / sigma;
+			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / (r * r *sigma);
+			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / (r * r *sigma);
+			dfdoffset = 1/sigma;
+			
+			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
+			gsl_matrix_set(jacobian, arrayOffset, 1, dfdr);
+			gsl_matrix_set(jacobian, arrayOffset, 2, dfdx0);
+			gsl_matrix_set(jacobian, arrayOffset, 3, dfdy0);
+			gsl_matrix_set(jacobian, arrayOffset, 4, dfdoffset);
+			++arrayOffset;
+		}
 	}
 	
 	return GSL_SUCCESS;
@@ -4460,7 +4469,7 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 	return GSL_SUCCESS;
 }
 
-int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
+/*int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
 	measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities_struct;
 	
 	unsigned long number_of_intensities = intensities_local->get_number_of_intensities();
@@ -4557,65 +4566,7 @@ int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void
 	Gauss_2D_Poissonian_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
 	
 	return GSL_SUCCESS;
-}
-
-gsl_vector * convert_gsl_matrix_to_vector(gsl_matrix *matrix) {
-	unsigned long number_of_rows, number_of_columns;
-	unsigned long number_of_elements;
-	unsigned long offset = 0;
-	
-	number_of_rows = matrix->size1;
-	number_of_columns = matrix->size2;
-	number_of_elements = number_of_rows * number_of_columns;
-	gsl_vector *vector = gsl_vector_alloc(number_of_elements);
-	if (vector == NULL) {
-		return NULL;
-	}
-	
-	for (unsigned long j = 0; j < number_of_columns; j++) {
-		for (unsigned long i = 0; i < number_of_rows; i++) {
-			gsl_vector_set(vector, offset, gsl_matrix_get(matrix, i, j));
-			offset++;
-		}
-	}
-	return vector;
-}	
-
-
-double * convert_gsl_matrix_to_array(gsl_matrix *matrix, unsigned long &number_of_elements) {
-	unsigned long number_of_rows, number_of_columns;
-	unsigned long offset = 0;
-	
-	number_of_rows = matrix->size1;
-	number_of_columns = matrix->size2;
-	number_of_elements = number_of_rows * number_of_columns;
-	double *array = new double[number_of_elements];
-	if (array == NULL)
-		return NULL;	// we will handle this condition in the calling function
-	
-	for (unsigned long j = 0; j < number_of_rows; j++) {
-		for (unsigned long i = 0; i < number_of_columns; i++) {
-			array[offset] = gsl_matrix_get(matrix, i, j);
-			offset++;
-		}
-	}
-	return array;
-}
-
-inline int return_xy_from_array(unsigned long pos, unsigned long x_size, unsigned long y_size, double x_offset, double y_offset, double &x, double &y) {
-	unsigned long number_of_pixels = x_size * y_size;
-	
-	if (pos > number_of_pixels)
-		return -1;
-	
-	y = (double)(pos / x_size); // integer division
-	x = (double)(pos % x_size); // modulus operator
-	
-	x += x_offset;
-	y += y_offset;
-	
-	return 0;
-}
+} */
 
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
@@ -4673,7 +4624,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 	gsl_multifit_fdfsolver *fit_iterator;
 	
 	solver = gsl_multifit_fdfsolver_lmsder;
-	measured_data_Gauss_fits measured_data;
+	measured_data_Gauss_fits fitData;
 	gsl_multifit_function_fdf f;
 	
 	gsl_vector *fit_parameters = gsl_vector_alloc(5);
@@ -4705,7 +4656,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 	f.fdf = &Gauss_2D_fit_function_and_Jacobian;
 	f.n = number_of_intensities;
 	f.p = 5;
-	f.params = (void *)&measured_data;
+	f.params = (void *)&fitData;
 	
 	
 	// iterate over all the determined positions
@@ -4723,50 +4674,21 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 		x_max = x0_initial + cutoff_radius;
 		y_max = y0_initial + cutoff_radius;
 		
-		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this positions is too close to the edge of the image
+		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 																									// we cannot include it
 			continue;
 		}
 		
-		for (unsigned long k = y_offset; k <= y_max; k++) {
-			for (unsigned long j = x_offset; j <= x_max; j++) {
+		for (unsigned long j = x_offset; j <= x_max; j++) {
+			for (unsigned long k = y_offset; k <= y_max; k++) {
 				image_subset->set(j - x_offset, k - y_offset, image->get(j, k));
 			}
 		}
 		
-		// ironically, for the fitting we need to provide the data as an array, so we'll convert again
-		double *intensity_array = convert_gsl_matrix_to_array(image_subset->get_ptr(), number_of_intensities);
-		if (intensity_array == NULL) {
-			gsl_vector_free(fit_parameters);
-			gsl_multifit_fdfsolver_free(fit_iterator);
-			gsl_matrix_free(covarianceMatrix);
-			string error;
-			error = "unable to allocate intensity_array in FitPositionsGaussian::fit_positions()\r";
-			throw OUT_OF_MEMORY(error);
-		}
-		
-		double *sigma_array = new double[number_of_intensities];
-		if (sigma_array == NULL) {
-			gsl_vector_free(fit_parameters);
-			gsl_multifit_fdfsolver_free(fit_iterator);
-			gsl_matrix_free(covarianceMatrix);
-			delete[] intensity_array;
-			string error;
-			error = "unable to allocate sigma_array in FitPositionsGaussian::fit_positions()\r";
-			throw OUT_OF_MEMORY(error);
-		}
-		
-		for (unsigned long j = 0; j < number_of_intensities; j++) {
-			sigma_array[j] = sigma;
-		}
-		
-		measured_data.set_number_of_intensities(number_of_intensities);
-		measured_data.set_intensities(intensity_array);
-		measured_data.set_sigma(sigma_array);
-		measured_data.set_x_size(size_of_subset);
-		measured_data.set_y_size(size_of_subset);
-		measured_data.set_x_offset(x_offset);
-		measured_data.set_y_offset(y_offset);
+		fitData.xOffset = (double)x_offset;
+		fitData.yOffset = (double)y_offset;
+		fitData.imageSubset = image_subset;
+		fitData.sigma = sigma;
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
@@ -4788,13 +4710,13 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
 		} while ((status = GSL_CONTINUE) && (iterations < 200));
 		
-		if ((status != GSL_SUCCESS) && (iterations == 200)) {
+		/*if ((status != GSL_SUCCESS) && (iterations == 200)) {
 			// max number of iterations reached
 		}
 		if ((status != GSL_SUCCESS) && (iterations < 200)) {
 			// some error occurred
 			//			cout << gsl_strerror(status) << "\n";
-		}
+		}*/
 		
 		// calculate the covariance matrix
 		gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
@@ -4824,9 +4746,6 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 		
 		fitted_positions->set(i - startPos, 1, fitted_positions->get(i - startPos, 1) / 1.414213562373095);
 		fitted_positions->set(i - startPos, 6, fitted_positions->get(i - startPos, 6) / 1.414213562373095);	// the same for the error
-		
-		delete[] intensity_array;
-		delete[] sigma_array;
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
@@ -5034,7 +4953,6 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 	}
 	
 	unsigned long number_of_positions = endPos - startPos + 1;
-	unsigned long size_of_subset = 2 * cutoff_radius + 1;
 	unsigned long xSize = image->get_x_size();
 	unsigned long ySize = image->get_y_size();
 	unsigned long x_offset, y_offset, x_max, y_max;
@@ -5512,19 +5430,4 @@ int IgorOutputWriter::write_positions_to_wave() {
 		positionsList.pop_front();
 	}
 	return 0;
-}
-
-measured_data_Gauss_fits::measured_data_Gauss_fits() {
-	intensities = NULL;
-	sigma = NULL;
-	x_y_positions = NULL;
-}
-
-measured_data_Gauss_fits::~measured_data_Gauss_fits() {
-	/*	if (intensities != NULL)
-	 delete[] intensities;
-	 if (sigma != NULL)
-	 delete[] sigma;
-	 if (x_y_positions != NULL)
-	 gsl_matrix_free(x_y_positions);*/
 }

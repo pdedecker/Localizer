@@ -766,7 +766,7 @@ boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_pt
 
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
 
-int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *model_values);
+int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 
 int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
@@ -774,77 +774,21 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 
 // the routines below are simply adapted versions of the least-squares routines above, but have been 'tweaked' to approximate Poissonian instead of Gaussian error distributions
 
-int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *model_values);
+// int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *model_values);
 
-int Gauss_2D_Poissonian_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+// int Gauss_2D_Poissonian_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
-int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
-
-double * convert_gsl_matrix_to_array(gsl_matrix *matrix, unsigned long &number_of_elements);
-
-inline int return_xy_from_array(unsigned long pos, unsigned long x_size, unsigned long y_size, double x_offset, double y_offset, double &x, double &y);
-// because we have to convert the image data to a linear array for the fitting, we need some way to covert the indices
-// for the array to the x,y coordinates in the image
-// WARNING: we assume that the data is stored in a row-major order
-
-gsl_vector * convert_gsl_matrix_to_vector(gsl_matrix *matrix);
-// ROW MAJOR ordering
-
-
-/*class OutputWriter {
-public:
-	OutputWriter(const unsigned long n_images);
-	OutputWriter(const string path, const unsigned long n_images);
-	~OutputWriter();
-	
-	int create_file(const string rhs);	// if there is already a file open then -1 will be returned, and nothing will happen
-	int write_positions_in_single_image(const gsl_matrix *positions);	// this writes the images to the file incrementally, so the first image should be first,
-	// then the second, and so on until the last
-	int close_file;		// should be called after the last image has been submitted
-	// if the number of images that is submitted does not equal the predicted total number of images then an error will be raised
-	
-protected:
-	unsigned long total_number_of_images;
-	unsigned long number_of_images_written;
-	unsigned long number_of_positions_written;
-	unsigned long *number_of_positions_array;		// this array keeps track of how many positions are found in the m-th image
-	// the size of this array is equal to the total number of images
-	unsigned long total_number_of_positions;
-	string file_path;
-	ofstream file;
-};*/
+// int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
 class measured_data_Gauss_fits {
 public:	
-	measured_data_Gauss_fits();
-	~measured_data_Gauss_fits();
-	unsigned long get_number_of_intensities() {return number_of_intensities;}
-	unsigned long get_x_size() {return x_size;}
-	unsigned long get_y_size() {return y_size;}
-	double get_x_offset() {return x_offset;}
-	double get_y_offset() {return y_offset;}
-	double * get_intensities() {return intensities;}
-	double * get_sigma() {return sigma;}
-	void * get_x_y_position(unsigned long pos, double &x, double &y);
+	measured_data_Gauss_fits() {;}
+	~measured_data_Gauss_fits() {;}
 	
-	void set_number_of_intensities(unsigned long n) {number_of_intensities = n;}
-	void set_x_size(unsigned long size) {x_size = size;}
-	void set_y_size(unsigned long size) {y_size = size;}
-	void set_x_offset(double offset) {x_offset = offset;}
-	void set_y_offset(double offset) {y_offset = offset;}
-	void set_intensities(double *intens) {intensities = intens;}
-	void set_sigma(double *s) {sigma = s;}
-	void set_x_y_positions(gsl_matrix *pos) {x_y_positions = pos;}
-	
-protected:
-	unsigned long number_of_intensities;
-	unsigned long x_size;
-	unsigned long y_size;
-	double x_offset;
-	double y_offset;
-	double *intensities;	// NOTE: we do not delete this data when the object is destroyed
-	double *sigma;	// NOTE: we do not delete this data when the object is destroyed
-	gsl_matrix *x_y_positions;
+	double xOffset;
+	double yOffset;
+	double sigma;
+	boost::shared_ptr<encap_gsl_matrix> imageSubset;
 };
 
 class OUT_OF_MEMORY {
