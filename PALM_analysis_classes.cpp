@@ -316,7 +316,7 @@ int ImageLoaderSPE::parse_header_information() {
 }
 
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned long n) {	
-	unsigned long offset;
+	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
@@ -637,7 +637,7 @@ int ImageLoaderAndor::parse_header_information() {
 }
 	
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsigned long n) {	
-	unsigned long offset;
+	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
 	float current_float = 0;
 	
 	
@@ -840,7 +840,7 @@ int ImageLoaderHamamatsu::parse_header_information() {
 
 
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const unsigned long n) {	
-	unsigned long offset;
+	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
 //	int current_int = 0;
 //	char byte_reader1, byte_reader2;
 	boost::shared_ptr<encap_gsl_matrix> image;
@@ -1009,7 +1009,8 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 	}
 	
 	// now load the new set of images
-	unsigned long offset, array_offset;
+	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
+	unsigned long array_offset;
 	boost::shared_ptr<encap_gsl_matrix> new_image;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
