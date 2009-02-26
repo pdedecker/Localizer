@@ -610,9 +610,9 @@ public:
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 };
 
-class ThresholdImage_MTT : public ThresholdImage {
+class ThresholdImage_GLRT : public ThresholdImage {
 public:
-	ThresholdImage_MTT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param;} 
+	ThresholdImage_GLRT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param;} 
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
 	
@@ -653,10 +653,10 @@ protected:
 	 ***/
 };
 
-class ThresholdImage_MTT_FFT : public ThresholdImage {
+class ThresholdImage_GLRT_FFT : public ThresholdImage {
 public:
-	ThresholdImage_MTT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; averageKernelXSize = 0; averageKernelYSize = 0; GaussianKernelXSize = 0; GaussianKernelYSize = 0;} 
-	~ThresholdImage_MTT_FFT() {;}
+	ThresholdImage_GLRT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; averageKernelXSize = 0; averageKernelYSize = 0; GaussianKernelXSize = 0; GaussianKernelYSize = 0;} 
+	~ThresholdImage_GLRT_FFT() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
 	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);

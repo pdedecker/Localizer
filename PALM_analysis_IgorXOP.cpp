@@ -545,7 +545,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_MTT_FFT(threshold_parameter, initial_width));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(threshold_parameter, initial_width));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1246,7 +1246,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_MTT_FFT(parameter, parameter2));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(parameter, parameter2));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;

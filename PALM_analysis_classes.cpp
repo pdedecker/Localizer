@@ -655,15 +655,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	// if it is then we return a copy
 	for (unsigned long i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
-			
-	//		image_copy = gsl_matrix_alloc(x_size, y_size);
-			
-	//		if (image_copy == NULL)
-	//			throw OUT_OF_MEMORY();
-			
-	//		gsl_matrix_memcpy(image_copy, image_cache[i]);
-			
-	//		return image_copy;
 			return image_cache[i];
 		}
 	}
@@ -674,10 +665,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
 	for (unsigned long i = 0; i < image_cache_size; i++) {
-		/*if (image_cache[i] != NULL) {
-			gsl_matrix_free(image_cache[i]);
-			image_cache[i] = NULL;
-		}*/
 		images_in_cache[i] = -1;
 	}
 	
@@ -725,16 +712,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	}
 	
 	file.seekg(0);
-	
-	// the originally requested image is at the start of the cache
-	// however, we will return a copy of the matrix, so that no synchronization problems can occur
-	// if another thread were to access a new image at a different time
-	/*image_copy = gsl_matrix_alloc(x_size, y_size);
-	if (image_copy == NULL) {
-		throw OUT_OF_MEMORY();
-	}
-	gsl_matrix_memcpy(image_copy, image_cache[0]);
-	return image_copy;*/
 	
 	return image_cache[0];
 	
@@ -3414,7 +3391,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
 	unsigned long x_size = image->get_x_size();
@@ -3577,7 +3554,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT::do_thresholding(bo
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_MTT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
 	unsigned long x_size = image->get_x_size();
