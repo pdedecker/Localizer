@@ -132,6 +132,33 @@ protected:
 	double intensity;
 };
 
+class XOPFileHandler {
+public:
+	XOPFileHandler() {fileRef = NULL;}
+	~XOPFileHandler();
+	
+	void open(const char *path_rhs);
+	void open(const char *path_rhs, std::ios_base::openmode mode) {open (path_rhs);}	// for compatibility with the standard library
+	
+	void close();
+	int fail() {return 0;}	// we will let this class throw exceptions
+							// so if a failure occurs then the code will never be able to check for fail() since control will have passed to the error-handling function
+							// we keep the function anyway since it matches the standard ifstream classes so the class can be swapped in
+	
+	int is_open() {return (fileRef != NULL);}
+	
+	void get(char & c);
+	void read(char *buffer, size_t nBytes);
+	void getline(char *buffer, size_t nMax);
+	
+	uint64_t tellg();
+	void seekg(uint64_t pos);
+	
+	
+private:
+	XOP_FILE_REF fileRef;
+	string path;
+};
 
 class ImageLoader {
 public:
@@ -153,7 +180,8 @@ protected:
 	unsigned long image_cache_size;
 	
 	string path;
-	ifstream file;
+	// ifstream file;
+	XOPFileHandler file;
 	unsigned long header_length;
 	unsigned long total_number_of_images;
 	unsigned long x_size;

@@ -180,6 +180,116 @@ long encap_gsl_matrix_long::get(size_t x, size_t y) {
 	return gsl_matrix_long_get(matrix, x, y);
 }
 
+
+XOPFileHandler::~XOPFileHandler() {
+	if (fileRef != NULL) {
+		XOPCloseFile(fileRef);
+		fileRef == NULL;
+	}
+}
+
+void XOPFileHandler::open(const char* path_rhs) {
+	int err;
+	
+	err = XOPOpenFile(path_rhs, 0, &fileRef);
+	if (err != 0) {
+		string error;
+		error = "Error trying opening the image file at \"";
+		error += path_rhs;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	path = path_rhs;
+}
+	
+void XOPFileHandler::close() {
+	int err;
+	if (fileRef != NULL) {
+		err = XOPCloseFile(fileRef);
+		if (err != 0) {
+			string error;
+			error = "Error closing the image file at \"";
+			error += path;
+			error += "\"\r";
+			throw ERROR_READING_FILE_DATA(error);
+		}
+		fileRef = NULL;
+	}
+}
+
+void XOPFileHandler::get(char& c) {
+	int err;
+	err = XOPReadFile2(fileRef, 1, &c, NULL);
+	if (err != 0) {
+		string error;
+		error = "Error using get() on the image file at \"";
+		error += path;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+}
+
+void XOPFileHandler::read(char *buffer, size_t nBytes) {
+	int err;
+	err = XOPReadFile2(fileRef, nBytes, buffer, NULL);
+	if (err != 0) {
+		string error;
+		error = "Error using read() on the image file at \"";
+		error += path;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+}
+
+void XOPFileHandler::getline(char *buffer, size_t nMax) {
+	int err;
+	err = XOPReadLine(fileRef, buffer, nMax, NULL);
+	if (err != 0) {
+		string error;
+		error = "Error using getline() on the image file at \"";
+		error += path;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+}
+
+uint64_t XOPFileHandler::tellg() {
+	double dPosition;
+	uint64_t pos;
+	int err;
+	
+	err = XOPGetFilePosition2(fileRef, &dPosition);
+	if (err != 0) {
+		string error;
+		error = "Error using tellg() on the image file at \"";
+		error += path;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	pos = (uint64_t) dPosition;
+	return pos;
+}
+
+void XOPFileHandler::seekg(uint64_t pos) {
+	double dPosition;
+	
+	int err;
+	
+	dPosition = (double)pos;
+	
+	err = XOPSetFilePosition2(fileRef, dPosition);
+	if (err != 0) {
+		string error;
+		error = "Error using seekg() on the image file at \"";
+		error += path;
+		error += "\"\r";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+}
+
+
 ImageLoader::ImageLoader() {
 	path.assign("");
 	total_number_of_images = 0;
@@ -337,11 +447,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 	for (unsigned long i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
-	//		image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
-			
-	//		gsl_matrix_memcpy(image_copy, image_cache[i]);
-			
-	//		return image_copy;
 		}
 	}
 	
