@@ -660,16 +660,6 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		return SIZE_OF_CHAR_IS_NOT_ONE_BYTE_DEF;
 	if (sizeof(float) != 4)
 		return SIZE_OF_FLOAT_IS_NOT_FOUR_BYTES_DEF;
-	
-	
-	if (imagesAreBeingRead == 1) {	// so that Igor can load images in the background we report this operation as being reentrant
-									// even though it really isn't. This static variable makes sure that no more than a single instance of the operation
-									// is running at a given time
-		XOPNotice("Another instance of ReadCCDImages is already running - aborting\r");
-		return USR_BKG_ERROR;
-	}
-	
-	imagesAreBeingRead = 1;
 		
 	
 	// Flag parameters.
@@ -743,25 +733,20 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		
 	}
 	catch (std::bad_alloc) {
-		imagesAreBeingRead = 0;
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
 		XOPNotice(err.get_error().c_str());
-		imagesAreBeingRead = 0;
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		imagesAreBeingRead = 0;
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		imagesAreBeingRead = 0;
 		XOPNotice(e.get_error().c_str());
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		imagesAreBeingRead = 0;
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
 	}
 	catch (std::range_error err) {
@@ -769,15 +754,12 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		return INDEX_OUT_OF_RANGE;
 	}
 	catch (int e) {
-		imagesAreBeingRead = 0;
 		return e;
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
 		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	
-	
-	imagesAreBeingRead = 0;
 	return err;
 }
 

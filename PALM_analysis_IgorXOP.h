@@ -23,8 +23,6 @@
 
 using namespace std;
 
-static int imagesAreBeingRead = 0;
-
 HOST_IMPORT int main(IORecHandle ioRecHandle);
 
 int convert_handle_to_string(Handle handle, string &output_string);

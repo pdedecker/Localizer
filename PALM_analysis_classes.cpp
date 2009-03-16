@@ -358,6 +358,7 @@ ImageLoaderSPE::~ImageLoaderSPE() {
 
 int ImageLoaderSPE::parse_header_information() {
 	long current_bytes = 0;	// assume that this is a four-byte variable
+	char header_buffer[1500];
 	char byte_reader1, byte_reader2, byte_reader3, byte_reader4;	// we want to only read 1 byte at a time
 	
 	// is there a file open?
@@ -365,9 +366,14 @@ int ImageLoaderSPE::parse_header_information() {
 		return -1;
 	}
 	
-	file.seekg(42);
-	file.get(byte_reader1);	// we know that the values are little-endian
-	file.get(byte_reader2);
+	// read the entire header into a buffer
+	file.read(header_buffer, 1500);
+	
+	// file.seekg(42);
+	// file.get(byte_reader1);	// we know that the values are little-endian
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer[42];
+	byte_reader2 = header_buffer[43];
 	current_bytes = 0x000000FF & byte_reader2;
 	current_bytes *= 256;
 	current_bytes = current_bytes | (0x000000FF & byte_reader1);
@@ -375,9 +381,11 @@ int ImageLoaderSPE::parse_header_information() {
 	x_size = current_bytes;
 	current_bytes = 0;
 	
-	file.seekg(656);
-	file.get(byte_reader1);	// we know that the values are little-endian
-	file.get(byte_reader2);
+	// file.seekg(656);
+	// file.get(byte_reader1);	// we know that the values are little-endian
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer[656];
+	byte_reader2 = header_buffer[657];
 	current_bytes = 0x000000FF & byte_reader2;
 	current_bytes *= 256;
 	current_bytes = current_bytes | (0x000000FF & byte_reader1);
@@ -385,11 +393,15 @@ int ImageLoaderSPE::parse_header_information() {
 	y_size = current_bytes;
 	current_bytes = 0;
 	
-	file.seekg(1446);
-	file.get(byte_reader1);	// we know that the values are little-endian
-	file.get(byte_reader2);
-	file.get(byte_reader3);	// we know that the values are little-endian
-	file.get(byte_reader4);
+	// file.seekg(1446);
+	// file.get(byte_reader1);	// we know that the values are little-endian
+	// file.get(byte_reader2);
+	// file.get(byte_reader3);	// we know that the values are little-endian
+	// file.get(byte_reader4);
+	byte_reader1 = header_buffer[1446];
+	byte_reader2 = header_buffer[1447];
+	byte_reader3 = header_buffer[1448];
+	byte_reader4 = header_buffer[1449];
 	current_bytes = 0x000000FF  & byte_reader4;
 	current_bytes *= 256;
 	current_bytes = current_bytes | (0x000000FF & byte_reader3);
@@ -401,9 +413,11 @@ int ImageLoaderSPE::parse_header_information() {
 	total_number_of_images = current_bytes;
 	current_bytes = 0;
 	
-	file.seekg(108);
-	file.get(byte_reader1);	// we know that the values are little-endian
-	file.get(byte_reader2);
+	// file.seekg(108);
+	// file.get(byte_reader1);	// we know that the values are little-endian
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer[108];
+	byte_reader2 = header_buffer[109];
 	current_bytes = 0x000000FF & byte_reader2;
 	current_bytes *= 256;
 	current_bytes = current_bytes | (0x000000FF & byte_reader1);
