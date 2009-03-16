@@ -657,88 +657,62 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, unsigned long image_cache_size_rh
 }
 
 ImageLoaderAndor::~ImageLoaderAndor() {
-	if (file.is_open() == 1)
+	if (file.is_open() == 1) {
 		file.close();
-	// free up any images that may remain in the cache
-	/*for (unsigned long i = 0; i < N_SIMULTANEOUS_IMAGE_LOADS; i++) {
-		if (image_cache[i] != NULL) {
-			gsl_matrix_free(image_cache[i]);
-			image_cache[i] = NULL;		// we need to do this as otherwise the ImageLoader destructor tries to free the same memory again
-		}
-	}*/
+	}
 }
 
 int ImageLoaderAndor::parse_header_information() {
-	char header_buffer_char[1024];
-	string header_buffer;
-	string header_subset;
-	size_t start_of_info, end_of_info;
-	// size_t start_of_data;
-	int temp;
-	// unsigned long file_position;
-	// unsigned long length;
+	unsigned long temp;
+	unsigned long xBinning, yBinning;
+	boost::scoped_array<char> headerBuffer(new char[60001]);
 	
-	// we need to get storage type out of the way as Andor doesn't use this
-	storage_type = 0;
+	file.read(headerBuffer.get(), 60000);
+	headerBuffer[60000] = '\0';	// NULL-terminate the string
 	
-	// the information that we are looking for is in the 22nd line (starting from 1) of the file
-	int image_params_line = 21;
-	
-	for (int i = 0; i < image_params_line; i++) {
-		file.getline(header_buffer_char, 1024);
+	for (int i = 0; i < 1000; ++i) {	// make sure that there are not intermediate NULL characters
+		if (headerBuffer[i] == '\0') {
+			headerBuffer[i] = '1';
+		}
 	}
 	
-	// now we read a few hundred bytes at the beginning of the file into the buffer
+	string headerString(headerBuffer.get());
+	stringstream ss(headerString, ios::in);
 	
-	// file_position = file.tellg();
-	// file.read(header_buffer_char, 24000);
-	// header_buffer_char[24000] = '\0';
+	// the important information on the measurement is on lines 22 and 23 (numbered from 1)
+	for (int i = 0; i < 21; ++i) {
+		ss.getline(headerBuffer.get(), 1024);
+	}
 	
-	// we have to make sure that there are no terminating \0 characters
-	// for (int i = 0; i < 24000; i++) {
-	//	if (header_buffer_char[i] == '\0') {
-	//		header_buffer_char[i] = '0';
-	//	}
-	//}
+	// get the first information
+	temp = ss.tellg();
+	ss.seekg(temp + 12);	// skip the "Pixel number"
+	ss >> temp;	// extracts "65538"
+	ss >> temp;	// extracts "1"
+	ss >> x_size;
+	ss >> y_size;
+	ss >> temp;	// extracts "1"
+	ss >> total_number_of_images;
+	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
 	
-	// now we read the line containing the first part of the data
-	file.getline(header_buffer_char, 1024);
-	header_buffer.assign(header_buffer_char);
+	ss >> temp;	// extracts "65538"
+	ss >> temp;
+	ss >> temp;
+	ss >> temp;
+	ss >> temp;
+	ss >> xBinning;
+	ss >> yBinning;
+	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
 	
-	// read the next part
-	file.getline(header_buffer_char, 1024);
-	header_buffer.append(header_buffer_char);
+	x_size = x_size / xBinning;
+	y_size = y_size / yBinning;	// integer division
 	
-	// length = header_buffer.length();
-	
-	start_of_info = header_buffer.find("65538");
-	end_of_info = header_buffer.find("65538", start_of_info + 1);
-	
-	header_subset = header_buffer.substr(start_of_info, end_of_info);
-	stringstream header_data(header_subset, (ios::in | ios::out));
-	
-	header_data >> temp;	// this extracts 65538
-	header_data >> temp;
-	
-	header_data >> y_size;
-	header_data >> x_size;
-	
-	header_data >> temp;
-	
-	header_data >> total_number_of_images;
-	
-	// now we have one additional line and a bunch of zeroes (equal to the number of images) on separate lines until the file data begins.
-	// we need to find the position of the start of the data
-	
-	// the number of zeroes is equal to the number of frames in the image
+	// now there are some lines that may contain timestamps. There are as many lines as there are images
 	for (unsigned long i = 0;  i < total_number_of_images; i++) {
-		file.getline(header_buffer_char, 1024);
+		ss.getline(headerBuffer.get(), 1024);
 	}
 	
-	header_length = file.tellg();
-	
-//	start_of_data = header_buffer.rfind("0\n0\n") + 4;
-//	header_length = start_of_data + file_position + 1;
+	header_length = ss.tellg();
 	
 	// did some error happen while reading the file?
 	if (file.fail() != 0) {
@@ -748,8 +722,6 @@ int ImageLoaderAndor::parse_header_information() {
 		error += "\" assuming the Andor format\r";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	file.seekg(0);
 	
 	return 0;
 }
