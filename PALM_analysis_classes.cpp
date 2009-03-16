@@ -184,7 +184,7 @@ long encap_gsl_matrix_long::get(size_t x, size_t y) {
 XOPFileHandler::~XOPFileHandler() {
 	if (fileRef != NULL) {
 		XOPCloseFile(fileRef);
-		fileRef == NULL;
+		fileRef = NULL;
 	}
 }
 
@@ -194,9 +194,9 @@ void XOPFileHandler::open(const char* path_rhs) {
 	err = XOPOpenFile(path_rhs, 0, &fileRef);
 	if (err != 0) {
 		string error;
-		error = "Error trying opening the image file at \"";
-		error += path_rhs;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using open() on the image file at \"" << path_rhs << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -209,9 +209,9 @@ void XOPFileHandler::close() {
 		err = XOPCloseFile(fileRef);
 		if (err != 0) {
 			string error;
-			error = "Error closing the image file at \"";
-			error += path;
-			error += "\"\r";
+			stringstream ss;
+			ss << "Error " << err << " returned using close() on the image file at \"" << path << "\"\r";
+			error = ss.str();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		fileRef = NULL;
@@ -223,9 +223,9 @@ void XOPFileHandler::get(char& c) {
 	err = XOPReadFile2(fileRef, 1, &c, NULL);
 	if (err != 0) {
 		string error;
-		error = "Error using get() on the image file at \"";
-		error += path;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using get() on the image file at \"" << path << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -235,9 +235,9 @@ void XOPFileHandler::read(char *buffer, size_t nBytes) {
 	err = XOPReadFile2(fileRef, nBytes, buffer, NULL);
 	if (err != 0) {
 		string error;
-		error = "Error using read() on the image file at \"";
-		error += path;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using read() on the image file at \"" << path << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -247,9 +247,9 @@ void XOPFileHandler::getline(char *buffer, size_t nMax) {
 	err = XOPReadLine(fileRef, buffer, nMax, NULL);
 	if (err != 0) {
 		string error;
-		error = "Error using getline() on the image file at \"";
-		error += path;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using getline() on the image file at \"" << path << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -262,9 +262,9 @@ uint64_t XOPFileHandler::tellg() {
 	err = XOPGetFilePosition2(fileRef, &dPosition);
 	if (err != 0) {
 		string error;
-		error = "Error using tellg() on the image file at \"";
-		error += path;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using tellg() on the image file at \"" << path << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -282,9 +282,9 @@ void XOPFileHandler::seekg(uint64_t pos) {
 	err = XOPSetFilePosition2(fileRef, dPosition);
 	if (err != 0) {
 		string error;
-		error = "Error using seekg() on the image file at \"";
-		error += path;
-		error += "\"\r";
+		stringstream ss;
+		ss << "Error " << err << " returned using seekg() on the image file at \"" << path << "\"\r";
+		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -426,14 +426,13 @@ int ImageLoaderSPE::parse_header_information() {
 }
 
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned long n) {	
-	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
+	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
 	unsigned short current_unsigned_short = 0;
 	string error;
 	boost::shared_ptr<encap_gsl_matrix> image;
-	// gsl_matrix *image_copy;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -461,8 +460,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 	
 	// now load the new set of images
 	
-	unsigned long n_bytes_in_single_image;
-	unsigned long cache_offset;
+	uint64_t n_bytes_in_single_image;
+	uint64_t cache_offset;
 	
 	// determine how big we have to make the single image buffer
 	switch(storage_type) {
@@ -486,7 +485,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 		boost::scoped_array<float> single_image_buffer_float(new float[x_size * y_size]);
 		boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
 	
-	for (unsigned long i = n; i < n + image_cache_size; i++) {
+	for (uint64_t i = n; i < n + image_cache_size; i++) {
 		
 		if (i >= total_number_of_images) {
 			continue;	// there are no more images to load into this cache location
@@ -742,12 +741,11 @@ int ImageLoaderAndor::parse_header_information() {
 }
 	
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsigned long n) {	
-	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
+	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
 	
 	boost::shared_ptr<encap_gsl_matrix> image;
-	// gsl_matrix *image_copy;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -776,9 +774,9 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	// now load the new set of images
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	unsigned long cache_offset;
+	uint64_t cache_offset;
 	
-	for (unsigned long i = n; i < n + image_cache_size; i++) {
+	for (uint64_t i = n; i < n + image_cache_size; i++) {
 		
 		if (i >= total_number_of_images) {
 			continue;	// there are no more images to load into this cache location
@@ -864,11 +862,6 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 
 int ImageLoaderHamamatsu::parse_header_information() {
 	char header_buffer_char[1024];	// too large, but we'd better be safe
-//	string header_buffer;
-//	string header_subset;
-//	size_t start_of_info, end_of_info;
-//	size_t start_of_data;
-//	int temp;
 	string header_string;
 	unsigned long wasabi_position;
 	
@@ -945,11 +938,8 @@ int ImageLoaderHamamatsu::parse_header_information() {
 
 
 boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const unsigned long n) {	
-	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
-//	int current_int = 0;
-//	char byte_reader1, byte_reader2;
+	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	boost::shared_ptr<encap_gsl_matrix> image;
-	// gsl_matrix *image_copy;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -963,15 +953,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	// if it is then we return a copy
 	for (unsigned long i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
-			
-		//	image_copy = gsl_matrix_alloc(x_size, y_size);
-			
-		//	if (image_copy == NULL)
-		//		throw OUT_OF_MEMORY();
-			
-		//	gsl_matrix_memcpy(image_copy, image_cache[i]);
-			
-		//	return image_copy;
 			return image_cache[i];
 		}
 	}
@@ -982,10 +963,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
 	for (unsigned long i = 0; i < image_cache_size; i++) {
-		/*if (image_cache[i] != NULL) {
-			gsl_matrix_free(image_cache[i]);
-			image_cache[i] = NULL;
-		}*/
 		images_in_cache[i] = -1;
 	}
 	
@@ -997,9 +974,9 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	unsigned int current_uint;
 	unsigned long n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	unsigned long cache_offset;
+	uint64_t cache_offset;
 	
-	for (unsigned long i = n; i < n + image_cache_size; i++) {
+	for (uint64_t i = n; i < n + image_cache_size; i++) {
 		
 		if (i >= total_number_of_images) {
 			continue;	// there are no more images to load into this cache location
@@ -1084,10 +1061,7 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsigned long n) {
-
-	// gsl_matrix *image_copy;
-	
+boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsigned long n) {	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
@@ -1114,12 +1088,12 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 	}
 	
 	// now load the new set of images
-	off_t offset;	// off_t is the size of the file pointer used by the OS. Important if we want to access large files
+	uint64_t offset;
 	unsigned long array_offset;
 	boost::shared_ptr<encap_gsl_matrix> new_image;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
-	for (unsigned long i = n; i < n + image_cache_size; i++) {
+	for (uint64_t i = n; i < n + image_cache_size; i++) {
 		
 		if (i >= total_number_of_images) {
 			continue;	// there are no more images to load into this cache location

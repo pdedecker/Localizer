@@ -182,10 +182,10 @@ protected:
 	string path;
 	// ifstream file;
 	XOPFileHandler file;
-	unsigned long header_length;
+	uint64_t header_length;
 	unsigned long total_number_of_images;
-	unsigned long x_size;
-	unsigned long y_size;
+	uint64_t x_size;
+	uint64_t y_size;
 	int storage_type;
 	vector <boost::shared_ptr<encap_gsl_matrix> > image_cache;	// array of pointer to gsl_matrices containing cached images
 	vector <unsigned long> images_in_cache;	// keeps track of the indices of the images in the cache
