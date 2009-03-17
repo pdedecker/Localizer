@@ -857,26 +857,37 @@ int ImageLoaderHamamatsu::parse_header_information() {
 	y_size = 0;
 	storage_type = 0;
 	
+	// first we load a set of data
+	file.seekg(0);
+	file.read(header_buffer_char, 1023);
+	header_buffer_char[1023] = '\0';
+	
 	
 	// bytes 4-7 contain the x and y size as UINT16
-	file.seekg(4);
-	file.get(byte_reader1);
-	file.get(byte_reader2);
+	// file.seekg(4);
+	// file.get(byte_reader1);
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer_char[4];
+	byte_reader2 = header_buffer_char[5];
 	
 	x_size = 0x00000000FF & byte_reader2;	// little-endian
 	x_size *= 256;
 	x_size = x_size | (0x00000000FF & byte_reader1);
 	
-	file.get(byte_reader1);
-	file.get(byte_reader2);
+	// file.get(byte_reader1);
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer_char[6];
+	byte_reader2 = header_buffer_char[7];
 	y_size = 0x000000FF & byte_reader2;	// little-endian
 	y_size *= 256;
 	y_size = y_size | (0x00000000FF & byte_reader1);
 	
 	// get the number of images, stored at bytes 14 and 15
-	file.seekg(14);
-	file.get(byte_reader1);
-	file.get(byte_reader2);
+	// file.seekg(14);
+	// file.get(byte_reader1);
+	// file.get(byte_reader2);
+	byte_reader1 = header_buffer_char[14];
+	byte_reader2 = header_buffer_char[15];
 	
 	total_number_of_images = 0x00000000FF & byte_reader2;
 	total_number_of_images *= 256;
@@ -885,11 +896,7 @@ int ImageLoaderHamamatsu::parse_header_information() {
 	
 	// now we need to determine the length of the header
 	// we will do this by looking for the string "~WASABI~" in the file
-	// first we load a set of data
-	file.seekg(0);
-	file.read(header_buffer_char, 1023);
-	header_buffer_char[1023] = '\0';
-	// we have to remove extraneous NULL characters that may be present in the string we read from the file
+	// first we have to remove extraneous NULL characters that may be present in the string we read from the file
 	// this will cause the string to be interpreted as a very short array
 	for (int i = 0; i < 1023; i++) {
 		if (header_buffer_char[i] == '\0')
@@ -898,11 +905,11 @@ int ImageLoaderHamamatsu::parse_header_information() {
 	
 	header_string.assign(header_buffer_char);
 	
-	// there seem to be different versions of the files, but they all follow the same stupid principle
+	// there seem to be different versions of the files, but they all follow the same principle
 	// first we check if it's one of the old files
 	
 	wasabi_position = header_string.find("~WASABI~", 0);
-	if (wasabi_position == (unsigned long)(-1)) {	// we didn't the "~WASABI~", it's probably a new file
+	if (wasabi_position == (unsigned long)(-1)) {	// we didn't find the "~WASABI~", it's probably a new file
 		wasabi_position = header_string.find("~Hokawo~", 0);
 	}
 	
