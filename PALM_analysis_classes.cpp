@@ -1744,6 +1744,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 		
 		result = TIFFSetDirectory(tiff_file, directoryIndices.at(i));
 		if (result != 1) {
+			_TIFFfree(single_scanline_buffer);
 			string error;
 			error = "Unable to set the directory to '0' for the image at\"";
 			error += path;
@@ -1754,6 +1755,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 		for (unsigned long j = 0; j < y_size; ++j) {
 			result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
 			if (result != 1) {
+				_TIFFfree(single_scanline_buffer);
 				string error;
 				error = "Unable to read a scanline from the image at\"";
 				error += path;
@@ -1831,7 +1833,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 							break;
 						default:
 							_TIFFfree(single_scanline_buffer);
-							_TIFFfree(single_scanline_buffer);
 							string error;
 							error = "Invalid floating point data size for the image at\"";
 							error += path;
@@ -1841,7 +1842,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 					}
 					break;
 				default:
-					_TIFFfree(single_scanline_buffer);
 					_TIFFfree(single_scanline_buffer);
 					string error;
 					error = "Unknown SampleFormat for the image at\"";
@@ -1860,7 +1860,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 	_TIFFfree(single_scanline_buffer);
 	result = TIFFSetDirectory(tiff_file, 0);
 	if (result != 1) {
-		_TIFFfree(single_scanline_buffer);
 		string error;
 		error = "Invalid to set the directory to '0' for the image at\"";
 		error += path;
