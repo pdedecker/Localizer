@@ -14,6 +14,7 @@
 #ifndef _DEBUG_
 #define ENCAP_GSL_RANGE_CHECK_OFF
 #endif
+#define HAVE_INLINE	// gsl uses inline functions
 
 #define N_SIMULTANEOUS_IMAGE_LOADS 40	// determines the extent of the caching
 #define N_SIMULTANEOUS_IMAGE_WRITES 40	// determines the extent of the caching
