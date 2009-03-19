@@ -664,6 +664,8 @@ ImageLoaderAndor::~ImageLoaderAndor() {
 int ImageLoaderAndor::parse_header_information() {
 	unsigned long temp;
 	unsigned long xBinning, yBinning;
+	unsigned long frameXSize, frameYSize;
+	unsigned long xStart, yStart, xEnd, yEnd;
 	boost::scoped_array<char> headerBuffer(new char[60001]);
 	
 	file.read(headerBuffer.get(), 60000);
@@ -688,23 +690,23 @@ int ImageLoaderAndor::parse_header_information() {
 	ss.seekg(temp + 12);	// skip the "Pixel number"
 	ss >> temp;	// extracts "65538"
 	ss >> temp;	// extracts "1"
-	ss >> x_size;
-	ss >> y_size;
+	ss >> frameYSize;
+	ss >> frameXSize;
 	ss >> temp;	// extracts "1"
 	ss >> total_number_of_images;
 	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
 	
 	ss >> temp;	// extracts "65538"
-	ss >> temp;
-	ss >> temp;
-	ss >> temp;
-	ss >> temp;
+	ss >> xStart;
+	ss >> yEnd;
+	ss >> xEnd;
+	ss >> yStart;
 	ss >> xBinning;
 	ss >> yBinning;
 	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
 	
-	x_size = x_size / xBinning;
-	y_size = y_size / yBinning;	// integer division
+	x_size = (xEnd - xStart + 1) / xBinning;
+	y_size = (yEnd - yStart + 1) / yBinning;	// integer division
 	
 	// now there are some lines that may contain timestamps. There are as many lines as there are images
 	for (unsigned long i = 0;  i < total_number_of_images; i++) {
