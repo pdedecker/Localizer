@@ -1875,6 +1875,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 
 
 ImageLoaderIgor::ImageLoaderIgor(string waveName) {
+	int err;
 	// try to get images from an Igor wave
 	// the string that is passed in has a leading slash added by the code that converts between Macintosh and Windows paths
 	// so we need to correct for that
@@ -1882,7 +1883,12 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 		waveName.erase(0, 1);
 	#endif
 	
-	igor_data_wave = FetchWave(waveName.c_str());
+	DataFolderHandle rootFolder;
+	err = GetRootDataFolder(0, &rootFolder);
+	if (err != 0)
+		throw err;
+	
+	igor_data_wave = FetchWaveFromDataFolder(rootFolder, waveName.c_str());
 	if (igor_data_wave == NULL) {
 		throw NOWAV;
 	}
@@ -4110,6 +4116,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	y_size2 = image2->get_y_size();
 	
 	size_t n_pixels, offset;
+	size_t FFT_xSize, FFT_ySize, i, j;
 	size_t n_FFT_values, nColumns;
 	
 	double *array1;
@@ -4125,7 +4132,21 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 		throw INCOMPATIBLE_DIMENSIONING;
 	}
 	
-	n_pixels = x_size1 * y_size1;
+	// does the image have dimension sizes that are odd? if so remove one column and/or row so that it becomes even
+	// we will correct for this when returning the image by copying the values back in
+	if ((x_size1 % 2) == 1) {	// odd x size
+		FFT_xSize = x_size1 - 1;
+	} else {	// even size, nothing needs to happen
+		FFT_xSize = x_size1;
+	}
+	
+	if ((y_size1 % 2) == 1) {	// odd y size
+		FFT_ySize = y_size1 - 1;
+	} else {	// even size, nothing needs to happen
+		FFT_ySize = y_size1;
+	}
+	
+	n_pixels = FFT_xSize * FFT_ySize;
 	double normalization_factor = (double)(n_pixels);
 	
 	// convert both of the matrices to an array of doubles
@@ -4149,8 +4170,8 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	offset = 0;
 	// now copy the matrices to the arrays
 	
-	for (size_t i = 0; i < x_size1; i++) {
-		for (size_t j = 0; j < y_size1; j++) {
+	for (size_t i = 0; i < FFT_xSize; i++) {
+		for (size_t j = 0; j < FFT_ySize; j++) {
 			// IMPORTANT: the data in the array is assumed to be in ROW-MAJOR order, so we loop over y first
 			array1[offset] = image1->get(i, j);
 			array2[offset] = image2->get(i, j);
@@ -4161,8 +4182,8 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	// now allocate the arrays that will hold the transformed result
 	// the dimensions of these arrays are a bit unusual, and are x_size * (y_size / 2 + 1)
-	n_FFT_values = x_size1 * (y_size1 / 2 + 1);
-	nColumns = y_size1 / 2 + 1;
+	n_FFT_values = FFT_xSize * (FFT_ySize / 2 + 1);
+	nColumns = FFT_ySize / 2 + 1;
 	
 	array1_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
 	if (array1_FFT == NULL) {
@@ -4185,16 +4206,16 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	// prepare the transform and execute it on the first array
 	// if there is no forward plan yet then create it
 	forwardPlanMutex.lock();
-	if ((forwardPlan == NULL) || (forwardPlanXSize != x_size1) || (forwardPlanYSize != y_size1)) {
+	if ((forwardPlan == NULL) || (forwardPlanXSize != FFT_xSize) || (forwardPlanYSize != FFT_ySize)) {
 		forwardCalculationMutex.lock();	// require exclusive ownership
 		if (forwardPlan != NULL) {
 			fftw_destroy_plan(forwardPlan);
 		}
 		
-		forwardPlanXSize = x_size1;
-		forwardPlanYSize = y_size1;
+		forwardPlanXSize = FFT_xSize;
+		forwardPlanYSize = FFT_ySize;
 		
-		forwardPlan = fftw_plan_dft_r2c_2d((int)(x_size1), (int)(y_size1), array1, array1_FFT, FFTW_ESTIMATE);
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(FFT_xSize), (int)(FFT_ySize), array1, array1_FFT, FFTW_ESTIMATE);
 		forwardCalculationMutex.unlock();
 	}
 	
@@ -4223,16 +4244,16 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	// we overwrite the original array
 	// if there is no reverse plan yet then create it
 	reversePlanMutex.lock();
-	if ((reversePlan == NULL) || (reversePlanXSize != x_size1) || (reversePlanYSize != y_size1)) {
+	if ((reversePlan == NULL) || (reversePlanXSize != FFT_xSize) || (reversePlanYSize != FFT_ySize)) {
 		reverseCalculationMutex.lock();	// require exclusive ownership
 		if (reversePlan != NULL) {
 			fftw_destroy_plan(reversePlan);
 		}
 		
-		reversePlanXSize = x_size1;
-		reversePlanYSize = y_size1;
+		reversePlanXSize = FFT_xSize;
+		reversePlanYSize = FFT_ySize;
 		
-		reversePlan = fftw_plan_dft_c2r_2d((int)(x_size1), (int)(y_size1), array1_FFT, array1, FFTW_ESTIMATE);
+		reversePlan = fftw_plan_dft_c2r_2d((int)(FFT_xSize), (int)(FFT_ySize), array1_FFT, array1, FFTW_ESTIMATE);
 		reverseCalculationMutex.unlock();
 	}
 	
@@ -4245,14 +4266,35 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	
 	// and store the result (we don't overwrite the input arguments)
 	offset = 0;
-	for (size_t i = 0; i < x_size1; i++) {
-		for (size_t j = 0; j < y_size1; j++) {
+	for (size_t i = 0; i < FFT_xSize; i++) {
+		for (size_t j = 0; j < FFT_ySize; j++) {
 			// the data in the array is assumed to be in ROW-MAJOR order, so we loop over x first
 			// we also normalize the result
 			convolved_image->set(i, j, (array1[offset] / normalization_factor));
 			
 			offset++;
 		}
+	}
+	
+	// if the number of rows was odd, make the last row (not included in the fft) a copy of that before it
+	if ((x_size1 % 2) == 1) {
+		i = x_size1 - 1;
+		for (size_t j = 0; j < y_size1; ++j) {
+			convolved_image->set(i, j, convolved_image->get(i - 1, j));
+		}
+	}
+	
+	// if the number of columns was odd, make the last column (not included in the fft) a copy of that before it
+	if ((y_size1 % 2) == 1) {
+		j = y_size1 - 1;
+		for (size_t i = 0; i < x_size1; ++i) {
+			convolved_image->set(i, j, convolved_image->get(i, j - 1));
+		}
+	}
+	
+	// if both the number of columns and the number of rows was odd, then the pixel at the top left (highest x, highest y) will be incorrect
+	if (((x_size1 % 2) == 1) && ((y_size1 % 2) == 1)) {
+		convolved_image->set(x_size1 - 1, y_size1 - 1, convolved_image->get(x_size1 - 2, y_size1 - 2));
 	}
 	
 	// cleanup
