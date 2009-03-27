@@ -180,6 +180,34 @@ long encap_gsl_matrix_long::get(size_t x, size_t y) {
 }
 
 
+encap_gsl_volume::encap_gsl_volume(size_t x, size_t y, size_t z) {
+	matrices.reserve(z);
+	
+	for (size_t i = 0; i < z; ++i) {
+		matrices.push_back(encap_gsl_matrix(x, y));
+	}
+	
+	x_size = x;
+	y_size = y;
+	z_size = z;
+}
+
+void encap_gsl_volume::set(size_t x, size_t y, size_t z, double value) {
+	matrices[z].set(x, y, value);
+}
+
+void encap_gsl_volume::set_all(double value) {
+	for (size_t i = 0; i < z_size; ++i) {
+		matrices[i].set_all(value);
+	}
+}
+
+double encap_gsl_volume::get(size_t x, size_t y, size_t z) {
+	return matrices[z].get(x, y);
+}
+
+
+
 XOPFileHandler::~XOPFileHandler() {
 	if (fileRef != NULL) {
 		XOPCloseFile(fileRef);

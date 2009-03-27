@@ -111,6 +111,25 @@ protected:
 	size_t x_size, y_size;
 };
 
+class encap_gsl_volume {	// extension of an encap_gsl_matrix to three dimensions
+public:
+	encap_gsl_volume(size_t x, size_t y, size_t z);
+	~encap_gsl_volume() {;}
+	
+	void set(size_t x, size_t y, size_t z, double value);
+	void set_all(double value);
+	
+	double get(size_t x, size_t y, size_t z);
+	size_t get_x_size() const {return x_size;}
+	size_t get_y_size() const {return y_size;}
+	size_t get_z_size() const {return z_size;}
+	
+protected:
+	string error;
+	vector<encap_gsl_matrix> matrices;
+	size_t x_size, y_size, z_size;
+};
+
 class position {
 public:
 	position() {x = 0; y = 0; intensity = 0;}
