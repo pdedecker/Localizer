@@ -30,10 +30,6 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
-								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
-
-int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
@@ -62,30 +58,13 @@ protected:
 
 class threadStartData {
 public:
-	threadStartData(boost::shared_ptr<encap_gsl_matrix> image_rhs, boost::shared_ptr<FitPositions> positionsFitter_rhs, boost::shared_ptr<encap_gsl_matrix> positions_rhs, 
-					boost::shared_ptr<encap_gsl_matrix> outputPositions_rhs, unsigned long start_rhs, unsigned long end_rhs) {image = image_rhs; positions = positions_rhs; outputPositions = outputPositions_rhs; positionsFitter = positionsFitter_rhs; start = start_rhs; end = end_rhs;}
-	~threadStartData() {;}
-	
-	boost::shared_ptr<encap_gsl_matrix> image;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost:: shared_ptr<encap_gsl_matrix> outputPositions;
-	boost::shared_ptr<FitPositions> positionsFitter;
-	
-	unsigned long start;
-	unsigned long end;
-};
-
-void fitPositionsThreadStart(threadStartData data);
-
-class threadStartData2 {
-public:
-	threadStartData2(boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor_rhs,
+	threadStartData(boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor_rhs,
 					 boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor_rhs,
 					 boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> positionsFitter_rhs) {
 		thresholder = thresholder_rhs; preprocessor = preprocessor_rhs; postprocessor = postprocessor_rhs; particleFinder = particleFinder_rhs, positionsFitter = positionsFitter_rhs;
 	}
 	
-	~threadStartData2() {;}
+	~threadStartData() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> image;
 	boost::shared_ptr<ThresholdImage> thresholder;
@@ -97,7 +76,7 @@ public:
 };
 	
 
-void fitPositionsThreadStart2(boost::shared_ptr<threadStartData2> data);
+void fitPositionsThreadStart(boost::shared_ptr<threadStartData> data);
 
 
 int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 

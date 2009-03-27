@@ -176,170 +176,8 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	
 }
 
+
 int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
-								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
-	
-	unsigned long number_of_images;
-	int status;
-	unsigned int numberOfProcessors = boost::thread::hardware_concurrency();
-	unsigned int numberOfThreads;
-	vector<boost::shared_ptr<boost::thread> > threads;
-	boost::shared_ptr<boost::thread> singleThreadPtr;
-	// vector<pthread_t> threads;
-	// threads.resize(numberOfProcessors, pthread_t());
-	// vector <boost::shared_ptr<encap_gsl_matrix> > localFittedPositions;
-	// localFittedPositions.resize(numberOfProcessors, boost::shared_ptr<encap_gsl_matrix>());
-	vector<unsigned long> startPositions;
-	vector<unsigned long> endPositions;
-	vector<threadStartData> threadData;
-	unsigned long positionsPerThread, startPosition, endPosition;
-	unsigned long nPositions, nLocalPositions;
-	
-	
-	
-	number_of_images = image_loader->get_total_number_of_images();
-	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
-	
-	unsigned long progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
-	int current_progress_index = 0;
-	
-	IgorOutputWriter output_writer(output_wave_name);
-	
-	for (int i = 0; i < 9; ++i) {
-		progress_indices[i] = floor((double)(i + 1) / 10.0 * (double)number_of_images);
-	}
-	
-	XOPNotice("Calculating");
-	
-	for (unsigned long i = 0; i < number_of_images; i++) {
-		// check if the user wants to cancel the calculation
-		status = CheckAbort(0);
-		if (status == -1) {
-			XOPNotice( " Abort requested by user\r");
-			return 0;
-		}
-		
-		current_image = image_loader->get_nth_image(i);
-		
-		thresholded_image = do_processing_and_thresholding(current_image, preprocessor, thresholder, postprocessor);
-		
-		// positions = find_positions_no_sort(current_image, thresholded_image, radius, min_distance_from_edge);
-		positions = particle_finder->findPositions(current_image, thresholded_image);
-		
-		if (positions.get() == NULL) {
-			// if we get back NULL and no exception has been thrown then this means that we found no positions
-			output_writer.append_new_positions(positions);	// we append a NULL pointer anyway because it keeps track of the image sequence
-			
-			if (i == progress_indices[current_progress_index]) {
-				XOPNotice(".");
-				current_progress_index++;
-			}
-			
-			continue;
-		}
-		
-		nPositions = positions->get_x_size();
-		numberOfThreads = nPositions / 4;	// assume that each thread needs about 4 positions in order for the parallel processing to be useful
-		if (numberOfThreads > numberOfProcessors) {
-			numberOfThreads = numberOfProcessors;	// never spawn more threads than there are processors
-		}
-		if (numberOfThreads == 0) {
-			numberOfThreads = 1;
-		}
-		
-		positionsPerThread = nPositions / numberOfThreads;
-		
-		if (numberOfThreads == 1) {	// there is no real reason to bother with the increased overhead of the parallel approach, or the computer has only a single core
-									// use the single-threaded approach (in this frame) and move on to the next one
-			fitted_positions = positions_fitter->fit_positions(current_image, positions);
-			
-			// now we need to pass the fitted images to the output routine
-			output_writer.append_new_positions(fitted_positions);
-			
-			if (i == progress_indices[current_progress_index]) {
-				XOPNotice(".");
-				current_progress_index++;
-			}
-			
-			continue;
-		}
-		
-		// allocate storage for the fitted results
-		fitted_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(nPositions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
-		
-		
-		// divide the positions where we have to fit so that we can pass each thread some part of it
-		startPositions.clear();
-		endPositions.clear();
-		threadData.clear();
-		threads.clear();
-		
-		endPosition = (unsigned long)-1;
-		for (unsigned long l = 0; l < numberOfThreads - 1; ++l) {
-			startPosition = endPosition + 1;
-			endPosition = startPosition + positionsPerThread - 1;
-			nLocalPositions = endPosition - startPosition + 1;
-			
-			startPositions.push_back(startPosition);
-			endPositions.push_back(endPosition);
-		}
-		
-		// the last thread is special because we need to make sure that we include all positions
-		startPosition = endPosition + 1;
-		endPosition = nPositions - 1;
-		nLocalPositions = endPosition - startPosition + 1;
-		
-		startPositions.push_back(startPosition);
-		endPositions.push_back(endPosition);
-		
-		// now set up the data that will be passed to each thread
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
-			threadData.push_back(threadStartData(current_image, positions_fitter, positions, fitted_positions, startPositions.at(j), endPositions.at(j)));
-		}
-		
-		// now start the threads
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
-			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart, threadData.at(j)));
-			threads.push_back(singleThreadPtr);
-		}
-		
-		// wait for the treads to finish
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
-			threads.at(j)->join();
-		}
-			
-		
-		
-		// now we need to pass the fitted positions to the output routine
-		output_writer.append_new_positions(fitted_positions);
-		
-		if (i == progress_indices[current_progress_index]) {
-			XOPNotice(".");
-			current_progress_index++;
-		}
-		
-	}
-	
-	// time to write the positions to an Igor wave
-	XOPNotice(" Writing output... ");
-	status = output_writer.write_positions_to_wave();
-	if (status != 0) {
-		return status;
-	}
-	
-	XOPNotice(" Done!\r");
-	
-    return 0;
-	
-}
-
-
-int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	
@@ -351,7 +189,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	vector<unsigned long> startPositions;
 	vector<unsigned long> endPositions;
-	vector<boost::shared_ptr<threadStartData2> > threadData;
+	vector<boost::shared_ptr<threadStartData> > threadData;
 	unsigned long nFramesRemaining;
 	
 	
@@ -372,7 +210,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	
 	// set up the vector containing the data for the threads
 	for (unsigned int i = 0; i < numberOfProcessors; ++i) {
-		threadData.push_back(boost::shared_ptr<threadStartData2> (new threadStartData2(thresholder, preprocessor, postprocessor, particle_finder, positions_fitter)));
+		threadData.push_back(boost::shared_ptr<threadStartData> (new threadStartData(thresholder, preprocessor, postprocessor, particle_finder, positions_fitter)));
 	}
 	
 	for (unsigned long i = 0; i < number_of_images; ) {	// i is incremented when assigning the threads
@@ -406,7 +244,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 		 // now start the threads
 		threads.clear();
 		for (unsigned long j = 0; j < numberOfThreads; ++j) {
-			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart2, threadData.at(j)));
+			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart, threadData.at(j)));
 			threads.push_back(singleThreadPtr);
 		}
 		
@@ -433,33 +271,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 	return 0;
 }
 
-
-void fitPositionsThreadStart(threadStartData startData) {
-	
-	boost::shared_ptr<encap_gsl_matrix> positions = startData.positions;
-	boost::shared_ptr<encap_gsl_matrix> image = startData.image;
-	boost::shared_ptr<encap_gsl_matrix> outputPositions = startData.outputPositions;
-	boost::shared_ptr<encap_gsl_matrix> localFittedPositions;
-	
-	boost::shared_ptr<FitPositions> positionsFitter = startData.positionsFitter;
-	
-	unsigned long start = startData.start;
-	unsigned long end = startData.end;
-	unsigned long nPositions = end - start + 1;
-	
-	// do the fit
-	localFittedPositions = positionsFitter->fit_positions(image, positions, start, end);
-	
-	// copy the result into the output matrix
-	for (unsigned long j = 0; j < nPositions; ++j) {
-		for (unsigned long l = 0; l < N_OUTPUT_PARAMS_PER_FITTED_POSITION; ++l) {
-			outputPositions->set(j + start, l, localFittedPositions->get(j, l));
-		}
-	}
-	
-}
-
-void fitPositionsThreadStart2(boost::shared_ptr<threadStartData2> data) {
+void fitPositionsThreadStart(boost::shared_ptr<threadStartData> data) {
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
 	boost::shared_ptr<encap_gsl_matrix> positions;
