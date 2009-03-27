@@ -398,6 +398,7 @@ int do_analyze_images_operation_parallel2(boost::shared_ptr<ImageLoader> image_l
 			
 			if (i == progress_indices[current_progress_index]) {
 				XOPNotice(".");
+				DoUpdate();
 				current_progress_index++;
 			}
 		}
