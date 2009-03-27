@@ -207,6 +207,7 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	}
 	
 	XOPNotice("Calculating");
+	DoUpdate();
 	
 	// set up the vector containing the data for the threads
 	for (unsigned int i = 0; i < numberOfProcessors; ++i) {
