@@ -91,6 +91,48 @@ class END_SHOULD_BE_LARGER_THAN_START{};
 class GET_NTH_IMAGE_RETURNED_NULL{};
 
 
+class PALMBitmapImageDeviationCalculator {
+public:
+	PALMBitmapImageDeviationCalculator();
+	~PALMBitmapImageDeviationCalculator();
+	
+	virtual double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) = 0;
+};
+
+class PALMBitmapImageDeviationCalculator_FitUncertainty : public PALMBitmapImageDeviationCalculator {
+public:
+	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
+	~PALMBitmapImageDeviationCalculator_FitUncertainty() {;}
+	
+	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return ((positions->get(index, 7) < upperLimit) ? (positions->get(index, 7) * scaleFactor) : -1);}
+	
+private:
+	double scaleFactor;
+	double upperLimit;
+};
+
+class PALMBitmapImageDeviationCalculator_Constant : public PALMBitmapImageDeviationCalculator {
+public:
+	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
+	PALMBitmapImageDeviationCalculator_Constant() {;}
+	
+	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return deviation;}
+	
+private:
+	double deviation;
+};
+
+class PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot : public PALMBitmapImageDeviationCalculator {
+public:
+	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double scaleFactor_rhs) {scaleFactor = scaleFactor_rhs;}
+	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot() {;}
+	
+	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return scaleFactor * sqrt(positions->get(index, 7));}
+	
+private:
+	double scaleFactor;
+};
+
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
