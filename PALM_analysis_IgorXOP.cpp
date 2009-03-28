@@ -333,6 +333,14 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double upperLimit;
 	int LFlagParamsSet[1];
 	
+	// Parameters for /W flag group.
+	int WFlagEncountered;
+	double CCDXSize;
+	double CCDYSize;
+	double ImageWidth;
+	double ImageHeight;
+	int WFlagParamsSet[4];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -1459,7 +1467,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	waveHndl colorWave, positionsWave;
 	
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<encap_gsl_matrix> positions;
 	boost::shared_ptr<encap_gsl_matrix> colors;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1498,6 +1506,13 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		}
 	}
 	
+	if (p->WFlagEncountered) {
+		// Parameter: p->CCDXSize
+		// Parameter: p->CCDYSize
+		// Parameter: p->ImageWidth
+		// Parameter: p->ImageHeight
+	}
+	
 	// Main parameters.
 	
 	if (p->colorWaveEncountered) {
@@ -1514,6 +1529,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		if (dimensionSizes[1] != 3)
 			return INCOMPATIBLE_DIMENSIONING;
 		
+		colors = copy_IgorDPWave_to_gsl_matrix(colorWave);
+		
 	} else {
 		return NOWAV;
 	}
@@ -1524,7 +1541,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			return NOWAV;
 		}
 		
-		colorWave = p->colorWave;
+		positionsWave = p->positionsWave;
 		
 		err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
 		if (err != 0)
@@ -1533,6 +1550,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			return INCOMPATIBLE_DIMENSIONING;
 		if (dimensionSizes[1] != N_OUTPUT_PARAMS_PER_FITTED_POSITION + 1)
 			return INCOMPATIBLE_DIMENSIONING;
+		
+		positions = copy_IgorDPWave_to_gsl_matrix(positionsWave);
 		
 	} else {
 		return NOWAV;
@@ -1553,6 +1572,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		default:
 			return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
 	}
+	
+	// do the actual calculation
 	
 	return err;
 }
@@ -1636,7 +1657,7 @@ static int RegisterMakeBitmapPALMImage(void) {
 	char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit wave:colorWave, wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} wave:colorWave, wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
