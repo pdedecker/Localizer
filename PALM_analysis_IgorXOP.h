@@ -33,5 +33,9 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matri
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(unsigned long camera_type, string data_file_path, unsigned long cache_size = N_SIMULTANEOUS_IMAGE_LOADS);
 
+boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave);
+
+waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volume, string waveName);
+
 #endif
 

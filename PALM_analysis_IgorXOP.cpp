@@ -1587,7 +1587,7 @@ boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave)
 	int err;
 	long numDimensions; 
 	long dimensionSizes[MAX_DIMENSIONS+1];
-	long x_size, y_size;
+	size_t x_size, y_size;
 	long indices[MAX_DIMENSIONS];
 	double value[2];
 	
@@ -1605,8 +1605,8 @@ boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave)
 	
 	boost::shared_ptr<encap_gsl_matrix> matrix(new encap_gsl_matrix(x_size, y_size));
 	
-	for (long j = 0; j < y_size; j++) {
-		for (long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1649,8 +1649,8 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matri
 	}
 		
 		
-	long x_size = (long)matrix->get_x_size();
-	long y_size = (long)matrix->get_y_size();
+	size_t x_size = (size_t)matrix->get_x_size();
+	size_t y_size = (size_t)matrix->get_y_size();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;
@@ -1661,8 +1661,8 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matri
 		throw err;
 	}
 	
-	for (long j = 0; j < y_size; j++) {
-		for (long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1714,5 +1714,108 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(unsigned long ca
 	
 	return image_loader;
 	
+}
+
+
+boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave) {
+	int err;
+	long indices[MAX_DIMENSIONS];
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	long numDimensions;
+	double value[2];
+	size_t x_size, y_size, z_size;
+	
+	err = MDGetWaveDimensions(wave, &numDimensions, dimensionSizes);
+	if (err != 0) {
+		throw err;
+	}
+	if (numDimensions != 3) {
+		throw INCOMPATIBLE_DIMENSIONING;
+	}
+	
+	x_size = dimensionSizes[0];
+	y_size = dimensionSizes[1];
+	z_size = dimensionSizes[2];
+	
+	boost::shared_ptr<encap_gsl_volume> volume(new encap_gsl_volume(x_size, y_size, z_size));
+	
+	for (size_t k = 0; k < z_size; ++k)
+		for (size_t j = 0; j < y_size; ++j) {
+			for (size_t i = 0; i < x_size; ++i) {
+				indices[0] = i;
+				indices[1] = j;
+				indices[2] = k;
+				
+				err = MDGetNumericWavePointValue(wave, indices, value);
+				if (err != 0) {
+					throw err;
+				}
+				
+				volume->set(i, j, k, value[0]);
+			}
+		}
+	
+	return volume;
+}
+
+waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volume, string waveName) {
+	
+	waveHndl DPWave;
+	
+	int err;
+	long indices[MAX_DIMENSIONS];
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	double value[2];
+	
+	// special case:
+	// if the matrix is NULL (such as when there are no positions found)
+	// then we return an empty wave
+	if (volume.get() == NULL) {
+		dimensionSizes[0] = 0;
+		dimensionSizes[1] = 0;
+		dimensionSizes[2] = 0;
+		
+		err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+		if (err != 0) {
+			throw err;
+		}
+		
+		return DPWave;
+		
+	}
+	
+	
+	size_t x_size = (size_t)volume->get_x_size();
+	size_t y_size = (size_t)volume->get_y_size();
+	size_t z_size = (size_t)volume->get_z_size();
+	
+	dimensionSizes[0] = x_size;
+	dimensionSizes[1] = y_size;
+	dimensionSizes[2] = z_size;
+	dimensionSizes[3] = 0;
+	
+	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	if (err != 0) {
+		throw err;
+	}
+	
+	for (size_t k = 0; k < z_size; ++k) {
+		for (size_t j = 0; j < y_size; ++j) {
+			for (size_t i = 0; i < x_size; ++i) {
+				indices[0] = i;
+				indices[1] = j;
+				indices[2] = k;
+				
+				value[0] = volume->get(i, j, k);
+				
+				err = MDSetNumericWavePointValue(DPWave, indices, value);
+				if (err != 0) {
+					throw err;
+				}
+			}
+		}
+	}
+	
+	return DPWave;
 }
 	
