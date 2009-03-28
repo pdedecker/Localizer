@@ -594,7 +594,6 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	return 0;
 }
 
-
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	unsigned long n_images = image_loader->get_total_number_of_images();
 	unsigned long x_size = image_loader->get_x_size();

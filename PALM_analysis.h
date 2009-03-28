@@ -90,24 +90,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::
 class END_SHOULD_BE_LARGER_THAN_START{};
 class GET_NTH_IMAGE_RETURNED_NULL{};
 
-struct thread_start_parameters {
-	gsl_matrix *image;
-	unsigned long n_image;
-	int analysis_method;	// pass 1 for 2D Gaussian fitting
-	double treshold;
-	unsigned long radius;
-	unsigned long min_distance_from_edge;
-	unsigned long cutoff_radius;
-	double r_initial;
-	double sigma;
-	double background;
-	struct thread_return_parameters *return_params;	// we provide this so we don't get problems with the return going out-of-scope when the thread finishes
-};
 
-struct thread_return_parameters {
-	gsl_matrix *positions;
-	unsigned long n_image;
-};
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
