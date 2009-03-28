@@ -109,14 +109,6 @@ struct thread_return_parameters {
 	unsigned long n_image;
 };
 
-/* gsl_matrix * find_positions(const gsl_matrix * image, double treshold, unsigned long radius, unsigned long min_distance_from_edge);
-	// the return values from this function is a N * 3 matrix with intensity and x and y coordinates in the columns
-
-// gsl_matrix * fit_Gauss_2D_to_positions(const gsl_matrix *image, gsl_matrix *positions, unsigned long cutoff_radius, double r_initial, double background, double sigma);
-	// WARNING: cutoff should never be larger than radius in the previous function!
-
-gsl_matrix * find_positions_no_sort(const gsl_matrix * image, gsl_matrix_uchar *thresholded_image, unsigned long radius, unsigned long min_distance_from_edge); */
-
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
@@ -124,17 +116,5 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, unsigned long number_of_bins);
-
-void print_localized_positions(gsl_matrix *positions);
-	
-void print_fitted_positions(gsl_matrix *positions);
-
-void print_image_to_file(gsl_matrix *image, string file_path);
-
-void print_fit_state(unsigned long iteration, gsl_multifit_fdfsolver *s);
-
-void print_initial_parameters(gsl_vector *params);
-
-void print_image(gsl_matrix * image);
 
 #endif
