@@ -594,6 +594,74 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	return 0;
 }
 
+
+boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight) {
+	size_t nPositions = positions->get_x_size();
+	size_t nColors = positions->get_y_size();
+	
+	double currentX, currentY, currentAmplitude;
+	size_t centerX, centerY;
+	long startX, endX, startY, endY;
+	double deviation, currentIntensity;
+	double distanceXSquared, distanceYSquared;
+	size_t colorIndex;
+	double summedIntensity;
+	
+	boost::shared_ptr<encap_gsl_volume> outputImage(new encap_gsl_volume(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
+	boost::shared_ptr<encap_gsl_matrix> totalIntensities(new encap_gsl_matrix(imageWidth, imageHeight));	// keep track of the total intensities in each pixel
+	
+	outputImage->set_all(0);
+	totalIntensities->set_all(0);
+	
+	for (size_t n = 0; n < nPositions; ++n) {
+		currentAmplitude = positions->get(n, 1);
+		currentX = positions->get(n, 3);
+		currentY = positions->get(n, 4);
+		
+		if ((currentAmplitude < 0) || (currentX < 0) || (currentX >= xSize) || (currentY < 0) || (currentY >= ySize)) {
+			continue;
+		}
+		
+		centerX = round(currentX / (double)xSize * (double)imageWidth);
+		centerY = round(currentY / (double)ySize * (double)imageHeight);
+		deviation = deviationCalculator->getDeviation(positions, n);
+		
+		startX = floor((double)centerX - 4 * deviation / (double)xSize * (double)imageWidth);
+		startY = floor((double)centerY - 4 * deviation / (double)ySize * (double)imageHeight);
+		endX = ceil((double)centerX + 4 * deviation / (double)xSize * (double)imageWidth);
+		endY = ceil((double)centerY + 4 * deviation / (double)ySize * (double)imageHeight);
+		
+		if (startX < 0)
+			startX = 0;
+		if (endX >= imageWidth)
+			endX = imageWidth - 1;
+		if (startY < 0)
+			startY = 0;
+		if (endY >= imageHeight)
+			endY = imageHeight - 1;
+		
+		for (size_t i = startX; i <= endX; ++i) {
+			for (size_t j = startY; j < endY; ++j) {
+				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
+				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
+				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
+				
+				colorIndex = round((double)n / double(nPositions) * (double)nColors);
+				
+				summedIntensity = currentIntensity + totalIntensities->get(i, j);
+				
+				outputImage->set(i, j, 0, (currentIntensity / summedIntensity * colors->get(colorIndex, 0) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
+				outputImage->set(i, j, 1, (currentIntensity / summedIntensity * colors->get(colorIndex, 1) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
+				outputImage->set(i, j, 2, (currentIntensity / summedIntensity * colors->get(colorIndex, 2) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
+			}
+		}
+	}
+	
+	return outputImage;
+}
+
+
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	unsigned long n_images = image_loader->get_total_number_of_images();
 	unsigned long x_size = image_loader->get_x_size();
