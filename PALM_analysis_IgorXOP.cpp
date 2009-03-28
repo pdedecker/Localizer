@@ -312,6 +312,48 @@ typedef struct ConvolveImagesRuntimeParams ConvolveImagesRuntimeParams;
 typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
 #include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
 
+
+// Runtime param structure for MakeBitmapPALMImage operation.
+#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+struct MakeBitmapPALMImageRuntimeParams {
+	// Flag parameters.
+	
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double deviationMethod;
+	int MFlagParamsSet[1];
+	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double scaleFactor;
+	int SFlagParamsSet[1];
+	
+	// Parameters for /L flag group.
+	int LFlagEncountered;
+	double upperLimit;
+	int LFlagParamsSet[1];
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int colorWaveEncountered;
+	waveHndl colorWave;
+	int colorWaveParamsSet[1];
+	
+	// Parameters for simple main group #1.
+	int positionsWaveEncountered;
+	waveHndl positionsWave;
+	int positionsWaveParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+};
+typedef struct MakeBitmapPALMImageRuntimeParams MakeBitmapPALMImageRuntimeParams;
+typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParamsPtr;
+#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+
+
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	int err = 0;
 	double threshold_parameter, radiusBetweenParticles, initial_width, min_distance_from_edge, cutoff_radius, sigma, background;
@@ -1409,6 +1451,113 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 }
 
 
+static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
+	int err = 0;
+	int method;
+	double scaleFactor, upperLimit;
+	
+	waveHndl colorWave, positionsWave;
+	
+	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
+	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<encap_gsl_matrix> colors;
+	
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	long numDimensions;
+	
+	// Flag parameters.
+	
+	if (p->MFlagEncountered) {
+		// Parameter: p->deviationMethod
+		if (p->deviationMethod <= 0) {
+			return EXPECT_POS_NUM;
+		}
+		
+		method = (int)(p->deviationMethod + 0.5);
+	} else {
+		return TOO_FEW_PARAMETERS;
+	}
+	
+	if (p->SFlagEncountered) {
+		// Parameter: p->scaleFactor
+		if (p->scaleFactor <= 0)
+			return EXPECT_POS_NUM;
+		scaleFactor = p->scaleFactor;
+	} else {
+		return TOO_FEW_PARAMETERS;
+	}
+	
+	if (p->LFlagEncountered) {
+		// Parameter: p->upperLimit
+		if (p->upperLimit <= 0)
+			return EXPECT_POS_NUM;
+		upperLimit = p->upperLimit;
+	} else {
+		if (method == 1) {	// calculate the width using the uncertainty from the fits
+			return TOO_FEW_PARAMETERS;
+		}
+	}
+	
+	// Main parameters.
+	
+	if (p->colorWaveEncountered) {
+		// Parameter: p->colorWave (test for NULL handle before using)
+		if (p->colorWave == NULL)
+			return NOWAV;
+		colorWave = p->colorWave;
+		
+		err = MDGetWaveDimensions(colorWave, &numDimensions, dimensionSizes);
+		if (err != 0)
+			return err;
+		if (numDimensions != 2)
+			return INCOMPATIBLE_DIMENSIONING;
+		if (dimensionSizes[1] != 3)
+			return INCOMPATIBLE_DIMENSIONING;
+		
+	} else {
+		return NOWAV;
+	}
+	
+	if (p->positionsWaveEncountered) {
+		// Parameter: p->positionsWave (test for NULL handle before using)
+		if (p->positionsWave == NULL) {
+			return NOWAV;
+		}
+		
+		colorWave = p->colorWave;
+		
+		err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+		if (err != 0)
+			return err;
+		if (numDimensions != 2)
+			return INCOMPATIBLE_DIMENSIONING;
+		if (dimensionSizes[1] != N_OUTPUT_PARAMS_PER_FITTED_POSITION + 1)
+			return INCOMPATIBLE_DIMENSIONING;
+		
+	} else {
+		return NOWAV;
+	}
+	
+	
+	// get the object that will calculate the standard deviation
+	switch (method) {
+		case 0:
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(scaleFactor));
+			break;
+		case 1:
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
+			break;
+		case 2:
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
+			break;
+		default:
+			return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+	}
+	
+	return err;
+}
+
+
 static int RegisterAnalyzePALMImages(void) {
 	char* cmdTemplate;
 	char* runtimeNumVarList;
@@ -1481,6 +1630,18 @@ static int RegisterConvolveImages(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);
 }
 
+static int RegisterMakeBitmapPALMImage(void) {
+	char* cmdTemplate;
+	char* runtimeNumVarList;
+	char* runtimeStrVarList;
+	
+	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit wave:colorWave, wave:positionsWave";
+	runtimeNumVarList = "";
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
+}
+
 /*	XOPEntry()
  
  This is the entry point from the host application to the XOP for all
@@ -1510,6 +1671,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 	if (result = RegisterTestThreshold())
 		return result;
 	if (result = RegisterConvolveImages())
+		return result;
+	if (result = RegisterMakeBitmapPALMImage())
 		return result;
 	
 	// There are no more operations added by this XOP.

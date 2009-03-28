@@ -65,5 +65,8 @@ resource 'XOPC' (1100) {
 		
 		"ConvolveImages",
 		XOPOp+utilOp+compilableOp,
+		
+		"MakeBitmapPALMImage",
+		XOPOp+utilOp+compilableOp,
 	}
 };
