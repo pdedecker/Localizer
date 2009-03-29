@@ -600,7 +600,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 
 
 boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight) {
+																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	size_t nPositions = positions->get_x_size();
 	size_t nColors = colors->get_x_size();
 	size_t nFrames = (size_t)(positions->get(nPositions - 1, 0)) + 1;
@@ -624,11 +624,13 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 	outputImage->set_all(0);
 	totalIntensities->set_all(0);
 	
-	// get the position with the maximum amplitude
-	// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
-	for (size_t n = 0; n < nPositions; ++n) {
-		if (positions->get(n, 1) > maxAmplitude) {
-			maxAmplitude = positions->get(n,1);
+	if (normalizeColors != 0) {
+		// get the position with the maximum amplitude
+		// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
+		for (size_t n = 0; n < nPositions; ++n) {
+			if (positions->get(n, 1) > maxAmplitude) {
+				maxAmplitude = positions->get(n,1);
+			}
 		}
 	}
 	
@@ -668,9 +670,15 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
 				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
 				
+				if (normalizeColors != 0) {
 				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
 				currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
 				currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+				} else {
+					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / currentAmplitude;
+					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / currentAmplitude;
+					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / currentAmplitude;
+				}
 				
 				summedIntensity = currentIntensity + totalIntensities->get(i, j);
 				
@@ -687,7 +695,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 }
 
 boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight) {
+																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	vector<size_t> startPositions;
@@ -723,11 +731,13 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 	
 	nPositionsPerThread = nPositions / nThreads;
 	
-	// get the position with the maximum amplitude
-	// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
-	for (size_t n = 0; n < nPositions; ++n) {
-		if (positions->get(n, 1) > maxAmplitude) {
-			maxAmplitude = positions->get(n,1);
+	if (normalizeColors != 0) {
+		// get the position with the maximum amplitude
+		// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
+		for (size_t n = 0; n < nPositions; ++n) {
+			if (positions->get(n, 1) > maxAmplitude) {
+				maxAmplitude = positions->get(n,1);
+			}
 		}
 	}
 	
@@ -769,6 +779,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 		singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
 		singleThreadStartParameter->colors = colors;
 		singleThreadStartParameter->deviationCalculator = deviationCalculator;
+		singleThreadStartParameter->normalizeColors = normalizeColors;
 		singleThreadStartParameter->nFrames = nFrames;
 		singleThreadStartParameter->startIndex = currentThreadStart;
 		singleThreadStartParameter->endIndex = currentThreadEnd;
@@ -827,6 +838,7 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 	size_t endIndex = startParameters->endIndex;
 	size_t nFrames = startParameters->nFrames;
 	size_t currentFrame;
+	int normalizeColors = startParameters->normalizeColors;
 	
 	size_t imageWidth = startParameters->imageWidth;
 	size_t imageHeight = startParameters->imageHeight;
@@ -883,9 +895,15 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
 				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
 				
-				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
-				currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
-				currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+				if (normalizeColors != 0) {
+					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
+					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
+					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+				} else {
+					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / currentAmplitude;
+					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / currentAmplitude;
+					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / currentAmplitude;
+				}
 				
 				summedIntensity = currentIntensity + totalIntensities->get(i, j);
 				
