@@ -1479,7 +1479,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	
 	if (p->MFlagEncountered) {
 		// Parameter: p->deviationMethod
-		if (p->deviationMethod <= 0) {
+		if (p->deviationMethod < 0) {
 			return EXPECT_POS_NUM;
 		}
 		

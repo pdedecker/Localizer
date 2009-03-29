@@ -825,7 +825,6 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 	size_t nColors = colors->get_x_size();
 	size_t startIndex = startParameters->startIndex;
 	size_t endIndex = startParameters->endIndex;
-	size_t nPositions = endIndex - startIndex + 1;
 	size_t nFrames = startParameters->nFrames;
 	size_t currentFrame;
 	
