@@ -346,6 +346,11 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double normalizeToBrightestEmitter;
 	int NFlagParamsSet[1];
 	
+	// Parameters for /P flag group.
+	int PFlagEncountered;
+	double PSFWidth;
+	int PFlagParamsSet[1];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -1467,7 +1472,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	int err = 0;
 	int method, normalizeColors;
-	double scaleFactor, upperLimit;
+	double scaleFactor, upperLimit, PSFWidth;
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
 	waveHndl colorWave, positionsWave;
@@ -1538,6 +1543,20 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		normalizeColors = 0;
 	}
 	
+	if (p->PFlagEncountered) {
+		// Parameter: p->PSFWidth
+		if (p->PSFWidth <= 0) {
+			return EXPECT_POS_NUM;
+		}
+		
+		PSFWidth = p->PSFWidth;
+		
+	} else{
+		if (method == 0) {
+			return TOO_FEW_PARAMETERS;
+		}
+	}
+	
 	// Main parameters.
 	
 	if (p->colorWaveEncountered) {
@@ -1586,7 +1605,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	// get the object that will calculate the standard deviation
 	switch (method) {
 		case 0:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(scaleFactor));
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(PSFWidth, scaleFactor));
 			break;
 		case 1:
 			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
@@ -1710,7 +1729,7 @@ static int RegisterMakeBitmapPALMImage(void) {
 	char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /N=number:normalizeToBrightestEmitter wave:colorWave, wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /N=number:normalizeToBrightestEmitter /P=number:PSFWidth wave:colorWave, wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);

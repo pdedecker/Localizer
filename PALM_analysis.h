@@ -124,12 +124,13 @@ private:
 
 class PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot : public PALMBitmapImageDeviationCalculator {
 public:
-	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double scaleFactor_rhs) {scaleFactor = scaleFactor_rhs;}
+	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
 	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot() {;}
 	
-	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return scaleFactor * sqrt(positions->get(index, 7));}
+	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->get(index, 1)));}
 	
 private:
+	double PSFWidth;
 	double scaleFactor;
 };
 
