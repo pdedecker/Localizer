@@ -642,8 +642,8 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 			continue;
 		}
 		
-		centerX = round(currentX * imageScaleFactor);
-		centerY = round(currentY * imageScaleFactor);
+		centerX = (size_t)(currentX * imageScaleFactor + 0.5);
+		centerY = (size_t)(currentY * imageScaleFactor + 0.5);
 		deviation = (deviationCalculator->getDeviation(positions, n) * imageScaleFactor);
 		
 		startX = floor((double)centerX - 4.0 * deviation);
@@ -660,7 +660,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 		if (endY >= imageHeight)
 			endY = imageHeight - 1;
 		
-		colorIndex = round((double)currentFrame / (double)nFrames * (double)(nColors - 1));
+		colorIndex = (size_t)((double)currentFrame / (double)nFrames * (double)(nColors - 1) + 0.5);
 		
 		for (size_t i = startX; i <= endX; ++i) {
 			for (size_t j = startY; j < endY; ++j) {
@@ -857,8 +857,8 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 			continue;
 		}
 		
-		centerX = round(currentX * imageScaleFactor);
-		centerY = round(currentY * imageScaleFactor);
+		centerX = (size_t)(currentX * imageScaleFactor + 0.5);
+		centerY = (size_t)(currentY * imageScaleFactor + 0.5);
 		deviation = (deviationCalculator->getDeviation(positions, n) * imageScaleFactor);
 		
 		startX = floor((double)centerX - 4.0 * deviation);
@@ -875,7 +875,7 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 		if (endY >= imageHeight)
 			endY = imageHeight - 1;
 		
-		colorIndex = round((double)currentFrame / (double)nFrames * (double)(nColors - 1));
+		colorIndex = (size_t)((double)currentFrame / (double)nFrames * (double)(nColors - 1) + 0.5);
 		
 		for (size_t i = startX; i <= endX; ++i) {
 			for (size_t j = startY; j < endY; ++j) {
