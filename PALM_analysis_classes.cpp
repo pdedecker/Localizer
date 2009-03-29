@@ -215,6 +215,10 @@ encap_gsl_volume_ushort::encap_gsl_volume_ushort(size_t x, size_t y, size_t z) {
 			throw OUT_OF_MEMORY(string("Unable to alloc a gsl_matrix_ushort in encap_gsl_volume_ushort\r"));
 		}
 	}
+	
+	x_size = x;
+	y_size = y;
+	z_size = z;
 }
 
 encap_gsl_volume_ushort::~encap_gsl_volume_ushort() {

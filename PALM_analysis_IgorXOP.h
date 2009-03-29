@@ -37,5 +37,7 @@ boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave)
 
 waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volume, string waveName);
 
+waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_volume_ushort> volume, string waveName);
+
 #endif
 

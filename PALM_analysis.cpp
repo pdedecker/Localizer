@@ -599,7 +599,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 }
 
 
-boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	size_t nPositions = positions->get_x_size();
 	size_t nColors = colors->get_x_size();
@@ -618,7 +618,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 	double currentColors[3];
 	double summedIntensity;
 	
-	boost::shared_ptr<encap_gsl_volume> outputImage(new encap_gsl_volume(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
+	boost::shared_ptr<encap_gsl_volume_ushort> outputImage(new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
 	boost::shared_ptr<encap_gsl_matrix> totalIntensities(new encap_gsl_matrix(imageWidth, imageHeight));	// keep track of the total intensities in each pixel
 	
 	outputImage->set_all(0);
@@ -682,9 +682,9 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 				
 				summedIntensity = currentIntensity + totalIntensities->get(i, j);
 				
-				outputImage->set(i, j, 0, (currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
-				outputImage->set(i, j, 1, (currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
-				outputImage->set(i, j, 2, (currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
+				outputImage->set(i, j, 0, (unsigned short)(currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
+				outputImage->set(i, j, 1, (unsigned short)(currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
+				outputImage->set(i, j, 2, (unsigned short)(currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
 				
 				totalIntensities->set(i,j, (totalIntensities->get(i, j) + currentIntensity));
 			}
@@ -694,7 +694,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 	return outputImage;
 }
 
-boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
@@ -702,7 +702,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 	vector<size_t> endPositions;
 	vector<boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> > threadData;
 	// boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter;
-	boost::shared_ptr<encap_gsl_volume> outputImage;
+	boost::shared_ptr<encap_gsl_volume_ushort> outputImage;
 	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
 	
 	size_t nPositions = positions->get_x_size();
@@ -775,7 +775,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 		
 		boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
 		singleThreadStartParameter->positions = positions;
-		singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume> (new encap_gsl_volume(imageWidth, imageHeight, 3));
+		singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume_ushort> (new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));
 		singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
 		singleThreadStartParameter->colors = colors;
 		singleThreadStartParameter->deviationCalculator = deviationCalculator;
@@ -813,9 +813,9 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 		for (size_t i = 0; i < imageWidth; ++i) {
 			for (size_t j = 0; j < imageHeight; ++j) {
 				summedIntensity = totalIntensities->get(i,j) + threadData[n]->totalIntensities->get(i,j);
-				outputImage->set(i, j, 0, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 0) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0)));
-				outputImage->set(i, j, 1, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 1) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 1)));
-				outputImage->set(i, j, 2, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 2) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 2)));
+				outputImage->set(i, j, 0, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 0) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0)));
+				outputImage->set(i, j, 1, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 1) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 1)));
+				outputImage->set(i, j, 2, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 2) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 2)));
 				totalIntensities->set(i,j, summedIntensity);
 			}
 		}
@@ -827,7 +827,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters) {
 	boost::shared_ptr<encap_gsl_matrix> positions = startParameters->positions;
-	boost::shared_ptr<encap_gsl_volume> image = startParameters->image;
+	boost::shared_ptr<encap_gsl_volume_ushort> image = startParameters->image;
 	boost::shared_ptr<encap_gsl_matrix> totalIntensities = startParameters->totalIntensities;
 	boost::shared_ptr<encap_gsl_matrix> colors = startParameters->colors;
 	
@@ -907,9 +907,9 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 				
 				summedIntensity = currentIntensity + totalIntensities->get(i, j);
 				
-				image->set(i, j, 0, (currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 0)));
-				image->set(i, j, 1, (currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 1)));
-				image->set(i, j, 2, (currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 2)));
+				image->set(i, j, 0, (unsigned short)(currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 0)));
+				image->set(i, j, 1, (unsigned short)(currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 1)));
+				image->set(i, j, 2, (unsigned short)(currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 2)));
 				
 				totalIntensities->set(i,j, (totalIntensities->get(i, j) + currentIntensity));
 			}

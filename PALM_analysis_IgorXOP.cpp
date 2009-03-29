@@ -1487,7 +1487,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<encap_gsl_matrix> positions;
 	boost::shared_ptr<encap_gsl_matrix> colors;
-	boost::shared_ptr<encap_gsl_volume> image;
+	boost::shared_ptr<encap_gsl_volume_ushort> image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long numDimensions;
@@ -1627,7 +1627,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	// do the actual calculation
 	try {
 		image = calculate_PALM_bitmap_image_parallel(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight, normalizeColors);
-		copy_gsl_volume_to_IgorDPWave(image, string("M_PALM"));
+		copy_gsl_volume_ushort_to_IgorUINT16wave(image, string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
@@ -2030,23 +2030,6 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	double value[2];
 	
-	// special case:
-	// if the matrix is NULL (such as when there are no positions found)
-	// then we return an empty wave
-	if (volume.get() == NULL) {
-		dimensionSizes[0] = 0;
-		dimensionSizes[1] = 0;
-		dimensionSizes[2] = 0;
-		
-		err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-		if (err != 0) {
-			throw err;
-		}
-		
-		return DPWave;
-		
-	}
-	
 	
 	size_t x_size = (size_t)volume->get_x_size();
 	size_t y_size = (size_t)volume->get_y_size();
@@ -2070,6 +2053,51 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 				indices[2] = k;
 				
 				value[0] = volume->get(i, j, k);
+				
+				err = MDSetNumericWavePointValue(DPWave, indices, value);
+				if (err != 0) {
+					throw err;
+				}
+			}
+		}
+	}
+	
+	return DPWave;
+}
+
+
+waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_volume_ushort> volume, string waveName) {
+	
+	waveHndl DPWave;
+	
+	int err;
+	long indices[MAX_DIMENSIONS];
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	double value[2];
+	
+	
+	size_t x_size = (size_t)volume->get_x_size();
+	size_t y_size = (size_t)volume->get_y_size();
+	size_t z_size = (size_t)volume->get_z_size();
+	
+	dimensionSizes[0] = x_size;
+	dimensionSizes[1] = y_size;
+	dimensionSizes[2] = z_size;
+	dimensionSizes[3] = 0;
+	
+	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_I16 | NT_UNSIGNED, 1);
+	if (err != 0) {
+		throw err;
+	}
+	
+	for (size_t k = 0; k < z_size; ++k) {
+		for (size_t j = 0; j < y_size; ++j) {
+			for (size_t i = 0; i < x_size; ++i) {
+				indices[0] = i;
+				indices[1] = j;
+				indices[2] = k;
+				
+				value[0] = (double)volume->get(i, j, k);
 				
 				err = MDSetNumericWavePointValue(DPWave, indices, value);
 				if (err != 0) {

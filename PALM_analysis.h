@@ -140,7 +140,7 @@ public:
 	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_volume> image;
+	boost::shared_ptr<encap_gsl_volume_ushort> image;
 	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
 	
 	boost::shared_ptr<encap_gsl_matrix> colors;
@@ -158,10 +158,10 @@ public:
 	double scaleFactor;
 };
 
-boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
-boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);
