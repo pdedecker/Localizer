@@ -1463,12 +1463,14 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	int err = 0;
 	int method;
 	double scaleFactor, upperLimit;
+	size_t imageWidth, imageHeight, xSize, ySize;
 	
 	waveHndl colorWave, positionsWave;
 	
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<encap_gsl_matrix> positions;
 	boost::shared_ptr<encap_gsl_matrix> colors;
+	boost::shared_ptr<encap_gsl_volume> image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long numDimensions;
@@ -1511,6 +1513,14 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		// Parameter: p->CCDYSize
 		// Parameter: p->ImageWidth
 		// Parameter: p->ImageHeight
+		if ((p->CCDXSize <= 0) || (p->CCDYSize <= 0) || (p->ImageWidth <= 0) || (p->ImageHeight <= 0))
+			return EXPECT_POS_NUM;
+		xSize = (size_t)(p->CCDXSize + 0.5);
+		ySize = (size_t)(p->CCDYSize + 0.5);
+		imageWidth = (size_t)(p->ImageWidth + 0.5);
+		imageHeight = (size_t)(p->ImageHeight + 0.5);
+	} else {
+		return TOO_FEW_PARAMETERS;
 	}
 	
 	// Main parameters.
@@ -1574,6 +1584,34 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	}
 	
 	// do the actual calculation
+	try {
+		image = calculate_PALM_bitmap_image_parallel(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight);
+		copy_gsl_volume_to_IgorDPWave(image, string("M_PALM"));
+	}
+	catch (std::bad_alloc) {
+		return NOMEM;
+	}
+	catch (OUT_OF_MEMORY err) {
+		XOPNotice(err.get_error().c_str());
+		return NOMEM;
+	}
+	catch (CANNOT_OPEN_FILE) {
+		return CANNOT_OPEN_FILE_DEF;
+	}
+	catch (ERROR_READING_FILE_DATA e) {
+		XOPNotice(e.get_error().c_str());
+		return ERROR_READING_FILE_DATA_DEF;
+	}
+	catch (END_SHOULD_BE_LARGER_THAN_START) {
+		return END_SHOULD_BE_LARGER_THAN_START_DEF;
+	}
+	catch (std::range_error err) {
+		XOPNotice(err.what());
+		return INDEX_OUT_OF_RANGE;
+	}
+	catch (int e) {
+		return e;
+	}
 	
 	return err;
 }

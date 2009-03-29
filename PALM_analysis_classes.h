@@ -126,7 +126,7 @@ public:
 	
 protected:
 	string error;
-	vector<encap_gsl_matrix> matrices;
+	vector<boost::shared_ptr<encap_gsl_matrix> > matrices;
 	size_t x_size, y_size, z_size;
 };
 

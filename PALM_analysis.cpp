@@ -192,6 +192,10 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	vector<boost::shared_ptr<threadStartData> > threadData;
 	unsigned long nFramesRemaining;
 	
+	if (numberOfProcessors == 0) {	// boost couldn't determine the number of processors
+		numberOfProcessors = 1;
+	}
+	
 	
 	number_of_images = image_loader->get_total_number_of_images();
 	boost::shared_ptr<encap_gsl_matrix> current_image;
@@ -598,7 +602,12 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight) {
 	size_t nPositions = positions->get_x_size();
-	size_t nColors = positions->get_y_size();
+	size_t nColors = colors->get_x_size();
+	size_t nFrames = (size_t)(positions->get(nPositions - 1, 0)) + 1;
+	size_t currentFrame;
+	
+	double imageScaleFactor = (double)(imageWidth - 1) / (double)xSize;
+	double maxAmplitude = 0;
 	
 	double currentX, currentY, currentAmplitude;
 	size_t centerX, centerY;
@@ -606,6 +615,7 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 	double deviation, currentIntensity;
 	double distanceXSquared, distanceYSquared;
 	size_t colorIndex;
+	double currentColors[3];
 	double summedIntensity;
 	
 	boost::shared_ptr<encap_gsl_volume> outputImage(new encap_gsl_volume(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
@@ -614,7 +624,16 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 	outputImage->set_all(0);
 	totalIntensities->set_all(0);
 	
+	// get the position with the maximum amplitude
+	// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
 	for (size_t n = 0; n < nPositions; ++n) {
+		if (positions->get(n, 1) > maxAmplitude) {
+			maxAmplitude = positions->get(n,1);
+		}
+	}
+	
+	for (size_t n = 0; n < nPositions; ++n) {
+		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
 		currentAmplitude = positions->get(n, 1);
 		currentX = positions->get(n, 3);
 		currentY = positions->get(n, 4);
@@ -623,14 +642,14 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 			continue;
 		}
 		
-		centerX = round(currentX / (double)xSize * (double)imageWidth);
-		centerY = round(currentY / (double)ySize * (double)imageHeight);
-		deviation = deviationCalculator->getDeviation(positions, n);
+		centerX = round(currentX * imageScaleFactor);
+		centerY = round(currentY * imageScaleFactor);
+		deviation = (deviationCalculator->getDeviation(positions, n) * imageScaleFactor);
 		
-		startX = floor((double)centerX - 4 * deviation / (double)xSize * (double)imageWidth);
-		startY = floor((double)centerY - 4 * deviation / (double)ySize * (double)imageHeight);
-		endX = ceil((double)centerX + 4 * deviation / (double)xSize * (double)imageWidth);
-		endY = ceil((double)centerY + 4 * deviation / (double)ySize * (double)imageHeight);
+		startX = floor((double)centerX - 4.0 * deviation);
+		startY = floor((double)centerY - 4.0 * deviation);
+		endX = ceil((double)centerX + 4.0 * deviation);
+		endY = ceil((double)centerY + 4.0 * deviation);
 		
 		if (startX < 0)
 			startX = 0;
@@ -641,24 +660,244 @@ boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_pt
 		if (endY >= imageHeight)
 			endY = imageHeight - 1;
 		
+		colorIndex = round((double)currentFrame / (double)nFrames * (double)(nColors - 1));
+		
 		for (size_t i = startX; i <= endX; ++i) {
 			for (size_t j = startY; j < endY; ++j) {
 				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
 				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
 				
-				colorIndex = round((double)n / double(nPositions) * (double)nColors);
+				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
+				currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
+				currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
 				
 				summedIntensity = currentIntensity + totalIntensities->get(i, j);
 				
-				outputImage->set(i, j, 0, (currentIntensity / summedIntensity * colors->get(colorIndex, 0) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
-				outputImage->set(i, j, 1, (currentIntensity / summedIntensity * colors->get(colorIndex, 1) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
-				outputImage->set(i, j, 2, (currentIntensity / summedIntensity * colors->get(colorIndex, 2) + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
+				outputImage->set(i, j, 0, (currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
+				outputImage->set(i, j, 1, (currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
+				outputImage->set(i, j, 2, (currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
+				
+				totalIntensities->set(i,j, (totalIntensities->get(i, j) + currentIntensity));
 			}
 		}
 	}
 	
 	return outputImage;
+}
+
+boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight) {
+	vector<boost::shared_ptr<boost::thread> > threads;
+	boost::shared_ptr<boost::thread> singleThreadPtr;
+	vector<size_t> startPositions;
+	vector<size_t> endPositions;
+	vector<boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> > threadData;
+	// boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter;
+	boost::shared_ptr<encap_gsl_volume> outputImage;
+	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
+	
+	size_t nPositions = positions->get_x_size();
+	size_t numberOfProcessors = boost::thread::hardware_concurrency();
+	if (numberOfProcessors == 0) {
+		numberOfProcessors = 1;
+	}
+	size_t nThreads = numberOfProcessors;
+	size_t nPositionsPerThread;
+	size_t currentThreadStart;
+	size_t currentThreadEnd;
+	size_t nFrames = (size_t)(positions->get(nPositions - 1, 0)) + 1;
+	
+	double maxAmplitude = 0;
+	double imageScaleFactor = (double)(imageWidth - 1) / (double)xSize;
+	double summedIntensity;
+	
+	nThreads = nPositions / 5;
+	if (nThreads > numberOfProcessors) {
+		nThreads = numberOfProcessors;
+	}
+	
+	if (nThreads == 0) {
+		nThreads = 1;
+	}
+	
+	nPositionsPerThread = nPositions / nThreads;
+	
+	// get the position with the maximum amplitude
+	// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
+	for (size_t n = 0; n < nPositions; ++n) {
+		if (positions->get(n, 1) > maxAmplitude) {
+			maxAmplitude = positions->get(n,1);
+		}
+	}
+	
+	/* boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
+	singleThreadStartParameter->positions = positions;
+	singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume> (new encap_gsl_volume(imageWidth, imageHeight, 3));
+	singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
+	singleThreadStartParameter->colors = colors;
+	singleThreadStartParameter->deviationCalculator = deviationCalculator;
+	singleThreadStartParameter->startIndex = 0;
+	singleThreadStartParameter->endIndex = nPositions - 1;
+	singleThreadStartParameter->imageWidth = imageWidth;
+	singleThreadStartParameter->imageHeight = imageHeight;
+	singleThreadStartParameter->xSize = xSize;
+	singleThreadStartParameter->ySize = ySize;
+	singleThreadStartParameter->maxAmplitude = maxAmplitude;
+	singleThreadStartParameter->scaleFactor = imageScaleFactor;
+	
+	calculate_PALM_bitmap_image_ThreadStart(singleThreadStartParameter);
+	
+	outputImage = singleThreadStartParameter->image;*/
+	
+	
+	// set up the vector containing the data for the threads
+	threadData.clear();
+	currentThreadEnd = (size_t)-1;
+	for (size_t i = 0; i < nThreads; ++i) {
+		if (i == nThreads - 1) {	// the last thread is special
+			currentThreadStart = currentThreadEnd + 1;
+			currentThreadEnd = nPositions - 1;
+		} else {
+			currentThreadStart = currentThreadEnd + 1;
+			currentThreadEnd = currentThreadStart + nPositionsPerThread;
+		}
+		
+		boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
+		singleThreadStartParameter->positions = positions;
+		singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume> (new encap_gsl_volume(imageWidth, imageHeight, 3));
+		singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
+		singleThreadStartParameter->colors = colors;
+		singleThreadStartParameter->deviationCalculator = deviationCalculator;
+		singleThreadStartParameter->nFrames = nFrames;
+		singleThreadStartParameter->startIndex = currentThreadStart;
+		singleThreadStartParameter->endIndex = currentThreadEnd;
+		singleThreadStartParameter->imageWidth = imageWidth;
+		singleThreadStartParameter->imageHeight = imageHeight;
+		singleThreadStartParameter->xSize = xSize;
+		singleThreadStartParameter->ySize = ySize;
+		singleThreadStartParameter->maxAmplitude = maxAmplitude;
+		singleThreadStartParameter->scaleFactor = imageScaleFactor;
+		
+		threadData.push_back(singleThreadStartParameter);
+	}
+	
+	// now start the threads
+	threads.clear();
+	for (unsigned long j = 0; j < nThreads; ++j) {
+		singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&calculate_PALM_bitmap_image_ThreadStart, threadData.at(j)));
+		threads.push_back(singleThreadPtr);
+	}
+	
+	// wait for the threads to finish
+	for (unsigned long j = 0; j < nThreads; ++j) {
+		threads.at(j)->join();
+	}
+	
+	// combine the individual images into the final output image
+	outputImage = threadData.at(0)->image;
+	totalIntensities = threadData.at(0)->totalIntensities;
+	
+	for (size_t n = 1; n < nThreads; ++n) {
+		for (size_t i = 0; i < imageWidth; ++i) {
+			for (size_t j = 0; j < imageHeight; ++j) {
+				summedIntensity = totalIntensities->get(i,j) + threadData[n]->totalIntensities->get(i,j);
+				outputImage->set(i, j, 0, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 0) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0)));
+				outputImage->set(i, j, 1, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 1) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 1)));
+				outputImage->set(i, j, 2, (totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 2) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 2)));
+				totalIntensities->set(i,j, summedIntensity);
+			}
+		}
+	}
+	
+	return outputImage;
+}
+
+
+void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters) {
+	boost::shared_ptr<encap_gsl_matrix> positions = startParameters->positions;
+	boost::shared_ptr<encap_gsl_volume> image = startParameters->image;
+	boost::shared_ptr<encap_gsl_matrix> totalIntensities = startParameters->totalIntensities;
+	boost::shared_ptr<encap_gsl_matrix> colors = startParameters->colors;
+	
+	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator = startParameters->deviationCalculator;
+	
+	size_t nColors = colors->get_x_size();
+	size_t startIndex = startParameters->startIndex;
+	size_t endIndex = startParameters->endIndex;
+	size_t nPositions = endIndex - startIndex + 1;
+	size_t nFrames = startParameters->nFrames;
+	size_t currentFrame;
+	
+	size_t imageWidth = startParameters->imageWidth;
+	size_t imageHeight = startParameters->imageHeight;
+	size_t xSize = startParameters->xSize;
+	size_t ySize = startParameters->ySize;
+	double imageScaleFactor = startParameters->scaleFactor;
+	double maxAmplitude = startParameters->maxAmplitude;
+	
+	double currentX, currentY, currentAmplitude;
+	size_t centerX, centerY;
+	long startX, endX, startY, endY;
+	double deviation, currentIntensity;
+	double distanceXSquared, distanceYSquared;
+	size_t colorIndex;
+	double currentColors[3];
+	double summedIntensity;
+	
+	image->set_all(0);
+	totalIntensities->set_all(0);
+	
+	for (size_t n = startIndex; n <= endIndex; ++n) {
+		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
+		currentAmplitude = positions->get(n, 1);
+		currentX = positions->get(n, 3);
+		currentY = positions->get(n, 4);
+		
+		if ((currentAmplitude < 0) || (currentX < 0) || (currentX >= xSize) || (currentY < 0) || (currentY >= ySize)) {
+			continue;
+		}
+		
+		centerX = round(currentX * imageScaleFactor);
+		centerY = round(currentY * imageScaleFactor);
+		deviation = (deviationCalculator->getDeviation(positions, n) * imageScaleFactor);
+		
+		startX = floor((double)centerX - 4.0 * deviation);
+		startY = floor((double)centerY - 4.0 * deviation);
+		endX = ceil((double)centerX + 4.0 * deviation);
+		endY = ceil((double)centerY + 4.0 * deviation);
+		
+		if (startX < 0)
+			startX = 0;
+		if (endX >= imageWidth)
+			endX = imageWidth - 1;
+		if (startY < 0)
+			startY = 0;
+		if (endY >= imageHeight)
+			endY = imageHeight - 1;
+		
+		colorIndex = round((double)currentFrame / (double)nFrames * (double)(nColors - 1));
+		
+		for (size_t i = startX; i <= endX; ++i) {
+			for (size_t j = startY; j < endY; ++j) {
+				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
+				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
+				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
+				
+				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
+				currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
+				currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+				
+				summedIntensity = currentIntensity + totalIntensities->get(i, j);
+				
+				image->set(i, j, 0, (currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 0)));
+				image->set(i, j, 1, (currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 1)));
+				image->set(i, j, 2, (currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * image->get(i, j, 2)));
+				
+				totalIntensities->set(i,j, (totalIntensities->get(i, j) + currentIntensity));
+			}
+		}
+	}
 }
 
 

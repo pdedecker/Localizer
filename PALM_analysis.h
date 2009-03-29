@@ -93,8 +93,8 @@ class GET_NTH_IMAGE_RETURNED_NULL{};
 
 class PALMBitmapImageDeviationCalculator {
 public:
-	PALMBitmapImageDeviationCalculator();
-	~PALMBitmapImageDeviationCalculator();
+	PALMBitmapImageDeviationCalculator() {;}
+	virtual ~PALMBitmapImageDeviationCalculator() {;}
 	
 	virtual double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) = 0;
 };
@@ -133,8 +133,36 @@ private:
 	double scaleFactor;
 };
 
+class calculate_PALM_bitmap_image_ThreadStartParameters {
+public:
+	calculate_PALM_bitmap_image_ThreadStartParameters() {;}
+	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
+	
+	boost::shared_ptr<encap_gsl_matrix> positions;
+	boost::shared_ptr<encap_gsl_volume> image;
+	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
+	
+	boost::shared_ptr<encap_gsl_matrix> colors;
+	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
+	
+	size_t nFrames;
+	size_t startIndex;
+	size_t endIndex;
+	size_t imageWidth;
+	size_t imageHeight;
+	size_t xSize;
+	size_t ySize;
+	double maxAmplitude;	// maximum amplitude of a fitted Gaussian over the entire fitted positions
+	double scaleFactor;
+};
+
 boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight);
+
+boost::shared_ptr<encap_gsl_volume> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight);
+
+void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);
 
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
