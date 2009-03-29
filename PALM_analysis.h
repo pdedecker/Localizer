@@ -33,29 +33,6 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
-class threadStartDataOld {
-public:
-	threadStartDataOld (boost::shared_ptr<encap_gsl_matrix> im, boost::shared_ptr<FitPositions> posFitter, boost::shared_ptr<encap_gsl_matrix> pos, boost::shared_ptr<encap_gsl_matrix> localPositions,
-					unsigned long startPos, unsigned long endPos) 
-					{image = im; positionsFitter = posFitter, positions = pos; localPositionsMatrix = localPositions, startPosition = startPos; endPosition = endPos;}
-	~threadStartDataOld() {;}
-	
-	boost::shared_ptr<encap_gsl_matrix> getPositions() {return positions;}
-	boost::shared_ptr<encap_gsl_matrix> getImage() {return image;}
-	boost::shared_ptr<FitPositions> getPositionsFitter() {return positionsFitter;}
-	boost::shared_ptr<encap_gsl_matrix> getLocalPositionsMatrix() {return localPositionsMatrix;}
-	unsigned long getStartPosition() {return startPosition;}
-	unsigned long getEndPosition() {return endPosition;}
-	
-protected:
-	unsigned long startPosition;
-	unsigned long endPosition;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> image;
-	boost::shared_ptr<FitPositions> positionsFitter;
-	boost::shared_ptr<encap_gsl_matrix> localPositionsMatrix;
-};
-
 class threadStartData {
 public:
 	threadStartData(boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor_rhs,

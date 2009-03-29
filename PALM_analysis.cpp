@@ -741,26 +741,6 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 		}
 	}
 	
-	/* boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
-	singleThreadStartParameter->positions = positions;
-	singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume> (new encap_gsl_volume(imageWidth, imageHeight, 3));
-	singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
-	singleThreadStartParameter->colors = colors;
-	singleThreadStartParameter->deviationCalculator = deviationCalculator;
-	singleThreadStartParameter->startIndex = 0;
-	singleThreadStartParameter->endIndex = nPositions - 1;
-	singleThreadStartParameter->imageWidth = imageWidth;
-	singleThreadStartParameter->imageHeight = imageHeight;
-	singleThreadStartParameter->xSize = xSize;
-	singleThreadStartParameter->ySize = ySize;
-	singleThreadStartParameter->maxAmplitude = maxAmplitude;
-	singleThreadStartParameter->scaleFactor = imageScaleFactor;
-	
-	calculate_PALM_bitmap_image_ThreadStart(singleThreadStartParameter);
-	
-	outputImage = singleThreadStartParameter->image;*/
-	
-	
 	// set up the vector containing the data for the threads
 	threadData.clear();
 	currentThreadEnd = (size_t)-1;
