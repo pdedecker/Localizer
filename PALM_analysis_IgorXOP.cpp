@@ -373,6 +373,7 @@ typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParam
 
 
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	double threshold_parameter, radiusBetweenParticles, initial_width, min_distance_from_edge, cutoff_radius, sigma, background;
 	string name_of_output_wave;
@@ -706,6 +707,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int camera_type;
 	unsigned long start_image, end_image;
@@ -825,6 +827,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int camera_type;
 	int method;
@@ -978,6 +981,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int camera_type;
 	int method;
@@ -1119,6 +1123,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	unsigned long method;
 	unsigned long preprocessing_method, postprocessing_method;
@@ -1400,6 +1405,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 
 
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	boost::shared_ptr<encap_gsl_matrix> firstImage;
 	boost::shared_ptr<encap_gsl_matrix> secondImage;
@@ -1470,6 +1476,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
+	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int method, normalizeColors;
 	double scaleFactor, upperLimit, PSFWidth;
