@@ -241,6 +241,23 @@ protected:
 	int parse_header_information();
 };
 
+class ImageLoaderHamamatsu_HeaderStructure {
+public:
+	uint16 magic;
+	uint16 commentLength;
+	uint16 xSize;
+	uint16 ySize;
+	uint16 xBinning;	// uncertain
+	uint16 yBinning;	// uncertain
+	uint16 storageFormat;
+	uint32 nImages;
+	uint16 nChannels;
+	uint16 channel;		// uncertain
+	double timeStamp;
+	uint32 marker;
+	uint32 misc;		// function unknown
+}
+
 class ImageLoaderHamamatsu : public ImageLoader {
 public:
 	ImageLoaderHamamatsu(string rhs);
