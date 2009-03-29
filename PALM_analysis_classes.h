@@ -130,6 +130,24 @@ protected:
 	size_t x_size, y_size, z_size;
 };
 
+class encap_gsl_volume_ushort {	// extension of an encap_gsl_matrix to three dimensions
+public:
+	encap_gsl_volume_ushort(size_t x, size_t y, size_t z);
+	~encap_gsl_volume_ushort();
+	
+	void set(size_t x, size_t y, size_t z, unsigned short value) {gsl_matrix_ushort_set(matrices[z], x, y, value);}
+	void set_all(unsigned short value);
+	
+	unsigned short get(size_t x, size_t y, size_t z) {gsl_matrix_ushort_get(matrices[z], x, y);}
+	size_t get_x_size() const {return x_size;}
+	size_t get_y_size() const {return y_size;}
+	size_t get_z_size() const {return z_size;}
+	
+protected:
+	vector <gsl_matrix_ushort*> matrices;
+	size_t x_size, y_size, z_size;
+};
+
 class position {
 public:
 	position() {x = 0; y = 0; intensity = 0;}

@@ -206,7 +206,31 @@ double encap_gsl_volume::get(size_t x, size_t y, size_t z) {
 	return matrices[z]->get(x, y);
 }
 
+encap_gsl_volume_ushort::encap_gsl_volume_ushort(size_t x, size_t y, size_t z) {
+	matrices.reserve(z);
+	
+	for (size_t i = 0; i < z; ++i) {
+		matrices.push_back(gsl_matrix_ushort_alloc(x, y));
+		if (matrices[i] == NULL) {
+			throw OUT_OF_MEMORY(string("Unable to alloc a gsl_matrix_ushort in encap_gsl_volume_ushort\r"));
+		}
+	}
+}
 
+encap_gsl_volume_ushort::~encap_gsl_volume_ushort() {
+	for (size_t i = 0; i < z_size; ++i) {
+		if (matrices[i] != NULL) {
+			gsl_matrix_ushort_free(matrices[i]);
+			matrices[i] = NULL;
+		}
+	}
+}
+
+void encap_gsl_volume_ushort::set_all(unsigned short value) {
+	for (size_t i = 0; i < z_size; ++i) {
+		gsl_matrix_ushort_set_all(matrices[i], value);
+	}
+}
 
 XOPFileHandler::~XOPFileHandler() {
 	if (fileRef != NULL) {
