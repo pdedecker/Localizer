@@ -1585,7 +1585,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	
 	// do the actual calculation
 	try {
-		image = calculate_PALM_bitmap_image_parallel(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight);
+		image = calculate_PALM_bitmap_image(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight);
 		copy_gsl_volume_to_IgorDPWave(image, string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
