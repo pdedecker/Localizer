@@ -1015,7 +1015,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 		startX = 0;
 		startY = 0;
 		endX = x_size - 1;
-		endY = x_size - 1;
+		endY = y_size - 1;
 	}
 	
 	xRange = endX - startX + 1;
