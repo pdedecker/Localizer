@@ -748,6 +748,7 @@ int ImageLoaderHamamatsu::parse_header_information() {
 	header_length = header.commentLength + 64;
 	x_size = header.xSize;
 	y_size = header.ySize;
+	total_number_of_images = header.nImages;
 	
 	// was there an error reading the file?
 	if (file.fail() != 0) {
