@@ -636,7 +636,13 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	
 	for (size_t n = 0; n < nPositions; ++n) {
 		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
-		currentAmplitude = positions->get(n, 1);
+		
+		if (normalizeColors != 0) {
+			currentAmplitude = positions->get(n, 1);
+		} else {
+			currentAmplitude = 1.0;	// every position is equally important when we don't do scaling
+		}
+		
 		currentX = positions->get(n, 3);
 		currentY = positions->get(n, 4);
 		
@@ -841,7 +847,13 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 	
 	for (size_t n = startIndex; n <= endIndex; ++n) {
 		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
-		currentAmplitude = positions->get(n, 1);
+		
+		if (normalizeColors != 0) {
+			currentAmplitude = positions->get(n, 1);
+		} else {
+			currentAmplitude = 1.0;	// every position is equally important when we don't do scaling
+		}
+		
 		currentX = positions->get(n, 3);
 		currentY = positions->get(n, 4);
 		
