@@ -197,6 +197,9 @@ private:
 	string path;
 };
 
+uint16 getUINT16FromCharArray(char *array, size_t offset);
+uint32 getUINT32FromCharArray(char *array, size_t offset);
+
 class ImageLoader {
 public:
 	ImageLoader();
@@ -256,7 +259,7 @@ public:
 	double timeStamp;
 	uint32 marker;
 	uint32 misc;		// function unknown
-}
+};
 
 class ImageLoaderHamamatsu : public ImageLoader {
 public:

@@ -344,6 +344,40 @@ void XOPFileHandler::seekg(uint64_t pos) {
 	}
 }
 
+uint16 getUINT16FromCharArray(char *array, size_t offset) {
+	char byteReader1, byteReader2;
+	uint16 result;
+	
+	byteReader1 = array[offset];
+	byteReader2 = array[offset + 1];
+	
+	result = 0xFF & byteReader2;
+	result *= 256;
+	result = result | (0x000000FF & byteReader1);
+	
+	return result;
+}
+
+uint32 getUINT32FromCharArray(char *array, size_t offset) {
+	char byteReader1, byteReader2, byteReader3, byteReader4;
+	uint32 result;
+	
+	byteReader1 = array[offset];
+	byteReader2 = array[offset + 1];
+	byteReader3 = array[offset + 2];
+	byteReader4 = array[offset + 3];
+	
+	result = 0xFF & byteReader4;
+	result *= 256;
+	result = result | (0x000000FF & byteReader3);
+	result *= 256;
+	result = result | (0x000000FF & byteReader2);
+	result *= 256;
+	result = result | (0x000000FF & byteReader1);
+	
+	return result;
+}
+
 
 ImageLoader::ImageLoader() {
 	path.assign("");
@@ -904,73 +938,43 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 
 
 int ImageLoaderHamamatsu::parse_header_information() {
-	char header_buffer_char[1024];	// too large, but we'd better be safe
-	string header_string;
-	unsigned long wasabi_position;
+	char headerBuffer[64];	// too large, but we'd better be safe
+	ImageLoaderHamamatsu_HeaderStructure header;
 	
-	char byte_reader1, byte_reader2;
-	total_number_of_images = 0;
-	x_size = 0;
-	y_size = 0;
 	storage_type = 0;
 	
 	// first we load a set of data
 	file.seekg(0);
-	file.read(header_buffer_char, 1023);
-	header_buffer_char[1023] = '\0';
+	file.read(headerBuffer, 63);
+	headerBuffer[63] = '\0';
 	
 	
-	// bytes 4-7 contain the x and y size as UINT16
-	// file.seekg(4);
-	// file.get(byte_reader1);
-	// file.get(byte_reader2);
-	byte_reader1 = header_buffer_char[4];
-	byte_reader2 = header_buffer_char[5];
+	// from the char array build up a complete header structure
+	header.magic = getUINT16FromCharArray(headerBuffer, 0);
+	header.commentLength = getUINT16FromCharArray(headerBuffer, 2);
+	header.xSize = getUINT16FromCharArray(headerBuffer, 4);
+	header.ySize = getUINT16FromCharArray(headerBuffer, 6);
+	header.xBinning = getUINT16FromCharArray(headerBuffer, 8);
+	header.yBinning = getUINT16FromCharArray(headerBuffer, 10);
+	header.storageFormat = getUINT16FromCharArray(headerBuffer, 12);
+	header.nImages = getUINT32FromCharArray(headerBuffer, 14);
+	header.nChannels = getUINT16FromCharArray(headerBuffer, 18);
+	header.channel = getUINT16FromCharArray(headerBuffer, 20);
+	// skip the timestamp for now
+	header.marker = getUINT32FromCharArray(headerBuffer, 28);
+	header.misc = getUINT32FromCharArray(headerBuffer, 32);
 	
-	x_size = 0x00000000FF & byte_reader2;	// little-endian
-	x_size *= 256;
-	x_size = x_size | (0x00000000FF & byte_reader1);
-	
-	// file.get(byte_reader1);
-	// file.get(byte_reader2);
-	byte_reader1 = header_buffer_char[6];
-	byte_reader2 = header_buffer_char[7];
-	y_size = 0x000000FF & byte_reader2;	// little-endian
-	y_size *= 256;
-	y_size = y_size | (0x00000000FF & byte_reader1);
-	
-	// get the number of images, stored at bytes 14 and 15
-	// file.seekg(14);
-	// file.get(byte_reader1);
-	// file.get(byte_reader2);
-	byte_reader1 = header_buffer_char[14];
-	byte_reader2 = header_buffer_char[15];
-	
-	total_number_of_images = 0x00000000FF & byte_reader2;
-	total_number_of_images *= 256;
-	total_number_of_images = total_number_of_images | (0x00000000FF & byte_reader1);
-	
-	
-	// now we need to determine the length of the header
-	// we will do this by looking for the string "~WASABI~" in the file
-	// first we have to remove extraneous NULL characters that may be present in the string we read from the file
-	// this will cause the string to be interpreted as a very short array
-	for (int i = 0; i < 1023; i++) {
-		if (header_buffer_char[i] == '\0')
-			header_buffer_char[i] = 1;
+	if (header.storageFormat != 2) {	// not UINT16
+		string error;
+		error = "The file at \"";
+		error += path;
+		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.\r";
+		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	header_string.assign(header_buffer_char);
-	
-	// there seem to be different versions of the files, but they all follow the same principle
-	// first we check if it's one of the old files
-	
-	wasabi_position = header_string.find("~WASABI~", 0);
-	if (wasabi_position == (unsigned long)(-1)) {	// we didn't find the "~WASABI~", it's probably a new file
-		wasabi_position = header_string.find("~Hokawo~", 0);
-	}
-	
-	header_length = wasabi_position + 8;	// we found the length of the header
+	header_length = header.commentLength + 64;
+	x_size = header.xSize;
+	y_size = header.ySize;
 	
 	// was there an error reading the file?
 	if (file.fail() != 0) {
