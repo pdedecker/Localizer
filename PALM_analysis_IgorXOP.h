@@ -18,6 +18,8 @@
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"
+#include "PALM_analysis_errors.h"
+#include "PALM_analysis_FileIO.h"
 
 
 

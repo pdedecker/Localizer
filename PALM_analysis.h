@@ -14,8 +14,10 @@
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
 #include "XOPStandardHeaders.h"
+#include "PALM_analysis_errors.h"
 #include "PALM_analysis_classes.h"
 #include "PALM_analysis_defines.h"
+#include "PALM_analysis_FileIO.h"
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since encap_gsl_matrix does range checks
 
