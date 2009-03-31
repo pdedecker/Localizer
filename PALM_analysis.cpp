@@ -636,14 +636,13 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	
 	for (size_t n = 0; n < nPositions; ++n) {
 		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
+		currentAmplitude = positions->get(n, 1);
 		
 		if ((currentAmplitude < 0) || (currentX < 0) || (currentX >= xSize) || (currentY < 0) || (currentY >= ySize)) {
 			continue;
 		}
 		
-		if (normalizeColors != 0) {
-			currentAmplitude = positions->get(n, 1);
-		} else {
+		if (normalizeColors == 0) {
 			currentAmplitude = 1.0;	// every position is equally important when we don't do scaling
 		}
 		
@@ -674,7 +673,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 			for (size_t j = startY; j < endY; ++j) {
 				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
-				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
+				currentIntensity = currentAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * deviation * deviation));
 				
 				if (normalizeColors != 0) {
 				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
@@ -847,16 +846,15 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 	
 	for (size_t n = startIndex; n <= endIndex; ++n) {
 		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
-		
+		currentAmplitude = positions->get(n, 1);
 		if ((currentAmplitude < 0) || (currentX < 0) || (currentX >= xSize) || (currentY < 0) || (currentY >= ySize)) {
 			continue;
 		}
 		
-		if (normalizeColors != 0) {
-			currentAmplitude = positions->get(n, 1);
-		} else {
+		if (normalizeColors == 0) {
 			currentAmplitude = 1.0;	// every position is equally important when we don't do scaling
 		}
+		
 		
 		currentX = positions->get(n, 3);
 		currentY = positions->get(n, 4);
@@ -885,7 +883,7 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 			for (size_t j = startY; j < endY; ++j) {
 				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
-				currentIntensity = currentAmplitude * exp(- distanceXSquared / (2 * deviation * deviation) - distanceYSquared / (2 * deviation * deviation));
+				currentIntensity = currentAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * deviation * deviation));
 				
 				if (normalizeColors != 0) {
 					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
