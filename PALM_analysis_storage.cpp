@@ -12,8 +12,7 @@
 encap_gsl_matrix::encap_gsl_matrix(size_t x, size_t y) {
 	matrix = gsl_matrix_alloc(x, y);
 	if (matrix == NULL) {
-		string error;
-		error = "unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r";
+		string error("unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r");
 		throw OUT_OF_MEMORY(error);
 	}
 	x_size = x;
@@ -29,7 +28,7 @@ encap_gsl_matrix::~encap_gsl_matrix() {
 void encap_gsl_matrix::set(size_t x, size_t y, double value) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::set()\r";
+		string error("Out of range in encap_gsl_matrix::set()\r");
 		throw std::range_error(error);
 	}
 #endif
@@ -57,7 +56,7 @@ void encap_gsl_matrix::operator=(gsl_matrix* rhs) {
 double encap_gsl_matrix::get(size_t x, size_t y) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::get()\r";
+		string error("Out of range in encap_gsl_matrix::get()\r");
 		throw std::range_error(error);
 	}
 #endif
@@ -68,8 +67,7 @@ double encap_gsl_matrix::get(size_t x, size_t y) {
 encap_gsl_matrix_uchar::encap_gsl_matrix_uchar(size_t x, size_t y) {
 	matrix = gsl_matrix_uchar_alloc(x, y);
 	if (matrix == NULL) {
-		string error;
-		error = "unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r";
+		string error("unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r");
 		throw OUT_OF_MEMORY(error);
 	}
 	x_size = x;
@@ -85,7 +83,7 @@ encap_gsl_matrix_uchar::~encap_gsl_matrix_uchar() {
 void encap_gsl_matrix_uchar::set(size_t x, size_t y, unsigned char value) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::set()\r";
+		string error("Out of range in encap_gsl_matrix::set()\r");
 		throw std::range_error(error);
 	}
 #endif
@@ -113,7 +111,7 @@ void encap_gsl_matrix_uchar::operator=(gsl_matrix_uchar * rhs) {
 unsigned char encap_gsl_matrix_uchar::get(size_t x, size_t y) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::get()\r";
+		string error("Out of range in encap_gsl_matrix::get()\r");
 		throw std::range_error(error);
 	}
 #endif
@@ -124,8 +122,7 @@ unsigned char encap_gsl_matrix_uchar::get(size_t x, size_t y) {
 encap_gsl_matrix_long::encap_gsl_matrix_long(size_t x, size_t y) {
 	matrix = gsl_matrix_long_alloc(x, y);
 	if (matrix == NULL) {
-		string error;
-		error = "unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r";
+		string error("unable to allocate matrix in encap_gsl_matrix::encap_gsl_matrix()\r");
 		throw OUT_OF_MEMORY(error);
 	}
 	x_size = x;
@@ -141,7 +138,7 @@ encap_gsl_matrix_long::~encap_gsl_matrix_long() {
 void encap_gsl_matrix_long::set(size_t x, size_t y, long value) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::set()\r";
+		string error("Out of range in encap_gsl_matrix::set()\r");
 		throw std::range_error(error);
 	}
 #endif
@@ -169,7 +166,7 @@ void encap_gsl_matrix_long::operator=(gsl_matrix_long * rhs) {
 long encap_gsl_matrix_long::get(size_t x, size_t y) {
 #ifndef ENCAP_GSL_RANGE_CHECK_OFF
 	if ((x > x_size - 1) || (y > y_size - 1)) {
-		error = "Out of range in encap_gsl_matrix::get()\r";
+		string error("Out of range in encap_gsl_matrix::get()\r");
 		throw std::range_error(error);
 	}
 #endif

@@ -37,7 +37,6 @@ public:
 	size_t get_y_size() const {return y_size;}
 	
 protected:
-	string error;
 	gsl_matrix *matrix;
 	size_t x_size, y_size;
 };
@@ -59,7 +58,6 @@ public:
 	size_t get_y_size() const {return y_size;}
 	
 protected:
-	string error;
 	gsl_matrix_uchar *matrix;
 	size_t x_size, y_size;
 };
@@ -81,7 +79,6 @@ public:
 	size_t get_y_size() const {return y_size;}
 	
 protected:
-	string error;
 	gsl_matrix_long *matrix;
 	size_t x_size, y_size;
 };
@@ -100,7 +97,6 @@ public:
 	size_t get_z_size() const {return z_size;}
 	
 protected:
-	string error;
 	vector<boost::shared_ptr<encap_gsl_matrix> > matrices;
 	size_t x_size, y_size, z_size;
 };
