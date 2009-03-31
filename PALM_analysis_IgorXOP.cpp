@@ -679,7 +679,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -798,7 +797,6 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -947,7 +945,6 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1094,7 +1091,6 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1379,7 +1375,6 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1450,7 +1445,6 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1633,7 +1627,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
-		XOPNotice(err.get_error().c_str());
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
