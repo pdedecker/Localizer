@@ -1606,13 +1606,13 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	// get the object that will calculate the standard deviation
 	switch (method) {
 		case 0:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(PSFWidth, scaleFactor));
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
 			break;
 		case 1:
 			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
 			break;
 		case 2:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(PSFWidth, scaleFactor));
 			break;
 		default:
 			return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
