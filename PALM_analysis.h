@@ -23,7 +23,7 @@
 
 using namespace std;
 
-int load_partial_ccd_image(ImageLoader *image_loader, unsigned long n_start, unsigned long n_end);
+int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
 
 int parse_ccd_headers(ImageLoader *image_loader);
 
@@ -152,6 +152,6 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, unsigned long number_of_bins);
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, size_t number_of_bins);
 
 #endif

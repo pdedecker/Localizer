@@ -55,9 +55,9 @@ public:
 	
 	virtual int convert_images() = 0;
 protected:
-	unsigned long total_number_of_images;
-	unsigned long x_size;
-	unsigned long y_size;
+	size_t total_number_of_images;
+	size_t x_size;
+	size_t y_size;
 	
 	ImageLoader *image_loader;
 	OutputWriter *output_writer;
@@ -71,10 +71,10 @@ public:
 	int convert_images();
 	
 	void set_n_parameter(double n);		// in this class this function sets the number of frames that we average over
-	unsigned long get_n_frames_averaging() const {return n_frames_averaging;}
+	size_t get_n_frames_averaging() const {return n_frames_averaging;}
 	
 protected:
-	unsigned long n_frames_averaging;	// how many frames do we average over?
+	size_t n_frames_averaging;	// how many frames do we average over?
 	
 	void subtract_average_of_entire_trace();
 	void subtract_partial_average();
@@ -159,7 +159,7 @@ public:
 	virtual ~FitPositions() {;}
 	
 	virtual boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) = 0;
-	virtual boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, unsigned long startPos, unsigned long endPos) = 0;
+	virtual boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
 };
@@ -168,15 +168,15 @@ class FitPositionsGaussian : public FitPositions {
 public:
 	// FitPositionsGaussian() {sigma = 0.1;}
 	// FitPositionsGaussian(double rhs) {sigma = rhs;}
-	FitPositionsGaussian(unsigned long cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; sigma = sigma_rhs;}
+	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, unsigned long startPos, unsigned long endPos);
+	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
-	unsigned long cutoff_radius;
+	size_t cutoff_radius;
 	double background;
 	double r_initial;
 };
@@ -187,12 +187,12 @@ class FitPositionsMultiplication : public FitPositions {
 	
 	// a description is given in Thompson, Biophys J 82:2775 2002
 public:
-	FitPositionsMultiplication(unsigned long cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; convergence_threshold = convergence_rhs;}
+	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, unsigned long startPos, unsigned long endPos);
+	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
 	
 protected:
 	int multiply_with_gaussian(boost::shared_ptr<encap_gsl_matrix> original_image, boost::shared_ptr<encap_gsl_matrix> masked_image, double x, double y,
@@ -201,7 +201,7 @@ protected:
 	int determine_x_y_position(boost::shared_ptr<encap_gsl_matrix> masked_image, double &x, double &y);
 	
 	double convergence_threshold;
-	unsigned long cutoff_radius;
+	size_t cutoff_radius;
 	double background;
 	double r_initial;
 };
@@ -210,15 +210,15 @@ class FitPositionsCentroid : public FitPositions {
 	// fits the positions by calculating a centroid for the pixel values
 	
 public:
-	FitPositionsCentroid(unsigned long cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
+	FitPositionsCentroid(size_t cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
 	~FitPositionsCentroid() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, unsigned long startPos, unsigned long endPos);
+	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
 	
 protected:
-	unsigned long cutoff_radius;
+	size_t cutoff_radius;
 };
 
 
@@ -339,10 +339,10 @@ protected:
 	fftw_plan forwardPlan;
 	fftw_plan reversePlan;
 	
-	unsigned long forwardPlanXSize;
-	unsigned long forwardPlanYSize;
-	unsigned long reversePlanXSize;
-	unsigned long reversePlanYSize;
+	size_t forwardPlanXSize;
+	size_t forwardPlanYSize;
+	size_t reversePlanXSize;
+	size_t reversePlanYSize;
 	
 	boost::mutex forwardPlanMutex;
 	boost::mutex reversePlanMutex;
@@ -375,8 +375,8 @@ protected:
 	double gaussianWidth;
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;
 	boost::shared_ptr<encap_gsl_matrix> average_kernel;
-	unsigned long averageKernelXSize, averageKernelYSize;
-	unsigned long GaussianKernelXSize, GaussianKernelYSize;
+	size_t averageKernelXSize, averageKernelYSize;
+	size_t GaussianKernelXSize, GaussianKernelYSize;
 	double sum_squared_Gaussian;
 	
 	boost::mutex GaussianKernelMutex;
@@ -398,13 +398,13 @@ public:
 
 class ThresholdImage_Preprocessor_MedianFilter : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
 public:
-	ThresholdImage_Preprocessor_MedianFilter(unsigned x, unsigned long y) {kernel_x_size = x; kernel_y_size = y;}
+	ThresholdImage_Preprocessor_MedianFilter(unsigned x, size_t y) {kernel_x_size = x; kernel_y_size = y;}
 	~ThresholdImage_Preprocessor_MedianFilter() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
-	unsigned long kernel_x_size, kernel_y_size;
+	size_t kernel_x_size, kernel_y_size;
 };
 
 
@@ -417,27 +417,27 @@ public:
 	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
-	void generate_Gaussian_kernel(unsigned long x_size, unsigned long y_size);
+	void generate_Gaussian_kernel(size_t x_size, size_t y_size);
 	ConvolveMatricesWithFFTClass matrixConvolver;
 	
 	boost::mutex generateKernelMutex;
 	
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;	// automatically initialized to a NULL pointer
 	double width;
-	unsigned long kernel_x_size;
-	unsigned long kernel_y_size;
+	size_t kernel_x_size;
+	size_t kernel_y_size;
 };
 
 
 class ThresholdImage_Preprocessor_MeanFilter : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
 public:
-	ThresholdImage_Preprocessor_MeanFilter(unsigned x, unsigned long y) {kernel_x_size = x; kernel_y_size = y;}
+	ThresholdImage_Preprocessor_MeanFilter(unsigned x, size_t y) {kernel_x_size = x; kernel_y_size = y;}
 	~ThresholdImage_Preprocessor_MeanFilter() {;}
 	
 	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
 	
 protected:
-	unsigned long kernel_x_size, kernel_y_size;
+	size_t kernel_x_size, kernel_y_size;
 };
 
 

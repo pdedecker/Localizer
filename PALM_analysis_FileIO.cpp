@@ -167,7 +167,7 @@ ImageLoader::~ImageLoader() {
 		file.close();
 	
 	/*// free any images that may remain in the cache
-	 for (unsigned long i = 0; i < N_SIMULTANEOUS_IMAGE_LOADS; i++) {
+	 for (size_t i = 0; i < N_SIMULTANEOUS_IMAGE_LOADS; i++) {
 	 if (image_cache[i] != NULL) {
 	 gsl_matrix_free(image_cache[i]);
 	 image_cache[i] = NULL;
@@ -190,10 +190,10 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
-ImageLoaderSPE::ImageLoaderSPE(string rhs, unsigned long image_cache_size_rhs) {
+ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -210,7 +210,7 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, unsigned long image_cache_size_rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderSPE::~ImageLoaderSPE() {
@@ -301,7 +301,7 @@ int ImageLoaderSPE::parse_header_information() {
 	return 0;
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned long n) {	
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const size_t n) {	
 	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
@@ -319,7 +319,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
 		}
@@ -330,7 +330,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 	
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		images_in_cache[i] = -1;
 	}
 	
@@ -406,8 +406,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 		switch(storage_type) {
 			case 0:	// 4-byte float
 				// this is currently only safe on little-endian systems!
-				for (unsigned long j  = 0; j < y_size; j++) {
-					for (unsigned long i = 0; i < x_size; i++) {
+				for (size_t j  = 0; j < y_size; j++) {
+					for (size_t i = 0; i < x_size; i++) {
 						//	file.read((char *)&current_float, sizeof(float));
 						
 						current_float = single_image_buffer_float[cache_offset];
@@ -420,8 +420,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 				break;
 				
 			case 1:	// 4-byte long
-				for (unsigned long j  = 0; j < y_size; j++) {
-					for (unsigned long i = 0; i < x_size; i++) {
+				for (size_t j  = 0; j < y_size; j++) {
+					for (size_t i = 0; i < x_size; i++) {
 						current_long = 0x000000FF & single_image_buffer[cache_offset + 3];	// little endian
 						current_long *= 256;
 						current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 2]);
@@ -438,8 +438,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 				break;
 				
 			case 2:	// 2-byte signed short
-				for (unsigned long j  = 0; j < y_size; j++) {
-					for (unsigned long i = 0; i < x_size; i++) {
+				for (size_t j  = 0; j < y_size; j++) {
+					for (size_t i = 0; i < x_size; i++) {
 						current_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
 						current_short *= 256;
 						current_short = current_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
@@ -452,8 +452,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const unsigned
 				break;
 				
 			case 3: // 2-byte unsigned short
-				for (unsigned long j  = 0; j < y_size; j++) {
-					for (unsigned long i = 0; i < x_size; i++) {
+				for (size_t j  = 0; j < y_size; j++) {
+					for (size_t i = 0; i < x_size; i++) {
 						//	file.read((char *)&current_unsigned_short, 2);
 						current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
 						current_unsigned_short *= 256;
@@ -497,10 +497,10 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
-ImageLoaderAndor::ImageLoaderAndor(string rhs, unsigned long image_cache_size_rhs) {
+ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -515,7 +515,7 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, unsigned long image_cache_size_rh
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderAndor::~ImageLoaderAndor() {
@@ -525,10 +525,10 @@ ImageLoaderAndor::~ImageLoaderAndor() {
 }
 
 int ImageLoaderAndor::parse_header_information() {
-	unsigned long temp;
-	unsigned long xBinning, yBinning;
-	unsigned long frameXSize, frameYSize;
-	unsigned long xStart, yStart, xEnd, yEnd;
+	size_t temp;
+	size_t xBinning, yBinning;
+	size_t frameXSize, frameYSize;
+	size_t xStart, yStart, xEnd, yEnd;
 	boost::scoped_array<char> headerBuffer(new char[60001]);
 	
 	file.read(headerBuffer.get(), 60000);
@@ -572,7 +572,7 @@ int ImageLoaderAndor::parse_header_information() {
 	y_size = (yEnd - yStart + 1) / yBinning;	// integer division
 	
 	// now there are some lines that may contain timestamps. There are as many lines as there are images
-	for (unsigned long i = 0;  i < total_number_of_images; i++) {
+	for (size_t i = 0;  i < total_number_of_images; i++) {
 		ss.getline(headerBuffer.get(), 1024);
 	}
 	
@@ -590,7 +590,7 @@ int ImageLoaderAndor::parse_header_information() {
 	return 0;
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsigned long n) {	
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const size_t n) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
@@ -606,7 +606,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
 		}
@@ -617,7 +617,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 	
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		images_in_cache[i] = -1;
 	}
 	
@@ -651,8 +651,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const unsign
 		
 		
 		// this is currently only safe on little-endian systems!
-		for (unsigned long j  = 0; j < y_size; j++) {
-			for (unsigned long i = 0; i < x_size; i++) {
+		for (size_t j  = 0; j < y_size; j++) {
+			for (size_t i = 0; i < x_size; i++) {
 				current_float = single_image_buffer[cache_offset];
 				image->set(i, j, (double)current_float);
 				cache_offset++;
@@ -683,10 +683,10 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
-ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, unsigned long image_cache_size_rhs) {
+ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -701,7 +701,7 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, unsigned long image_cache
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
@@ -765,7 +765,7 @@ int ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const unsigned long n) {	
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const size_t n) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	boost::shared_ptr<encap_gsl_matrix> image;
 	
@@ -779,7 +779,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
 		}
@@ -790,7 +790,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		images_in_cache[i] = -1;
 	}
 	
@@ -800,7 +800,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 	// because we assume that a char s equal to one byte
 	
 	unsigned int current_uint;
-	unsigned long n_bytes_per_image = x_size * y_size * 2;
+	size_t n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	uint64_t cache_offset;
 	
@@ -827,8 +827,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const un
 		
 		cache_offset = 0;
 		
-		for (unsigned long j  = 0; j < y_size; j++) {
-			for (unsigned long i = 0; i < x_size; i++) {
+		for (size_t j  = 0; j < y_size; j++) {
+			for (size_t i = 0; i < x_size; i++) {
 				current_uint = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
 				current_uint *= 256;
 				current_uint = current_uint | (0x000000FF & single_image_buffer[cache_offset]);
@@ -862,10 +862,10 @@ SimpleImageLoader::SimpleImageLoader(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
-SimpleImageLoader::SimpleImageLoader(string rhs, unsigned long image_cache_size_rhs) {
+SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -880,7 +880,7 @@ SimpleImageLoader::SimpleImageLoader(string rhs, unsigned long image_cache_size_
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 SimpleImageLoader::~SimpleImageLoader() {
@@ -889,7 +889,7 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsigned long n) {	
+boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const size_t n) {	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
@@ -900,7 +900,7 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
 		}
@@ -911,13 +911,13 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 	
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		images_in_cache[i] = -1;
 	}
 	
 	// now load the new set of images
 	uint64_t offset;
-	unsigned long array_offset;
+	size_t array_offset;
 	boost::shared_ptr<encap_gsl_matrix> new_image;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
@@ -930,7 +930,7 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 		
 		new_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
-		offset = 3 * sizeof(unsigned long) + i * (x_size) * (y_size) * sizeof(float);
+		offset = 3 * sizeof(size_t) + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
 		
 		array_offset = 0;
@@ -946,8 +946,8 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const unsig
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
-		for (unsigned long j  = 0; j < y_size; j++) {
-			for (unsigned long i = 0; i < x_size; i++) {
+		for (size_t j  = 0; j < y_size; j++) {
+			for (size_t i = 0; i < x_size; i++) {
 				new_image->set(i, j, single_image_buffer[array_offset]);
 				array_offset++;
 			}
@@ -968,9 +968,9 @@ int SimpleImageLoader::parse_header_information() {
 	file.seekg(0);
 	
 	// the first 12 bytes of the file contain this information
-	file.read((char *)&x_size, sizeof(unsigned long));
-	file.read((char *)&y_size, sizeof(unsigned long));
-	file.read((char *)&total_number_of_images, sizeof(unsigned long));
+	file.read((char *)&x_size, sizeof(size_t));
+	file.read((char *)&y_size, sizeof(size_t));
+	file.read((char *)&total_number_of_images, sizeof(size_t));
 	
 	if (file.fail() != 0) {
 		string error;
@@ -1024,7 +1024,7 @@ ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs) {
 	
 #ifdef _WINDOWS_
 	// we need to escape the backslashes in the filepath so that it can be passed directly to Igor
-	for (unsigned long i = 0; i < native_Igor_FilePath.length(); i++) {
+	for (size_t i = 0; i < native_Igor_FilePath.length(); i++) {
 		if (native_Igor_FilePath[i] == '\\') {
 			native_Igor_FilePath.insert(i, "\\");
 			i++;
@@ -1035,11 +1035,11 @@ ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs) {
 	parse_header_information();
 	
 	tiff_cache_wave = NULL;
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
-ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs, unsigned long image_cache_size_rhs) {
+ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs, size_t image_cache_size_rhs) {
 	int result;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -1081,7 +1081,7 @@ ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs, unsigned long image_cache
 	
 #ifdef _WINDOWS_
 	// we need to escape the backslashes in the filepath so that it can be passed directly to Igor
-	for (unsigned long i = 0; i < native_Igor_FilePath.length(); i++) {
+	for (size_t i = 0; i < native_Igor_FilePath.length(); i++) {
 		if (native_Igor_FilePath[i] == '\\') {
 			native_Igor_FilePath.insert(i, "\\");
 			i++;
@@ -1092,7 +1092,7 @@ ImageLoaderTIFF_Igor::ImageLoaderTIFF_Igor(string rhs, unsigned long image_cache
 	parse_header_information();
 	
 	tiff_cache_wave = NULL;
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
@@ -1154,7 +1154,7 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	x_size = (unsigned long)(value[0] + 0.5);
+	x_size = (size_t)(value[0] + 0.5);
 	
 	result = FetchNumVar("V_numCols", &value[0], &value[1]);
 	if (result == -1) {
@@ -1165,7 +1165,7 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	y_size = (unsigned long)(value[0] + 0.5);
+	y_size = (size_t)(value[0] + 0.5);
 	
 	result = FetchNumVar("V_numImages", &value[0], &value[1]);
 	if (result == -1) {
@@ -1176,13 +1176,13 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	total_number_of_images = (unsigned long)(value[0] + 0.5);
+	total_number_of_images = (size_t)(value[0] + 0.5);
 	
 	return 0;
 	
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const unsigned long n) {
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const size_t n) {
 	
 	boost::shared_ptr<encap_gsl_matrix> image_copy;
 	int result;
@@ -1199,7 +1199,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const un
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			
 			image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
@@ -1235,7 +1235,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const un
 			throw result;
 		}
 		tiff_cache_wave = NULL;
-		for (unsigned long i = 0; i < image_cache_size; i++) {
+		for (size_t i = 0; i < image_cache_size; i++) {
 			images_in_cache[i] = -1;
 		}
 	}
@@ -1344,11 +1344,11 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
-ImageLoaderTIFF::ImageLoaderTIFF(string rhs, unsigned long image_cache_size_rhs) {
+ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
 	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
@@ -1364,7 +1364,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, unsigned long image_cache_size_rhs)
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
-	images_in_cache.resize(image_cache_size, (unsigned long)-1);
+	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
@@ -1382,7 +1382,7 @@ int ImageLoaderTIFF::parse_header_information() {
 	int result;
 	uint16_t result_uint16;
 	uint32_t result_uint32;
-	unsigned long index = 0;
+	size_t index = 0;
 	
 	
 	// is the image in grayscale format?
@@ -1455,7 +1455,7 @@ int ImageLoaderTIFF::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	x_size = (unsigned long)(result_uint32);
+	x_size = (size_t)(result_uint32);
 	
 	// what is the y size?
 	result = TIFFGetField(tiff_file, TIFFTAG_IMAGELENGTH, &result_uint32);
@@ -1467,7 +1467,7 @@ int ImageLoaderTIFF::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	y_size = (unsigned long)(result_uint32);
+	y_size = (size_t)(result_uint32);
 	
 	
 	// how many images are there in the file?
@@ -1508,7 +1508,7 @@ int ImageLoaderTIFF::parse_header_information() {
 	
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigned long n) {
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const size_t n) {
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -1520,7 +1520,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 	
 	// is the requested image in the cache?
 	// if it is then we return a copy
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			return image_cache[i];
 		}
@@ -1531,7 +1531,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 	
 	// first we free the images that are already in the cache
 	// this is safe because we only pass copies to other functions
-	for (unsigned long i = 0; i < image_cache_size; i++) {
+	for (size_t i = 0; i < image_cache_size; i++) {
 		images_in_cache[i] = -1;
 	}
 	
@@ -1557,7 +1557,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 		throw OUT_OF_MEMORY(error);
 	}
 	
-	for (unsigned long i = n; i < n + image_cache_size; i++) {
+	for (size_t i = n; i < n + image_cache_size; i++) {
 		
 		if (i >= total_number_of_images) {
 			continue;	// there are no more images to load into this cache location
@@ -1568,7 +1568,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 			new_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		}
 		catch (std::bad_alloc) {
-			for (unsigned long j = 0; j < i - n; j++) {
+			for (size_t j = 0; j < i - n; j++) {
 				images_in_cache[j] = -1;
 			}
 			_TIFFfree(single_scanline_buffer);
@@ -1587,7 +1587,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
-		for (unsigned long j = 0; j < y_size; ++j) {
+		for (size_t j = 0; j < y_size; ++j) {
 			result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
 			if (result != 1) {
 				_TIFFfree(single_scanline_buffer);
@@ -1603,7 +1603,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 					switch (bitsPerPixel) {	// handle the different sampling sizes
 						case 4:
 							scanline_pointer = single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
 									current_uint16 = 0x0000000F & (*scanline_pointer);
 									new_image->set(k, j, (double)current_uint16);
@@ -1616,7 +1616,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 							break;
 						case 8:
 							scanline_pointer = single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								current_uint16 = (uint16_t)(*scanline_pointer);
 								new_image->set(k, j, (double)current_uint16);
 								scanline_pointer += 1;
@@ -1624,7 +1624,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 							break;
 						case 16:
 							uint16Ptr = (uint16_t*)single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								current_uint16 = (*uint16Ptr);
 								new_image->set(k, j, (double)current_uint16);
 								uint16Ptr += 1;
@@ -1632,7 +1632,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 							break;
 						case 32:
 							uint32Ptr = (uint32_t*)single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								current_uint32 = (*uint32Ptr);
 								new_image->set(k, j, (double)current_uint32);
 								uint32Ptr += 1;
@@ -1652,7 +1652,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 					switch (bitsPerPixel) {
 						case 32:
 							floatPtr = (float *)single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								current_float = *floatPtr;
 								new_image->set(k, j, (double)current_float);
 								floatPtr += 1;
@@ -1660,7 +1660,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const unsigne
 							break;
 						case 64:
 							doublePtr = (double *)single_scanline_buffer;
-							for (unsigned long k = 0; k < x_size; ++k) {
+							for (size_t k = 0; k < x_size; ++k) {
 								current_double = *doublePtr;
 								new_image->set(k, j, current_double);
 								floatPtr += 1;
@@ -1740,9 +1740,9 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 		throw INCOMPATIBLE_DIMENSIONING;
 	}
 	
-	x_size = (unsigned long)DimensionSizes[0];
-	y_size = (unsigned long)DimensionSizes[1];
-	total_number_of_images = (unsigned long)DimensionSizes[2];
+	x_size = (size_t)DimensionSizes[0];
+	y_size = (size_t)DimensionSizes[1];
+	total_number_of_images = (size_t)DimensionSizes[2];
 	
 	// special case: if the wave contains only a single image then it is usually two-dimensional, that is, DimensionSizes[2] == 0
 	// in that case total_number_of_images is still one
@@ -1751,7 +1751,7 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderIgor::get_nth_image(const unsigned long n) {
+boost::shared_ptr<encap_gsl_matrix> ImageLoaderIgor::get_nth_image(const size_t n) {
 	boost::shared_ptr<encap_gsl_matrix> image;
 	double value[2];
 	long indices[3];
@@ -1764,8 +1764,8 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderIgor::get_nth_image(const unsigne
 	
 	indices[2] = n;
 	
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			indices[0] = (long)i;
 			indices[1] = (long)j;
 			
@@ -1799,7 +1799,7 @@ SimpleOutputWriter::SimpleOutputWriter(const string &rhs,int overwrite) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
-	int header_length = 3 * sizeof(unsigned long);
+	int header_length = 3 * sizeof(size_t);
 	
 	char *header = new char[header_length];
 	if (header == NULL) {
@@ -1865,7 +1865,7 @@ void SimpleOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_ima
 
 void SimpleOutputWriter::flush_cache() {
 	boost::shared_ptr<encap_gsl_matrix> current_image;
-	unsigned long n_pixels, offset;
+	size_t n_pixels, offset;
 	
 	if (image_buffer.size() == 0) {
 		return;
@@ -1890,8 +1890,8 @@ void SimpleOutputWriter::flush_cache() {
 		current_image = image_buffer.front();
 		
 		
-		for (unsigned long j = 0; j < y_size; j++) {
-			for (unsigned long i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
+			for (size_t i = 0; i < x_size; i++) {
 				single_image_buffer[offset] = (float)current_image->get(i, j);
 				offset++;
 			}
@@ -1919,9 +1919,9 @@ int SimpleOutputWriter::flush_and_close() {
 	}
 	
 	file.seekp(0);
-	file.write((char *)&x_size, sizeof(unsigned long));
-	file.write((char *)&y_size, sizeof(unsigned long));
-	file.write((char *)&n_images_written, sizeof(unsigned long));
+	file.write((char *)&x_size, sizeof(size_t));
+	file.write((char *)&y_size, sizeof(size_t));
+	file.write((char *)&n_images_written, sizeof(size_t));
 	
 	file.close();
 	
@@ -1931,9 +1931,9 @@ int SimpleOutputWriter::flush_and_close() {
 	 file_header_out.seekp(0);
 	 file_header_out.seekg(0);	// should be unnecessary
 	 
-	 file_header_out.write((char *)&x_size, sizeof(unsigned long));
-	 file_header_out.write((char *)&y_size, sizeof(unsigned long));
-	 file_header_out.write((char *)&n_images_written, sizeof(unsigned long));
+	 file_header_out.write((char *)&x_size, sizeof(size_t));
+	 file_header_out.write((char *)&y_size, sizeof(size_t));
+	 file_header_out.write((char *)&n_images_written, sizeof(size_t));
 	 
 	 file_header_out.close();*/
 	
@@ -1990,7 +1990,7 @@ void TIFFOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_image
 
 void TIFFOutputWriter::flush_cache() {
 	boost::shared_ptr<encap_gsl_matrix> current_image;
-	unsigned long n_pixels, offset;
+	size_t n_pixels, offset;
 	
 	int result;
 	uint16_t current_uint16;
@@ -2088,9 +2088,9 @@ void TIFFOutputWriter::flush_cache() {
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
-		for (unsigned long j = 0; j < y_size; j++) {
+		for (size_t j = 0; j < y_size; j++) {
 			offset = 0;
-			for (unsigned long i = 0; i < x_size; i++) {
+			for (size_t i = 0; i < x_size; i++) {
 				scanLine[offset] = (float)current_image->get(i, j);
 				offset++;
 			}
@@ -2160,7 +2160,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 	double value;
 	boost::shared_ptr<encap_gsl_matrix> positions;
 	long number_of_positions_in_matrix, offset = 0;
-	unsigned long frameNumber = 0;
+	size_t frameNumber = 0;
 	
 	dim_size[0] = (long)total_number_of_positions;
 	dim_size[1] = 12;

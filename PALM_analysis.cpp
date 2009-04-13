@@ -1,10 +1,10 @@
 #include "PALM_analysis.h"
 
 
-int load_partial_ccd_image(ImageLoader *image_loader, unsigned long n_start, unsigned long n_end) {
-	unsigned long total_n_images = image_loader->get_total_number_of_images();
-	unsigned long n_images_to_load;
-	unsigned long x_size, y_size;
+int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end) {
+	size_t total_n_images = image_loader->get_total_number_of_images();
+	size_t n_images_to_load;
+	size_t x_size, y_size;
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
 	long indices[MAX_DIMENSIONS];
@@ -49,14 +49,14 @@ int load_partial_ccd_image(ImageLoader *image_loader, unsigned long n_start, uns
 	}
 	
 	// load the data
-	for (unsigned long i = n_start; i <= n_end; i++) {
+	for (size_t i = n_start; i <= n_end; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		indices[2] = i - n_start;
 		
 		// store the data in the output wave
-		for (unsigned long k = 0; k < y_size; k++) {
-			for (unsigned long j = 0; j < x_size; j++) {
+		for (size_t k = 0; k < y_size; k++) {
+			for (size_t j = 0; j < x_size; j++) {
 				current_value = current_image->get(j, k);
 				
 				indices[0] = j;
@@ -79,9 +79,9 @@ int load_partial_ccd_image(ImageLoader *image_loader, unsigned long n_start, uns
 
 
 int parse_ccd_headers(ImageLoader *image_loader) {
-	unsigned long total_n_images = image_loader->get_total_number_of_images();
-	unsigned long x_size = image_loader->get_x_size();
-	unsigned long y_size = image_loader->get_y_size();
+	size_t total_n_images = image_loader->get_total_number_of_images();
+	size_t x_size = image_loader->get_x_size();
+	size_t y_size = image_loader->get_y_size();
 	
 	int result;
 	
@@ -102,7 +102,7 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	
-	unsigned long number_of_images;
+	size_t number_of_images;
 	int status;
 	
 	number_of_images = image_loader->get_total_number_of_images();
@@ -112,7 +112,7 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	boost::shared_ptr<encap_gsl_matrix> current_image;
 	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
 	
-	unsigned long progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
+	size_t progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
 	int current_progress_index = 0;
 	
 	IgorOutputWriter output_writer(output_wave_name);
@@ -123,7 +123,7 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	
 	XOPNotice("Calculating");
 	
-	for (unsigned long i = 0; i < number_of_images; i++) {
+	for (size_t i = 0; i < number_of_images; i++) {
 		// check if the user wants to cancel the calculation
 		status = CheckAbort(0);
 		if (status == -1) {
@@ -181,16 +181,16 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
 										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	
-	unsigned long number_of_images;
+	size_t number_of_images;
 	int status;
-	unsigned int numberOfProcessors = boost::thread::hardware_concurrency();
-	unsigned int numberOfThreads;
+	size_t numberOfProcessors = boost::thread::hardware_concurrency();
+	size_t numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
-	vector<unsigned long> startPositions;
-	vector<unsigned long> endPositions;
+	vector<size_t> startPositions;
+	vector<size_t> endPositions;
 	vector<boost::shared_ptr<threadStartData> > threadData;
-	unsigned long nFramesRemaining;
+	size_t nFramesRemaining;
 	
 	if (numberOfProcessors == 0) {	// boost couldn't determine the number of processors
 		numberOfProcessors = 1;
@@ -201,12 +201,12 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	boost::shared_ptr<encap_gsl_matrix> current_image;
 	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
 	
-	unsigned long progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
-	int current_progress_index = 0;
+	size_t progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
+	size_t current_progress_index = 0;
 	
 	IgorOutputWriter output_writer(output_wave_name);
 	
-	for (int i = 0; i < 9; ++i) {
+	for (size_t i = 0; i < 9; ++i) {
 		progress_indices[i] = floor((double)(i + 1) / 10.0 * (double)number_of_images);
 	}
 	
@@ -214,11 +214,11 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	DoUpdate();
 	
 	// set up the vector containing the data for the threads
-	for (unsigned int i = 0; i < numberOfProcessors; ++i) {
+	for (size_t i = 0; i < numberOfProcessors; ++i) {
 		threadData.push_back(boost::shared_ptr<threadStartData> (new threadStartData(thresholder, preprocessor, postprocessor, particle_finder, positions_fitter)));
 	}
 	
-	for (unsigned long i = 0; i < number_of_images; ) {	// i is incremented when assigning the threads
+	for (size_t i = 0; i < number_of_images; ) {	// i is incremented when assigning the threads
 		// check if the user wants to cancel the calculation
 		status = CheckAbort(0);
 		if (status == -1) {
@@ -234,7 +234,7 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		}
 		
 		// provide the starting image for the threads
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
+		for (size_t j = 0; j < numberOfThreads; ++j) {
 			current_image = image_loader->get_nth_image(i);
 			++i;
 			threadData.at(j)->image = current_image;
@@ -248,18 +248,18 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		
 		 // now start the threads
 		threads.clear();
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
+		for (size_t j = 0; j < numberOfThreads; ++j) {
 			singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&fitPositionsThreadStart, threadData.at(j)));
 			threads.push_back(singleThreadPtr);
 		}
 		
 		// wait for the threads to finish
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
+		for (size_t j = 0; j < numberOfThreads; ++j) {
 			threads.at(j)->join();
 		} 
 		
 		// output the fitted positions
-		for (unsigned long j = 0; j < numberOfThreads; ++j) {
+		for (size_t j = 0; j < numberOfThreads; ++j) {
 			output_writer.append_new_positions(threadData.at(j)->fittedPositions);
 		}
 	}
@@ -307,22 +307,22 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 	
 	// the format for passing the positions to the fitting routines is intensity, x, y
 	
-	unsigned long number_of_images;
+	size_t number_of_images;
 	int status;
 	long indices[MAX_DIMENSIONS + 1];
 	long n_dimensions;
-	unsigned long offset_in_positions_wave = 0;
-	unsigned long total_n_positions;
-	unsigned long n_positions_in_current_frame;
+	size_t offset_in_positions_wave = 0;
+	size_t total_n_positions;
+	size_t n_positions_in_current_frame;
 	double double_image_index;
 	double current_value;
 	double intensity;
-	unsigned long ulong_image_index, counter;
-	unsigned long ulong_current_value;
-	unsigned long x_size, y_size;
-	unsigned long current_x, current_y;
+	size_t ulong_image_index, counter;
+	size_t ulong_current_value;
+	size_t x_size, y_size;
+	size_t current_x, current_y;
 	
-	unsigned long progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
+	size_t progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
 	int current_progress_index = 0;
 	
 	number_of_images = image_loader->get_total_number_of_images();
@@ -361,7 +361,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 	
 	// copy the data in the newly allocated array
 	
-	for (unsigned long i = 0; i < total_n_positions; i++) {
+	for (size_t i = 0; i < total_n_positions; i++) {
 		indices[0] = i;
 		indices[1] = 0;
 		status = MDGetNumericWavePointValue(fitting_positions, indices, &double_image_index);
@@ -374,7 +374,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 			throw EXPECT_POS_NUM;
 		}
 		
-		ulong_image_index = (unsigned long)(double_image_index + 0.5);
+		ulong_image_index = (size_t)(double_image_index + 0.5);
 		
 		if (ulong_image_index > (number_of_images - 1)) {
 			throw INDEX_OUT_OF_RANGE;
@@ -395,7 +395,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 			throw EXPECT_POS_NUM;
 		}
 		
-		ulong_current_value = (unsigned long)(current_value + 0.5);
+		ulong_current_value = (size_t)(current_value + 0.5);
 		
 		if (ulong_current_value > (x_size - 1)) {
 			throw INDEX_OUT_OF_RANGE;
@@ -415,7 +415,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 			throw EXPECT_POS_NUM;
 		}
 		
-		ulong_current_value = (unsigned long)(current_value + 0.5);
+		ulong_current_value = (size_t)(current_value + 0.5);
 		
 		if (ulong_current_value > (y_size - 1)) {
 			throw INDEX_OUT_OF_RANGE;
@@ -427,14 +427,14 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 	// a full copy of the wave data is now stored in supplied_fitting_positions
 	offset_in_positions_wave = 0;
 	
-	for (unsigned long i = 0; i < number_of_images; i++) {
+	for (size_t i = 0; i < number_of_images; i++) {
 		
 		n_positions_in_current_frame = 0;
 		
 		// we start by checking if we have some positions to fit in the current_frame
 		counter = 0;
 		
-		while ((offset_in_positions_wave + counter < total_n_positions) && ((unsigned long)(supplied_fitting_positions->get(offset_in_positions_wave + counter, 0) + 0.5) == i)) {
+		while ((offset_in_positions_wave + counter < total_n_positions) && ((size_t)(supplied_fitting_positions->get(offset_in_positions_wave + counter, 0) + 0.5) == i)) {
 			n_positions_in_current_frame++;
 			counter++;
 		}
@@ -453,9 +453,9 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 			
 			positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(n_positions_in_current_frame, 3));
 			
-			for (unsigned long j = offset_in_positions_wave; j < (offset_in_positions_wave + n_positions_in_current_frame); j++) {
-				current_x = (unsigned long)(supplied_fitting_positions->get(j, 1) + 0.5);
-				current_y = (unsigned long)(supplied_fitting_positions->get(j, 2) + 0.5);
+			for (size_t j = offset_in_positions_wave; j < (offset_in_positions_wave + n_positions_in_current_frame); j++) {
+				current_x = (size_t)(supplied_fitting_positions->get(j, 1) + 0.5);
+				current_y = (size_t)(supplied_fitting_positions->get(j, 2) + 0.5);
 				
 				intensity = current_image->get(current_x, current_y);
 				
@@ -541,9 +541,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::
 }
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
-	unsigned long n_images = image_loader->get_total_number_of_images();
-	unsigned long x_size = image_loader->get_x_size();
-	unsigned long y_size = image_loader->get_y_size();
+	size_t n_images = image_loader->get_total_number_of_images();
+	size_t x_size = image_loader->get_x_size();
+	size_t y_size = image_loader->get_y_size();
 	
 	boost::shared_ptr<encap_gsl_matrix> current_image;
 	double summed_intensity;
@@ -569,13 +569,13 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	// try to allocate a buffer that will hold the intensity trace
 	boost::scoped_array<double> intensity_trace_buffer(new double[n_images]);
 	
-	for (unsigned long i = 0; i < n_images; i++) {
+	for (size_t i = 0; i < n_images; i++) {
 		summed_intensity = 0;
 			current_image = image_loader->get_nth_image(i);
 		
 		// calculate the total sum of the image
-		for (unsigned long k = startY; k <= endY; k++) {
-			for (unsigned long j = startX; j <= endX; j++) {
+		for (size_t k = startY; k <= endY; k++) {
+			for (size_t j = startX; j <= endX; j++) {
 				summed_intensity += current_image->get(j, k);
 			}
 		}
@@ -705,7 +705,6 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 	vector<size_t> startPositions;
 	vector<size_t> endPositions;
 	vector<boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> > threadData;
-	// boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter;
 	boost::shared_ptr<encap_gsl_volume_ushort> outputImage;
 	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
 	
@@ -779,13 +778,13 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 	
 	// now start the threads
 	threads.clear();
-	for (unsigned long j = 0; j < nThreads; ++j) {
+	for (size_t j = 0; j < nThreads; ++j) {
 		singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&calculate_PALM_bitmap_image_ThreadStart, threadData.at(j)));
 		threads.push_back(singleThreadPtr);
 	}
 	
 	// wait for the threads to finish
-	for (unsigned long j = 0; j < nThreads; ++j) {
+	for (size_t j = 0; j < nThreads; ++j) {
 		threads.at(j)->join();
 	}
 	
@@ -907,9 +906,9 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 
 
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
-	unsigned long n_images = image_loader->get_total_number_of_images();
-	unsigned long x_size = image_loader->get_x_size();
-	unsigned long y_size = image_loader->get_y_size();
+	size_t n_images = image_loader->get_total_number_of_images();
+	size_t x_size = image_loader->get_x_size();
+	size_t y_size = image_loader->get_y_size();
 	
 	long xRange, yRange;
 	
@@ -944,7 +943,7 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	average_image->set_all(0);
 	
 	
-	for (unsigned long i = 0; i < n_images; i++) {
+	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the values of the newly loaded image to the average image
@@ -958,8 +957,8 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	}
 	
 	// divide by the number of images
-	for (long i = startX; i <= endX; ++i) {
-		for (long j = startY; j <= endY; ++j) {
+	for (size_t i = startX; i <= endX; ++i) {
+		for (size_t j = startY; j <= endY; ++j) {
 			current_value[0] = average_image->get(i, j);
 			current_value[0] /= (double)n_images;
 			average_image->set(i, j, current_value[0]);
@@ -973,8 +972,8 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	}
 	
 	// write the output data to the wave
-	for (long i = startX; i <= endX; ++i) {
-		for (long j = startY; j <= endY; ++j) {
+	for (size_t i = startX; i <= endX; ++i) {
+		for (size_t j = startY; j <= endY; ++j) {
 			current_value[0] = average_image->get(i, j);
 			indices[0] = i;
 			indices[1] = j;
@@ -990,9 +989,9 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
-	unsigned long n_images = image_loader->get_total_number_of_images();
-	unsigned long x_size = image_loader->get_x_size();
-	unsigned long y_size = image_loader->get_y_size();
+	size_t n_images = image_loader->get_total_number_of_images();
+	size_t x_size = image_loader->get_x_size();
+	size_t y_size = image_loader->get_y_size();
 	int result;
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -1025,12 +1024,12 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	stdDevImage->set_all(0);
 	
 	// construct an average image
-	for (unsigned long i = 0; i < n_images; i++) {
+	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the values of the newly loaded image to the average image
-		for (long j = startX; j <= endX; ++j) {
-			for (long k = startY; k <= endY; ++k) {
+		for (size_t j = startX; j <= endX; ++j) {
+			for (size_t k = startY; k <= endY; ++k) {
 				value = average_image->get(j, k);
 				value += current_image->get(j, k);
 				average_image->set(j, k, value);
@@ -1039,8 +1038,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 	
 	// divide by the number of images
-	for (long i = startX; i <= endX; ++i) {
-		for (long j = startY; j <= endY; ++j) {
+	for (size_t i = startX; i <= endX; ++i) {
+		for (size_t j = startY; j <= endY; ++j) {
 			value = average_image->get(i, j);
 			value /= (double)n_images;
 			average_image->set(i, j, value);
@@ -1048,12 +1047,12 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 	
 	// now loop over the images again, calculating the standard deviation of each pixel
-	for (unsigned long i = 0; i < n_images; i++) {
+	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev jmage
-		for (long j = startX; j <= endX; ++j) {
-			for (long k = startY; k <= endY; ++k) {
+		for (size_t j = startX; j <= endX; ++j) {
+			for (size_t k = startY; k <= endY; ++k) {
 				value = stdDevImage->get(j, k);
 				deviation = (current_image->get(j, k) - average_image->get(j, k)) * (current_image->get(j, k) - average_image->get(j, k));
 				value += deviation;
@@ -1063,8 +1062,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 	
 	// divide by the number of images to get the average deviation, and take the square root
-	for (long i = startX; i <= endX; ++i) {
-		for (long j = startY; j <= endY; ++j) {
+	for (size_t i = startX; i <= endX; ++i) {
+		for (size_t j = startY; j <= endY; ++j) {
 			value = stdDevImage->get(i, j);
 			value /= (double)n_images;
 			value = sqrt(value);
@@ -1082,8 +1081,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 	
 	// write the output data to the wave
-	for (long i = startX; i <= endX; ++i) {
-		for (long j = startY; j <= endX; ++j) {
+	for (size_t i = startX; i <= endX; ++i) {
+		for (size_t j = startY; j <= endX; ++j) {
 			current_value[0] = stdDevImage->get(i, j);
 			indices[0] = i;
 			indices[1] = j;
@@ -1097,8 +1096,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	
 
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, unsigned long number_of_bins) {
-	unsigned long x_size, y_size;
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, size_t number_of_bins) {
+	size_t x_size, y_size;
 	gsl_histogram *hist;
 	double min = 1e100;
 	double max = -1e100;
@@ -1116,8 +1115,8 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> i
 		return NULL;
 	}
 	
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			current_value = image->get(i, j);
 			if (current_value < min)
 				min = current_value;
@@ -1130,8 +1129,8 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> i
 	gsl_histogram_set_ranges_uniform(hist, min, max);
 	
 	// now populate the histogram
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			current_value = image->get(i, j);
 			
 			gsl_histogram_increment(hist, current_value);

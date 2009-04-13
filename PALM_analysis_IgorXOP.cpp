@@ -378,7 +378,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	double threshold_parameter, radiusBetweenParticles, initial_width, min_distance_from_edge, cutoff_radius, sigma, background;
 	string name_of_output_wave;
 	string data_file_path;
-	unsigned long camera_type;
+	size_t camera_type;
 	int method;
 	int particle_finding_method;
 	int fitting_positions_supplied_in_wave = 0;	// determines if we have to determine the positions to fit in ourselves, or if we can read them from the wave
@@ -386,9 +386,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	long dimensionSizes[MAX_DIMENSIONS + 1];
 	waveHndl fitting_positions = NULL;
 	
-	unsigned long preprocessing_method;
-	unsigned long thresholding_method;
-	unsigned long postprocessing_method;
+	size_t preprocessing_method;
+	size_t thresholding_method;
+	size_t postprocessing_method;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
 	boost::shared_ptr<FitPositions> positions_fitter;
@@ -423,14 +423,14 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		camera_type = (unsigned long)(p->camera_type + 0.5);
+		camera_type = (size_t)(p->camera_type + 0.5);
 	}
 	
 	if (p->GFlagEncountered) {
 		// Parameter: p->preprocessing
 		// Parameter: p->postprocessing
-		preprocessing_method = (unsigned long)(p->preprocessing + 0.5);
-		postprocessing_method = (unsigned long)(p->postprocessing + 0.5);
+		preprocessing_method = (size_t)(p->preprocessing + 0.5);
+		postprocessing_method = (size_t)(p->postprocessing + 0.5);
 	} else {
 		// if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
 		preprocessing_method = 0;
@@ -709,7 +709,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int camera_type;
-	unsigned long start_image, end_image;
+	size_t start_image, end_image;
 	std::string data_file_path;
 	int header_only = 0;
 	
@@ -746,7 +746,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->start_image < 0) {
 			start_image = 0;
 		} else {
-		start_image = (unsigned long)(p->start_image + 0.5);
+		start_image = (size_t)(p->start_image + 0.5);
 		}
 	} else {
 		return TOO_FEW_PARAMETERS;
@@ -757,7 +757,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->end_image < 0) {
 			return EXPECT_POS_NUM;
 		}
-		end_image = (unsigned long)(p->end_image + 0.5);
+		end_image = (size_t)(p->end_image + 0.5);
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -1121,9 +1121,9 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	unsigned long method;
-	unsigned long preprocessing_method, postprocessing_method;
-	unsigned long particle_finding_method;
+	size_t method;
+	size_t preprocessing_method, postprocessing_method;
+	size_t particle_finding_method;
 	int output_located_particles;
 	double parameter, parameter2;
 	double radiusBetweenParticles;
@@ -1152,7 +1152,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	
 	if (p->MFlagEncountered) {
 		// Parameter: p->method
-		method = (unsigned long)(p->method + 0.5);
+		method = (size_t)(p->method + 0.5);
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -1178,8 +1178,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	if (p->GFlagEncountered) {
 		// Parameter: p->preprocessing
 		// Parameter: p->postprocessing
-		preprocessing_method = (unsigned long)(p->preprocessing + 0.5);
-		postprocessing_method = (unsigned long)(p->postprocessing + 0.5);
+		preprocessing_method = (size_t)(p->preprocessing + 0.5);
+		postprocessing_method = (size_t)(p->postprocessing + 0.5);
 	} else {
 		// if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
 		preprocessing_method = 0;
@@ -1195,7 +1195,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	
 	if (p->FFlagEncountered) {	// choose which particle finder we want to use
 		// Parameter: p->particle_finder
-		particle_finding_method = (unsigned long)(p->particle_finder + 0.5);
+		particle_finding_method = (size_t)(p->particle_finder + 0.5);
 	} else {
 		if (output_located_particles == 1)
 			return TOO_FEW_PARAMETERS;
@@ -1936,7 +1936,7 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matri
 
 
 
-boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(unsigned long camera_type, string data_file_path, unsigned long image_cache_size) {
+boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t image_cache_size) {
 	// image_cache_size has a default value of N_SIMULTANEOUS_IMAGE_LOADS
 	
 	boost::shared_ptr<ImageLoader> image_loader;

@@ -64,36 +64,36 @@ public:
 	// int open_file(const string rhs);
 	// int close_current_file();
 	
-	unsigned long get_total_number_of_images() const {return total_number_of_images;}
-	unsigned long get_x_size() const {return x_size;}
-	unsigned long get_y_size() const {return y_size;}
-	virtual boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n) = 0;	// images are numbered from 0 to N - 1
+	size_t get_total_number_of_images() const {return total_number_of_images;}
+	size_t get_x_size() const {return x_size;}
+	size_t get_y_size() const {return y_size;}
+	virtual boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n) = 0;	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual int parse_header_information() = 0;
 	
-	unsigned long image_cache_size;
+	size_t image_cache_size;
 	
 	string path;
 	// ifstream file;
 	XOPFileHandler file;
 	uint64_t header_length;
-	unsigned long total_number_of_images;
+	size_t total_number_of_images;
 	uint64_t x_size;
 	uint64_t y_size;
 	int storage_type;
 	vector <boost::shared_ptr<encap_gsl_matrix> > image_cache;	// array of pointer to gsl_matrices containing cached images
-	vector <unsigned long> images_in_cache;	// keeps track of the indices of the images in the cache
+	vector <size_t> images_in_cache;	// keeps track of the indices of the images in the cache
 	// if there is no image at a particular location then this is set to -1
 };
 
 class ImageLoaderAndor : public ImageLoader {
 public:
 	ImageLoaderAndor(string rhs);
-	ImageLoaderAndor(string rhs, unsigned long image_cache_size_rhs);
+	ImageLoaderAndor(string rhs, size_t image_cache_size_rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -119,10 +119,10 @@ public:
 class ImageLoaderHamamatsu : public ImageLoader {
 public:
 	ImageLoaderHamamatsu(string rhs);
-	ImageLoaderHamamatsu(string rhs, unsigned long image_cache_size);
+	ImageLoaderHamamatsu(string rhs, size_t image_cache_size);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -131,22 +131,22 @@ protected:
 class ImageLoaderSPE : public ImageLoader {
 public:
 	ImageLoaderSPE(string rhs);
-	ImageLoaderSPE(string rhs, unsigned long image_cache_size);
+	ImageLoaderSPE(string rhs, size_t image_cache_size);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
 };
 
-class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of unsigned longs in row-major order
+class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
 public:
 	SimpleImageLoader(string rhs);
-	SimpleImageLoader(string rhs, unsigned long image_cache_size);
+	SimpleImageLoader(string rhs, size_t image_cache_size);
 	~SimpleImageLoader();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -155,10 +155,10 @@ protected:
 class ImageLoaderTIFF_Igor : public ImageLoader {	// loads data from TIFF files using extensive callbacks to IGOR because the TIFF format is a mess
 public:
 	ImageLoaderTIFF_Igor(string rhs);
-	ImageLoaderTIFF_Igor(string rhs, unsigned long image_cache_size);
+	ImageLoaderTIFF_Igor(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF_Igor();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -171,10 +171,10 @@ protected:
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
 	ImageLoaderTIFF(string rhs);
-	ImageLoaderTIFF(string rhs, unsigned long image_cache_size);
+	ImageLoaderTIFF(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -183,7 +183,7 @@ protected:
 	unsigned int bitsPerPixel;
 	unsigned int sampleFormat;	// unsigned integer of floating point?
 	// 1 for uint, 3 for floating point (same as tiff specification)
-	vector<unsigned long> directoryIndices;	// some images in the TIFF format are not actual data, but low resolution previews of other images and such
+	vector<size_t> directoryIndices;	// some images in the TIFF format are not actual data, but low resolution previews of other images and such
 	// this means that the image at directory i is not necessarily the i-th experimental frame
 	// we correct for this using this array
 	
@@ -194,7 +194,7 @@ public:
 	ImageLoaderIgor(string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const unsigned long n);
+	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information() {return 0;}
@@ -211,7 +211,7 @@ public:
 	virtual ~OutputWriter() {;}
 	
 	string get_file_path() const {return file_path;}
-	unsigned long get_n_images_written() const {return n_images_written;}
+	size_t get_n_images_written() const {return n_images_written;}
 	
 	virtual void write_image(boost::shared_ptr<encap_gsl_matrix> new_image) = 0;
 	
@@ -222,9 +222,9 @@ protected:
 	string file_path;
 	ofstream file;
 	
-	unsigned long n_images_written;
-	unsigned long x_size;
-	unsigned long y_size;
+	size_t n_images_written;
+	size_t x_size;
+	size_t y_size;
 	
 	queue <boost::shared_ptr<encap_gsl_matrix> > image_buffer;
 };
@@ -271,7 +271,7 @@ public:
 	
 private:
 	list <boost::shared_ptr<encap_gsl_matrix> > positionsList;
-	unsigned long total_number_of_positions;
+	size_t total_number_of_positions;
 	string wave_name;
 };
 

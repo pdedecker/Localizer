@@ -36,7 +36,7 @@ void CCDImagesProcessorAverageSubtraction::set_n_parameter(double n) {
 	// the exception is that a value of '0' means that we have to average over the entire sequence
 	
 	// by convention the calling function checks that n is positive
-	n_frames_averaging = (unsigned long)(n + 0.5);
+	n_frames_averaging = (size_t)(n + 0.5);
 	
 	if (((n_frames_averaging % 2) != 1) && (n_frames_averaging != 0)) {
 		throw NUMBER_OF_AVERAGING_FRAMES_SHOULD_BE_ODD();
@@ -59,7 +59,7 @@ int CCDImagesProcessorAverageSubtraction::convert_images() {
 }
 
 void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
-	unsigned long n;
+	size_t n;
 	boost::shared_ptr<encap_gsl_matrix> average_image;
 	boost::shared_ptr<encap_gsl_matrix> loaded_image;
 	boost::shared_ptr<encap_gsl_matrix> subtracted_image;
@@ -79,8 +79,8 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 		loaded_image = image_loader->get_nth_image(n);
 		
 		// average_image->add(*loaded_image);
-		for (unsigned long l = 0; l < y_size; ++l) {
-			for (unsigned long k = 0; k < x_size; ++k) {
+		for (size_t l = 0; l < y_size; ++l) {
+			for (size_t k = 0; k < x_size; ++k) {
 				value = average_image->get(k, l);
 				value += loaded_image->get(k, l);
 				average_image->set(k, l, value);
@@ -93,8 +93,8 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	
 	// the approach using the gsl functions seems off so we use a different one instead
 	
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_double = average_image->get(i, j);
 			current_double /= (double)total_number_of_images;
 			average_image->set(i, j, current_double);
@@ -106,8 +106,8 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 		loaded_image = image_loader->get_nth_image(n);
 		
 		// loaded_image->sub(*average_image);
-		for (unsigned long k = 0; k < x_size; ++k) {
-			for (unsigned long l = 0; l < y_size; ++l) {
+		for (size_t k = 0; k < x_size; ++k) {
+			for (size_t l = 0; l < y_size; ++l) {
 				value = loaded_image->get(k, l);
 				value -= average_image->get(k, l);
 				loaded_image->set(k, l, value);
@@ -134,7 +134,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	averaging_buffer.resize(n_frames_averaging, boost::shared_ptr<encap_gsl_matrix> ());
 	
 	long average_starting_index, average_ending_index;
-	unsigned long cache_loading_offset = 0;
+	size_t cache_loading_offset = 0;
 	
 	double current_double;
 	double value;
@@ -142,7 +142,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	average_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	
 	/*// the buffer for the averaging will be allocated by the get_nth_image() routine
-	for (unsigned long i = 0; i < n_frames_averaging; i++) {
+	for (size_t i = 0; i < n_frames_averaging; i++) {
 		averaging_buffer[i] = NULL;
 	}*/
 	
@@ -153,7 +153,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	// instead we construct an average of n_frames_averaging as close as possible to the frame we are interested in
 	
 	// loop over all the images
-	for (unsigned long n = 0; n < total_number_of_images; n++) {
+	for (size_t n = 0; n < total_number_of_images; n++) {
 		average_starting_index = n - floor((double)total_number_of_images / 2.0);
 		average_ending_index = n + floor((double)total_number_of_images / 2.0);
 		
@@ -163,7 +163,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 			// all the points that fulfill this condition calculate their average using the same set of frames
 			// so we only load these frames once, for the first image
 			if (n == 0) {
-				for (unsigned long i = 0; i < n_frames_averaging; i++) {
+				for (size_t i = 0; i < n_frames_averaging; i++) {
 					
 					averaging_buffer.at(i) = image_loader->get_nth_image(i);
 					
@@ -171,9 +171,9 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 				
 				// now calculate the average once
 				average_image->set_all(0);
-				for (unsigned long i = 0; i < n_frames_averaging; i++) {
-					for (unsigned long k = 0; k < x_size; ++k) {
-						for (unsigned long l = 0; l < y_size; ++l) {
+				for (size_t i = 0; i < n_frames_averaging; i++) {
+					for (size_t k = 0; k < x_size; ++k) {
+						for (size_t l = 0; l < y_size; ++l) {
 							value = average_image->get(k, l);
 							value += averaging_buffer.at(i)->get(k, l);
 							average_image->set(k, l, value);
@@ -183,8 +183,8 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 				// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
 				// the calculation using the gsl seems to be off so we use a direct one instead
 				
-				for (unsigned long i = 0; i < x_size; i++) {
-					for (unsigned long j = 0; j < y_size; j++) {
+				for (size_t i = 0; i < x_size; i++) {
+					for (size_t j = 0; j < y_size; j++) {
 						current_double = average_image->get(i, j);
 						current_double /= n_frames_averaging;
 						average_image->set(i, j, current_double);
@@ -201,14 +201,14 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 			
 			// subtract the average from the current frame
 			// subtracted_image->copy(*current_image);
-			for (unsigned long j = 0; j < y_size; ++j) {
-				for (unsigned long i = 0; i < x_size; ++i) {
+			for (size_t j = 0; j < y_size; ++j) {
+				for (size_t i = 0; i < x_size; ++i) {
 					subtracted_image->set(i, j, current_image->get(i, j));
 				}
 			}
 			// subtracted_image->sub(*average_image);
-			for (unsigned long k = 0; k < x_size; ++k) {
-				for (unsigned long l = 0; l < y_size; ++l) {
+			for (size_t k = 0; k < x_size; ++k) {
+				for (size_t l = 0; l < y_size; ++l) {
 					value = subtracted_image->get(k, l);
 					value -= average_image->get(k, l);
 					subtracted_image->set(k, l, value);
@@ -224,28 +224,28 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		
 		
 		// SPECIAL CASE: check if we are too close to the END of the image stack to calculate a normal average
-		if ((unsigned long)average_ending_index >= total_number_of_images) {
+		if ((size_t)average_ending_index >= total_number_of_images) {
 			
 			// we don't need to update the image buffer anymore, all the images we need to calculate the average are stored in memory
 			// also, we don't need to calculate this average as it will have been calculated by the last image
 			// that could calculate a normal average
 			
-			current_image = averaging_buffer[(unsigned long)floor((double)(n_frames_averaging) / 2.0) + cache_loading_offset];
+			current_image = averaging_buffer[(size_t)floor((double)(n_frames_averaging) / 2.0) + cache_loading_offset];
 			
 			// now allocate the subtracted image
 			subtracted_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 			
 			// subtracted_image->copy(*current_image);
-			for (unsigned long j = 0; j < y_size; ++j) {
-				for (unsigned long i = 0; i < x_size; ++i) {
+			for (size_t j = 0; j < y_size; ++j) {
+				for (size_t i = 0; i < x_size; ++i) {
 					subtracted_image->set(i, j, current_image->get(i, j));
 				}
 			}
 			
 			
 			// subtracted_image->sub(*average_image);
-			for (unsigned long k = 0; k < x_size; ++k) {
-				for (unsigned long l = 0; l < y_size; ++l) {
+			for (size_t k = 0; k < x_size; ++k) {
+				for (size_t l = 0; l < y_size; ++l) {
 					value = subtracted_image->get(k, l);
 					value -= average_image->get(k, l);
 					subtracted_image->set(k, l, value);
@@ -263,7 +263,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		
 		averaging_buffer.erase(averaging_buffer.begin());
 		// we shift the images to the right by one position
-		for (unsigned long i = 0; i < (n_frames_averaging - 1); i++) {
+		for (size_t i = 0; i < (n_frames_averaging - 1); i++) {
 			
 			averaging_buffer.at(i) = averaging_buffer.at(i + 1);
 		}
@@ -273,9 +273,9 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		// if we are here then we can calculate a new average
 		average_image->set_all(0);
 		
-		for (unsigned long i = 0; i < n_frames_averaging; i++) {
-			for (unsigned long i = 0; i < x_size; ++i) {
-				for (unsigned long j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < n_frames_averaging; i++) {
+			for (size_t i = 0; i < x_size; ++i) {
+				for (size_t j = 0; j < y_size; ++j) {
 					value = average_image->get(i, j);
 					value += current_image->get(i, j);
 					average_image->set(i, j, value);
@@ -286,8 +286,8 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
 		// the calculation using the gsl seems to be off so we use a direct one instead
 		
-		for (unsigned long i = 0; i < x_size; i++) {
-			for (unsigned long j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
+			for (size_t j = 0; j < y_size; j++) {
 				current_double = average_image->get(i, j);
 				current_double /= n_frames_averaging;
 				average_image->set(i, j, current_double);
@@ -295,21 +295,21 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		}
 		
 		// the image that we are interested in is at the center of the imaging buffer
-		current_image = averaging_buffer.at((unsigned long)floor((double)(n_frames_averaging) / 2.0));
+		current_image = averaging_buffer.at((size_t)floor((double)(n_frames_averaging) / 2.0));
 		
 		// now allocate the subtracted image
 		subtracted_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 		
 		// subtracted_image->copy(*current_image);
-		for (unsigned long j = 0; j < y_size; ++j) {
-			for (unsigned long i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
+			for (size_t i = 0; i < x_size; ++i) {
 				subtracted_image->set(i, j, current_image->get(i, j));
 			}
 		}
 		
 		// subtracted_image->sub(*average_image);
-		for (unsigned long k = 0; k < x_size; ++k) {
-			for (unsigned long l = 0; l < y_size; ++l) {
+		for (size_t k = 0; k < x_size; ++k) {
+			for (size_t l = 0; l < y_size; ++l) {
 				value = subtracted_image->get(k, l);
 				value -= average_image->get(k, l);
 				subtracted_image->set(k, l, value);
@@ -345,7 +345,7 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 	next_image = image_loader->get_nth_image(0);
 	
 	
-	for (unsigned long n = 0; n < (total_number_of_images - 1); n++) {
+	for (size_t n = 0; n < (total_number_of_images - 1); n++) {
 		
 		// the previous image for this run of the loop is the image that was previously in current_image
 		// so we have to shift it down
@@ -382,7 +382,7 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	
 	boost::shared_ptr<encap_gsl_matrix> current_image;
 	
-	for (unsigned long n = 0; n < total_number_of_images; ++n) {
+	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->get_nth_image(n);
 		output_writer->write_image(current_image);
 	}
@@ -394,8 +394,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 	vector<position> positions;
 	position position;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
-	unsigned long x_size = image->get_x_size(), y_size = image->get_y_size();
-	unsigned long number_of_positions;
+	size_t x_size = image->get_x_size(), y_size = image->get_y_size();
+	size_t number_of_positions;
 	double current_intensity, previous_intensity, current_x, current_y;
 	double distance_squared;
 	double radius_squared = (double)(radius * radius);
@@ -404,8 +404,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 	boost::shared_ptr<encap_gsl_matrix> output_positions;
 	
 	// we run over all the points in the image to see if they are above the treshold
-	for (unsigned long j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; j++) {
-		for (unsigned long i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; i++) {
+	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; j++) {
+		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; i++) {
 			
 			if (threshold_image->get(i, j) < 128)
 				continue;	// we don't care about this point, it's not included in the thresholded image
@@ -425,7 +425,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 			// check if the current point overlaps with a previous point
 			skip = 0;
 			number_of_positions = positions.size();
-			for (unsigned long k = 0; k < number_of_positions; k++) {
+			for (size_t k = 0; k < number_of_positions; k++) {
 				x = positions[k].get_x();
 				y = positions[k].get_y();
 				distance_squared = (current_x - x) * (current_x - x) + (current_y - y) * (current_y - y);
@@ -464,7 +464,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 	
 	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(number_of_positions, 3));
 	
-	for (unsigned long i = 0; i < number_of_positions; i++) {
+	for (size_t i = 0; i < number_of_positions; i++) {
 		output_positions->set(i, 0, positions[i].get_intensity());
 		output_positions->set(i, 1, positions[i].get_x());
 		output_positions->set(i, 2, positions[i].get_y());
@@ -482,9 +482,9 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 	position currentPosition;
 	vector<position> particles;
 	boost::shared_ptr<encap_gsl_matrix_long> mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
-	unsigned long x, y;
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
+	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
@@ -493,8 +493,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 	
 	mapped_image->set_all(-1);
 	
-	for (unsigned long j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
-		for (unsigned long i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
+	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
+		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
 			
 			if (threshold_image->get(i, j) < 128) {
 				continue;
@@ -523,8 +523,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 			
 			while (positionsInCurrentParticleList.size() > 0) {
 				currentPosition = positionsInCurrentParticleList.front();
-				x = (unsigned long)(currentPosition.get_x() + 0.5);
-				y = (unsigned long)(currentPosition.get_y() + 0.5);
+				x = (size_t)(currentPosition.get_x() + 0.5);
+				y = (size_t)(currentPosition.get_y() + 0.5);
 				
 				growParticle(currentPosition, positionsInCurrentParticleList, image, threshold_image, mapped_image);
 				// growParticle will update the list with new positions
@@ -542,7 +542,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 			maxIntensity = 0;
 			average_x = 0;
 			average_y = 0;
-			for (unsigned long k = 0; k < positionsInCurrentParticle.size(); ++k) {
+			for (size_t k = 0; k < positionsInCurrentParticle.size(); ++k) {
 				average_x += positionsInCurrentParticle[k].get_x();
 				average_y += positionsInCurrentParticle[k].get_y();
 				if (positionsInCurrentParticle[k].get_intensity() > maxIntensity) {
@@ -573,7 +573,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(particles.size(), 3));
 	
 	// now copy the output to a gsl matrix
-	for (unsigned long k = 0; k < particles.size(); ++k) {
+	for (size_t k = 0; k < particles.size(); ++k) {
 		output_positions->set(k, 0, particles[k].get_intensity());
 		output_positions->set(k, 1, particles[k].get_x());
 		output_positions->set(k, 2, particles[k].get_y());
@@ -592,12 +592,12 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	position currentPosition;
 	
-	unsigned long x = (unsigned long)(centerPosition.get_x() + 0.5);
-	unsigned long y = (unsigned long)(centerPosition.get_y() + 0.5);
+	size_t x = (size_t)(centerPosition.get_x() + 0.5);
+	size_t y = (size_t)(centerPosition.get_y() + 0.5);
 	
 	long particleIndex = mapped_image->get(x, y);
 	
@@ -685,9 +685,9 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 	position currentPosition;
 	vector<position> particles;
 	boost::shared_ptr<encap_gsl_matrix_long> mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
-	unsigned long x, y;
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
+	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
@@ -696,8 +696,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 	
 	mapped_image->set_all(-1);
 	
-	for (unsigned long j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
-		for (unsigned long i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
+	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
+		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
 			
 			if (threshold_image->get(i, j) < 128) {
 				continue;
@@ -726,8 +726,8 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 			
 			while (positionsInCurrentParticleList.size() > 0) {
 				currentPosition = positionsInCurrentParticleList.front();
-				x = (unsigned long)(currentPosition.get_x() + 0.5);
-				y = (unsigned long)(currentPosition.get_y() + 0.5);
+				x = (size_t)(currentPosition.get_x() + 0.5);
+				y = (size_t)(currentPosition.get_y() + 0.5);
 				
 				growParticle(currentPosition, positionsInCurrentParticleList, image, threshold_image, mapped_image);
 				// growParticle will update the list with new positions
@@ -746,7 +746,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 			maxIntensity = 0;
 			average_x = 0;
 			average_y = 0;
-			for (unsigned long k = 0; k < positionsInCurrentParticle.size(); ++k) {
+			for (size_t k = 0; k < positionsInCurrentParticle.size(); ++k) {
 				average_x += positionsInCurrentParticle[k].get_x();
 				average_y += positionsInCurrentParticle[k].get_y();
 				if (positionsInCurrentParticle[k].get_intensity() > maxIntensity) {
@@ -777,7 +777,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(particles.size(), 3));
 	
 	// now copy the output to a gsl matrix
-	for (unsigned long k = 0; k < particles.size(); ++k) {
+	for (size_t k = 0; k < particles.size(); ++k) {
 		output_positions->set(k, 0, particles[k].get_intensity());
 		output_positions->set(k, 1, particles[k].get_x());
 		output_positions->set(k, 2, particles[k].get_y());
@@ -796,12 +796,12 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	position currentPosition;
 	
-	unsigned long x = (unsigned long)(centerPosition.get_x() + 0.5);
-	unsigned long y = (unsigned long)(centerPosition.get_y() + 0.5);
+	size_t x = (size_t)(centerPosition.get_x() + 0.5);
+	size_t y = (size_t)(centerPosition.get_y() + 0.5);
 	
 	long particleIndex = mapped_image->get(x, y);
 	
@@ -810,8 +810,10 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 	if ((y < minDistanceFromEdge) || (y > y_size - minDistanceFromEdge - 1))
 		return;
 	
-	for (long j = y - 1; j <= y + 1; ++j) {
-		for (long i = x - 1; i <= x + 1; ++i) {
+	assert((x > 0) && (y > 0));
+	
+	for (size_t j = y - 1; j <= y + 1; ++j) {
+		for (size_t i = x - 1; i <= x + 1; ++i) {
 			
 			if ((i == 0) && (j == 0))
 				continue;
@@ -834,7 +836,7 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	double current_value;
 	
 	x_size = image->get_x_size();
@@ -842,8 +844,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_value = image->get(i, j);
 			if (current_value >= threshold) {
 				thresholded_image->set(i, j, 255);
@@ -864,7 +866,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	// and next we copy the data back out into a new image
 	
 	// this is wasteful, but in this way the interface is the same as the other classes
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -893,8 +895,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -914,8 +916,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	}
 	
 	// now copy the data back to the output matrix
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -949,7 +951,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	// and next we copy the data back out into a new image
 	
 	// this is wasteful, but the interface is the same as the other classes
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -977,8 +979,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -998,8 +1000,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	}
 	
 	// now copy the data back to the output matrix
-	for (unsigned long i = 0; i < x_size; ++i) {
-		for (unsigned long j = 0; j < y_size; ++j) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1033,7 +1035,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	// and next we copy the data back out into a new image
 	
 	// this is wasteful, but the interface is the same as the other classes
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -1066,8 +1068,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	}
 	
 	// now copy the data
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1093,8 +1095,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	}
 	
 	// now copy the thresholded image back to the first output wave
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1133,8 +1135,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	}
 	
 	// now copy the thresholded image back to the second output wave
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1150,8 +1152,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	}
 	
 	// now construct the combined threshold image by AND'ing the original and transpose together
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			if (original_thresholded->get(i, j) < 128) {	// below the threshold, we skip it
 				continue;
 			} else {
@@ -1186,7 +1188,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	// and next we copy the data back out into a new image
 	
 	// this is wasteful, but the interface is the same as the other classes
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -1214,8 +1216,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1235,8 +1237,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	}
 	
 	// now copy the data back to the output matrix
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1270,7 +1272,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	// and next we copy the data back out into a new image
 	
 	// this is wasteful, but the interface is the same as the other classes
-	unsigned long x_size, y_size;
+	size_t x_size, y_size;
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -1298,8 +1300,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
 	// now copy the data
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1319,8 +1321,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	}
 	
 	// now copy the data back to the output matrix
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -1351,18 +1353,18 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	gsl_histogram *hist;
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
 	
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	
-	unsigned long number_of_bins = 256;
-	unsigned long current_threshold_bin = 127;
+	size_t number_of_bins = 256;
+	size_t current_threshold_bin = 127;
 	int n_iterations = 0;
 	int max_iters = 50;
 	double lower_mean, upper_mean;
 	double sum, denominator_sum;
 	double current_threshold = -1, previous_threshold;
 	double lower_bin_limit, upper_bin_limit;
-	unsigned long bin_threshold;
+	size_t bin_threshold;
 	double intensity_threshold;
 	int converged = 0;
 	
@@ -1379,7 +1381,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 		// calculate the lower mean
 		sum = 0;
 		denominator_sum = 0;
-		for (unsigned long i = 0; i < current_threshold_bin; i++) {
+		for (size_t i = 0; i < current_threshold_bin; i++) {
 			sum += (double)i * gsl_histogram_get(hist, i);
 			denominator_sum += gsl_histogram_get(hist, i);
 		}
@@ -1389,7 +1391,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 		// calculate the upper mean
 		sum = 0;
 		denominator_sum = 0;
-		for (unsigned long i = current_threshold_bin; i < number_of_bins; i++) {
+		for (size_t i = current_threshold_bin; i < number_of_bins; i++) {
 			sum += (double)i * gsl_histogram_get(hist, i);
 			denominator_sum += gsl_histogram_get(hist, i);
 		}
@@ -1437,8 +1439,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	gsl_histogram *hist;
-	unsigned long number_of_bins = 256;
-	unsigned long maximum_bin;
+	size_t number_of_bins = 256;
+	size_t maximum_bin;
 	double max_val, max_bin_double;
 	double end_val, end_bin_double;
 	double slope, intercept, perpendicular_slope, perpendicular_intercept;
@@ -1446,12 +1448,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	double intercept_x, intercept_y;
 	double distance;
 	double max_distance = -1;
-	unsigned long max_index;
+	size_t max_index;
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
@@ -1494,7 +1496,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	// calculate the slope of a line perpendicular to the connecting line
 	perpendicular_slope = - 1.0 / slope;
 	
-	for (unsigned long i = maximum_bin + 1; i < number_of_bins; i++) {	// determine the minimum distance in the triangle
+	for (size_t i = maximum_bin + 1; i < number_of_bins; i++) {	// determine the minimum distance in the triangle
 		
 		// what is the intercept for the perpendicular line if it has to go through the bin that we're currently looking at?
 		current_bin_value = gsl_histogram_get(hist, i);
@@ -1542,8 +1544,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	
 	boost::shared_ptr<encap_gsl_matrix> averages(new encap_gsl_matrix (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
 	boost::shared_ptr<encap_gsl_matrix> image_squared(new encap_gsl_matrix (x_size, y_size));
@@ -1555,9 +1557,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	
 	
 	double average = 0;
-	unsigned long window_size = 13;	// this is the size of the window over which we calculate the hypotheses
-	unsigned long half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
-	unsigned long window_pixels = window_size * window_size;
+	size_t window_size = 13;	// this is the size of the window over which we calculate the hypotheses
+	size_t half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
+	size_t window_pixels = window_size * window_size;
 	double double_window_pixels = (double)(window_pixels);
 	double current_value;
 	double distance_x, distance_y;
@@ -1574,8 +1576,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_value = image->get(i, j);
 			current_value = current_value * current_value;
 			image_squared->set(i, j, current_value);
@@ -1587,15 +1589,15 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	// start by estimating the mean at every position
 	// in the original code this done by a convolution of a unity matrix with the window size-> This is done using an FFT in the matlab code, but we'll do it directly
 	
-	for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
-		for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
+	for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
+		for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 			// these two loops run over the entire image-> We exclude the edges where the window doesn't fit
 			
 			// now we loop over the size of the window, to determine the average at every pixel
 			average = 0;
 			
-			for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
-				for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
+			for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
+				for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
 					average += image->get(i, j);
 				}
 			}
@@ -1606,12 +1608,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	}
 	
 	// now we do the same, but for the square of the pixel values, and we don't divide (no averaging)
-	for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
-		for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
+	for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
+		for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 			// these two loops run over the entire image-> We exclude the edges where the window doesn't fit
 			current_value = 0;
-			for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
-				for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
+			for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
+				for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
 					current_value += image_squared->get(i, j);
 				}
 			}
@@ -1620,8 +1622,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	}
 	
 	// now calculate the null hypothesis image-> This is T_sig0_2 in the original matlab source
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			current_value = summed_squares->get(k, l) - double_window_pixels * averages->get(k, l) * averages->get(k, l);
 			null_hypothesis->set(k, l, current_value);
 		}
@@ -1632,8 +1634,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	// store the values of a Gaussian in a matrix with the size of a window
 	// this is so we can cache the values, and do not to calculate it every time
 	sum = 0;
-	for (unsigned long j = 0; j < window_size; j++) {
-		for (unsigned long i = 0; i < window_size; i++) {
+	for (size_t j = 0; j < window_size; j++) {
+		for (size_t i = 0; i < window_size; i++) {
 			// the Gaussian is assumed to be in the center of the window
 			distance_x = (double)half_window_size - (double)i;
 			distance_y = (double)half_window_size - (double)j;
@@ -1649,8 +1651,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	// at this point Gaussian_window becomes equal to 'gc' in the original matlab code
 	sum /= double_window_pixels;
 	sum_squared_Gaussian = 0;
-	for (unsigned long j = 0; j < window_size; j++) {
-		for (unsigned long i = 0; i < window_size; i++) {
+	for (size_t j = 0; j < window_size; j++) {
+		for (size_t i = 0; i < window_size; i++) {
 			current_value = Gaussian_window->get(i, j);
 			current_value = current_value - sum;
 			Gaussian_window->set(i, j, current_value);
@@ -1660,12 +1662,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image-> As before, we'll do it directly
 	// these two loops run over the entire image-> We exclude the edges where the window doesn't fit
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			
 			sum = 0;
-			for (unsigned long j = l - half_window_size; j <= l + half_window_size; j++) {
-				for (unsigned long i = k - half_window_size; i <= k + half_window_size; i++) {
+			for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
+				for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
 					current_value = Gaussian_window->get(i - k + half_window_size, j - l + half_window_size);
 					current_value *= image->get(i, j);
 					sum += current_value;
@@ -1679,8 +1681,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	// "image_Gaussian_convolved" is now equal to 'alpha' in the original matlab code
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			current_value = 1 - (sum_squared_Gaussian * image_Gaussian_convolved->get(k, l) * image_Gaussian_convolved->get(k, l)) / null_hypothesis->get(k , l);
 			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) ->* test + (test <= 0) in the original code
 			current_value = - double_window_pixels * log(current_value);
@@ -1690,8 +1692,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	
 	// at this point 'hypothesis_test' is equal to 'carte_MV' in the original image
 	// check where we have to reject the hypothesis test
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			if (hypothesis_test->get(k, l) > PFA) {
 				threshold_image->set(k, l, 255);
 			}
@@ -1705,8 +1707,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	
 	boost::shared_ptr<encap_gsl_matrix> averages;
 	boost::shared_ptr<encap_gsl_matrix> image_squared;
@@ -1716,11 +1718,11 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	boost::shared_ptr<encap_gsl_matrix> hypothesis_test;
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_window;
 	
-	unsigned long window_size = 13;
-	unsigned long half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
-	unsigned long center_x = x_size / 2;
-	unsigned long center_y = y_size / 2;
-	unsigned long window_pixels = window_size * window_size;
+	size_t window_size = 13;
+	size_t half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
+	size_t center_x = x_size / 2;
+	size_t center_y = y_size / 2;
+	size_t window_pixels = window_size * window_size;
 	double double_window_pixels = (double)(window_pixels);
 	double current_value;
 	double distance_x, distance_y;
@@ -1748,8 +1750,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_value = image->get(i, j);
 			current_value = current_value * current_value;
 			image_squared->set(i, j, current_value);
@@ -1774,8 +1776,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 		
 		average_kernel->set_all(0);
 		
-		for (unsigned long j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-			for (unsigned long i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
+		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
+			for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 				average_kernel->set(i, j, 1);
 			}
 		}
@@ -1797,8 +1799,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	averageCalculationMutex.unlock_shared();
 	
 	// normalize the result, so that we get averages
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_value = averages->get(i, j);
 			current_value /= double_window_pixels;
 			averages->set(i, j, current_value);
@@ -1806,8 +1808,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	}
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			current_value = summed_squares->get(k, l) - double_window_pixels * averages->get(k, l) * averages->get(k, l);
 			null_hypothesis->set(k, l, current_value);
 		}
@@ -1827,8 +1829,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 		Gaussian_window = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(window_size, window_size));
 		
 		sum = 0;
-		for (unsigned long j = 0; j < window_size; j++) {
-			for (unsigned long i = 0; i < window_size; i++) {
+		for (size_t j = 0; j < window_size; j++) {
+			for (size_t i = 0; i < window_size; i++) {
 				// the Gaussian is assumed to be in the center of the window
 				distance_x = (double)half_window_size - (double)i;
 				distance_y = (double)half_window_size - (double)j;
@@ -1844,8 +1846,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 		// at this point Gaussian_window becomes equal to 'gc' in the original matlab code
 		sum /= double_window_pixels;
 		sum_squared_Gaussian = 0;
-		for (unsigned long j = 0; j < window_size; j++) {
-			for (unsigned long i = 0; i < window_size; i++) {
+		for (size_t j = 0; j < window_size; j++) {
+			for (size_t i = 0; i < window_size; i++) {
 				current_value = Gaussian_window->get(i, j);
 				current_value = current_value - sum;
 				Gaussian_window->set(i, j, current_value);
@@ -1856,8 +1858,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 		// now introduce this small kernel into a larger one that is the same size as the image
 		Gaussian_kernel->set_all(0);
 		
-		for (unsigned long j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-			for (unsigned long i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
+		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
+			for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 				Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
 			}
 		}
@@ -1878,8 +1880,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	gaussianCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			current_value = image_Gaussian_convolved->get(i, j);
 			current_value /= sum_squared_Gaussian;
 			image_Gaussian_convolved->set(i, j, current_value);
@@ -1887,8 +1889,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	}
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			current_value = 1 - (sum_squared_Gaussian * image_Gaussian_convolved->get(k, l) * image_Gaussian_convolved->get(k, l)) / null_hypothesis->get(k , l);
 			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) .* test + (test <= 0) in the original code
 			current_value = - double_window_pixels * log(current_value);
@@ -1898,8 +1900,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	
 	// at this point 'hypothesis_test' is equal to 'carte_MV' in the original image
 	// check where we have to reject the hypothesis test
-	for (unsigned long l = half_window_size; l < y_size - half_window_size; l++) {
-		for (unsigned long k = half_window_size; k < x_size - half_window_size; k++) {
+	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
+		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			if (hypothesis_test->get(k, l) > PFA) {
 				threshold_image->set(k, l, 255);
 			}
@@ -1912,12 +1914,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 
 boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
 	
-	unsigned long kernel_size = kernel_x_size * kernel_y_size;
-	unsigned long half_kernel_size_x = kernel_x_size / 2;
-	unsigned long half_kernel_size_y = kernel_y_size / 2;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
-	unsigned long offset;
+	size_t kernel_size = kernel_x_size * kernel_y_size;
+	size_t half_kernel_size_x = kernel_x_size / 2;
+	size_t half_kernel_size_y = kernel_y_size / 2;
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
+	size_t offset;
 	double value, median;
 	
 	gsl_vector *median_environment;
@@ -1925,15 +1927,15 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do
 	
 	// allocate a gsl_vector with the correct size
 	median_environment = gsl_vector_alloc(kernel_size);
-	unsigned long sorted_center = kernel_size / 2;
+	size_t sorted_center = kernel_size / 2;
 	
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
 	filtered_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	
-	for (unsigned long j = 0; j < y_size; ++j) {
-		for (unsigned long i = 0; i < x_size; ++i) {
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
 			filtered_image->set(i, j, image->get(i, j));
 		}
 	}
@@ -1942,12 +1944,12 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do
 	// the main loop
 	// for now we handle this using a direct, slow calculation
 	
-	for (unsigned long j = half_kernel_size_y; j < y_size - half_kernel_size_y; j++) {
-		for (unsigned long i = half_kernel_size_x; i < x_size - half_kernel_size_x; i++) {
+	for (size_t j = half_kernel_size_y; j < y_size - half_kernel_size_y; j++) {
+		for (size_t i = half_kernel_size_x; i < x_size - half_kernel_size_x; i++) {
 			
 			offset = 0;
-			for (unsigned long l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
-				for (unsigned long k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
+			for (size_t l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
+				for (size_t k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
 					value = image->get(k, l);
 					gsl_vector_set(median_environment, offset, value);
 					offset++;
@@ -1965,12 +1967,12 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do
 }
 
 
-void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(unsigned long x_size, unsigned long y_size) {
+void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(size_t x_size, size_t y_size) {
 	
-	unsigned long window_size = 31;
-	unsigned long half_window_size = window_size / 2;
-	unsigned long center_x = x_size / 2;
-	unsigned long center_y = y_size / 2;
+	size_t window_size = 31;
+	size_t half_window_size = window_size / 2;
+	size_t center_x = x_size / 2;
+	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
 	boost::shared_ptr<encap_gsl_matrix> Gaussian_window(new encap_gsl_matrix(window_size, window_size));
@@ -1979,8 +1981,8 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(uns
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
-	for (unsigned long j = 0; j < window_size; j++) {
-		for (unsigned long i = 0; i < window_size; i++) {
+	for (size_t j = 0; j < window_size; j++) {
+		for (size_t i = 0; i < window_size; i++) {
 			// the Gaussian is assumed to be in the center of the window
 			distance_x = (double)half_window_size - (double)i;
 			distance_y = (double)half_window_size - (double)j;
@@ -1994,8 +1996,8 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(uns
 	// now introduce this small kernel into a larger one that is the same size as the image
 	Gaussian_kernel->set_all(0);
 	
-	for (unsigned long j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-		for (unsigned long i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
+	for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
+		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 			Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
 		}
 	}
@@ -2007,8 +2009,8 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(uns
 boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
 	
 	boost::shared_ptr<encap_gsl_matrix> filtered_image;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	generateKernelMutex.lock();
@@ -2032,12 +2034,12 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothin
 
 boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
 	
-	unsigned long kernel_size = kernel_x_size * kernel_y_size;
+	size_t kernel_size = kernel_x_size * kernel_y_size;
 	double double_kernel_pixels = (double)kernel_size;
-	unsigned long half_kernel_size_x = kernel_x_size / 2;
-	unsigned long half_kernel_size_y = kernel_y_size / 2;
-	unsigned long x_size = image->get_x_size();
-	unsigned long y_size = image->get_y_size();
+	size_t half_kernel_size_x = kernel_x_size / 2;
+	size_t half_kernel_size_y = kernel_y_size / 2;
+	size_t x_size = image->get_x_size();
+	size_t y_size = image->get_y_size();
 	double mean;
 	
 	boost::shared_ptr<encap_gsl_matrix> filtered_image;
@@ -2047,8 +2049,8 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_p
 	// close to the edges, where the kernel doesn't fit we will not modify the image
 	filtered_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
 	
-	for (unsigned long i = 0; i < x_size; ++i) {
-		for (unsigned long j = 0; j < y_size; ++j) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			filtered_image->set(i, j, image->get(i, j));
 		}
 	}
@@ -2057,12 +2059,12 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_p
 	// the main loop
 	// for now we handle this using a direct, slow calculation
 	
-	for (unsigned long j = half_kernel_size_y; j < y_size - half_kernel_size_y; j++) {
-		for (unsigned long i = half_kernel_size_x; i < x_size - half_kernel_size_x; i++) {
+	for (size_t j = half_kernel_size_y; j < y_size - half_kernel_size_y; j++) {
+		for (size_t i = half_kernel_size_x; i < x_size - half_kernel_size_x; i++) {
 			
 			mean = 0;
-			for (unsigned long l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
-				for (unsigned long k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
+			for (size_t l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
+				for (size_t k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
 					mean += image->get(k, l);
 				}
 			}
@@ -2077,8 +2079,8 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_p
 			
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	unsigned long x_size = thresholded_image->get_x_size();
-	unsigned long y_size = thresholded_image->get_y_size();
+	size_t x_size = thresholded_image->get_x_size();
+	size_t y_size = thresholded_image->get_y_size();
 	unsigned char value;
 	double meanIntensity = 0;
 	
@@ -2089,15 +2091,15 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemoveIso
 	processed_thresholded_image->set_all(0);
 	
 	// calculate the mean intensity
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			meanIntensity += image->get(i, j);
 		}
 	}
 	meanIntensity /= x_size * y_size;
 	
-	for (unsigned long i = 0; i < x_size; i++) {
-		for (unsigned long j = 0; j < y_size; j++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			
 			value = thresholded_image->get(i, j);
 			if (value < 128) {	// this is an 'off' pixel
@@ -2118,8 +2120,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemoveIso
 
 boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	unsigned long x_size = thresholded_image->get_x_size();
-	unsigned long y_size = thresholded_image->get_y_size();
+	size_t x_size = thresholded_image->get_x_size();
+	size_t y_size = thresholded_image->get_y_size();
 	unsigned char value;
 	bool neighbour_found;
 	
@@ -2127,16 +2129,16 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePix
 	
 	processed_thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
 	
-	for (unsigned long i = 0; i < x_size; ++i) {
-		for (unsigned long j = 0; j < y_size; ++j) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			processed_thresholded_image->set(i, j, thresholded_image->get(i, j));
 		}
 	}
 	
 	// we will return a copy
 	
-	for (unsigned long j = 1; j < y_size - 1; j++) {
-		for (unsigned long i = 1; i < x_size - 1; i++) {
+	for (size_t j = 1; j < y_size - 1; j++) {
+		for (size_t i = 1; i < x_size - 1; i++) {
 			
 			value = thresholded_image->get(i, j);
 			if (value < 128) {	// this is an 'off' pixel
@@ -2144,8 +2146,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePix
 			}
 			
 			neighbour_found = 0;
-			for (unsigned long l = j - 1; l <= j + 1; l++) {
-				for (unsigned long k = i - 1; k <= i + 1; k++) {
+			for (size_t l = j - 1; l <= j + 1; l++) {
+				for (size_t k = i - 1; k <= i + 1; k++) {
 					if ((k == i) && (l == j)) {
 						continue;	// this is the pixel that we are considering itself, not the environment
 					}
@@ -2540,8 +2542,8 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
 	
-	unsigned long xSize = imageSubset->get_x_size();
-	unsigned long ySize = imageSubset->get_x_size();
+	size_t xSize = imageSubset->get_x_size();
+	size_t ySize = imageSubset->get_x_size();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -2576,8 +2578,8 @@ int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, 
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
 	
-	unsigned long xSize = imageSubset->get_x_size();
-	unsigned long ySize = imageSubset->get_x_size();
+	size_t xSize = imageSubset->get_x_size();
+	size_t ySize = imageSubset->get_x_size();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -2633,11 +2635,11 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 /*int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
 	measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities_struct;
 	
-	unsigned long number_of_intensities = intensities_local->get_number_of_intensities();
+	size_t number_of_intensities = intensities_local->get_number_of_intensities();
 	double *measured_intensities = intensities_local->get_intensities();
 	// double *sigma = intensities_local->get_sigma();
-	unsigned long x_size = intensities_local->get_x_size();
-	unsigned long y_size = intensities_local->get_y_size();
+	size_t x_size = intensities_local->get_x_size();
+	size_t y_size = intensities_local->get_y_size();
 	double x_offset = intensities_local->get_x_offset();
 	double y_offset = intensities_local->get_y_offset();
 	
@@ -2653,7 +2655,7 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 		return GSL_FAILURE;
 	}
 	
-	for (unsigned long i = 0; i < number_of_intensities; i++) {
+	for (size_t i = 0; i < number_of_intensities; i++) {
 		return_xy_from_array(i, x_size, y_size, x_offset, y_offset, x, y);
 		
 		function_value = offset + amplitude * exp(- (((x0 - x)/ r) * ((x0 - x)/ r) + ((y0 - y) / r) * ((y0 - y) / r)));
@@ -2668,11 +2670,11 @@ int Gauss_2D_Poissonian_fit_function_Jacobian(const gsl_vector *params, void *me
 	
 	measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities;
 	
-	unsigned long number_of_intensities = intensities_local->get_number_of_intensities();
+	size_t number_of_intensities = intensities_local->get_number_of_intensities();
 	// double *measured_intensities = intensities_local->get_intensities();
 	// double *sigma = intensities_local->get_sigma();
-	unsigned long x_size = intensities_local->get_x_size();
-	unsigned long y_size = intensities_local->get_y_size();
+	size_t x_size = intensities_local->get_x_size();
+	size_t y_size = intensities_local->get_y_size();
 	double x_offset = intensities_local->get_x_offset();
 	double y_offset = intensities_local->get_y_offset();
 	double *measured_intensities_array = intensities_local->get_intensities();
@@ -2697,7 +2699,7 @@ int Gauss_2D_Poissonian_fit_function_Jacobian(const gsl_vector *params, void *me
 	double measured_intensity;
 	double denominator;
 	
-	for (unsigned long i = 0; i < number_of_intensities; i++) {
+	for (size_t i = 0; i < number_of_intensities; i++) {
 		measured_intensity = measured_intensities_array[i];
 		return_xy_from_array(i, x_size, y_size, x_offset, y_offset, x, y);
 		
@@ -2732,7 +2734,7 @@ int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
 	
-	unsigned long startPosition, endPosition;
+	size_t startPosition, endPosition;
 	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
 	
 	startPosition = 0;
@@ -2745,7 +2747,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 }
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
-																		unsigned long startPos, unsigned long endPos) {
+																		size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
@@ -2760,12 +2762,12 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 		throw std::range_error(error);
 	}
 	
-	unsigned long number_of_positions = endPos - startPos + 1;
-	unsigned long size_of_subset = 2 * cutoff_radius + 1;
-	unsigned long x_offset, y_offset, x_max, y_max;
-	unsigned long number_of_intensities = size_of_subset * size_of_subset;
-	unsigned long xSize = image->get_x_size();
-	unsigned long ySize = image->get_y_size();
+	size_t number_of_positions = endPos - startPos + 1;
+	size_t size_of_subset = 2 * cutoff_radius + 1;
+	size_t x_offset, y_offset, x_max, y_max;
+	size_t number_of_intensities = size_of_subset * size_of_subset;
+	size_t xSize = image->get_x_size();
+	size_t ySize = image->get_y_size();
 	
 	double x0_initial, y0_initial, initial_intensity, amplitude;
 	double chi, degreesOfFreedom, c;
@@ -2821,7 +2823,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 	
 	
 	// iterate over all the determined positions
-	for (unsigned long i = startPos; i <= endPos; i++) {
+	for (size_t i = startPos; i <= endPos; i++) {
 		iterations = 0;
 		
 		initial_intensity = positions->get(i, 0);
@@ -2840,8 +2842,8 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 			continue;
 		}
 		
-		for (unsigned long j = x_offset; j <= x_max; j++) {
-			for (unsigned long k = y_offset; k <= y_max; k++) {
+		for (size_t j = x_offset; j <= x_max; j++) {
+			for (size_t k = y_offset; k <= y_max; k++) {
 				image_subset->set(j - x_offset, k - y_offset, image->get(j, k));
 			}
 		}
@@ -2886,12 +2888,12 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
 		// store the data
-		for (unsigned long j = 0; j < 5; ++j) {
+		for (size_t j = 0; j < 5; ++j) {
 			fitted_positions->set(i - startPos, j, gsl_vector_get(fit_iterator->x, j));
 		}
 		
 		// store the errors
-		for (unsigned long j = 5; j < 10; ++j) {
+		for (size_t j = 5; j < 10; ++j) {
 			fitted_positions->set(i - startPos, j, c * sqrt(gsl_matrix_get(covarianceMatrix, j - 5, j - 5)));
 		}
 		
@@ -2918,7 +2920,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
-	unsigned long startPosition, endPosition;
+	size_t startPosition, endPosition;
 	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
 	
 	startPosition = 0;
@@ -2931,7 +2933,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 		
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
-																			  unsigned long startPos, unsigned long endPos) {
+																			  size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
@@ -2946,14 +2948,14 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 		throw std::range_error(error);
 	}
 	
-	unsigned long number_of_positions = endPos - startPos + 1;
-	unsigned long size_of_subset = 2 * cutoff_radius + 1;
-	unsigned long xSize = image->get_x_size();
-	unsigned long ySize = image->get_y_size();
-	unsigned long x_offset, y_offset, x_max, y_max;
+	size_t number_of_positions = endPos - startPos + 1;
+	size_t size_of_subset = 2 * cutoff_radius + 1;
+	size_t xSize = image->get_x_size();
+	size_t ySize = image->get_y_size();
+	size_t x_offset, y_offset, x_max, y_max;
 	
 	double x0_initial, y0_initial, initial_intensity, amplitude;
-	unsigned long iterations = 0;
+	size_t iterations = 0;
 	
 	double convergence_treshold_squared = convergence_threshold * convergence_threshold;
 	double delta_squared = 10 * convergence_treshold_squared;	// this test the convergence of the position determined by the iteration
@@ -2972,24 +2974,24 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 	
 	fitted_positions->set_all(0);
 	
-	for (unsigned long i = startPos; i <= endPos; ++i) {
+	for (size_t i = startPos; i <= endPos; ++i) {
 		initial_intensity = positions->get(i, 0);
 		x0_initial = positions->get(i, 1);
 		y0_initial = positions->get(i, 2);
 		
 		amplitude = initial_intensity - background;
 		
-		x_offset = (unsigned long)x0_initial - cutoff_radius;
-		y_offset = (unsigned long)y0_initial - cutoff_radius;
-		x_max = (unsigned long)x0_initial + cutoff_radius;
-		y_max = (unsigned long)y0_initial + cutoff_radius;
+		x_offset = (size_t)x0_initial - cutoff_radius;
+		y_offset = (size_t)y0_initial - cutoff_radius;
+		x_max = (size_t)x0_initial + cutoff_radius;
+		y_max = (size_t)y0_initial + cutoff_radius;
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
 			continue;
 		}
 		
-		for (unsigned long k = y_offset; k <= y_max; ++k) {
-			for (unsigned long j = x_offset; j <= x_max; ++j) {
+		for (size_t k = y_offset; k <= y_max; ++k) {
+			for (size_t j = x_offset; j <= x_max; ++j) {
 				image_subset->set(j - x_offset, k - y_offset, image->get(j, k));
 			}
 		}
@@ -3035,8 +3037,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<encap_g
 													   double std_dev, double background, double amplitude) {
 	// we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 	
-	unsigned long x_size = masked_image->get_x_size();
-	unsigned long y_size = masked_image->get_y_size();
+	size_t x_size = masked_image->get_x_size();
+	size_t y_size = masked_image->get_y_size();
 	
 	double gaussian_value, distance_squared;
 	
@@ -3044,8 +3046,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<encap_g
 		throw DIMENSIONS_SHOULD_BE_EQUAL();
 	}
 	
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			distance_squared = (x - (double)i) * (x - (double)i) + (y - (double)j) * (y - (double)j);
 			
 			gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev)) + background;
@@ -3061,15 +3063,15 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<encap_g
 int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<encap_gsl_matrix> masked_image, double &x, double &y) {
 	// based on eq (3) in Thompson Biophys J 2002
 	
-	unsigned long x_size = (unsigned long)masked_image->get_x_size();
-	unsigned long y_size = (unsigned long)masked_image->get_y_size();
+	size_t x_size = (size_t)masked_image->get_x_size();
+	size_t y_size = (size_t)masked_image->get_y_size();
 	
 	double numerator_x = 0, denominator = 0;
 	double numerator_y = 0;
 	
 	// start with determining the x-position
-	for (unsigned long j = 0; j < y_size; j++) {
-		for (unsigned long i = 0; i < x_size; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			numerator_x += (double)i * masked_image->get(i, j);
 			numerator_y += (double)j * masked_image->get(i, j);
 			denominator += masked_image->get(i, j);
@@ -3085,7 +3087,7 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<encap_g
 
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
-	unsigned long startPosition, endPosition;
+	size_t startPosition, endPosition;
 	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
 	
 	startPosition = 0;
@@ -3098,7 +3100,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 
 
 boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
-																			  unsigned long startPos, unsigned long endPos) {
+																			  size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
@@ -3113,12 +3115,12 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 		throw std::range_error(error);
 	}
 	
-	unsigned long number_of_positions = endPos - startPos + 1;
-	unsigned long xSize = image->get_x_size();
-	unsigned long ySize = image->get_y_size();
-	unsigned long x_offset, y_offset, x_max, y_max;
+	size_t number_of_positions = endPos - startPos + 1;
+	size_t xSize = image->get_x_size();
+	size_t ySize = image->get_y_size();
+	size_t x_offset, y_offset, x_max, y_max;
 	
-	unsigned long x0_initial, y0_initial;
+	size_t x0_initial, y0_initial;
 	double current_x, current_y;
 	double denominator;
 	
@@ -3128,7 +3130,7 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 	
 	fitted_positions->set_all(0);
 	
-	for (unsigned long i = startPos; i <= endPos; ++i) {
+	for (size_t i = startPos; i <= endPos; ++i) {
 		x0_initial = positions->get(i, 1);
 		y0_initial = positions->get(i, 2);
 		current_x = 0;
@@ -3146,8 +3148,8 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 			continue;
 		}
 		
-		for (unsigned long j = x_offset; j <= x_max; ++j) {
-			for (unsigned long k = y_offset; k <= y_max; ++k) {
+		for (size_t j = x_offset; j <= x_max; ++j) {
+			for (size_t k = y_offset; k <= y_max; ++k) {
 				current_x += (double)j * image->get(j, k);
 				current_y += (double)k * image->get(j, k);
 				denominator += image->get(j, k);
