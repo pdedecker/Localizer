@@ -106,10 +106,10 @@ public:
 	encap_gsl_volume_ushort(size_t x, size_t y, size_t z);
 	~encap_gsl_volume_ushort();
 	
-	void set(size_t x, size_t y, size_t z, unsigned short value) {gsl_matrix_ushort_set(matrices[z], x, y, value);}
+	void set(size_t x, size_t y, size_t z, unsigned short value) {assert((x < x_size) && (y < y_size) && (z < z_size)); gsl_matrix_ushort_set(matrices[z], x, y, value);}
 	void set_all(unsigned short value);
 	
-	unsigned short get(size_t x, size_t y, size_t z) {return gsl_matrix_ushort_get(matrices[z], x, y);}
+	unsigned short get(size_t x, size_t y, size_t z) {assert((x < x_size) && (y < y_size) && (z < z_size)); return gsl_matrix_ushort_get(matrices[z], x, y);}
 	size_t get_x_size() const {return x_size;}
 	size_t get_y_size() const {return y_size;}
 	size_t get_z_size() const {return z_size;}

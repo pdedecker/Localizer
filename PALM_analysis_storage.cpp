@@ -26,13 +26,7 @@ encap_gsl_matrix::~encap_gsl_matrix() {
 }
 
 void encap_gsl_matrix::set(size_t x, size_t y, double value) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::set()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	gsl_matrix_set(matrix, x, y, value);
 }
 
@@ -54,13 +48,7 @@ void encap_gsl_matrix::operator=(gsl_matrix* rhs) {
 }
 
 double encap_gsl_matrix::get(size_t x, size_t y) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::get()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	return gsl_matrix_get(matrix, x, y);
 }
 
@@ -81,13 +69,7 @@ encap_gsl_matrix_uchar::~encap_gsl_matrix_uchar() {
 }
 
 void encap_gsl_matrix_uchar::set(size_t x, size_t y, unsigned char value) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::set()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	gsl_matrix_uchar_set(matrix, x, y, value);
 }
 
@@ -109,13 +91,7 @@ void encap_gsl_matrix_uchar::operator=(gsl_matrix_uchar * rhs) {
 }
 
 unsigned char encap_gsl_matrix_uchar::get(size_t x, size_t y) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::get()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	return gsl_matrix_uchar_get(matrix, x, y);
 }
 
@@ -136,13 +112,7 @@ encap_gsl_matrix_long::~encap_gsl_matrix_long() {
 }
 
 void encap_gsl_matrix_long::set(size_t x, size_t y, long value) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::set()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	gsl_matrix_long_set(matrix, x, y, value);
 }
 
@@ -164,13 +134,7 @@ void encap_gsl_matrix_long::operator=(gsl_matrix_long * rhs) {
 }
 
 long encap_gsl_matrix_long::get(size_t x, size_t y) {
-#ifndef ENCAP_GSL_RANGE_CHECK_OFF
-	if ((x > x_size - 1) || (y > y_size - 1)) {
-		string error("Out of range in encap_gsl_matrix::get()\r");
-		throw std::range_error(error);
-	}
-#endif
-	
+	assert((x < x_size) && (y < y_size));
 	return gsl_matrix_long_get(matrix, x, y);
 }
 
@@ -188,6 +152,7 @@ encap_gsl_volume::encap_gsl_volume(size_t x, size_t y, size_t z) {
 }
 
 void encap_gsl_volume::set(size_t x, size_t y, size_t z, double value) {
+	assert((x < x_size) && (y < y_size) && (z < z_size));
 	matrices[z]->set(x, y, value);
 }
 
@@ -198,6 +163,7 @@ void encap_gsl_volume::set_all(double value) {
 }
 
 double encap_gsl_volume::get(size_t x, size_t y, size_t z) {
+	assert((x < x_size) && (y < y_size) && (z < z_size));
 	return matrices[z]->get(x, y);
 }
 
