@@ -165,14 +165,6 @@ ImageLoader::ImageLoader() {
 ImageLoader::~ImageLoader() {
 	if (file.is_open() == 1)
 		file.close();
-	
-	/*// free any images that may remain in the cache
-	 for (size_t i = 0; i < N_SIMULTANEOUS_IMAGE_LOADS; i++) {
-	 if (image_cache[i] != NULL) {
-	 gsl_matrix_free(image_cache[i]);
-	 image_cache[i] = NULL;
-	 }
-	 }*/
 }
 
 
@@ -231,9 +223,6 @@ int ImageLoaderSPE::parse_header_information() {
 	// read the entire header into a buffer
 	file.read(header_buffer, 1500);
 	
-	// file.seekg(42);
-	// file.get(byte_reader1);	// we know that the values are little-endian
-	// file.get(byte_reader2);
 	byte_reader1 = header_buffer[42];
 	byte_reader2 = header_buffer[43];
 	current_bytes = 0x000000FF & byte_reader2;
@@ -243,9 +232,6 @@ int ImageLoaderSPE::parse_header_information() {
 	x_size = current_bytes;
 	current_bytes = 0;
 	
-	// file.seekg(656);
-	// file.get(byte_reader1);	// we know that the values are little-endian
-	// file.get(byte_reader2);
 	byte_reader1 = header_buffer[656];
 	byte_reader2 = header_buffer[657];
 	current_bytes = 0x000000FF & byte_reader2;
@@ -255,11 +241,6 @@ int ImageLoaderSPE::parse_header_information() {
 	y_size = current_bytes;
 	current_bytes = 0;
 	
-	// file.seekg(1446);
-	// file.get(byte_reader1);	// we know that the values are little-endian
-	// file.get(byte_reader2);
-	// file.get(byte_reader3);	// we know that the values are little-endian
-	// file.get(byte_reader4);
 	byte_reader1 = header_buffer[1446];
 	byte_reader2 = header_buffer[1447];
 	byte_reader3 = header_buffer[1448];
@@ -275,9 +256,6 @@ int ImageLoaderSPE::parse_header_information() {
 	total_number_of_images = current_bytes;
 	current_bytes = 0;
 	
-	// file.seekg(108);
-	// file.get(byte_reader1);	// we know that the values are little-endian
-	// file.get(byte_reader2);
 	byte_reader1 = header_buffer[108];
 	byte_reader2 = header_buffer[109];
 	current_bytes = 0x000000FF & byte_reader2;
@@ -408,8 +386,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const size_t n
 				// this is currently only safe on little-endian systems!
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
-						//	file.read((char *)&current_float, sizeof(float));
-						
 						current_float = single_image_buffer_float[cache_offset];
 						
 						image->set(i, j, (double)current_float);
@@ -454,7 +430,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const size_t n
 			case 3: // 2-byte unsigned short
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
-						//	file.read((char *)&current_unsigned_short, 2);
 						current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
 						current_unsigned_short *= 256;
 						current_unsigned_short = current_unsigned_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
@@ -1117,7 +1092,6 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 	IgorCommand = "ImageFileInfo \"";
 	IgorCommand += native_Igor_FilePath;
 	IgorCommand += "\"";
-	// XOPNotice(IgorCommand.c_str());
 	
 	result = XOPSilentCommand(IgorCommand.c_str());
 	if (result != 0) {
@@ -1203,9 +1177,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const si
 		if (images_in_cache[i] == n) {
 			
 			image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
-			/*if (image_copy == NULL) {
-			 throw OUT_OF_MEMORY();
-			 }*/
 			
 			indices[2] = i;
 			for (long j = 0; j < (long)y_size; j++) {
@@ -1308,9 +1279,6 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const si
 	
 	// now return a gsl matrix corresponding to the image that we want
 	image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
-	/*if (image_copy == NULL) {
-	 throw OUT_OF_MEMORY();
-	 }*/
 	
 	// we want the first image if we just loaded a new set
 	indices[2] = 0;
@@ -1924,18 +1892,6 @@ int SimpleOutputWriter::flush_and_close() {
 	file.write((char *)&n_images_written, sizeof(size_t));
 	
 	file.close();
-	
-	// we add the size of the image frame and the number of images to the top of the file
-	/*	fstream file_header_out;
-	 file_header_out.open(file_path.c_str(), ios::in | ios::out | ios::binary | ios::ate);
-	 file_header_out.seekp(0);
-	 file_header_out.seekg(0);	// should be unnecessary
-	 
-	 file_header_out.write((char *)&x_size, sizeof(size_t));
-	 file_header_out.write((char *)&y_size, sizeof(size_t));
-	 file_header_out.write((char *)&n_images_written, sizeof(size_t));
-	 
-	 file_header_out.close();*/
 	
 	return 0;
 }

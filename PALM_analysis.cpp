@@ -675,9 +675,9 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 				currentIntensity = currentAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * deviation * deviation));
 				
 				if (normalizeColors != 0) {
-				currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
-				currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
-				currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
+					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
+					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
 				} else {
 					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / currentAmplitude;
 					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / currentAmplitude;
