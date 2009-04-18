@@ -468,9 +468,6 @@ public:
 };
 
 
-boost::shared_ptr<encap_gsl_matrix> convolve_matrices_using_fft(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2);
-
-
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
 
 int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
