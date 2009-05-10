@@ -1366,7 +1366,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
 			
 			string output_name = "M_locatedParticles";
-			copy_gsl_matrix_to_IgorDPWave(located_particles, output_name);
+			copy_PALMMatrix_to_IgorDPWave(located_particles, output_name);
 		}
 		
 	}
@@ -1438,7 +1438,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		
 		outputImage = matrixConvolver.ConvolveMatricesWithFFT(firstImage,secondImage);
 		
-		outputWave = copy_gsl_matrix_to_IgorDPWave(outputImage, "M_Convolved");
+		outputWave = copy_PALMMatrix_to_IgorDPWave(outputImage, "M_Convolved");
 		
 	}
 	catch (std::bad_alloc) {
@@ -1621,7 +1621,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	// do the actual calculation
 	try {
 		image = calculate_PALM_bitmap_image_parallel(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight, normalizeColors);
-		copy_gsl_volume_ushort_to_IgorUINT16wave(image, string("M_PALM"));
+		copy_PALMVolume_ushort_to_IgorUINT16wave(image, string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
@@ -1878,7 +1878,7 @@ boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wa
 	return matrix;
 }
 
-waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName) {
+waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -2014,7 +2014,7 @@ boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl w
 	return volume;
 }
 
-waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, string waveName) {
+waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume<double> > volume, string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -2059,7 +2059,7 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > v
 }
 
 
-waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume <unsigned short> > volume, string waveName) {
+waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<unsigned short> > volume, string waveName) {
 	
 	waveHndl DPWave;
 	

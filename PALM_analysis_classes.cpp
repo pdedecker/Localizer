@@ -63,8 +63,6 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	boost::shared_ptr<PALMMatrix<double> > average_image;
 	boost::shared_ptr<PALMMatrix<double> > loaded_image;
 	boost::shared_ptr<PALMMatrix<double> > subtracted_image;
-	double current_double;
-	double value;
 	
 	// we pass through the images two times:
 	// the first pass calculates the average,
@@ -82,19 +80,13 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	}
 	
 	// now divide each point so that we get the average
-	// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
-	
-	// the approach using the gsl functions seems off so we use a different one instead
 	(*average_image) = (*average_image).DivideByScalar(n_frames_averaging);
 	
 	// now subtract the average for each frame
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
-		// loaded_image->sub(*average_image);
-		(*loaded_image) = (*loaded_image) - (*average_image);
-		
-		subtracted_image = loaded_image;
+		(*subtracted_image) = (*loaded_image) - (*average_image);
 		
 		output_writer->write_image(subtracted_image);
 	}
@@ -234,9 +226,6 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 				}
 			}
 		}
-		
-		// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
-		// the calculation using the gsl seems to be off so we use a direct one instead
 		
 		for (size_t i = 0; i < x_size; i++) {
 			for (size_t j = 0; j < y_size; j++) {
@@ -570,8 +559,6 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 				currentPosition.set_y((double)y);
 				currentPosition.set_intensity(image->get(x - 1, y));
 				positionsInCurrentParticle.push_back(currentPosition);
-				// now call this function itself (recursion) on the new pixel
-				// growParticle(positions, x - 1, y, threshold_image, mapped_image);
 			}
 		}
 	}
@@ -587,8 +574,6 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 				currentPosition.set_y((double)y);
 				currentPosition.set_intensity(image->get(x + 1, y));
 				positionsInCurrentParticle.push_back(currentPosition);
-				// now call this function itself (recursion) on the new pixel
-				// growParticle(positions, x + 1, y, threshold_image, mapped_image);
 			}
 		}
 	}
@@ -604,8 +589,6 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 				currentPosition.set_y((double)y - 1);
 				currentPosition.set_intensity(image->get(x, y - 1));
 				positionsInCurrentParticle.push_back(currentPosition);
-				// now call this function itself (recursion) on the new pixel
-				// growParticle(positions, x, y - 1, threshold_image, mapped_image);
 			}
 		}
 	}
@@ -621,8 +604,6 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 				currentPosition.set_y((double)y + 1);
 				currentPosition.set_intensity(image->get(x, y + 1));
 				positionsInCurrentParticle.push_back(currentPosition);
-				// now call this function itself (recursion) on the new pixel
-				// growParticle(positions, x, y + 1, threshold_image, mapped_image);
 			}
 		}
 	}

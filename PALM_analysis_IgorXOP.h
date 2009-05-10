@@ -31,15 +31,15 @@ int convert_handle_to_string(Handle handle, string &output_string);
 
 boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
 
-waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName);
+waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName);
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t cache_size = N_SIMULTANEOUS_IMAGE_LOADS);
 
 boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl wave);
 
-waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, string waveName);
+waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, string waveName);
 
-waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume <unsigned short> > volume, string waveName);
+waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<unsigned short> > volume, string waveName);
 
 #endif
 

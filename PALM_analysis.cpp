@@ -440,7 +440,6 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 		}
 		
 		if (n_positions_in_current_frame == 0) {	// we found no positions
-			// positions = NULL;
 			positions = boost::shared_ptr<PALMMatrix<double> >();
 		} else {	// we found some positions
 			// we need to load the image
@@ -484,21 +483,13 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 		
 		fitted_positions = positions_fitter->fit_positions(current_image, positions);
 		
-		//		print_fitted_positions(fitted_positions);
-		
-		
 		// now we need to pass the fitted images to the output routine
-		// this will also take care of freeing the matrix
 		output_writer.append_new_positions(fitted_positions);
 		
 		if (i == progress_indices[current_progress_index]) {
 			XOPNotice(".");
 			current_progress_index++;
 		}
-		
-		// if (((int)((double)i / (double)number_of_images * 100.0) % 10) == 0) {
-		// 	XOPNotice(".");
-		// }
 		
 	}
 	
@@ -984,7 +975,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	long dimension_sizes[MAX_DIMENSIONS + 1];
 	long indices[MAX_DIMENSIONS];
 	
-	double current_value[2], deviation, value;
+	double current_value[2];
 	
 	long xRange, yRange;
 	
