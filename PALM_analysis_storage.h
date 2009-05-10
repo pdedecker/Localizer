@@ -61,10 +61,10 @@ public:
 	PALMMatrix & operator*=(const PALMMatrix &rhs);
 	PALMMatrix & operator/=(const PALMMatrix &rhs);
 	
-	const PALMMatrix operator+(const PALMMatrix &rhs) const;
-	const PALMMatrix operator-(const PALMMatrix &rhs) const;
-	const PALMMatrix operator/(const PALMMatrix &rhs) const;
-	const PALMMatrix operator*(const PALMMatrix &rhs) const;
+	PALMMatrix operator+(const PALMMatrix &rhs) const;
+	PALMMatrix operator-(const PALMMatrix &rhs) const;
+	PALMMatrix operator/(const PALMMatrix &rhs) const;
+	PALMMatrix operator*(const PALMMatrix &rhs) const;
 	
 	const PALMMatrix AddScalar(const double scalar);
 	const PALMMatrix SubtractScalar(const double scalar);
@@ -204,7 +204,7 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator/=(const PALMMatrix
 	return *this;
 }
 
-template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator+(const PALMMatrix &rhs) const {
+template <typename T> PALMMatrix<T> PALMMatrix<T>::operator+(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -213,7 +213,7 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator+(const PALMMat
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator-(const PALMMatrix &rhs) const {
+template <typename T> PALMMatrix<T> PALMMatrix<T>::operator-(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -222,7 +222,7 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator-(const PALMMat
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator*(const PALMMatrix &rhs) const {
+template <typename T> PALMMatrix<T> PALMMatrix<T>::operator*(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -231,7 +231,7 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator*(const PALMMat
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator/(const PALMMatrix &rhs) const {
+template <typename T> PALMMatrix<T> PALMMatrix<T>::operator/(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix

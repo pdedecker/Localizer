@@ -127,9 +127,6 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 		// the output_writer also takes care of freeing current_image
 	}
 	
-	// before we exit the function we need to free next_image
-	// gsl_matrix_free(next_image);
-	
 	return 0;
 }
 		
@@ -230,9 +227,9 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boos
 	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 3));
 	
 	for (size_t i = 0; i < number_of_positions; i++) {
-		output_positions->set(i, 0, positions[i].get_intensity());
-		output_positions->set(i, 1, positions[i].get_x());
-		output_positions->set(i, 2, positions[i].get_y());
+		(*output_positions)(i, 0) = positions[i].get_intensity();
+		(*output_positions)(i, 1) = positions[i].get_x();
+		(*output_positions)(i, 2) = positions[i].get_y();
 	}
 	
 	return output_positions;
@@ -1553,9 +1550,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	(*averages) = (*averages).DivideByScalar(double_window_pixels);
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
-	(*null_hypothesis) = (*averages) * (*averages);
-	(*null_hypothesis) = (*null_hypothesis).MultiplyWithScalar(double_window_pixels);
-	(*null_hypothesis) = (*summed_squares) - (*null_hypothesis);
+	(*null_hypothesis) = (*summed_squares) - (((*averages) * (*averages)).MultiplyWithScalar(double_window_pixels));
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -1622,13 +1617,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	gaussianCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			current_value = image_Gaussian_convolved->get(i, j);
-			current_value /= sum_squared_Gaussian;
-			image_Gaussian_convolved->set(i, j, current_value);
-		}
-	}
+	(*image_Gaussian_convolved) = (*image_Gaussian_convolved).DivideByScalar(sum_squared_Gaussian);
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {

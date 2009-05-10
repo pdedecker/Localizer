@@ -562,7 +562,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	
 	for (size_t i = 0; i < n_images; i++) {
 		summed_intensity = 0;
-			current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->get_nth_image(i);
 		
 		// calculate the total sum of the image
 		for (size_t k = startY; k <= endY; k++) {
