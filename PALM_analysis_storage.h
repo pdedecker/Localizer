@@ -10,8 +10,6 @@
 #ifndef PALM_ANALYSIS_STORAGE
 #define PALM_ANALYSIS_STORAGE
 
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
 #include <string>
 #include <vector>
 #include "boost/smart_ptr.hpp"
