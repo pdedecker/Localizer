@@ -354,7 +354,7 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 		next_image = image_loader->get_nth_image(n + 1);
 		
 		// now do the actual subtraction
-		gsl_matrix_sub(current_image->get_ptr(), next_image->get_ptr());
+		*current_image = *current_image - *next_image;
 		
 		// current_image now contains the subtracted image, we should write it to disk
 		output_writer->write_image(current_image);

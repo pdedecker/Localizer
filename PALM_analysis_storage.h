@@ -148,7 +148,7 @@ template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator+(const PALMM
 }
 
 template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator-(const PALMMatrix &rhs) const {
-	assert ((xSize == rhs.getXSize()) && (ySize = rhs.getYSize()));
+	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
 	for (size_t i = 0; i < xSize; ++i) {
