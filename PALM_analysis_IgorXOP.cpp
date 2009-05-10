@@ -1553,7 +1553,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		PSFWidth = p->PSFWidth;
 		
 	} else{
-		if (method == 0) {
+		if (method == 2) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}

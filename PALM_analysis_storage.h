@@ -20,6 +20,173 @@
 
 using namespace std;
 
+class position {
+public:
+	position() {x = 0; y = 0; intensity = 0;}
+	position(double xLoc, double yLoc) {x = xLoc; y = yLoc;}
+	position(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
+	~position() {;}
+	
+	void set_x(double xLoc) {x = xLoc;}
+	void set_y(double yLoc) {y = yLoc;}
+	void set_intensity(double intensity_rhs) {intensity = intensity_rhs;}
+	
+	double get_x() {return x;}
+	double get_y() {return y;}
+	double get_intensity() {return intensity;}
+	
+protected:
+	double x;
+	double y;
+	double intensity;
+};
+
+
+template <typename T> class PALMMatrix {
+public:
+	PALMMatrix(size_t xSize_rhs, size_t ySize_rhs);
+	PALMMatrix(const PALMMatrix &rhs);
+	~PALMMatrix();
+	
+	T & operator() (size_t x, size_t y);
+	T & get(size_t x, size_t y);
+	void set(size_t x, size_t y, T &value);
+	void set_all(T &value);
+	
+	PALMMatrix & operator=(const PALMMatrix &rhs);
+	
+	const PALMMatrix & operator+(PALMMatrix &rhs);
+	const PALMMatrix & operator-(PALMMatrix &rhs);
+	const PALMMatrix & operator/(PALMMatrix &rhs);
+	const PALMMatrix & operator*(PALMMatrix &rhs);
+	
+	size_t getXSize() {return xSize;}
+	size_t getYSize() {return ySize;}
+	
+protected:
+	size_t xSize;
+	size_t ySize;
+	T *data;
+};
+
+template <typename T> PALMMatrix<T>::PALMMatrix(size_t xSize_rhs, size_t ySize_rhs) {
+	data = NULL;
+	data = new T[xSize * ySize];
+	xSize = xSize_rhs;
+	ySize = ySize_rhs;
+}
+
+template <typename T> PALMMatrix<T>::PALMMatrix(const PALMMatrix &rhs) {
+	data = NULL;
+	xSize = rhs.getXSize();
+	ySize = rhs.getYSize();
+	
+	data = new T[xSize * ySize];
+	
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			(*this)(i, j) = rhs(i, j);
+		}
+	}
+}
+
+template <typename T> PALMMatrix<T>::~PALMMatrix() {
+	if (data != NULL) {
+		delete[] data;
+	}
+}
+
+template <typename T> inline T & PALMMatrix<T>::operator() (size_t x, size_t y) {
+	assert ((x < xSize) && (y < ySize));
+	return data[x * ySize + y];
+}
+
+template <typename T> inline T & PALMMatrix<T>::get(size_t x, size_t y) {
+	assert ((x < xSize) && (y < ySize));
+	return data[x * ySize + y];
+}
+
+template <typename T> inline void PALMMatrix<T>::set(size_t x, size_t y, T &value) {
+	assert ((x < xSize) && (y < ySize));
+	data[x * ySize + y] = value;
+}
+
+template <typename T> inline void PALMMatrix<T>::set_all(T &value) {
+	size_t nItems = xSize * ySize;
+	for (size_t i = 0; i < nItems; ++i) {
+		data[i] = value;
+	}
+}
+
+template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator=(const PALMMatrix &rhs) {
+	if (this == &rhs) {
+		return *this;
+	}
+	
+	delete[] data;
+	xSize = rhs.getXSize();
+	ySize = rhs.getYSize();
+	
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			(*this)(i, j) = rhs(i, j);
+		}
+	}
+}
+
+template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator+(PALMMatrix &rhs) {
+	assert ((xSize == rhs.getXSize()) && (ySize = rhs.getYSize()));
+	
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) = (*this)(i, j) + rhs(i, j);
+		}
+	}
+	
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator-(PALMMatrix &rhs) {
+	assert ((xSize == rhs.getXSize()) && (ySize = rhs.getYSize()));
+	
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) = (*this)(i, j) - rhs(i, j);
+		}
+	}
+	
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator*(PALMMatrix &rhs) {
+	assert ((xSize == rhs.getXSize()) && (ySize = rhs.getYSize()));
+	
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) = (*this)(i, j) * rhs(i, j);
+		}
+	}
+	
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator/(PALMMatrix &rhs) {
+	assert ((xSize == rhs.getXSize()) && (ySize = rhs.getYSize()));
+	
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) = (*this)(i, j) / rhs(i, j);
+		}
+	}
+	
+	return result;
+}
+
+
 class encap_gsl_matrix {
 public:
 	encap_gsl_matrix() {matrix = NULL;}
@@ -117,27 +284,6 @@ public:
 protected:
 	vector <gsl_matrix_ushort*> matrices;
 	size_t x_size, y_size, z_size;
-};
-
-class position {
-public:
-	position() {x = 0; y = 0; intensity = 0;}
-	position(double xLoc, double yLoc) {x = xLoc; y = yLoc;}
-	position(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
-	~position() {;}
-	
-	void set_x(double xLoc) {x = xLoc;}
-	void set_y(double yLoc) {y = yLoc;}
-	void set_intensity(double intensity_rhs) {intensity = intensity_rhs;}
-	
-	double get_x() {return x;}
-	double get_y() {return y;}
-	double get_intensity() {return intensity;}
-	
-protected:
-	double x;
-	double y;
-	double intensity;
 };
 
 #endif

@@ -9,6 +9,7 @@
 
 #include "PALM_analysis_storage.h"
 
+
 encap_gsl_matrix::encap_gsl_matrix(size_t x, size_t y) {
 	matrix = gsl_matrix_alloc(x, y);
 	if (matrix == NULL) {
