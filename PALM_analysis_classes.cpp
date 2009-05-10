@@ -23,8 +23,8 @@ CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(Image
 	output_writer = o_writer;
 	
 	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->get_x_size();
-	y_size = image_loader->get_y_size();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
 	
 	n_frames_averaging = 0;
 }
@@ -60,9 +60,9 @@ int CCDImagesProcessorAverageSubtraction::convert_images() {
 
 void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	size_t n;
-	boost::shared_ptr<encap_gsl_matrix> average_image;
-	boost::shared_ptr<encap_gsl_matrix> loaded_image;
-	boost::shared_ptr<encap_gsl_matrix> subtracted_image;
+	boost::shared_ptr<PALMMatrix<double> > average_image;
+	boost::shared_ptr<PALMMatrix<double> > loaded_image;
+	boost::shared_ptr<PALMMatrix<double> > subtracted_image;
 	double current_double;
 	double value;
 	
@@ -71,7 +71,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	// the second pass subtracts it from the image
 	// fortunately out intermediate format uses doubles to store the data!
 	
-	average_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	average_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	average_image->set_all(0);	// zero the matrix
 	
@@ -123,15 +123,15 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 
 
 void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> average_image;
-	boost::shared_ptr<encap_gsl_matrix> subtracted_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > average_image;
+	boost::shared_ptr<PALMMatrix<double> > subtracted_image;
 	// gsl_matrix *averaging_buffer[n_frames_averaging];	// strictly speaking this isn't legal C++ code because declarations on the stack should be
 															// a const size
 															// g++ accepts this, but the Microsoft compiler throws an error on this
 															// so we will convert it to an assignment on the heap instead
-	vector<boost::shared_ptr<encap_gsl_matrix> > averaging_buffer;
-	averaging_buffer.resize(n_frames_averaging, boost::shared_ptr<encap_gsl_matrix> ());
+	vector<boost::shared_ptr<PALMMatrix<double> > > averaging_buffer;
+	averaging_buffer.resize(n_frames_averaging, boost::shared_ptr<PALMMatrix<double> > ());
 	
 	long average_starting_index, average_ending_index;
 	size_t cache_loading_offset = 0;
@@ -139,7 +139,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	double current_double;
 	double value;
 	
-	average_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	average_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	/*// the buffer for the averaging will be allocated by the get_nth_image() routine
 	for (size_t i = 0; i < n_frames_averaging; i++) {
@@ -197,7 +197,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 			current_image = averaging_buffer.at(n);
 			
 			// now allocate the subtracted image
-			subtracted_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+			subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 			
 			// subtract the average from the current frame
 			// subtracted_image->copy(*current_image);
@@ -233,7 +233,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 			current_image = averaging_buffer[(size_t)floor((double)(n_frames_averaging) / 2.0) + cache_loading_offset];
 			
 			// now allocate the subtracted image
-			subtracted_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+			subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 			
 			// subtracted_image->copy(*current_image);
 			for (size_t j = 0; j < y_size; ++j) {
@@ -298,7 +298,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 		current_image = averaging_buffer.at((size_t)floor((double)(n_frames_averaging) / 2.0));
 		
 		// now allocate the subtracted image
-		subtracted_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		// subtracted_image->copy(*current_image);
 		for (size_t j = 0; j < y_size; ++j) {
@@ -330,14 +330,14 @@ CCDImagesProcessorDifferenceImage::CCDImagesProcessorDifferenceImage(ImageLoader
 	output_writer = o_writer;
 	
 	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->get_x_size();
-	y_size = image_loader->get_y_size();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
 }
 
 int CCDImagesProcessorDifferenceImage::convert_images() {
 	
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> next_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > next_image;
 	
 	// we start by loading the first image in next_image
 	// this is required so the loop that follows can start properly
@@ -374,13 +374,13 @@ CCDImagesProcessorConvertToSimpleFileFormat::CCDImagesProcessorConvertToSimpleFi
 	output_writer = o_writer;
 	
 	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->get_x_size();
-	y_size = image_loader->get_y_size();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
 }
 
 int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->get_nth_image(n);
@@ -390,18 +390,18 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image) {
+boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	vector<position> positions;
 	position position;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
-	size_t x_size = image->get_x_size(), y_size = image->get_y_size();
+	size_t x_size = image->getXSize(), y_size = image->getYSize();
 	size_t number_of_positions;
 	double current_intensity, previous_intensity, current_x, current_y;
 	double distance_squared;
 	double radius_squared = (double)(radius * radius);
 	int skip;
 	double x, y;
-	boost::shared_ptr<encap_gsl_matrix> output_positions;
+	boost::shared_ptr<PALMMatrix<double> > output_positions;
 	
 	// we run over all the points in the image to see if they are above the treshold
 	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; j++) {
@@ -462,7 +462,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 		return output_positions;	// is equal to NULL due to its initialization as a shared_ptr
 	}
 	
-	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(number_of_positions, 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 3));
 	
 	for (size_t i = 0; i < number_of_positions; i++) {
 		output_positions->set(i, 0, positions[i].get_intensity());
@@ -474,22 +474,22 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_radius::findPositions(boost::
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image) {
+boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<encap_gsl_matrix> output_positions;
+	boost::shared_ptr<PALMMatrix<double> > output_positions;
 	list<position> positionsInCurrentParticleList;
 	vector<position> positionsInCurrentParticle;
 	position currentPosition;
 	vector<position> particles;
-	boost::shared_ptr<encap_gsl_matrix_long> mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
 	
-	mapped_image = boost::shared_ptr<encap_gsl_matrix_long>(new encap_gsl_matrix_long(x_size, y_size));
+	mapped_image = boost::shared_ptr<PALMMatrix<long> >(new PALMMatrix<long>(x_size, y_size));
 	
 	mapped_image->set_all(-1);
 	
@@ -570,7 +570,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 		return output_positions;
 	}
 	
-	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(particles.size(), 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
 	
 	// now copy the output to a gsl matrix
 	for (size_t k = 0; k < particles.size(); ++k) {
@@ -583,7 +583,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent4::findPositions(boos
 	
 }
 
-void ParticleFinder_adjacent4::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image, boost::shared_ptr<encap_gsl_matrix_long> mapped_image) {
+void ParticleFinder_adjacent4::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -592,8 +592,8 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	position currentPosition;
 	
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);
@@ -677,22 +677,22 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image) {
+boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<encap_gsl_matrix> output_positions;
+	boost::shared_ptr<PALMMatrix<double> > output_positions;
 	list<position> positionsInCurrentParticleList;
 	vector<position> positionsInCurrentParticle;
 	position currentPosition;
 	vector<position> particles;
-	boost::shared_ptr<encap_gsl_matrix_long> mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
 	
-	mapped_image = boost::shared_ptr<encap_gsl_matrix_long>(new encap_gsl_matrix_long(x_size, y_size));
+	mapped_image = boost::shared_ptr<PALMMatrix<long> >(new PALMMatrix<long>(x_size, y_size));
 	
 	mapped_image->set_all(-1);
 	
@@ -774,7 +774,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 		return output_positions;
 	}
 	
-	output_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(particles.size(), 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
 	
 	// now copy the output to a gsl matrix
 	for (size_t k = 0; k < particles.size(); ++k) {
@@ -787,7 +787,7 @@ boost::shared_ptr<encap_gsl_matrix> ParticleFinder_adjacent8::findPositions(boos
 	
 }
 
-void ParticleFinder_adjacent8::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image, boost::shared_ptr<encap_gsl_matrix_long> mapped_image) {
+void ParticleFinder_adjacent8::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -796,8 +796,8 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	position currentPosition;
 	
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);
@@ -834,15 +834,15 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, list<positi
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	
 	size_t x_size, y_size;
 	double current_value;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>_uchar(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
@@ -859,7 +859,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Direct::do_thresholding
 
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -875,8 +875,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -892,7 +892,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 		throw result;
 	}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -944,7 +944,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Iterative::do_thre
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -960,8 +960,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -976,7 +976,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 		throw result;
 	}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -1028,7 +1028,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Bimodal::do_thresh
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -1041,18 +1041,18 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	double value[2];
 	int result;
 	unsigned char threshold_result;
-	boost::shared_ptr<encap_gsl_matrix_uchar> original_thresholded;
-	boost::shared_ptr<encap_gsl_matrix_uchar> transposed_tresholded;
+	boost::shared_ptr<PALMMatrix <unsigned char> > original_thresholded;
+	boost::shared_ptr<PALMMatrix <unsigned char> > transposed_tresholded;
 	
 	waveHndl tmp_storage_wave;
 	waveHndl thresholded_wave;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	// we make two images for the original and the transposed threshold
-	original_thresholded = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
-	transposed_tresholded = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	original_thresholded = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	transposed_tresholded = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -1181,7 +1181,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Adaptive::do_thres
 	return original_thresholded;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -1197,8 +1197,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -1213,7 +1213,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 		throw result;
 	}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -1265,7 +1265,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy1::do_thresho
 	return thresholded_image;	
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -1281,8 +1281,8 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -1297,7 +1297,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 		throw result;
 	}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -1349,12 +1349,12 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Igor_Fuzzy2::do_thresho
 	return thresholded_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	gsl_histogram *hist;
-	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
 	
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	
 	size_t number_of_bins = 256;
 	size_t current_threshold_bin = 127;
@@ -1410,7 +1410,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
 		// to indicate this we set everything to 'off' (0)
-		threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 		threshold_image->set_all(0);
 		return threshold_image;
 	}
@@ -1437,7 +1437,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Isodata::do_thresholdin
 	return threshold_image;
 }
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	gsl_histogram *hist;
 	size_t number_of_bins = 256;
 	size_t maximum_bin;
@@ -1451,9 +1451,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	size_t max_index;
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
@@ -1475,7 +1475,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	// catch an unlikely case where the maximum corresponds to the last bin
 	if (maximum_bin == (number_of_bins - 1)) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 		threshold_image->set_all(0);
 		return threshold_image;
 	}
@@ -1487,7 +1487,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 	// catch an unlikely case where the connecting line is flat (the histogram is apparently uniform)
 	if (slope == 0) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 		threshold_image->set_all(0);
 		return threshold_image;
 	}
@@ -1541,19 +1541,19 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Triangle::do_thresholdi
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
-	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	
-	boost::shared_ptr<encap_gsl_matrix> averages(new encap_gsl_matrix (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
-	boost::shared_ptr<encap_gsl_matrix> image_squared(new encap_gsl_matrix (x_size, y_size));
-	boost::shared_ptr<encap_gsl_matrix> summed_squares(new encap_gsl_matrix (x_size, y_size));
-	boost::shared_ptr<encap_gsl_matrix> null_hypothesis(new encap_gsl_matrix (x_size, y_size));
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_window(new encap_gsl_matrix (x_size, y_size));
-	boost::shared_ptr<encap_gsl_matrix> image_Gaussian_convolved(new encap_gsl_matrix (x_size, y_size));	// this is 'alpha' in the original matlab code
-	boost::shared_ptr<encap_gsl_matrix> hypothesis_test(new encap_gsl_matrix (x_size, y_size));	// this is 'test' in the original matlab code
+	boost::shared_ptr<PALMMatrix<double> > averages(new PALMMatrix<double> (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
+	boost::shared_ptr<PALMMatrix<double> > image_squared(new PALMMatrix<double> (x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > summed_squares(new PALMMatrix<double> (x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > null_hypothesis(new PALMMatrix<double> (x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > Gaussian_window(new PALMMatrix<double> (x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > image_Gaussian_convolved(new PALMMatrix<double> (x_size, y_size));	// this is 'alpha' in the original matlab code
+	boost::shared_ptr<PALMMatrix<double> > hypothesis_test(new PALMMatrix<double> (x_size, y_size));	// this is 'test' in the original matlab code
 	
 	
 	double average = 0;
@@ -1567,7 +1567,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 	double sum_squared_Gaussian;
 	
 	
-	threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	threshold_image->set_all(0);
 	
 	averages->set_all(0);
@@ -1704,19 +1704,19 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT::do_thresholding(b
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
-	boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	
-	boost::shared_ptr<encap_gsl_matrix> averages;
-	boost::shared_ptr<encap_gsl_matrix> image_squared;
-	boost::shared_ptr<encap_gsl_matrix> summed_squares;
-	boost::shared_ptr<encap_gsl_matrix> null_hypothesis;
-	boost::shared_ptr<encap_gsl_matrix> image_Gaussian_convolved;
-	boost::shared_ptr<encap_gsl_matrix> hypothesis_test;
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_window;
+	boost::shared_ptr<PALMMatrix<double> > averages;
+	boost::shared_ptr<PALMMatrix<double> > image_squared;
+	boost::shared_ptr<PALMMatrix<double> > summed_squares;
+	boost::shared_ptr<PALMMatrix<double> > null_hypothesis;
+	boost::shared_ptr<PALMMatrix<double> > image_Gaussian_convolved;
+	boost::shared_ptr<PALMMatrix<double> > hypothesis_test;
+	boost::shared_ptr<PALMMatrix<double> > Gaussian_window;
 	
 	size_t window_size = 13;
 	size_t half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
@@ -1728,24 +1728,24 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	double distance_x, distance_y;
 	double sum;
 	
-	threshold_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	threshold_image->set_all(0);
 	
-	averages = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	averages = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	averages->set_all(0);
 	
-	image_squared = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	image_squared = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
-	summed_squares = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	summed_squares = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	summed_squares->set_all(0);
 	
-	null_hypothesis = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	null_hypothesis = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
-	Gaussian_window = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	Gaussian_window = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
-	image_Gaussian_convolved = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));	// this is 'alpha' in the original matlab code
+	image_Gaussian_convolved = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));	// this is 'alpha' in the original matlab code
 	
-	hypothesis_test = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));	// this is 'test' in the original matlab code
+	hypothesis_test = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));	// this is 'test' in the original matlab code
 	hypothesis_test->set_all(0);
 	
 	// calculate the square of the pixel values
@@ -1772,7 +1772,7 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	if ((average_kernel.get() == NULL) || (averageKernelXSize != x_size) || (averageKernelYSize != y_size)) {
 		averageCalculationMutex.lock();	// get a unique lock
 		
-		average_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		average_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		average_kernel->set_all(0);
 		
@@ -1824,9 +1824,9 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 	
 	if ((Gaussian_kernel.get() == NULL) || (GaussianKernelXSize != x_size) || (GaussianKernelYSize != y_size)) {
 		gaussianCalculationMutex.lock();	// get a unique lock
-		Gaussian_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		Gaussian_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
-		Gaussian_window = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(window_size, window_size));
+		Gaussian_window = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(window_size, window_size));
 		
 		sum = 0;
 		for (size_t j = 0; j < window_size; j++) {
@@ -1912,18 +1912,18 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_GLRT_FFT::do_thresholdi
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	size_t offset;
 	double value, median;
 	
 	gsl_vector *median_environment;
-	boost::shared_ptr<encap_gsl_matrix> filtered_image;
+	boost::shared_ptr<PALMMatrix<double> > filtered_image;
 	
 	// allocate a gsl_vector with the correct size
 	median_environment = gsl_vector_alloc(kernel_size);
@@ -1932,7 +1932,7 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MedianFilter::do
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
-	filtered_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	filtered_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -1975,9 +1975,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_window(new encap_gsl_matrix(window_size, window_size));
+	boost::shared_ptr<PALMMatrix<double> > Gaussian_window(new PALMMatrix<double>(window_size, window_size));
 	
-	Gaussian_kernel = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	Gaussian_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
@@ -2006,11 +2006,11 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	
 
 
-boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
 	
-	boost::shared_ptr<encap_gsl_matrix> filtered_image;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	boost::shared_ptr<PALMMatrix<double> > filtered_image;
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	generateKernelMutex.lock();
@@ -2020,7 +2020,7 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothin
 		
 	} else {	// we already have a kernel stored, is it the correct size?
 				// if not we will calculate a new one
-		if ((x_size != Gaussian_kernel->get_x_size()) || (y_size != Gaussian_kernel->get_y_size())) {
+		if ((x_size != Gaussian_kernel->getXSize()) || (y_size != Gaussian_kernel->getYSize())) {
 			generate_Gaussian_kernel(x_size, y_size);
 		}
 	}
@@ -2032,22 +2032,22 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_GaussianSmoothin
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	double double_kernel_pixels = (double)kernel_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->get_x_size();
-	size_t y_size = image->get_y_size();
+	size_t x_size = image->getXSize();
+	size_t y_size = image->getYSize();
 	double mean;
 	
-	boost::shared_ptr<encap_gsl_matrix> filtered_image;
+	boost::shared_ptr<PALMMatrix<double> > filtered_image;
 	
 	// make a copy of the image
 	// this copy will be mean-filtered
 	// close to the edges, where the kernel doesn't fit we will not modify the image
-	filtered_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	filtered_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -2077,16 +2077,16 @@ boost::shared_ptr<encap_gsl_matrix> ThresholdImage_Preprocessor_MeanFilter::do_p
 }
 	
 			
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->get_x_size();
-	size_t y_size = thresholded_image->get_y_size();
+	size_t x_size = thresholded_image->getXSize();
+	size_t y_size = thresholded_image->getYSize();
 	unsigned char value;
 	double meanIntensity = 0;
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> processed_thresholded_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
 	
-	processed_thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	processed_thresholded_image->set_all(0);
 	
@@ -2118,16 +2118,16 @@ boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemoveIso
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image) {
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->get_x_size();
-	size_t y_size = thresholded_image->get_y_size();
+	size_t x_size = thresholded_image->getXSize();
+	size_t y_size = thresholded_image->getYSize();
 	unsigned char value;
 	bool neighbour_found;
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> processed_thresholded_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
 	
-	processed_thresholded_image = boost::shared_ptr<encap_gsl_matrix_uchar>(new encap_gsl_matrix_uchar(x_size, y_size));
+	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -2178,13 +2178,13 @@ ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2) {
+boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<PALMMatrix<double> > image1, boost::shared_ptr<PALMMatrix<double> > image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	
-	x_size1 = image1->get_x_size();
-	y_size1 = image1->get_y_size();
-	x_size2 = image2->get_x_size();
-	y_size2 = image2->get_y_size();
+	x_size1 = image1->getXSize();
+	y_size1 = image1->getYSize();
+	x_size2 = image2->getXSize();
+	y_size2 = image2->getYSize();
 	
 	size_t n_pixels, offset;
 	size_t FFT_xSize, FFT_ySize, i, j;
@@ -2195,7 +2195,7 @@ boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFTClass::ConvolveMatric
 	fftw_complex *array1_FFT;
 	fftw_complex *array2_FFT;
 	fftw_complex complex_value;
-	boost::shared_ptr<encap_gsl_matrix> convolved_image(new encap_gsl_matrix(x_size1, y_size1));
+	boost::shared_ptr<PALMMatrix<double> > convolved_image(new PALMMatrix<double>(x_size1, y_size1));
 	
 	// are the dimensions equal?
 	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
@@ -2384,10 +2384,10 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 	
 	
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
+	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->get_x_size();
-	size_t ySize = imageSubset->get_x_size();
+	size_t xSize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getXSize();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -2420,10 +2420,10 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 
 int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<encap_gsl_matrix> imageSubset = fitDataLocal->imageSubset;
+	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->get_x_size();
-	size_t ySize = imageSubset->get_x_size();
+	size_t xSize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getXSize();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -2482,8 +2482,8 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 	size_t number_of_intensities = intensities_local->get_number_of_intensities();
 	double *measured_intensities = intensities_local->get_intensities();
 	// double *sigma = intensities_local->get_sigma();
-	size_t x_size = intensities_local->get_x_size();
-	size_t y_size = intensities_local->get_y_size();
+	size_t x_size = intensities_local->getXSize();
+	size_t y_size = intensities_local->getYSize();
 	double x_offset = intensities_local->get_x_offset();
 	double y_offset = intensities_local->get_y_offset();
 	
@@ -2517,8 +2517,8 @@ int Gauss_2D_Poissonian_fit_function_Jacobian(const gsl_vector *params, void *me
 	size_t number_of_intensities = intensities_local->get_number_of_intensities();
 	// double *measured_intensities = intensities_local->get_intensities();
 	// double *sigma = intensities_local->get_sigma();
-	size_t x_size = intensities_local->get_x_size();
-	size_t y_size = intensities_local->get_y_size();
+	size_t x_size = intensities_local->getXSize();
+	size_t y_size = intensities_local->getYSize();
 	double x_offset = intensities_local->get_x_offset();
 	double y_offset = intensities_local->get_y_offset();
 	double *measured_intensities_array = intensities_local->get_intensities();
@@ -2576,13 +2576,13 @@ int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void
 } */
 
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
+boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
 	
 	size_t startPosition, endPosition;
-	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
 	
 	startPosition = 0;
-	endPosition = positions->get_x_size() - 1;
+	endPosition = positions->getXSize() - 1;
 	
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
 	
@@ -2590,11 +2590,11 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 	
 }
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
+boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																		size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
+	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
@@ -2610,19 +2610,19 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
-	size_t xSize = image->get_x_size();
-	size_t ySize = image->get_y_size();
+	size_t xSize = image->getXSize();
+	size_t ySize = image->getYSize();
 	
 	double x0_initial, y0_initial, initial_intensity, amplitude;
 	double chi, degreesOfFreedom, c;
 	long iterations = 0;
 	int status;
 	
-	boost::shared_ptr<encap_gsl_matrix> image_subset;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix<double> > image_subset;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
-	image_subset = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(size_of_subset, size_of_subset));
-	fitted_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
+	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
+	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
 	fitted_positions->set_all(0);
 	
@@ -2763,12 +2763,12 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsGaussian::fit_positions(const bo
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
+boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
 	size_t startPosition, endPosition;
-	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
 	
 	startPosition = 0;
-	endPosition = positions->get_x_size() - 1;
+	endPosition = positions->getXSize() - 1;
 	
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
 	
@@ -2776,11 +2776,11 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 }
 		
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
+boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																			  size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
+	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
@@ -2794,8 +2794,8 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 	
 	size_t number_of_positions = endPos - startPos + 1;
 	size_t size_of_subset = 2 * cutoff_radius + 1;
-	size_t xSize = image->get_x_size();
-	size_t ySize = image->get_y_size();
+	size_t xSize = image->getXSize();
+	size_t ySize = image->getYSize();
 	size_t x_offset, y_offset, x_max, y_max;
 	
 	double x0_initial, y0_initial, initial_intensity, amplitude;
@@ -2808,13 +2808,13 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 	double previous_position_x, previous_position_y;
 	double current_x, current_y;
 	
-	boost::shared_ptr<encap_gsl_matrix> image_subset;
-	boost::shared_ptr<encap_gsl_matrix> image_subset_mask;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix<double> > image_subset;
+	boost::shared_ptr<PALMMatrix<double> > image_subset_mask;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
-	image_subset = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(size_of_subset, size_of_subset));
-	image_subset_mask = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(size_of_subset, size_of_subset));
-	fitted_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
+	image_subset = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(size_of_subset, size_of_subset));
+	image_subset_mask = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
+	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
 	fitted_positions->set_all(0);
 	
@@ -2877,16 +2877,16 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsMultiplication::fit_positions(co
 }
 		
 
-int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<encap_gsl_matrix> original_image, boost::shared_ptr<encap_gsl_matrix> masked_image, double x, double y, 
+int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<PALMMatrix<double> > original_image, boost::shared_ptr<PALMMatrix<double> > masked_image, double x, double y, 
 													   double std_dev, double background, double amplitude) {
 	// we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 	
-	size_t x_size = masked_image->get_x_size();
-	size_t y_size = masked_image->get_y_size();
+	size_t x_size = masked_image->getXSize();
+	size_t y_size = masked_image->getYSize();
 	
 	double gaussian_value, distance_squared;
 	
-	if ((original_image->get_x_size() != x_size) || (original_image->get_y_size() != y_size)) {
+	if ((original_image->getXSize() != x_size) || (original_image->getYSize() != y_size)) {
 		throw DIMENSIONS_SHOULD_BE_EQUAL();
 	}
 	
@@ -2904,11 +2904,11 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<encap_g
 }
 
 
-int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<encap_gsl_matrix> masked_image, double &x, double &y) {
+int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<PALMMatrix<double> > masked_image, double &x, double &y) {
 	// based on eq (3) in Thompson Biophys J 2002
 	
-	size_t x_size = (size_t)masked_image->get_x_size();
-	size_t y_size = (size_t)masked_image->get_y_size();
+	size_t x_size = (size_t)masked_image->getXSize();
+	size_t y_size = (size_t)masked_image->getYSize();
 	
 	double numerator_x = 0, denominator = 0;
 	double numerator_y = 0;
@@ -2930,12 +2930,12 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<encap_g
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) {
+boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
 	size_t startPosition, endPosition;
-	boost::shared_ptr<encap_gsl_matrix> fittedPositions;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
 	
 	startPosition = 0;
-	endPosition = positions->get_x_size() - 1;
+	endPosition = positions->getXSize() - 1;
 	
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
 	
@@ -2943,11 +2943,11 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, 
+boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																			  size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->get_x_size()) || (startPos >= positions->get_x_size())) {
+	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsCentroid::fit_positions";
 		throw std::range_error(error);
@@ -2960,17 +2960,17 @@ boost::shared_ptr<encap_gsl_matrix> FitPositionsCentroid::fit_positions(const bo
 	}
 	
 	size_t number_of_positions = endPos - startPos + 1;
-	size_t xSize = image->get_x_size();
-	size_t ySize = image->get_y_size();
+	size_t xSize = image->getXSize();
+	size_t ySize = image->getYSize();
 	size_t x_offset, y_offset, x_max, y_max;
 	
 	size_t x0_initial, y0_initial;
 	double current_x, current_y;
 	double denominator;
 	
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
-	fitted_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
+	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
 	fitted_positions->set_all(0);
 	

@@ -181,7 +181,7 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -201,7 +201,7 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -279,14 +279,14 @@ int ImageLoaderSPE::parse_header_information() {
 	return 0;
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const size_t n) {	
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_t n) {	
 	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
 	unsigned short current_unsigned_short = 0;
 	string error;
-	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -346,7 +346,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderSPE::get_nth_image(const size_t n
 			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
 		}
 		
-		image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		switch(storage_type) {
 			case 0:	// 4 byte float
@@ -471,7 +471,7 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -489,7 +489,7 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -565,12 +565,12 @@ int ImageLoaderAndor::parse_header_information() {
 	return 0;
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const size_t n) {	
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderAndor::get_nth_image(const size_t n) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
 	
-	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -608,7 +608,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderAndor::get_nth_image(const size_t
 			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
 		}
 		
-		image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = header_length + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
@@ -657,7 +657,7 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -675,7 +675,7 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_r
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -740,9 +740,9 @@ int ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const size_t n) {	
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderHamamatsu::get_nth_image(const size_t n) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
-	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -786,7 +786,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderHamamatsu::get_nth_image(const si
 			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
 		}
 		
-		image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = (i + 1) * header_length + i * (x_size) * (y_size) * 2;	// assume a 16-bit format
 		file.seekg(offset);
@@ -836,7 +836,7 @@ SimpleImageLoader::SimpleImageLoader(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -854,7 +854,7 @@ SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
@@ -864,7 +864,7 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const size_t n) {	
+boost::shared_ptr<PALMMatrix<double> > SimpleImageLoader::get_nth_image(const size_t n) {	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
@@ -893,7 +893,7 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const size_
 	// now load the new set of images
 	uint64_t offset;
 	size_t array_offset;
-	boost::shared_ptr<encap_gsl_matrix> new_image;
+	boost::shared_ptr<PALMMatrix<double> > new_image;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
 	for (uint64_t i = n; i < n + image_cache_size; i++) {
@@ -903,7 +903,7 @@ boost::shared_ptr<encap_gsl_matrix> SimpleImageLoader::get_nth_image(const size_
 			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
 		}
 		
-		new_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+		new_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = 3 * sizeof(size_t) + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
@@ -1156,9 +1156,9 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 	
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const size_t n) {
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF_Igor::get_nth_image(const size_t n) {
 	
-	boost::shared_ptr<encap_gsl_matrix> image_copy;
+	boost::shared_ptr<PALMMatrix<double> > image_copy;
 	int result;
 	int number_of_images_loaded;
 	double value[2];
@@ -1176,7 +1176,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const si
 	for (size_t i = 0; i < image_cache_size; i++) {
 		if (images_in_cache[i] == n) {
 			
-			image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+			image_copy = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 			
 			indices[2] = i;
 			for (long j = 0; j < (long)y_size; j++) {
@@ -1278,7 +1278,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF_Igor::get_nth_image(const si
 	}
 	
 	// now return a gsl matrix corresponding to the image that we want
-	image_copy = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	image_copy = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	// we want the first image if we just loaded a new set
 	indices[2] = 0;
@@ -1311,7 +1311,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
@@ -1331,7 +1331,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<encap_gsl_matrix>());
+	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
@@ -1476,7 +1476,7 @@ int ImageLoaderTIFF::parse_header_information() {
 	
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const size_t n) {
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size_t n) {
 	
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -1515,7 +1515,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const size_t 
 	uint32_t *uint32Ptr;
 	float *floatPtr;
 	double *doublePtr;
-	boost::shared_ptr<encap_gsl_matrix> new_image;
+	boost::shared_ptr<PALMMatrix<double> > new_image;
 	int result;
 	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
@@ -1533,7 +1533,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderTIFF::get_nth_image(const size_t 
 		}
 		
 		try {
-			new_image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+			new_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		}
 		catch (std::bad_alloc) {
 			for (size_t j = 0; j < i - n; j++) {
@@ -1719,8 +1719,8 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	}
 }
 
-boost::shared_ptr<encap_gsl_matrix> ImageLoaderIgor::get_nth_image(const size_t n) {
-	boost::shared_ptr<encap_gsl_matrix> image;
+boost::shared_ptr<PALMMatrix<double> > ImageLoaderIgor::get_nth_image(const size_t n) {
+	boost::shared_ptr<PALMMatrix<double> > image;
 	double value[2];
 	long indices[3];
 	int result;
@@ -1728,7 +1728,7 @@ boost::shared_ptr<encap_gsl_matrix> ImageLoaderIgor::get_nth_image(const size_t 
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
-	image = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(x_size, y_size));
+	image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	indices[2] = n;
 	
@@ -1818,7 +1818,7 @@ SimpleOutputWriter::~SimpleOutputWriter() {
 
 
 
-void SimpleOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_image) {
+void SimpleOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1832,7 +1832,7 @@ void SimpleOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_ima
 
 
 void SimpleOutputWriter::flush_cache() {
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	size_t n_pixels, offset;
 	
 	if (image_buffer.size() == 0) {
@@ -1841,8 +1841,8 @@ void SimpleOutputWriter::flush_cache() {
 	
 	// determine the size of the frames
 	current_image = image_buffer.front();
-	x_size = current_image->get_x_size();
-	y_size = current_image->get_y_size();
+	x_size = current_image->getXSize();
+	y_size = current_image->getYSize();
 	n_pixels = x_size * y_size;
 	
 	float *single_image_buffer = new float[n_pixels];	// a temporary buffer for writing a single image
@@ -1932,7 +1932,7 @@ TIFFOutputWriter::~TIFFOutputWriter() {
 
 
 
-void TIFFOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_image) {
+void TIFFOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1945,7 +1945,7 @@ void TIFFOutputWriter::write_image(boost::shared_ptr<encap_gsl_matrix> new_image
 
 
 void TIFFOutputWriter::flush_cache() {
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	size_t n_pixels, offset;
 	
 	int result;
@@ -1958,8 +1958,8 @@ void TIFFOutputWriter::flush_cache() {
 	
 	// determine the size of the frames
 	current_image = image_buffer.front();
-	x_size = current_image->get_x_size();
-	y_size = current_image->get_y_size();
+	x_size = current_image->getXSize();
+	y_size = current_image->getYSize();
 	n_pixels = x_size * y_size;
 	
 	boost::scoped_array<float> scanLine(new float[x_size]);
@@ -2100,10 +2100,10 @@ IgorOutputWriter::~IgorOutputWriter() {
 	}
 }
 
-int IgorOutputWriter::append_new_positions(boost::shared_ptr<encap_gsl_matrix> positions) {
+int IgorOutputWriter::append_new_positions(boost::shared_ptr<PALMMatrix<double> > positions) {
 	positionsList.push_back(positions);
 	if (positions != NULL) {	// if it NULL then this no positions were found
-		total_number_of_positions += positions->get_x_size();
+		total_number_of_positions += positions->getXSize();
 	}
 	return 0;
 }
@@ -2114,7 +2114,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 	long indices[2];
 	int status;
 	double value;
-	boost::shared_ptr<encap_gsl_matrix> positions;
+	boost::shared_ptr<PALMMatrix<double> > positions;
 	long number_of_positions_in_matrix, offset = 0;
 	size_t frameNumber = 0;
 	
@@ -2143,7 +2143,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 			continue;
 		}
 		
-		number_of_positions_in_matrix = positions->get_x_size();
+		number_of_positions_in_matrix = positions->getXSize();
 		
 		for (long j = 0; j < number_of_positions_in_matrix; j++) {
 			// start by storing the index of the matrix

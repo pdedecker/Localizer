@@ -10,7 +10,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	long indices[MAX_DIMENSIONS];
 	
 	int result;
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	double current_value;
 	double current_value_array[2];
 	
@@ -25,8 +25,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 		n_end = total_n_images - 1;
 	}
 	
-	x_size = image_loader->get_x_size();
-	y_size = image_loader->get_y_size();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
 	
 	SetIgorIntVar("V_numberOfImages", (long)total_n_images, 1);
 	SetIgorIntVar("V_xSize", (long)x_size, 1);
@@ -80,8 +80,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 
 int parse_ccd_headers(ImageLoader *image_loader) {
 	size_t total_n_images = image_loader->get_total_number_of_images();
-	size_t x_size = image_loader->get_x_size();
-	size_t y_size = image_loader->get_y_size();
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
 	
 	int result;
 	
@@ -107,10 +107,10 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	
 	number_of_images = image_loader->get_total_number_of_images();
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<PALMMatrix<double> > positions;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
 	size_t progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
 	int current_progress_index = 0;
@@ -198,8 +198,8 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	
 	
 	number_of_images = image_loader->get_total_number_of_images();
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
 	size_t progress_indices[9];		// keeps track of the indices of the images that correspond to 10% done, 20% done, and so on
 	size_t current_progress_index = 0;
@@ -278,9 +278,9 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 
 void fitPositionsThreadStart(boost::shared_ptr<threadStartData> data) {
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<PALMMatrix<double> > positions;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 		
 	thresholded_image = do_processing_and_thresholding(data->image, data->preprocessor, data->thresholder, data->postprocessor);
 		
@@ -326,13 +326,13 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 	int current_progress_index = 0;
 	
 	number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->get_x_size();
-	y_size = image_loader->get_y_size();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<encap_gsl_matrix> supplied_fitting_positions;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> fitted_positions;
+	boost::shared_ptr<PALMMatrix<double> > supplied_fitting_positions;
+	boost::shared_ptr<PALMMatrix<double> > positions;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
 	
 	IgorOutputWriter output_writer(output_wave_name);
 	
@@ -357,7 +357,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 	}
 	
 	total_n_positions = indices[0];
-	supplied_fitting_positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(total_n_positions, 3));
+	supplied_fitting_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(total_n_positions, 3));
 	
 	// copy the data in the newly allocated array
 	
@@ -441,7 +441,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 		
 		if (n_positions_in_current_frame == 0) {	// we found no positions
 			// positions = NULL;
-			positions = boost::shared_ptr<encap_gsl_matrix>();
+			positions = boost::shared_ptr<PALMMatrix<double> >();
 		} else {	// we found some positions
 			// we need to load the image
 			try {
@@ -451,7 +451,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 				throw NOMEM;
 			}
 			
-			positions = boost::shared_ptr<encap_gsl_matrix>(new encap_gsl_matrix(n_positions_in_current_frame, 3));
+			positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(n_positions_in_current_frame, 3));
 			
 			for (size_t j = offset_in_positions_wave; j < (offset_in_positions_wave + n_positions_in_current_frame); j++) {
 				current_x = (size_t)(supplied_fitting_positions->get(j, 1) + 0.5);
@@ -516,13 +516,13 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 }
 
 
-boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
-	boost::shared_ptr<encap_gsl_matrix> preprocessed_image;
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
-	boost::shared_ptr<encap_gsl_matrix_uchar> postprocessed_image;
+	boost::shared_ptr<PALMMatrix<double> > preprocessed_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > postprocessed_image;
 	
 	if (preprocessor.get() != NULL) {
 		preprocessed_image = preprocessor->do_preprocessing(image);
@@ -542,10 +542,10 @@ boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
-	size_t x_size = image_loader->get_x_size();
-	size_t y_size = image_loader->get_y_size();
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	double summed_intensity;
 	
 	waveHndl output_wave;
@@ -599,10 +599,10 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 }
 
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
-	size_t nPositions = positions->get_x_size();
-	size_t nColors = colors->get_x_size();
+	size_t nPositions = positions->getXSize();
+	size_t nColors = colors->getXSize();
 	size_t nFrames = (size_t)(positions->get(nPositions - 1, 0)) + 1;
 	size_t currentFrame;
 	
@@ -619,7 +619,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	double summedIntensity;
 	
 	boost::shared_ptr<encap_gsl_volume_ushort> outputImage(new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
-	boost::shared_ptr<encap_gsl_matrix> totalIntensities(new encap_gsl_matrix(imageWidth, imageHeight));	// keep track of the total intensities in each pixel
+	boost::shared_ptr<PALMMatrix<double> > totalIntensities(new PALMMatrix<double>(imageWidth, imageHeight));	// keep track of the total intensities in each pixel
 	
 	outputImage->set_all(0);
 	totalIntensities->set_all(0);
@@ -698,7 +698,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	return outputImage;
 }
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
@@ -706,9 +706,9 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 	vector<size_t> endPositions;
 	vector<boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> > threadData;
 	boost::shared_ptr<encap_gsl_volume_ushort> outputImage;
-	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
+	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
 	
-	size_t nPositions = positions->get_x_size();
+	size_t nPositions = positions->getXSize();
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	if (numberOfProcessors == 0) {
 		numberOfProcessors = 1;
@@ -759,7 +759,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 		boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
 		singleThreadStartParameter->positions = positions;
 		singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume_ushort> (new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));
-		singleThreadStartParameter->totalIntensities = boost::shared_ptr<encap_gsl_matrix> (new encap_gsl_matrix(imageWidth, imageHeight));
+		singleThreadStartParameter->totalIntensities = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(imageWidth, imageHeight));
 		singleThreadStartParameter->colors = colors;
 		singleThreadStartParameter->deviationCalculator = deviationCalculator;
 		singleThreadStartParameter->normalizeColors = normalizeColors;
@@ -809,14 +809,14 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters) {
-	boost::shared_ptr<encap_gsl_matrix> positions = startParameters->positions;
+	boost::shared_ptr<PALMMatrix<double> > positions = startParameters->positions;
 	boost::shared_ptr<encap_gsl_volume_ushort> image = startParameters->image;
-	boost::shared_ptr<encap_gsl_matrix> totalIntensities = startParameters->totalIntensities;
-	boost::shared_ptr<encap_gsl_matrix> colors = startParameters->colors;
+	boost::shared_ptr<PALMMatrix<double> > totalIntensities = startParameters->totalIntensities;
+	boost::shared_ptr<PALMMatrix<double> > colors = startParameters->colors;
 	
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator = startParameters->deviationCalculator;
 	
-	size_t nColors = colors->get_x_size();
+	size_t nColors = colors->getXSize();
 	size_t startIndex = startParameters->startIndex;
 	size_t endIndex = startParameters->endIndex;
 	size_t nFrames = startParameters->nFrames;
@@ -907,8 +907,8 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
-	size_t x_size = image_loader->get_x_size();
-	size_t y_size = image_loader->get_y_size();
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
 	
 	long xRange, yRange;
 	
@@ -927,8 +927,8 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::shared_ptr<encap_gsl_matrix> current_image;
-	boost::shared_ptr<encap_gsl_matrix> average_image(new encap_gsl_matrix(xRange, yRange));
+	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<PALMMatrix<double> > average_image(new PALMMatrix<double>(xRange, yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -990,8 +990,8 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
-	size_t x_size = image_loader->get_x_size();
-	size_t y_size = image_loader->get_y_size();
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
 	int result;
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -1016,9 +1016,9 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<encap_gsl_matrix> stdDevImage(new encap_gsl_matrix(xRange, yRange));
-	boost::scoped_ptr<encap_gsl_matrix> average_image(new encap_gsl_matrix(xRange, yRange));
-	boost::shared_ptr<encap_gsl_matrix> current_image;
+	boost::scoped_ptr<PALMMatrix<double> > stdDevImage(new PALMMatrix<double>(xRange, yRange));
+	boost::scoped_ptr<PALMMatrix<double> > average_image(new PALMMatrix<double>(xRange, yRange));
+	boost::shared_ptr<PALMMatrix<double> > current_image;
 	
 	average_image->set_all(0);
 	stdDevImage->set_all(0);
@@ -1096,15 +1096,15 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	
 
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, size_t number_of_bins) {
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins) {
 	size_t x_size, y_size;
 	gsl_histogram *hist;
 	double min = 1e100;
 	double max = -1e100;
 	double current_value;
 	
-	x_size = image->get_x_size();
-	y_size = image->get_y_size();
+	x_size = image->getXSize();
+	y_size = image->getYSize();
 	
 	string error;
 	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()\r";

@@ -259,8 +259,8 @@ public:
 	void set_all(double value);
 	
 	double get(size_t x, size_t y, size_t z);
-	size_t get_x_size() const {return x_size;}
-	size_t get_y_size() const {return y_size;}
+	size_t getXSize() const {return x_size;}
+	size_t getYSize() const {return y_size;}
 	size_t get_z_size() const {return z_size;}
 	
 protected:
@@ -277,8 +277,8 @@ public:
 	void set_all(unsigned short value);
 	
 	unsigned short get(size_t x, size_t y, size_t z) {assert((x < x_size) && (y < y_size) && (z < z_size)); return gsl_matrix_ushort_get(matrices[z], x, y);}
-	size_t get_x_size() const {return x_size;}
-	size_t get_y_size() const {return y_size;}
+	size_t getXSize() const {return x_size;}
+	size_t getYSize() const {return y_size;}
 	size_t get_z_size() const {return z_size;}
 	
 protected:

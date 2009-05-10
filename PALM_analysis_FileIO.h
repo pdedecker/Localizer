@@ -65,9 +65,9 @@ public:
 	// int close_current_file();
 	
 	size_t get_total_number_of_images() const {return total_number_of_images;}
-	size_t get_x_size() const {return x_size;}
-	size_t get_y_size() const {return y_size;}
-	virtual boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n) = 0;	// images are numbered from 0 to N - 1
+	size_t getXSize() const {return x_size;}
+	size_t getYSize() const {return y_size;}
+	virtual boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n) = 0;	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual int parse_header_information() = 0;
@@ -82,7 +82,7 @@ protected:
 	uint64_t x_size;
 	uint64_t y_size;
 	int storage_type;
-	vector <boost::shared_ptr<encap_gsl_matrix> > image_cache;	// array of pointer to gsl_matrices containing cached images
+	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;	// array of pointer to gsl_matrices containing cached images
 	vector <size_t> images_in_cache;	// keeps track of the indices of the images in the cache
 	// if there is no image at a particular location then this is set to -1
 };
@@ -93,7 +93,7 @@ public:
 	ImageLoaderAndor(string rhs, size_t image_cache_size_rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -122,7 +122,7 @@ public:
 	ImageLoaderHamamatsu(string rhs, size_t image_cache_size);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -134,7 +134,7 @@ public:
 	ImageLoaderSPE(string rhs, size_t image_cache_size);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -146,7 +146,7 @@ public:
 	SimpleImageLoader(string rhs, size_t image_cache_size);
 	~SimpleImageLoader();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -158,7 +158,7 @@ public:
 	ImageLoaderTIFF_Igor(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF_Igor();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -174,7 +174,7 @@ public:
 	ImageLoaderTIFF(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF();
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information();
@@ -194,7 +194,7 @@ public:
 	ImageLoaderIgor(string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> get_nth_image(const size_t n);
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
 	int parse_header_information() {return 0;}
@@ -213,7 +213,7 @@ public:
 	string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
 	
-	virtual void write_image(boost::shared_ptr<encap_gsl_matrix> new_image) = 0;
+	virtual void write_image(boost::shared_ptr<PALMMatrix<double> > new_image) = 0;
 	
 	virtual int flush_and_close() = 0;
 	
@@ -226,7 +226,7 @@ protected:
 	size_t x_size;
 	size_t y_size;
 	
-	queue <boost::shared_ptr<encap_gsl_matrix> > image_buffer;
+	queue <boost::shared_ptr<PALMMatrix<double> > > image_buffer;
 };
 
 
@@ -235,7 +235,7 @@ public:
 	SimpleOutputWriter(const string &rhs, int overwrite);
 	~SimpleOutputWriter();
 	
-	void write_image(boost::shared_ptr<encap_gsl_matrix> new_image);
+	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
 	
 	int flush_and_close();
 	
@@ -248,7 +248,7 @@ public:
 	TIFFOutputWriter(const string &rhs, int overwrite);
 	~TIFFOutputWriter();
 	
-	void write_image(boost::shared_ptr<encap_gsl_matrix> new_image);
+	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
 	
 	int flush_and_close();
 	
@@ -264,13 +264,13 @@ public:
 	IgorOutputWriter(const string rhs);
 	~IgorOutputWriter();
 	
-	int append_new_positions(boost::shared_ptr<encap_gsl_matrix> positions);
+	int append_new_positions(boost::shared_ptr<PALMMatrix<double> > positions);
 	int write_positions_to_wave();	// to be called when the positions have been uploaded
 	// writes the positions to the wave
 	// the wave is only created at this point, and WILL overwrite previous waves of the same name
 	
 private:
-	list <boost::shared_ptr<encap_gsl_matrix> > positionsList;
+	list <boost::shared_ptr<PALMMatrix<double> > > positionsList;
 	size_t total_number_of_positions;
 	string wave_name;
 };

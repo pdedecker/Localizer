@@ -19,7 +19,7 @@
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_FileIO.h"
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since encap_gsl_matrix does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
 using namespace std;
 
@@ -45,13 +45,13 @@ public:
 	
 	~threadStartData() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	boost::shared_ptr<ThresholdImage> thresholder;
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particleFinder;
 	boost::shared_ptr<FitPositions> positionsFitter;
-	boost::shared_ptr<encap_gsl_matrix> fittedPositions;	// the positions will be returned here
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;	// the positions will be returned here
 };
 	
 
@@ -63,7 +63,7 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 // this function is the same as the previous one, except that it does not try to localize the positions before fitting, but assumes that the positions
 // to start fitting at are provided as a 2D wave in fitting_positions
 
-boost::shared_ptr<encap_gsl_matrix_uchar> do_processing_and_thresholding(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 class END_SHOULD_BE_LARGER_THAN_START{};
@@ -75,7 +75,7 @@ public:
 	PALMBitmapImageDeviationCalculator() {;}
 	virtual ~PALMBitmapImageDeviationCalculator() {;}
 	
-	virtual double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) = 0;
+	virtual double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) = 0;
 };
 
 class PALMBitmapImageDeviationCalculator_FitUncertainty : public PALMBitmapImageDeviationCalculator {
@@ -83,7 +83,7 @@ public:
 	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
 	~PALMBitmapImageDeviationCalculator_FitUncertainty() {;}
 	
-	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return ((positions->get(index, 7) < upperLimit) ? (positions->get(index, 7) * scaleFactor) : -1);}
+	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return ((positions->get(index, 7) < upperLimit) ? (positions->get(index, 7) * scaleFactor) : -1);}
 	
 private:
 	double scaleFactor;
@@ -95,7 +95,7 @@ public:
 	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
 	PALMBitmapImageDeviationCalculator_Constant() {;}
 	
-	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return deviation;}
+	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return deviation;}
 	
 private:
 	double deviation;
@@ -106,7 +106,7 @@ public:
 	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
 	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot() {;}
 	
-	double getDeviation(boost::shared_ptr<encap_gsl_matrix> positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->get(index, 1)));}
+	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->get(index, 1)));}
 	
 private:
 	double PSFWidth;
@@ -118,11 +118,11 @@ public:
 	calculate_PALM_bitmap_image_ThreadStartParameters() {;}
 	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> positions;
+	boost::shared_ptr<PALMMatrix<double> > positions;
 	boost::shared_ptr<encap_gsl_volume_ushort> image;
-	boost::shared_ptr<encap_gsl_matrix> totalIntensities;
+	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
 	
-	boost::shared_ptr<encap_gsl_matrix> colors;
+	boost::shared_ptr<PALMMatrix<double> > colors;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	
 	int normalizeColors;
@@ -137,10 +137,10 @@ public:
 	double scaleFactor;
 };
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<encap_gsl_matrix> positions, boost::shared_ptr<encap_gsl_matrix> colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);
@@ -152,6 +152,6 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<encap_gsl_matrix> image, size_t number_of_bins);
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins);
 
 #endif

@@ -30,7 +30,7 @@
 #include "stdint.h"
 #include "XOPStandardHeaders.h"
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since encap_gsl_matrix does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
 
 
@@ -114,7 +114,7 @@ public:
 	ParticleFinder() {minDistanceFromEdge = 0;}
 	virtual ~ParticleFinder() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix> findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image) = 0;
+	virtual boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) = 0;
 protected:
 	double minDistanceFromEdge;
 };
@@ -124,7 +124,7 @@ public:
 	ParticleFinder_radius(double dist, double rhs) {minDistanceFromEdge = dist; radius = rhs;}
 	~ParticleFinder_radius() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image);
+	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 protected:
 	double radius;
 };
@@ -134,10 +134,10 @@ public:
 	ParticleFinder_adjacent4(double rhs) {minDistanceFromEdge = rhs;}
 	~ParticleFinder_adjacent4() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image);
+	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
-	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image, boost::shared_ptr<encap_gsl_matrix_long> mapped_image);
+	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
 
 };
 
@@ -146,10 +146,10 @@ public:
 	ParticleFinder_adjacent8(double rhs) {minDistanceFromEdge = rhs;}
 	~ParticleFinder_adjacent8() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> findPositions(boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image);
+	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
-	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix_uchar> threshold_image, boost::shared_ptr<encap_gsl_matrix_long> mapped_image);
+	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
 	
 };
 
@@ -158,8 +158,8 @@ public:
 	FitPositions() {;}
 	virtual ~FitPositions() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions) = 0;
-	virtual boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos) = 0;
+	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) = 0;
+	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
 };
@@ -171,8 +171,8 @@ public:
 	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -190,15 +190,15 @@ public:
 	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
-	int multiply_with_gaussian(boost::shared_ptr<encap_gsl_matrix> original_image, boost::shared_ptr<encap_gsl_matrix> masked_image, double x, double y,
+	int multiply_with_gaussian(boost::shared_ptr<PALMMatrix<double> > original_image, boost::shared_ptr<PALMMatrix<double> > masked_image, double x, double y,
 							   double std_dev, double background, double amplitude);
 	// masked_image should be provided with the same dimensions as original_image. It will be overwritten with the contents of the multiplication
-	int determine_x_y_position(boost::shared_ptr<encap_gsl_matrix> masked_image, double &x, double &y);
+	int determine_x_y_position(boost::shared_ptr<PALMMatrix<double> > masked_image, double &x, double &y);
 	
 	double convergence_threshold;
 	size_t cutoff_radius;
@@ -213,9 +213,9 @@ public:
 	FitPositionsCentroid(size_t cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
 	~FitPositionsCentroid() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<encap_gsl_matrix> fit_positions(const boost::shared_ptr<encap_gsl_matrix> image, boost::shared_ptr<encap_gsl_matrix> positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	size_t cutoff_radius;
@@ -227,7 +227,7 @@ public:
 	ThresholdImage() {;}
 	virtual ~ThresholdImage() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image) = 0;
+	virtual boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) = 0;
 };
 
 class ThresholdImage_Direct : public ThresholdImage {
@@ -236,7 +236,7 @@ public:
 	ThresholdImage_Direct(double thresh_parameter) {threshold = thresh_parameter;}
 	~ThresholdImage_Direct() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	double threshold;
@@ -248,7 +248,7 @@ public:
 	ThresholdImage_Igor_Iterative() {;}
 	~ThresholdImage_Igor_Iterative() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -260,7 +260,7 @@ public:
 	ThresholdImage_Igor_Bimodal() {;}
 	~ThresholdImage_Igor_Bimodal() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -272,7 +272,7 @@ public:
 	ThresholdImage_Igor_Adaptive() {;}
 	~ThresholdImage_Igor_Adaptive() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -284,7 +284,7 @@ public:
 	ThresholdImage_Igor_Fuzzy1() {;}
 	~ThresholdImage_Igor_Fuzzy1() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -296,7 +296,7 @@ public:
 	ThresholdImage_Igor_Fuzzy2() {;}
 	~ThresholdImage_Igor_Fuzzy2() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -307,21 +307,21 @@ public:
 	ThresholdImage_Isodata() {;}
 	~ThresholdImage_Isodata() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 };
 
 class ThresholdImage_Triangle : public ThresholdImage {
 public:
 	ThresholdImage_Triangle() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 };
 
 class ThresholdImage_GLRT : public ThresholdImage {
 public:
 	ThresholdImage_GLRT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param;} 
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	double PFA;
@@ -333,7 +333,7 @@ public:
 	ConvolveMatricesWithFFTClass() {forwardPlan = NULL; reversePlan = NULL; forwardPlanXSize = 0; forwardPlanYSize = 0; reversePlanXSize = 0; reversePlanYSize = 0;}
 	~ConvolveMatricesWithFFTClass();
 	
-	boost::shared_ptr<encap_gsl_matrix> ConvolveMatricesWithFFT(boost::shared_ptr<encap_gsl_matrix> image1, boost::shared_ptr<encap_gsl_matrix> image2);
+	boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFT(boost::shared_ptr<PALMMatrix<double> > image1, boost::shared_ptr<PALMMatrix<double> > image2);
 	
 protected:
 	fftw_plan forwardPlan;
@@ -365,16 +365,16 @@ public:
 	ThresholdImage_GLRT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; averageKernelXSize = 0; averageKernelYSize = 0; GaussianKernelXSize = 0; GaussianKernelYSize = 0;} 
 	~ThresholdImage_GLRT_FFT() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding();
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_thresholding(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding();
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_thresholding(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	ConvolveMatricesWithFFTClass matrixConvolver;
 	
 	double PFA;
 	double gaussianWidth;
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;
-	boost::shared_ptr<encap_gsl_matrix> average_kernel;
+	boost::shared_ptr<PALMMatrix<double> > Gaussian_kernel;
+	boost::shared_ptr<PALMMatrix<double> > average_kernel;
 	size_t averageKernelXSize, averageKernelYSize;
 	size_t GaussianKernelXSize, GaussianKernelYSize;
 	double sum_squared_Gaussian;
@@ -393,7 +393,7 @@ public:
 	ThresholdImage_Preprocessor() {;}
 	virtual ~ThresholdImage_Preprocessor() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image) = 0;
+	virtual boost::shared_ptr<PALMMatrix<double> > do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) = 0;
 };
 
 class ThresholdImage_Preprocessor_MedianFilter : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
@@ -401,7 +401,7 @@ public:
 	ThresholdImage_Preprocessor_MedianFilter(unsigned x, size_t y) {kernel_x_size = x; kernel_y_size = y;}
 	~ThresholdImage_Preprocessor_MedianFilter() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix<double> > do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	size_t kernel_x_size, kernel_y_size;
@@ -414,7 +414,7 @@ public:
 																									// when the first image is supplied
 	~ThresholdImage_Preprocessor_GaussianSmoothing() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix<double> > do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	void generate_Gaussian_kernel(size_t x_size, size_t y_size);
@@ -422,7 +422,7 @@ protected:
 	
 	boost::mutex generateKernelMutex;
 	
-	boost::shared_ptr<encap_gsl_matrix> Gaussian_kernel;	// automatically initialized to a NULL pointer
+	boost::shared_ptr<PALMMatrix<double> > Gaussian_kernel;	// automatically initialized to a NULL pointer
 	double width;
 	size_t kernel_x_size;
 	size_t kernel_y_size;
@@ -434,7 +434,7 @@ public:
 	ThresholdImage_Preprocessor_MeanFilter(unsigned x, size_t y) {kernel_x_size = x; kernel_y_size = y;}
 	~ThresholdImage_Preprocessor_MeanFilter() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix> do_preprocessing(boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix<double> > do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image);
 	
 protected:
 	size_t kernel_x_size, kernel_y_size;
@@ -446,7 +446,7 @@ public:
 	ThresholdImage_Postprocessor() {;}
 	virtual ~ThresholdImage_Postprocessor() {;}
 	
-	virtual boost::shared_ptr<encap_gsl_matrix_uchar> do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image) = 0;
+	virtual boost::shared_ptr<PALMMatrix <unsigned char> > do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) = 0;
 };
 
 class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
@@ -455,7 +455,7 @@ public:
 	ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	~ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image);
 };
 
 class ThresholdImage_Postprocessor_RemovePixelsBelowMean : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
@@ -464,7 +464,7 @@ public:
 	ThresholdImage_Postprocessor_RemovePixelsBelowMean() {;}
 	~ThresholdImage_Postprocessor_RemovePixelsBelowMean() {;}
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> do_postprocessing(boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image, boost::shared_ptr<encap_gsl_matrix> image);
+	boost::shared_ptr<PALMMatrix <unsigned char> > do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image);
 };
 
 
@@ -492,7 +492,7 @@ public:
 	double xOffset;
 	double yOffset;
 	double sigma;
-	boost::shared_ptr<encap_gsl_matrix> imageSubset;
+	boost::shared_ptr<PALMMatrix<double> > imageSubset;
 };
 
 

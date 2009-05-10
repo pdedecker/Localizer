@@ -29,9 +29,9 @@ HOST_IMPORT int main(IORecHandle ioRecHandle);
 
 int convert_handle_to_string(Handle handle, string &output_string);
 
-boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
+boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
 
-waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matrix, string waveName);
+waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName);
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t cache_size = N_SIMULTANEOUS_IMAGE_LOADS);
 

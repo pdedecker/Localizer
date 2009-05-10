@@ -1129,8 +1129,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double radiusBetweenParticles;
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
-	boost::shared_ptr<encap_gsl_matrix> CCD_Frame;
-	boost::shared_ptr<encap_gsl_matrix> located_particles;
+	boost::shared_ptr<PALMMatrix<double> > CCD_Frame;
+	boost::shared_ptr<PALMMatrix<double> > located_particles;
 	
 	// long numDimensions; 
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1139,7 +1139,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double value[2];
 	
 	
-	boost::shared_ptr<encap_gsl_matrix_uchar> thresholded_image;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
 	
 	
 	boost::shared_ptr<ThresholdImage> thresholder;
@@ -1233,8 +1233,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// copy the Igor wave with the CCD Frame into a new gsl_matrix
 		CCD_Frame = copy_IgorDPWave_to_gsl_matrix(CCD_Frame_wave);
 		
-		x_size = CCD_Frame->get_x_size();
-		y_size = CCD_Frame->get_y_size();
+		x_size = CCD_Frame->getXSize();
+		y_size = CCD_Frame->getYSize();
 		
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
@@ -1402,9 +1402,9 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	boost::shared_ptr<encap_gsl_matrix> firstImage;
-	boost::shared_ptr<encap_gsl_matrix> secondImage;
-	boost::shared_ptr<encap_gsl_matrix> outputImage;
+	boost::shared_ptr<PALMMatrix<double> > firstImage;
+	boost::shared_ptr<PALMMatrix<double> > secondImage;
+	boost::shared_ptr<PALMMatrix<double> > outputImage;
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;
@@ -1479,8 +1479,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	waveHndl colorWave, positionsWave;
 	
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	boost::shared_ptr<encap_gsl_matrix> positions;
-	boost::shared_ptr<encap_gsl_matrix> colors;
+	boost::shared_ptr<PALMMatrix<double> > positions;
+	boost::shared_ptr<PALMMatrix<double> > colors;
 	boost::shared_ptr<encap_gsl_volume_ushort> image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1837,7 +1837,7 @@ int convert_handle_to_string(Handle handle, string &output_path) {
 
 
 
-boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {
+boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
@@ -1859,7 +1859,7 @@ boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave)
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<encap_gsl_matrix> matrix(new encap_gsl_matrix(x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > matrix(new encap_gsl_matrix(x_size, y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -1878,7 +1878,7 @@ boost::shared_ptr<encap_gsl_matrix> copy_IgorDPWave_to_gsl_matrix(waveHndl wave)
 	return matrix;
 }
 
-waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matrix, string waveName) {
+waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -1905,8 +1905,8 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<encap_gsl_matrix> matri
 	}
 		
 		
-	size_t x_size = (size_t)matrix->get_x_size();
-	size_t y_size = (size_t)matrix->get_y_size();
+	size_t x_size = (size_t)matrix->getXSize();
+	size_t y_size = (size_t)matrix->getYSize();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;
@@ -2024,8 +2024,8 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 	double value[2];
 	
 	
-	size_t x_size = (size_t)volume->get_x_size();
-	size_t y_size = (size_t)volume->get_y_size();
+	size_t x_size = (size_t)volume->getXSize();
+	size_t y_size = (size_t)volume->getYSize();
 	size_t z_size = (size_t)volume->get_z_size();
 	
 	dimensionSizes[0] = x_size;
@@ -2069,8 +2069,8 @@ waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_vo
 	double value[2];
 	
 	
-	size_t x_size = (size_t)volume->get_x_size();
-	size_t y_size = (size_t)volume->get_y_size();
+	size_t x_size = (size_t)volume->getXSize();
+	size_t y_size = (size_t)volume->getYSize();
 	size_t z_size = (size_t)volume->get_z_size();
 	
 	dimensionSizes[0] = x_size;
