@@ -130,7 +130,9 @@ template <typename T> inline void PALMMatrix<T>::set(size_t x, size_t y, const T
 template <typename T> inline void PALMMatrix<T>::set_all(const T &value) {
 	size_t nItems = xSize * ySize;
 	
-	for (size_t i = 0; i < nItems; ++i) {
+	int i;
+	#pragma omp parallel for private(i) num_threads(2)
+	for (i = 0; i < nItems; ++i) {
 		data[i] = value;
 	}
 }
@@ -145,8 +147,10 @@ template <typename T> PALMMatrix<T> PALMMatrix<T>::operator=(const PALMMatrix &r
 	ySize = rhs.getYSize();
 	data = new T[xSize * ySize];
 	
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			(*this)(i, j) = rhs(i, j);
 		}
 	}
@@ -157,8 +161,10 @@ template <typename T> PALMMatrix<T> PALMMatrix<T>::operator=(const PALMMatrix &r
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator+=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			(*this)(i, j) += rhs(i, j);
 		}
 	}
@@ -169,8 +175,10 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator+=(const PALMMatrix
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator-=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			(*this)(i, j) -= rhs(i, j);
 		}
 	}
@@ -181,8 +189,10 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator-=(const PALMMatrix
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator*=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			(*this)(i, j) *= rhs(i, j);
 		}
 	}
@@ -193,8 +203,10 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator*=(const PALMMatrix
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator/=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			(*this)(i, j) /= rhs(i, j);
 		}
 	}
@@ -240,8 +252,11 @@ template <typename T> PALMMatrix<T> PALMMatrix<T>::operator/(const PALMMatrix &r
 
 template <typename T> const PALMMatrix<T> PALMMatrix<T>::AddScalar(const double scalar) {
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	
+	int i, j;
+	#pragma omp parallel for private(i, j) shared(result) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			result(i, j) += scalar;
 		}
 	}
@@ -250,8 +265,11 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::AddScalar(const double 
 
 template <typename T> const PALMMatrix<T> PALMMatrix<T>::SubtractScalar(const double scalar) {
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	
+	int i, j;
+	#pragma omp parallel for private(i, j) shared(result) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			result(i, j) -= scalar;
 		}
 	}
@@ -260,8 +278,11 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::SubtractScalar(const do
 
 template <typename T> const PALMMatrix<T> PALMMatrix<T>::MultiplyWithScalar(const double scalar) {
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	
+	int i, j;
+	#pragma omp parallel for private(i, j) shared(result) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			result(i, j) *= scalar;
 		}
 	}
@@ -270,8 +291,11 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::MultiplyWithScalar(cons
 
 template <typename T> const PALMMatrix<T> PALMMatrix<T>::DivideByScalar(const double scalar) {
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	
+	int i, j;
+	#pragma omp parallel for private(i, j) shared(result) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			result(i, j) /= scalar;
 		}
 	}
@@ -280,8 +304,10 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::DivideByScalar(const do
 
 template <typename T> const PALMMatrix<T> PALMMatrix<T>::RaiseToPower(const double power) {
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	int i, j;
+	#pragma omp parallel for private(i, j) shared(result) num_threads(2)
+	for (i = 0; i < xSize; ++i) {
+		for (j = 0; j < ySize; ++j) {
 			result(i, j) = pow(result(i, j), power);
 		}
 	}
