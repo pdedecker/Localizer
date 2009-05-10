@@ -460,8 +460,8 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 				intensity = current_image->get(current_x, current_y);
 				
 				(*positions)((j - offset_in_positions_wave), 0) = intensity;
-				(*positions)((j - offset_in_positions_wave), 1) = (*supplied_fitting_positions)(j, 1));
-				(*positions)((j - offset_in_positions_wave), 2) = (*supplied_fitting_positions)(j, 2));
+				(*positions)((j - offset_in_positions_wave), 1) = (*supplied_fitting_positions)(j, 1);
+				(*positions)((j - offset_in_positions_wave), 2) = (*supplied_fitting_positions)(j, 2);
 			}
 			
 			offset_in_positions_wave += n_positions_in_current_frame;
@@ -599,7 +599,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 }
 
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	size_t nPositions = positions->getXSize();
 	size_t nColors = colors->getXSize();
@@ -618,7 +618,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	double currentColors[3];
 	double summedIntensity;
 	
-	boost::shared_ptr<encap_gsl_volume_ushort> outputImage(new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
+	boost::shared_ptr<PALMVolume <unsigned short> > outputImage(new PALMVolume <unsigned short>(imageWidth, imageHeight, 3));	// 3 layers because it will be a direct color image
 	boost::shared_ptr<PALMMatrix<double> > totalIntensities(new PALMMatrix<double>(imageWidth, imageHeight));	// keep track of the total intensities in each pixel
 	
 	outputImage->set_all(0);
@@ -675,22 +675,22 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 				currentIntensity = currentAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * deviation * deviation));
 				
 				if (normalizeColors != 0) {
-					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
-					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / maxAmplitude;
-					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / maxAmplitude;
+					currentColors[0] = (*colors)(colorIndex, 0) * currentIntensity / maxAmplitude;	// Simplification of colors->get(colorIndex, 0) * currentIntensity / currentAmplitude * currentAmplitude / maxAmplitude
+					currentColors[1] = (*colors)(colorIndex, 1) * currentIntensity / maxAmplitude;
+					currentColors[2] = (*colors)(colorIndex, 2) * currentIntensity / maxAmplitude;
 				} else {
-					currentColors[0] = colors->get(colorIndex, 0) * currentIntensity / currentAmplitude;
-					currentColors[1] = colors->get(colorIndex, 1) * currentIntensity / currentAmplitude;
-					currentColors[2] = colors->get(colorIndex, 2) * currentIntensity / currentAmplitude;
+					currentColors[0] = (*colors)(colorIndex, 0) * currentIntensity / currentAmplitude;
+					currentColors[1] = (*colors)(colorIndex, 1) * currentIntensity / currentAmplitude;
+					currentColors[2] = (*colors)(colorIndex, 2) * currentIntensity / currentAmplitude;
 				}
 				
-				summedIntensity = currentIntensity + totalIntensities->get(i, j);
+				summedIntensity = currentIntensity + (*totalIntensities)(i, j);
 				
-				outputImage->set(i, j, 0, (unsigned short)(currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0)));
-				outputImage->set(i, j, 1, (unsigned short)(currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1)));
-				outputImage->set(i, j, 2, (unsigned short)(currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2)));
+				(*outputImage)(i, j, 0) = (unsigned short)(currentIntensity / summedIntensity * currentColors[0] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 0));
+				(*outputImage)(i, j, 1) = (unsigned short)(currentIntensity / summedIntensity * currentColors[1] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 1));
+				(*outputImage)(i, j, 2) = (unsigned short)(currentIntensity / summedIntensity * currentColors[2] + totalIntensities->get(i, j) / summedIntensity * outputImage->get(i, j, 2));
 				
-				totalIntensities->set(i,j, (totalIntensities->get(i, j) + currentIntensity));
+				(*totalIntensities)(i,j) = totalIntensities->get(i, j) + currentIntensity;
 			}
 		}
 	}
@@ -698,14 +698,14 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 	return outputImage;
 }
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	vector<size_t> startPositions;
 	vector<size_t> endPositions;
 	vector<boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> > threadData;
-	boost::shared_ptr<encap_gsl_volume_ushort> outputImage;
+	boost::shared_ptr<PALMVolume <unsigned short> > outputImage;
 	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
 	
 	size_t nPositions = positions->getXSize();
@@ -738,8 +738,8 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 		// get the position with the maximum amplitude
 		// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
 		for (size_t n = 0; n < nPositions; ++n) {
-			if (positions->get(n, 1) > maxAmplitude) {
-				maxAmplitude = positions->get(n,1);
+			if ((*positions)(n,1) > maxAmplitude) {
+				maxAmplitude = (*positions)(n,1);
 			}
 		}
 	}
@@ -758,7 +758,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 		
 		boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> singleThreadStartParameter(new calculate_PALM_bitmap_image_ThreadStartParameters);
 		singleThreadStartParameter->positions = positions;
-		singleThreadStartParameter->image = boost::shared_ptr<encap_gsl_volume_ushort> (new encap_gsl_volume_ushort(imageWidth, imageHeight, 3));
+		singleThreadStartParameter->image = boost::shared_ptr<PALMVolume <unsigned short> > (new PALMVolume <unsigned short>(imageWidth, imageHeight, 3));
 		singleThreadStartParameter->totalIntensities = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(imageWidth, imageHeight));
 		singleThreadStartParameter->colors = colors;
 		singleThreadStartParameter->deviationCalculator = deviationCalculator;
@@ -796,10 +796,10 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 		for (size_t i = 0; i < imageWidth; ++i) {
 			for (size_t j = 0; j < imageHeight; ++j) {
 				summedIntensity = totalIntensities->get(i,j) + threadData[n]->totalIntensities->get(i,j);
-				outputImage->set(i, j, 0, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 0) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0)));
-				outputImage->set(i, j, 1, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 1) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 1)));
-				outputImage->set(i, j, 2, (unsigned short)(totalIntensities->get(i,j) / summedIntensity * outputImage->get(i, j, 2) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 2)));
-				totalIntensities->set(i,j, summedIntensity);
+				(*outputImage)(i, j, 0) = (unsigned short)((*totalIntensities)(i,j) / summedIntensity * (*outputImage)(i, j, 0) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0));
+				(*outputImage)(i, j, 1) = (unsigned short)((*totalIntensities)(i,j) / summedIntensity * (*outputImage)(i, j, 1) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0));
+				(*outputImage)(i, j, 2) = (unsigned short)((*totalIntensities)(i,j) / summedIntensity * (*outputImage)(i, j, 2) + threadData[n]->totalIntensities->get(i,j) / summedIntensity * threadData[n]->image->get(i, j, 0));
+				(*totalIntensities)(i,j) = summedIntensity;
 			}
 		}
 	}
@@ -810,7 +810,7 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters) {
 	boost::shared_ptr<PALMMatrix<double> > positions = startParameters->positions;
-	boost::shared_ptr<encap_gsl_volume_ushort> image = startParameters->image;
+	boost::shared_ptr<PALMVolume <unsigned short> > image = startParameters->image;
 	boost::shared_ptr<PALMMatrix<double> > totalIntensities = startParameters->totalIntensities;
 	boost::shared_ptr<PALMMatrix<double> > colors = startParameters->colors;
 	
@@ -843,10 +843,10 @@ void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bi
 	totalIntensities->set_all(0);
 	
 	for (size_t n = startIndex; n <= endIndex; ++n) {
-		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
-		currentAmplitude = positions->get(n, 1);
-		currentX = positions->get(n, 3);
-		currentY = positions->get(n, 4);
+		currentFrame = (size_t)((*positions)(n, 0) + 0.5);
+		currentAmplitude = (*positions)(n, 1);
+		currentX = (*positions)(n, 3);
+		currentY = (*positions)(n, 4);
 		
 		if ((currentAmplitude < 0) || (currentX < 0) || (currentX >= xSize) || (currentY < 0) || (currentY >= ySize)) {
 			continue;
@@ -937,33 +937,20 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	dimension_sizes[2] = 0;
 	long indices[MAX_DIMENSIONS];
 	double current_value[2];
-	double value;
 	int result;
 	
-	average_image->set_all(0.0);
+	average_image->set_all(0);
 	
 	
 	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the values of the newly loaded image to the average image
-		for (long i = startX; i <= endX; ++i) {
-			for (long j = startY; j <= endY; ++j) {
-				value = average_image->get(i, j);
-				value += current_image->get(i, j);
-				average_image->set(i, j, value);
-			}
-		}
+		(*average_image) += (*current_image);
 	}
 	
 	// divide by the number of images
-	for (size_t i = startX; i <= endX; ++i) {
-		for (size_t j = startY; j <= endY; ++j) {
-			current_value[0] = average_image->get(i, j);
-			current_value[0] /= (double)n_images;
-			average_image->set(i, j, current_value[0]);
-		}
-	}
+	(*average_image) = (*average_image).DivideByScalar(n_images);
 	
 	// try to create the output wave
 	result = MDMakeWave(&output_wave, output_wave_name.c_str(), NULL, dimension_sizes, NT_FP64, 1);
@@ -974,7 +961,7 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {
 		for (size_t j = startY; j <= endY; ++j) {
-			current_value[0] = average_image->get(i, j);
+			current_value[0] = (*average_image)(i, j);
 			indices[0] = i;
 			indices[1] = j;
 			result = MDSetNumericWavePointValue(output_wave, indices, current_value);
@@ -1028,48 +1015,23 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the values of the newly loaded image to the average image
-		for (size_t j = startX; j <= endX; ++j) {
-			for (size_t k = startY; k <= endY; ++k) {
-				value = average_image->get(j, k);
-				value += current_image->get(j, k);
-				average_image->set(j, k, value);
-			}
-		}
+		(*average_image) += (*current_image);
 	}
 	
 	// divide by the number of images
-	for (size_t i = startX; i <= endX; ++i) {
-		for (size_t j = startY; j <= endY; ++j) {
-			value = average_image->get(i, j);
-			value /= (double)n_images;
-			average_image->set(i, j, value);
-		}
-	}
+	(*average_image) = (*average_image).DivideByScalar(n_images);
 	
 	// now loop over the images again, calculating the standard deviation of each pixel
 	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
-		// add the deviation of the newly loaded image from the mean to the stddev jmage
-		for (size_t j = startX; j <= endX; ++j) {
-			for (size_t k = startY; k <= endY; ++k) {
-				value = stdDevImage->get(j, k);
-				deviation = (current_image->get(j, k) - average_image->get(j, k)) * (current_image->get(j, k) - average_image->get(j, k));
-				value += deviation;
-				stdDevImage->set(j, k, value);
-			}
-		}
+		// add the deviation of the newly loaded image from the mean to the stddev image
+		(*stdDevImage) += (((*current_image) - (*average_image)) * ((*current_image) - (*average_image)));
 	}
 	
 	// divide by the number of images to get the average deviation, and take the square root
-	for (size_t i = startX; i <= endX; ++i) {
-		for (size_t j = startY; j <= endY; ++j) {
-			value = stdDevImage->get(i, j);
-			value /= (double)n_images;
-			value = sqrt(value);
-			stdDevImage->set(i, j, value);
-		}
-	}
+	(*stdDevImage) = (*stdDevImage).DivideByScalar(n_images);
+	(*stdDevImage) = (*stdDevImage).RaiseToPower(0.5);
 	
 	// try to create the output wave
 	dimension_sizes[0] = xRange;
@@ -1083,7 +1045,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {
 		for (size_t j = startY; j <= endX; ++j) {
-			current_value[0] = stdDevImage->get(i, j);
+			current_value[0] = (*stdDevImage)(i, j);
 			indices[0] = i;
 			indices[1] = j;
 			result = MDSetNumericWavePointValue(output_wave, indices, current_value);
@@ -1117,7 +1079,7 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> 
 	
 	for (size_t j = 0; j < y_size; j++) {
 		for (size_t i = 0; i < x_size; i++) {
-			current_value = image->get(i, j);
+			current_value = (*image)(i, j);
 			if (current_value < min)
 				min = current_value;
 			if (current_value > max)
@@ -1126,12 +1088,12 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> 
 	}
 	
 	// adjust the histogram bins so that they range uniformly from min to max and set the values to zero
-	gsl_histogram_set_ranges_uniform(hist, min, max);
+	gsl_histogram_set_ranges_uniform(hist, min, max + 1e-10);
 	
 	// now populate the histogram
 	for (size_t j = 0; j < y_size; j++) {
 		for (size_t i = 0; i < x_size; i++) {
-			current_value = image->get(i, j);
+			current_value = (*image)(i, j);
 			
 			gsl_histogram_increment(hist, current_value);
 			

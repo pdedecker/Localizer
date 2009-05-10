@@ -48,24 +48,30 @@ public:
 	PALMMatrix(const PALMMatrix &rhs);
 	~PALMMatrix();
 	
-	T & operator() (size_t x, size_t y);
-	T operator() (size_t x, size_t y) const;
-	T & get(size_t x, size_t y);
-	void set(size_t x, size_t y, T &value);
-	void set_all(T &value);
-	void set_all(T value);
+	T & operator() (const size_t x, const size_t y);
+	T operator() (const size_t x, const size_t y) const;
+	T get(size_t x, size_t y) const;
+	void set(size_t x, size_t y, const T &value);
+	void set_all(const T &value);
 	
-	PALMMatrix & operator=(const PALMMatrix &rhs);
+	PALMMatrix operator=(const PALMMatrix &rhs);
 	
 	PALMMatrix & operator+=(const PALMMatrix &rhs);
 	PALMMatrix & operator-=(const PALMMatrix &rhs);
 	PALMMatrix & operator*=(const PALMMatrix &rhs);
 	PALMMatrix & operator/=(const PALMMatrix &rhs);
 	
-	const PALMMatrix & operator+(const PALMMatrix &rhs) const;
-	const PALMMatrix & operator-(const PALMMatrix &rhs) const;
-	const PALMMatrix & operator/(const PALMMatrix &rhs) const;
-	const PALMMatrix & operator*(const PALMMatrix &rhs) const;
+	const PALMMatrix operator+(const PALMMatrix &rhs) const;
+	const PALMMatrix operator-(const PALMMatrix &rhs) const;
+	const PALMMatrix operator/(const PALMMatrix &rhs) const;
+	const PALMMatrix operator*(const PALMMatrix &rhs) const;
+	
+	const PALMMatrix AddScalar(const double scalar);
+	const PALMMatrix SubtractScalar(const double scalar);
+	const PALMMatrix MultiplyWithScalar(const double scalar);
+	const PALMMatrix DivideByScalar(const double scalar);
+	
+	const PALMMatrix RaiseToPower(const double power);
 	
 	size_t getXSize() const {return xSize;}
 	size_t getYSize() const {return ySize;}
@@ -78,9 +84,9 @@ protected:
 
 template <typename T> PALMMatrix<T>::PALMMatrix(size_t xSize_rhs, size_t ySize_rhs) {
 	data = NULL;
-	data = new T[xSize * ySize];
 	xSize = xSize_rhs;
 	ySize = ySize_rhs;
+	data = new T[xSize * ySize];
 }
 
 template <typename T> PALMMatrix<T>::PALMMatrix(const PALMMatrix &rhs) {
@@ -103,41 +109,35 @@ template <typename T> PALMMatrix<T>::~PALMMatrix() {
 	}
 }
 
-template <typename T> inline T & PALMMatrix<T>::operator() (size_t x, size_t y) {
+template <typename T> inline T & PALMMatrix<T>::operator() (const size_t x, const size_t y) {
 	assert ((x < xSize) && (y < ySize));
 	return data[x * ySize + y];
 }
 
-template <typename T> inline T PALMMatrix<T>::operator() (size_t x, size_t y) const {
+template <typename T> inline T PALMMatrix<T>::operator() (const size_t x, const size_t y) const {
 	assert ((x < xSize) && (y < ySize));
 	return data[x * ySize + y];
 }
 
-template <typename T> inline T & PALMMatrix<T>::get(size_t x, size_t y) {
+template <typename T> inline T PALMMatrix<T>::get(size_t x, size_t y) const {
 	assert ((x < xSize) && (y < ySize));
 	return data[x * ySize + y];
 }
 
-template <typename T> inline void PALMMatrix<T>::set(size_t x, size_t y, T &value) {
+template <typename T> inline void PALMMatrix<T>::set(size_t x, size_t y, const T &value) {
 	assert ((x < xSize) && (y < ySize));
 	data[x * ySize + y] = value;
 }
 
-template <typename T> inline void PALMMatrix<T>::set_all(T &value) {
+template <typename T> inline void PALMMatrix<T>::set_all(const T &value) {
 	size_t nItems = xSize * ySize;
+	
 	for (size_t i = 0; i < nItems; ++i) {
 		data[i] = value;
 	}
 }
 
-template <typename T> inline void PALMMatrix<T>::set_all(T value) {
-	size_t nItems = xSize * ySize;
-	for (size_t i = 0; i < nItems; ++i) {
-		data[i] = value;
-	}
-}
-
-template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator=(const PALMMatrix &rhs) {
+template <typename T> PALMMatrix<T> PALMMatrix<T>::operator=(const PALMMatrix &rhs) {
 	if (this == &rhs) {
 		return *this;
 	}
@@ -145,6 +145,7 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator=(const PALMMatrix 
 	delete[] data;
 	xSize = rhs.getXSize();
 	ySize = rhs.getYSize();
+	data = new T[xSize * ySize];
 	
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
@@ -181,6 +182,7 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator-=(const PALMMatrix
 
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator*=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
+	
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
 			(*this)(i, j) *= rhs(i, j);
@@ -192,6 +194,7 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator*=(const PALMMatrix
 
 template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator/=(const PALMMatrix &rhs) {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
+	
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
 			(*this)(i, j) /= rhs(i, j);
@@ -201,7 +204,7 @@ template <typename T> PALMMatrix<T> & PALMMatrix<T>::operator/=(const PALMMatrix
 	return *this;
 }
 
-template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator+(const PALMMatrix &rhs) const {
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator+(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -210,7 +213,7 @@ template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator+(const PALMM
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator-(const PALMMatrix &rhs) const {
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator-(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -219,7 +222,7 @@ template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator-(const PALMM
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator*(const PALMMatrix &rhs) const {
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator*(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -228,7 +231,7 @@ template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator*(const PALMM
 	return result;
 }
 
-template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator/(const PALMMatrix &rhs) const {
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::operator/(const PALMMatrix &rhs) const {
 	assert ((xSize == rhs.getXSize()) && (ySize == rhs.getYSize()));
 	
 	PALMMatrix <T> result(*this);	// make a copy of the current matrix
@@ -236,6 +239,57 @@ template <typename T> const PALMMatrix<T> & PALMMatrix<T>::operator/(const PALMM
 	
 	return result;
 }
+
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::AddScalar(const double scalar) {
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) += scalar;
+		}
+	}
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::SubtractScalar(const double scalar) {
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) -= scalar;
+		}
+	}
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::MultiplyWithScalar(const double scalar) {
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) *= scalar;
+		}
+	}
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::DivideByScalar(const double scalar) {
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) /= scalar;
+		}
+	}
+	return result;
+}
+
+template <typename T> const PALMMatrix<T> PALMMatrix<T>::RaiseToPower(const double power) {
+	PALMMatrix <T> result(*this);	// make a copy of the current matrix
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			result(i, j) = pow(result(i, j), power);
+		}
+	}
+	return result;
+}
+
 
 template <typename T> class PALMVolume {
 public:
@@ -245,10 +299,9 @@ public:
 	
 	T & operator() (size_t x, size_t y, size_t z);
 	T operator() (size_t x, size_t y, size_t z) const;
-	T & get(size_t x, size_t y, size_t z);
-	void set(size_t x, size_t y, size_t z, T &value);
-	void set_all(T &value);
-	void set_all(T value);
+	T get(size_t x, size_t y, size_t z) const;
+	void set(size_t x, size_t y, size_t z, const T &value);
+	void set_all(const T &value);
 	
 	PALMVolume & operator=(const PALMVolume &rhs);
 	
@@ -274,10 +327,10 @@ protected:
 };
 
 template <typename T> PALMVolume<T>::PALMVolume(size_t xSize_rhs, size_t ySize_rhs, size_t zSize_rhs) {
-	data.resize(zSize_rhs, PALMMatrix<T>(xSize, ySize));
 	xSize = xSize_rhs;
 	ySize = ySize_rhs;
 	zSize = zSize_rhs;
+	data.resize(zSize, PALMMatrix<T>(xSize, ySize));
 }
 
 template <typename T> PALMVolume<T>::PALMVolume(const PALMVolume &rhs) {
@@ -305,27 +358,17 @@ template <typename T> inline T PALMVolume<T>::operator() (size_t x, size_t y, si
 	return data[z](x, y);
 }
 
-template <typename T> inline T & PALMVolume<T>::get(size_t x, size_t y, size_t z) {
+template <typename T> inline T PALMVolume<T>::get(size_t x, size_t y, size_t z) const {
 	assert ((x < xSize) && (y < ySize) && (z < zSize));
-	return data[z](x, y);
+	return (data[z])(x, y);
 }
 
-template <typename T> inline void PALMVolume<T>::set(size_t x, size_t y, size_t z, T &value) {
+template <typename T> inline void PALMVolume<T>::set(size_t x, size_t y, size_t z, const T &value) {
 	assert ((x < xSize) && (y < ySize) && (z < zSize));
 	data[z](x, y) = value;
 }
 
-template <typename T> inline void PALMVolume<T>::set_all(T &value) {
-	for (size_t k = 0; k < zSize; ++k) {
-		for (size_t i = 0; i < xSize; ++i) {
-			for (size_t j = 0; j < ySize; ++j) {
-				(*this)(i, j, k) = value;
-			}
-		}
-	}
-}
-
-template <typename T> inline void PALMVolume<T>::set_all(T value) {
+template <typename T> inline void PALMVolume<T>::set_all(const T &value) {
 	for (size_t k = 0; k < zSize; ++k) {
 		for (size_t i = 0; i < xSize; ++i) {
 			for (size_t j = 0; j < ySize; ++j) {

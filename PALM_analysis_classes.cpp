@@ -78,45 +78,25 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
-		// average_image->add(*loaded_image);
-		for (size_t l = 0; l < y_size; ++l) {
-			for (size_t k = 0; k < x_size; ++k) {
-				value = average_image->get(k, l);
-				value += loaded_image->get(k, l);
-				average_image->set(k, l, value);
-			}
-		}
+		(*average_image) = (*average_image) + (*loaded_image);
 	}
 	
 	// now divide each point so that we get the average
 	// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
 	
 	// the approach using the gsl functions seems off so we use a different one instead
-	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			current_double = average_image->get(i, j);
-			current_double /= (double)total_number_of_images;
-			average_image->set(i, j, current_double);
-		}
-	}
+	(*average_image) = (*average_image).DivideByScalar(n_frames_averaging);
 	
 	// now subtract the average for each frame
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
 		// loaded_image->sub(*average_image);
-		for (size_t k = 0; k < x_size; ++k) {
-			for (size_t l = 0; l < y_size; ++l) {
-				value = loaded_image->get(k, l);
-				value -= average_image->get(k, l);
-				loaded_image->set(k, l, value);
-			}
-		}
+		(*loaded_image) = (*loaded_image) - (*average_image);
 		
 		subtracted_image = loaded_image;
 		
-		output_writer->write_image(subtracted_image);	// the output writer will take care of freeing the memory
+		output_writer->write_image(subtracted_image);
 	}
 }
 
@@ -126,10 +106,6 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	boost::shared_ptr<PALMMatrix<double> > current_image;
 	boost::shared_ptr<PALMMatrix<double> > average_image;
 	boost::shared_ptr<PALMMatrix<double> > subtracted_image;
-	// gsl_matrix *averaging_buffer[n_frames_averaging];	// strictly speaking this isn't legal C++ code because declarations on the stack should be
-															// a const size
-															// g++ accepts this, but the Microsoft compiler throws an error on this
-															// so we will convert it to an assignment on the heap instead
 	vector<boost::shared_ptr<PALMMatrix<double> > > averaging_buffer;
 	averaging_buffer.resize(n_frames_averaging, boost::shared_ptr<PALMMatrix<double> > ());
 	
@@ -140,11 +116,6 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 	double value;
 	
 	average_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
-	
-	/*// the buffer for the averaging will be allocated by the get_nth_image() routine
-	for (size_t i = 0; i < n_frames_averaging; i++) {
-		averaging_buffer[i] = NULL;
-	}*/
 	
 	// we normally try to subtract the average of the frames surrounding the frame that we are interested in
 	// this is why we demand that n_frames_averaging is odd
@@ -183,13 +154,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 				// gsl_matrix_scale(average_image, (1.0 / (double)n_frames_averaging));
 				// the calculation using the gsl seems to be off so we use a direct one instead
 				
-				for (size_t i = 0; i < x_size; i++) {
-					for (size_t j = 0; j < y_size; j++) {
-						current_double = average_image->get(i, j);
-						current_double /= n_frames_averaging;
-						average_image->set(i, j, current_double);
-					}
-				}
+				(*average_image) = (*average_image).DivideByScalar(n_frames_averaging);
 				
 			}
 			// the frame that we are interested in (index n) can now also be found at
@@ -200,20 +165,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_partial_average() {
 			subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 			
 			// subtract the average from the current frame
-			// subtracted_image->copy(*current_image);
-			for (size_t j = 0; j < y_size; ++j) {
-				for (size_t i = 0; i < x_size; ++i) {
-					subtracted_image->set(i, j, current_image->get(i, j));
-				}
-			}
-			// subtracted_image->sub(*average_image);
-			for (size_t k = 0; k < x_size; ++k) {
-				for (size_t l = 0; l < y_size; ++l) {
-					value = subtracted_image->get(k, l);
-					value -= average_image->get(k, l);
-					subtracted_image->set(k, l, value);
-				}
-			}
+			(*subtracted_image) = (*current_image) - (*average_image);
 			
 			// store the subtracted image
 			output_writer->write_image(subtracted_image);	// output_writer will take care of freeing the memory
@@ -842,7 +794,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Direct::do_thresho
 	x_size = image->getXSize();
 	y_size = image->getYSize();
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>_uchar(x_size, y_size));
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image(new PALMMatrix<unsigned char>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
@@ -1750,13 +1702,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			current_value = image->get(i, j);
-			current_value = current_value * current_value;
-			image_squared->set(i, j, current_value);
-		}
-	}
+	(*image_squared) = (*image) * (*image);
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -1799,21 +1745,12 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	averageCalculationMutex.unlock_shared();
 	
 	// normalize the result, so that we get averages
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			current_value = averages->get(i, j);
-			current_value /= double_window_pixels;
-			averages->set(i, j, current_value);
-		}
-	}
+	(*averages) = (*averages).DivideByScalar(double_window_pixels);
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
-	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
-		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			current_value = summed_squares->get(k, l) - double_window_pixels * averages->get(k, l) * averages->get(k, l);
-			null_hypothesis->set(k, l, current_value);
-		}
-	}
+	(*null_hypothesis) = (*averages) * (*averages);
+	(*null_hypothesis) = (*null_hypothesis).MultiplyWithScalar(double_window_pixels);
+	(*null_hypothesis) = (*summed_squares) - (*null_hypothesis);
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -1903,7 +1840,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 			if (hypothesis_test->get(k, l) > PFA) {
-				threshold_image->set(k, l, 255);
+				threshold_image->set(k, l, (unsigned char)255);
 			}
 		}
 	}
@@ -2868,9 +2805,9 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions
 		
 		delta_squared = 10 * convergence_treshold_squared;
 		
-		fitted_positions->set(i - startPos, 2, current_x + (double)x_offset);
-		fitted_positions->set(i - startPos, 3, current_y + (double)y_offset);
-		fitted_positions->set(i - startPos, 10, (double)iterations);
+		(*fitted_positions)(i - startPos, 2) = (double)current_x + (double)x_offset;
+		(*fitted_positions)(i - startPos, 3) = current_y + (double)y_offset;
+		(*fitted_positions)(i - startPos, 10) = (double)iterations;
 	}
 	
 	return fitted_positions;

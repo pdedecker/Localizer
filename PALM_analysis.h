@@ -119,7 +119,7 @@ public:
 	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
 	
 	boost::shared_ptr<PALMMatrix<double> > positions;
-	boost::shared_ptr<encap_gsl_volume_ushort> image;
+	boost::shared_ptr<PALMVolume <unsigned short> > image;
 	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
 	
 	boost::shared_ptr<PALMMatrix<double> > colors;
@@ -137,10 +137,10 @@ public:
 	double scaleFactor;
 };
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
-boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
+boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
 
 void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);

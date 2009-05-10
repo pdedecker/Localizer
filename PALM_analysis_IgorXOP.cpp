@@ -1481,7 +1481,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMMatrix<double> > positions;
 	boost::shared_ptr<PALMMatrix<double> > colors;
-	boost::shared_ptr<encap_gsl_volume_ushort> image;
+	boost::shared_ptr<PALMVolume <unsigned short> > image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long numDimensions;
@@ -1859,7 +1859,7 @@ boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wa
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<PALMMatrix<double> > matrix(new encap_gsl_matrix(x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > matrix(new PALMMatrix<double>(x_size, y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -1973,7 +1973,7 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 }
 
 
-boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave) {
+boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl wave) {
 	int err;
 	long indices[MAX_DIMENSIONS];
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1993,7 +1993,7 @@ boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave)
 	y_size = dimensionSizes[1];
 	z_size = dimensionSizes[2];
 	
-	boost::shared_ptr<encap_gsl_volume> volume(new encap_gsl_volume(x_size, y_size, z_size));
+	boost::shared_ptr<PALMVolume <double> > volume(new PALMVolume <double>(x_size, y_size, z_size));
 	
 	for (size_t k = 0; k < z_size; ++k)
 		for (size_t j = 0; j < y_size; ++j) {
@@ -2007,14 +2007,14 @@ boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave)
 					throw err;
 				}
 				
-				volume->set(i, j, k, value[0]);
+				(*volume)(i, j, k) = value[0];
 			}
 		}
 	
 	return volume;
 }
 
-waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volume, string waveName) {
+waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -2026,7 +2026,7 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 	
 	size_t x_size = (size_t)volume->getXSize();
 	size_t y_size = (size_t)volume->getYSize();
-	size_t z_size = (size_t)volume->get_z_size();
+	size_t z_size = (size_t)volume->getZSize();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;
@@ -2045,7 +2045,7 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 				indices[1] = j;
 				indices[2] = k;
 				
-				value[0] = volume->get(i, j, k);
+				value[0] = (*volume)(i, j, k);
 				
 				err = MDSetNumericWavePointValue(DPWave, indices, value);
 				if (err != 0) {
@@ -2059,7 +2059,7 @@ waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volum
 }
 
 
-waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_volume_ushort> volume, string waveName) {
+waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume <unsigned short> > volume, string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -2071,7 +2071,7 @@ waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_vo
 	
 	size_t x_size = (size_t)volume->getXSize();
 	size_t y_size = (size_t)volume->getYSize();
-	size_t z_size = (size_t)volume->get_z_size();
+	size_t z_size = (size_t)volume->getZSize();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;
@@ -2090,7 +2090,7 @@ waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_vo
 				indices[1] = j;
 				indices[2] = k;
 				
-				value[0] = (double)volume->get(i, j, k);
+				value[0] = (double)(*volume)(i, j, k);
 				
 				err = MDSetNumericWavePointValue(DPWave, indices, value);
 				if (err != 0) {

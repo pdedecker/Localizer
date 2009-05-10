@@ -35,11 +35,11 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t cache_size = N_SIMULTANEOUS_IMAGE_LOADS);
 
-boost::shared_ptr<encap_gsl_volume> copy_IgorDPWave_to_gsl_volume(waveHndl wave);
+boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl wave);
 
-waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<encap_gsl_volume> volume, string waveName);
+waveHndl copy_gsl_volume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, string waveName);
 
-waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<encap_gsl_volume_ushort> volume, string waveName);
+waveHndl copy_gsl_volume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume <unsigned short> > volume, string waveName);
 
 #endif
 
