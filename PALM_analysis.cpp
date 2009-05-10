@@ -57,7 +57,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 		// store the data in the output wave
 		for (size_t k = 0; k < y_size; k++) {
 			for (size_t j = 0; j < x_size; j++) {
-				current_value = current_image->get(j, k);
+				current_value = (*current_image)(j, k);
 				
 				indices[0] = j;
 				indices[1] = k;
@@ -459,9 +459,9 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 				
 				intensity = current_image->get(current_x, current_y);
 				
-				positions->set((j - offset_in_positions_wave), 0, intensity);
-				positions->set((j - offset_in_positions_wave), 1, supplied_fitting_positions->get(j, 1));
-				positions->set((j - offset_in_positions_wave), 2, supplied_fitting_positions->get(j, 2));
+				(*positions)((j - offset_in_positions_wave), 0) = intensity;
+				(*positions)((j - offset_in_positions_wave), 1) = (*supplied_fitting_positions)(j, 1));
+				(*positions)((j - offset_in_positions_wave), 2) = (*supplied_fitting_positions)(j, 2));
 			}
 			
 			offset_in_positions_wave += n_positions_in_current_frame;
@@ -576,7 +576,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 		// calculate the total sum of the image
 		for (size_t k = startY; k <= endY; k++) {
 			for (size_t j = startX; j <= endX; j++) {
-				summed_intensity += current_image->get(j, k);
+				summed_intensity += (*current_image)(j, k);
 			}
 		}
 		// store the contents in the buffer
@@ -628,14 +628,14 @@ boost::shared_ptr<encap_gsl_volume_ushort> calculate_PALM_bitmap_image(boost::sh
 		// get the position with the maximum amplitude
 		// those positions will have the 'full' colors, the colors of the other positions will be scaled relative to it
 		for (size_t n = 0; n < nPositions; ++n) {
-			if (positions->get(n, 1) > maxAmplitude) {
+			if ((*positions)(n, 1) > maxAmplitude) {
 				maxAmplitude = positions->get(n,1);
 			}
 		}
 	}
 	
 	for (size_t n = 0; n < nPositions; ++n) {
-		currentFrame = (size_t)(positions->get(n, 0) + 0.5);
+		currentFrame = (size_t)((*positions)(n, 0) + 0.5);
 		currentAmplitude = positions->get(n, 1);
 		currentX = positions->get(n, 3);
 		currentY = positions->get(n, 4);
@@ -940,7 +940,7 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 	double value;
 	int result;
 	
-	average_image->set_all(0);
+	average_image->set_all(0.0);
 	
 	
 	for (size_t i = 0; i < n_images; i++) {

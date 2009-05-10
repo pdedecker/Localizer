@@ -1352,7 +1352,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				indices[0] = i;
 				indices[1] = j;
 				
-				value[0] = (double)(thresholded_image->get(i, j));
+				value[0] = (double)((*thresholded_image)(i, j));
 				
 				err = MDSetNumericWavePointValue(threshold_image_wave, indices, value);
 				if (err != 0) {
@@ -1922,7 +1922,7 @@ waveHndl copy_gsl_matrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = matrix->get(i, j);
+			value[0] = (*matrix)(i, j);
 			
 			err = MDSetNumericWavePointValue(DPWave, indices, value);
 			if (err != 0) {
