@@ -77,7 +77,6 @@ protected:
 	size_t n_frames_averaging;	// how many frames do we average over?
 	
 	void subtract_average_of_entire_trace();
-	void subtract_partial_average();
 };
 
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {	// creates a difference image, where we subtract the next frame from the current one
