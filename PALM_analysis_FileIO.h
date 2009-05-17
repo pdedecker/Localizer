@@ -61,16 +61,17 @@ public:
 	ImageLoader(const string rhs);
 	virtual ~ImageLoader();
 	
-	// int open_file(const string rhs);
-	// int close_current_file();
-	
 	size_t get_total_number_of_images() const {return total_number_of_images;}
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
-	virtual boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n) = 0;	// images are numbered from 0 to N - 1
+	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual void parse_header_information() = 0;
+	virtual void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) = 0;
+	
+	size_t cacheStart;
+	size_t cacheEnd;
 	
 	size_t image_cache_size;
 	
@@ -83,8 +84,6 @@ protected:
 	uint64_t y_size;
 	int storage_type;
 	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;	// array of pointer to gsl_matrices containing cached images
-	vector <size_t> images_in_cache;	// keeps track of the indices of the images in the cache
-	// if there is no image at a particular location then this is set to -1
 };
 
 class ImageLoaderAndor : public ImageLoader {
@@ -93,10 +92,9 @@ public:
 	ImageLoaderAndor(string rhs, size_t image_cache_size_rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -122,10 +120,9 @@ public:
 	ImageLoaderHamamatsu(string rhs, size_t image_cache_size);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
 };
 
 class ImageLoaderSPE : public ImageLoader {
@@ -134,10 +131,9 @@ public:
 	ImageLoaderSPE(string rhs, size_t image_cache_size);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
 };
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
@@ -146,10 +142,9 @@ public:
 	SimpleImageLoader(string rhs, size_t image_cache_size);
 	~SimpleImageLoader();
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -158,10 +153,9 @@ public:
 	ImageLoaderTIFF(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF();
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
@@ -178,10 +172,10 @@ public:
 	ImageLoaderIgor(string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
 protected:
 	void parse_header_information() {;}
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	// technically we are not reading from disk, but we keep the name since it corresponds to a virtual method in the base class
 	
 	waveHndl igor_data_wave;
 };

@@ -159,12 +159,48 @@ ImageLoader::ImageLoader() {
 	y_size = 0;
 	header_length = 0;
 	image_cache.reserve(N_SIMULTANEOUS_IMAGE_LOADS);
-	images_in_cache.reserve(N_SIMULTANEOUS_IMAGE_LOADS);
+	
+	cacheStart = (size_t)-1;
+	cacheEnd = (size_t)-1;
 }
 
 ImageLoader::~ImageLoader() {
 	if (file.is_open() == 1)
 		file.close();
+}
+
+
+boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
+	if (n >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES();
+	
+	// is there a file open?
+	if (file.is_open() != 1)
+		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
+	
+	// is the requested image in the cache?
+	// if it is then we return a copy
+	if ((n >= cacheStart) && (n <= cacheEnd)) {
+		return image_cache[n - cacheStart];
+	}
+	
+	// if we are here then the image wasn't in the cache
+	// we will load a new sequence of images in the cache, starting with the one that is requested
+	size_t firstImageToLoad, lastImageToLoad;
+	firstImageToLoad = n;
+	lastImageToLoad = n + image_cache_size;
+	if (lastImageToLoad >= total_number_of_images) {
+		lastImageToLoad = total_number_of_images - 1;
+	}
+	
+	assert(lastImageToLoad >= firstImageToLoad);
+	assert(lastImageToLoad < total_number_of_images);
+	
+	ReadImagesFromDisk(firstImageToLoad, lastImageToLoad, image_cache);
+	cacheStart = firstImageToLoad;
+	cacheEnd = lastImageToLoad;
+	
+	return image_cache[n - cacheStart];
 }
 
 
@@ -182,7 +218,6 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
@@ -202,7 +237,6 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderSPE::~ImageLoaderSPE() {
@@ -272,8 +306,9 @@ void ImageLoaderSPE::parse_header_information() {
 	file.seekg(0);
 }
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_t n) {	
+void ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
 	uint64_t offset;
+	size_t nImages = nEnd - nStart + 1;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
@@ -281,31 +316,8 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_
 	string error;
 	boost::shared_ptr<PALMMatrix<double> > image;
 	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
-	// is there a file open?
-	if (file.is_open() != 1)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
-	// is the requested image in the cache?
-	// if it is then we return a copy
-	for (size_t i = 0; i < image_cache_size; i++) {
-		if (images_in_cache[i] == n) {
-			return image_cache[i];
-		}
-	}
-	
-	// if we are here then the image wasn't in the cache
-	// we will load a new sequence of images in the cache, starting with the one that is requested
-	
-	// first we free the images that are already in the cache
-	// this is safe because we only pass copies to other functions
-	for (size_t i = 0; i < image_cache_size; i++) {
-		images_in_cache[i] = -1;
-	}
-	
-	// now load the new set of images
+	cache.clear();
+	cache.reserve(nImages);
 	
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
@@ -332,12 +344,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_
 	boost::scoped_array<float> single_image_buffer_float(new float[x_size * y_size]);
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
 	
-	for (uint64_t i = n; i < n + image_cache_size; i++) {
-		
-		if (i >= total_number_of_images) {
-			continue;	// there are no more images to load into this cache location
-			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
-		}
+	for (uint64_t i = nStart; i <= nEnd; i++) {
 		
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
@@ -355,9 +362,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_
 				offset = header_length + i * (x_size) * (y_size) * 2;
 				break;
 			default:
-				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();	// if we have already loaded some images in the cache then this causes a memory leak
-				// fortunately that's not a real problem because this would have been caught already while
-				// we were determining the number of bytes in each image
+				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
 				break;
 		}
 		
@@ -442,15 +447,10 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_
 				
 		}
 		
-		// store the image at the correct location in the cache
-		image_cache[i - n] = image;
-		images_in_cache[i - n] = i;
+		cache.push_back(image);
 	}
 	
-	file.seekg(0);
-	
-	return image_cache[0];
-	
+	file.seekg(0);	
 }
 
 ImageLoaderAndor::ImageLoaderAndor(string rhs) {
@@ -465,7 +465,6 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
@@ -483,7 +482,6 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderAndor::~ImageLoaderAndor() {
@@ -556,49 +554,20 @@ void ImageLoaderAndor::parse_header_information() {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoaderAndor::get_nth_image(const size_t n) {	
+void ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
+	size_t nImages = nEnd - nStart + 1;
 	
+	cache.clear();
+	cache.reserve(nImages);
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
-	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
-	// is there a file open?
-	if (file.is_open() != 1)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
-	// is the requested image in the cache?
-	// if it is then we return a copy
-	for (size_t i = 0; i < image_cache_size; i++) {
-		if (images_in_cache[i] == n) {
-			return image_cache[i];
-		}
-	}
-	
-	// if we are here then the image wasn't in the cache
-	// we will load a new sequence of images in the cache, starting with the one that is requested
-	
-	// first we free the images that are already in the cache
-	// this is safe because we only pass copies to other functions
-	for (size_t i = 0; i < image_cache_size; i++) {
-		images_in_cache[i] = -1;
-	}
-	
-	// now load the new set of images
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	uint64_t cache_offset;
 	
-	for (uint64_t i = n; i < n + image_cache_size; i++) {
-		
-		if (i >= total_number_of_images) {
-			continue;	// there are no more images to load into this cache location
-			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
-		}
-		
+	for (uint64_t i = nStart; i <= nEnd; i++) {
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = header_length + i * (x_size) * (y_size) * sizeof(float);
@@ -625,14 +594,8 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderAndor::get_nth_image(const siz
 			}
 		}
 		
-		// store the image at the correct location in the cache
-		image_cache[i - n] = image;
-		images_in_cache[i - n] = i;
+		cache.push_back(image);
 	}
-	
-	file.seekg(0);
-	
-	return image_cache[0];
 	
 }
 
@@ -649,7 +612,6 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
@@ -667,7 +629,6 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_r
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
@@ -729,52 +690,20 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoaderHamamatsu::get_nth_image(const size_t n) {	
+void ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	boost::shared_ptr<PALMMatrix<double> > image;
+	size_t nImages = nEnd - nStart + 1;
 	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
-	// is there a file open?
-	if (file.is_open() != 1)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
-	
-	// is the requested image in the cache?
-	// if it is then we return a copy
-	for (size_t i = 0; i < image_cache_size; i++) {
-		if (images_in_cache[i] == n) {
-			return image_cache[i];
-		}
-	}
-	
-	// if we are here then the image wasn't in the cache
-	// we will load a new sequence of images in the cache, starting with the one that is requested
-	
-	// first we free the images that are already in the cache
-	// this is safe because we only pass copies to other functions
-	for (size_t i = 0; i < image_cache_size; i++) {
-		images_in_cache[i] = -1;
-	}
-	
-	// now load the new set of images
-	
-	// we are going to load the images first into a char buffer
-	// because we assume that a char s equal to one byte
+	cache.clear();
+	cache.reserve(nImages);
 	
 	unsigned int current_uint;
 	size_t n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	uint64_t cache_offset;
 	
-	for (uint64_t i = n; i < n + image_cache_size; i++) {
-		
-		if (i >= total_number_of_images) {
-			continue;	// there are no more images to load into this cache location
-			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
-		}
-		
+	for (uint64_t i = nStart; i <= nEnd; i++) {
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = (i + 1) * header_length + i * (x_size) * (y_size) * 2;	// assume a 16-bit format
@@ -804,13 +733,10 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderHamamatsu::get_nth_image(const
 		}
 		
 		
-		// store the image at the correct location in the cache
-		image_cache[i - n] = image;
-		images_in_cache[i - n] = i;
+		cache.push_back(image);
 	}
 	
 	file.seekg(0);
-	return image_cache[0];
 }
 
 
@@ -826,7 +752,6 @@ SimpleImageLoader::SimpleImageLoader(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
@@ -844,7 +769,6 @@ SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 }
 
 SimpleImageLoader::~SimpleImageLoader() {
@@ -853,46 +777,18 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > SimpleImageLoader::get_nth_image(const size_t n) {	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
-	// is there a file open?
-	if (file.is_open() != 1)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
-	
-	// is the requested image in the cache?
-	// if it is then we return a copy
-	for (size_t i = 0; i < image_cache_size; i++) {
-		if (images_in_cache[i] == n) {
-			return image_cache[i];
-		}
-	}
-	
-	// if we are here then the image wasn't in the cache
-	// we will load a new sequence of images in the cache, starting with the one that is requested
-	
-	// first we free the images that are already in the cache
-	// this is safe because we only pass copies to other functions
-	for (size_t i = 0; i < image_cache_size; i++) {
-		images_in_cache[i] = -1;
-	}
-	
-	// now load the new set of images
+void SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
+	size_t nImages = nEnd - nStart + 1;
 	uint64_t offset;
 	size_t array_offset;
-	boost::shared_ptr<PALMMatrix<double> > new_image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
-	for (uint64_t i = n; i < n + image_cache_size; i++) {
-		
-		if (i >= total_number_of_images) {
-			continue;	// there are no more images to load into this cache location
-			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
-		}
-		
-		new_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	cache.clear();
+	cache.reserve(nImages);
+	
+	for (uint64_t i = nStart; i <= nEnd; i++) {
+		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		offset = 3 * sizeof(size_t) + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
@@ -912,18 +808,15 @@ boost::shared_ptr<PALMMatrix<double> > SimpleImageLoader::get_nth_image(const si
 		
 		for (size_t j  = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
-				new_image->set(i, j, single_image_buffer[array_offset]);
+				image->set(i, j, single_image_buffer[array_offset]);
 				array_offset++;
 			}
 		}
 		
-		// store the image at the correct location in the cache
-		image_cache[i - n] = new_image;
-		images_in_cache[i - n] = i;
+		cache.push_back(image);
 	}
 	
 	file.seekg(0);
-	return image_cache[0];
 }
 
 
@@ -959,7 +852,6 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
@@ -979,7 +871,6 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	parse_header_information();
 	
 	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	images_in_cache.resize(image_cache_size, (size_t)-1);
 	
 }
 
@@ -1120,35 +1011,8 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size_t n) {
-	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
-	// is there a file open?
-	if (tiff_file == NULL)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
-	
-	// is the requested image in the cache?
-	// if it is then we return a copy
-	for (size_t i = 0; i < image_cache_size; i++) {
-		if (images_in_cache[i] == n) {
-			return image_cache[i];
-		}
-	}
-	
-	// if we are here then the image wasn't in the cache
-	// we will load a new sequence of images in the cache, starting with the one that is requested
-	
-	// first we free the images that are already in the cache
-	// this is safe because we only pass copies to other functions
-	for (size_t i = 0; i < image_cache_size; i++) {
-		images_in_cache[i] = -1;
-	}
-	
-	// now load the new set of images
-	
+void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
+	size_t nImages = nEnd - nStart + 1;
 	char *single_scanline_buffer;
 	char *scanline_pointer;
 	uint16_t current_uint16;
@@ -1159,8 +1023,11 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 	uint32_t *uint32Ptr;
 	float *floatPtr;
 	double *doublePtr;
-	boost::shared_ptr<PALMMatrix<double> > new_image;
+	boost::shared_ptr<PALMMatrix<double> > image;
 	int result;
+	
+	cache.clear();
+	cache.reserve(nImages);
 	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
 	if (single_scanline_buffer == NULL) {
@@ -1169,20 +1036,11 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 		throw OUT_OF_MEMORY(error);
 	}
 	
-	for (size_t i = n; i < n + image_cache_size; i++) {
-		
-		if (i >= total_number_of_images) {
-			continue;	// there are no more images to load into this cache location
-			// by freeing the locations above we have already made sure that the arrays are set to a NULL pointer and -1
-		}
-		
+	for (size_t i = nStart; i <= nEnd; i++) {
 		try {
-			new_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+			image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		}
 		catch (std::bad_alloc) {
-			for (size_t j = 0; j < i - n; j++) {
-				images_in_cache[j] = -1;
-			}
 			_TIFFfree(single_scanline_buffer);
 			string error;
 			error = "unable to allocate new_image in ImageLoaderTIFF::get_nth_image()\r";
@@ -1218,10 +1076,10 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							for (size_t k = 0; k < x_size; ++k) {
 								if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
 									current_uint16 = 0x0000000F & (*scanline_pointer);
-									new_image->set(k, j, (double)current_uint16);
+									image->set(k, j, (double)current_uint16);
 								} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
 									current_uint16 = 0x000000F0 & (*scanline_pointer);
-									new_image->set(k, j, (double)current_uint16);
+									image->set(k, j, (double)current_uint16);
 									scanline_pointer += 1;
 								}
 							}
@@ -1230,7 +1088,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							scanline_pointer = single_scanline_buffer;
 							for (size_t k = 0; k < x_size; ++k) {
 								current_uint16 = (uint16_t)(*scanline_pointer);
-								new_image->set(k, j, (double)current_uint16);
+								image->set(k, j, (double)current_uint16);
 								scanline_pointer += 1;
 							}
 							break;
@@ -1238,7 +1096,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							uint16Ptr = (uint16_t*)single_scanline_buffer;
 							for (size_t k = 0; k < x_size; ++k) {
 								current_uint16 = (*uint16Ptr);
-								new_image->set(k, j, (double)current_uint16);
+								image->set(k, j, (double)current_uint16);
 								uint16Ptr += 1;
 							}
 							break;
@@ -1246,7 +1104,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							uint32Ptr = (uint32_t*)single_scanline_buffer;
 							for (size_t k = 0; k < x_size; ++k) {
 								current_uint32 = (*uint32Ptr);
-								new_image->set(k, j, (double)current_uint32);
+								image->set(k, j, (double)current_uint32);
 								uint32Ptr += 1;
 							}
 							break;
@@ -1266,7 +1124,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							floatPtr = (float *)single_scanline_buffer;
 							for (size_t k = 0; k < x_size; ++k) {
 								current_float = *floatPtr;
-								new_image->set(k, j, (double)current_float);
+								image->set(k, j, (double)current_float);
 								floatPtr += 1;
 							}
 							break;
@@ -1274,7 +1132,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 							doublePtr = (double *)single_scanline_buffer;
 							for (size_t k = 0; k < x_size; ++k) {
 								current_double = *doublePtr;
-								new_image->set(k, j, current_double);
+								image->set(k, j, current_double);
 								floatPtr += 1;
 							}
 							break;
@@ -1299,9 +1157,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 			}
 		}
 		
-		// store the image at the correct location in the cache
-		image_cache[i - n] = new_image;
-		images_in_cache[i - n] = i;
+		cache.push_back(image);
 	}
 	
 	_TIFFfree(single_scanline_buffer);
@@ -1313,8 +1169,6 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size
 		error += "\"\r";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	return image_cache[0];
 	
 }
 
@@ -1363,34 +1217,37 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoaderIgor::get_nth_image(const size_t n) {
+void ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
 	boost::shared_ptr<PALMMatrix<double> > image;
+	size_t nImages = nEnd - nStart + 1;
 	double value[2];
 	long indices[3];
 	int result;
 	
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
-	
+	cache.clear();
+	cache.reserve(nImages);
 	image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
-	indices[2] = n;
-	
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
-			indices[0] = (long)i;
-			indices[1] = (long)j;
-			
-			result = MDGetNumericWavePointValue(igor_data_wave, indices, value);
-			if (result != 0) {
-				throw result;
+	for (size_t n = nStart; n <= nEnd; ++n) {
+		indices[2] = n;
+		
+		for (size_t j = 0; j < y_size; j++) {
+			for (size_t i = 0; i < x_size; i++) {
+				indices[0] = (long)i;
+				indices[1] = (long)j;
+				
+				result = MDGetNumericWavePointValue(igor_data_wave, indices, value);
+				if (result != 0) {
+					throw result;
+				}
+				
+				image->set(i, j, value[0]);
 			}
-			
-			image->set(i, j, value[0]);
 		}
+		
+		cache.push_back(image);
+		
 	}
-	
-	return image;
 }
 
 
