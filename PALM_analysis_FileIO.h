@@ -70,7 +70,7 @@ public:
 	virtual boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n) = 0;	// images are numbered from 0 to N - 1
 	
 protected:
-	virtual int parse_header_information() = 0;
+	virtual void parse_header_information() = 0;
 	
 	size_t image_cache_size;
 	
@@ -96,7 +96,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -125,7 +125,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 };
 
 class ImageLoaderSPE : public ImageLoader {
@@ -137,7 +137,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 };
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
@@ -149,7 +149,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 };
 
 class ImageLoaderTIFF_Igor : public ImageLoader {	// loads data from TIFF files using extensive callbacks to IGOR because the TIFF format is a mess
@@ -161,7 +161,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 	
 	string native_Igor_FilePath;	// in Windows format or the native HFS Macintosh format
 	waveHndl tiff_cache_wave;
@@ -177,7 +177,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information();
+	void parse_header_information();
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
@@ -197,7 +197,7 @@ public:
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
 	
 protected:
-	int parse_header_information() {return 0;}
+	void parse_header_information() {;}
 	
 	waveHndl igor_data_wave;
 };

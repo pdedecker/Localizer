@@ -210,15 +210,10 @@ ImageLoaderSPE::~ImageLoaderSPE() {
 		file.close();
 }
 
-int ImageLoaderSPE::parse_header_information() {
+void ImageLoaderSPE::parse_header_information() {
 	long current_bytes = 0;	// assume that this is a four-byte variable
 	char header_buffer[1500];
 	char byte_reader1, byte_reader2, byte_reader3, byte_reader4;	// we want to only read 1 byte at a time
-	
-	// is there a file open?
-	if (file.is_open() == 0) {
-		return -1;
-	}
 	
 	// read the entire header into a buffer
 	file.read(header_buffer, 1500);
@@ -275,8 +270,6 @@ int ImageLoaderSPE::parse_header_information() {
 	}
 	
 	file.seekg(0);
-	
-	return 0;
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoaderSPE::get_nth_image(const size_t n) {	
@@ -499,7 +492,7 @@ ImageLoaderAndor::~ImageLoaderAndor() {
 	}
 }
 
-int ImageLoaderAndor::parse_header_information() {
+void ImageLoaderAndor::parse_header_information() {
 	size_t temp;
 	size_t xBinning, yBinning;
 	size_t frameXSize, frameYSize;
@@ -561,8 +554,6 @@ int ImageLoaderAndor::parse_header_information() {
 		error += "\" assuming the Andor format\r";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	return 0;
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoaderAndor::get_nth_image(const size_t n) {	
@@ -685,7 +676,7 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 }
 
 
-int ImageLoaderHamamatsu::parse_header_information() {
+void ImageLoaderHamamatsu::parse_header_information() {
 	char headerBuffer[64];	// too large, but we'd better be safe
 	ImageLoaderHamamatsu_HeaderStructure header;
 	
@@ -735,8 +726,6 @@ int ImageLoaderHamamatsu::parse_header_information() {
 	}
 	
 	file.seekg(0);
-	
-	return 0;
 }
 
 
@@ -938,7 +927,7 @@ boost::shared_ptr<PALMMatrix<double> > SimpleImageLoader::get_nth_image(const si
 }
 
 
-int SimpleImageLoader::parse_header_information() {
+void SimpleImageLoader::parse_header_information() {
 	
 	file.seekg(0);
 	
@@ -954,9 +943,6 @@ int SimpleImageLoader::parse_header_information() {
 		error += "\" assuming the simple image format\r";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	return 0;
-	
 }
 
 
@@ -1083,7 +1069,7 @@ ImageLoaderTIFF_Igor::~ImageLoaderTIFF_Igor() {
 }
 
 
-int ImageLoaderTIFF_Igor::parse_header_information() {
+void ImageLoaderTIFF_Igor::parse_header_information() {
 	// we let Igor do the parsing for us
 	string IgorCommand;
 	double value[2];
@@ -1151,9 +1137,6 @@ int ImageLoaderTIFF_Igor::parse_header_information() {
 	}
 	
 	total_number_of_images = (size_t)(value[0] + 0.5);
-	
-	return 0;
-	
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF_Igor::get_nth_image(const size_t n) {
@@ -1346,7 +1329,7 @@ ImageLoaderTIFF::~ImageLoaderTIFF() {
 }
 
 
-int ImageLoaderTIFF::parse_header_information() {
+void ImageLoaderTIFF::parse_header_information() {
 	int result;
 	uint16_t result_uint16;
 	uint32_t result_uint32;
@@ -1471,9 +1454,6 @@ int ImageLoaderTIFF::parse_header_information() {
 		error += "\"\r";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	return 0;
-	
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoaderTIFF::get_nth_image(const size_t n) {
