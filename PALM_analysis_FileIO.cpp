@@ -172,10 +172,6 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
-	// is there a file open?
-	if (file.is_open() != 1)
-		throw GET_NTH_IMAGE_FILE_NOT_OPEN();
-	
 	// is the requested image in the cache?
 	// if it is then we return a copy
 	if ((n >= cacheStart) && (n <= cacheEnd)) {
@@ -186,7 +182,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n
 	// we will load a new sequence of images in the cache, starting with the one that is requested
 	size_t firstImageToLoad, lastImageToLoad;
 	firstImageToLoad = n;
-	lastImageToLoad = n + image_cache_size;
+	lastImageToLoad = n + image_cache_size - 1;
 	if (lastImageToLoad >= total_number_of_images) {
 		lastImageToLoad = total_number_of_images - 1;
 	}
