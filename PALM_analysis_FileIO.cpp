@@ -158,8 +158,6 @@ ImageLoader::ImageLoader() {
 	x_size = 0;
 	y_size = 0;
 	header_length = 0;
-	image_cache.reserve(N_SIMULTANEOUS_IMAGE_LOADS);
-	
 	cacheStart = (size_t)-1;
 	cacheEnd = (size_t)-1;
 }
@@ -217,15 +215,13 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs) {
 	
 	parse_header_information();
 	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
+	image_cache.reserve(image_cache_size);
 }
 
 ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
-	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
-		image_cache.reserve(image_cache_size);
-	}
+	image_cache.reserve(image_cache_size);
 	
 	header_length = 4100;
 	
@@ -235,8 +231,6 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 ImageLoaderSPE::~ImageLoaderSPE() {
@@ -456,6 +450,7 @@ void ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, 
 ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	path = rhs;
 	image_cache_size = N_SIMULTANEOUS_IMAGE_LOADS;
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -463,16 +458,12 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
-	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
-		image_cache.reserve(image_cache_size);
-	}
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -480,8 +471,6 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 ImageLoaderAndor::~ImageLoaderAndor() {
@@ -603,6 +592,7 @@ void ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	path = rhs;
 	image_cache_size = N_SIMULTANEOUS_IMAGE_LOADS;
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -610,16 +600,12 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
-	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
-		image_cache.reserve(image_cache_size);
-	}
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -627,8 +613,6 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_r
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
@@ -742,7 +726,7 @@ void ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const 
 
 SimpleImageLoader::SimpleImageLoader(string rhs) {
 	path = rhs;
-	image_cache_size = N_SIMULTANEOUS_IMAGE_LOADS;
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -750,16 +734,12 @@ SimpleImageLoader::SimpleImageLoader(string rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
-	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
-		image_cache.reserve(image_cache_size);
-	}
+	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -767,8 +747,6 @@ SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
 }
 
 SimpleImageLoader::~SimpleImageLoader() {
@@ -843,6 +821,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	path = rhs;
 	tiff_file = NULL;
 	image_cache_size = N_SIMULTANEOUS_IMAGE_LOADS;
+	image_cache.reserve(image_cache_size);
 	
 	tiff_file = TIFFOpen(path.c_str(), "r");
 	if (tiff_file == NULL) {
@@ -850,17 +829,13 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	
 }
 
 ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	image_cache_size = image_cache_size_rhs;
-	if (image_cache_size > N_SIMULTANEOUS_IMAGE_LOADS) {
-		image_cache.reserve(image_cache_size);
-	}
+	image_cache.reserve(image_cache_size);
+	
 	tiff_file = NULL;
 	
 	tiff_file = TIFFOpen(path.c_str(), "r");
@@ -869,9 +844,6 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	}
 	
 	parse_header_information();
-	
-	image_cache.resize(image_cache_size, boost::shared_ptr<PALMMatrix<double> >());
-	
 }
 
 
@@ -1182,6 +1154,55 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 #ifdef _MACINTOSH_
 	waveName.erase(0, 1);
 #endif
+	
+	image_cache_size = N_SIMULTANEOUS_IMAGE_LOADS;
+	image_cache.reserve(image_cache_size);
+	
+	DataFolderHandle rootFolder;
+	err = GetRootDataFolder(0, &rootFolder);
+	if (err != 0)
+		throw err;
+	
+	igor_data_wave = FetchWaveFromDataFolder(rootFolder, waveName.c_str());
+	if (igor_data_wave == NULL) {
+		throw NOWAV;
+	}
+	
+	
+	long DimensionSizes[MAX_DIMENSIONS + 1];
+	long numDimensions;
+	int result;
+	
+	result = MDGetWaveDimensions(igor_data_wave, &numDimensions, DimensionSizes);
+	if (result != 0) {
+		throw result;
+	}
+	if ((numDimensions != 2) && (numDimensions != 3)) {
+		throw INCOMPATIBLE_DIMENSIONING;
+	}
+	
+	x_size = (size_t)DimensionSizes[0];
+	y_size = (size_t)DimensionSizes[1];
+	total_number_of_images = (size_t)DimensionSizes[2];
+	
+	// special case: if the wave contains only a single image then it is usually two-dimensional, that is, DimensionSizes[2] == 0
+	// in that case total_number_of_images is still one
+	if (DimensionSizes[2] == 0) {
+		total_number_of_images = 1;
+	}
+}
+
+ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
+	int err;
+	// try to get images from an Igor wave
+	// the string that is passed in has a leading slash added by the code that converts between Macintosh and Windows paths
+	// so we need to correct for that
+#ifdef _MACINTOSH_
+	waveName.erase(0, 1);
+#endif
+	
+	image_cache_size = image_cache_size_rhs;
+	image_cache.reserve(image_cache_size);
 	
 	DataFolderHandle rootFolder;
 	err = GetRootDataFolder(0, &rootFolder);

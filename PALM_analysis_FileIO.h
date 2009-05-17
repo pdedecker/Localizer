@@ -170,6 +170,7 @@ protected:
 class ImageLoaderIgor : public ImageLoader {
 public:
 	ImageLoaderIgor(string waveName);
+	ImageLoaderIgor(string waveName, size_t image_cache_size_rhs);
 	~ImageLoaderIgor() {;}
 	
 protected:
