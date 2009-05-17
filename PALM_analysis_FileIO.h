@@ -86,6 +86,16 @@ protected:
 	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;	// array of pointer to gsl_matrices containing cached images
 };
 
+class ImageLoaderSPE : public ImageLoader {
+public:
+	ImageLoaderSPE(string rhs, size_t image_cache_size);
+	~ImageLoaderSPE();
+	
+protected:
+	void parse_header_information();
+	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+};
+
 class ImageLoaderAndor : public ImageLoader {
 public:
 	ImageLoaderAndor(string rhs, size_t image_cache_size_rhs);
@@ -117,16 +127,6 @@ class ImageLoaderHamamatsu : public ImageLoader {
 public:
 	ImageLoaderHamamatsu(string rhs, size_t image_cache_size);
 	~ImageLoaderHamamatsu();
-	
-protected:
-	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
-};
-
-class ImageLoaderSPE : public ImageLoader {
-public:
-	ImageLoaderSPE(string rhs, size_t image_cache_size);
-	~ImageLoaderSPE();
 	
 protected:
 	void parse_header_information();
