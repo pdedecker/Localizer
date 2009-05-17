@@ -21,6 +21,7 @@
 #include "tiffio.h"
 #include "stdint.h"
 #include "XOPStandardHeaders.h"
+#include "boost/thread.hpp"
 
 using namespace std;
 
@@ -65,6 +66,7 @@ public:
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
+	// boost::shared_ptr<PALMMatrix<double> > get_nth_image_parallel(const size_t n);
 	
 protected:
 	virtual void parse_header_information() = 0;
@@ -83,7 +85,13 @@ protected:
 	uint64_t x_size;
 	uint64_t y_size;
 	int storage_type;
-	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;	// array of pointer to gsl_matrices containing cached images
+	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;
+	
+	int newImagesAreBeingLoaded;
+	boost::thread newImagesLoaderThread;
+	size_t firstImageInLoaderThread;
+	size_t lastImageInLoaderThread;
+	vector <boost::shared_ptr<PALMMatrix<double> > > loaderThreadCache;
 };
 
 class ImageLoaderSPE : public ImageLoader {

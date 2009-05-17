@@ -167,7 +167,6 @@ ImageLoader::~ImageLoader() {
 		file.close();
 }
 
-
 boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
@@ -196,6 +195,84 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n
 	
 	return image_cache[n - cacheStart];
 }
+
+/* boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image_parallel(const size_t n) {
+	if (n >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES();
+	
+	// is the requested image in the cache?
+	// if it is then we return a copy
+	if ((n >= cacheStart) && (n <= cacheEnd)) {
+		return image_cache[n - cacheStart];
+	}
+	
+	// if we are here then the image wasn't in the cache
+	// are we currently running another thread that is loading images? If so then wait for it to finish
+	if (newImagesAreBeingLoaded == 1) {	// a loader thread is running
+		newImagesLoaderThread.join();	// wait for the loading thread to finish
+		newImagesAreBeingLoaded = 0;
+		image_cache = loaderThreadCache;
+		cacheStart = firstImageInLoaderThread;
+		cacheEnd = lastImageInLoaderThread;
+	}
+	
+	// with the new images that were loaded by the thread, is the image in the cache yet?
+	if ((n >= cacheStart) && (n <= cacheEnd)) {
+		// the image is in the cache now
+		// before we return it we start a new thread that will load the next set of images, but only if the full cache size is requested
+		firstImageInLoaderThread = cacheEnd + 1;
+		lastImageInLoaderThread = firstImageInLoaderThread + image_cache_size - 1;
+		if (firstImageInLoaderThread >= total_number_of_images) {
+			// there's no point in loading more images since we've reached the end of the file
+			return image_cache[n - cacheStart];
+		}
+		if (lastImageInLoaderThread >= total_number_of_images) {
+			lastImageInLoaderThread = total_number_of_images - 1;
+		}
+			
+		newImagesLoaderThread = boost::thread(ReadImagesFromDisk, firstImageInLoaderThread, lastImageInLoaderThread, boost::ref(loaderThreadCache));
+		newImagesAreBeingLoaded = 1;
+		
+		return image_cache[n - cacheStart];
+	} else {
+		// even with the newly-loaded images the requested image is still not in the cache
+		// we will the load that image below
+		// we will already start loading another thread that reads the images after the ones that are requested below
+		firstImageInLoaderThread = n + image_cache_size;
+		lastImageInLoaderThread = firstImageInLoaderThread + image_cache_size - 1;
+		if (firstImageInLoaderThread >= total_number_of_images) {
+			// there's no point in loading more images since we've reached the end of the file
+			// just do nothing
+		} else {
+			if (lastImageInLoaderThread >= total_number_of_images) {
+				lastImageInLoaderThread = total_number_of_images - 1;
+			}
+			
+			newImagesLoaderThread = boost::thread(ReadImagesFromDisk, firstImageInLoaderThread, lastImageInLoaderThread, boost::ref(loaderThreadCache));
+			newImagesAreBeingLoaded = 1;
+		}
+	}
+	
+	// if we're still here then, even with the newly loaded images from the thread, we still don't have the correct image
+	// discard the images that have been loaded and just load a new set in the main thread
+	
+	// we will load a new sequence of images in the cache, starting with the one that is requested
+	size_t firstImageToLoad, lastImageToLoad;
+	firstImageToLoad = n;
+	lastImageToLoad = n + image_cache_size - 1;
+	if (lastImageToLoad >= total_number_of_images) {
+		lastImageToLoad = total_number_of_images - 1;
+	}
+	
+	assert(lastImageToLoad >= firstImageToLoad);
+	assert(lastImageToLoad < total_number_of_images);
+	
+	ReadImagesFromDisk(firstImageToLoad, lastImageToLoad, image_cache);
+	cacheStart = firstImageToLoad;
+	cacheEnd = lastImageToLoad;
+	
+	return image_cache[n - cacheStart];
+} */
 
 ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
