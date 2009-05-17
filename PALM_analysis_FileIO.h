@@ -152,22 +152,6 @@ protected:
 	void parse_header_information();
 };
 
-class ImageLoaderTIFF_Igor : public ImageLoader {	// loads data from TIFF files using extensive callbacks to IGOR because the TIFF format is a mess
-public:
-	ImageLoaderTIFF_Igor(string rhs);
-	ImageLoaderTIFF_Igor(string rhs, size_t image_cache_size);
-	~ImageLoaderTIFF_Igor();
-	
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);
-	
-protected:
-	void parse_header_information();
-	
-	string native_Igor_FilePath;	// in Windows format or the native HFS Macintosh format
-	waveHndl tiff_cache_wave;
-	
-};
-
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
 	ImageLoaderTIFF(string rhs);
