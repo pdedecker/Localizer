@@ -88,7 +88,6 @@ protected:
 
 class ImageLoaderAndor : public ImageLoader {
 public:
-	ImageLoaderAndor(string rhs);
 	ImageLoaderAndor(string rhs, size_t image_cache_size_rhs);
 	~ImageLoaderAndor();
 	
@@ -116,7 +115,6 @@ public:
 
 class ImageLoaderHamamatsu : public ImageLoader {
 public:
-	ImageLoaderHamamatsu(string rhs);
 	ImageLoaderHamamatsu(string rhs, size_t image_cache_size);
 	~ImageLoaderHamamatsu();
 	
@@ -127,7 +125,6 @@ protected:
 
 class ImageLoaderSPE : public ImageLoader {
 public:
-	ImageLoaderSPE(string rhs);
 	ImageLoaderSPE(string rhs, size_t image_cache_size);
 	~ImageLoaderSPE();
 	
@@ -138,7 +135,6 @@ protected:
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
 public:
-	SimpleImageLoader(string rhs);
 	SimpleImageLoader(string rhs, size_t image_cache_size);
 	~SimpleImageLoader();
 	
@@ -149,7 +145,6 @@ protected:
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
-	ImageLoaderTIFF(string rhs);
 	ImageLoaderTIFF(string rhs, size_t image_cache_size);
 	~ImageLoaderTIFF();
 	
@@ -169,7 +164,6 @@ protected:
 
 class ImageLoaderIgor : public ImageLoader {
 public:
-	ImageLoaderIgor(string waveName);
 	ImageLoaderIgor(string waveName, size_t image_cache_size_rhs);
 	~ImageLoaderIgor() {;}
 	

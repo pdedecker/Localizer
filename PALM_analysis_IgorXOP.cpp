@@ -1961,7 +1961,7 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path, image_cache_size));
 			break;
 		case 6: // Matrix wave in Igor
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path, image_cache_size));
 			break;
 		default:
 			throw UNSUPPORTED_CCD_FILE_TYPE;
