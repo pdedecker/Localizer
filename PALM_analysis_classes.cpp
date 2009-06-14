@@ -2472,6 +2472,17 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 			//			cout << gsl_strerror(status) << "\n";
 		}*/
 		
+		// are the fit results close enough to the initial values to be trusted?
+		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
+			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
+			continue;
+		}
+		
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * 1.414213562373095 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.414213562373095 * 2.0)) {
+			// the output fit width is more than a factor of two different from the initial value, drop this point
+			continue;
+		}
+		
 		// calculate the covariance matrix
 		gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
 		chi = gsl_blas_dnrm2(fit_iterator->f);
