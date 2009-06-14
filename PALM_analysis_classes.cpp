@@ -266,13 +266,13 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
 		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
 			
-			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
+			if ((*threshold_image)(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
 				++nBackgroundPixels;
 				continue;
 			}
 			
-			if (mapped_image->get(i, j) != -1) {	// this point is already assigned to another particle
+			if ((*mapped_image)(i, j) != -1) {	// this point is already assigned to another particle
 				continue;
 			}
 			
@@ -281,7 +281,7 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 			positionsInCurrentParticle.clear();
 			positionsInCurrentParticleList.clear();
 			
-			mapped_image->set(i, j, particleIndex);
+			(*mapped_image)(i, j) = particleIndex;
 			
 			// store this position
 			currentPosition.set_x((double)i);
@@ -347,9 +347,9 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 	
 	// now copy the output to a gsl matrix
 	for (size_t k = 0; k < particles.size(); ++k) {
-		output_positions->set(k, 0, particles[k].get_intensity() - backgroundIntensity);
-		output_positions->set(k, 1, particles[k].get_x());
-		output_positions->set(k, 2, particles[k].get_y());
+		(*output_positions)(k, 0) = particles[k].get_intensity() - backgroundIntensity;
+		(*output_positions)(k, 1) = particles[k].get_x();
+		(*output_positions)(k, 2) = particles[k].get_y();
 	}
 	
 	return output_positions;
@@ -372,7 +372,7 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);
 	size_t y = (size_t)(centerPosition.get_y() + 0.5);
 	
-	long particleIndex = mapped_image->get(x, y);
+	long particleIndex = (*mapped_image)(x, y);
 	
 	if ((x < minDistanceFromEdge) || (x > x_size - minDistanceFromEdge - 1))
 		return;
@@ -381,11 +381,11 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	
 	// is the pixel to the left of the current one active?
 	if (x > 0) {
-		if (threshold_image->get(x - 1, y) > 128) {
+		if ((*threshold_image)(x - 1, y) > 128) {
 			// it's active
 			// did we already include this pixel?
-			if (mapped_image->get(x - 1, y) == -1) {
-				mapped_image->set(x - 1, y, particleIndex);
+			if ((*mapped_image)(x - 1, y) == -1) {
+				(*mapped_image)(x - 1, y) = particleIndex;
 				// add the point to the vector
 				currentPosition.set_x((double)x - 1);
 				currentPosition.set_y((double)y);
@@ -396,11 +396,11 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	}
 	// is the pixel to the right of the current one active?
 	if (x < x_size - 1) {
-		if (threshold_image->get(x + 1, y) > 128) {
+		if ((*threshold_image)(x + 1, y) > 128) {
 			// it's active
 			// did we already include this pixel?
-			if (mapped_image->get(x + 1, y) == -1) {
-				mapped_image->set(x + 1, y, particleIndex);
+			if ((*mapped_image)(x + 1, y) == -1) {
+				(*mapped_image)(x + 1, y) = particleIndex;
 				// add the point to the vector
 				currentPosition.set_x((double)x + 1);
 				currentPosition.set_y((double)y);
@@ -411,11 +411,11 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	}
 	// is the pixel above the current one active?
 	if (y > 0) {
-		if (threshold_image->get(x, y - 1) > 128) {
+		if ((*threshold_image)(x, y - 1) > 128) {
 			// it's active
 			// did we already include this pixel?
-			if (mapped_image->get(x, y - 1) == -1) {
-				mapped_image->set(x, y - 1, particleIndex);
+			if ((*mapped_image)(x, y - 1) == -1) {
+				(*mapped_image)(x, y - 1) = particleIndex;
 				// add the point to the vector
 				currentPosition.set_x((double)x);
 				currentPosition.set_y((double)y - 1);
@@ -426,11 +426,11 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 	}
 	// is the pixel below the current one active?
 	if (y < y_size - 1) {
-		if (threshold_image->get(x, y + 1) > 128) {
+		if ((*threshold_image)(x, y + 1) > 128) {
 			// it's active
 			// did we already include this pixel?
-			if (mapped_image->get(x, y + 1) == -1) {
-				mapped_image->set(x, y + 1, particleIndex);
+			if ((*mapped_image)(x, y + 1) == -1) {
+				(*mapped_image)(x, y + 1) = particleIndex;
 				// add the point to the vector
 				currentPosition.set_x((double)x);
 				currentPosition.set_y((double)y + 1);
@@ -2460,17 +2460,9 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 			status = gsl_multifit_fdfsolver_iterate(fit_iterator);
 			if (status != 0)
 				break;
-			//			print_fit_state(iterations, fit_iterator);
+			
 			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
 		} while ((status = GSL_CONTINUE) && (iterations < 200));
-		
-		/*if ((status != GSL_SUCCESS) && (iterations == 200)) {
-			// max number of iterations reached
-		}
-		if ((status != GSL_SUCCESS) && (iterations < 200)) {
-			// some error occurred
-			//			cout << gsl_strerror(status) << "\n";
-		}*/
 		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
