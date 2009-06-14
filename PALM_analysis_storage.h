@@ -52,6 +52,10 @@ public:
 	void set(size_t x, size_t y, const T &value);
 	void set_all(const T &value);
 	
+	T Sum() const;
+	double Average() const;
+	double StandardDeviation() const;
+	
 	PALMMatrix operator=(const PALMMatrix &rhs);
 	
 	PALMMatrix & operator+=(const PALMMatrix &rhs);
@@ -135,6 +139,48 @@ template <typename T> inline void PALMMatrix<T>::set_all(const T &value) {
 	for (i = 0; i < nItems; ++i) {
 		data[i] = value;
 	}
+}
+
+template <typename T> T PALMMatrix<T>::Sum() const {
+	size_t nItems = xSize * ySize;
+	T sum = 0;
+	
+	int i;
+	#pragma omp parallel for private(i) num_threads(2)
+	for (i = 0; i < nItems; ++i) {
+		sum += data[i];
+	}
+}
+
+template <typename T> double PALMMatrix<T>::Average() const {
+	size_t nItems = xSize * ySize;
+	double sum = 0;
+	
+	int i;
+	#pragma omp parallel for private(i) num_threads(2)
+	for (i = 0; i < nItems; ++i) {
+		sum += (double)data[i];
+	}
+	
+	sum /= (double)nItems;
+	return sum;
+}
+
+template <typename T> double PALMMatrix<T>::StandardDeviation() const {
+	size_t nItems = xSize * ySize;
+	double average = 0;
+	double standardDeviation = 0;
+	
+	average = this->Average();
+	
+	int i;
+	#pragma omp parallel for private(i) num_threads(2)
+	for (i = 0; i < nItems; ++i) {
+		standardDeviation += ((double)data[i] - average) * ((double)data[i] - average);
+	}
+	
+	standardDeviation /= (double)nItems;
+	return sqrt(standardDeviation);
 }
 
 template <typename T> PALMMatrix<T> PALMMatrix<T>::operator=(const PALMMatrix &rhs) {
