@@ -164,13 +164,18 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boos
 	int skip;
 	double x, y;
 	boost::shared_ptr<PALMMatrix<double> > output_positions;
+	double backgroundIntensity = 0;
+	size_t nBackgroundPixels = 0;
 	
 	// we run over all the points in the image to see if they are above the treshold
 	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; j++) {
 		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; i++) {
 			
-			if (threshold_image->get(i, j) < 128)
-				continue;	// we don't care about this point, it's not included in the thresholded image
+			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
+				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
+				++nBackgroundPixels;
+				continue;
+			}
 			
 			current_intensity = image->get(i, j);
 			
@@ -225,9 +230,10 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boos
 	}
 	
 	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 3));
+	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	for (size_t i = 0; i < number_of_positions; i++) {
-		(*output_positions)(i, 0) = positions[i].get_intensity();
+		(*output_positions)(i, 0) = positions[i].get_intensity() - backgroundIntensity;
 		(*output_positions)(i, 1) = positions[i].get_x();
 		(*output_positions)(i, 2) = positions[i].get_y();
 	}
@@ -250,6 +256,8 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
+	double backgroundIntensity = 0;
+	size_t nBackgroundPixels = 0;
 	
 	mapped_image = boost::shared_ptr<PALMMatrix<long> >(new PALMMatrix<long>(x_size, y_size));
 	
@@ -258,7 +266,9 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
 		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
 			
-			if (threshold_image->get(i, j) < 128) {
+			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
+				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
+				++nBackgroundPixels;
 				continue;
 			}
 			
@@ -333,10 +343,11 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 	}
 	
 	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
+	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// now copy the output to a gsl matrix
 	for (size_t k = 0; k < particles.size(); ++k) {
-		output_positions->set(k, 0, particles[k].get_intensity());
+		output_positions->set(k, 0, particles[k].get_intensity() - backgroundIntensity);
 		output_positions->set(k, 1, particles[k].get_x());
 		output_positions->set(k, 2, particles[k].get_y());
 	}
@@ -445,6 +456,8 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 	long particleIndex = 0;
 	double average_x, average_y;
 	double maxIntensity;
+	double backgroundIntensity = 0;
+	size_t nBackgroundPixels = 0;
 	
 	mapped_image = boost::shared_ptr<PALMMatrix<long> >(new PALMMatrix<long>(x_size, y_size));
 	
@@ -453,7 +466,9 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
 		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
 			
-			if (threshold_image->get(i, j) < 128) {
+			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
+				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
+				++nBackgroundPixels;
 				continue;
 			}
 			
@@ -529,10 +544,11 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 	}
 	
 	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
+	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// now copy the output to a gsl matrix
 	for (size_t k = 0; k < particles.size(); ++k) {
-		output_positions->set(k, 0, particles[k].get_intensity());
+		output_positions->set(k, 0, particles[k].get_intensity() - backgroundIntensity);
 		output_positions->set(k, 1, particles[k].get_x());
 		output_positions->set(k, 2, particles[k].get_y());
 	}
