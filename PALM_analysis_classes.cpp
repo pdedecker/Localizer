@@ -229,13 +229,14 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boos
 		return output_positions;	// is equal to NULL due to its initialization as a shared_ptr
 	}
 	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	for (size_t i = 0; i < number_of_positions; i++) {
 		(*output_positions)(i, 0) = positions[i].get_intensity() - backgroundIntensity;
 		(*output_positions)(i, 1) = positions[i].get_x();
 		(*output_positions)(i, 2) = positions[i].get_y();
+		(*output_positions)(i, 3) = backgroundIntensity;
 	}
 	
 	return output_positions;
@@ -342,7 +343,7 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 		return output_positions;
 	}
 	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// now copy the output to a gsl matrix
@@ -350,6 +351,7 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 		(*output_positions)(k, 0) = particles[k].get_intensity() - backgroundIntensity;
 		(*output_positions)(k, 1) = particles[k].get_x();
 		(*output_positions)(k, 2) = particles[k].get_y();
+		(*output_positions)(k, 3) = backgroundIntensity;
 	}
 	
 	return output_positions;
@@ -543,7 +545,7 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 		return output_positions;
 	}
 	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 3));
+	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// now copy the output to a gsl matrix
@@ -551,6 +553,7 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 		output_positions->set(k, 0, particles[k].get_intensity() - backgroundIntensity);
 		output_positions->set(k, 1, particles[k].get_x());
 		output_positions->set(k, 2, particles[k].get_y());
+		(*output_positions)(k, 3) = backgroundIntensity;
 	}
 	
 	return output_positions;

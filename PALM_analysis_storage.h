@@ -25,18 +25,21 @@ public:
 	position(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
 	~position() {;}
 	
-	void set_x(double xLoc) {x = xLoc;}
-	void set_y(double yLoc) {y = yLoc;}
-	void set_intensity(double intensity_rhs) {intensity = intensity_rhs;}
+	void set_x(const double xLoc) {x = xLoc;}
+	void set_y(const double yLoc) {y = yLoc;}
+	void set_intensity(const double intensity_rhs) {intensity = intensity_rhs;}
+	void set_background(const double background_rhs) {background = background_rhs;}
 	
-	double get_x() {return x;}
-	double get_y() {return y;}
-	double get_intensity() {return intensity;}
+	double get_x() const {return x;}
+	double get_y() const {return y;}
+	double get_intensity() const {return intensity;}
+	double get_background() const {return background;}
 	
 protected:
 	double x;
 	double y;
 	double intensity;
+	double background;
 };
 
 
