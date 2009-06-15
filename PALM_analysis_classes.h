@@ -167,7 +167,7 @@ class FitPositionsGaussian : public FitPositions {
 public:
 	// FitPositionsGaussian() {sigma = 0.1;}
 	// FitPositionsGaussian(double rhs) {sigma = rhs;}
-	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; sigma = sigma_rhs;}
+	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
@@ -176,7 +176,6 @@ public:
 protected:
 	double sigma;
 	size_t cutoff_radius;
-	double background;
 	double r_initial;
 };
 
@@ -186,7 +185,7 @@ class FitPositionsMultiplication : public FitPositions {
 	
 	// a description is given in Thompson, Biophys J 82:2775 2002
 public:
-	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double background_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; background = background_rhs; convergence_threshold = convergence_rhs;}
+	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
 	
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
@@ -201,7 +200,6 @@ protected:
 	
 	double convergence_threshold;
 	size_t cutoff_radius;
-	double background;
 	double r_initial;
 };
 

@@ -650,11 +650,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		if (p->MFlagEncountered) {
 			switch (method) {
 				case 0:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, background, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 					break;
 					
 				case 1:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, background, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, sigma));
 					break;
 				case 2:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
@@ -665,7 +665,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			}
 			
 		} else {
-			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, background, sigma));
+			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 		}
 		
 		if (fitting_positions_supplied_in_wave == 0) {

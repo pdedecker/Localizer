@@ -2363,7 +2363,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
 	
-	double x0_initial, y0_initial, initial_intensity, amplitude;
+	double x0_initial, y0_initial, amplitude, background;
 	double chi, degreesOfFreedom, c;
 	long iterations = 0;
 	int status;
@@ -2420,11 +2420,10 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	for (size_t i = startPos; i <= endPos; i++) {
 		iterations = 0;
 		
-		initial_intensity = positions->get(i, 0);
+		amplitude = positions->get(i, 0);
 		x0_initial = positions->get(i, 1);
 		y0_initial = positions->get(i, 2);
-		
-		amplitude = initial_intensity - background;
+		background = positions->get(i, 3);
 		
 		x_offset = x0_initial - cutoff_radius;
 		y_offset = y0_initial - cutoff_radius;
@@ -2551,7 +2550,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions
 	size_t ySize = image->getYSize();
 	size_t x_offset, y_offset, x_max, y_max;
 	
-	double x0_initial, y0_initial, initial_intensity, amplitude;
+	double x0_initial, y0_initial, amplitude, background;
 	size_t iterations = 0;
 	
 	double convergence_treshold_squared = convergence_threshold * convergence_threshold;
@@ -2572,11 +2571,10 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions
 	fitted_positions->set_all(0);
 	
 	for (size_t i = startPos; i <= endPos; ++i) {
-		initial_intensity = positions->get(i, 0);
+		amplitude = positions->get(i, 0);
 		x0_initial = positions->get(i, 1);
 		y0_initial = positions->get(i, 2);
-		
-		amplitude = initial_intensity - background;
+		background = positions->get(i, 3);
 		
 		x_offset = (size_t)x0_initial - cutoff_radius;
 		y_offset = (size_t)y0_initial - cutoff_radius;
