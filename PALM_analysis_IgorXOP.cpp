@@ -16,89 +16,93 @@ using namespace std;
 // Runtime param structure for AnalyzePALMImages operation.
 #include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
 struct AnalyzePALMImagesRuntimeParams {
-// Flag parameters.
-
-// Parameters for /M flag group.
-int MFlagEncountered;
-double method;
-int MFlagParamsSet[1];
-
-// Parameters for /D flag group.
-int DFlagEncountered;
-double thresholding_method;
-int DFlagParamsSet[1];
-
-// Parameters for /Y flag group.
-int YFlagEncountered;
-double camera_type;
-int YFlagParamsSet[1];
-
-// Parameters for /G flag group.
-int GFlagEncountered;
-double preprocessing;
-double postprocessing;
-int GFlagParamsSet[2];
-
-// Parameters for /F flag group.
-int FFlagEncountered;
-double particle_finder;
-int FFlagParamsSet[1];
-
-// Parameters for /T flag group.
-int TFlagEncountered;
-double treshold_parameter;
-int TFlagParamsSet[1];
-
-// Parameters for /B flag group.
-int BFlagEncountered;
-double background;
-int BFlagParamsSet[1];
-
-// Parameters for /R flag group.
-int RFlagEncountered;
-double radius;
-int RFlagParamsSet[1];
-
-// Parameters for /W flag group.
-int WFlagEncountered;
-double initial_width;
-int WFlagParamsSet[1];
-
-// Parameters for /E flag group.
-int EFlagEncountered;
-double min_distance_from_edge;
-int EFlagParamsSet[1];
-
-// Parameters for /C flag group.
-int CFlagEncountered;
-double cutoff_radius;
-int CFlagParamsSet[1];
-
-// Parameters for /S flag group.
-int SFlagEncountered;
-double sigma;
-int SFlagParamsSet[1];
-
-// Parameters for /P flag group.
-int PFlagEncountered;
-waveHndl positions_wave;
-int PFlagParamsSet[1];
-
-// Main parameters.
-
-// Parameters for simple main group #0.
-int name_of_output_waveEncountered;
-char name_of_output_wave[MAX_OBJ_NAME+1];
-int name_of_output_waveParamsSet[1];
-
-// Parameters for simple main group #1.
-int experiment_fileEncountered;
-Handle experiment_file;
-int experiment_fileParamsSet[1];
-
-// These are postamble fields that Igor sets.
-int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	// Flag parameters.
+	
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double method;
+	int MFlagParamsSet[1];
+	
+	// Parameters for /D flag group.
+	int DFlagEncountered;
+	double thresholding_method;
+	int DFlagParamsSet[1];
+	
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double camera_type;
+	int YFlagParamsSet[1];
+	
+	// Parameters for /G flag group.
+	int GFlagEncountered;
+	double preprocessing;
+	double postprocessing;
+	int GFlagParamsSet[2];
+	
+	// Parameters for /F flag group.
+	int FFlagEncountered;
+	double particle_finder;
+	int FFlagParamsSet[1];
+	
+	// Parameters for /T flag group.
+	int TFlagEncountered;
+	double treshold_parameter;
+	int TFlagParamsSet[1];
+	
+	// Parameters for /B flag group.
+	int BFlagEncountered;
+	double background;
+	int BFlagParamsSet[1];
+	
+	// Parameters for /R flag group.
+	int RFlagEncountered;
+	double radius;
+	int RFlagParamsSet[1];
+	
+	// Parameters for /W flag group.
+	int WFlagEncountered;
+	double initial_width;
+	int WFlagParamsSet[1];
+	
+	// Parameters for /E flag group.
+	int EFlagEncountered;
+	double min_distance_from_edge;
+	int EFlagParamsSet[1];
+	
+	// Parameters for /C flag group.
+	int CFlagEncountered;
+	double cutoff_radius;
+	int CFlagParamsSet[1];
+	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double sigma;
+	int SFlagParamsSet[1];
+	
+	// Parameters for /P flag group.
+	int PFlagEncountered;
+	waveHndl positions_wave;
+	int PFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int name_of_output_waveEncountered;
+	char name_of_output_wave[MAX_OBJ_NAME+1];
+	int name_of_output_waveParamsSet[1];
+	
+	// Parameters for simple main group #1.
+	int experiment_fileEncountered;
+	Handle experiment_file;
+	int experiment_fileParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct AnalyzePALMImagesRuntimeParams AnalyzePALMImagesRuntimeParams;
 typedef struct AnalyzePALMImagesRuntimeParams* AnalyzePALMImagesRuntimeParamsPtr;
@@ -385,6 +389,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	long numDimensions;
 	long dimensionSizes[MAX_DIMENSIONS + 1];
 	waveHndl fitting_positions = NULL;
+	int quiet = 0;
 	
 	size_t preprocessing_method;
 	size_t thresholding_method;
@@ -521,6 +526,12 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		fitting_positions_supplied_in_wave = 1;
 	} else {
 		fitting_positions_supplied_in_wave = 0;
+	}
+	
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		quiet = 0;
 	}
 	
 	// Main parameters.
@@ -671,10 +682,10 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		}
 		
 		if (fitting_positions_supplied_in_wave == 0) {
-			do_analyze_images_operation_parallel(image_loader, name_of_output_wave, positions_fitter, particle_finder, preprocessor, thresholder, postprocessor);
+			do_analyze_images_operation_parallel(image_loader, name_of_output_wave, positions_fitter, particle_finder, preprocessor, thresholder, postprocessor, quiet);
 			
 		} else {	// we need to use the positions supplied in the wave fitting_positions to do the fit
-			do_analyze_images_operation_no_positions_finding(image_loader, name_of_output_wave, fitting_positions, positions_fitter);
+			do_analyze_images_operation_no_positions_finding(image_loader, name_of_output_wave, fitting_positions, positions_fitter, quiet);
 		}
 	}
 	catch (std::bad_alloc) {
@@ -1659,7 +1670,7 @@ static int RegisterAnalyzePALMImages(void) {
 	char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /E=number:min_distance_from_edge /C=number:cutoff_radius /S=number:sigma /P=wave:positions_wave name:name_of_output_wave, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /E=number:min_distance_from_edge /C=number:cutoff_radius /S=number:sigma /P=wave:positions_wave /Q name:name_of_output_wave, string:experiment_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);

@@ -100,7 +100,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 
 int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
+								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor, int quiet) {
 	
 	size_t number_of_images;
 	int status;
@@ -121,7 +121,9 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 		progress_indices[i] = floor((double)(i + 1) / 10.0 * (double)number_of_images);
 	}
 	
-	XOPNotice("Calculating");
+	if (quiet == 0) {
+		XOPNotice("Calculating");
+	}
 	
 	for (size_t i = 0; i < number_of_images; i++) {
 		// check if the user wants to cancel the calculation
@@ -144,7 +146,9 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 			output_writer.append_new_positions(positions);	// we append a NULL pointer anyway because it keeps track of the image sequence
 			
 			if (i == progress_indices[current_progress_index]) {
-				XOPNotice(".");
+				if (quiet == 0) {
+					XOPNotice(".");
+				}
 				current_progress_index++;
 			}
 			
@@ -164,13 +168,17 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 	}
 	
 	// time to write the positions to an Igor wave
-	XOPNotice(" Writing output... ");
+	if (quiet == 0) {
+		XOPNotice(" Writing output... ");
+	}
 	status = output_writer.write_positions_to_wave();
 	if (status != 0) {
 		return status;
 	}
 	
-	XOPNotice(" Done!\r");
+	if (quiet == 0) {
+		XOPNotice(" Done!\r");
+	}
 	
     return 0;
 	
@@ -179,7 +187,7 @@ int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, con
 
 int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
+										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor, int quiet) {
 	
 	size_t number_of_images;
 	int status;
@@ -210,8 +218,10 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 		progress_indices[i] = floor((double)(i + 1) / 10.0 * (double)number_of_images);
 	}
 	
-	XOPNotice("Calculating");
-	DoUpdate();
+	if (quiet == 0) {
+		XOPNotice("Calculating");
+		DoUpdate();
+	}
 	
 	// set up the vector containing the data for the threads
 	for (size_t i = 0; i < numberOfProcessors; ++i) {
@@ -240,8 +250,10 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 			threadData.at(j)->image = current_image;
 			
 			if (i == progress_indices[current_progress_index]) {
-				XOPNotice(".");
-				DoUpdate();
+				if (quiet == 0) {
+					XOPNotice(".");
+					DoUpdate();
+				}
 				current_progress_index++;
 			}
 		}
@@ -265,13 +277,17 @@ int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_lo
 	}
 	
 	// write the positions to an Igor wave
-	XOPNotice(" Writing output... ");
+	if (quiet == 0) {
+		XOPNotice(" Writing output... ");
+	}
 	status = output_writer.write_positions_to_wave();
 	if (status != 0) {
 		return status;
 	}
 	
-	XOPNotice(" Done!\r");
+	if (quiet == 0) {
+		XOPNotice(" Done!\r");
+	}
 	
 	return 0;
 }
@@ -303,7 +319,7 @@ void fitPositionsThreadStart(boost::shared_ptr<threadStartData> data) {
 
 
 int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 
-													 boost::shared_ptr<FitPositions> positions_fitter) {
+													 boost::shared_ptr<FitPositions> positions_fitter, int quiet) {
 	
 	// the format for passing the positions to the fitting routines is intensity, x, y
 	
@@ -340,8 +356,9 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 		progress_indices[i] = floor((double)number_of_images / 100.0 * (double)(i + 1));
 	}
 	
-	
-	XOPNotice("Calculating");
+	if (quiet == 0) {
+		XOPNotice("Calculating");
+	}
 	
 	// we will start by copying the positions into a gsl_matrix
 	// even though this is quite unnecessary, it is easier to work with
@@ -487,20 +504,26 @@ int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoad
 		output_writer.append_new_positions(fitted_positions);
 		
 		if (i == progress_indices[current_progress_index]) {
-			XOPNotice(".");
+			if (quiet == 0) {
+				XOPNotice(".");
+			}
 			current_progress_index++;
 		}
 		
 	}
 	
 	// time to write the positions to an Igor wave
-	XOPNotice(" Writing output... ");
+	if (quiet == 0) {
+		XOPNotice(" Writing output... ");
+	}
 	status = output_writer.write_positions_to_wave();
 	if (status != 0) {
 		return status;
 	}
 	
-	XOPNotice(" Done!\r");
+	if (quiet == 0) {
+		XOPNotice(" Done!\r");
+	}
 	
     return 0;
 	

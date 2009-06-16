@@ -29,11 +29,11 @@ int parse_ccd_headers(ImageLoader *image_loader);
 
 int do_analyze_images_operation(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 								boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
+								boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor, int quiet);
 
 int do_analyze_images_operation_parallel(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, boost::shared_ptr<FitPositions> positions_fitter, 
 										 boost::shared_ptr<ParticleFinder> particle_finder, boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor, 
-										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
+										 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor, int quiet);
 
 class threadStartData {
 public:
@@ -59,7 +59,7 @@ void fitPositionsThreadStart(boost::shared_ptr<threadStartData> data);
 
 
 int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 
-													 boost::shared_ptr<FitPositions> positions_fitter);
+													 boost::shared_ptr<FitPositions> positions_fitter, int quiet);
 // this function is the same as the previous one, except that it does not try to localize the positions before fitting, but assumes that the positions
 // to start fitting at are provided as a 2D wave in fitting_positions
 
