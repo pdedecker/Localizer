@@ -424,6 +424,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
 		camera_type = (size_t)(p->camera_type + 0.5);
+	} else {
+		return TOO_FEW_PARAMETERS;
 	}
 	
 	if (p->GFlagEncountered) {
@@ -538,7 +540,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				return EXPECTED_STRING_EXPR;
 			}
 			
-			err = convert_handle_to_string(p->experiment_file, data_file_path);
+			err = ConvertHandleToFilepathString(p->experiment_file, camera_type, data_file_path);
 			if (err != 0) {
 				return err;
 			}
@@ -767,7 +769,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->experiment_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = convert_handle_to_string(p->experiment_file, data_file_path);
+		err = ConvertHandleToFilepathString(p->experiment_file, camera_type, data_file_path);
 		if (err != 0) {
 			return err;
 		}
@@ -894,7 +896,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->input_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = convert_handle_to_string(p->input_file, input_file_path);
+		err = ConvertHandleToFilepathString(p->input_file, camera_type, input_file_path);
 		if (err != 0) {
 			return err;
 		}
@@ -907,7 +909,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->output_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = convert_handle_to_string(p->output_file, output_file_path);
+		err = ConvertHandleToFilepathString(p->output_file, camera_type, output_file_path);
 		if (err != 0) {
 			return err;
 		}
@@ -1061,7 +1063,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		if (p->input_fileEncountered == 0) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = convert_handle_to_string(p->input_file, input_file_path);
+		err = ConvertHandleToFilepathString(p->input_file, camera_type, input_file_path);
 		if (err != 0) {
 			return err;
 		}
@@ -1800,7 +1802,7 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 class INCOMPATIBLE_WAVE_FORMAT {};
 
 
-int convert_handle_to_string(Handle handle, string &output_path) {
+int ConvertHandleToFilepathString(Handle handle, size_t cameraType, string &output_path) {
 	int err;
 	char handle_char[1024];
 	char handle_char_POSIX[1024];
@@ -1808,6 +1810,11 @@ int convert_handle_to_string(Handle handle, string &output_path) {
 	err = GetCStringFromHandle(handle, handle_char, 1023);
 	if (err != 0) {
 		return err;
+	}
+	
+	if (cameraType == 6) {	// special case: if we are loading from an Igor wave then no conversion is required
+		output_path.assign(handle_char);
+		return 0;
 	}
 	
 	#ifdef _MACINTOSH_

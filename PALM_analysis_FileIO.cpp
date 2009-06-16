@@ -1147,24 +1147,42 @@ void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd,
 
 ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	int err;
+	size_t waveNameOffset;
+	string dataFolderPath;
+	DataFolderHandle dataFolder;
+	char charDataFolderName[1024];
 	// try to get images from an Igor wave
-	// the string that is passed in has a leading slash added by the code that converts between Macintosh and Windows paths
-	// so we need to correct for that
-#ifdef _MACINTOSH_
-	waveName.erase(0, 1);
-#endif
 	
 	image_cache_size = image_cache_size_rhs;
 	image_cache.reserve(image_cache_size);
 	
-	DataFolderHandle rootFolder;
-	err = GetRootDataFolder(0, &rootFolder);
-	if (err != 0)
-		throw err;
-	
-	igor_data_wave = FetchWaveFromDataFolder(rootFolder, waveName.c_str());
-	if (igor_data_wave == NULL) {
-		throw NOWAV;
+	// did we receive a wavename that does not reference any data folders? (no ':' in the name)
+	// in that case we assume that the wave is located in the current data folder
+	if (waveName.find(':') == string::npos) {
+		igor_data_wave = FetchWaveFromDataFolder(NULL, waveName.c_str());
+		if (igor_data_wave == NULL) {
+			throw NOWAV;
+		}
+	} else {
+		// we found a ':' in the string
+		// therefore we're being passed a wave location that also includes datafolder information
+		// we need to parse this string to get out the data folder handle and the wave handle
+		waveNameOffset = waveName.rfind(':');
+		if (waveNameOffset != 0) {	// check for the case where the user specifies something like ":waveName"
+			dataFolderPath = waveName.substr(0, waveNameOffset);
+		} else {
+			dataFolderPath = ":";
+		}
+		err = GetNamedDataFolder(NULL, dataFolderPath.c_str(), &dataFolder);
+		if (err != 0)
+			throw err;
+		
+		// retain only the waveName part, discard the information about the data folder
+		waveName = waveName.substr(waveNameOffset + 1, waveName.length() - waveNameOffset - 1);
+		igor_data_wave = FetchWaveFromDataFolder(dataFolder, waveName.c_str());
+		if (igor_data_wave == NULL) {
+			throw NOWAV;
+		}
 	}
 	
 	

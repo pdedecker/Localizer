@@ -27,7 +27,7 @@ using namespace std;
 
 HOST_IMPORT int main(IORecHandle ioRecHandle);
 
-int convert_handle_to_string(Handle handle, string &output_string);
+int ConvertHandleToFilepathString(Handle handle, size_t cameraType, string &output_string);
 
 boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
 
