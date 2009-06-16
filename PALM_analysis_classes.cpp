@@ -2374,7 +2374,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
 	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
-	fitted_positions->set_all(0);
+	fitted_positions->set_all(-1.0);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;

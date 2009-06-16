@@ -1596,7 +1596,13 @@ IgorOutputWriter::~IgorOutputWriter() {
 int IgorOutputWriter::append_new_positions(boost::shared_ptr<PALMMatrix<double> > positions) {
 	positionsList.push_back(positions);
 	if (positions != NULL) {	// if it NULL then this no positions were found
-		total_number_of_positions += positions->getXSize();
+		// if any of the positions did not fit successfully then they will have a negative amplitude
+		// do not include those positions
+		for (size_t i = 0; i < positions->getXSize(); ++i) {
+			if ((*positions)(i, 0) != -1.0) {
+				++total_number_of_positions;	// only include positions that are not equal to -1.0 (convention to signal an invalid point)
+			}
+		}
 	}
 	return 0;
 }
@@ -1645,6 +1651,10 @@ int IgorOutputWriter::write_positions_to_wave() {
 			indices[1] = 0;
 			value = (double)frameNumber;
 			MDSetNumericWavePointValue(output_wave, indices, &value);
+			
+			if ((*positions)(j, 0) == -1.0) {
+				continue;	// not a valid fit position, ignore
+			}
 			
 			for (long k = 0; k < 11; ++k) {
 				indices[1] = k + 1;
