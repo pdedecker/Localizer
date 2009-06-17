@@ -179,6 +179,20 @@ protected:
 	double r_initial;
 };
 
+class FitPositionsGaussian_FixedWidth : public FitPositions {
+public:
+	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	~FitPositionsGaussian_FixedWidth() {;}
+	
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	
+protected:
+	double sigma;
+	size_t cutoff_radius;
+	double r_initial;
+};
+
 class FitPositionsMultiplication : public FitPositions {
 	// fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
 	// if this converges then we assume that we have found the actual position
@@ -468,10 +482,13 @@ public:
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
 
 int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
+int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 
 int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
 int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
 // the routines below are simply adapted versions of the least-squares routines above, but have been 'tweaked' to approximate Poissonian instead of Gaussian error distributions
 
@@ -489,6 +506,7 @@ public:
 	double xOffset;
 	double yOffset;
 	double sigma;
+	double width;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset;
 };
 

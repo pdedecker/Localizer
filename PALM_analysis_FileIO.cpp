@@ -1150,7 +1150,6 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	size_t waveNameOffset;
 	string dataFolderPath;
 	DataFolderHandle dataFolder;
-	char charDataFolderName[1024];
 	// try to get images from an Igor wave
 	
 	image_cache_size = image_cache_size_rhs;
