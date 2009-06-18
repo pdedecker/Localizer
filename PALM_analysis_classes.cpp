@@ -1939,6 +1939,7 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	size_t n_pixels, offset;
 	size_t FFT_xSize, FFT_ySize, i, j;
 	size_t n_FFT_values, nColumns;
+	size_t lastRow, lastCol;
 	
 	double *array1;
 	double *array2;
@@ -2091,7 +2092,7 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 		for (size_t j = 0; j < FFT_ySize; j++) {
 			// the data in the array is assumed to be in ROW-MAJOR order, so we loop over x first
 			// we also normalize the result
-			convolved_image->set(i, j, (array1[offset] / normalization_factor));
+			(*convolved_image)(i, j) = array1[offset] / normalization_factor;
 			
 			offset++;
 		}
@@ -2099,23 +2100,23 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	
 	// if the number of rows was odd, make the last row (not included in the fft) a copy of that before it
 	if ((x_size1 % 2) == 1) {
-		i = x_size1 - 1;
+		lastRow = x_size1 - 1;
 		for (size_t j = 0; j < y_size1; ++j) {
-			convolved_image->set(i, j, convolved_image->get(i - 1, j));
+			(*convolved_image)(lastRow, j) = (*convolved_image)(lastRow - 1, j);
 		}
 	}
 	
 	// if the number of columns was odd, make the last column (not included in the fft) a copy of that before it
 	if ((y_size1 % 2) == 1) {
-		j = y_size1 - 1;
+		lastCol = y_size1 - 1;
 		for (size_t i = 0; i < x_size1; ++i) {
-			convolved_image->set(i, j, convolved_image->get(i, j - 1));
+			(*convolved_image)(i, lastCol) = (*convolved_image)(i, lastCol - 1);
 		}
 	}
 	
 	// if both the number of columns and the number of rows was odd, then the pixel at the top left (highest x, highest y) will be incorrect
 	if (((x_size1 % 2) == 1) && ((y_size1 % 2) == 1)) {
-		convolved_image->set(x_size1 - 1, y_size1 - 1, convolved_image->get(x_size1 - 2, y_size1 - 2));
+		(*convolved_image)(x_size1 - 1, y_size1 - 1) = (*convolved_image)(x_size1 - 2, y_size1 - 2);
 	}
 	
 	// cleanup
