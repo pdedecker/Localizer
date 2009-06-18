@@ -1644,16 +1644,16 @@ int IgorOutputWriter::write_positions_to_wave() {
 		number_of_positions_in_matrix = positions->getXSize();
 		
 		for (long j = 0; j < number_of_positions_in_matrix; j++) {
+			if ((*positions)(j, 0) == -1.0) {
+				continue;	// not a valid fit position, ignore
+			}
+			
 			// start by storing the index of the matrix
 			// so we can tell what image the positions correspond to
 			indices[0] = offset;
 			indices[1] = 0;
 			value = (double)frameNumber;
 			MDSetNumericWavePointValue(output_wave, indices, &value);
-			
-			if ((*positions)(j, 0) == -1.0) {
-				continue;	// not a valid fit position, ignore
-			}
 			
 			for (long k = 0; k < 11; ++k) {
 				indices[1] = k + 1;
