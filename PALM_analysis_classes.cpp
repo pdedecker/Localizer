@@ -2759,28 +2759,20 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * 1.414213562373095 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.414213562373095 * 2.0)) {
-			// the output fit width is more than a factor of two different from the initial value, drop this point
-			continue;
-		}
-		
 		// calculate the covariance matrix
 		gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
 		chi = gsl_blas_dnrm2(fit_iterator->f);
-		degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
+		degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 4;
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
 		// store the data
 		(*fitted_positions)(i- startPos, 0) = gsl_vector_get(fit_iterator->x, 0);
-		(*fitted_positions)(i - startPos, 1) = r_initial / 1.414213562373095;
+		(*fitted_positions)(i - startPos, 1) = r_initial;
 		(*fitted_positions)(i - startPos, 2) = gsl_vector_get(fit_iterator->x, 1);
 		(*fitted_positions)(i - startPos, 3) = gsl_vector_get(fit_iterator->x, 2);
 		(*fitted_positions)(i - startPos, 4) = gsl_vector_get(fit_iterator->x, 3);
 		
 		// store the errors
-		for (size_t j = 5; j < 10; ++j) {
-			fitted_positions->set(i - startPos, j, c * sqrt(gsl_matrix_get(covarianceMatrix, j - 5, j - 5)));
-		}
 		(*fitted_positions)(i- startPos, 5) = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
 		(*fitted_positions)(i - startPos, 6) = 0;
 		(*fitted_positions)(i - startPos, 7) = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));

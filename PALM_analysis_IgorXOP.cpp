@@ -666,13 +666,14 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 					break;
 				case 1:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian_FixedWidth(cutoff_radius, initial_width, sigma));
 					break;
 				case 2:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, sigma));
 					break;
 				case 3:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
+					break;
 				default:
 					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
 					break;
