@@ -934,7 +934,11 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	try {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
 		
-		output_writer = boost::shared_ptr<OutputWriter>(new TIFFOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+		if (method == 3) {	// convert to a compressed TIFF file
+			output_writer = boost::shared_ptr<OutputWriter>(new TIFFOutputWriter(output_file_path, overwrite, COMPRESSION_ADOBE_DEFLATE));
+		} else {	// convert to an uncompressed TIFF file
+			output_writer = boost::shared_ptr<OutputWriter>(new TIFFOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+		}
 		
 		
 		// do the actual procedure
@@ -946,6 +950,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader.get(), output_writer.get()));
 				break;
 			case 2:		// convert to a different form (determined by the output writer)
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
+				break;
+			case 3:		// convert to a zip-compressed TIFF file
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
 				break;
 			default:
