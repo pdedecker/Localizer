@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include "tiffio.h"
 #include "boost/smart_ptr.hpp"
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis.h"

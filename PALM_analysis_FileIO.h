@@ -226,7 +226,7 @@ protected:
 
 class TIFFOutputWriter : public OutputWriter {
 public:
-	TIFFOutputWriter(const string &rhs, int overwrite);
+	TIFFOutputWriter(const string &rhs, int overwrite, int compression_rhs);
 	~TIFFOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
@@ -235,7 +235,7 @@ public:
 	
 protected:
 	void flush_cache();
-	int compress;	// if 0 then don't compress the data, otherwise compress
+	int compression;	// if 1 then don't compress the data, otherwise compress
 	
 	TIFF *tiff_file;
 };

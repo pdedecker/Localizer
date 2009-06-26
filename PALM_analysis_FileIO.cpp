@@ -1389,11 +1389,12 @@ int SimpleOutputWriter::flush_and_close() {
 }
 
 
-TIFFOutputWriter::TIFFOutputWriter(const string &rhs,int overwrite) {
+TIFFOutputWriter::TIFFOutputWriter(const string &rhs,int overwrite, int compression_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
 	file_path = rhs;
+	compression = compression_rhs;
 	
 	if (overwrite == 0) {
 		ifstream input_test;
@@ -1527,7 +1528,7 @@ void TIFFOutputWriter::flush_cache() {
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
-		result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, COMPRESSION_ADOBE_DEFLATE);
+		result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, compression);
 		if (result != 1) {
 			string error;
 			error = "Unable to set the compression method for the image at\"";
