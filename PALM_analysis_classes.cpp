@@ -2758,6 +2758,10 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
 		} while ((status = GSL_CONTINUE) && (iterations < 200));
 		
+		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			continue;
+		}
+		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
