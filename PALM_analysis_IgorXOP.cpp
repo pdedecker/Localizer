@@ -594,8 +594,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		
 		// choose which thresholding we want to do
 		switch(thresholding_method) {
-			case 0:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold_parameter));
+			case 0:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(threshold_parameter, initial_width));
 				break;
 			case 1:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -618,8 +618,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
-			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(threshold_parameter, initial_width));
+			case 8:	// direct threshold
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold_parameter));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1286,8 +1286,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				break;
 		}
 		switch(method) {
-			case 0:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(parameter));
+			case 0:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(parameter, parameter2));
 				break;
 			case 1:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -1310,8 +1310,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
-			case 8:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(parameter, parameter2));
+			case 8:	// direct threshold
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(parameter));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
