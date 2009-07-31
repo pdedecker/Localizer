@@ -1192,7 +1192,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// Parameter: p->parameter2
 		parameter2 = p->parameter2;
 	} else {
-		if (method == 8) {
+		if (method == 0) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}

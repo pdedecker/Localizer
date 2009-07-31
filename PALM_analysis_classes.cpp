@@ -1255,7 +1255,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	
 	// calculate the line that connects the maximum and highest-intensity value
 	slope = (end_val - max_val) / (end_bin_double - max_bin_double);
-	intercept = max_val / (slope * max_bin_double);
+	intercept = max_val - slope * max_bin_double;
 	
 	// catch an unlikely case where the connecting line is flat (the histogram is apparently uniform)
 	if (slope == 0) {
@@ -1275,11 +1275,11 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 		current_bin_value = gsl_histogram_get(hist, i);
 		double_i = (double)i;
 		
-		perpendicular_intercept = current_bin_value / (perpendicular_slope * double_i);
+		perpendicular_intercept = current_bin_value - perpendicular_slope * double_i;
 		
 		// where does the perpendicular line intercept the connecting line?
 		// x = (b1 - b2) / (a1 - a2) and y = a1 * x + b1
-		intercept_x = (intercept - perpendicular_intercept) / (slope - perpendicular_slope);
+		intercept_x = (intercept - perpendicular_intercept) / (perpendicular_slope - slope);
 		intercept_y = slope * intercept_x + intercept;
 		
 		// what is the distance to the connecting line?
