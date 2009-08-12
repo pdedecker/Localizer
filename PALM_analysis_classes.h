@@ -98,6 +98,18 @@ public:
 	// there are no protected members
 };
 
+class CCDImagesProcessorCrop : public CCDImagesProcessor {
+public:
+	CCDImagesProcessorCrop(ImageLoader *i_loader, OutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
+	~CCDImagesProcessorCrop() {output_writer->flush_and_close();}
+	
+	int convert_images();
+	
+protected:
+	size_t startX, endX, startY, endY;	// the points between which we should crop
+	size_t croppedXSize, croppedYSize;
+};
+
 
 class ParticleFinder {
 public:

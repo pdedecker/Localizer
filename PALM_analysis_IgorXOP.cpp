@@ -172,6 +172,14 @@ struct ProcessCCDImagesRuntimeParams {
 	int OFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /R flag group.
+	int RFlagEncountered;
+	double startX;
+	double endX;
+	double startY;
+	double endY;
+	int RFlagParamsSet[4];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -845,6 +853,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	int camera_type;
 	int method;
 	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
+	size_t startX, endX, startY, endY;
 	
 	double n_parameter;	// the value that corresponds to the /N flag
 	
@@ -902,6 +911,30 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		overwrite = 1;
 	}
 	
+	if (p->RFlagEncountered) {
+		// Parameter: p->startX
+		// Parameter: p->endX
+		// Parameter: p->startY
+		// Parameter: p->endY
+		
+		// check that they are all positive
+		if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
+			return EXPECT_POS_NUM;
+		}
+		if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
+			return EXPECT_POS_NUM;	// update this with the proper error message
+		}
+		
+		startX = (size_t)(p->startX + 0.5);
+		endX = (size_t)(p->endX + 0.5);
+		startY = (size_t)(p->startY + 0.5);
+		endY = (size_t)(p->endY + 0.5);
+	} else {
+		if (method == 4) {	// export a cropped version
+			return TOO_FEW_PARAMETERS;
+		}
+	}
+	
 	// Main parameters.
 	
 	if (p->input_fileEncountered) {
@@ -954,6 +987,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				break;
 			case 3:		// convert to a zip-compressed TIFF file
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
+				break;
+			case 4:		// output a cropped version of the image
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader.get(), output_writer.get(), startX, endX, startY, endY));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1039,13 +1075,13 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		if ((p->RFlagNumber0 < 0) || (p->RFlagNumber1 < 0) || (p->RFlagNumber2 < 0) || (p->RFlagNumber3 < 0)) {
 			return EXPECT_POS_NUM;
 		}
-		if ((p->RFlagNumber1 >= p->RFlagNumber3) || (p->RFlagNumber0 >= p->RFlagNumber2)) {
+		if ((p->RFlagNumber0 >= p->RFlagNumber1) || (p->RFlagNumber2 >= p->RFlagNumber3)) {
 			return EXPECT_POS_NUM;	// update this with the proper error message
 		}
 		
 		startX = (long)(p->RFlagNumber0 + 0.5);
-		startY = (long)(p->RFlagNumber1 + 0.5);
-		endX = (long)(p->RFlagNumber2 + 0.5);
+		endX = (long)(p->RFlagNumber1 + 0.5);
+		startY = (long)(p->RFlagNumber2 + 0.5);
 		endY = (long)(p->RFlagNumber3 + 0.5);
 		
 		if (startX < 0)
@@ -1703,7 +1739,7 @@ static int RegisterProcessCCDImages(void) {
 	char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /O string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /O /R={number:startX, number:endX, number:startY, number:endY} string:input_file, string:output_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);

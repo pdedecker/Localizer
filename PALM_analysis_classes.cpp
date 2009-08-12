@@ -132,6 +132,50 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	return 0;
 }
 
+CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, OutputWriter *o_writer, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) {
+	image_loader = i_loader;
+	output_writer = o_writer;
+	
+	total_number_of_images = image_loader->get_total_number_of_images();
+	x_size = image_loader->getXSize();
+	y_size = image_loader->getYSize();
+	
+	startX = startX_rhs;
+	endX = endX_rhs;
+	startY = startY_rhs;
+	endY = endY_rhs;
+	
+	if ((startX >= endX) || (startY >= endY)) {
+		throw kBadROIDimensions;
+	}
+	
+	if ((endX >= x_size) || (endY >= y_size)) {
+		throw kBadROIDimensions;
+	}
+	
+	croppedXSize = endX - startX + 1;
+	croppedYSize = endY - startY + 1;
+}
+
+int CCDImagesProcessorCrop::convert_images() {
+	boost::shared_ptr<PALMMatrix <double> > croppedImage;
+	boost::shared_ptr<PALMMatrix <double> > loadedImage;
+	
+	for (size_t n = 0; n < total_number_of_images; ++n) {
+		loadedImage = image_loader->get_nth_image(n);
+		croppedImage = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double> (croppedXSize, croppedYSize));
+		
+		for (size_t x = startX; x <= endX; ++x) {
+			for (size_t y = startY; y <= endY; ++y) {
+				(*croppedImage)(x - startX, y - startY) = (*loadedImage)(x, y);
+			}
+		}
+		
+		output_writer->write_image(croppedImage);
+	}
+	return 0;
+}
+
 
 boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	vector<position> positions;
