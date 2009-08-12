@@ -18,7 +18,7 @@
 
 
 
-CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer) {
+CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging) {
 	image_loader = i_loader;
 	output_writer = o_writer;
 	
@@ -26,27 +26,8 @@ CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(Image
 	x_size = image_loader->getXSize();
 	y_size = image_loader->getYSize();
 	
-	n_frames_averaging = 0;
+	n_frames_averaging = nFramesAveraging;
 }
-
-
-void CCDImagesProcessorAverageSubtraction::set_n_parameter(double n) {
-	// check is we are indeed averaging over an odd number
-	// if not then we throw an error
-	// the exception is that a value of '0' means that we have to average over the entire sequence
-	
-	// by convention the calling function checks that n is positive
-	n_frames_averaging = (size_t)(n + 0.5);
-	
-	if (((n_frames_averaging % 2) != 1) && (n_frames_averaging != 0)) {
-		throw NUMBER_OF_AVERAGING_FRAMES_SHOULD_BE_ODD();
-	}
-	
-	if (n_frames_averaging > total_number_of_images) {
-		throw NUMBER_OF_AVERAGING_LARGER_THAN_N_FRAMES_IN_FILE();
-	}
-}
-
 
 int CCDImagesProcessorAverageSubtraction::convert_images() {
 	// this function exists so that we could select between a partial or global average

@@ -944,7 +944,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		// do the actual procedure
 		switch (method) {
 			case 0:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader.get(), output_writer.get()));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader.get(), output_writer.get(), 0));
 				break;
 			case 1:		// generate a difference image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader.get(), output_writer.get()));

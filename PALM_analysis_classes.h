@@ -51,8 +51,6 @@ public:
 	
 	virtual ~CCDImagesProcessor() {;}
 	
-	virtual void set_n_parameter(double n) {;}
-	
 	virtual int convert_images() = 0;
 protected:
 	size_t total_number_of_images;
@@ -65,12 +63,11 @@ protected:
 
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
-	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer);
+	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging);
 	~CCDImagesProcessorAverageSubtraction() {output_writer->flush_and_close();}
 
 	int convert_images();
 	
-	void set_n_parameter(double n);		// in this class this function sets the number of frames that we average over
 	size_t get_n_frames_averaging() const {return n_frames_averaging;}
 	
 protected:
@@ -88,21 +85,15 @@ public:
 	
 	int convert_images();
 	
-	void set_n_parameter(double n) {;}		// ignored in this class
-	
 // there are no protected members
 };
 
-class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {	// creates a difference image, where we subtract the next frame from the current one
-	// similar to the method used in Betzig et al, Science 2006
-	// the result is a trace of length N-1
+class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, OutputWriter *o_writer);
 	~CCDImagesProcessorConvertToSimpleFileFormat() {output_writer->flush_and_close();}
 	
 	int convert_images();
-	
-	void set_n_parameter(double n) {;}		// ignored in this class
 	
 	// there are no protected members
 };
