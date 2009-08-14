@@ -1150,6 +1150,7 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	size_t waveNameOffset;
 	string dataFolderPath;
 	DataFolderHandle dataFolder;
+	size_t position;
 	// try to get images from an Igor wave
 	
 	image_cache_size = image_cache_size_rhs;
@@ -1178,6 +1179,13 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 		
 		// retain only the waveName part, discard the information about the data folder
 		waveName = waveName.substr(waveNameOffset + 1, waveName.length() - waveNameOffset - 1);
+		
+		// if the waveName part is quoted ('') then Igor chokes on this
+		// so we remove the quotes
+		while ((position = waveName.find('\'')) != string::npos) {
+			waveName.erase(position, 1);
+		}
+		
 		igor_data_wave = FetchWaveFromDataFolder(dataFolder, waveName.c_str());
 		if (igor_data_wave == NULL) {
 			throw NOWAV;

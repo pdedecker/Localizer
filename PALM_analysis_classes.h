@@ -43,11 +43,19 @@ using namespace std;
 // AMPLITUDE	WIDTH		X		Y		OFFSET		AMP_ERROR	WIDTH_ERROR		X_ERROR		Y_ERROR		OFFSET_ERROR		# OF ITERATIONS
 
 
-
+/**
+ * @brief An abstract base class from which all other CCD processor classes must derive
+ * 
+ * The 'CCDImagesProcessor' family of classes contains algorithms that accept a CCD image stack as input (encapsulated in a 'ImageLoader' object)
+ * and produce another image stack as output.
+ *
+ * This class is abstract, meaning that it can not be instantiated. However, it provides the virtual function 'convert_images()', 
+ * which is where derived classes should do their work. This function does not accept arguments, instead the parameters a processor needs
+ * should be passed in the constructor.
+ */
 class CCDImagesProcessor {
 public:
 	CCDImagesProcessor() {;}
-	CCDImagesProcessor(ImageLoader *i_loader, OutputWriter *o_writer) {;}
 	
 	virtual ~CCDImagesProcessor() {;}
 	
@@ -61,6 +69,9 @@ protected:
 	OutputWriter *output_writer;
 };
 
+/**
+ * @brief Calculate the average image of all frames and subtract it from every frame in the CCD image stack
+ */
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
 	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging);
@@ -76,9 +87,10 @@ protected:
 	void subtract_average_of_entire_trace();
 };
 
-class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {	// creates a difference image, where we subtract the next frame from the current one
-																		// similar to the method used in Betzig et al, Science 2006
-																		// the result is a trace of length N-1
+/**
+ * @brief Calculates the average image of all frames and subtract it from every frame in the CCD image stack.
+ */
+class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, OutputWriter *o_writer);
 	~CCDImagesProcessorDifferenceImage() {output_writer->flush_and_close();}
@@ -88,6 +100,9 @@ public:
 // there are no protected members
 };
 
+/**
+ * @brief Converts the input CCD image stack into a standard format, currently an uncompressed TIFF.
+ */
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, OutputWriter *o_writer);
@@ -98,6 +113,10 @@ public:
 	// there are no protected members
 };
 
+/**
+ * @brief Generates a new CCD image stack that is a cropped version of the input image stack.
+ * The boundary box for the cropping is specified by the parameters in the constructor.
+ */
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorCrop(ImageLoader *i_loader, OutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
@@ -110,7 +129,15 @@ protected:
 	size_t croppedXSize, croppedYSize;
 };
 
-
+/**
+ * @brief An abstract base class from which all other 'particle finder' classes must derive
+ * 
+ * This family of classes contains algorithms that accept a single binary segment images as input and reduce this to a list of (x, y) positions
+ * where a localization fit will be attempted.
+ *
+ * This class is abstract, meaning that it can not be instantiated. However, it provides the virtual function 'findPositions()', 
+ * which is where derived classes should do their work. Any necessary parameters should be passed in the constructors of derived classes.
+ */
 class ParticleFinder {
 public:
 	ParticleFinder() {minDistanceFromEdge = 0;}
@@ -121,6 +148,9 @@ protected:
 	double minDistanceFromEdge;
 };
 
+/**
+ * @brief Assumes that all active pixels within a given radius belong to the same particle
+ */
 class ParticleFinder_radius : public ParticleFinder {
 public:
 	ParticleFinder_radius(double dist, double rhs) {minDistanceFromEdge = dist; radius = rhs;}
@@ -131,6 +161,9 @@ protected:
 	double radius;
 };
 
+/**
+ * @brief Assumes that all neighbouring active pixels (four-way adjacency) belong to the same particle
+ */
 class ParticleFinder_adjacent4 : public ParticleFinder {
 public:
 	ParticleFinder_adjacent4(double rhs) {minDistanceFromEdge = rhs;}
@@ -143,6 +176,9 @@ protected:
 
 };
 
+/**
+ * @brief Assumes that all neighbouring active pixels (eight-way adjacency) belong to the same particle
+ */
 class ParticleFinder_adjacent8 : public ParticleFinder {
 public:
 	ParticleFinder_adjacent8(double rhs) {minDistanceFromEdge = rhs;}
@@ -155,6 +191,14 @@ protected:
 	
 };
 
+/**
+ * @brief An abstract base class from which all other 'FitPositions' classes must derive
+ * 
+ * This family of classes contains algorithms that accept a single CCD image and a list of positions as input and return a list of subpixel-localized positions.
+ *
+ * This class is abstract, meaning that it can not be instantiated. However, it provides the virtual function 'fit_positions()', 
+ * which is where derived classes should do their work. Any necessary parameters should be passed in the constructors of derived classes.
+ */
 class FitPositions {
 public:
 	FitPositions() {;}
@@ -166,6 +210,9 @@ public:
 	// it's mainly provided to help with multithreading
 };
 
+/**
+ * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting.
+ */
 class FitPositionsGaussian : public FitPositions {
 public:
 	// FitPositionsGaussian() {sigma = 0.1;}
