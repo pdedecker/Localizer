@@ -1850,50 +1850,8 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MeanFilter::d
 	
 	return filtered_image;
 }
-	
-			
+
 boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
-	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->getXSize();
-	size_t y_size = thresholded_image->getYSize();
-	unsigned char value;
-	double meanIntensity = 0;
-	
-	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
-	
-	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-	
-	processed_thresholded_image->set_all(0);
-	
-	// calculate the mean intensity
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			meanIntensity += image->get(i, j);
-		}
-	}
-	meanIntensity /= x_size * y_size;
-	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			
-			value = thresholded_image->get(i, j);
-			if (value < 128) {	// this is an 'off' pixel
-				continue;
-			}
-			
-			// if we are here then the current pixel is active
-			// we only mark the pixel as active in the processed image if it is above the mean
-			if (image->get(i, j) > meanIntensity) {
-				processed_thresholded_image->set(i, j, 255);
-			}
-		}
-	}
-	
-	return processed_thresholded_image;
-}
-
-
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
 	size_t x_size = thresholded_image->getXSize();
 	size_t y_size = thresholded_image->getYSize();
@@ -1937,6 +1895,46 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_Remo
 			if (neighbour_found == 0) {
 				// we didn't find an active point in the neighborhood, it was an isolated pixel
 				processed_thresholded_image->set(i, j, 0);
+			}
+		}
+	}
+	
+	return processed_thresholded_image;
+}
+
+boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
+	// we don't care about the edges, they are ignored anyway in the fitting
+	size_t x_size = thresholded_image->getXSize();
+	size_t y_size = thresholded_image->getYSize();
+	unsigned char value;
+	double meanIntensity = 0;
+	
+	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
+	
+	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	
+	processed_thresholded_image->set_all(0);
+	
+	// calculate the mean intensity
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
+			meanIntensity += image->get(i, j);
+		}
+	}
+	meanIntensity /= x_size * y_size;
+	
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
+			
+			value = thresholded_image->get(i, j);
+			if (value < 128) {	// this is an 'off' pixel
+				continue;
+			}
+			
+			// if we are here then the current pixel is active
+			// we only mark the pixel as active in the processed image if it is above the mean
+			if (image->get(i, j) > meanIntensity) {
+				processed_thresholded_image->set(i, j, 255);
 			}
 		}
 	}
@@ -2594,6 +2592,12 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 			continue;
 		}
 		
+		// are the reported positions within the window?
+		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
+			// the reported positions are not within the window, we should reject them
+			continue;
+		}
+		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
@@ -2784,6 +2788,12 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 		} while ((status = GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			continue;
+		}
+		
+		// are the reported positions within the window?
+		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
+			// the reported positions are not within the window, we should reject them
 			continue;
 		}
 		
