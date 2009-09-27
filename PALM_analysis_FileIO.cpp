@@ -1542,18 +1542,14 @@ void IgorResultsWriter::WriteResults() {
 		
 		if (positions.get() == NULL) {
 			// no positions were found in this frame
-			++frameNumber;
 			resultsList.pop_front();
 			continue;
 		}
 		
 		number_of_positions_in_matrix = positions->getXSize();
+		frameNumber = (resultsList.front())->getFrameIndex();
 		
 		for (long j = 0; j < number_of_positions_in_matrix; j++) {
-			if ((*positions)(j, 0) == -1.0) {
-				continue;	// not a valid fit position, ignore
-			}
-			
 			// start by storing the index of the matrix
 			// so we can tell what image the positions correspond to
 			indices[0] = offset;
@@ -1561,7 +1557,7 @@ void IgorResultsWriter::WriteResults() {
 			value = (double)frameNumber;
 			MDSetNumericWavePointValue(output_wave, indices, &value);
 			
-			for (long k = 0; k < 11; ++k) {
+			for (long k = 0; k < N_OUTPUT_PARAMS_PER_FITTED_POSITION; ++k) {
 				indices[1] = k + 1;
 				value = positions->get(j, k);
 				MDSetNumericWavePointValue(output_wave, indices, &value);

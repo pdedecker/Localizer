@@ -343,6 +343,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositions::RemoveUnsuccessfulFits(boos
 			for (size_t j = 0; j < fittedPositions->getYSize(); ++j) {
 				(*correctedPositions)(offset, j) = (*fittedPositions)(i, j);
 			}
+			++offset;
 		}
 	}
 	

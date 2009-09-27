@@ -204,6 +204,9 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	std::list<boost::shared_ptr<PALMResults> >::iterator it;
 	
 	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
+	if (numberOfThreads == 0) {
+		numberOfThreads = 1;
+	}
 	if (numberOfThreads > this->nImages) {
 		numberOfThreads = nImages;
 	}
@@ -261,7 +264,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 														  controller->thresholdImagePostprocessor);
 		locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
-		fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);	// TODO: NOT YET SAFE IF NO POSITIONS ARE FOUND
+		fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
 		
 		analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
 		
