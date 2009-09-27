@@ -202,6 +202,7 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	std::list<boost::shared_ptr<PALMResults> >::iterator it;
+	int firstThreadHasFinished;
 	
 	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
 	if (numberOfThreads == 0) {
@@ -225,8 +226,17 @@ void PALMAnalysisController::DoPALMAnalysis() {
 		threads.push_back(singleThreadPtr);
 	}
 	
-	// wait for the threads to finish
-	for (size_t j = 0; j < numberOfThreads; ++j) {
+	// test if the threads have finished
+	for (;;) {
+		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(500));
+		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
+			continue;
+		} else {
+			break;
+		}
+	}
+	
+	for (size_t j = 1; j < numberOfThreads; ++j) {
 		threads.at(j)->join();
 	}
 	

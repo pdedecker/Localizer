@@ -13,6 +13,7 @@
 #include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_Localization.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
