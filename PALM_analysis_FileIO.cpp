@@ -1494,33 +1494,25 @@ int TIFFOutputWriter::flush_and_close() {
 }
 
 
-IgorOutputWriter::IgorOutputWriter(const string rhs) {
-	wave_name = rhs;
-	total_number_of_positions = 0;
+IgorResultsWriter::IgorOutputWriter(const string rhs) {
+	this->waveName = rhs;
+	this->totalNumberOfPositions = 0;
 }
 
-IgorOutputWriter::~IgorOutputWriter() {
+IgorResultsWriter::~IgorOutputWriter() {
 	// if some positions were passed on then write the output
 	if (positionsList.size() > 0) {
-		write_positions_to_wave();
+		WritePositions();
 	}
 }
 
-int IgorOutputWriter::append_new_positions(boost::shared_ptr<PALMMatrix<double> > positions) {
-	positionsList.push_back(positions);
-	if (positions != NULL) {	// if it NULL then this no positions were found
-		// if any of the positions did not fit successfully then they will have a negative amplitude
-		// do not include those positions
-		for (size_t i = 0; i < positions->getXSize(); ++i) {
-			if ((*positions)(i, 0) != -1.0) {
-				++total_number_of_positions;	// only include positions that are not equal to -1.0 (convention to signal an invalid point)
-			}
-		}
-	}
-	return 0;
+void IgorResultsWriter::AppendNewResult(boost::shared_ptr<PALMResults> result) {
+	resultsList.push_back(result);
+	
+	totalNumberOfPositions += result->getNumberOfFittedPositions();
 }
 
-int IgorOutputWriter::write_positions_to_wave() {
+void IgorResultsWriter::WriteResults() {
 	waveHndl output_wave;
 	long dim_size[3];
 	long indices[2];
@@ -1530,7 +1522,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 	long number_of_positions_in_matrix, offset = 0;
 	size_t frameNumber = 0;
 	
-	dim_size[0] = (long)total_number_of_positions;
+	dim_size[0] = (long)this->totalNumberOfPositions;
 	dim_size[1] = 12;
 	dim_size[2] = 0;
 	
@@ -1540,18 +1532,18 @@ int IgorOutputWriter::write_positions_to_wave() {
 	// n_image	amplitude	radius	x_position	y_position	offset	amp_error	radius_err	x_err	y_err	offset_err	n_iters
 	
 	// try to make the wave
-	status = MDMakeWave(&output_wave, wave_name.c_str(), NULL, dim_size, NT_FP64, 1);
+	status = MDMakeWave(&output_wave, this->waveName.c_str(), NULL, dim_size, NT_FP64, 1);
 	if (status != 0)
 		return status;
 	
-	while (positionsList.size() > 0) {
+	while (resultsList.size() > 0) {
 		
-		positions = positionsList.front();
+		positions = (resultsList.front())->getFittedPositions();
 		
 		if (positions.get() == NULL) {
 			// no positions were found in this frame
 			++frameNumber;
-			positionsList.pop_front();
+			resultsList.pop_front();
 			continue;
 		}
 		
@@ -1577,7 +1569,7 @@ int IgorOutputWriter::write_positions_to_wave() {
 			offset++;
 		}
 		++frameNumber;
-		positionsList.pop_front();
+		resultsList.pop_front();
 	}
 	return 0;
 }

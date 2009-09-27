@@ -56,7 +56,8 @@ public:
 	PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
 						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs);
+						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
+						   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs);
 	~PALMAnalysisController() {;}
 	
 	void DoPALMAnalysis();
@@ -73,6 +74,7 @@ protected:
 	boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
 	boost::shared_ptr<ParticleFinder> particleFinder;
 	boost::shared_ptr<FitPositions> fitPositions;
+	boost::shared_ptr<PALMResultsWriter> resultsWriter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addPALMResultsMutex;
@@ -107,6 +109,7 @@ public:
 	~PALMResults() {;}
 	
 	size_t getFrameIndex() const {return frameIndex;}
+	size_t getNumberOfFittedPositions const {return fittedPositions->ySize();}
 	boost::shared_ptr<PALMMatrix<double> > getFittedPositions() const {return fittedPositions;}
 	
 protected:

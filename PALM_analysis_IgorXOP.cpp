@@ -409,6 +409,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particle_finder;
+	boost::shared_ptr<PALMAnalysisController> analysisController;
+	boost::shared_ptr<PALMResultsWriter> resultsWriter;
 	
 	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
 	if (sizeof(char) != 1)
@@ -690,13 +692,12 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		} else {
 			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 		}
+		resultsWriter = boost::shared_ptr<PALMResultsWriter> (new IgorResultsWriter(std::string("POS_out")));
+		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(image_loader, thresholder, preprocessor, 
+																								   postprocessor, particle_finder, positions_fitter,
+																								   resultsWriter));
 		
-		if (fitting_positions_supplied_in_wave == 0) {
-			do_analyze_images_operation_parallel(image_loader, name_of_output_wave, positions_fitter, particle_finder, preprocessor, thresholder, postprocessor, quiet);
-			
-		} else {	// we need to use the positions supplied in the wave fitting_positions to do the fit
-			do_analyze_images_operation_no_positions_finding(image_loader, name_of_output_wave, fitting_positions, positions_fitter, quiet);
-		}
+		analysisController->DoPALMAnalysis();
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;

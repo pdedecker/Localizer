@@ -16,13 +16,15 @@
 PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
 											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs) {
+											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
+											   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs) {
 	imageLoader = imageLoader_rhs;
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
 	particleFinder = particleFinder_rhs;
 	fitPositions = fitPositions_rhs;
+	resultsWriter = resultsWriter_rhs;
 	
 	nImages = imageLoader->get_total_number_of_images();
 }
@@ -65,7 +67,7 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	
 	// store the results
 	for (it = this->fittedPositions.begin(); it != this->fittedPositions.end(); ++it) {
-		output_writer.append_new_positions(*it);
+		this->resultsWriter.append_new_positions(*it);
 	}
 }
 

@@ -239,20 +239,34 @@ protected:
 	TIFF *tiff_file;
 };
 
-class IgorOutputWriter {	// this class will take care of outputting the fitted positions to an Igor wave
+/**
+ * @brief Takes the set of PALM results generated from an analysis and outputs them in some way. This is the abstract base class.
+ */
+class PALMResultsWriter {
 public:
-	IgorOutputWriter(const string rhs);
-	~IgorOutputWriter();
+	PALMResultsWriter() {;}
+	~PALMResultsWriter() {;}
 	
-	int append_new_positions(boost::shared_ptr<PALMMatrix<double> > positions);
-	int write_positions_to_wave();	// to be called when the positions have been uploaded
-	// writes the positions to the wave
-	// the wave is only created at this point, and WILL overwrite previous waves of the same name
+	virtual void AppendNewResult(boost::shared_ptr<PALMResults> result) = 0;
+	virtual void WriteResults() = 0;
 	
 private:
-	list <boost::shared_ptr<PALMMatrix<double> > > positionsList;
-	size_t total_number_of_positions;
-	string wave_name;
+	std::list <boost::shared_ptr<PALMMatrix<double> > > resultsList;
+	size_t totalNumberOfPositions;
+}
+
+class IgorResultsWriter : public PALMResultsWriter {	// this class will take care of outputting the fitted positions to an Igor wave
+public:
+	IgorResultsWriter(const string rhs);
+	~IgorResultsWriter();
+	
+	void AppendNewResult(boost::shared_ptr<PALMResults> result);
+	void WriteResults();	// to be called when the positions have been uploaded
+							// writes the positions to the wave
+							// the wave is only created at this point, and WILL overwrite previous waves of the same name
+	
+private:
+	string waveName;
 };
 
 
