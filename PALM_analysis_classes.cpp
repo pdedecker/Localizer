@@ -2551,8 +2551,36 @@ boost::shared_ptr<PALMMatrix<double> > FitPositions::fit_positions(const boost::
 	endPosition = positions->getXSize() - 1;
 	
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
+	fittedPositions = RemoveUnsuccessfulFits(fittedPositions);
 	
 	return fittedPositions;
+}
+
+boost::shared_ptr<PALMMatrix<double> > FitPositions::RemoveUnsuccessfulFits(boost::shared_ptr<PALMMatrix<double> > fittedPositions) {
+	size_t nFittedPositions = fittedPositions->getXSize();
+	size_t nSuccessfulFits = 0;
+	size_t offset = 0;
+	double fittedAmplitude;
+	
+	for (size_t i = 0; i < nFittedPositions; ++i) {
+		fittedAmplitude = (*fittedPositions)(i, 0);
+		if (fittedAmplitude > 0) {
+			++nSuccessfulFits;
+		}
+	}
+	
+	boost::shared_ptr<PALMMatrix<double> > correctedPositions (new PALMMatrix<double> (nSuccessfulFits, fittedPositions->getYSize()));
+	
+	for (size_t i = 0; i < nFittedPositions; ++i) {
+		fittedAmplitude = (*fittedPositions)(i, 0);
+		if (fittedAmplitude > 0) {
+			for (size_t j = 0; j < fittedPositions->getYSize(); ++j) {
+				(*correctedPositions)(offset, j) = (*fittedPositions)(i, j)
+			}
+		}
+	}
+	
+	return correctedPositions;
 }
 
 

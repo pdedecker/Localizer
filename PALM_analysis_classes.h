@@ -282,6 +282,16 @@ public:
 	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
+	
+protected:
+	/**
+	 *@brief Accept raw fitted positions and remove those that were not successful (signaled by a negative amplitude)
+	 *
+	 * Due to using a not-resizable storage (a matrix) for the fit results, we cannot easily delete unsuccessful fits
+	 * this function makes a copy of the fitted positions and returns a possibly smaller matrix that does not contain
+	 * the unsuccessful fits
+	 */
+	boost::shared_ptr<PALMMatrix<double> > RemoveUnsuccessfulFits(boost::shared_ptr<PALMMatrix<double> > fittedPositions);
 };
 
 /**
