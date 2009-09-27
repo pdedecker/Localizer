@@ -1494,15 +1494,15 @@ int TIFFOutputWriter::flush_and_close() {
 }
 
 
-IgorResultsWriter::IgorOutputWriter(const string rhs) {
+IgorResultsWriter::IgorResultsWriter(const string rhs) {
 	this->waveName = rhs;
 	this->totalNumberOfPositions = 0;
 }
 
-IgorResultsWriter::~IgorOutputWriter() {
+IgorResultsWriter::~IgorResultsWriter() {
 	// if some positions were passed on then write the output
-	if (positionsList.size() > 0) {
-		WritePositions();
+	if (resultsList.size() > 0) {
+		WriteResults();
 	}
 }
 
@@ -1534,7 +1534,7 @@ void IgorResultsWriter::WriteResults() {
 	// try to make the wave
 	status = MDMakeWave(&output_wave, this->waveName.c_str(), NULL, dim_size, NT_FP64, 1);
 	if (status != 0)
-		return status;
+		throw status;
 	
 	while (resultsList.size() > 0) {
 		
@@ -1571,5 +1571,4 @@ void IgorResultsWriter::WriteResults() {
 		++frameNumber;
 		resultsList.pop_front();
 	}
-	return 0;
 }

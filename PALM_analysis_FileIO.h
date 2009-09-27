@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef PALM_ANALYSIS_FILEIO
-#define PALM_ANALYSIS_FILEIO
+#ifndef PALM_ANALYSIS_FILEIO_H
+#define PALM_ANALYSIS_FILEIO_H
 
 #include <fstream>
 #include <iostream>
@@ -18,12 +18,14 @@
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_defines.h"
+#include "PALM_analysis.h"
 #include "tiffio.h"
 #include "stdint.h"
 #include "XOPStandardHeaders.h"
 #include "boost/thread.hpp"
 
 using namespace std;
+class PALMResults;
 
 class XOPFileHandler {
 public:
@@ -250,10 +252,10 @@ public:
 	virtual void AppendNewResult(boost::shared_ptr<PALMResults> result) = 0;
 	virtual void WriteResults() = 0;
 	
-private:
-	std::list <boost::shared_ptr<PALMMatrix<double> > > resultsList;
+protected:
+	std::list <boost::shared_ptr<PALMResults> > resultsList;
 	size_t totalNumberOfPositions;
-}
+};
 
 class IgorResultsWriter : public PALMResultsWriter {	// this class will take care of outputting the fitted positions to an Igor wave
 public:
@@ -262,10 +264,10 @@ public:
 	
 	void AppendNewResult(boost::shared_ptr<PALMResults> result);
 	void WriteResults();	// to be called when the positions have been uploaded
-							// writes the positions to the wave
-							// the wave is only created at this point, and WILL overwrite previous waves of the same name
+	// writes the positions to the wave
+	// the wave is only created at this point, and WILL overwrite previous waves of the same name
 	
-private:
+protected:
 	string waveName;
 };
 

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef PALM_ANALYSIS_ERRORS
-#define PALM_ANALYSIS_ERRORS
+#ifndef PALM_ANALYSIS_ERRORS_H
+#define PALM_ANALYSIS_ERRORS_H
 
 #include <string>
 

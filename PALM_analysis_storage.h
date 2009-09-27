@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef PALM_ANALYSIS_STORAGE
-#define PALM_ANALYSIS_STORAGE
+#ifndef PALM_ANALYSIS_STORAGE_H
+#define PALM_ANALYSIS_STORAGE_H
 
 #include <string>
 #include <vector>

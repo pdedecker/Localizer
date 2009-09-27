@@ -6,8 +6,8 @@
  *  Copyright 2008 __MyCompanyName__. All rights reserved.
  *
  */
-#ifndef PALM_ANALYSIS_DEFINES
-#define PALM_ANALYSIS_DEFINES
+#ifndef PALM_ANALYSIS_DEFINES_H
+#define PALM_ANALYSIS_DEFINES_H
 
 #define N_OUTPUT_PARAMS_PER_FITTED_POSITION 11
 

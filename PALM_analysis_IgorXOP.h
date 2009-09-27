@@ -20,7 +20,11 @@
 #include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
+#include "PALM_analysis_Processing.h"
 #include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_segmentation.h"
+#include "PALM_analysis_Localization.h"
+#include "PALM_analysis_ParticleFinding.h"
 
 
 

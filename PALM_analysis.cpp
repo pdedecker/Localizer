@@ -180,6 +180,108 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	return 0;
 }
 
+PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
+											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
+											   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs) {
+	imageLoader = imageLoader_rhs;
+	thresholder = thresholder_rhs;
+	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
+	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
+	particleFinder = particleFinder_rhs;
+	fitPositions = fitPositions_rhs;
+	resultsWriter = resultsWriter_rhs;
+	
+	nImages = imageLoader->get_total_number_of_images();
+}
+
+void PALMAnalysisController::DoPALMAnalysis() {
+	size_t numberOfProcessors = boost::thread::hardware_concurrency();
+	size_t numberOfThreads;
+	vector<boost::shared_ptr<boost::thread> > threads;
+	boost::shared_ptr<boost::thread> singleThreadPtr;
+	std::list<boost::shared_ptr<PALMResults> >::iterator it;
+	
+	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
+	if (numberOfThreads > this->nImages) {
+		numberOfThreads = nImages;
+	}
+	
+	this->fittedPositionsList.clear();
+	
+	// fill the queue holding the frames to be processed with the frames in the sequence
+	for (size_t i = 0; i < this->nImages; ++i) {
+		this->framesToBeProcessed.push(i);
+	}
+	
+	// start the thread pool
+	threads.clear();
+	for (size_t j = 0; j < numberOfThreads; ++j) {
+		singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(ThreadPoolWorker, this)));
+		threads.push_back(singleThreadPtr);
+	}
+	
+	// wait for the threads to finish
+	for (size_t j = 0; j < numberOfThreads; ++j) {
+		threads.at(j)->join();
+	}
+	
+	// the processing itself is now done, but the results will not have been returned in the correct order
+	fittedPositionsList.sort(ComparePALMResults);
+	
+	// store the results
+	for (it = this->fittedPositionsList.begin(); it != this->fittedPositionsList.end(); ++it) {
+		this->resultsWriter->AppendNewResult(*it);
+	}
+}
+
+void ThreadPoolWorker(PALMAnalysisController* controller) {
+	size_t currentImageToProcess;
+	boost::shared_ptr<PALMMatrix<double> > currentImage;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
+	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
+	boost::shared_ptr<PALMResults> analysisResult;
+	
+	for (;;) {	// loop continuously looking for more images until there are none left
+		// start by a acquiring an image to process
+		controller->acquireFrameForProcessingMutex.lock();
+		if (controller->framesToBeProcessed.size() == 0) {
+			// no more frames to be processed
+			controller->acquireFrameForProcessingMutex.unlock();
+			return;
+		}
+		currentImageToProcess = controller->framesToBeProcessed.front();
+		controller->framesToBeProcessed.pop();
+		controller->acquireFrameForProcessingMutex.unlock();
+		
+		// we need to process the image with index currentImageToProcess
+		currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
+		thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
+														  controller->thresholdImagePostprocessor);
+		locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
+		fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);	// TODO: NOT YET SAFE IF NO POSITIONS ARE FOUND
+		
+		analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
+		
+		// pass the result to the output queue
+		controller->addPALMResultsMutex.lock();
+		controller->fittedPositionsList.push_back(analysisResult);
+		controller->addPALMResultsMutex.unlock();
+	}
+	
+}
+
+int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr<PALMResults> result2) {
+	assert(result1->getFrameIndex() != result2->getFrameIndex());
+	if (result1->getFrameIndex() < result2->getFrameIndex()) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 
 boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
 																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors) {
@@ -638,49 +740,3 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 }
 	
-
-
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins) {
-	size_t x_size, y_size;
-	gsl_histogram *hist;
-	double min = 1e100;
-	double max = -1e100;
-	double current_value;
-	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
-	
-	string error;
-	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()\r";
-	
-	hist = gsl_histogram_alloc(number_of_bins);
-	if (hist == NULL) {
-		throw OUT_OF_MEMORY(error);
-		return NULL;
-	}
-	
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
-			current_value = (*image)(i, j);
-			if (current_value < min)
-				min = current_value;
-			if (current_value > max)
-				max = current_value;
-		}
-	}
-	
-	// adjust the histogram bins so that they range uniformly from min to max and set the values to zero
-	gsl_histogram_set_ranges_uniform(hist, min, max + 1e-10);
-	
-	// now populate the histogram
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
-			current_value = (*image)(i, j);
-			
-			gsl_histogram_increment(hist, current_value);
-			
-		}
-	}
-	
-	return hist;
-}
