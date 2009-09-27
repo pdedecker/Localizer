@@ -13,9 +13,98 @@
 #include "PALM_analysis_IgorXOP.h"
 
 
+PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
+											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs) {
+	imageLoader = imageLoader_rhs;
+	thresholder = thresholder_rhs;
+	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
+	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
+	particleFinder = particleFinder_rhs;
+	fitPositions = fitPositions_rhs;
+	
+	nImages = imageLoader->get_total_number_of_images();
+}
 
+void PALMAnalysisController::DoPALMAnalysis() {
+	size_t numberOfProcessors = boost::thread::hardware_concurrency();
+	size_t numberOfThreads;
+	vector<boost::shared_ptr<boost::thread> > threads;
+	std::list<PALMResults>::iterator it;
+	
+	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
+	if (numberOfThreads > this->nImages) {
+		numberOfThreads = nImages;
+	}
+	
+	this->framesToBeProcessed.clear();
+	this->fittedPositions.clear();
+	this->framesToBeProcessed.reserve(this->nImages);
+	this->fittedPositions.reserve(this->nImages);
+	
+	// fill the queue holding the frames to be processed with the frames in the sequence
+	for (size_t i = 0; i < this->nImages; ++i) {
+		this->framesToBeProcessed.push_back(i);
+	}
+	
+	// start the thread pool
+	threads.clear();
+	for (size_t j = 0; j < numberOfThreads; ++j) {
+		singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(&ThreadPoolWorker));
+		threads.push_back(singleThreadPtr);
+	}
+	
+	// wait for the threads to finish
+	for (size_t j = 0; j < numberOfThreads; ++j) {
+		threads.at(j)->join();
+	}
+	
+	// the processing itself is now done, but the results will not have been returned in the correct order
+	std::sort(this->fittedPositions.begin(), this->fittedPositions.end(), this->ComparePALMResults);
+	
+	// store the results
+	for (it = this->fittedPositions.begin(); it != this->fittedPositions.end(); ++it) {
+		output_writer.append_new_positions(*it);
+	}
+}
 
-
+void PALMAnalysisController::ThreadPoolWorker() {
+	size_t currentImageToProcess;
+	boost::shared_ptr<PALMMatrix<double> > currentImage;
+	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
+	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
+	boost::shared_ptr<PALMResults> analysisResult;
+	
+	for (;;) {	// loop continuously looking for more images until there are none left
+		// start by a acquiring an image to process
+		this->acquireFrameForProcessingMutex.lock();
+		if (this->framesToBeProcessed.size() == 0) {
+			// no more frames to be processed
+			this->acquireFrameForProcessingMutex.unlock();
+			return;
+		}
+		currentImageToProcess = this->framesToBeProcessed.front();
+		this->framesToBeProcessed.pop();
+		this->acquireFrameForProcessingMutex.unlock();
+		
+		// we need to process the image with index currentImageToProcess
+		currentImage = this->imageLoader->get_nth_image(currentImageToProcess);
+		thresholdedImage = do_processing_and_thresholding(currentImage, this->thresholdImagePreprocessor, this->thresholder,
+														  this->thresholdImagePostprocessor);
+		locatedParticles = this->particleFinder->findPositions(currentImage, thresholdedImage);
+		fittedPositions = this->fit_positions(currentImage, locatedParticles);	// TODO: NOT YET SAFE IF NO POSITIONS ARE FOUND
+		
+		analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
+		
+		// pass the result to the output queue
+		addPALMResultsMutex.lock();
+		fittedPositions.push_back(analysisResult);
+		addPALMResultsMutex.unlock();
+	}
+	
+}
 
 
 CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging) {

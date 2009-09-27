@@ -14,6 +14,7 @@
 #include <list>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
@@ -42,6 +43,76 @@ using namespace std;
 // these entries are:
 // AMPLITUDE	WIDTH		X		Y		OFFSET		AMP_ERROR	WIDTH_ERROR		X_ERROR		Y_ERROR		OFFSET_ERROR		# OF ITERATIONS
 
+
+/**
+ *@brief A class that handles the actual PALM analysis
+ *
+ *
+ * The 'PALMAnalysisController' class must be initialized with pointers to the thresholder, particle finder, fitter, and output writer objects.
+ * It will coordinate the PALM analysis between those objects and take care of all the details
+ */
+class PALMAnalysisController {
+public:
+	PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
+						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs);
+	~PALMAnalysisController() {;}
+	
+	void DoPALMAnalysis();
+	
+protected:
+	size_t nImages;
+	
+	std::queue<size_t> framesToBeProcessed;
+	std::list<PALMResults> fittedPositions;
+	
+	boost::shared_ptr<ImageLoader> imageLoader;
+	boost::shared_ptr<ThresholdImage> thresholder;
+	boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor;
+	boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
+	boost::shared_ptr<ParticleFinder> particleFinder;
+	boost::shared_ptr<FitPositions> fitPositions;
+	
+	boost::mutex acquireFrameForProcessingMutex;
+	boost::mutex addPALMResultsMutex;
+	
+	/**
+	 * The function that will be handle the image processing in a different thread
+	 */
+	void ThreadPoolWorker();
+	
+	/**
+	 * Compare two PALMResults to see which one originated from an earlier frame
+	 */
+	int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr<PALMResults> result2) {
+		assert(result1->getFrameIndex() != result2->getFrameIndex();
+		if (result1->getFrameIndex() < result2->getFrameIndex()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+};
+
+/**
+ *@brief Stores the result from fitting a particular frame, remembering both the frame index as well as the fitted positions
+ */
+class PALMResults {
+public:
+	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<PALMMatrix<double> > fittedPositions_rhs) {
+		frameIndex = frameIndex_rhs;
+		fittedPositions = fittedPositions_rhs;
+	}
+	~PALMResults() {;}
+	
+	size_t getFrameIndex() const {return frameIndex;}
+	boost::shared_ptr<PALMMatrix<double> > getFittedPositions() const {return fittedPositions;}
+	
+protected:
+	size_t frameIndex;
+	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
+}
 
 /**
  * @brief An abstract base class from which all other CCD processor classes must derive
