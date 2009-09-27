@@ -27,10 +27,6 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 
 int parse_ccd_headers(ImageLoader *image_loader);
 
-int do_analyze_images_operation_no_positions_finding(boost::shared_ptr<ImageLoader> image_loader, const string output_wave_name, waveHndl fitting_positions, 
-													 boost::shared_ptr<FitPositions> positions_fitter, int quiet);
-// this function is the same as the previous one, except that it does not try to localize the positions before fitting, but assumes that the positions
-// to start fitting at are provided as a 2D wave in fitting_positions
 
 boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
