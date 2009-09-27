@@ -66,7 +66,6 @@ public:
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
-	// boost::shared_ptr<PALMMatrix<double> > get_nth_image_parallel(const size_t n);
 	
 protected:
 	virtual void parse_header_information() = 0;
