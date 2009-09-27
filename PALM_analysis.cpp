@@ -184,7 +184,8 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
-											   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs) {
+											   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs,
+											   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
 	imageLoader = imageLoader_rhs;
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
@@ -192,6 +193,7 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 	particleFinder = particleFinder_rhs;
 	fitPositions = fitPositions_rhs;
 	resultsWriter = resultsWriter_rhs;
+	progressReporter = progressReporter_rhs;
 	
 	nImages = imageLoader->get_total_number_of_images();
 }
@@ -202,7 +204,8 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	std::list<boost::shared_ptr<PALMResults> >::iterator it;
-	int firstThreadHasFinished;
+	int firstThreadHasFinished, status;
+	double percentDone;
 	
 	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
 	if (numberOfThreads == 0) {
@@ -219,6 +222,8 @@ void PALMAnalysisController::DoPALMAnalysis() {
 		this->framesToBeProcessed.push(i);
 	}
 	
+	progressReporter->CalculationStarted();
+	
 	// start the thread pool
 	threads.clear();
 	for (size_t j = 0; j < numberOfThreads; ++j) {
@@ -230,6 +235,19 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	for (;;) {
 		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(500));
 		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
+											// while we wait we check for a user abort and give the interface the chance to update
+			status = CheckAbort(0);
+			if (status == -1) {
+				for (size_t j = 0; j < numberOfThreads; ++j) {
+					threads.at(j)->interrupt();
+				}
+				progressReporter->CalculationAborted();
+				return;
+			}
+			this->addPALMResultsMutex.lock();
+			percentDone = (double)(fittedPositionsList.size()) / (double)(this->nImages) * 100.0;
+			progressReporter->UpdateCalculationProgress(percentDone);
+			this->addPALMResultsMutex.unlock();
 			continue;
 		} else {
 			break;
@@ -247,6 +265,8 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	for (it = this->fittedPositionsList.begin(); it != this->fittedPositionsList.end(); ++it) {
 		this->resultsWriter->AppendNewResult(*it);
 	}
+	
+	progressReporter->CalculationDone();
 }
 
 void ThreadPoolWorker(PALMAnalysisController* controller) {
@@ -292,6 +312,15 @@ int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr
 		return 1;
 	} else {
 		return 0;
+	}
+}
+
+void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double percentDone) {
+	char XOPOut[10];
+	if (percentDone - previousPercentage > 10.0) {
+		previousPercentage = floor(percentDone / 10.0) * 10.0;
+		sprintf(XOPOut, "%.0lf%% ", previousPercentage);
+		XOPNotice(XOPOut);
 	}
 }
 

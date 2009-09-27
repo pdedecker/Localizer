@@ -25,6 +25,7 @@ class ThresholdImage_Postprocessor;
 class ParticleFinder;
 class PALMResultsWriter;
 class FitPositions;
+class PALMAnalysisProgressReporter;
 
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
 
@@ -69,7 +70,7 @@ public:
 						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
-						   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs);
+						   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
 	~PALMAnalysisController() {;}
 	
 	void DoPALMAnalysis();
@@ -89,6 +90,7 @@ protected:
 	boost::shared_ptr<ParticleFinder> particleFinder;
 	boost::shared_ptr<FitPositions> fitPositions;
 	boost::shared_ptr<PALMResultsWriter> resultsWriter;
+	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addPALMResultsMutex;
@@ -105,6 +107,50 @@ void ThreadPoolWorker(PALMAnalysisController* controller);
  */
 int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr<PALMResults> result2);
 
+/**
+ * @briefWhen passed to PALMAnalysisController the methods of this object will be called to provide usage updates to the user
+ */
+class PALMAnalysisProgressReporter {
+public:
+	PALMAnalysisProgressReporter() {;}
+	virtual ~PALMAnalysisProgressReporter() {;}
+	
+	virtual void CalculationStarted() = 0;
+	virtual void UpdateCalculationProgress(double percentDone) = 0;
+	virtual void CalculationDone() = 0;
+	virtual void CalculationAborted() = 0;
+};
+
+class PALMAnalysisProgressReporter_Silent : public PALMAnalysisProgressReporter {
+public:
+	PALMAnalysisProgressReporter_Silent() {previousPercentage = 0;}
+	~PALMAnalysisProgressReporter_Silent() {;}
+	
+	void CalculationStarted() {;}
+	void UpdateCalculationProgress(double percentDone) {;}
+	void CalculationDone() {;}
+	void CalculationAborted() {;}
+	
+protected:
+	double previousPercentage;
+};
+
+/**
+ * @brief Print updates on the calculation progress to the Igor command line
+ */
+class PALMAnalysisProgressReporter_IgorCommandLine : public PALMAnalysisProgressReporter {
+public:
+	PALMAnalysisProgressReporter_IgorCommandLine() {previousPercentage = 0;}
+	~PALMAnalysisProgressReporter_IgorCommandLine() {;}
+	
+	void CalculationStarted() {XOPNotice("Running PALM analysis... ");}
+	void UpdateCalculationProgress(double percentDone);
+	void CalculationDone() {XOPNotice("Calculation finished!\r");}
+	void CalculationAborted() {XOPNotice("Abort requested by user\r");}
+	
+protected:
+	double previousPercentage;
+};
 
 class END_SHOULD_BE_LARGER_THAN_START{};
 class GET_NTH_IMAGE_RETURNED_NULL{};
