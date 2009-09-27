@@ -1509,7 +1509,9 @@ IgorResultsWriter::~IgorResultsWriter() {
 void IgorResultsWriter::AppendNewResult(boost::shared_ptr<PALMResults> result) {
 	resultsList.push_back(result);
 	
-	totalNumberOfPositions += result->getNumberOfFittedPositions();
+	if (NULL != result->getFittedPositions().get()) {
+		totalNumberOfPositions += result->getNumberOfFittedPositions();
+	}
 }
 
 void IgorResultsWriter::WriteResults() {
