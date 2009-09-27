@@ -2538,9 +2538,7 @@ int Gauss_2D_Poissonian_fit_function_and_Jacobian(const gsl_vector *params, void
 	return GSL_SUCCESS;
 } */
 
-
-boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
-	
+boost::shared_ptr<PALMMatrix<double> > FitPositions::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
 	size_t startPosition, endPosition;
 	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
 	
@@ -2550,8 +2548,8 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
 	
 	return fittedPositions;
-	
 }
+
 
 boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																		size_t startPos, size_t endPos) {
@@ -2737,20 +2735,6 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	
 }
 
-boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
-	
-	size_t startPosition, endPosition;
-	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
-	
-	startPosition = 0;
-	endPosition = positions->getXSize() - 1;
-	
-	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
-	
-	return fittedPositions;
-	
-}
-
 boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																		   size_t startPos, size_t endPos) {
 	
@@ -2928,18 +2912,6 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 	return fitted_positions;
 	
 }
-
-boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
-	size_t startPosition, endPosition;
-	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
-	
-	startPosition = 0;
-	endPosition = positions->getXSize() - 1;
-	
-	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
-	
-	return fittedPositions;
-}
 		
 
 boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
@@ -3092,19 +3064,6 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<PALMMat
 	y = numerator_y / denominator;
 	
 	return 0;
-}
-
-
-boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
-	size_t startPosition, endPosition;
-	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
-	
-	startPosition = 0;
-	endPosition = positions->getXSize() - 1;
-	
-	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
-	
-	return fittedPositions;
 }
 
 

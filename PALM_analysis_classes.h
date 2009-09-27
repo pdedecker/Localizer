@@ -278,7 +278,7 @@ public:
 	FitPositions() {;}
 	virtual ~FitPositions() {;}
 	
-	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) = 0;
+	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
@@ -294,7 +294,6 @@ public:
 	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
@@ -308,7 +307,6 @@ public:
 	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian_FixedWidth() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
@@ -326,7 +324,6 @@ public:
 	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	// r_initial should be the standard deviation of the Gaussian
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
@@ -348,7 +345,6 @@ public:
 	FitPositionsCentroid(size_t cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
 	~FitPositionsCentroid() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	// r_initial should be the standard deviation of the Gaussian
 	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
