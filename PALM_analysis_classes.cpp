@@ -2542,6 +2542,11 @@ boost::shared_ptr<PALMMatrix<double> > FitPositions::fit_positions(const boost::
 	size_t startPosition, endPosition;
 	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
 	
+	// if no positions were found, return a NULL fitted positions
+	if (NULL == positions.get()) {
+		return fittedPositions;
+	}
+	
 	startPosition = 0;
 	endPosition = positions->getXSize() - 1;
 	
