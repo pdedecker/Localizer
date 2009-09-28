@@ -94,6 +94,7 @@ protected:
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addPALMResultsMutex;
+	boost::mutex loadImagesMutex;
 };
 
 /**
