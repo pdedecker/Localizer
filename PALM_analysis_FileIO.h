@@ -71,12 +71,7 @@ public:
 	
 protected:
 	virtual void parse_header_information() = 0;
-	virtual void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) = 0;
-	
-	size_t cacheStart;
-	size_t cacheEnd;
-	
-	size_t image_cache_size;
+	virtual vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
 	string path;
 	// ifstream file;
@@ -86,13 +81,6 @@ protected:
 	uint64_t x_size;
 	uint64_t y_size;
 	int storage_type;
-	vector <boost::shared_ptr<PALMMatrix<double> > > image_cache;
-	
-	int newImagesAreBeingLoaded;
-	boost::thread newImagesLoaderThread;
-	size_t firstImageInLoaderThread;
-	size_t lastImageInLoaderThread;
-	vector <boost::shared_ptr<PALMMatrix<double> > > loaderThreadCache;
 };
 
 class ImageLoaderSPE : public ImageLoader {
@@ -102,7 +90,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderAndor : public ImageLoader {
@@ -112,7 +100,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -139,7 +127,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
@@ -149,7 +137,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -159,7 +147,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
@@ -178,7 +166,7 @@ public:
 	
 protected:
 	void parse_header_information() {;}
-	void ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache);
+	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	// technically we are not reading from disk, but we keep the name since it corresponds to a virtual method in the base class
 	
 	waveHndl igor_data_wave;

@@ -158,8 +158,6 @@ ImageLoader::ImageLoader() {
 	x_size = 0;
 	y_size = 0;
 	header_length = 0;
-	cacheStart = (size_t)-1;
-	cacheEnd = (size_t)-1;
 }
 
 ImageLoader::~ImageLoader() {
@@ -168,21 +166,20 @@ ImageLoader::~ImageLoader() {
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
+	vector<boost::shared_ptr<PALMMatrix <double> > > images;
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES();
 	
 	size_t firstImageToLoad = n;
 	size_t lastImageToLoad = n;
 	
-	ReadImagesFromDisk(firstImageToLoad, lastImageToLoad, image_cache);
+	images = ReadImagesFromDisk(firstImageToLoad, lastImageToLoad);
 	
-	return image_cache.at(0);
+	return images.at(0);
 }
 
 ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	header_length = 4100;
 	
@@ -261,18 +258,15 @@ void ImageLoaderSPE::parse_header_information() {
 	file.seekg(0);
 }
 
-void ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
+vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;
-	size_t nImages = nEnd - nStart + 1;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
 	unsigned short current_unsigned_short = 0;
 	string error;
 	boost::shared_ptr<PALMMatrix<double> > image;
-	
-	cache.clear();
-	cache.reserve(nImages);
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
@@ -402,16 +396,15 @@ void ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, 
 				
 		}
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 	}
 	
-	file.seekg(0);	
+	file.seekg(0);
+	return requestedImages;
 }
 
 ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -491,15 +484,12 @@ void ImageLoaderAndor::parse_header_information() {
 	}
 }
 
-void ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
+vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
-	size_t nImages = nEnd - nStart + 1;
-	
-	cache.clear();
-	cache.reserve(nImages);
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	uint64_t cache_offset;
@@ -531,15 +521,14 @@ void ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd
 			}
 		}
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 	}
 	
+	return requestedImages;
 }
 
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -608,18 +597,18 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-void ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {	
+vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
-	boost::shared_ptr<PALMMatrix<double> > image;
-	size_t nImages = nEnd - nStart + 1;
 	
-	cache.clear();
-	cache.reserve(nImages);
+	boost::shared_ptr<PALMMatrix<double> > image;
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	unsigned int current_uint;
 	size_t n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	uint64_t cache_offset;
+	
+	
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
@@ -651,16 +640,15 @@ void ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const 
 		}
 		
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 	}
 	
 	file.seekg(0);
+	return requestedImages;
 }
 
 SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
@@ -676,15 +664,12 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-void SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
-	size_t nImages = nEnd - nStart + 1;
+vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	uint64_t offset;
 	size_t array_offset;
 	boost::shared_ptr<PALMMatrix<double> > image;
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	
-	cache.clear();
-	cache.reserve(nImages);
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
@@ -712,10 +697,11 @@ void SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEn
 			}
 		}
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 	}
 	
 	file.seekg(0);
+	return requestedImages;
 }
 
 
@@ -739,8 +725,6 @@ void SimpleImageLoader::parse_header_information() {
 
 ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	tiff_file = NULL;
 	
@@ -889,8 +873,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 }
 
-void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
-	size_t nImages = nEnd - nStart + 1;
+vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	char *single_scanline_buffer;
 	char *scanline_pointer;
 	uint16_t current_uint16;
@@ -902,10 +885,8 @@ void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd,
 	float *floatPtr;
 	double *doublePtr;
 	boost::shared_ptr<PALMMatrix<double> > image;
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	int result;
-	
-	cache.clear();
-	cache.reserve(nImages);
 	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
 	if (single_scanline_buffer == NULL) {
@@ -1035,7 +1016,7 @@ void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd,
 			}
 		}
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 	}
 	
 	_TIFFfree(single_scanline_buffer);
@@ -1048,6 +1029,7 @@ void ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd,
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
+	return requestedImages;
 }
 
 ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
@@ -1057,9 +1039,6 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	DataFolderHandle dataFolder;
 	size_t position;
 	// try to get images from an Igor wave
-	
-	image_cache_size = image_cache_size_rhs;
-	image_cache.reserve(image_cache_size);
 	
 	// did we receive a wavename that does not reference any data folders? (no ':' in the name)
 	// in that case we assume that the wave is located in the current data folder
@@ -1121,19 +1100,17 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	}
 }
 
-void ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd, vector<boost::shared_ptr<PALMMatrix <double> > > & cache) {
-	boost::shared_ptr<PALMMatrix<double> > image;
-	size_t nImages = nEnd - nStart + 1;
+vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	double value[2];
 	long indices[3];
 	int result;
 	
-	cache.clear();
-	cache.reserve(nImages);
-	image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	boost::shared_ptr<PALMMatrix<double> > image;
+	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	for (size_t n = nStart; n <= nEnd; ++n) {
 		indices[2] = n;
+		image = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(x_size, y_size));
 		
 		for (size_t j = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
@@ -1149,9 +1126,11 @@ void ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd,
 			}
 		}
 		
-		cache.push_back(image);
+		requestedImages.push_back(image);
 		
 	}
+	
+	return requestedImages;
 }
 
 
