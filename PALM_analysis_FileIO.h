@@ -235,7 +235,7 @@ protected:
 class PALMResultsWriter {
 public:
 	PALMResultsWriter() {;}
-	~PALMResultsWriter() {;}
+	virtual ~PALMResultsWriter() {;}
 	
 	virtual void AppendNewResult(boost::shared_ptr<PALMResults> result) = 0;
 	virtual void WriteResults() = 0;

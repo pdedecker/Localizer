@@ -35,6 +35,29 @@ int parse_ccd_headers(ImageLoader *image_loader);
 boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
+/**
+ *@brief A class designed to contain a single PALM position and its localization parameters
+ */
+class PALMLocalizationResult {
+public:
+	PALMLocalizationResult() {amplitude = 0; width = 0; xPos = 0; yPos = 0; offset = 0; amplitudeError = 0, widthError = 0,
+		xPosError = 0; yPosError = 0; offsetError = 0; nIterations = 0;}
+	~PALMLocalizationResult() {;}
+	
+	double amplitude;
+	double width;
+	double xPos;
+	double yPos;
+	double offset;
+	
+	double amplitudeError;
+	double widthError;
+	double xPosError;
+	double yPosError;
+	double offsetError;
+	
+	size_t nIterations;
+};
 
 
 /**
@@ -42,19 +65,19 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
  */
 class PALMResults {
 public:
-	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<PALMMatrix<double> > fittedPositions_rhs) {
+	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions_rhs) {
 		frameIndex = frameIndex_rhs;
 		fittedPositions = fittedPositions_rhs;
 	}
 	~PALMResults() {;}
 	
 	size_t getFrameIndex() {return frameIndex;}
-	size_t getNumberOfFittedPositions() {return fittedPositions->getXSize();}
-	boost::shared_ptr<PALMMatrix<double> > getFittedPositions() {return fittedPositions;}
+	size_t getNumberOfFittedPositions() {return fittedPositions->size();}
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > getFittedPositions() {return fittedPositions;}
 	
 protected:
 	size_t frameIndex;
-	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions;
 };
 
 /**
@@ -152,86 +175,6 @@ public:
 protected:
 	double previousPercentage;
 };
-
-class END_SHOULD_BE_LARGER_THAN_START{};
-class GET_NTH_IMAGE_RETURNED_NULL{};
-
-
-class PALMBitmapImageDeviationCalculator {
-public:
-	PALMBitmapImageDeviationCalculator() {;}
-	virtual ~PALMBitmapImageDeviationCalculator() {;}
-	
-	virtual double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) = 0;
-};
-
-class PALMBitmapImageDeviationCalculator_FitUncertainty : public PALMBitmapImageDeviationCalculator {
-public:
-	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
-	~PALMBitmapImageDeviationCalculator_FitUncertainty() {;}
-	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return ((positions->get(index, 7) < upperLimit) ? (positions->get(index, 7) * scaleFactor) : -1);}
-	
-private:
-	double scaleFactor;
-	double upperLimit;
-};
-
-class PALMBitmapImageDeviationCalculator_Constant : public PALMBitmapImageDeviationCalculator {
-public:
-	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
-	PALMBitmapImageDeviationCalculator_Constant() {;}
-	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return deviation;}
-	
-private:
-	double deviation;
-};
-
-class PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot : public PALMBitmapImageDeviationCalculator {
-public:
-	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
-	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot() {;}
-	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->get(index, 1)));}
-	
-private:
-	double PSFWidth;
-	double scaleFactor;
-};
-
-class calculate_PALM_bitmap_image_ThreadStartParameters {
-public:
-	calculate_PALM_bitmap_image_ThreadStartParameters() {;}
-	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
-	
-	boost::shared_ptr<PALMMatrix<double> > positions;
-	boost::shared_ptr<PALMVolume <unsigned short> > image;
-	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
-	
-	boost::shared_ptr<PALMMatrix<double> > colors;
-	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	
-	int normalizeColors;
-	size_t nFrames;
-	size_t startIndex;
-	size_t endIndex;
-	size_t imageWidth;
-	size_t imageHeight;
-	size_t xSize;
-	size_t ySize;
-	double maxAmplitude;	// maximum amplitude of a fitted Gaussian over the entire fitted positions
-	double scaleFactor;
-};
-
-boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
-
-boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																		 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
-
-void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);
-
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 

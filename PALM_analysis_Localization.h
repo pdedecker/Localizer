@@ -12,6 +12,7 @@
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
+#include "PALM_analysis.h"
 #include "PALM_analysis_storage.h"
 #include "boost/smart_ptr.hpp"
 #include <gsl/gsl_multifit_nlin.h>
@@ -22,6 +23,7 @@
 #include <stdexcept>
 
 using namespace std;
+class PALMLocalizationResult;
 
 /**
  * @brief An abstract base class from which all other 'FitPositions' classes must derive
@@ -36,20 +38,10 @@ public:
 	FitPositions() {;}
 	virtual ~FitPositions() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
-	virtual boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
+	virtual boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
-	
-protected:
-	/**
-	 *@brief Accept raw fitted positions and remove those that were not successful (signaled by a negative amplitude)
-	 *
-	 * Due to using a not-resizable storage (a matrix) for the fit results, we cannot easily delete unsuccessful fits
-	 * this function makes a copy of the fitted positions and returns a possibly smaller matrix that does not contain
-	 * the unsuccessful fits
-	 */
-	boost::shared_ptr<PALMMatrix<double> > RemoveUnsuccessfulFits(boost::shared_ptr<PALMMatrix<double> > fittedPositions);
 };
 
 /**
@@ -57,12 +49,10 @@ protected:
  */
 class FitPositionsGaussian : public FitPositions {
 public:
-	// FitPositionsGaussian() {sigma = 0.1;}
-	// FitPositionsGaussian(double rhs) {sigma = rhs;}
 	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -75,7 +65,7 @@ public:
 	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian_FixedWidth() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -93,7 +83,7 @@ public:
 	~FitPositionsMultiplication() {;}
 	
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	int multiply_with_gaussian(boost::shared_ptr<PALMMatrix<double> > original_image, boost::shared_ptr<PALMMatrix<double> > masked_image, double x, double y,
@@ -114,7 +104,7 @@ public:
 	~FitPositionsCentroid() {;}
 	
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<PALMMatrix<double> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	size_t cutoff_radius;

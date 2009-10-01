@@ -304,12 +304,13 @@ int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void
  return GSL_SUCCESS;
  } */
 
-boost::shared_ptr<PALMMatrix<double> > FitPositions::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
+boost::shared_ptr<std::vector<PALMLocalizationResult> > FitPositions::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
 	size_t startPosition, endPosition;
-	boost::shared_ptr<PALMMatrix<double> > fittedPositions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions;
 	
 	// if no positions were found, return a NULL fitted positions
 	if (NULL == positions.get()) {
+		fittedPositions = boost::shared_ptr<std::vector<PALMLocalizationResult> > (new std::vector<PALMLocalizationResult>);
 		return fittedPositions;
 	}
 	
@@ -317,41 +318,11 @@ boost::shared_ptr<PALMMatrix<double> > FitPositions::fit_positions(const boost::
 	endPosition = positions->getXSize() - 1;
 	
 	fittedPositions = fit_positions(image, positions, startPosition, endPosition);
-	fittedPositions = RemoveUnsuccessfulFits(fittedPositions);
 	
 	return fittedPositions;
 }
 
-boost::shared_ptr<PALMMatrix<double> > FitPositions::RemoveUnsuccessfulFits(boost::shared_ptr<PALMMatrix<double> > fittedPositions) {
-	size_t nFittedPositions = fittedPositions->getXSize();
-	size_t nSuccessfulFits = 0;
-	size_t offset = 0;
-	double fittedAmplitude;
-	
-	for (size_t i = 0; i < nFittedPositions; ++i) {
-		fittedAmplitude = (*fittedPositions)(i, 0);
-		if (fittedAmplitude > 0) {
-			++nSuccessfulFits;
-		}
-	}
-	
-	boost::shared_ptr<PALMMatrix<double> > correctedPositions (new PALMMatrix<double> (nSuccessfulFits, fittedPositions->getYSize()));
-	
-	for (size_t i = 0; i < nFittedPositions; ++i) {
-		fittedAmplitude = (*fittedPositions)(i, 0);
-		if (fittedAmplitude > 0) {
-			for (size_t j = 0; j < fittedPositions->getYSize(); ++j) {
-				(*correctedPositions)(offset, j) = (*fittedPositions)(i, j);
-			}
-			++offset;
-		}
-	}
-	
-	return correctedPositions;
-}
-
-
-boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<std::vector<PALMLocalizationResult> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																		   size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -380,12 +351,12 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	int status;
 	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
-	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fitted_positions (new std::vector<PALMLocalizationResult>);
+	PALMLocalizationResult localizationResult;
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
-	fitted_positions->set_all(-1.0);
+	fitted_positions->reserve(number_of_positions);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -504,28 +475,28 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 		degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
-		// store the data
-		for (size_t j = 0; j < 5; ++j) {
-			fitted_positions->set(i - startPos, j, gsl_vector_get(fit_iterator->x, j));
-		}
+		// store the fitted parameters
+		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
+		localizationResult.width = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 3);
+		localizationResult.offset = gsl_vector_get(fit_iterator->x, 4);
 		
-		// store the errors
-		for (size_t j = 5; j < 10; ++j) {
-			fitted_positions->set(i - startPos, j, c * sqrt(gsl_matrix_get(covarianceMatrix, j - 5, j - 5)));
-		}
+		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
+		localizationResult.widthError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
 		
 		// store the number of iterations
-		if ((status == GSL_SUCCESS) || (status == GSL_ETOLF) || (status == GSL_ETOLX)) {
-			fitted_positions->set(i - startPos, 10, (double)iterations);
-		} else {
-			fitted_positions->set(i - startPos, 10, (double)(-1 * status));
-		}
+		localizationResult.nIterations = iterations;
 		
 		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
 		// so we correct for that
+		localizationResult.width = localizationResult.width / 1.414213562373095;
+		localizationResult.widthError = localizationResult.widthError / 1.414213562373095;	// the same for the error
 		
-		fitted_positions->set(i - startPos, 1, fitted_positions->get(i - startPos, 1) / 1.414213562373095);
-		fitted_positions->set(i - startPos, 6, fitted_positions->get(i - startPos, 6) / 1.414213562373095);	// the same for the error
+		fitted_positions->push_back(localizationResult);
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
@@ -535,7 +506,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian::fit_positions(const
 	
 }
 
-boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<std::vector<PALMLocalizationResult> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																					  size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -564,12 +535,12 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 	int status;
 	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
-	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fitted_positions (new std::vector<PALMLocalizationResult>);
+	PALMLocalizationResult localizationResult;
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
-	fitted_positions->set_all(-1.0);
+	fitted_positions->reserve(number_of_positions);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -685,25 +656,23 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
 		// store the data
-		(*fitted_positions)(i- startPos, 0) = gsl_vector_get(fit_iterator->x, 0);
-		(*fitted_positions)(i - startPos, 1) = r_initial;
-		(*fitted_positions)(i - startPos, 2) = gsl_vector_get(fit_iterator->x, 1);
-		(*fitted_positions)(i - startPos, 3) = gsl_vector_get(fit_iterator->x, 2);
-		(*fitted_positions)(i - startPos, 4) = gsl_vector_get(fit_iterator->x, 3);
+		// store the fitted parameters
+		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
+		localizationResult.width = r_initial;
+		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult.offset = gsl_vector_get(fit_iterator->x, 3);
 		
-		// store the errors
-		(*fitted_positions)(i- startPos, 5) = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
-		(*fitted_positions)(i - startPos, 6) = 0;
-		(*fitted_positions)(i - startPos, 7) = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-		(*fitted_positions)(i - startPos, 8) = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
-		(*fitted_positions)(i - startPos, 9) = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
+		localizationResult.widthError = 0;
+		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
 		
 		// store the number of iterations
-		if ((status == GSL_SUCCESS) || (status == GSL_ETOLF) || (status == GSL_ETOLX)) {
-			fitted_positions->set(i - startPos, 10, (double)iterations);
-		} else {
-			fitted_positions->set(i - startPos, 10, (double)(-1 * status));
-		}
+		localizationResult.nIterations = iterations;
+		
+		fitted_positions->push_back(localizationResult);
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
@@ -714,7 +683,7 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsGaussian_FixedWidth::fit_posi
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<std::vector<PALMLocalizationResult> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																				 size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -748,13 +717,13 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions
 	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
 	boost::shared_ptr<PALMMatrix<double> > image_subset_mask;
-	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fitted_positions (new std::vector<PALMLocalizationResult>);
+	PALMLocalizationResult localizationResult;
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(size_of_subset, size_of_subset));
 	image_subset_mask = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
 	
-	fitted_positions->set_all(0);
+	fitted_positions->reserve(number_of_positions);
 	
 	for (size_t i = startPos; i <= endPos; ++i) {
 		amplitude = positions->get(i, 0);
@@ -805,9 +774,12 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsMultiplication::fit_positions
 		
 		delta_squared = 10 * convergence_treshold_squared;
 		
-		(*fitted_positions)(i - startPos, 2) = (double)current_x + (double)x_offset;
-		(*fitted_positions)(i - startPos, 3) = current_y + (double)y_offset;
-		(*fitted_positions)(i - startPos, 10) = (double)iterations;
+		localizationResult.width = r_initial;
+		localizationResult.xPos = (double)current_x + (double)x_offset;
+		localizationResult.yPos = (double)current_y + (double)y_offset;
+		localizationResult.nIterations = iterations;
+		
+		fitted_positions->push_back(localizationResult);
 	}
 	
 	return fitted_positions;
@@ -867,7 +839,7 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<PALMMat
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<std::vector<PALMLocalizationResult> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																		   size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -892,11 +864,10 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const
 	double current_x, current_y;
 	double denominator;
 	
-	boost::shared_ptr<PALMMatrix<double> > fitted_positions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > fitted_positions (new std::vector<PALMLocalizationResult>);
+	PALMLocalizationResult localizationResult;
 	
-	fitted_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, N_OUTPUT_PARAMS_PER_FITTED_POSITION));
-	
-	fitted_positions->set_all(0);
+	fitted_positions->reserve(number_of_positions);
 	
 	for (size_t i = startPos; i <= endPos; ++i) {
 		x0_initial = positions->get(i, 1);
@@ -927,9 +898,10 @@ boost::shared_ptr<PALMMatrix<double> > FitPositionsCentroid::fit_positions(const
 		current_x /= denominator;
 		current_y /= denominator;		
 		
+		localizationResult.xPos = current_x;
+		localizationResult.yPos = current_y;
 		
-		fitted_positions->set(i - startPos, 2, current_x);
-		fitted_positions->set(i - startPos, 3, current_y);
+		fitted_positions->push_back(localizationResult);
 	}
 	
 	return fitted_positions;

@@ -1488,7 +1488,7 @@ IgorResultsWriter::~IgorResultsWriter() {
 void IgorResultsWriter::AppendNewResult(boost::shared_ptr<PALMResults> result) {
 	resultsList.push_back(result);
 	
-	if (NULL != result->getFittedPositions().get()) {
+	if (result->getFittedPositions()->size() != 0) {
 		totalNumberOfPositions += result->getNumberOfFittedPositions();
 	}
 }
@@ -1499,7 +1499,7 @@ void IgorResultsWriter::WriteResults() {
 	long indices[2];
 	int status;
 	double value;
-	boost::shared_ptr<PALMMatrix<double> > positions;
+	boost::shared_ptr<std::vector<PALMLocalizationResult> > positions;
 	long number_of_positions_in_matrix, offset = 0;
 	size_t frameNumber = 0;
 	
@@ -1521,13 +1521,13 @@ void IgorResultsWriter::WriteResults() {
 		
 		positions = (resultsList.front())->getFittedPositions();
 		
-		if (positions.get() == NULL) {
+		if (positions->size() == 0) {
 			// no positions were found in this frame
 			resultsList.pop_front();
 			continue;
 		}
 		
-		number_of_positions_in_matrix = positions->getXSize();
+		number_of_positions_in_matrix = positions->size();
 		frameNumber = (resultsList.front())->getFrameIndex();
 		
 		for (long j = 0; j < number_of_positions_in_matrix; j++) {
@@ -1538,11 +1538,40 @@ void IgorResultsWriter::WriteResults() {
 			value = (double)frameNumber;
 			MDSetNumericWavePointValue(output_wave, indices, &value);
 			
-			for (long k = 0; k < N_OUTPUT_PARAMS_PER_FITTED_POSITION; ++k) {
-				indices[1] = k + 1;
-				value = positions->get(j, k);
-				MDSetNumericWavePointValue(output_wave, indices, &value);
-			}
+			indices[1] = 1;
+			value = positions->at(j).amplitude;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 2;
+			value = positions->at(j).width;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 3;
+			value = positions->at(j).xPos;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 4;
+			value = positions->at(j).yPos;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 5;
+			value = positions->at(j).offset;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 6;
+			value = positions->at(j).amplitudeError;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 7;
+			value = positions->at(j).widthError;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 8;
+			value = positions->at(j).xPosError;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 9;
+			value = positions->at(j).yPosError;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 10;
+			value = positions->at(j).offsetError;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			indices[1] = 11;
+			value = (double)positions->at(j).nIterations;
+			MDSetNumericWavePointValue(output_wave, indices, &value);
+			
 			offset++;
 		}
 		++frameNumber;

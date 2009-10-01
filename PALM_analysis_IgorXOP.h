@@ -25,6 +25,7 @@
 #include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_Localization.h"
 #include "PALM_analysis_ParticleFinding.h"
+#include "PALM_analysis_PALMImages.h"
 
 
 
