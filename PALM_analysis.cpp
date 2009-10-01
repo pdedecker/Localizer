@@ -274,7 +274,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	boost::shared_ptr<PALMMatrix<double> > currentImage;
 	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
 	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
-	boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions;
+	boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions;
 	boost::shared_ptr<PALMResults> analysisResult;
 	
 	for (;;) {	// loop continuously looking for more images until there are none left

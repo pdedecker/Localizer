@@ -38,11 +38,11 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
 /**
  *@brief A class designed to contain a single PALM position and its localization parameters
  */
-class PALMLocalizationResult {
+class LocalizedPosition {
 public:
-	PALMLocalizationResult() {amplitude = 0; width = 0; xPos = 0; yPos = 0; offset = 0; amplitudeError = 0, widthError = 0,
+	LocalizedPosition() {amplitude = 0; width = 0; xPos = 0; yPos = 0; offset = 0; amplitudeError = 0, widthError = 0,
 		xPosError = 0; yPosError = 0; offsetError = 0; nIterations = 0;}
-	~PALMLocalizationResult() {;}
+	~LocalizedPosition() {;}
 	
 	double amplitude;
 	double width;
@@ -65,7 +65,7 @@ public:
  */
 class PALMResults {
 public:
-	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions_rhs) {
+	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions_rhs) {
 		frameIndex = frameIndex_rhs;
 		fittedPositions = fittedPositions_rhs;
 	}
@@ -73,11 +73,11 @@ public:
 	
 	size_t getFrameIndex() {return frameIndex;}
 	size_t getNumberOfFittedPositions() {return fittedPositions->size();}
-	boost::shared_ptr<std::vector<PALMLocalizationResult> > getFittedPositions() {return fittedPositions;}
+	boost::shared_ptr<std::vector<LocalizedPosition> > getFittedPositions() {return fittedPositions;}
 	
 protected:
 	size_t frameIndex;
-	boost::shared_ptr<std::vector<PALMLocalizationResult> > fittedPositions;
+	boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions;
 };
 
 /**

@@ -1499,7 +1499,7 @@ void IgorResultsWriter::WriteResults() {
 	long indices[2];
 	int status;
 	double value;
-	boost::shared_ptr<std::vector<PALMLocalizationResult> > positions;
+	boost::shared_ptr<std::vector<LocalizedPosition> > positions;
 	long number_of_positions_in_matrix, offset = 0;
 	size_t frameNumber = 0;
 	
