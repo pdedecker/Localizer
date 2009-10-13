@@ -5,6 +5,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	size_t total_n_images = image_loader->get_total_number_of_images();
 	size_t n_images_to_load;
 	size_t x_size, y_size;
+	int storage_type, waveType;
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
 	long indices[MAX_DIMENSIONS];
@@ -27,6 +28,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	
 	x_size = image_loader->getXSize();
 	y_size = image_loader->getYSize();
+	storage_type = image_loader->getStorageType();
 	
 	SetIgorIntVar("V_numberOfImages", (long)total_n_images, 1);
 	SetIgorIntVar("V_xSize", (long)x_size, 1);
@@ -41,8 +43,40 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	dimension_sizes[2] = (long)n_images_to_load;
 	dimension_sizes[3] = 0;
 	
+	// decide on the storage type to use
+	// we use the storage type that matches that of the original frames
+	switch (storage_type) {
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_INT8:
+			waveType = NT_I8;
+			break;
+		case STORAGE_TYPE_UINT8:
+			waveType = NT_I8 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT16:
+			waveType = NT_I16;
+			break;
+		case STORAGE_TYPE_UINT16:
+			waveType = NT_I16 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT32:
+			waveType = NT_I32;
+			break;
+		case STORAGE_TYPE_UINT32:
+			waveType = NT_I32 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_FP32:
+			waveType = NT_FP32;
+			break;
+		case STORAGE_TYPE_FP64:
+			waveType = NT_FP64;
+			break;
+		default:
+			waveType = NT_FP64;
+	}
 	
-	result = MDMakeWave(&output_wave, "M_CCDFrames", NULL, dimension_sizes, NT_FP32, 1);
+	result = MDMakeWave(&output_wave, "M_CCDFrames", NULL, dimension_sizes, waveType, 1);
 	
 	if (result != 0) {
 		throw result;
@@ -477,4 +511,5 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 		}
 	}
 }
+
 	

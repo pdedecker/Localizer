@@ -244,6 +244,23 @@ void ImageLoaderSPE::parse_header_information() {
 	current_bytes = current_bytes | (0x000000FF & byte_reader1);
 	
 	storage_type = (int)current_bytes;
+	switch (storage_type) {
+		case 0:
+			storage_type = STORAGE_TYPE_FP32;
+			break;
+		case 1:
+			storage_type = STORAGE_TYPE_UINT32;
+			break;
+		case 2:
+			storage_type = STORAGE_TYPE_INT16;
+			break;
+		case 3:
+			storage_type = STORAGE_TYPE_UINT16;
+			break;
+		default:
+			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
+			break;
+	}
 	current_bytes = 0;
 	
 	// was there an error sometime during this procedure that would have caused the reading to fail?
@@ -273,16 +290,16 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 	
 	// determine how big we have to make the single image buffer
 	switch(storage_type) {
-		case 0:	// 4 byte float
+		case STORAGE_TYPE_FP32:	// 4 byte float
 			n_bytes_in_single_image = x_size * y_size * 4;
 			break;
-		case 1:	// 4-byte long
+		case STORAGE_TYPE_UINT32:	// 4-byte long
 			n_bytes_in_single_image = x_size * y_size * 4;
 			break;
-		case 2:	// 2 byte signed short
+		case STORAGE_TYPE_INT16:	// 2 byte signed short
 			n_bytes_in_single_image = x_size * y_size * 2;
 			break;
-		case 3:	// 2 byte unsigned short
+		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
 			n_bytes_in_single_image = x_size * y_size * 2;
 			break;
 		default:
@@ -298,16 +315,16 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 		
 		switch(storage_type) {
-			case 0:	// 4 byte float
+			case STORAGE_TYPE_FP32:	// 4 byte float
 				offset = header_length + i * (x_size) * (y_size) * 4;
 				break;
-			case 1:	// 4-byte long
+			case STORAGE_TYPE_UINT32:	// 4-byte long
 				offset = header_length + i * (x_size) * (y_size) * 4;
 				break;
-			case 2:	// 2 byte signed short
+			case STORAGE_TYPE_INT16:	// 2 byte signed short
 				offset = header_length + i * (x_size) * (y_size) * 2;
 				break;
-			case 3:	// 2 byte unsigned short
+			case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
 				offset = header_length + i * (x_size) * (y_size) * 2;
 				break;
 			default:
@@ -329,7 +346,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 		}
 		
 		switch(storage_type) {
-			case 0:	// 4-byte float
+			case STORAGE_TYPE_FP32:	// 4-byte float
 				// this is currently only safe on little-endian systems!
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
@@ -342,7 +359,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				}
 				break;
 				
-			case 1:	// 4-byte long
+			case STORAGE_TYPE_UINT32:	// 4-byte long
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
 						current_long = 0x000000FF & single_image_buffer[cache_offset + 3];	// little endian
@@ -360,7 +377,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				}
 				break;
 				
-			case 2:	// 2-byte signed short
+			case STORAGE_TYPE_INT16:	// 2-byte signed short
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
 						current_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
@@ -374,7 +391,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				}
 				break;
 				
-			case 3: // 2-byte unsigned short
+			case STORAGE_TYPE_UINT16: // 2-byte unsigned short
 				for (size_t j  = 0; j < y_size; j++) {
 					for (size_t i = 0; i < x_size; i++) {
 						current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
@@ -426,6 +443,8 @@ void ImageLoaderAndor::parse_header_information() {
 	size_t frameXSize, frameYSize;
 	size_t xStart, yStart, xEnd, yEnd;
 	boost::scoped_array<char> headerBuffer(new char[60001]);
+	
+	storage_type = STORAGE_TYPE_FP32;
 	
 	file.read(headerBuffer.get(), 60000);
 	headerBuffer[60000] = '\0';	// NULL-terminate the string
@@ -548,7 +567,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	char headerBuffer[64];	// too large, but we'd better be safe
 	ImageLoaderHamamatsu_HeaderStructure header;
 	
-	storage_type = 0;
+	storage_type = STORAGE_TYPE_UINT16;
 	
 	// first we load a set of data
 	file.seekg(0);
@@ -707,6 +726,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 
 void SimpleImageLoader::parse_header_information() {
 	
+	storage_type = STORAGE_TYPE_FP64;
+	
 	file.seekg(0);
 	
 	// the first 12 bytes of the file contain this information
@@ -750,6 +771,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	int result;
 	uint16_t result_uint16;
 	uint32_t result_uint32;
+	int isInt;
 	size_t index = 0;
 	
 	
@@ -794,15 +816,15 @@ void ImageLoaderTIFF::parse_header_information() {
 	// is the data in unsigned integer or floating point format?
 	result = TIFFGetField(tiff_file, TIFFTAG_SAMPLEFORMAT, &result_uint16);
 	if (result != 1) {	// if the field does not exist then we assume that it is integer format
-		result_uint16 = 1;
+		isInt = 1;
 	}
 	
 	switch (result_uint16) {
 		case 1:
-			sampleFormat = 1;
+			isInt = 1;
 			break;
 		case 3:
-			sampleFormat = 3;
+			isInt = 0;
 			break;
 		default:
 			string error;
@@ -811,6 +833,46 @@ void ImageLoaderTIFF::parse_header_information() {
 			error += "\" is unknown\r";
 			throw ERROR_READING_FILE_DATA(error);
 			break;
+	}
+	
+	if (isInt == 1) {
+		switch (bitsPerPixel) {
+			case 4:
+				storage_type = STORAGE_TYPE_UINT4;
+				break;
+			case 8:
+				storage_type = STORAGE_TYPE_UINT8;
+				break;
+			case 16:
+				storage_type = STORAGE_TYPE_UINT16;
+				break;
+			case 32:
+				storage_type = STORAGE_TYPE_UINT32;
+				break;
+			default:
+				string error;
+				error = "The SampleFormat of the image at\"";
+				error += path;
+				error += "\" is unknown\r";
+				throw ERROR_READING_FILE_DATA(error);
+				break;
+		}
+	} else {	// the image is not in integer format but is a floating point
+		switch (bitsPerPixel) {
+			case 32:
+				storage_type = STORAGE_TYPE_FP32;
+				break;
+			case 64:
+				storage_type = STORAGE_TYPE_FP64;
+				break;
+			default:
+				string error;
+				error = "The SampleFormat of the image at\"";
+				error += path;
+				error += "\" is unknown\r";
+				throw ERROR_READING_FILE_DATA(error);
+				break;
+		}
 	}
 	
 	// what is the x size?
@@ -927,88 +989,70 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 				throw ERROR_READING_FILE_DATA(error);
 			}
 			
-			switch (sampleFormat) {	// handle the different possibilities (floating, integer) and variable sizes
-				case 1:	// the data is present as an integer
-					switch (bitsPerPixel) {	// handle the different sampling sizes
-						case 4:
-							scanline_pointer = single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
-									current_uint16 = 0x0000000F & (*scanline_pointer);
-									image->set(k, j, (double)current_uint16);
-								} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
-									current_uint16 = 0x000000F0 & (*scanline_pointer);
-									image->set(k, j, (double)current_uint16);
-									scanline_pointer += 1;
-								}
-							}
-							break;
-						case 8:
-							scanline_pointer = single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								current_uint16 = (uint16_t)(*scanline_pointer);
-								image->set(k, j, (double)current_uint16);
-								scanline_pointer += 1;
-							}
-							break;
-						case 16:
-							uint16Ptr = (uint16_t*)single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								current_uint16 = (*uint16Ptr);
-								image->set(k, j, (double)current_uint16);
-								uint16Ptr += 1;
-							}
-							break;
-						case 32:
-							uint32Ptr = (uint32_t*)single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								current_uint32 = (*uint32Ptr);
-								image->set(k, j, (double)current_uint32);
-								uint32Ptr += 1;
-							}
-							break;
-						default:
-							_TIFFfree(single_scanline_buffer);
-							string error;
-							error = "Invalid integer data size for the image at\"";
-							error += path;
-							error += "\"\r";
-							throw ERROR_READING_FILE_DATA(error);
-							break;
+			switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
+				case STORAGE_TYPE_UINT4:
+					scanline_pointer = single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
+							current_uint16 = 0x0000000F & (*scanline_pointer);
+							image->set(k, j, (double)current_uint16);
+						} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
+							current_uint16 = 0x000000F0 & (*scanline_pointer);
+							image->set(k, j, (double)current_uint16);
+							scanline_pointer += 1;
+						}
 					}
 					break;
-				case 3:	// the data are stored as floating point values
-					switch (bitsPerPixel) {
-						case 32:
-							floatPtr = (float *)single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								current_float = *floatPtr;
-								image->set(k, j, (double)current_float);
-								floatPtr += 1;
-							}
-							break;
-						case 64:
-							doublePtr = (double *)single_scanline_buffer;
-							for (size_t k = 0; k < x_size; ++k) {
-								current_double = *doublePtr;
-								image->set(k, j, current_double);
-								floatPtr += 1;
-							}
-							break;
-						default:
-							_TIFFfree(single_scanline_buffer);
-							string error;
-							error = "Invalid floating point data size for the image at\"";
-							error += path;
-							error += "\"\r";
-							throw ERROR_READING_FILE_DATA(error);
-							break;
+					
+				case STORAGE_TYPE_UINT8:
+					scanline_pointer = single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						current_uint16 = (uint16_t)(*scanline_pointer);
+						image->set(k, j, (double)current_uint16);
+						scanline_pointer += 1;
 					}
 					break;
+					
+				case STORAGE_TYPE_UINT16:
+					uint16Ptr = (uint16_t*)single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						current_uint16 = (*uint16Ptr);
+						image->set(k, j, (double)current_uint16);
+						uint16Ptr += 1;
+					}
+					break;
+					
+				case STORAGE_TYPE_UINT32:
+					uint32Ptr = (uint32_t*)single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						current_uint32 = (*uint32Ptr);
+						image->set(k, j, (double)current_uint32);
+						uint32Ptr += 1;
+					}
+					break;
+					
+				case STORAGE_TYPE_FP32:
+					floatPtr = (float *)single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						current_float = *floatPtr;
+						image->set(k, j, (double)current_float);
+						floatPtr += 1;
+					}
+					break;
+					
+				case STORAGE_TYPE_FP64:
+					doublePtr = (double *)single_scanline_buffer;
+					for (size_t k = 0; k < x_size; ++k) {
+						current_double = *doublePtr;
+						image->set(k, j, current_double);
+						floatPtr += 1;
+					}
+					break;
+					
 				default:
 					_TIFFfree(single_scanline_buffer);
 					string error;
-					error = "Unknown SampleFormat for the image at\"";
+					error = "Invalid floating point data size for the image at\"";
 					error += path;
 					error += "\"\r";
 					throw ERROR_READING_FILE_DATA(error);
@@ -1038,6 +1082,7 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	string dataFolderPath;
 	DataFolderHandle dataFolder;
 	size_t position;
+	int waveType;
 	// try to get images from an Igor wave
 	
 	// did we receive a wavename that does not reference any data folders? (no ':' in the name)
@@ -1097,6 +1142,36 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	// in that case total_number_of_images is still one
 	if (DimensionSizes[2] == 0) {
 		total_number_of_images = 1;
+	}
+	
+	waveType = WaveType(igor_data_wave);
+	switch (waveType) {
+		case NT_I8:
+			storage_type = STORAGE_TYPE_INT8;
+			break;
+		case NT_I16:
+			storage_type = STORAGE_TYPE_INT16;
+			break;
+		case NT_I32:
+			storage_type = STORAGE_TYPE_INT32;
+			break;
+		case (NT_I8 | NT_UNSIGNED):
+			storage_type = STORAGE_TYPE_UINT8;
+			break;
+		case (NT_I16 | NT_UNSIGNED):
+			storage_type = STORAGE_TYPE_UINT16;
+			break;
+		case (NT_I32 | NT_UNSIGNED):
+			storage_type = STORAGE_TYPE_UINT32;
+			break;
+		case NT_FP32:
+			storage_type = STORAGE_TYPE_FP32;
+			break;
+		case NT_FP64:
+			storage_type = STORAGE_TYPE_FP64;
+			break;
+		default:
+			storage_type = STORAGE_TYPE_FP64;
 	}
 }
 
