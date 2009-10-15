@@ -241,6 +241,10 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	int firstThreadHasFinished, status;
 	double percentDone;
 	
+	if (this->nImages == 0) {	// if there are no images to load, do not do any processing
+		return;
+	}
+	
 	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
 	if (numberOfThreads == 0) {
 		numberOfThreads = 1;
