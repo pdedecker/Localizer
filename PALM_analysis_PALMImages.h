@@ -77,12 +77,4 @@ private:
 	double scaleFactor;
 };
 
-boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																			size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
-
-boost::shared_ptr<PALMVolume <unsigned short> > calculate_PALM_bitmap_image_parallel(boost::shared_ptr<PALMMatrix<double> > positions, boost::shared_ptr<PALMMatrix<double> > colors, boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator,
-																					 size_t xSize, size_t ySize, size_t imageWidth, size_t imageHeight, int normalizeColors);
-
-void calculate_PALM_bitmap_image_ThreadStart(boost::shared_ptr<calculate_PALM_bitmap_image_ThreadStartParameters> startParameters);
-
 #endif
