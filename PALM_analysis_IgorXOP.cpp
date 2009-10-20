@@ -353,11 +353,6 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double ImageHeight;
 	int WFlagParamsSet[4];
 	
-	// Parameters for /N flag group.
-	int NFlagEncountered;
-	double normalizeToBrightestEmitter;
-	int NFlagParamsSet[1];
-	
 	// Parameters for /P flag group.
 	int PFlagEncountered;
 	double PSFWidth;
@@ -366,11 +361,6 @@ struct MakeBitmapPALMImageRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int colorWaveEncountered;
-	waveHndl colorWave;
-	int colorWaveParamsSet[1];
-	
-	// Parameters for simple main group #1.
 	int positionsWaveEncountered;
 	waveHndl positionsWave;
 	int positionsWaveParamsSet[1];
@@ -1794,7 +1784,7 @@ static int RegisterMakeBitmapPALMImage(void) {
 	char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /N=number:normalizeToBrightestEmitter /P=number:PSFWidth wave:colorWave, wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /P=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
