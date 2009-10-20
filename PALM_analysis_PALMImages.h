@@ -14,6 +14,25 @@
 #include "boost/thread.hpp"
 #include "PALM_analysis_storage.h"
 
+/**
+ * Given a set of positions, calculate a bitmap image adding an individual Gaussian for every position to the image.
+ * Assumes that the positions given are a copy of the positions wave as it is produced in Igor by the fitting routine.
+ */
+class PALMBitmapImageCalculator {
+public:
+	PALMBitmapImageCalculator(boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs) {
+		devationCalculator_rhs = devationCalculator;
+	}
+	~PALMBitmapImageCalculator() {;}
+	
+	boost::shared_ptr<PALMMatrix<float> > CalculateImage(boost::shared_ptr<PALMMatrix<double> > positions, size_t xSize, 
+														 size_t ySize, size_t imageWidth, size_t imageHeight);
+	
+	
+protected:
+	boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
+};
+
 
 class PALMBitmapImageDeviationCalculator {
 public:
@@ -55,30 +74,6 @@ public:
 	
 private:
 	double PSFWidth;
-	double scaleFactor;
-};
-
-class calculate_PALM_bitmap_image_ThreadStartParameters {
-public:
-	calculate_PALM_bitmap_image_ThreadStartParameters() {;}
-	~calculate_PALM_bitmap_image_ThreadStartParameters() {;}
-	
-	boost::shared_ptr<PALMMatrix<double> > positions;
-	boost::shared_ptr<PALMVolume <unsigned short> > image;
-	boost::shared_ptr<PALMMatrix<double> > totalIntensities;
-	
-	boost::shared_ptr<PALMMatrix<double> > colors;
-	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	
-	int normalizeColors;
-	size_t nFrames;
-	size_t startIndex;
-	size_t endIndex;
-	size_t imageWidth;
-	size_t imageHeight;
-	size_t xSize;
-	size_t ySize;
-	double maxAmplitude;	// maximum amplitude of a fitted Gaussian over the entire fitted positions
 	double scaleFactor;
 };
 
