@@ -893,7 +893,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	boost::shared_ptr<PALMMatrix<double> > hypothesis_test;
 	boost::shared_ptr<PALMMatrix<double> > Gaussian_window;
 	
-	size_t window_size = 13;
+	size_t window_size = 11;
 	size_t half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
 	size_t center_x = x_size / 2;
 	size_t center_y = y_size / 2;
