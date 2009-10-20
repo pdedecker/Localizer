@@ -1527,16 +1527,16 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	int method, normalizeColors;
+	int method;
 	double scaleFactor, upperLimit, PSFWidth;
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
-	waveHndl colorWave, positionsWave;
+	waveHndl positionsWave;
 	
+	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMMatrix<double> > positions;
-	boost::shared_ptr<PALMMatrix<double> > colors;
-	boost::shared_ptr<PALMVolume <unsigned short> > image;
+	boost::shared_ptr<PALMMatrix <float> > image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	long numDimensions;
@@ -1589,16 +1589,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->NFlagEncountered) {
-		// Parameter: p->normalizeToBrightestEmitter
-		if (p->normalizeToBrightestEmitter < 0)
-			return EXPECT_POS_NUM;
-		
-		normalizeColors = (int)(p->normalizeToBrightestEmitter + 0.5);
-	} else {
-		normalizeColors = 0;
-	}
-	
 	if (p->PFlagEncountered) {
 		// Parameter: p->PSFWidth
 		if (p->PSFWidth <= 0) {
@@ -1607,34 +1597,13 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		
 		PSFWidth = p->PSFWidth;
 		
-	} else{
+	} else {
 		if (method == 2) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}
 	
-	// Main parameters.
-	
-	if (p->colorWaveEncountered) {
-		// Parameter: p->colorWave (test for NULL handle before using)
-		if (p->colorWave == NULL)
-			return NOWAV;
-		colorWave = p->colorWave;
-		
-		err = MDGetWaveDimensions(colorWave, &numDimensions, dimensionSizes);
-		if (err != 0)
-			return err;
-		if (numDimensions != 2)
-			return INCOMPATIBLE_DIMENSIONING;
-		if (dimensionSizes[1] != 3)
-			return INCOMPATIBLE_DIMENSIONING;
-		
-		colors = copy_IgorDPWave_to_gsl_matrix(colorWave);
-		
-	} else {
-		return NOWAV;
-	}
-	
+	// Main parameters.	
 	if (p->positionsWaveEncountered) {
 		// Parameter: p->positionsWave (test for NULL handle before using)
 		if (p->positionsWave == NULL) {
@@ -1644,12 +1613,15 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		positionsWave = p->positionsWave;
 		
 		err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
-		if (err != 0)
+		if (err != 0) {
 			return err;
-		if (numDimensions != 2)
+		}
+		if (numDimensions != 2) {
 			return INCOMPATIBLE_DIMENSIONING;
-		if (dimensionSizes[1] != N_OUTPUT_PARAMS_PER_FITTED_POSITION + 1)
+		}
+		if (dimensionSizes[1] != N_OUTPUT_PARAMS_PER_FITTED_POSITION + 1) {
 			return INCOMPATIBLE_DIMENSIONING;
+		}
 		
 		positions = copy_IgorDPWave_to_gsl_matrix(positionsWave);
 		
@@ -1675,8 +1647,9 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	
 	// do the actual calculation
 	try {
-		image = calculate_PALM_bitmap_image_parallel(positions, colors, deviationCalculator, xSize, ySize, imageWidth, imageHeight, normalizeColors);
-		copy_PALMVolume_ushort_to_IgorUINT16wave(image, string("M_PALM"));
+		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator));
+		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
+		copy_PALMMatrix_float_to_IgorFPWave(image, string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
@@ -1994,6 +1967,61 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 	return DPWave;
 }
 
+waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float> > matrix, string waveName) {
+	
+	waveHndl DPWave;
+	
+	int err;
+	long indices[MAX_DIMENSIONS];
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	double value[2];
+	
+	// special case:
+	// if the matrix is NULL (such as when there are no positions found)
+	// then we return an empty wave
+	if (matrix.get() == NULL) {
+		dimensionSizes[0] = 0;
+		dimensionSizes[1] = 0;
+		dimensionSizes[2] = 0;
+		
+		err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP32, 1);
+		if (err != 0) {
+			throw err;
+		}
+		
+		return DPWave;
+		
+	}
+	
+	
+	size_t x_size = (size_t)matrix->getXSize();
+	size_t y_size = (size_t)matrix->getYSize();
+	
+	dimensionSizes[0] = x_size;
+	dimensionSizes[1] = y_size;
+	dimensionSizes[2] = 0;
+	
+	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP32, 1);
+	if (err != 0) {
+		throw err;
+	}
+	
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
+			indices[0] = i;
+			indices[1] = j;
+			
+			value[0] = (*matrix)(i, j);
+			
+			err = MDSetNumericWavePointValue(DPWave, indices, value);
+			if (err != 0) {
+				throw err;
+			}
+		}
+	}
+	
+	return DPWave;
+}
 
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t image_cache_size) {

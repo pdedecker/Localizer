@@ -49,5 +49,8 @@ const int STORAGE_TYPE_UINT64 = 9;
 const int STORAGE_TYPE_FP32 = 10;
 const int STORAGE_TYPE_FP64 = 11;
 
+const double PI = 3.1415926535897932384626433;
+const double SQRT2 = 1.4142135623730950488;
+
 
 #endif

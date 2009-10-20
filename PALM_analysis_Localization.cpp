@@ -430,7 +430,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		gsl_vector_set(fit_parameters, 1, r_initial * 1.414213562373095);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
+		gsl_vector_set(fit_parameters, 1, r_initial * SQRT2);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
 		gsl_vector_set(fit_parameters, 2, x0_initial);
 		gsl_vector_set(fit_parameters, 3, y0_initial);
 		gsl_vector_set(fit_parameters, 4, background);
@@ -464,7 +464,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * 1.414213562373095 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.414213562373095 * 2.0)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * SQRT2 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * SQRT2 * 2.0)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
@@ -493,8 +493,8 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 		
 		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
 		// so we correct for that
-		localizationResult.width = localizationResult.width / 1.414213562373095;
-		localizationResult.widthError = localizationResult.widthError / 1.414213562373095;	// the same for the error
+		localizationResult.width = localizationResult.width / SQRT2;
+		localizationResult.widthError = localizationResult.widthError / SQRT2;	// the same for the error
 		
 		fitted_positions->push_back(localizationResult);
 	}

@@ -10,9 +10,12 @@
 #ifndef PALM_ANALYSIS_PALMIMAGES_H
 #define PALM_ANALYSIS_PALMIMAGES_H
 
+#include "PALM_analysis_defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
 #include "PALM_analysis_storage.h"
+
+class PALMBitmapImageDeviationCalculator;
 
 /**
  * Given a set of positions, calculate a bitmap image adding an individual Gaussian for every position to the image.
@@ -21,7 +24,7 @@
 class PALMBitmapImageCalculator {
 public:
 	PALMBitmapImageCalculator(boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs) {
-		devationCalculator_rhs = devationCalculator;
+		devationCalculator = devationCalculator_rhs;
 	}
 	~PALMBitmapImageCalculator() {;}
 	
