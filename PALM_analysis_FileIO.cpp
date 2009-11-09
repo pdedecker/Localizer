@@ -288,6 +288,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
 	
+	loadImagesMutex.lock();
+	
 	// determine how big we have to make the single image buffer
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4 byte float
@@ -303,6 +305,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			n_bytes_in_single_image = x_size * y_size * 2;
 			break;
 		default:
+			loadImagesMutex.unlock();
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
 			break;
 	}
@@ -328,6 +331,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				offset = header_length + i * (x_size) * (y_size) * 2;
 				break;
 			default:
+				loadImagesMutex.unlock();
 				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
 				break;
 		}
@@ -342,6 +346,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			error = "Error trying to read image data from \"";
 			error += path;
 			error += "\" assuming the SPE format\r";
+			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -408,6 +413,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				break;
 				
 			default:
+				loadImagesMutex.unlock();
 				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
 				break;
 				
@@ -417,6 +423,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 	}
 	
 	file.seekg(0);
+	
+	loadImagesMutex.unlock();
+	
 	return requestedImages;
 }
 
@@ -510,6 +519,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 	boost::shared_ptr<PALMMatrix<double> > image;
 	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
+	loadImagesMutex.lock();
+	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	uint64_t cache_offset;
 	
@@ -527,6 +538,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 			error = "Error trying to read image data from \"";
 			error += path;
 			error += "\" assuming the Andor format\r";
+			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -542,6 +554,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 		
 		requestedImages.push_back(image);
 	}
+	
+	loadImagesMutex.unlock();
 	
 	return requestedImages;
 }
@@ -622,12 +636,12 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 	boost::shared_ptr<PALMMatrix<double> > image;
 	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
+	loadImagesMutex.lock();
+	
 	unsigned int current_uint;
 	size_t n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	uint64_t cache_offset;
-	
-	
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
 		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
@@ -641,6 +655,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 			error = "Error reading image data from \"";
 			error += path;
 			error += "\" assuming the Hamamatsu format\r";
+			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -663,6 +678,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 	}
 	
 	file.seekg(0);
+	
+	loadImagesMutex.unlock();
+	
 	return requestedImages;
 }
 
@@ -688,6 +706,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 	size_t array_offset;
 	boost::shared_ptr<PALMMatrix<double> > image;
 	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	
+	loadImagesMutex.lock();
+	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
@@ -706,6 +727,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 			error = "Error reading image data from \"";
 			error += path;
 			error += "\" assuming the simple image format\r";
+			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -720,6 +742,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 	}
 	
 	file.seekg(0);
+	
+	loadImagesMutex.unlock();
+	
 	return requestedImages;
 }
 
@@ -816,7 +841,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	// is the data in unsigned integer or floating point format?
 	result = TIFFGetField(tiff_file, TIFFTAG_SAMPLEFORMAT, &result_uint16);
 	if (result != 1) {	// if the field does not exist then we assume that it is integer format
-		isInt = 1;
+		result_uint16 = 1;
 	}
 	
 	switch (result_uint16) {
@@ -950,6 +975,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	int result;
 	
+	loadImagesMutex.lock();
+	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
 	if (single_scanline_buffer == NULL) {
 		string error;
@@ -965,6 +992,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 			_TIFFfree(single_scanline_buffer);
 			string error;
 			error = "unable to allocate new_image in ImageLoaderTIFF::get_nth_image()\r";
+			loadImagesMutex.unlock();
 			throw OUT_OF_MEMORY(error);
 		}
 		
@@ -975,6 +1003,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 			error = "Unable to set the directory to '0' for the image at\"";
 			error += path;
 			error += "\"\r";
+			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -986,6 +1015,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 				error = "Unable to read a scanline from the image at\"";
 				error += path;
 				error += "\"\r";
+				loadImagesMutex.unlock();
 				throw ERROR_READING_FILE_DATA(error);
 			}
 			
@@ -1055,6 +1085,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 					error = "Invalid floating point data size for the image at\"";
 					error += path;
 					error += "\"\r";
+					loadImagesMutex.unlock();
 					throw ERROR_READING_FILE_DATA(error);
 					break;
 			}
@@ -1070,8 +1101,11 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 		error = "Invalid to set the directory to '0' for the image at\"";
 		error += path;
 		error += "\"\r";
+		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
+	
+	loadImagesMutex.unlock();
 	
 	return requestedImages;
 }
@@ -1182,6 +1216,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFrom
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
 	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	
+	// no mutex locking is required since these calls are all threadsafe
 	
 	for (size_t n = nStart; n <= nEnd; ++n) {
 		indices[2] = n;

@@ -82,6 +82,8 @@ protected:
 	uint64_t x_size;
 	uint64_t y_size;
 	int storage_type;
+	
+	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
 };
 
 class ImageLoaderSPE : public ImageLoader {

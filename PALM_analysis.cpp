@@ -328,9 +328,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		controller->acquireFrameForProcessingMutex.unlock();
 		
 		// we need to process the image with index currentImageToProcess
-		controller->loadImagesMutex.lock();
 		currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
-		controller->loadImagesMutex.unlock();
 		thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 														  controller->thresholdImagePostprocessor);
 		locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
