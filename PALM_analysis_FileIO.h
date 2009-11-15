@@ -232,6 +232,21 @@ protected:
 	TIFF *tiff_file;
 };
 
+class IgorImageOutputWriter : public ImageOutputWriter {
+public:
+	IgorImageOutputWriter(std::string waveName, size_t xSize, size_t ySize, size_t nImagesTotal);
+	~IgorImageOutputWriter() {;}
+	
+	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
+	
+	int flush_and_close() {;}
+	
+protected:
+	size_t nImagesTotal;
+	std::string waveName;
+	waveHndl outputWave;
+};
+
 /**
  * @brief Takes the set of PALM results generated from an analysis and outputs them in some way. This is the abstract base class.
  */
