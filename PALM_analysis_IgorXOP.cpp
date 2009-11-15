@@ -892,7 +892,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	string output_file_path;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
-	boost::shared_ptr<OutputWriter> output_writer;
+	boost::shared_ptr<ImageOutputWriter> output_writer;
 	boost::shared_ptr<CCDImagesProcessor> ccd_image_processor;
 	
 	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
@@ -999,9 +999,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
 		
 		if (method == 3) {	// convert to a compressed TIFF file
-			output_writer = boost::shared_ptr<OutputWriter>(new TIFFOutputWriter(output_file_path, overwrite, COMPRESSION_ADOBE_DEFLATE));
+			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_ADOBE_DEFLATE));
 		} else {	// convert to an uncompressed TIFF file
-			output_writer = boost::shared_ptr<OutputWriter>(new TIFFOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
 		}
 		
 		

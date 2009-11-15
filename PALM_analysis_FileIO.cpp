@@ -1246,19 +1246,19 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFrom
 
 
 
-OutputWriter::OutputWriter() {
+ImageOutputWriter::ImageOutputWriter() {
 	file_path.assign("");
 	n_images_written = 0;
 }
 
-OutputWriter::OutputWriter(const string &rhs, int overwrite) {
+ImageOutputWriter::ImageOutputWriter(const string &rhs, int overwrite) {
 	file_path.assign("");
 	n_images_written = 0;
 }
 
 
 
-SimpleOutputWriter::SimpleOutputWriter(const string &rhs,int overwrite) {
+SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
@@ -1267,7 +1267,7 @@ SimpleOutputWriter::SimpleOutputWriter(const string &rhs,int overwrite) {
 	char *header = new char[header_length];
 	if (header == NULL) {
 		string error;
-		error = "unable to allocate header in SimpleOutputWriter::SimpleOutputWriter()\r";
+		error = "unable to allocate header in SimpleImageOutputWriter::SimpleImageOutputWriter()\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	for (int i = 0; i < header_length; i++) {
@@ -1304,7 +1304,7 @@ SimpleOutputWriter::SimpleOutputWriter(const string &rhs,int overwrite) {
 }
 
 
-SimpleOutputWriter::~SimpleOutputWriter() {
+SimpleImageOutputWriter::~SimpleImageOutputWriter() {
 	
 	if (file.is_open() != 0) {
 		flush_and_close();
@@ -1313,7 +1313,7 @@ SimpleOutputWriter::~SimpleOutputWriter() {
 
 
 
-void SimpleOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
+void SimpleImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1326,7 +1326,7 @@ void SimpleOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_
 }
 
 
-void SimpleOutputWriter::flush_cache() {
+void SimpleImageOutputWriter::flush_cache() {
 	boost::shared_ptr<PALMMatrix<double> > current_image;
 	size_t n_pixels, offset;
 	
@@ -1343,7 +1343,7 @@ void SimpleOutputWriter::flush_cache() {
 	float *single_image_buffer = new float[n_pixels];	// a temporary buffer for writing a single image
 	if (single_image_buffer == NULL) {
 		string error;
-		error = "unable to allocate buffer in SimpleOutputWriter::flush_cache()\r";
+		error = "unable to allocate buffer in SimpleImageOutputWriter::flush_cache()\r";
 		throw OUT_OF_MEMORY(error);
 	}
 	
@@ -1370,7 +1370,7 @@ void SimpleOutputWriter::flush_cache() {
 	
 }
 
-int SimpleOutputWriter::flush_and_close() {
+int SimpleImageOutputWriter::flush_and_close() {
 	try {
 		flush_cache();
 	}
@@ -1392,7 +1392,7 @@ int SimpleOutputWriter::flush_and_close() {
 }
 
 
-TIFFOutputWriter::TIFFOutputWriter(const string &rhs,int overwrite, int compression_rhs) {
+TIFFImageOutputWriter::TIFFImageOutputWriter(const string &rhs,int overwrite, int compression_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
@@ -1419,7 +1419,7 @@ TIFFOutputWriter::TIFFOutputWriter(const string &rhs,int overwrite, int compress
 }
 
 
-TIFFOutputWriter::~TIFFOutputWriter() {
+TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 	
 	if (tiff_file != NULL) {
 		flush_and_close();
@@ -1428,7 +1428,7 @@ TIFFOutputWriter::~TIFFOutputWriter() {
 
 
 
-void TIFFOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
+void TIFFImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1440,7 +1440,7 @@ void TIFFOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_im
 }
 
 
-void TIFFOutputWriter::flush_cache() {
+void TIFFImageOutputWriter::flush_cache() {
 	boost::shared_ptr<PALMMatrix<double> > current_image;
 	size_t n_pixels, offset;
 	
@@ -1573,7 +1573,7 @@ void TIFFOutputWriter::flush_cache() {
 	
 }
 
-int TIFFOutputWriter::flush_and_close() {
+int TIFFImageOutputWriter::flush_and_close() {
 	if (tiff_file != NULL) {
 		flush_cache();
 		TIFFClose(tiff_file);

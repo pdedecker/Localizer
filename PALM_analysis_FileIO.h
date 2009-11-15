@@ -177,11 +177,11 @@ protected:
 
 
 
-class OutputWriter {
+class ImageOutputWriter {
 public:
-	OutputWriter();
-	OutputWriter(const string &rhs, int overwrite);
-	virtual ~OutputWriter() {;}
+	ImageOutputWriter();
+	ImageOutputWriter(const string &rhs, int overwrite);
+	virtual ~ImageOutputWriter() {;}
 	
 	string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
@@ -203,10 +203,10 @@ protected:
 };
 
 
-class SimpleOutputWriter : public OutputWriter {
+class SimpleImageOutputWriter : public ImageOutputWriter {
 public:
-	SimpleOutputWriter(const string &rhs, int overwrite);
-	~SimpleOutputWriter();
+	SimpleImageOutputWriter(const string &rhs, int overwrite);
+	~SimpleImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
 	
@@ -216,10 +216,10 @@ protected:
 	void flush_cache();
 };
 
-class TIFFOutputWriter : public OutputWriter {
+class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	TIFFOutputWriter(const string &rhs, int overwrite, int compression_rhs);
-	~TIFFOutputWriter();
+	TIFFImageOutputWriter(const string &rhs, int overwrite, int compression_rhs);
+	~TIFFImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
 	

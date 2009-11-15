@@ -11,7 +11,7 @@
 #include "PALM_analysis_Processing.h"
 
 
-CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging) {
+CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t nFramesAveraging) {
 	image_loader = i_loader;
 	output_writer = o_writer;
 	
@@ -64,7 +64,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 }
 	
 	
-CCDImagesProcessorDifferenceImage::CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, OutputWriter *o_writer) {
+CCDImagesProcessorDifferenceImage::CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, ImageOutputWriter *o_writer) {
 	image_loader = i_loader;
 	output_writer = o_writer;
 	
@@ -105,7 +105,7 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 }
 		
 
-CCDImagesProcessorConvertToSimpleFileFormat::CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, OutputWriter *o_writer) {
+CCDImagesProcessorConvertToSimpleFileFormat::CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, ImageOutputWriter *o_writer) {
 	image_loader = i_loader;
 	output_writer = o_writer;
 	
@@ -125,7 +125,7 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	return 0;
 }
 
-CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, OutputWriter *o_writer, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) {
+CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) {
 	image_loader = i_loader;
 	output_writer = o_writer;
 	

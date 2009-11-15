@@ -58,7 +58,7 @@ protected:
 	size_t y_size;
 	
 	ImageLoader *image_loader;
-	OutputWriter *output_writer;
+	ImageOutputWriter *output_writer;
 };
 
 /**
@@ -66,7 +66,7 @@ protected:
  */
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
-	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, OutputWriter *o_writer, size_t nFramesAveraging);
+	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t nFramesAveraging);
 	~CCDImagesProcessorAverageSubtraction() {output_writer->flush_and_close();}
 
 	int convert_images();
@@ -84,7 +84,7 @@ protected:
  */
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, OutputWriter *o_writer);
+	CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, ImageOutputWriter *o_writer);
 	~CCDImagesProcessorDifferenceImage() {output_writer->flush_and_close();}
 	
 	int convert_images();
@@ -97,7 +97,7 @@ public:
  */
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, OutputWriter *o_writer);
+	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, ImageOutputWriter *o_writer);
 	~CCDImagesProcessorConvertToSimpleFileFormat() {output_writer->flush_and_close();}
 	
 	int convert_images();
@@ -111,7 +111,7 @@ public:
  */
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorCrop(ImageLoader *i_loader, OutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
+	CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
 	~CCDImagesProcessorCrop() {output_writer->flush_and_close();}
 	
 	int convert_images();
