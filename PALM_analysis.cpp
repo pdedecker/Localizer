@@ -30,11 +30,21 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	y_size = image_loader->getYSize();
 	storage_type = image_loader->getStorageType();
 	
-	SetIgorIntVar("V_numberOfImages", (long)total_n_images, 1);
-	SetIgorIntVar("V_xSize", (long)x_size, 1);
-	SetIgorIntVar("V_ySize", (long)y_size, 1);
-	SetIgorIntVar("V_firstImageLoaded", (long)n_start, 1);
-	SetIgorIntVar("V_lastImageLoaded", (long)n_end, 1);
+	result = SetOperationNumVar("V_numberOfImages", total_n_images);
+	if (result != 0)
+		throw result;
+	result = SetOperationNumVar("V_xSize", x_size);
+	if (result != 0)
+		throw result;
+	result = SetOperationNumVar("V_ySize", y_size);
+	if (result != 0)
+		throw result;
+	result = SetOperationNumVar("V_firstImageLoaded", n_start);
+	if (result != 0)
+		throw result;
+	result = SetOperationNumVar("V_lastImageLoaded", n_end);
+	if (result != 0)
+		throw result;
 	
 	
 	// make the output wave that will store the data
@@ -119,15 +129,22 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	
 	int result;
 	
-	result = SetIgorIntVar("V_numberOfImages", (long)total_n_images, 1);
+	result = SetOperationNumVar("V_numberOfImages", total_n_images);
 	if (result != 0)
-		return result;
-	result = SetIgorIntVar("V_xSize", (long)x_size, 1);
+		throw result;
+	result = SetOperationNumVar("V_xSize", x_size);
 	if (result != 0)
-		return result;
-	result = SetIgorIntVar("V_ySize", (long)y_size, 1);
+		throw result;
+	result = SetOperationNumVar("V_ySize", y_size);
 	if (result != 0)
-		return result;
+		throw result;
+	result = SetOperationNumVar("V_firstImageLoaded", -1);
+	if (result != 0)
+		throw result;
+	result = SetOperationNumVar("V_lastImageLoaded", -1);
+	if (result != 0)
+		throw result;
+	
 	return 0;
 }
 

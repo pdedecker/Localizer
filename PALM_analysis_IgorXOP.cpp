@@ -88,6 +88,10 @@ struct AnalyzePALMImagesRuntimeParams {
 	int QFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /Z flag group.
+	int ZFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -120,6 +124,10 @@ struct ReadCCDImagesRuntimeParams {
 	
 	// Parameters for /H flag group.
 	int HFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
+	// Parameters for /Z flag group.
+	int ZFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
 	// Main parameters.
@@ -388,6 +396,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	long dimensionSizes[MAX_DIMENSIONS + 1];
 	waveHndl fitting_positions = NULL;
 	int quiet = 0;
+	int returnErrors = 1;
 	
 	size_t preprocessing_method;
 	size_t thresholding_method;
@@ -533,6 +542,12 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		quiet = 1;
 	} else {
 		quiet = 0;
+	}
+	
+	if (p->ZFlagEncountered) {
+		returnErrors = 1;
+	} else {
+		returnErrors = 0;
 	}
 	
 	// Main parameters.
@@ -696,38 +711,45 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		analysisController->DoPALMAnalysis();
 	}
 	catch (std::bad_alloc) {
-		return NOMEM;
+		err = NOMEM;
 	}
-	catch (OUT_OF_MEMORY err) {
-		return NOMEM;
+	catch (OUT_OF_MEMORY error) {
+		err = NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		err = CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.get_error().c_str());
-		return ERROR_READING_FILE_DATA_DEF;
+		err = ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
+		err = END_SHOULD_BE_LARGER_THAN_START_DEF;
 	}
 	catch (std::range_error err) {
 		XOPNotice(err.what());
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+		err = IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	catch (int e) {
-		return e;
+		err = e;
 	}
 	
-	return 0;
+	SetOperationNumVar("V_flag", err);
+	
+	if ((err != 0) && (returnErrors != 0)) {
+		return err;
+	} else {
+		return 0;
+	}
 }
 
 
 static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
+	int returnErrors = 1;
 	int camera_type;
 	size_t start_image, end_image;
 	std::string data_file_path;
@@ -757,6 +779,12 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		header_only = 1;
 	} else {
 		header_only = 0;
+	}
+	
+	if (p->ZFlagEncountered) {
+		returnErrors = 0;
+	} else {
+		returnErrors = 1;
 	}
 	
 	// Main parameters.
@@ -814,33 +842,39 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		
 	}
 	catch (std::bad_alloc) {
-		return NOMEM;
+		err = NOMEM;
 	}
-	catch (OUT_OF_MEMORY err) {
-		return NOMEM;
+	catch (OUT_OF_MEMORY error) {
+		err =  NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		err =  CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.get_error().c_str());
-		return ERROR_READING_FILE_DATA_DEF;
+		err =  ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
+		err =  END_SHOULD_BE_LARGER_THAN_START_DEF;
 	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		return INDEX_OUT_OF_RANGE;
+	catch (std::range_error error) {
+		XOPNotice(error.what());
+		err =  INDEX_OUT_OF_RANGE;
 	}
 	catch (int e) {
-		return e;
+		err =  e;
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+		err =  IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	
-	return err;
+	SetOperationNumVar("V_flag", err);
+	
+	if ((err != 0) && (returnErrors != 0)) {
+		return err;
+	} else {
+		return 0;
+	}
 }
 
 
@@ -997,37 +1031,46 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	}
 	
 	catch (std::bad_alloc) {
+		SetOperationNumVar("V_flag", NOMEM);
 		return NOMEM;
 	}
 	catch (OUT_OF_MEMORY err) {
+		SetOperationNumVar("V_flag", NOMEM);
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
+		SetOperationNumVar("V_flag", CANNOT_OPEN_FILE_DEF);
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.get_error().c_str());
+		SetOperationNumVar("V_flag", ERROR_READING_FILE_DATA_DEF);
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (ERROR_WRITING_FILE_DATA e) {
 		XOPNotice(e.get_error().c_str());
+		SetOperationNumVar("V_flag", ERROR_WRITING_FILE_DATA_DEF);
 		return ERROR_WRITING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
+		SetOperationNumVar("V_flag", END_SHOULD_BE_LARGER_THAN_START_DEF);
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
 	}
 	catch (std::range_error err) {
+		SetOperationNumVar("V_flag", INDEX_OUT_OF_RANGE);
 		XOPNotice(err.what());
 		return INDEX_OUT_OF_RANGE;
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
+		SetOperationNumVar("V_flag", IMAGE_INDEX_BEYOND_N_IMAGES_DEF);
 		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	catch (int e) {
+		SetOperationNumVar("V_flag", e);
 		return e;
 	}
 	
-	
+	SetOperationNumVar("V_flag", 0.0);
 	return err;
 }
 
@@ -1678,27 +1721,25 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	return err;
 }
 
-
 static int RegisterAnalyzePALMImages(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /E=number:min_distance_from_edge /C=number:cutoff_radius /S=number:sigma /P=wave:positions_wave /Q name:name_of_output_wave, string:experiment_file";
-	runtimeNumVarList = "";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /E=number:min_distance_from_edge /C=number:cutoff_radius /S=number:sigma /P=wave:positions_wave /Q /Z name:name_of_output_wave, string:experiment_file";
+	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);
 }
-
 static int RegisterReadCCDImages(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H number:start_image, number:end_image, string:experiment_file";
-	runtimeNumVarList = "";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z number:start_image, number:end_image, string:experiment_file";
+	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
 }
@@ -1710,7 +1751,7 @@ static int RegisterProcessCCDImages(void) {
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
 	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /O /R={number:startX, number:endX, number:startY, number:endY} string:input_file, string:output_file";
-	runtimeNumVarList = "";
+	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
 }
