@@ -52,5 +52,17 @@ const int STORAGE_TYPE_FP64 = 11;
 const double PI = 3.1415926535897932384626433;
 const double SQRT2 = 1.4142135623730950488;
 
+const int CAMERA_TYPE_WINSPEC = 0;
+const int CAMERA_TYPE_ANDOR = 1;
+const int CAMERA_TYPE_HAMAMATSU = 2;
+const int CAMERA_TYPE_TIFF = 3;
+const int CAMERA_TYPE_SIMPLE = 4;	// a custom, very simple image format. Not currently used anywhere
+const int CAMERA_TYPE_ZEISS = 5;	// Zeiss .lsm files. Not working currently
+const int CAMERA_TYPE_IGOR_WAVE = 6;
+
+const int IMAGE_OUTPUT_TYPE_TIFF = 0;
+const int IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF = 1;
+const int IMAGE_OUTPUT_TYPE_IGOR = 2;
+
 
 #endif

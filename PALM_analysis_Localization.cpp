@@ -205,6 +205,21 @@ int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void
 	return GSL_SUCCESS;
 }
 
+/*	Maxima code to generate the required derivatives for a 2D ellipsoidal Gaussian
+	g: A * %e^(-(a * (x - x0)**2 + 2*b*(x - x0)*(y-y0) + c * (y - y0)**2)) + offset;
+	\begin{align}
+		g &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,A+z_0 \\
+		\frac{\partial g}{\partial A} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2} \\
+		\frac{\partial g}{\partial x_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\, \left(2\,b\,\left(y-{\it y_0}\right)+2\,a\,\left(x-{\it x_0}\right) \right)\,A \\
+		\frac{\partial g}{\partial y_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(2\,c\,\left(y-{\it y_0}\right)+2\,b\,\left(x-{\it x_0}\right)\right)\,A \\
+		\frac{\partial g}{\partial a} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)^2\,A \\
+		\frac{\partial g}{\partial b} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)\,A \\
+		\frac{\partial g}{\partial c} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(y-{\it y_0}\right)^2\,A \\
+		\frac{\partial g}{\partial z_0} &= 1
+ \end{align}
+ */
+
+
 /*int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
  measured_data_Gauss_fits *intensities_local = (measured_data_Gauss_fits *)measured_intensities_struct;
  

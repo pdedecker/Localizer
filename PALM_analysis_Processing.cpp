@@ -15,16 +15,17 @@ CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(Image
 	image_loader = i_loader;
 	output_writer = o_writer;
 	
-	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->getXSize();
-	y_size = image_loader->getYSize();
+	this->total_number_of_images = image_loader->get_total_number_of_images();
+	this->x_size = image_loader->getXSize();
+	this->y_size = image_loader->getYSize();
 	
-	n_frames_averaging = nFramesAveraging;
+	this->n_frames_averaging = nFramesAveraging;
 }
 
 int CCDImagesProcessorAverageSubtraction::convert_images() {
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
+	this->n_frames_averaging = this->total_number_of_images;
 	subtract_average_of_entire_trace();
 	return 0;
 }
@@ -41,6 +42,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	// fortunately out intermediate format uses doubles to store the data!
 	
 	average_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
 	
 	average_image->set_all(0);	// zero the matrix
 	
@@ -51,7 +53,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	}
 	
 	// now divide each point so that we get the average
-	(*average_image) = (*average_image).DivideByScalar(n_frames_averaging);
+	(*average_image) = (*average_image).DivideByScalar(this->n_frames_averaging);
 	
 	// now subtract the average for each frame
 	for (n = 0; n < total_number_of_images; n++) {

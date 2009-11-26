@@ -176,10 +176,6 @@ struct ProcessCCDImagesRuntimeParams {
 	double method_parameter;
 	int NFlagParamsSet[1];
 	
-	// Parameters for /O flag group.
-	int OFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
 	double startX;
@@ -187,6 +183,15 @@ struct ProcessCCDImagesRuntimeParams {
 	double startY;
 	double endY;
 	int RFlagParamsSet[4];
+	
+	// Parameters for /OUT flag group.
+	int OUTFlagEncountered;
+	double outputType;
+	int OUTFlagParamsSet[1];
+	
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	// There are no fields for this group because it has no parameters.
 	
 	// Main parameters.
 	
@@ -884,6 +889,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	int camera_type;
 	int method;
 	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
+	int outputType;
 	size_t startX, endX, startY, endY;
 	
 	double n_parameter;	// the value that corresponds to the /N flag
@@ -938,6 +944,13 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 	}
 	
+	if (p->OUTFlagEncountered) {
+		// Parameter: p->outputType
+		outputType = (int)(p->outputType + 0.5);
+	} else {
+		outputType = IMAGE_OUTPUT_TYPE_TIFF;
+	}
+	
 	if (p->OFlagEncountered) {
 		overwrite = 1;
 	}
@@ -986,7 +999,11 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->output_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = ConvertHandleToFilepathString(p->output_file, camera_type, output_file_path);
+		if (outputType == IMAGE_OUTPUT_TYPE_IGOR) {
+			err = ConvertHandleToFilepathString(p->output_file, CAMERA_TYPE_IGOR_WAVE, output_file_path);
+		} else {
+			err = ConvertHandleToFilepathString(p->output_file, CAMERA_TYPE_TIFF, output_file_path);
+		}
 		if (err != 0) {
 			return err;
 		}
@@ -998,12 +1015,23 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	try {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
 		
-		if (method == 3) {	// convert to a compressed TIFF file
-			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_ADOBE_DEFLATE));
-		} else {	// convert to an uncompressed TIFF file
-			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+		switch (outputType) {
+			case IMAGE_OUTPUT_TYPE_TIFF:
+				output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+				break;
+			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
+				output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE));
+				break;
+			case IMAGE_OUTPUT_TYPE_IGOR:
+				output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getXSize(), 
+																							   image_loader->getYSize(), 
+																							   image_loader->get_total_number_of_images(), 
+																							   overwrite));
+				break;
+			default:
+				XOPNotice("Unknown output format (/OUT flag)\r");
+				return UNSUPPORTED_CCD_FILE_TYPE;
 		}
-		
 		
 		// do the actual procedure
 		switch (method) {
@@ -1016,10 +1044,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			case 2:		// convert to a different form (determined by the output writer)
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
 				break;
-			case 3:		// convert to a zip-compressed TIFF file
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
-				break;
-			case 4:		// output a cropped version of the image
+			case 3:		// output a cropped version of the image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader.get(), output_writer.get(), startX, endX, startY, endY));
 				break;
 			default:
@@ -1745,13 +1770,13 @@ static int RegisterReadCCDImages(void) {
 }
 
 static int RegisterProcessCCDImages(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /O /R={number:startX, number:endX, number:startY, number:endY} string:input_file, string:output_file";
-	runtimeNumVarList = "V_flag;";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /R={number:startX, number:endX, number:startY, number:endY} /OUT=number:outputType /O string:input_file, string:output_file";
+	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
 }

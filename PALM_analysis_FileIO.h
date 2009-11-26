@@ -234,7 +234,7 @@ protected:
 
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
-	IgorImageOutputWriter(std::string waveName, size_t xSize, size_t ySize, size_t nImagesTotal);
+	IgorImageOutputWriter(std::string waveName, size_t xSize, size_t ySize, size_t nImagesTotal, int overwrite);
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
@@ -245,6 +245,7 @@ protected:
 	size_t nImagesTotal;
 	std::string waveName;
 	waveHndl outputWave;
+	int overwrite;
 };
 
 /**

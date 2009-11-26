@@ -1584,7 +1584,7 @@ int TIFFImageOutputWriter::flush_and_close() {
 }
 
 
-IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t xSize_rhs, size_t ySize_rhs, size_t nImages_rhs) {
+IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t xSize_rhs, size_t ySize_rhs, size_t nImages_rhs, int overwrite_rhs) {
 	this->waveName = waveName_rhs;
 	this->x_size = xSize_rhs;
 	this->y_size = ySize_rhs;
@@ -1596,7 +1596,13 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t xS
 	dimensionSizes[1] = this->y_size;
 	dimensionSizes[2] = this->nImagesTotal;
 	dimensionSizes[3] = 0;
-	int result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	int result;
+	
+	if (overwrite == 0) {
+		result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 0);
+	} else {
+		result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	}
 	if (result != 0) {
 		throw result;
 	}
