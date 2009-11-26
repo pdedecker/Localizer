@@ -89,6 +89,44 @@ int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *fitData_rhs
 	return GSL_SUCCESS;
 }
 
+int Ellipsoidal_Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+	// params contains the current values of the parameters - amplitude, width, etc.
+	// fitData is an object that contains the experimental data
+	
+	
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
+	
+	size_t xSize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getXSize();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
+	
+	double amplitude = gsl_vector_get(params, 0);
+	double a = gsl_vector_get(params, 1);
+	double b = gsl_vector_get(params, 2);
+	double c = gsl_vector_get(params, 3);
+	double x0 = gsl_vector_get(params, 4);
+	double y0 = gsl_vector_get(params, 5);
+	double offset = gsl_vector_get(params, 6);
+	
+	double x,y, function_value, square_deviation;
+	
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			function_value = offset + amplitude * exp(- a * (x - x0) * (x - x0) - 2 * b * (x - x0) * (y - y0) - c * (y - y0) * (y - y0));
+			square_deviation = (function_value - imageSubset->get(i, j)) / sigma;
+			gsl_vector_set(deviations, arrayOffset, square_deviation);
+			++arrayOffset;
+		}
+	}
+	return GSL_SUCCESS;
+}
+
 int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
@@ -189,35 +227,105 @@ int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fi
 	
 }
 
+/*	Maxima code to generate the required derivatives for a 2D ellipsoidal Gaussian
+ g: A * %e^(-(a * (x - x0)**2 + 2*b*(x - x0)*(y-y0) + c * (y - y0)**2)) + offset;
+ \begin{align}
+ g &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,A+z_0 \\
+ \frac{\partial g}{\partial A} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2} \\
+ \frac{\partial g}{\partial x_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\, \left(2\,b\,\left(y-{\it y_0}\right)+2\,a\,\left(x-{\it x_0}\right) \right)\,A \\
+ \frac{\partial g}{\partial y_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(2\,c\,\left(y-{\it y_0}\right)+2\,b\,\left(x-{\it x_0}\right)\right)\,A \\
+ \frac{\partial g}{\partial a} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)^2\,A \\
+ \frac{\partial g}{\partial b} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)\,A \\
+ \frac{\partial g}{\partial c} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(y-{\it y_0}\right)^2\,A \\
+ \frac{\partial g}{\partial z_0} &= 1
+ \end{align}
+ */
+int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
+	
+	size_t xSize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getXSize();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
+	
+	double amplitude = gsl_vector_get(params, 0);
+	double a = gsl_vector_get(params, 1);
+	double b = gsl_vector_get(params, 2);
+	double c = gsl_vector_get(params, 3);
+	double x0 = gsl_vector_get(params, 4);
+	double y0 = gsl_vector_get(params, 5);
+	double offset = gsl_vector_get(params, 6);
+	
+	double x,y, exp_factor;
+	double dfdA, dfda, dfdb, dfdc, dfdx0, dfdy0,dfdoffset;
+	
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			
+			exp_factor = exp(- a * (x - x0) * (x - x0) - 2 * b * (x - x0) * (y - y0) - b * (y - y0) * (y - y0));
+			
+			dfdA = exp_factor;
+			dfda = amplitude * (x - x0) * (x - x0) * exp_factor;
+			dfdb = amplitude * (x - x0) * (y - y0) * exp_factor;
+			dfdc = amplitude * (y - y0) * (y - y0) * exp_factor;
+			dfdx0 = amplitude * (2 * b * (y - y0) + 2 * a * (x - x0)) * exp_factor;
+			dfdy0 = amplitude * (2 * c * (y - y0) + 2 * b * (x - x0)) * exp_factor;
+			dfdoffset = 1.0;
+			
+			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
+			gsl_matrix_set(jacobian, arrayOffset, 1, dfda);
+			gsl_matrix_set(jacobian, arrayOffset, 2, dfdb);
+			gsl_matrix_set(jacobian, arrayOffset, 3, dfdc);
+			gsl_matrix_set(jacobian, arrayOffset, 4, dfdx0);
+			gsl_matrix_set(jacobian, arrayOffset, 5, dfdy0);
+			gsl_matrix_set(jacobian, arrayOffset, 6, dfdoffset);
+			++arrayOffset;
+		}
+	}
+	
+	return GSL_SUCCESS;
+	
+}
+
 int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
-	
-	Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	int result;
+	result = Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	if (result != GSL_SUCCESS)
+		return result;
 	Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
-	
+	if (result != GSL_SUCCESS)
+		return result;
 	return GSL_SUCCESS;
 }
 
 int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
-	
-	Gauss_2D_fit_function_FixedWidth(params, measured_intensities_struct, model_values);
-	Gauss_2D_fit_function_Jacobian_FixedWidth(params, measured_intensities_struct, jacobian);
+	int result;
+	result = Gauss_2D_fit_function_FixedWidth(params, measured_intensities_struct, model_values);
+	if (result != GSL_SUCCESS)
+		return result;
+	result = Gauss_2D_fit_function_Jacobian_FixedWidth(params, measured_intensities_struct, jacobian);
+	if (result != GSL_SUCCESS)
+		return result;
 	
 	return GSL_SUCCESS;
 }
 
-/*	Maxima code to generate the required derivatives for a 2D ellipsoidal Gaussian
-	g: A * %e^(-(a * (x - x0)**2 + 2*b*(x - x0)*(y-y0) + c * (y - y0)**2)) + offset;
-	\begin{align}
-		g &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,A+z_0 \\
-		\frac{\partial g}{\partial A} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2} \\
-		\frac{\partial g}{\partial x_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\, \left(2\,b\,\left(y-{\it y_0}\right)+2\,a\,\left(x-{\it x_0}\right) \right)\,A \\
-		\frac{\partial g}{\partial y_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(2\,c\,\left(y-{\it y_0}\right)+2\,b\,\left(x-{\it x_0}\right)\right)\,A \\
-		\frac{\partial g}{\partial a} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)^2\,A \\
-		\frac{\partial g}{\partial b} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)\,A \\
-		\frac{\partial g}{\partial c} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(y-{\it y_0}\right)^2\,A \\
-		\frac{\partial g}{\partial z_0} &= 1
- \end{align}
- */
+int Ellipsoidal_Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+	int result;
+	Ellipsoidal_Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	if (result != GSL_SUCCESS)
+		return result;
+	Elliposoidal_Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
+	if (result != GSL_SUCCESS)
+		return result;
+	
+	return GSL_SUCCESS;
+}
 
 
 /*int Gauss_2D_Poissonian_fit_function(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values) {
@@ -338,7 +446,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositions::fit_positions(c
 }
 
 boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
-																		   size_t startPos, size_t endPos) {
+																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
@@ -522,7 +630,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 }
 
 boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
-																					  size_t startPos, size_t endPos) {
+																								  size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
@@ -699,7 +807,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 
 
 boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
-																				 size_t startPos, size_t endPos) {
+																							 size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
@@ -855,7 +963,7 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<PALMMat
 
 
 boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
-																		   size_t startPos, size_t endPos) {
+																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
 	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
