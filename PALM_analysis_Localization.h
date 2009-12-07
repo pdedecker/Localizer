@@ -73,6 +73,19 @@ protected:
 	double r_initial;
 };
 
+/*class FitPositionsEllipsoidalGaussian : public FitPositions {
+public:
+	FitPositionsEllipsoidalGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	~FitPositionsEllipsoidalGaussian() {;}
+	
+	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	
+protected:
+	double sigma;
+	size_t cutoff_radius;
+	double r_initial;
+};*/
+
 class FitPositionsMultiplication : public FitPositions {
 	// fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
 	// if this converges then we assume that we have found the actual position

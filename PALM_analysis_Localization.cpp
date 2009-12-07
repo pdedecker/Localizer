@@ -806,6 +806,191 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 }
 
 
+/*boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsEllipsoidalGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+																					   size_t startPos, size_t endPos) {
+	
+	// some safety checks
+	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
+		string error;
+		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
+		throw std::range_error(error);
+	}
+	
+	if (startPos > endPos) {
+		string error;
+		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
+		throw std::range_error(error);
+	}
+	
+	size_t number_of_positions = endPos - startPos + 1;
+	size_t size_of_subset = 2 * cutoff_radius + 1;
+	size_t x_offset, y_offset, x_max, y_max;
+	size_t number_of_intensities = size_of_subset * size_of_subset;
+	size_t xSize = image->getXSize();
+	size_t ySize = image->getYSize();
+	
+	double x0_initial, y0_initial, amplitude, background;
+	double chi, degreesOfFreedom, c;
+	long iterations = 0;
+	int status;
+	
+	boost::shared_ptr<PALMMatrix<double> > image_subset;
+	boost::shared_ptr<std::vector<LocalizedPosition> > fitted_positions (new std::vector<LocalizedPosition>);
+	LocalizedPosition localizationResult;
+	
+	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
+	
+	fitted_positions->reserve(number_of_positions);
+	
+	// initialize the solver
+	const gsl_multifit_fdfsolver_type *solver;
+	gsl_multifit_fdfsolver *fit_iterator;
+	
+	solver = gsl_multifit_fdfsolver_lmsder;
+	measured_data_Gauss_fits fitData;
+	gsl_multifit_function_fdf f;
+	
+	gsl_vector *fit_parameters = gsl_vector_alloc(7);
+	if (fit_parameters == NULL) {
+		string error;
+		error = "unable to allocate fit_parameters in FitPositionsGaussian::fit_positions()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	fit_iterator = gsl_multifit_fdfsolver_alloc(solver, number_of_intensities, 7);
+	if (fit_iterator == NULL) {
+		gsl_vector_free(fit_parameters);
+		string error;
+		error = "unable to allocate fit_iterator in FitPositionsGaussian::fit_positions()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	gsl_matrix *covarianceMatrix = gsl_matrix_alloc(7, 7);
+	if (covarianceMatrix == NULL) {
+		gsl_vector_free(fit_parameters);
+		gsl_multifit_fdfsolver_free(fit_iterator);
+		string error;
+		error = "unable to allocate covarianceMatrix in FitPositionsGaussian::fit_positions()\r";
+		throw OUT_OF_MEMORY(error);
+	}
+	
+	f.f = &Gauss_2D_fit_function;
+	f.df = &Gauss_2D_fit_function_Jacobian;
+	f.fdf = &Gauss_2D_fit_function_and_Jacobian;
+	f.n = number_of_intensities;
+	f.p = 5;
+	f.params = (void *)&fitData;
+	
+	
+	// iterate over all the determined positions
+	for (size_t i = startPos; i <= endPos; i++) {
+		iterations = 0;
+		
+		amplitude = positions->get(i, 0);
+		x0_initial = positions->get(i, 1);
+		y0_initial = positions->get(i, 2);
+		background = positions->get(i, 3);
+		
+		x_offset = x0_initial - cutoff_radius;
+		y_offset = y0_initial - cutoff_radius;
+		x_max = x0_initial + cutoff_radius;
+		y_max = y0_initial + cutoff_radius;
+		
+		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
+			// we cannot include it
+			continue;
+		}
+		
+		for (size_t j = x_offset; j <= x_max; j++) {
+			for (size_t k = y_offset; k <= y_max; k++) {
+				image_subset->set(j - x_offset, k - y_offset, image->get(j, k));
+			}
+		}
+		
+		fitData.xOffset = (double)x_offset;
+		fitData.yOffset = (double)y_offset;
+		fitData.imageSubset = image_subset;
+		fitData.sigma = sigma;
+		
+		// provide the initial parameters
+		gsl_vector_set(fit_parameters, 0, amplitude);
+		gsl_vector_set(fit_parameters, 1, r_initial * SQRT2);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
+		gsl_vector_set(fit_parameters, 2, x0_initial);
+		gsl_vector_set(fit_parameters, 3, y0_initial);
+		gsl_vector_set(fit_parameters, 4, background);
+		
+		// set the solver
+		gsl_multifit_fdfsolver_set(fit_iterator, &f, fit_parameters);
+		
+		// run the iterations
+		do {
+			iterations++;
+			status = gsl_multifit_fdfsolver_iterate(fit_iterator);
+			if (status != 0)
+				break;
+			
+			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
+		} while ((status = GSL_CONTINUE) && (iterations < 200));
+		
+		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			continue;
+		}
+		
+		// are the reported positions within the window?
+		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
+			// the reported positions are not within the window, we should reject them
+			continue;
+		}
+		
+		// are the fit results close enough to the initial values to be trusted?
+		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
+			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
+			continue;
+		}
+		
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * SQRT2 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * SQRT2 * 2.0)) {
+			// the output fit width is more than a factor of two different from the initial value, drop this point
+			continue;
+		}
+		
+		// calculate the covariance matrix
+		gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
+		chi = gsl_blas_dnrm2(fit_iterator->f);
+		degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
+		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
+		
+		// store the fitted parameters
+		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
+		localizationResult.width = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 3);
+		localizationResult.offset = gsl_vector_get(fit_iterator->x, 4);
+		
+		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
+		localizationResult.widthError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
+		
+		// store the number of iterations
+		localizationResult.nIterations = iterations;
+		
+		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
+		// so we correct for that
+		localizationResult.width = localizationResult.width / SQRT2;
+		localizationResult.widthError = localizationResult.widthError / SQRT2;	// the same for the error
+		
+		fitted_positions->push_back(localizationResult);
+	}
+	
+	gsl_multifit_fdfsolver_free(fit_iterator);
+	gsl_vector_free(fit_parameters);
+	
+	return fitted_positions;
+	
+}*/
+
+
 boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																							 size_t startPos, size_t endPos) {
 	

@@ -239,7 +239,7 @@ public:
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
 	
-	int flush_and_close() {;}
+	int flush_and_close() {return 0;}
 	
 protected:
 	size_t nImagesTotal;
