@@ -722,7 +722,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		err = CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		err = ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
@@ -850,7 +850,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		err =  CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		err =  ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
@@ -1058,12 +1058,12 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		SetOperationNumVar("V_flag", ERROR_READING_FILE_DATA_DEF);
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (ERROR_WRITING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		SetOperationNumVar("V_flag", ERROR_WRITING_FILE_DATA_DEF);
 		return ERROR_WRITING_FILE_DATA_DEF;
 	}
@@ -1207,7 +1207,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
@@ -1488,7 +1488,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
@@ -1555,7 +1555,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
@@ -1707,7 +1707,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.get_error().c_str());
+		XOPNotice(e.what());
 		return ERROR_READING_FILE_DATA_DEF;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {

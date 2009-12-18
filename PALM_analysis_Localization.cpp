@@ -1084,7 +1084,7 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<PALMMat
 	double gaussian_value, distance_squared;
 	
 	if ((original_image->getXSize() != x_size) || (original_image->getYSize() != y_size)) {
-		throw DIMENSIONS_SHOULD_BE_EQUAL();
+		throw DIMENSIONS_SHOULD_BE_EQUAL(std::string("Matrix dimensions are not equal in FitPositionsMultiplication::multiply_with_gaussian"));
 	}
 	
 	for (size_t j = 0; j < y_size; j++) {

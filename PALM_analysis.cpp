@@ -16,7 +16,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	double current_value_array[2];
 	
 	if (n_start > n_end)
-		throw END_SHOULD_BE_LARGER_THAN_START();
+		throw END_SHOULD_BE_LARGER_THAN_START(std::string("When loading part of a CCD file a the starting index was larger than the ending index"));
 	
 	// how many images should we load?
 	if (n_end <= total_n_images) {

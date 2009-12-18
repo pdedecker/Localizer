@@ -168,7 +168,7 @@ ImageLoader::~ImageLoader() {
 boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
 	vector<boost::shared_ptr<PALMMatrix <double> > > images;
 	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES();
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	size_t firstImageToLoad = n;
 	size_t lastImageToLoad = n;
@@ -185,7 +185,9 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
-		throw CANNOT_OPEN_FILE();
+		std::string error ("Unable to open the file at ");
+		error += path;
+		throw CANNOT_OPEN_FILE(error);
 	}
 	
 	parse_header_information();
@@ -258,7 +260,9 @@ void ImageLoaderSPE::parse_header_information() {
 			storage_type = STORAGE_TYPE_UINT16;
 			break;
 		default:
-			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
+			std::string error("Unable to determine the storage type used in ");
+			error += this->path;
+			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
 	current_bytes = 0;
@@ -306,7 +310,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			break;
 		default:
 			loadImagesMutex.unlock();
-			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
+			std::string error("Unable to determine the storage type used in ");
+			error += this->path;
+			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
 	
@@ -332,7 +338,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				break;
 			default:
 				loadImagesMutex.unlock();
-				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
+				std::string error("Unable to determine the storage type used in ");
+				error += this->path;
+				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 				break;
 		}
 		
@@ -414,7 +422,9 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 				
 			default:
 				loadImagesMutex.unlock();
-				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE();
+				std::string error("Unable to determine the storage type used in ");
+				error += this->path;
+				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 				break;
 				
 		}
@@ -434,7 +444,9 @@ ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
-		throw CANNOT_OPEN_FILE();
+		std::string error ("Error opening the file at ");
+		error += path;
+		throw CANNOT_OPEN_FILE(error);
 	}
 	
 	parse_header_information();
@@ -565,7 +577,9 @@ ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_r
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
-		throw CANNOT_OPEN_FILE();
+		std::string error ("Unable to open the file at ");
+		error += path;
+		throw CANNOT_OPEN_FILE(error);
 	}
 	
 	parse_header_information();
@@ -689,7 +703,9 @@ SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	
 	file.open(path.c_str(), ios::binary | ios::in);
 	if (file.fail() == 1) {
-		throw CANNOT_OPEN_FILE();
+		std::string error ("Unable to open the file at ");
+		error += path;
+		throw CANNOT_OPEN_FILE(error);
 	}
 	
 	parse_header_information();
@@ -776,7 +792,9 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	
 	tiff_file = TIFFOpen(path.c_str(), "r");
 	if (tiff_file == NULL) {
-		throw CANNOT_OPEN_FILE();
+		std::string error ("Unable to open the file at ");
+		error += path;
+		throw CANNOT_OPEN_FILE(error);
 	}
 	
 	parse_header_information();
@@ -1273,7 +1291,9 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite
 		input_test.open(file_path.c_str(), ios::in | ios::binary);
 		input_test.close();
 		if (input_test.fail() == 0) {
-			throw OUTPUT_FILE_ALREADY_EXISTS();	// escape without overwriting
+			std::string error("The output file at ");
+			error += this->file_path;
+			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		} else {
 			file.open(file_path.c_str(), ios::binary | ios::out);
 		}
@@ -1284,7 +1304,9 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite
 	}
 	
 	if (file.fail() != 0) {
-		throw CANNOT_OPEN_OUTPUT_FILE();
+		std::string error("Cannot create an output file at ");
+		error += this->file_path;
+		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
 	x_size = 0;
@@ -1394,13 +1416,17 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const string &rhs,int overwrite, in
 		input_test.open(file_path.c_str(), ios::in | ios::binary);
 		input_test.close();
 		if (input_test.fail() == 0) {
-			throw OUTPUT_FILE_ALREADY_EXISTS();	// escape without overwriting
+			std::string error("The output file at ");
+			error += this->file_path;
+			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 	}
 	
 	tiff_file = TIFFOpen(file_path.c_str(), "w");
 	if (tiff_file == NULL) {
-		throw CANNOT_OPEN_OUTPUT_FILE();
+		std::string error("Cannot create an output file at ");
+		error += this->file_path;
+		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
 	x_size = 0;
