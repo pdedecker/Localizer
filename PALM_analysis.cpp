@@ -531,4 +531,3 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wa
 	}
 }
 
-	

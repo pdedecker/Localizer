@@ -195,7 +195,7 @@ int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fi
 	// double offset = gsl_vector_get(params, 4);
 	
 	double x,y, exp_factor;
-	double dfdA, dfdr, dfdx0, dfdy0,dfdoffset;
+	double dfdA, dfdx0, dfdy0,dfdoffset;
 	
 	if (r == 0) {
 		return GSL_FAILURE;
@@ -249,7 +249,6 @@ int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
-	double sigma = fitDataLocal->sigma;
 	
 	double amplitude = gsl_vector_get(params, 0);
 	double a = gsl_vector_get(params, 1);
@@ -257,7 +256,6 @@ int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *
 	double c = gsl_vector_get(params, 3);
 	double x0 = gsl_vector_get(params, 4);
 	double y0 = gsl_vector_get(params, 5);
-	double offset = gsl_vector_get(params, 6);
 	
 	double x,y, exp_factor;
 	double dfdA, dfda, dfdb, dfdc, dfdx0, dfdy0,dfdoffset;

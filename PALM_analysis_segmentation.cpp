@@ -1326,7 +1326,7 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	y_size2 = image2->getYSize();
 	
 	size_t n_pixels, offset;
-	size_t FFT_xSize, FFT_ySize, i, j;
+	size_t FFT_xSize, FFT_ySize;
 	size_t n_FFT_values, nColumns;
 	size_t lastRow, lastCol;
 	

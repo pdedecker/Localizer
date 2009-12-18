@@ -270,3 +270,4 @@ public:
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins);
 
 #endif
+
