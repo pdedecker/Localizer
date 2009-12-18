@@ -719,12 +719,12 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		err = NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		err = CANNOT_OPEN_FILE_DEF;
+		err = FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		err = ERROR_READING_FILE_DATA_DEF;
+		err = FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		err = END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -738,6 +738,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		err = e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		err = SYNERR;
 	}
 	
 	SetOperationNumVar("V_flag", err);
@@ -849,12 +854,12 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		err = NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		err =  CANNOT_OPEN_FILE_DEF;
+		err =  FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		err =  ERROR_READING_FILE_DATA_DEF;
+		err =  FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		err =  END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -869,6 +874,11 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
 		err =  IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		err = SYNERR;
 	}
 	
 	SetOperationNumVar("V_flag", err);
@@ -1058,20 +1068,20 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		SetOperationNumVar("V_flag", CANNOT_OPEN_FILE_DEF);
-		return CANNOT_OPEN_FILE_DEF;
+		SetOperationNumVar("V_flag", FILE_OPEN_ERROR);
+		return FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		SetOperationNumVar("V_flag", ERROR_READING_FILE_DATA_DEF);
-		return ERROR_READING_FILE_DATA_DEF;
+		SetOperationNumVar("V_flag", FILE_READ_ERROR);
+		return FILE_READ_ERROR;
 	}
 	catch (ERROR_WRITING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		SetOperationNumVar("V_flag", ERROR_WRITING_FILE_DATA_DEF);
-		return ERROR_WRITING_FILE_DATA_DEF;
+		SetOperationNumVar("V_flag", FILE_WRITE_ERROR);
+		return FILE_WRITE_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		SetOperationNumVar("V_flag", END_SHOULD_BE_LARGER_THAN_START_DEF);
@@ -1090,6 +1100,11 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	catch (int e) {
 		SetOperationNumVar("V_flag", e);
 		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		err = SYNERR;
 	}
 	
 	SetOperationNumVar("V_flag", 0.0);
@@ -1211,12 +1226,12 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		return FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return ERROR_READING_FILE_DATA_DEF;
+		return FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -1231,6 +1246,11 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return SYNERR;
 	}
 
 	return 0;
@@ -1494,12 +1514,12 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		return FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return ERROR_READING_FILE_DATA_DEF;
+		return FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -1511,6 +1531,11 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return SYNERR;
 	}
 	
 	return err;
@@ -1563,12 +1588,12 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		return FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return ERROR_READING_FILE_DATA_DEF;
+		return FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -1580,6 +1605,11 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return SYNERR;
 	}
 	
 	return err;
@@ -1717,12 +1747,12 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
-		return CANNOT_OPEN_FILE_DEF;
+		return FILE_OPEN_ERROR;
 	}
 	catch (ERROR_READING_FILE_DATA e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return ERROR_READING_FILE_DATA_DEF;
+		return FILE_READ_ERROR;
 	}
 	catch (END_SHOULD_BE_LARGER_THAN_START) {
 		return END_SHOULD_BE_LARGER_THAN_START_DEF;
@@ -1734,6 +1764,11 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return SYNERR;
 	}
 	
 	return err;
