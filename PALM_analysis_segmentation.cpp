@@ -1339,8 +1339,8 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	
 	// are the dimensions equal?
 	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
-		XOPNotice("Error while convolving the images: the dimensions of the images are not equal.\r");
-		throw INCOMPATIBLE_DIMENSIONING;
+		std::string error("Tried to convolve images with unequal dimensions");
+		throw DIMENSIONS_SHOULD_BE_EQUAL(error);
 	}
 	
 	// does the image have dimension sizes that are odd? if so remove one column and/or row so that it becomes even
@@ -1522,7 +1522,7 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> 
 	y_size = image->getYSize();
 	
 	string error;
-	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()\r";
+	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()";
 	
 	hist = gsl_histogram_alloc(number_of_bins);
 	if (hist == NULL) {

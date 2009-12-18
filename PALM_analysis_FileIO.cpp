@@ -23,7 +23,7 @@ void XOPFileHandler::open(const char* path_rhs) {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using open() on the image file at \"" << path_rhs << "\"\r";
+		ss << "Error " << err << " returned using open() on the image file at \"" << path_rhs << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -38,7 +38,7 @@ void XOPFileHandler::close() {
 		if (err != 0) {
 			string error;
 			stringstream ss;
-			ss << "Error " << err << " returned using close() on the image file at \"" << path << "\"\r";
+			ss << "Error " << err << " returned using close() on the image file at \"" << path << "\"";
 			error = ss.str();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -52,7 +52,7 @@ void XOPFileHandler::get(char& c) {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using get() on the image file at \"" << path << "\"\r";
+		ss << "Error " << err << " returned using get() on the image file at \"" << path << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -64,7 +64,7 @@ void XOPFileHandler::read(char *buffer, size_t nBytes) {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using read() on the image file at \"" << path << "\"\r";
+		ss << "Error " << err << " returned using read() on the image file at \"" << path << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -76,7 +76,7 @@ void XOPFileHandler::getline(char *buffer, size_t nMax) {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using getline() on the image file at \"" << path << "\"\r";
+		ss << "Error " << err << " returned using getline() on the image file at \"" << path << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -91,7 +91,7 @@ uint64_t XOPFileHandler::tellg() {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using tellg() on the image file at \"" << path << "\"\r";
+		ss << "Error " << err << " returned using tellg() on the image file at \"" << path << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -111,7 +111,7 @@ void XOPFileHandler::seekg(uint64_t pos) {
 	if (err != 0) {
 		string error;
 		stringstream ss;
-		ss << "Error " << err << " returned using seekg() on the image file at \"" << path << "\"\r";
+		ss << "Error " << err << " returned using seekg() on the image file at \"" << path << "\"";
 		error = ss.str();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -272,7 +272,7 @@ void ImageLoaderSPE::parse_header_information() {
 		string error;
 		error = "Error parsing the header information in \"";
 		error += path;
-		error += "\" assuming the SPE format\r";
+		error += "\" assuming the SPE format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -353,7 +353,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			string error;
 			error = "Error trying to read image data from \"";
 			error += path;
-			error += "\" assuming the SPE format\r";
+			error += "\" assuming the SPE format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -519,7 +519,7 @@ void ImageLoaderAndor::parse_header_information() {
 		string error;
 		error = "Error parsing the header information in \"";
 		error += path;
-		error += "\" assuming the Andor format\r";
+		error += "\" assuming the Andor format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -549,7 +549,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 			string error;
 			error = "Error trying to read image data from \"";
 			error += path;
-			error += "\" assuming the Andor format\r";
+			error += "\" assuming the Andor format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -622,7 +622,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 		string error;
 		error = "The file at \"";
 		error += path;
-		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.\r";
+		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -636,7 +636,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 		string error;
 		error = "Error parsing the header information in \"";
 		error += path;
-		error += "\" assuming the Hamamatsu format\r";
+		error += "\" assuming the Hamamatsu format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -668,7 +668,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 			string error;
 			error = "Error reading image data from \"";
 			error += path;
-			error += "\" assuming the Hamamatsu format\r";
+			error += "\" assuming the Hamamatsu format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -742,7 +742,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 			string error;
 			error = "Error reading image data from \"";
 			error += path;
-			error += "\" assuming the simple image format\r";
+			error += "\" assuming the simple image format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -780,7 +780,7 @@ void SimpleImageLoader::parse_header_information() {
 		string error;
 		error = "Error parsing the header information in \"";
 		error += path;
-		error += "\" assuming the simple image format\r";
+		error += "\" assuming the simple image format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -824,7 +824,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" is not a grayscale image\r";
+		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -832,7 +832,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" is not a grayscale image\r";
+		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -842,7 +842,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" is not a grayscale image\r";
+		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -850,7 +850,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" is not a grayscale image\r";
+		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -873,7 +873,7 @@ void ImageLoaderTIFF::parse_header_information() {
 			string error;
 			error = "The SampleFormat of the image at\"";
 			error += path;
-			error += "\" is unknown\r";
+			error += "\" is unknown";
 			throw ERROR_READING_FILE_DATA(error);
 			break;
 	}
@@ -896,7 +896,7 @@ void ImageLoaderTIFF::parse_header_information() {
 				string error;
 				error = "The SampleFormat of the image at\"";
 				error += path;
-				error += "\" is unknown\r";
+				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
 		}
@@ -912,7 +912,7 @@ void ImageLoaderTIFF::parse_header_information() {
 				string error;
 				error = "The SampleFormat of the image at\"";
 				error += path;
-				error += "\" is unknown\r";
+				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
 		}
@@ -924,7 +924,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" does not specify a width\r";
+		error += "\" does not specify a width";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -936,7 +936,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "The image at\"";
 		error += path;
-		error += "\" does not specify a height\r";
+		error += "\" does not specify a height";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -973,7 +973,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		string error;
 		error = "Unable to set the directory to '0' for the image at\"";
 		error += path;
-		error += "\"\r";
+		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 }
@@ -1016,7 +1016,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 			string error;
 			error = "Unable to set the directory to '0' for the image at\"";
 			error += path;
-			error += "\"\r";
+			error += "\"";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -1028,7 +1028,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 				string error;
 				error = "Unable to read a scanline from the image at\"";
 				error += path;
-				error += "\"\r";
+				error += "\"";
 				loadImagesMutex.unlock();
 				throw ERROR_READING_FILE_DATA(error);
 			}
@@ -1098,7 +1098,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 					string error;
 					error = "Invalid floating point data size for the image at\"";
 					error += path;
-					error += "\"\r";
+					error += "\"";
 					loadImagesMutex.unlock();
 					throw ERROR_READING_FILE_DATA(error);
 					break;
@@ -1114,7 +1114,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 		string error;
 		error = "Invalid to set the directory to '0' for the image at\"";
 		error += path;
-		error += "\"\r";
+		error += "\"";
 		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -1485,7 +1485,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the photometric type for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1495,7 +1495,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the image width for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1505,7 +1505,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the image height for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1514,7 +1514,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the SampleFormat for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1524,7 +1524,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the BitsPerSample for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1533,7 +1533,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the SubFileType for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1543,7 +1543,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the PageNumber for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1552,7 +1552,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to set the compression method for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
@@ -1568,7 +1568,7 @@ void TIFFImageOutputWriter::flush_cache() {
 				string error;
 				error = "There was an error writing a scanline for the image at\"";
 				error += file_path;
-				error += "\"\r";
+				error += "\"";
 				throw ERROR_WRITING_FILE_DATA(error);
 			}
 			
@@ -1579,7 +1579,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			string error;
 			error = "Unable to write a directory for the image at\"";
 			error += file_path;
-			error += "\"\r";
+			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
