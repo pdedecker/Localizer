@@ -296,6 +296,10 @@ void PALMAnalysisController::DoPALMAnalysis() {
 				for (size_t j = 0; j < numberOfThreads; ++j) {
 					threads.at(j)->interrupt();
 				}
+				// wait until the threads have completed
+				for (size_t j = 0; j < numberOfThreads; ++j) {
+					threads.at(j)->join();
+				}
 				progressReporter->CalculationAborted();
 				return;
 			}
@@ -333,6 +337,10 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	boost::shared_ptr<PALMResults> analysisResult;
 	
 	for (;;) {	// loop continuously looking for more images until there are none left
+		// if the main thread wants us to interrupt, then give it an opportunity to do so
+		// this will throw an interruption exception which we don't handle, effectively stopping this thread
+		boost::this_thread::interruption_point();
+		
 		// start by a acquiring an image to process
 		controller->acquireFrameForProcessingMutex.lock();
 		if (controller->framesToBeProcessed.size() == 0) {
