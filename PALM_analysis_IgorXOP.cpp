@@ -718,9 +718,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		err = NOMEM;
 	}
-	catch (OUT_OF_MEMORY error) {
-		err = NOMEM;
-	}
 	catch (CANNOT_OPEN_FILE) {
 		err = CANNOT_OPEN_FILE_DEF;
 	}
@@ -848,9 +845,6 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	}
 	catch (std::bad_alloc) {
 		err = NOMEM;
-	}
-	catch (OUT_OF_MEMORY error) {
-		err =  NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
 		err =  CANNOT_OPEN_FILE_DEF;
@@ -1059,10 +1053,6 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		SetOperationNumVar("V_flag", NOMEM);
 		return NOMEM;
 	}
-	catch (OUT_OF_MEMORY err) {
-		SetOperationNumVar("V_flag", NOMEM);
-		return NOMEM;
-	}
 	catch (CANNOT_OPEN_FILE) {
 		SetOperationNumVar("V_flag", CANNOT_OPEN_FILE_DEF);
 		return CANNOT_OPEN_FILE_DEF;
@@ -1211,9 +1201,6 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		}
 	}
 	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (OUT_OF_MEMORY err) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1497,9 +1484,6 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (OUT_OF_MEMORY err) {
-		return NOMEM;
-	}
 	catch (CANNOT_OPEN_FILE) {
 		return CANNOT_OPEN_FILE_DEF;
 	}
@@ -1565,9 +1549,6 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		
 	}
 	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (OUT_OF_MEMORY err) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {
@@ -1720,9 +1701,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		copy_PALMMatrix_float_to_IgorFPWave(image, string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (OUT_OF_MEMORY err) {
 		return NOMEM;
 	}
 	catch (CANNOT_OPEN_FILE) {

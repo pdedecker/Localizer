@@ -600,11 +600,9 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresh
 	try {
 		threshold_image = thresholder.do_thresholding(image);
 	}
-	catch (OUT_OF_MEMORY) {
+	catch (std::bad_alloc) {
 		gsl_histogram_free(hist);
-		string error;
-		error = "unable to allocate threshold_image in ThresholdImage_Isodata::do_thresholding()\r";
-		throw OUT_OF_MEMORY(error);
+		throw;
 	}
 	
 	gsl_histogram_free(hist);
@@ -632,14 +630,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
-	try {
-		hist = make_histogram_from_matrix(image, number_of_bins);
-	}
-	catch (OUT_OF_MEMORY) {
-		string error;
-		error = "unable to allocate buffer in ThresholdImage_Triangle::do_thresholding()\r";
-		throw OUT_OF_MEMORY(error);
-	}
+	hist = make_histogram_from_matrix(image, number_of_bins);
 	
 	maximum_bin = gsl_histogram_max_bin(hist);
 	max_bin_double = (double)maximum_bin;
@@ -703,11 +694,9 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	try {
 		threshold_image = thresholder.do_thresholding(image);
 	}
-	catch (OUT_OF_MEMORY) {
-		string error;
-		error = "unable to do direct thresholding in ThresholdImage_Triangle::do_thresholding()\r";
+	catch (std::bad_alloc) {
 		gsl_histogram_free(hist);
-		throw OUT_OF_MEMORY(error);
+		throw;
 	}
 	
 	gsl_histogram_free(hist);
@@ -1376,17 +1365,13 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	// as this is recommended by the library
 	array1 = (double *)fftw_malloc(sizeof(double) * n_pixels);
 	if (array1 == NULL) {
-		string error;
-		error = "Error while convolving the images: unable to allocate array1\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	array2 = (double *)fftw_malloc(sizeof(double) * n_pixels);
 	if (array2 == NULL) {
 		fftw_free(array1);
-		string error;
-		error = "Error while convolving the images: unable to allocate array2\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	offset = 0;
@@ -1411,18 +1396,14 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	if (array1_FFT == NULL) {
 		fftw_free(array1);
 		fftw_free(array2);
-		string error;
-		error = "Error while convolving the images: unable to allocate array1_FFT\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	array2_FFT = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values);
 	if (array2_FFT == NULL) {
 		fftw_free(array1);
 		fftw_free(array2);
 		fftw_free(array1_FFT);
-		string error;
-		error = "Error while convolving the images: unable to allocate array2_FFT\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	// prepare the transform and execute it on the first array
@@ -1545,8 +1526,7 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> 
 	
 	hist = gsl_histogram_alloc(number_of_bins);
 	if (hist == NULL) {
-		throw OUT_OF_MEMORY(error);
-		return NULL;
+		throw std::bad_alloc();
 	}
 	
 	for (size_t j = 0; j < y_size; j++) {

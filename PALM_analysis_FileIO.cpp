@@ -979,9 +979,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
 	if (single_scanline_buffer == NULL) {
-		string error;
-		error = "unable to allocate scanline buffer in ImageLoaderTIFF::get_nth_image()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	for (size_t i = nStart; i <= nEnd; i++) {
@@ -990,10 +988,8 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 		}
 		catch (std::bad_alloc) {
 			_TIFFfree(single_scanline_buffer);
-			string error;
-			error = "unable to allocate new_image in ImageLoaderTIFF::get_nth_image()\r";
 			loadImagesMutex.unlock();
-			throw OUT_OF_MEMORY(error);
+			throw std::bad_alloc();
 		}
 		
 		result = TIFFSetDirectory(tiff_file, directoryIndices.at(i));
@@ -1266,9 +1262,7 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite
 	
 	char *header = new char[header_length];
 	if (header == NULL) {
-		string error;
-		error = "unable to allocate header in SimpleImageOutputWriter::SimpleImageOutputWriter()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	for (int i = 0; i < header_length; i++) {
 		header[i] = 0;
@@ -1342,9 +1336,7 @@ void SimpleImageOutputWriter::flush_cache() {
 	
 	float *single_image_buffer = new float[n_pixels];	// a temporary buffer for writing a single image
 	if (single_image_buffer == NULL) {
-		string error;
-		error = "unable to allocate buffer in SimpleImageOutputWriter::flush_cache()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	while (image_buffer.size() != 0) {
@@ -1374,11 +1366,9 @@ int SimpleImageOutputWriter::flush_and_close() {
 	try {
 		flush_cache();
 	}
-	catch (OUT_OF_MEMORY) {
+	catch (std::bad_alloc) {
 		file.close();
-		string error;
-		error = "exiting because of error in flush_cache()\r";
-		throw OUT_OF_MEMORY(error);
+		throw;
 	}
 	
 	file.seekp(0);

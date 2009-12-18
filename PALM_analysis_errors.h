@@ -14,16 +14,6 @@
 
 using namespace std;
 
-class OUT_OF_MEMORY {
-public:
-	OUT_OF_MEMORY(string rhs) {error = rhs;}
-	~OUT_OF_MEMORY() {;}
-	
-	string get_error() {return error;}
-	
-protected:
-	string error;
-};
 class CANNOT_OPEN_FILE {};
 class DIMENSIONS_SHOULD_BE_EQUAL {};
 class KERNEL_SIZE_SHOULD_BE_ODD {};

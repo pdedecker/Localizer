@@ -491,26 +491,20 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 	
 	gsl_vector *fit_parameters = gsl_vector_alloc(5);
 	if (fit_parameters == NULL) {
-		string error;
-		error = "unable to allocate fit_parameters in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	fit_iterator = gsl_multifit_fdfsolver_alloc(solver, number_of_intensities, 5);
 	if (fit_iterator == NULL) {
 		gsl_vector_free(fit_parameters);
-		string error;
-		error = "unable to allocate fit_iterator in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	gsl_matrix *covarianceMatrix = gsl_matrix_alloc(5, 5);
 	if (covarianceMatrix == NULL) {
 		gsl_vector_free(fit_parameters);
 		gsl_multifit_fdfsolver_free(fit_iterator);
-		string error;
-		error = "unable to allocate covarianceMatrix in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	f.f = &Gauss_2D_fit_function;
@@ -675,26 +669,20 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 	
 	gsl_vector *fit_parameters = gsl_vector_alloc(4);
 	if (fit_parameters == NULL) {
-		string error;
-		error = "unable to allocate fit_parameters in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	fit_iterator = gsl_multifit_fdfsolver_alloc(solver, number_of_intensities, 4);
 	if (fit_iterator == NULL) {
 		gsl_vector_free(fit_parameters);
-		string error;
-		error = "unable to allocate fit_iterator in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	gsl_matrix *covarianceMatrix = gsl_matrix_alloc(4, 4);
 	if (covarianceMatrix == NULL) {
 		gsl_vector_free(fit_parameters);
 		gsl_multifit_fdfsolver_free(fit_iterator);
-		string error;
-		error = "unable to allocate covarianceMatrix in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	f.f = &Gauss_2D_fit_function_FixedWidth;
@@ -852,26 +840,20 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 	
 	gsl_vector *fit_parameters = gsl_vector_alloc(7);
 	if (fit_parameters == NULL) {
-		string error;
-		error = "unable to allocate fit_parameters in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	fit_iterator = gsl_multifit_fdfsolver_alloc(solver, number_of_intensities, 7);
 	if (fit_iterator == NULL) {
 		gsl_vector_free(fit_parameters);
-		string error;
-		error = "unable to allocate fit_iterator in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	gsl_matrix *covarianceMatrix = gsl_matrix_alloc(7, 7);
 	if (covarianceMatrix == NULL) {
 		gsl_vector_free(fit_parameters);
 		gsl_multifit_fdfsolver_free(fit_iterator);
-		string error;
-		error = "unable to allocate covarianceMatrix in FitPositionsGaussian::fit_positions()\r";
-		throw OUT_OF_MEMORY(error);
+		throw std::bad_alloc();
 	}
 	
 	f.f = &Gauss_2D_fit_function;
