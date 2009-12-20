@@ -247,6 +247,8 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 	progressReporter = progressReporter_rhs;
 	
 	nImages = imageLoader->get_total_number_of_images();
+	
+	this->errorMessage.assign("");
 }
 
 void PALMAnalysisController::DoPALMAnalysis() {
@@ -290,7 +292,26 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	for (;;) {
 		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(500));
 		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
-											// while we wait we check for a user abort and give the interface the chance to update
+											// while we wait we check for various things and give the interface the chance to update
+			
+			// did one of the threads run into an error?
+			this->errorReportingMutex.lock();
+			if (this->errorMessage.length() != 0) {
+				errorReportingMutex.unlock();
+				// an error occured, time to abort this analysis
+				for (size_t j = 0; j < numberOfThreads; ++j) {
+					threads.at(j)->interrupt();
+				}
+				// wait until the threads have completed
+				for (size_t j = 0; j < numberOfThreads; ++j) {
+				threads.at(j)->join();
+				}
+				
+				throw ERROR_RUNNING_THREADED_ANALYSIS(this->errorMessage);
+			}
+			this->errorReportingMutex.unlock();
+			
+			// does the user want to abort?
 			status = CheckAbort(0);
 			if (status == -1) {
 				for (size_t j = 0; j < numberOfThreads; ++j) {
@@ -301,8 +322,10 @@ void PALMAnalysisController::DoPALMAnalysis() {
 					threads.at(j)->join();
 				}
 				progressReporter->CalculationAborted();
-				return;
+				throw USER_ABORTED("Analysis aborted on user request");
 			}
+			
+			// allow the reporter to update with new progress
 			this->addPALMResultsMutex.lock();
 			percentDone = (double)(fittedPositionsList.size()) / (double)(this->nImages) * 100.0;
 			progressReporter->UpdateCalculationProgress(percentDone);
@@ -336,35 +359,64 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions;
 	boost::shared_ptr<PALMResults> analysisResult;
 	
-	for (;;) {	// loop continuously looking for more images until there are none left
-		// if the main thread wants us to interrupt, then give it an opportunity to do so
-		// this will throw an interruption exception which we don't handle, effectively stopping this thread
-		boost::this_thread::interruption_point();
-		
-		// start by a acquiring an image to process
-		controller->acquireFrameForProcessingMutex.lock();
-		if (controller->framesToBeProcessed.size() == 0) {
-			// no more frames to be processed
+	try {
+		for (;;) {	// loop continuously looking for more images until there are none left
+			// if the main thread wants us to interrupt, then give it an opportunity to do so
+			if (boost::this_thread::interruption_requested()) {
+				return;
+			}
+			
+			// start by a acquiring an image to process
+			controller->acquireFrameForProcessingMutex.lock();
+			if (controller->framesToBeProcessed.size() == 0) {
+				// no more frames to be processed
+				controller->acquireFrameForProcessingMutex.unlock();
+				return;
+			}
+			currentImageToProcess = controller->framesToBeProcessed.front();
+			controller->framesToBeProcessed.pop();
 			controller->acquireFrameForProcessingMutex.unlock();
-			return;
+			
+			// we need to process the image with index currentImageToProcess
+			currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
+			thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
+															  controller->thresholdImagePostprocessor);
+			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
+			fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
+			
+			analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
+			
+			// pass the result to the output queue
+			controller->addPALMResultsMutex.lock();
+			controller->fittedPositionsList.push_back(analysisResult);
+			controller->addPALMResultsMutex.unlock();
 		}
-		currentImageToProcess = controller->framesToBeProcessed.front();
-		controller->framesToBeProcessed.pop();
-		controller->acquireFrameForProcessingMutex.unlock();
+	}
+	catch (runtime_error &e) {
+		// an error has appeared somewhere in this thread during the calculation
+		// since there seems to be no easy way to communicate the exception to the
+		// main thread, set an error message in the analysis controller.
+		// The controller will periodically check this message and handle the error
+		controller->errorReportingMutex.lock();
+		controller->errorMessage.assign(e.what());
+		controller->errorReportingMutex.unlock();
 		
-		// we need to process the image with index currentImageToProcess
-		currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
-		thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
-														  controller->thresholdImagePostprocessor);
-		locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
-		fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
+		// no point in continuing this thread
+		return;
+	}
+	catch (boost::thread_interrupted) {
+		// the main thread wants us to stop
+		XOPNotice("Interruption caught\r");
+		return;
+	}
+	catch (...) {
+		// catch any other exception not handled by the above block
+		controller->errorReportingMutex.lock();
+		controller->errorMessage.assign("Encountered an unspecified exception while doing the PALM analysis");
+		controller->errorReportingMutex.unlock();
 		
-		analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
-		
-		// pass the result to the output queue
-		controller->addPALMResultsMutex.lock();
-		controller->fittedPositionsList.push_back(analysisResult);
-		controller->addPALMResultsMutex.unlock();
+		// no point in continuing this thread
+		return;
 	}
 	
 }

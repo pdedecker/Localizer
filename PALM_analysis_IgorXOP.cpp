@@ -550,9 +550,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	}
 	
 	if (p->ZFlagEncountered) {
-		returnErrors = 1;
-	} else {
 		returnErrors = 0;
+	} else {
+		returnErrors = 1;
 	}
 	
 	// Main parameters.
@@ -735,6 +735,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	}
 	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
 		err = IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+	}
+	catch (USER_ABORTED e) {
+		err = USER_ABORT;
 	}
 	catch (int e) {
 		err = e;
@@ -1104,7 +1107,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		err = SYNERR;
+		return SYNERR;
 	}
 	
 	SetOperationNumVar("V_flag", 0.0);

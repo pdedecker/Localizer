@@ -96,4 +96,16 @@ public:
 	std::runtime_error(error_message) {}
 };
 
+class ERROR_RUNNING_THREADED_ANALYSIS : public std::runtime_error {
+public:
+	ERROR_RUNNING_THREADED_ANALYSIS(const std::string& error_message) :
+	std::runtime_error(error_message) {}
+};
+
+class USER_ABORTED : public std::runtime_error {
+public:
+	USER_ABORTED(const std::string& error_message) :
+	std::runtime_error(error_message) {}
+};
+
 #endif

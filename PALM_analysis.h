@@ -117,6 +117,12 @@ protected:
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addPALMResultsMutex;
+	boost::mutex errorReportingMutex;
+	
+	std::string errorMessage;
+		// this string is an ugly hack to ensure that we can communicate errors encountered during the fitting back to the main thread
+		// if one of the threads encounters an exception then it will set this message to some not-nil string
+		// that is the sign for the main thread to kill the processing threads and throw an exception in the main thread
 };
 
 /**
