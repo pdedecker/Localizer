@@ -181,6 +181,14 @@ protected:
 	double previousPercentage;
 };
 
+class RipleysKFunctionCalculator {
+public:
+	RipleysKFunctionCalculator() {;}
+	~RipleysKFunctionCalculator() {;}
+	
+	boost::shared_ptr<vector<double> > CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth);
+};
+
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
 int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
