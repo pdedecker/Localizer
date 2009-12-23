@@ -386,6 +386,33 @@ typedef struct MakeBitmapPALMImageRuntimeParams MakeBitmapPALMImageRuntimeParams
 typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParamsPtr;
 #include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
 
+// Runtime param structure for RipleyKFunctionClustering operation.
+#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+struct RipleyKFunctionClusteringRuntimeParams {
+	// Flag parameters.
+	
+	// Parameters for /RANGE flag group.
+	int RANGEFlagEncountered;
+	double startBin;
+	double endBin;
+	double binWidth;
+	int RANGEFlagParamsSet[3];
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int positionsWaveEncountered;
+	waveHndl positionsWave;
+	int positionsWaveParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+};
+typedef struct RipleyKFunctionClusteringRuntimeParams RipleyKFunctionClusteringRuntimeParams;
+typedef struct RipleyKFunctionClusteringRuntimeParams* RipleyKFunctionClusteringRuntimeParamsPtr;
+#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+
 
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
@@ -1777,6 +1804,26 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	return err;
 }
 
+static int ExecuteRipleyKFunctionClustering(RipleyKFunctionClusteringRuntimeParamsPtr p) {
+	int err = 0;
+	
+	// Flag parameters.
+	
+	if (p->RANGEFlagEncountered) {
+		// Parameter: p->startBin
+		// Parameter: p->endBin
+		// Parameter: p->binWidth
+	}
+	
+	// Main parameters.
+	
+	if (p->positionsWaveEncountered) {
+		// Parameter: p->positionsWave (test for NULL handle before using)
+	}
+	
+	return err;
+}
+
 static int RegisterAnalyzePALMImages(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
@@ -1858,6 +1905,19 @@ static int RegisterMakeBitmapPALMImage(void) {
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
+}
+
+
+static int RegisterRipleyKFunctionClustering(void) {
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
+	
+	// NOTE: If you change this template, you must change the RipleyKFunctionClusteringRuntimeParams structure as well.
+	cmdTemplate = "RipleyKFunctionClustering /RANGE={number:startBin, number:endBin, number:binWidth} wave:positionsWave";
+	runtimeNumVarList = "";
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyKFunctionClusteringRuntimeParams), (void*)ExecuteRipleyKFunctionClustering, 0);
 }
 
 /*	XOPEntry()
