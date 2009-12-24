@@ -1,0 +1,58 @@
+Different types of localization approaches exist, and most of them return different results or a different number of results. Some analysis types, such as including z information, only work with some approaches.
+
+Because each of these techniques possibly produces different results, it becomes difficult to use these results in subsequent operations, such as making output images, or just saving the positions to an Igor wave or to a file. In the worst case an overloaded method should be prepared for each kind of position, leading to a maintenance nightmare.
+
+Instead a uniform and abstract base class (LocalizedPositionsContainer) is provided that supports every type of localized positions (through inheritance) and every type of possible parameter (through a variety of accessor methods). Derived classes implement the methods for the base class in a way that best suits the type of localization method used, and if necessary provide calculated or placeholder values for requested parameters that are not provided by the localization procedure.
+
+Importantly the abstract base class only provides accessor methods – new positions can be appended only to a concrete derived class, since that guarantees that the correct type of positions are passed to the appropriate LocalizedPositionsContainer.
+
+Each of these derived classes also provides its own methods for saving the positions as an Igor wave or possibly to disk. In this way only the information directly provided by the analysis can be stored – nothing more, nothing less.
+
+When positions are requested from an Igor wave or from a file, these positions may have been obtained by any supported analysis type. The routines have to realize what type of position has been used, and initialize the appropriate kind of LocalizedPositionsContainer.
+
+A fundamental question then is how the routines know what type of localized positions are passed in. For a text file it's possible to standardize the positions on an output format that includes information on the type of analysis used in the header, for example as the first line. This line can be parsed and the correct type of LocalizedPositionsContainer is initialized. For Igor waves the situation is more difficult as they are basically nothing more than multidimensional arrays. Deciding on the type of localized positions through the dimensions of the wave is not sufficient since different analysis techniques can produce the same number of parameters but with different meanings. The only opportunity to store more information on the analysis is in a waveNote, a string associated with a wave that can contain metadata.
+
+Therefore we require that an Igor wave passed in as a possible positions wave contain a wavenote that lists the type of localized positions contained in that wave. If no wavenote is present, or the wavenote does not list the type, then any operation making use of those positions is to be aborted. The same holds for loading positions from a text wave.
+
+
+Currently we support the following localization methods and formats:
+- Fitting with a circularly symmetric 2D Gaussian. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN". The actual positions wave itself has 12 columns for every position, in the following format:
+0. frame number
+1. amplitude
+2. standard deviation (width)
+3. x position
+4. y position
+5. background level (offset)
+6. deviation on the amplitude
+7. deviation on the standard deviation
+8. deviation on the x position
+9. deviation on the y position
+10. deviation on the background
+11. number of frames in which the emitter is assumed to be present
+
+
+- Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH". The actual positions wave itself has 11 columns for every position, in the following format:
+0. frame number
+1. amplitude
+2. standard deviation (width)
+3. x position
+4. y position
+5. background level (offset)
+6. deviation on the amplitude
+7. deviation on the x position
+8. deviation on the y position
+9. deviation on the background
+10. number of frames in which the emitter is assumed to be present
+
+
+- A straightforward centroid (averaging) calculation. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: CENTROID CALCULATION". The actual positions wave itself has 4 columns for every localized position:
+0. frame number
+1. x position
+2. y position
+3. number of frames in which the emitter is assumed to be present
+
+- An iterative multiplication technique in which the spot is localized by repeated multiplication with a Gaussian function centered at different positions. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: ITERATIVE MULTIPLICATION". The actual positions wave itself has 4 columns for every localized position:
+0. frame number
+1. x position
+2. y position
+3. number of frames in which the emitter is assumed to be present
