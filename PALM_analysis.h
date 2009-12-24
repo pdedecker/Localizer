@@ -81,6 +81,122 @@ protected:
 };
 
 /**
+ * Stores a single position localized using fitting of a circularly symmetric Gaussian
+ */
+class LocalizedPositions_2DGauss {
+public:
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double amplitude;
+	double width;
+	double xPosition;
+	double yPosition;
+	double background;
+	
+	double amplitudeDeviation;
+	double widthDeviation;
+	double xPositionDeviation;
+	double yPositionDeviation;
+	double backgroundDeviation;
+};
+
+/**
+ * @brief An abstract base class that holds localized positions. Has derived classes that handle specific types of positions.
+ * Can import positions from waves or files, and write to them. The base class contains accessor methods for every data possible,
+ * derived classes should return meaningful results for all of these, depending on the type of localization used
+ */
+class LocalizedPositionsContainer {
+public:
+	// these functions handle creating a LocalizedPositionsContainer object from an igor wave
+	// or from a file containing positions written to disk
+	// the functions will discern the type of positions and return a LocalizedPositionsContainer of the correct type
+	static LocalizedPositionsContainer GetPositionsFromWave(waveHndl wave);
+	static LocalizedPositionsContainer GetPositionsFromFile(std::string& filePath);
+	
+	// constructor and destructor
+	LocalizedPositionsContainer() {;}
+	virtual ~LocalizedPositionsContainer() = 0;
+	
+	// accessor methods
+	virtual size_t getNPositions(size_t index) const = 0;
+	virtual size_t getFrameNumber(size_t index) const = 0;
+	virtual double getIntegral(size_t index) const = 0;
+	virtual double getXWidth(size_t index) const = 0;
+	virtual double getYWidth(size_t index) const = 0;
+	virtual double getRotationAngle(size_t index) const = 0;
+	virtual double getXPosition(size_t index) const = 0;
+	virtual double getYPosition(size_t index) const = 0;
+	virtual double getBackground(size_t index) const = 0;
+	
+	
+	virtual double getIntegralDeviation(size_t index) const = 0;
+	virtual double getXWidthDeviation(size_t index) const = 0;
+	virtual double getYWidthDeviation(size_t index) const = 0;
+	virtual double getRotationAngleDeviation(size_t index) const = 0;
+	virtual double getXPositionDeviation(size_t index) const = 0;
+	virtual double getYPositionDeviation(size_t index) const = 0;
+	virtual double getBackgroundDeviation(size_t index) const = 0;
+	
+	// this abstract base class defines no methods to add positions
+	// that is left up to derived class for type safety
+	// this means that it is impossible to simultaneously read and write from the same positions
+	
+	// save the positions localized this far under different formats
+	virtual waveHndl writePositionsToWave(std::string waveName) const = 0;
+	virtual void writePositionsToFile(std::string filePath) const = 0;
+	
+	// sort the positions according to ascending frame number, with no guarantees
+	// for the sorting of positions within the same frame
+	virtual void SortPositionsByFrameNumber();
+	
+protected:
+	// a function that compares two localized positions for sorting
+	virtual int SortCompareFrameNumber const = 0;
+};
+
+/**
+ * @brief Contain localized positions created by fitting a circularly symmetric 2D Gaussian
+ */
+class LocalizedPositionsContainer_2DGauss : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_2DGauss();
+	LocalizedPositionsContainer_2DGauss(waveHndl wave);
+	LocalizedPositionsContainer_2DGauss(const std::string& filePath);
+	
+	~LocalizedPositionsContainer_2DGauss();
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const;
+	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getRotationAngle(size_t index) const {return 0;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getBackground(size_t index) const {return positionsVector.at(index).background;}
+	
+	double getIntegralDeviation(size_t index) const;
+	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
+	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
+	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
+	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
+	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
+	
+	// adding new positions
+	void AddPosition(LocalizedPositions_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
+	void AddPositions(LocalizedPositionsContainer_2DGauss& newPositions);
+	
+	void SortPositionsByFrameNumber();
+protected:
+	std::vector<LocalizedPositions_2DGauss> positionsVector;
+	int SortCompareFrameNumber(LocalizedPositions_2DGauss& left, LocalizedPositions_2DGauss& right) {
+		(left.frameNumber <= right.frameNumber) ? return left : return right;}
+};
+
+/**
  *@brief A class that handles the actual PALM analysis
  *
  *
