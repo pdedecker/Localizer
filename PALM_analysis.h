@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
 #include "XOPStandardHeaders.h"
@@ -127,6 +128,7 @@ public:
 	virtual double getRotationAngle(size_t index) const = 0;
 	virtual double getXPosition(size_t index) const = 0;
 	virtual double getYPosition(size_t index) const = 0;
+	virtual double getZPosition(size_t index) const = 0;
 	virtual double getBackground(size_t index) const = 0;
 	
 	
@@ -136,6 +138,7 @@ public:
 	virtual double getRotationAngleDeviation(size_t index) const = 0;
 	virtual double getXPositionDeviation(size_t index) const = 0;
 	virtual double getYPositionDeviation(size_t index) const = 0;
+	virtual double getZPositionDeviation(size_t index) const = 0;
 	virtual double getBackgroundDeviation(size_t index) const = 0;
 	
 	// this abstract base class defines no methods to add positions
@@ -160,7 +163,7 @@ protected:
  */
 class LocalizedPositionsContainer_2DGauss : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_2DGauss();
+	LocalizedPositionsContainer_2DGauss() {;}
 	LocalizedPositionsContainer_2DGauss(waveHndl wave);
 	LocalizedPositionsContainer_2DGauss(const std::string& filePath);
 	
@@ -175,6 +178,7 @@ public:
 	double getRotationAngle(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
 	
 	double getIntegralDeviation(size_t index) const;
@@ -183,13 +187,14 @@ public:
 	double getRotationAngleDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
+	double getZPositionDeviation(size_t index) const {return 0;}
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
 	void AddPosition(LocalizedPositions_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
 	void AddPositions(LocalizedPositionsContainer_2DGauss& newPositions);
 	
-	void SortPositionsByFrameNumber();
+	void SortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), SortCompareFrameNumber);}
 protected:
 	std::vector<LocalizedPositions_2DGauss> positionsVector;
 	int SortCompareFrameNumber(LocalizedPositions_2DGauss& left, LocalizedPositions_2DGauss& right) {
