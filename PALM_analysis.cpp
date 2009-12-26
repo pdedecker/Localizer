@@ -173,6 +173,123 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
 	return thresholded_image;
 }
 
+
+static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave) {
+	int err;
+	size_t findPosition;
+	
+	// determine the type of positions being passed
+	Handle waveNoteHandle = WaveNote(positionsWave);
+	size_t waveNoteSize = GetHandleSize(positionsWave);
+	boost::scoped_array<char> CStringWaveNote(new char[waveNoteSize + 1]);
+	
+	err = GetCStringFromHandle(waveNoteHandle, CStringWaveNote.get(), waveNoteSize);
+	if (err != 0)
+		throw std::runtime_error("GetCStringFromHandle() returned a nonzero code");
+	
+	// save the wavenote as a std::string
+	std::string waveNote(CStringWaveNote.get());
+	
+	// see if the wave note contains info on the kind of localization used
+	// if not then fail
+	
+	findPosition = waveNote.find("LOCALIZATION METHOD:");
+	if (findPosition == (size_t)-1)	// not found
+		throw std::runtime_error("The positions wave does not specify a localization method");
+	
+	findPosition = waveNote.find("LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
+	}
+	
+	// check for the different kinds of localization approaches
+	findPosition = waveNote.find("LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
+	}
+	
+	// if we are still here then we don't recognize the type of localization used
+	throw std::runtime_error("Unknown localization method");
+}
+
+LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHndl positionsWave) {
+	// initialize a new PositionsContainer from a wave that contains positions of the correct type
+	long numDimensions;
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	
+	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+	
+	if ((numDimensions != 2) || (dimensionSizes[1] != 12)) {	// invalid dimensions (warning: magic numbers)
+		throw (std::runtime_error("Invalid positions wave"));
+	}
+	
+	LocalizedPosition_2DGauss singlePosition;
+	size_t nPositions = dimensionSizes[0];
+	this->positionsVector.reserve(nPositions);
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		// get all the relevant data out of the wave and into a position object
+		indices[0] = i;
+		indices[1] = 0;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.frameNumber = value[0];
+		indices[1] = 1;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integral = value[0];
+		indices[1] = 2;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.width = value[0];
+		indices[1] = 3;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPosition = value[0];
+		indices[1] = 4;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPosition = value[0];
+		indices[1] = 5;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.background = value[0];
+		indices[1] = 6;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integralDeviation = value[0];
+		indices[1] = 7;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.widthDeviation = value[0];
+		indices[1] = 8;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPositionDeviation = value[0];
+		indices[1] = 9;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPositionDeviation = value[0];
+		indices[1] = 10;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.backgroundDeviation = value[0];
+		indices[1] = 11;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.nFramesPresent = value[0];
+		
+		this->positionsVector.push_back(singlePosition);
+	}
+}
+
+/*double LocalizedPositionsContainer_2DGauss::getIntegralDeviation(size_t index) const {
+	// use the rules for error propagation to calculate the error on the integrated intensity
+	// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+	
+	double relativeAmplitudeError = this->positionsVector.at(index).amplitudeDeviation / this->positionsVector.at(index).amplitude;
+	double relativeWidthError = this->positionsVector.at(index).widthDeviation / this->positionsVector.at(index).width;
+	double error = sqrt(this->getIntegral(index) * this->getIntegral(index) * (relativeAmplitudeError * relativeAmplitudeError + relativeWidthError * relativeWidthError));
+	return error;
+}*/
+
+void LocalizedPositionsContainer_2DGauss::addPositions(LocalizedPositionsContainer_2DGauss& rhs) {
+	for (vector<LocalizedPosition_2DGauss>::iterator it = rhs.positionsVector.begin(); it != rhs.positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
+}
+						
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();

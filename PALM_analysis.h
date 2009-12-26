@@ -84,19 +84,36 @@ protected:
 /**
  * Stores a single position localized using fitting of a circularly symmetric Gaussian
  */
-class LocalizedPositions_2DGauss {
+class LocalizedPosition_2DGauss {
 public:
 	size_t frameNumber;
 	size_t nFramesPresent;	// the number of frames this position was localized in
 	
-	double amplitude;
+	double integral;
 	double width;
 	double xPosition;
 	double yPosition;
 	double background;
 	
-	double amplitudeDeviation;
+	double integralDeviation;
 	double widthDeviation;
+	double xPositionDeviation;
+	double yPositionDeviation;
+	double backgroundDeviation;
+};
+
+class LocalizedPosition_2DGaussFixedWidth {
+public:
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double integral;
+	double width;
+	double xPosition;
+	double yPosition;
+	double background;
+	
+	double integralDeviation;
 	double xPositionDeviation;
 	double yPositionDeviation;
 	double backgroundDeviation;
@@ -112,15 +129,15 @@ public:
 	// these functions handle creating a LocalizedPositionsContainer object from an igor wave
 	// or from a file containing positions written to disk
 	// the functions will discern the type of positions and return a LocalizedPositionsContainer of the correct type
-	static LocalizedPositionsContainer GetPositionsFromWave(waveHndl wave);
-	static LocalizedPositionsContainer GetPositionsFromFile(std::string& filePath);
+	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave);
+	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string& filePath);
 	
 	// constructor and destructor
 	LocalizedPositionsContainer() {;}
-	virtual ~LocalizedPositionsContainer() = 0;
+	virtual ~LocalizedPositionsContainer() {;}
 	
 	// accessor methods
-	virtual size_t getNPositions(size_t index) const = 0;
+	virtual size_t getNPositions() const = 0;
 	virtual size_t getFrameNumber(size_t index) const = 0;
 	virtual double getIntegral(size_t index) const = 0;
 	virtual double getXWidth(size_t index) const = 0;
@@ -151,11 +168,7 @@ public:
 	
 	// sort the positions according to ascending frame number, with no guarantees
 	// for the sorting of positions within the same frame
-	virtual void SortPositionsByFrameNumber();
-	
-protected:
-	// a function that compares two localized positions for sorting
-	virtual int SortCompareFrameNumber const = 0;
+	virtual void sortPositionsByFrameNumber() = 0;
 };
 
 /**
@@ -165,14 +178,14 @@ class LocalizedPositionsContainer_2DGauss : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_2DGauss() {;}
 	LocalizedPositionsContainer_2DGauss(waveHndl wave);
-	LocalizedPositionsContainer_2DGauss(const std::string& filePath);
+	LocalizedPositionsContainer_2DGauss(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
-	~LocalizedPositionsContainer_2DGauss();
+	~LocalizedPositionsContainer_2DGauss() {;}
 	
 	// accessor methods
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
-	double getIntegral(size_t index) const;
+	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getRotationAngle(size_t index) const {return 0;}
@@ -181,7 +194,7 @@ public:
 	double getZPosition(size_t index) const {return 0;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
 	
-	double getIntegralDeviation(size_t index) const;
+	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
 	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
 	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
 	double getRotationAngleDeviation(size_t index) const {return 0;}
@@ -191,15 +204,62 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void AddPosition(LocalizedPositions_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
-	void AddPositions(LocalizedPositionsContainer_2DGauss& newPositions);
+	void addPosition(LocalizedPosition_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
+	void addPositions(LocalizedPositionsContainer_2DGauss& newPositionsContainer);
 	
-	void SortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), SortCompareFrameNumber);}
+	waveHndl writePositionsToWave(std::string waveName) const {;}
+	void writePositionsToFile(std::string filePath) const {;}
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_2DGauss left, LocalizedPosition_2DGauss right) {
+		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
 protected:
-	std::vector<LocalizedPositions_2DGauss> positionsVector;
-	int SortCompareFrameNumber(LocalizedPositions_2DGauss& left, LocalizedPositions_2DGauss& right) {
-		(left.frameNumber <= right.frameNumber) ? return left : return right;}
+	std::vector<LocalizedPosition_2DGauss> positionsVector;
 };
+
+class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_2DGaussFixedWidth() {;}
+	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
+	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	
+	~LocalizedPositionsContainer_2DGaussFixedWidth() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
+	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getRotationAngle(size_t index) const {return 0;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
+	double getBackground(size_t index) const {return positionsVector.at(index).background;}
+	
+	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
+	double getXWidthDeviation(size_t index) const {return 0;}
+	double getYWidthDeviation(size_t index) const {return 0;}
+	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
+	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
+	double getZPositionDeviation(size_t index) const {return 0;}
+	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
+	
+	// adding new positions
+	void addPosition(LocalizedPosition_2DGaussFixedWidth& newPosition) {positionsVector.push_back(newPosition);}
+	void addPositions(LocalizedPositionsContainer_2DGaussFixedWidth& newPositionsContainer);
+	
+	waveHndl writePositionsToWave(std::string waveName) const {;}
+	void writePositionsToFile(std::string filePath) const {;}
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
+		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+protected:
+	std::vector<LocalizedPosition_2DGaussFixedWidth> positionsVector;
+};
+
 
 /**
  *@brief A class that handles the actual PALM analysis
