@@ -248,35 +248,5 @@ protected:
 	int overwrite;
 };
 
-/**
- * @brief Takes the set of PALM results generated from an analysis and outputs them in some way. This is the abstract base class.
- */
-class PALMResultsWriter {
-public:
-	PALMResultsWriter() {;}
-	virtual ~PALMResultsWriter() {;}
-	
-	virtual void AppendNewResult(boost::shared_ptr<PALMResults> result) = 0;
-	virtual void WriteResults() = 0;
-	
-protected:
-	std::list <boost::shared_ptr<PALMResults> > resultsList;
-	size_t totalNumberOfPositions;
-};
-
-class IgorResultsWriter : public PALMResultsWriter {	// this class will take care of outputting the fitted positions to an Igor wave
-public:
-	IgorResultsWriter(const string rhs);
-	~IgorResultsWriter();
-	
-	void AppendNewResult(boost::shared_ptr<PALMResults> result);
-	void WriteResults();	// to be called when the positions have been uploaded
-	// writes the positions to the wave
-	// the wave is only created at this point, and WILL overwrite previous waves of the same name
-	
-protected:
-	string waveName;
-};
-
 
 #endif

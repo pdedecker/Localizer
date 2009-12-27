@@ -454,7 +454,6 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
-											   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs,
 											   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
 	imageLoader = imageLoader_rhs;
 	thresholder = thresholder_rhs;
@@ -462,7 +461,6 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
 	particleFinder = particleFinder_rhs;
 	fitPositions = fitPositions_rhs;
-	resultsWriter = resultsWriter_rhs;
 	progressReporter = progressReporter_rhs;
 	
 	nImages = imageLoader->get_total_number_of_images();
@@ -543,10 +541,10 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			}
 			
 			// allow the reporter to update with new progress
-			this->addLocalizedPositionsMutex.lock();
-			percentDone = (double)(fittedPositionsList.size()) / (double)(this->nImages) * 100.0;
+			this->acquireFrameForProcessingMutex.lock();
+			percentDone = (double)(framesToBeProcessed.size()) / (double)(this->nImages) * 100.0;
 			progressReporter->UpdateCalculationProgress(percentDone);
-			this->addLocalizedPositionsMutex.unlock();
+			this->acquireFrameForProcessingMutex.unlock();
 			continue;
 		} else {
 			break;

@@ -279,7 +279,7 @@ public:
 						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
-						   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
+						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
 	~PALMAnalysisController() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis();
@@ -300,7 +300,6 @@ protected:
 	boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
 	boost::shared_ptr<ParticleFinder> particleFinder;
 	boost::shared_ptr<FitPositions> fitPositions;
-	boost::shared_ptr<PALMResultsWriter> resultsWriter;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
