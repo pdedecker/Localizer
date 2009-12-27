@@ -212,6 +212,28 @@ static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveH
 	throw std::runtime_error("Unknown localization method");
 }
 
+void LocalizedPositionsContainer_2DGauss::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+	// check if the type of positions that we are adding is suitable
+	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS)
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPosition_2DGauss> newPosition_2DGauss(boost::static_pointer_cast<LocalizedPosition_2DGauss> (newPosition));
+	
+	this->positionsVector.push_back(*newPosition_2DGauss);
+}
+
+void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// check if the positions container is of the right type
+	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS) {
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+	}
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_2DGauss> (newPositionsContainer));
+	size_t nPositions = newPositionsContainer_2DGauss->getNPositions();
+}
+
 LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -341,12 +363,6 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	double error = sqrt(this->getIntegral(index) * this->getIntegral(index) * (relativeAmplitudeError * relativeAmplitudeError + relativeWidthError * relativeWidthError));
 	return error;
 }*/
-
-void LocalizedPositionsContainer_2DGauss::addPositions(LocalizedPositionsContainer_2DGauss& rhs) {
-	for (vector<LocalizedPosition_2DGauss>::iterator it = rhs.positionsVector.begin(); it != rhs.positionsVector.end(); ++it) {
-		this->positionsVector.push_back(*it);
-	}
-}
 						
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
@@ -426,7 +442,7 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 	this->errorMessage.assign("");
 }
 
-void PALMAnalysisController::DoPALMAnalysis() {
+boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis() {
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
@@ -436,7 +452,7 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	double percentDone;
 	
 	if (this->nImages == 0) {	// if there are no images to load, do not do any processing
-		return;
+		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
 	}
 	
 	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
@@ -446,8 +462,6 @@ void PALMAnalysisController::DoPALMAnalysis() {
 	if (numberOfThreads > this->nImages) {
 		numberOfThreads = nImages;
 	}
-	
-	this->fittedPositionsList.clear();
 	
 	// fill the queue holding the frames to be processed with the frames in the sequence
 	for (size_t i = 0; i < this->nImages; ++i) {
@@ -501,10 +515,10 @@ void PALMAnalysisController::DoPALMAnalysis() {
 			}
 			
 			// allow the reporter to update with new progress
-			this->addPALMResultsMutex.lock();
+			this->addLocalizedPositionsMutex.lock();
 			percentDone = (double)(fittedPositionsList.size()) / (double)(this->nImages) * 100.0;
 			progressReporter->UpdateCalculationProgress(percentDone);
-			this->addPALMResultsMutex.unlock();
+			this->addLocalizedPositionsMutex.unlock();
 			continue;
 		} else {
 			break;
@@ -531,7 +545,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	boost::shared_ptr<PALMMatrix<double> > currentImage;
 	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
 	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
-	boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions;
+	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	boost::shared_ptr<PALMResults> analysisResult;
 	
 	try {
@@ -557,7 +571,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 															  controller->thresholdImagePostprocessor);
 			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
-			fittedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
+			localizedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
 			
 			analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
 			

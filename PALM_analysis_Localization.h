@@ -52,7 +52,7 @@ public:
 	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian() {;}
 	
-	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -65,7 +65,7 @@ public:
 	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsGaussian_FixedWidth() {;}
 	
-	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;

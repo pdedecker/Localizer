@@ -443,7 +443,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositions::fit_positions(c
 	return fittedPositions;
 }
 
-boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer_2DGauss> FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -471,13 +471,13 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 	long iterations = 0;
 	int status;
 	
+	double relativeAmplitudeError, relativeWidthError;
+	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
-	boost::shared_ptr<std::vector<LocalizedPosition> > fitted_positions (new std::vector<LocalizedPosition>);
-	LocalizedPosition localizationResult;
+	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
+	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	
-	fitted_positions->reserve(number_of_positions);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -591,27 +591,28 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
 		// store the fitted parameters
-		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
-		localizationResult.width = gsl_vector_get(fit_iterator->x, 1);
-		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 2);
-		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 3);
-		localizationResult.offset = gsl_vector_get(fit_iterator->x, 4);
-		
-		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
-		localizationResult.widthError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
-		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
-		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
-		
-		// store the number of iterations
-		localizationResult.nIterations = iterations;
 		
 		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
 		// so we correct for that
-		localizationResult.width = localizationResult.width / SQRT2;
-		localizationResult.widthError = localizationResult.widthError / SQRT2;	// the same for the error
+		localizationResult->width = gsl_vector_get(fit_iterator->x, 1) / SQRT2;
+		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 3);
+		localizationResult->background = gsl_vector_get(fit_iterator->x, 4);
 		
-		fitted_positions->push_back(localizationResult);
+		localizationResult->widthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1)) / SQRT2;
+		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
+		
+		localizationResult->integral = SQRT2PI * localizationResult->width * gsl_vector_get(fit_iterator->x, 0);
+		
+		// use the rules for error propagation to calculate the error on the integrated intensity
+		// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+		relativeAmplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0); // the relative error on the amplitude
+		relativeWidthError = localizationResult->widthDeviation / localizationResult->width;
+		localizationResult->integralDeviation  = sqrt(localizationResult->integral * localizationResult->integral * (relativeAmplitudeError * relativeAmplitudeError + relativeWidthError * relativeWidthError));
+		
+		fitted_positions->addPosition(localizationResult);
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
@@ -621,7 +622,7 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian::fit_pos
 	
 }
 
-boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
 																								  size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -649,13 +650,13 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 	long iterations = 0;
 	int status;
 	
+	double relativeAmplitudeError;
+	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
-	boost::shared_ptr<std::vector<LocalizedPosition> > fitted_positions (new std::vector<LocalizedPosition>);
-	LocalizedPosition localizationResult;
+	boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
+	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	
-	fitted_positions->reserve(number_of_positions);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -766,22 +767,28 @@ boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsGaussian_FixedWid
 		
 		// store the data
 		// store the fitted parameters
-		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
-		localizationResult.width = r_initial;
-		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 1);
-		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 2);
-		localizationResult.offset = gsl_vector_get(fit_iterator->x, 3);
 		
-		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
-		localizationResult.widthError = 0;
-		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
-		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
+		// so we correct for that
+		localizationResult->width = r_initial;
+		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
 		
-		// store the number of iterations
-		localizationResult.nIterations = iterations;
+		localizationResult->integral = SQRT2PI * localizationResult->width * gsl_vector_get(fit_iterator->x, 0);
 		
-		fitted_positions->push_back(localizationResult);
+		
+		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		
+		// use the rules for error propagation to calculate the error on the integrated intensity
+		// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+		relativeAmplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0); // the relative error on the amplitude
+		localizationResult->integralDeviation  = sqrt(localizationResult->integral * localizationResult->integral * (relativeAmplitudeError * relativeAmplitudeError));
+		
+		
+		fitted_positions->addPosition(localizationResult);
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);

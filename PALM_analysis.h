@@ -41,23 +41,10 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
  */
 class LocalizedPosition {
 public:
-	LocalizedPosition() {amplitude = 0; width = 0; xPos = 0; yPos = 0; offset = 0; amplitudeError = 0, widthError = 0,
-		xPosError = 0; yPosError = 0; offsetError = 0; nIterations = 0;}
-	~LocalizedPosition() {;}
+	LocalizedPosition() {;}
+	virtual ~LocalizedPosition() {;}
 	
-	double amplitude;
-	double width;
-	double xPos;
-	double yPos;
-	double offset;
-	
-	double amplitudeError;
-	double widthError;
-	double xPosError;
-	double yPosError;
-	double offsetError;
-	
-	size_t nIterations;
+	virtual size_t getPositionType() const = 0;
 };
 
 
@@ -84,8 +71,11 @@ protected:
 /**
  * Stores a single position localized using fitting of a circularly symmetric Gaussian
  */
-class LocalizedPosition_2DGauss {
+class LocalizedPosition_2DGauss : public LocalizedPosition {
 public:
+	LocalizedPosition_2DGauss() {;}
+	~LocalizedPosition_2DGauss() {;}
+	
 	size_t frameNumber;
 	size_t nFramesPresent;	// the number of frames this position was localized in
 	
@@ -100,10 +90,15 @@ public:
 	double xPositionDeviation;
 	double yPositionDeviation;
 	double backgroundDeviation;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS;}
 };
 
-class LocalizedPosition_2DGaussFixedWidth {
+class LocalizedPosition_2DGaussFixedWidth : public LocalizedPosition {
 public:
+	LocalizedPosition_2DGaussFixedWidth() {;}
+	~LocalizedPosition_2DGaussFixedWidth() {;}
+	
 	size_t frameNumber;
 	size_t nFramesPresent;	// the number of frames this position was localized in
 	
@@ -117,6 +112,8 @@ public:
 	double xPositionDeviation;
 	double yPositionDeviation;
 	double backgroundDeviation;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH;}
 };
 
 /**
@@ -158,9 +155,9 @@ public:
 	virtual double getZPositionDeviation(size_t index) const = 0;
 	virtual double getBackgroundDeviation(size_t index) const = 0;
 	
-	// this abstract base class defines no methods to add positions
-	// that is left up to derived class for type safety
-	// this means that it is impossible to simultaneously read and write from the same positions
+	// add positions
+	virtual void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) = 0;
+	virtual void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) = 0;
 	
 	// save the positions localized this far under different formats
 	virtual waveHndl writePositionsToWave(std::string waveName) const = 0;
@@ -169,6 +166,8 @@ public:
 	// sort the positions according to ascending frame number, with no guarantees
 	// for the sorting of positions within the same frame
 	virtual void sortPositionsByFrameNumber() = 0;
+	
+	virtual size_t getPositionsType() const = 0;
 };
 
 /**
@@ -204,8 +203,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void addPosition(LocalizedPosition_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
-	void addPositions(LocalizedPositionsContainer_2DGauss& newPositionsContainer);
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
@@ -213,6 +212,9 @@ public:
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGauss left, LocalizedPosition_2DGauss right) {
 		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS;}
+	
 protected:
 	std::vector<LocalizedPosition_2DGauss> positionsVector;
 };
@@ -277,13 +279,15 @@ public:
 						   boost::shared_ptr<PALMResultsWriter> resultsWriter_rhs, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
 	~PALMAnalysisController() {;}
 	
-	void DoPALMAnalysis();
+	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis();
+	// runs a PALM analysis according to the parameters passed in as objects in the constructor
+	// returns a LocalizedPositionsContainer containing fitted PALM positions
 	
 protected:
 	size_t nImages;
 	
 	std::queue<size_t> framesToBeProcessed;
-	std::list<boost::shared_ptr<PALMResults> > fittedPositionsList;
+	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	friend void ThreadPoolWorker(PALMAnalysisController* controller);
 	
@@ -297,7 +301,7 @@ protected:
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
-	boost::mutex addPALMResultsMutex;
+	boost::mutex addLocalizedPositionsMutex;
 	boost::mutex errorReportingMutex;
 	
 	std::string errorMessage;
