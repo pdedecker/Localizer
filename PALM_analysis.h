@@ -238,8 +238,8 @@ protected:
 
 class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_2DGaussFixedWidth() {throw std::runtime_error("2D Gauss fixed width is not yet supported");}
-	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave) {;}
+	LocalizedPositionsContainer_2DGaussFixedWidth() {;}
+	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
 	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGaussFixedWidth() {;}
@@ -276,7 +276,7 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
+	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}

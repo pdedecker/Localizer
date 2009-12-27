@@ -372,6 +372,130 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	return outputWave;
 }
 
+LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl positionsWave) {
+	// initialize a new PositionsContainer from a wave that contains positions of the correct type
+	long numDimensions;
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	
+	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+	
+	if ((numDimensions != 2) || (dimensionSizes[1] != 11)) {	// invalid dimensions (warning: magic numbers)
+		throw (std::runtime_error("Invalid positions wave"));
+	}
+	
+	LocalizedPosition_2DGaussFixedWidth singlePosition;
+	size_t nPositions = dimensionSizes[0];
+	this->positionsVector.reserve(nPositions);
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		// get all the relevant data out of the wave and into a position object
+		indices[0] = i;
+		indices[1] = 0;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.frameNumber = value[0];
+		indices[1] = 1;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integral = value[0];
+		indices[1] = 2;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.width = value[0];
+		indices[1] = 3;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPosition = value[0];
+		indices[1] = 4;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPosition = value[0];
+		indices[1] = 5;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.background = value[0];
+		indices[1] = 6;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integralDeviation = value[0];
+		indices[1] = 7;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPositionDeviation = value[0];
+		indices[1] = 8;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPositionDeviation = value[0];
+		indices[1] = 9;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.backgroundDeviation = value[0];
+		indices[1] = 10;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.nFramesPresent = value[0];
+		
+		this->positionsVector.push_back(singlePosition);
+	}
+}
+
+waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std::string waveName) const {
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	waveHndl outputWave;
+	size_t nPositions = this->positionsVector.size();
+	dimensionSizes[0] = nPositions;
+	dimensionSizes[1] = 11;	// magic number
+	dimensionSizes[2] = 0;
+	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
+	
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		indices[0] = i;
+		indices[1] = 0;
+		value[0] = this->positionsVector.at(i).frameNumber;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 1;
+		value[0] = this->positionsVector.at(i).integral;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 2;
+		value[0] = this->positionsVector.at(i).width;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 3;
+		value[0] = this->positionsVector.at(i).xPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 4;
+		value[0] = this->positionsVector.at(i).yPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 5;
+		value[0] = this->positionsVector.at(i).background;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 6;
+		value[0] = this->positionsVector.at(i).integralDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 7;
+		value[0] = this->positionsVector.at(i).xPositionDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 8;
+		value[0] = this->positionsVector.at(i).yPositionDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 9;
+		value[0] = this->positionsVector.at(i).backgroundDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 10;
+		value[0] = this->positionsVector.at(i).nFramesPresent;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+	}
+	
+	// add a wavenote containing the type of localization method
+	std::string waveNote("LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH;");
+	Handle waveNoteHandle = NewHandle(waveNote.length());
+	if (waveNoteHandle == NULL) {
+		throw std::bad_alloc();
+	}
+	
+	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+	SetWaveNote(outputWave, waveNoteHandle);
+	
+	return outputWave;
+}
+
 void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH)

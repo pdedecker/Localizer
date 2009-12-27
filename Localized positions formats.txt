@@ -16,7 +16,7 @@ Therefore we require that an Igor wave passed in as a possible positions wave co
 
 
 Currently we support the following localization methods and formats:
-- Fitting with a circularly symmetric 2D Gaussian. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN". The actual positions wave itself has 12 columns for every position, in the following format:
+- Fitting with a circularly symmetric 2D Gaussian. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN". The actual positions wave itself has 12 columns for every position, in the following format:
 0. frame number
 1. integrated intensity
 2. standard deviation (width)
@@ -31,7 +31,7 @@ Currently we support the following localization methods and formats:
 11. number of frames in which the emitter is assumed to be present
 
 
-- Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH". The actual positions wave itself has 11 columns for every position, in the following format:
+- Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH". The actual positions wave itself has 11 columns for every position, in the following format:
 0. frame number
 1. integrated intensity
 2. standard deviation (width)
@@ -45,13 +45,13 @@ Currently we support the following localization methods and formats:
 10. number of frames in which the emitter is assumed to be present
 
 
-- A straightforward centroid (averaging) calculation. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: CENTROID CALCULATION". The actual positions wave itself has 4 columns for every localized position:
+- A straightforward centroid (averaging) calculation. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:CENTROID CALCULATION". The actual positions wave itself has 4 columns for every localized position:
 0. frame number
 1. x position
 2. y position
 3. number of frames in which the emitter is assumed to be present
 
-- An iterative multiplication technique in which the spot is localized by repeated multiplication with a Gaussian function centered at different positions. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: ITERATIVE MULTIPLICATION". The actual positions wave itself has 4 columns for every localized position:
+- An iterative multiplication technique in which the spot is localized by repeated multiplication with a Gaussian function centered at different positions. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:ITERATIVE MULTIPLICATION". The actual positions wave itself has 4 columns for every localized position:
 0. frame number
 1. width of the Gaussian used in the calculation
 2. x position
