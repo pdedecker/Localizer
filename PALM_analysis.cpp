@@ -359,6 +359,16 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
+	// add a wavenote containing the type of localization method
+	std::string waveNote("LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN;");
+	Handle waveNoteHandle = NewHandle(waveNote.length());
+	if (waveNoteHandle == NULL) {
+		throw std::bad_alloc();
+	}
+	
+	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+	SetWaveNote(outputWave, waveNoteHandle);
+	
 	return outputWave;
 }
 
