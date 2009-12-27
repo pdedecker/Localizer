@@ -541,7 +541,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			
 			// allow the reporter to update with new progress
 			this->acquireFrameForProcessingMutex.lock();
-			percentDone = (double)(framesToBeProcessed.size()) / (double)(this->nImages) * 100.0;
+			percentDone = (double)(nImages - framesToBeProcessed.size()) / (double)(this->nImages) * 100.0;
 			progressReporter->UpdateCalculationProgress(percentDone);
 			this->acquireFrameForProcessingMutex.unlock();
 			continue;
