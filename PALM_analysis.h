@@ -345,8 +345,8 @@ protected:
 
 class LocalizedPositionsContainer_Multiplication : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_Multiplication() {throw std::runtime_error("Multiplication is not yet supported");}
-	LocalizedPositionsContainer_Multiplication(waveHndl wave) {;}
+	LocalizedPositionsContainer_Multiplication() {;}
+	LocalizedPositionsContainer_Multiplication(waveHndl wave);
 	LocalizedPositionsContainer_Multiplication(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Multiplication() {;}
@@ -356,7 +356,7 @@ public:
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return 0;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getYWidth(size_t index) const {return 0;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getRotationAngle(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
@@ -373,8 +373,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {;}
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {;}
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -383,7 +383,7 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
+	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}

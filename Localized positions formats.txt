@@ -56,4 +56,4 @@ Currently we support the following localization methods and formats:
 1. width of the Gaussian used in the calculation
 2. x position
 3. y position
-3. number of frames in which the emitter is assumed to be present
+4. number of frames in which the emitter is assumed to be present

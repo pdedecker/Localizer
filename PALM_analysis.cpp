@@ -614,9 +614,9 @@ void LocalizedPositionsContainer_Centroid::addPosition(boost::shared_ptr<Localiz
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Centroid");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_Centroid> newPosition_2DGaussFixedWidth(boost::static_pointer_cast<LocalizedPosition_Centroid> (newPosition));
+	boost::shared_ptr<LocalizedPosition_Centroid> newPosition_Centroid(boost::static_pointer_cast<LocalizedPosition_Centroid> (newPosition));
 	
-	this->positionsVector.push_back(*newPosition_2DGaussFixedWidth);
+	this->positionsVector.push_back(*newPosition_Centroid);
 }
 
 void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
@@ -631,9 +631,127 @@ void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<Locali
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_Centroid> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_Centroid> (newPositionsContainer));
+	boost::shared_ptr<LocalizedPositionsContainer_Centroid> newPositionsContainer_Centroid(boost::static_pointer_cast<LocalizedPositionsContainer_Centroid> (newPositionsContainer));
 	
-	for (std::vector<LocalizedPosition_Centroid>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
+	for (std::vector<LocalizedPosition_Centroid>::iterator it = newPositionsContainer_Centroid->positionsVector.begin(); it != newPositionsContainer_Centroid->positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
+}
+
+LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multiplication(waveHndl positionsWave) {
+	// initialize a new PositionsContainer from a wave that contains positions of the correct type
+	long numDimensions;
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	
+	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+	
+	if ((numDimensions != 2) || (dimensionSizes[1] != 5)) {	// invalid dimensions (warning: magic numbers)
+		throw (std::runtime_error("Invalid positions wave"));
+	}
+	
+	LocalizedPosition_Multiplication singlePosition;
+	size_t nPositions = dimensionSizes[0];
+	this->positionsVector.reserve(nPositions);
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		// get all the relevant data out of the wave and into a position object
+		indices[0] = i;
+		indices[1] = 0;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.frameNumber = value[0];
+		indices[1] = 1;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.width = value[0];
+		indices[1] = 2;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPosition = value[0];
+		indices[1] = 3;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPosition = value[0];
+		indices[1] = 4;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.nFramesPresent = value[0];
+		
+		this->positionsVector.push_back(singlePosition);
+	}
+}
+
+waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName) const {
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	waveHndl outputWave;
+	size_t nPositions = this->positionsVector.size();
+	dimensionSizes[0] = nPositions;
+	dimensionSizes[1] = 5;	// magic number
+	dimensionSizes[2] = 0;
+	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
+	
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		indices[0] = i;
+		indices[1] = 0;
+		value[0] = this->positionsVector.at(i).frameNumber;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 1;
+		value[0] = this->positionsVector.at(i).width;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[2] = 1;
+		value[0] = this->positionsVector.at(i).xPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[3] = 2;
+		value[0] = this->positionsVector.at(i).yPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[4] = 3;
+		value[0] = this->positionsVector.at(i).nFramesPresent;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+	}
+	
+	// add a wavenote containing the type of localization method
+	std::string waveNote("LOCALIZATION METHOD:ITERATIVE MULTIPLICATION;");
+	Handle waveNoteHandle = NewHandle(waveNote.length());
+	if (waveNoteHandle == NULL) {
+		throw std::bad_alloc();
+	}
+	
+	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+	SetWaveNote(outputWave, waveNoteHandle);
+	
+	return outputWave;
+}
+
+void LocalizedPositionsContainer_Multiplication::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+	// check if the type of positions that we are adding is suitable
+	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_CENTROID)
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPosition_Multiplication> newPosition_Multiplication(boost::static_pointer_cast<LocalizedPosition_Multiplication> (newPosition));
+	
+	this->positionsVector.push_back(*newPosition_Multiplication);
+}
+
+void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// are we trying to add the same container to itself?
+	if (this == newPositionsContainer.get()) {
+		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_Multiplication to itself");
+	}
+	
+	// check if the positions container is of the right type
+	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_MULTIPLICATION) {
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
+	}
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPositionsContainer_Multiplication> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_Multiplication> (newPositionsContainer));
+	
+	for (std::vector<LocalizedPosition_Multiplication>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
 	}
 }
