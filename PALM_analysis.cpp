@@ -391,6 +391,13 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_p
 		this->positionsVector.push_back(*it);
 	}
 }
+
+waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName) const {
+	throw std::runtime_error("Cannot write multiplication positions to an Igor wave right now");
+}
+void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::string filePath) const {
+	throw std::runtime_error("Writing positions to a file is not yet supported");
+}
 						
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
@@ -597,12 +604,22 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
 			localizedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
 			
-			analysisResult = boost::shared_ptr<PALMResults> (new PALMResults(currentImageToProcess, fittedPositions));
+			// the localization routines have no idea what frame number the processed frame was
+			// so we need to add the appropriate frame number to the fitted positions here
+			localizedPositions->setFrameNumbers(currentImageToProcess);
 			
 			// pass the result to the output queue
-			controller->addPALMResultsMutex.lock();
-			controller->fittedPositionsList.push_back(analysisResult);
-			controller->addPALMResultsMutex.unlock();
+			controller->addLocalizedPositionsMutex.lock();
+			// if this is the first time that positions are being returned then controller will contain a NULL pointer
+			// set it to the positions we are now returning
+			// this way ThreadPoolWorker does not need to know what the type of positions is
+			if (controller->localizedPositions.get() == NULL) {
+				controller->localizedPositions = localizedPositions;
+			} else {
+				controller->localizedPositions->addPositions(localizedPositions);
+			}
+			
+			controller->addLocalizedPositionsMutex.unlock();
 		}
 	}
 	catch (runtime_error &e) {

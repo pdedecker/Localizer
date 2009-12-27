@@ -188,6 +188,9 @@ public:
 	virtual void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) = 0;
 	virtual void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) = 0;
 	
+	// set the frame numbers for all positions
+	virtual void setFrameNumbers(size_t frameNumber) = 0;
+	
 	// save the positions localized this far under different formats
 	virtual waveHndl writePositionsToWave(std::string waveName) const = 0;
 	virtual void writePositionsToFile(std::string filePath) const = 0;
@@ -235,6 +238,13 @@ public:
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
 	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_2DGauss>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
 	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
 	
@@ -250,7 +260,7 @@ protected:
 
 class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_2DGaussFixedWidth() {;}
+	LocalizedPositionsContainer_2DGaussFixedWidth() {throw std::runtime_error("2D Gauss fixed width is not yet supported");}
 	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
 	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
@@ -281,6 +291,13 @@ public:
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
 	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_2DGaussFixedWidth>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
 	waveHndl writePositionsToWave(std::string waveName) const {;}
 	void writePositionsToFile(std::string filePath) const {;}
 	
@@ -297,7 +314,7 @@ protected:
 
 class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_Centroid() {;}
+	LocalizedPositionsContainer_Centroid() {throw std::runtime_error("Centroid is not yet supported");}
 	LocalizedPositionsContainer_Centroid(waveHndl wave) {;}
 	LocalizedPositionsContainer_Centroid(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
@@ -328,11 +345,18 @@ public:
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
 	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_Centroid>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
 	waveHndl writePositionsToWave(std::string waveName) const {;}
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
-	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
+	static int sortCompareFrameNumber(LocalizedPosition_Centroid left, LocalizedPosition_Centroid right) {
 		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_CENTROID;}
@@ -343,7 +367,7 @@ protected:
 
 class LocalizedPositionsContainer_Multiplication : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_Multiplication() {;}
+	LocalizedPositionsContainer_Multiplication() {throw std::runtime_error("Multiplication is not yet supported");}
 	LocalizedPositionsContainer_Multiplication(waveHndl wave) {;}
 	LocalizedPositionsContainer_Multiplication(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
@@ -374,11 +398,18 @@ public:
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
 	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
-	waveHndl writePositionsToWave(std::string waveName) const {;}
-	void writePositionsToFile(std::string filePath) const {;}
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_Multiplication>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
+	waveHndl writePositionsToWave(std::string waveName) const;
+	void writePositionsToFile(std::string filePath) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
-	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
+	static int sortCompareFrameNumber(LocalizedPosition_Multiplication left, LocalizedPosition_Multiplication right) {
 		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_MULTIPLICATION;}

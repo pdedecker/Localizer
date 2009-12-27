@@ -24,6 +24,7 @@
 
 using namespace std;
 class LocalizedPosition;
+class LocalizedPositionsContainer;
 
 /**
  * @brief An abstract base class from which all other 'FitPositions' classes must derive
@@ -38,7 +39,7 @@ public:
 	FitPositions() {;}
 	virtual ~FitPositions() {;}
 	
-	virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions);
 	virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading

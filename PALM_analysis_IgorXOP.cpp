@@ -441,7 +441,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particle_finder;
 	boost::shared_ptr<PALMAnalysisController> analysisController;
-	boost::shared_ptr<PALMResultsWriter> resultsWriter;
+	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	
 	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
@@ -730,7 +730,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		} else {
 			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 		}
-		resultsWriter = boost::shared_ptr<PALMResultsWriter> (new IgorResultsWriter(std::string("POS_out")));
+		
 		if (quiet == 1) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
 		} else {
@@ -738,9 +738,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		}
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(image_loader, thresholder, preprocessor, 
 																								   postprocessor, particle_finder, positions_fitter,
-																								   resultsWriter, progressReporter));
+																								   progressReporter));
 		
-		analysisController->DoPALMAnalysis();
+		localizedPositions = analysisController->DoPALMAnalysis();
 	}
 	catch (std::bad_alloc) {
 		err = NOMEM;
