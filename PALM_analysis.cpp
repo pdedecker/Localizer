@@ -224,6 +224,11 @@ void LocalizedPositionsContainer_2DGauss::addPosition(boost::shared_ptr<Localize
 }
 
 void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// are we trying to add the same container to itself?
+	if (this == newPositionsContainer.get()) {
+		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_2DGauss to itself");
+	}
+	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS) {
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
@@ -231,7 +236,10 @@ void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<Localiz
 	
 	// cast the pointer to the more specific type
 	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_2DGauss> (newPositionsContainer));
-	size_t nPositions = newPositionsContainer_2DGauss->getNPositions();
+	
+	for (std::vector<LocalizedPosition_2DGauss>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
 }
 
 LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHndl positionsWave) {
@@ -354,15 +362,35 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	return outputWave;
 }
 
-/*double LocalizedPositionsContainer_2DGauss::getIntegralDeviation(size_t index) const {
-	// use the rules for error propagation to calculate the error on the integrated intensity
-	// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+	// check if the type of positions that we are adding is suitable
+	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH)
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
 	
-	double relativeAmplitudeError = this->positionsVector.at(index).amplitudeDeviation / this->positionsVector.at(index).amplitude;
-	double relativeWidthError = this->positionsVector.at(index).widthDeviation / this->positionsVector.at(index).width;
-	double error = sqrt(this->getIntegral(index) * this->getIntegral(index) * (relativeAmplitudeError * relativeAmplitudeError + relativeWidthError * relativeWidthError));
-	return error;
-}*/
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPosition_2DGaussFixedWidth> newPosition_2DGaussFixedWidth(boost::static_pointer_cast<LocalizedPosition_2DGaussFixedWidth> (newPosition));
+	
+	this->positionsVector.push_back(*newPosition_2DGaussFixedWidth);
+}
+
+void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// are we trying to add the same container to itself?
+	if (this == newPositionsContainer.get()) {
+		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_2DGaussFixedWidth to itself");
+	}
+	
+	// check if the positions container is of the right type
+	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH) {
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+	}
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_2DGaussFixedWidth> (newPositionsContainer));
+	
+	for (std::vector<LocalizedPosition_2DGaussFixedWidth>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
+}
 						
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();

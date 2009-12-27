@@ -249,8 +249,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void addPosition(LocalizedPosition_2DGaussFixedWidth& newPosition) {positionsVector.push_back(newPosition);}
-	void addPositions(LocalizedPositionsContainer_2DGaussFixedWidth& newPositionsContainer);
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	waveHndl writePositionsToWave(std::string waveName) const {;}
 	void writePositionsToFile(std::string filePath) const {;}
@@ -258,6 +258,9 @@ public:
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
 		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH;}
+	
 protected:
 	std::vector<LocalizedPosition_2DGaussFixedWidth> positionsVector;
 };
