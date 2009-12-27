@@ -228,7 +228,7 @@ public:
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGauss left, LocalizedPosition_2DGauss right) {
-		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
 
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS;}
 	
@@ -281,7 +281,7 @@ public:
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
-		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH;}
 	
@@ -335,7 +335,7 @@ public:
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Centroid left, LocalizedPosition_Centroid right) {
-		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_CENTROID;}
 	
@@ -388,7 +388,7 @@ public:
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Multiplication left, LocalizedPosition_Multiplication right) {
-		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_MULTIPLICATION;}
 	
