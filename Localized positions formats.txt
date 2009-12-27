@@ -53,6 +53,7 @@ Currently we support the following localization methods and formats:
 
 - An iterative multiplication technique in which the spot is localized by repeated multiplication with a Gaussian function centered at different positions. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD: ITERATIVE MULTIPLICATION". The actual positions wave itself has 4 columns for every localized position:
 0. frame number
-1. x position
-2. y position
+1. width of the Gaussian used in the calculation
+2. x position
+3. y position
 3. number of frames in which the emitter is assumed to be present

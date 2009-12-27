@@ -96,7 +96,7 @@ public:
 	~FitPositionsMultiplication() {;}
 	
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	int multiply_with_gaussian(boost::shared_ptr<PALMMatrix<double> > original_image, boost::shared_ptr<PALMMatrix<double> > masked_image, double x, double y,
@@ -117,7 +117,7 @@ public:
 	~FitPositionsCentroid() {;}
 	
 	// r_initial should be the standard deviation of the Gaussian
-	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	size_t cutoff_radius;

@@ -556,14 +556,12 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	}
 	
 	// the processing itself is now done, but the results will not have been returned in the correct order
-	fittedPositionsList.sort(ComparePALMResults);
-	
-	// store the results
-	for (it = this->fittedPositionsList.begin(); it != this->fittedPositionsList.end(); ++it) {
-		this->resultsWriter->AppendNewResult(*it);
-	}
+	this->localizedPositions->sortPositionsByFrameNumber();
 	
 	progressReporter->CalculationDone();
+	
+	// return the results
+	return this->localizedPositions;
 }
 
 void ThreadPoolWorker(PALMAnalysisController* controller) {

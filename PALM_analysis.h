@@ -73,7 +73,7 @@ protected:
  */
 class LocalizedPosition_2DGauss : public LocalizedPosition {
 public:
-	LocalizedPosition_2DGauss() {;}
+	LocalizedPosition_2DGauss() : nFramesPresent(1) {}
 	~LocalizedPosition_2DGauss() {;}
 	
 	size_t frameNumber;
@@ -96,7 +96,7 @@ public:
 
 class LocalizedPosition_2DGaussFixedWidth : public LocalizedPosition {
 public:
-	LocalizedPosition_2DGaussFixedWidth() {;}
+	LocalizedPosition_2DGaussFixedWidth() : nFramesPresent(1) {}
 	~LocalizedPosition_2DGaussFixedWidth() {;}
 	
 	size_t frameNumber;
@@ -114,6 +114,35 @@ public:
 	double backgroundDeviation;
 	
 	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH;}
+};
+
+class LocalizedPosition_Centroid : public LocalizedPosition {
+public:
+	LocalizedPosition_Centroid() : nFramesPresent(1) {}
+	~LocalizedPosition_Centroid() {;}
+	
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double xPosition;
+	double yPosition;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_CENTROID;}
+};
+
+class LocalizedPosition_Multiplication : public LocalizedPosition {
+public:
+	LocalizedPosition_Multiplication() : nFramesPresent(1) {}
+	~LocalizedPosition_Multiplication() {;}
+	
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double xPosition;
+	double yPosition;
+	double width;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_MULTIPLICATION;}
 };
 
 /**
@@ -265,6 +294,98 @@ protected:
 	std::vector<LocalizedPosition_2DGaussFixedWidth> positionsVector;
 };
 
+
+class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_Centroid() {;}
+	LocalizedPositionsContainer_Centroid(waveHndl wave) {;}
+	LocalizedPositionsContainer_Centroid(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	
+	~LocalizedPositionsContainer_Centroid() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const {return 0;}
+	double getXWidth(size_t index) const {return 0;}
+	double getYWidth(size_t index) const {return 0;}
+	double getRotationAngle(size_t index) const {return 0;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
+	double getBackground(size_t index) const {return 0;}
+	
+	double getIntegralDeviation(size_t index) const {return 0;}
+	double getXWidthDeviation(size_t index) const {return 0;}
+	double getYWidthDeviation(size_t index) const {return 0;}
+	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getXPositionDeviation(size_t index) const {return 0;}
+	double getYPositionDeviation(size_t index) const {return 0;}
+	double getZPositionDeviation(size_t index) const {return 0;}
+	double getBackgroundDeviation(size_t index) const {return 0;}
+	
+	// adding new positions
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	
+	waveHndl writePositionsToWave(std::string waveName) const {;}
+	void writePositionsToFile(std::string filePath) const {;}
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
+		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_CENTROID;}
+	
+protected:
+	std::vector<LocalizedPosition_Centroid> positionsVector;
+};
+
+class LocalizedPositionsContainer_Multiplication : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_Multiplication() {;}
+	LocalizedPositionsContainer_Multiplication(waveHndl wave) {;}
+	LocalizedPositionsContainer_Multiplication(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	
+	~LocalizedPositionsContainer_Multiplication() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const {return 0;}
+	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getYWidth(size_t index) const {return 0;}
+	double getRotationAngle(size_t index) const {return 0;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
+	double getBackground(size_t index) const {return 0;}
+	
+	double getIntegralDeviation(size_t index) const {return 0;}
+	double getXWidthDeviation(size_t index) const {return 0;}
+	double getYWidthDeviation(size_t index) const {return 0;}
+	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getXPositionDeviation(size_t index) const {return 0;}
+	double getYPositionDeviation(size_t index) const {return 0;}
+	double getZPositionDeviation(size_t index) const {return 0;}
+	double getBackgroundDeviation(size_t index) const {return 0;}
+	
+	// adding new positions
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	
+	waveHndl writePositionsToWave(std::string waveName) const {;}
+	void writePositionsToFile(std::string filePath) const {;}
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
+		return ((left.frameNumber <= right.frameNumber) ? 1 : 0);}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_MULTIPLICATION;}
+	
+protected:
+	std::vector<LocalizedPosition_Multiplication> positionsVector;
+};
 
 /**
  *@brief A class that handles the actual PALM analysis
