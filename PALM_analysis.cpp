@@ -197,13 +197,13 @@ static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveH
 	if (findPosition == (size_t)-1)	// not found
 		throw std::runtime_error("The positions wave does not specify a localization method");
 	
-	findPosition = waveNote.find("LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH");
+	findPosition = waveNote.find("LOCALIZATION METHOD:symmetric 2D Gaussian with fixed width");
 	if (findPosition != (size_t)-1) {
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
 	}
 	
 	// check for the different kinds of localization approaches
-	findPosition = waveNote.find("LOCALIZATION METHOD: SYMMETRIC 2D GAUSSIAN");
+	findPosition = waveNote.find("LOCALIZATION METHOD:symmetric 2D Gaussian");
 	if (findPosition != (size_t)-1) {
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
 	}
@@ -360,7 +360,7 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	}
 	
 	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN;");
+	std::string waveNote("LOCALIZATION METHOD:symmetric 2D Gaussian;");
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
@@ -484,7 +484,7 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 	}
 	
 	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:SYMMETRIC 2D GAUSSIAN WITH FIXED WIDTH;");
+	std::string waveNote("LOCALIZATION METHOD:symmetric 2D Gaussian with fixed width;");
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
@@ -596,7 +596,7 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 	}
 	
 	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:CENTROID CALCULATION;");
+	std::string waveNote("LOCALIZATION METHOD:centroid calculation;");
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
@@ -714,7 +714,7 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 	}
 	
 	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:ITERATIVE MULTIPLICATION;");
+	std::string waveNote("LOCALIZATION METHOD:iterative multiplication;");
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
