@@ -292,8 +292,8 @@ protected:
 
 class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer {
 public:
-	LocalizedPositionsContainer_Centroid() {throw std::runtime_error("Centroid is not yet supported");}
-	LocalizedPositionsContainer_Centroid(waveHndl wave) {;}
+	LocalizedPositionsContainer_Centroid() {;}
+	LocalizedPositionsContainer_Centroid(waveHndl wave);
 	LocalizedPositionsContainer_Centroid(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Centroid() {;}
@@ -320,8 +320,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {;}
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {;}
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -330,7 +330,7 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
+	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
