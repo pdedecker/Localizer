@@ -391,13 +391,6 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_p
 		this->positionsVector.push_back(*it);
 	}
 }
-
-waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName) const {
-	throw std::runtime_error("Cannot write multiplication positions to an Igor wave right now");
-}
-void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::string filePath) const {
-	throw std::runtime_error("Writing positions to a file is not yet supported");
-}
 						
 int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
@@ -480,7 +473,6 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	size_t numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
-	std::list<boost::shared_ptr<PALMResults> >::iterator it;
 	int firstThreadHasFinished, status;
 	double percentDone;
 	
@@ -577,7 +569,6 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
 	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
-	boost::shared_ptr<PALMResults> analysisResult;
 	
 	try {
 		for (;;) {	// loop continuously looking for more images until there are none left
@@ -649,15 +640,6 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		return;
 	}
 	
-}
-
-int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr<PALMResults> result2) {
-	assert(result1->getFrameIndex() != result2->getFrameIndex());
-	if (result1->getFrameIndex() < result2->getFrameIndex()) {
-		return 1;
-	} else {
-		return 0;
-	}
 }
 
 void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double percentDone) {

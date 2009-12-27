@@ -25,7 +25,6 @@
 #include "boost/thread.hpp"
 
 using namespace std;
-class PALMResults;
 
 class XOPFileHandler {
 public:

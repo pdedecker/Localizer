@@ -741,6 +741,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 																								   progressReporter));
 		
 		localizedPositions = analysisController->DoPALMAnalysis();
+		localizedPositions->writePositionsToWave(std::string("POS_Out"));
 	}
 	catch (std::bad_alloc) {
 		err = NOMEM;

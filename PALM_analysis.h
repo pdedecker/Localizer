@@ -24,7 +24,6 @@ class ThresholdImage;
 class ThresholdImage_Preprocessor;
 class ThresholdImage_Postprocessor;
 class ParticleFinder;
-class PALMResultsWriter;
 class FitPositions;
 class PALMAnalysisProgressReporter;
 
@@ -45,27 +44,6 @@ public:
 	virtual ~LocalizedPosition() {;}
 	
 	virtual size_t getPositionType() const = 0;
-};
-
-
-/**
- *@brief Stores the result from fitting a particular frame, remembering both the frame index as well as the fitted positions
- */
-class PALMResults {
-public:
-	PALMResults(size_t frameIndex_rhs, boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions_rhs) {
-		frameIndex = frameIndex_rhs;
-		fittedPositions = fittedPositions_rhs;
-	}
-	~PALMResults() {;}
-	
-	size_t getFrameIndex() {return frameIndex;}
-	size_t getNumberOfFittedPositions() {return fittedPositions->size();}
-	boost::shared_ptr<std::vector<LocalizedPosition> > getFittedPositions() {return fittedPositions;}
-	
-protected:
-	size_t frameIndex;
-	boost::shared_ptr<std::vector<LocalizedPosition> > fittedPositions;
 };
 
 /**
@@ -261,7 +239,7 @@ protected:
 class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_2DGaussFixedWidth() {throw std::runtime_error("2D Gauss fixed width is not yet supported");}
-	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
+	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave) {;}
 	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGaussFixedWidth() {;}
@@ -298,7 +276,7 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const {;}
+	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -342,8 +320,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {;}
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {;}
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -352,7 +330,7 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const {;}
+	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -395,8 +373,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {;}
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {;}
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -405,8 +383,8 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const;
-	void writePositionsToFile(std::string filePath) const;
+	waveHndl writePositionsToWave(std::string waveName) const {waveHndl w; return w;}
+	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Multiplication left, LocalizedPosition_Multiplication right) {
@@ -469,11 +447,6 @@ protected:
  * and returns the results to the object
  */
 void ThreadPoolWorker(PALMAnalysisController* controller);
-
-/**
- * Compare two PALMResults to see which one originated from an earlier frame
- */
-int ComparePALMResults(boost::shared_ptr<PALMResults> result1, boost::shared_ptr<PALMResults> result2);
 
 /**
  * @briefWhen passed to PALMAnalysisController the methods of this object will be called to provide usage updates to the user
