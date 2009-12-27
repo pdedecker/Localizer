@@ -274,6 +274,64 @@ LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHnd
 	}
 }
 
+waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string waveName) const {
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	waveHndl outputWave;
+	size_t nPositions = this->positionsVector.size();
+	dimensionSizes[0] = nPositions;
+	dimensionSizes[1] = 12;	// magic number
+	dimensionSizes[2] = 0;
+	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
+	
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		indices[0] = i;
+		indices[1] = 0;
+		value[0] = this->positionsVector.at(i).frameNumber;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 1;
+		value[0] = this->positionsVector.at(i).integral;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 2;
+		value[0] = this->positionsVector.at(i).width;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 3;
+		value[0] = this->positionsVector.at(i).xPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 4;
+		value[0] = this->positionsVector.at(i).yPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 5;
+		value[0] = this->positionsVector.at(i).background;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 6;
+		value[0] = this->positionsVector.at(i).integralDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 7;
+		value[0] = this->positionsVector.at(i).widthDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 8;
+		value[0] = this->positionsVector.at(i).xPositionDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 9;
+		value[0] = this->positionsVector.at(i).yPositionDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 10;
+		value[0] = this->positionsVector.at(i).backgroundDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 11;
+		value[0] = this->positionsVector.at(i).nFramesPresent;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+	}
+	
+	return outputWave;
+}
+
 /*double LocalizedPositionsContainer_2DGauss::getIntegralDeviation(size_t index) const {
 	// use the rules for error propagation to calculate the error on the integrated intensity
 	// http://en.wikipedia.org/wiki/Propagation_of_uncertainty

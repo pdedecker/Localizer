@@ -207,7 +207,7 @@ public:
 	void addPosition(LocalizedPosition_2DGauss& newPosition) {positionsVector.push_back(newPosition);}
 	void addPositions(LocalizedPositionsContainer_2DGauss& newPositionsContainer);
 	
-	waveHndl writePositionsToWave(std::string waveName) const {;}
+	waveHndl writePositionsToWave(std::string waveName) const;
 	void writePositionsToFile(std::string filePath) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
