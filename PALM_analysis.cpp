@@ -202,14 +202,23 @@ static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveH
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
 	}
 	
-	// check for the different kinds of localization approaches
 	findPosition = waveNote.find("LOCALIZATION METHOD:symmetric 2D Gaussian");
 	if (findPosition != (size_t)-1) {
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
 	}
 	
+	findPosition = waveNote.find("LOCALIZATION METHOD:centroid calculation");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Centroid(positionsWave));
+	}
+	
+	findPosition = waveNote.find("LOCALIZATION METHOD:iterative multiplication");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Multiplication(positionsWave));
+	}
+	
 	// if we are still here then we don't recognize the type of localization used
-	throw std::runtime_error("Unknown localization method");
+	throw std::runtime_error("Unknown localization method (check the wave note of the wave containing the positions)");
 }
 
 void LocalizedPositionsContainer_2DGauss::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
