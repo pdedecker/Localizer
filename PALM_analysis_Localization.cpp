@@ -450,7 +450,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		throw std::range_error(error);
 	}
 	
-	size_t number_of_positions = endPos - startPos + 1;
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
@@ -627,7 +626,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		throw std::range_error(error);
 	}
 	
-	size_t number_of_positions = endPos - startPos + 1;
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
@@ -982,7 +980,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		throw std::range_error(error);
 	}
 	
-	size_t number_of_positions = endPos - startPos + 1;
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
@@ -1135,7 +1132,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		throw std::range_error(error);
 	}
 	
-	size_t number_of_positions = endPos - startPos + 1;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
 	size_t x_offset, y_offset, x_max, y_max;

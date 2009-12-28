@@ -14,7 +14,6 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 	double fittedXPos, fittedYPos, fittedIntegral, fittedDeviation;
 	double centerX, centerY, calculatedAmplitude, calculatedDeviation;
 	size_t startX, endX, startY, endY;
-	double sqrt2pi = SQRT2PI;
 	double distanceXSquared, distanceYSquared, currentIntensity;
 	
 	size_t nPositions = positions->getNPositions();
