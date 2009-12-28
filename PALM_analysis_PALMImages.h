@@ -10,6 +10,7 @@
 #ifndef PALM_ANALYSIS_PALMIMAGES_H
 #define PALM_ANALYSIS_PALMIMAGES_H
 
+#include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
@@ -28,7 +29,7 @@ public:
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	boost::shared_ptr<PALMMatrix<float> > CalculateImage(boost::shared_ptr<PALMMatrix<double> > positions, size_t xSize, 
+	boost::shared_ptr<PALMMatrix<float> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	
@@ -42,7 +43,7 @@ public:
 	PALMBitmapImageDeviationCalculator() {;}
 	virtual ~PALMBitmapImageDeviationCalculator() {;}
 	
-	virtual double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) = 0;
+	virtual double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) = 0;
 };
 
 class PALMBitmapImageDeviationCalculator_FitUncertainty : public PALMBitmapImageDeviationCalculator {
@@ -50,7 +51,7 @@ public:
 	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
 	~PALMBitmapImageDeviationCalculator_FitUncertainty() {;}
 	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return ((positions->get(index, 7) < upperLimit) ? (positions->get(index, 7) * scaleFactor) : -1);}
+	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return ((positions->getXPositionDeviation(index) < upperLimit) ? (positions->getXPositionDeviation(index) * scaleFactor) : -1);}
 	
 private:
 	double scaleFactor;
@@ -62,18 +63,18 @@ public:
 	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
 	PALMBitmapImageDeviationCalculator_Constant() {;}
 	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return deviation;}
+	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return deviation;}
 	
 private:
 	double deviation;
 };
 
-class PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot : public PALMBitmapImageDeviationCalculator {
+class PALMBitmapImageDeviationCalculator_IntegralSquareRoot : public PALMBitmapImageDeviationCalculator {
 public:
-	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
-	PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot() {;}
+	PALMBitmapImageDeviationCalculator_IntegralSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
+	PALMBitmapImageDeviationCalculator_IntegralSquareRoot() {;}
 	
-	double getDeviation(boost::shared_ptr<PALMMatrix<double> > positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->get(index, 1)));}
+	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->getIntegral(index)));}
 	
 private:
 	double PSFWidth;

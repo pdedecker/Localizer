@@ -174,7 +174,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
 }
 
 
-static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave) {
+boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPositionsFromWave(waveHndl positionsWave) {
 	int err;
 	size_t findPosition;
 	

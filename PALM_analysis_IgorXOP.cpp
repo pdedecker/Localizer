@@ -1658,7 +1658,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	boost::shared_ptr<PALMMatrix<double> > positions;
 	boost::shared_ptr<PALMMatrix <float> > image;
 	
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1746,8 +1745,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			return INCOMPATIBLE_DIMENSIONING;
 		}
 		
-		positions = copy_IgorDPWave_to_gsl_matrix(positionsWave);
-		
 	} else {
 		return NOWAV;
 	}
@@ -1762,7 +1759,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
 			break;
 		case 2:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_AmplitudeSquareRoot(PSFWidth, scaleFactor));
+			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_IntegralSquareRoot(PSFWidth, scaleFactor));
 			break;
 		default:
 			return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1771,6 +1768,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	// do the actual calculation
 	try {
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator));
+		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
 		copy_PALMMatrix_float_to_IgorFPWave(image, string("M_PALM"));
 	}

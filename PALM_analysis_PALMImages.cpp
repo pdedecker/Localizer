@@ -9,33 +9,31 @@
 
 #include "PALM_analysis_PALMImages.h"
 
-boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<PALMMatrix<double> > positions, size_t xSize, 
+boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
-	double fittedXPos, fittedYPos, fittedAmplitude, fittedDeviation;
+	double fittedXPos, fittedYPos, fittedIntegral, fittedDeviation;
 	double centerX, centerY, calculatedAmplitude, calculatedDeviation;
-	long startX, endX, startY, endY;
-	double sqrt2pi = sqrt(2 * PI);
+	size_t startX, endX, startY, endY;
+	double sqrt2pi = SQRT2PI;
 	double distanceXSquared, distanceYSquared, currentIntensity;
 	
-	size_t nPositions = positions->getXSize();
+	size_t nPositions = positions->getNPositions();
 	boost::shared_ptr<PALMMatrix<float> > outputImage(new PALMMatrix<float> (imageWidth, imageHeight));
 	outputImage->set_all(0);
 	
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;
 	double imageHeightScaleFactor = (double)(imageHeight - 1) / (double)ySize;
-	double integratedFittedIntensity;
 	
 	for (size_t n = 0; n < nPositions; ++n) {
-		fittedAmplitude = positions->get(n, 1);	// warning: magic numbers
-		fittedDeviation = positions->get(n, 2);
-		fittedXPos = positions->get(n, 3);
-		fittedYPos = positions->get(n, 4);
-		integratedFittedIntensity = sqrt2pi * fittedDeviation * fittedAmplitude;
+		fittedIntegral = positions->getIntegral(n);
+		fittedDeviation = positions->getXWidth(n);
+		fittedXPos = positions->getXPosition(n);
+		fittedYPos = positions->getYPosition(n);
 		
 		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
-		calculatedAmplitude = integratedFittedIntensity / (sqrt2pi * calculatedDeviation);	// keep the integrated intensity the same
+		calculatedAmplitude = fittedIntegral / (sqrt2pi * calculatedDeviation);	// keep the integrated intensity the same
 		
-		if ((fittedAmplitude < 0) || (fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
+		if ((fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
 			continue;
 		}
 		
