@@ -1,0 +1,59 @@
+The wave note is about the only place available to store metadata about fitted positions. The Igor-sancationed way to store the metadata is as semicolon-separated list containing keyword:value pairs (separated by a colon), making it essentially a poor man's map.
+
+Since this is the only place to put metadata, the wave note for a particular positions should at all times contain as much relevant information as possible. The purpose of this document is to outline the possible metadata that can be present thus standardize the keyword:value pairs.
+
+The order in which these pairs are stored is irrelevant, but every pair should have a semicolon ';' appended to it. Not all data needs to be stored in a given positions wave, but some downstream rountines may depend on the information contained in these pairs.
+
+Right now only the following pairs are used in the Igor routines: X SIZE, Y SIZE, and LOCALIZATION METHOD.
+
+1. ORIGINAL FILE PATH:<string>
+A string containing the full path to the data file that the positions were derived from (the file that was analyzed by the localization routines).
+
+2. X SIZE:<integer>
+3. Y SIZE:<integer>
+The width and height (in pixels) of the original data file. If the positions were created by cropping, that is, only positions within a certain area were selected, then these contain the dimensions of the cropped area.
+
+3. X START:<integer>
+4. Y START:<integer>
+The coordinates of the lowest (x,y) corner of the positions. If the positions are an immediate result of fitting a set of CCD images then these will be (0,0). If the positions were cropped from another set of positions then X START and Y START will correspond to the lowest corner of the cropped area.
+
+5. X PIXEL SIZE:<double>
+6. Y PIXEL SIZE:<double>
+The optical sizes of a single pixel in the original CCD frames (in nanometer). All distances or positions stored in the positions waves must be in units of pixels, but these value pairs can allow image output routines to automatically convert to physical sizes.
+
+7. NUMBER OF IMAGES:<integer>
+The total number of images (frames) in the original data
+
+8. THRESHOLD METHOD:<integer>
+The threshold method used.
+	8a. PFA:<double>
+	The PFA value set if the GLRT method was used
+	8b. ABSOLUTE THRESHOLD:<double>
+	The value set for the threshold if absolute (direct) thresholding was used
+
+9. PREPROCESSING:<integer>
+10. POSTPROCESSING:<integer>
+The pre- and postprocessing methods used.
+
+11. PARTICLE FINDING METHOD:<integer>
+The method used to convert the binary thresholded image to a list of (x,y) positions containing the locations where localization will be attempted.
+	8a. MINIMUM DISTANCE BETWEEN PARTICLES:<double>
+	The minimum distance allowed for two active pixels to be considered as belonging to different particles
+
+12. GAUSSIAN WIDTH:<double>
+The initial guess for the standard deviation of the point-spread function, provided by the user. Used by the GLRT thresholding method and most of the localization routines.
+
+13. BACKGROUND:<double>
+An initial guess for the background level, possibly provided by the user. Currently unused, but provided for completeness.
+
+14. MIN DISTANCE FROM EDGE:<integer>
+How far away a position has to be from the edge to be used in the localization routines (in pixels).
+
+15. CUTOFF RADIUS:<integer>
+The localization routines do not work on a full image, but rather on a subset of the image surrounding the position returned by the particle finding. The cutoff radius specifies the radius of the cutout area (square) used.
+
+16. LOCALIZATION METHOD:<integer>
+The type of localization routine used. Determines the type of positions returns by the localization, and therefore needs to be checked in any routine or processing that start from fitted positions.
+
+17. CALCULATION DATE:<date>
+The date on which the localization analysis was performed.
