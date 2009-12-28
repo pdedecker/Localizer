@@ -40,7 +40,7 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 		for (size_t j = 0; j < ySize; ++j) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
-			function_value = offset + amplitude * exp(- (((x0 - x)/ r) * ((x0 - x)/ r) + ((y0 - y) / r) * ((y0 - y) / r)));
+			function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
 			square_deviation = (function_value - imageSubset->get(i, j)) / sigma;
 			gsl_vector_set(deviations, arrayOffset, square_deviation);
 			++arrayOffset;
@@ -80,7 +80,7 @@ int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *fitData_rhs
 		for (size_t j = 0; j < ySize; ++j) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
-			function_value = offset + amplitude * exp(- (((x0 - x)/ r) * ((x0 - x)/ r) + ((y0 - y) / r) * ((y0 - y) / r)));
+			function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
 			square_deviation = (function_value - imageSubset->get(i, j)) / sigma;
 			gsl_vector_set(deviations, arrayOffset, square_deviation);
 			++arrayOffset;
@@ -156,12 +156,12 @@ int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, 
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
-			exp_factor = exp(- ((x0 - x)/ r) * ((x0 - x)/ r) - ((y0 - y) / r) * ((y0 - y) / r));
+			exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
 			
 			dfdA = exp_factor / sigma;
-			dfdr = (2 * (y - y0) * (y - y0) / r / r / r + 2 * (x - x0) * (x - x0) / r / r / r) * exp_factor * amplitude / sigma;
-			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / (r * r *sigma);
-			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / (r * r *sigma);
+			dfdr = (2 * (y - y0) * (y - y0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r) + 2 * (x - x0) * (x - x0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r)) * exp_factor * amplitude / sigma;
+			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
+			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
 			dfdoffset = 1/sigma;
 			
 			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
@@ -206,12 +206,12 @@ int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fi
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
-			exp_factor = exp(- ((x0 - x)/ r) * ((x0 - x)/ r) - ((y0 - y) / r) * ((y0 - y) / r));
+			exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
 			
 			dfdA = exp_factor / sigma;
 			// dfdr = (2 * (y - y0) * (y - y0) / r / r / r + 2 * (x - x0) * (x - x0) / r / r / r) * exp_factor * amplitude / sigma;
-			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / (r * r *sigma);
-			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / (r * r *sigma);
+			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
+			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
 			dfdoffset = 1/sigma;
 			
 			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
@@ -536,7 +536,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		gsl_vector_set(fit_parameters, 1, r_initial * SQRT2);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
+		gsl_vector_set(fit_parameters, 1, r_initial);
 		gsl_vector_set(fit_parameters, 2, x0_initial);
 		gsl_vector_set(fit_parameters, 3, y0_initial);
 		gsl_vector_set(fit_parameters, 4, background);
@@ -583,14 +583,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		
 		// store the fitted parameters
 		
-		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
-		// so we correct for that
-		localizationResult->width = gsl_vector_get(fit_iterator->x, 1) / SQRT2;
+		localizationResult->width = gsl_vector_get(fit_iterator->x, 1);
 		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 3);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 4);
 		
-		localizationResult->widthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1)) / SQRT2;
+		localizationResult->widthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
 		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
 		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
 		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
@@ -712,7 +710,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		fitData.yOffset = (double)y_offset;
 		fitData.imageSubset = image_subset;
 		fitData.sigma = sigma;
-		fitData.width = r_initial * 1.414213562373095;
+		fitData.width = r_initial;
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
