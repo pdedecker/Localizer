@@ -596,10 +596,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		localizationResult->integral = 2 * PI * localizationResult->width * localizationResult->width * gsl_vector_get(fit_iterator->x, 1);
 		
 		// use the rules for error propagation to calculate the error on the integrated intensity
-		// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+		// \sigma_I	= 2 \pi I \sqrt{\left(\frac{\sigma_A}{A} \right)^2 + 2 \left(\frac{\sigma_r}{r} \right)^2}
 		relativeAmplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0); // the relative error on the amplitude
 		relativeWidthError = localizationResult->widthDeviation / localizationResult->width;
-		localizationResult->integralDeviation  = sqrt(localizationResult->integral * localizationResult->integral * (relativeAmplitudeError * relativeAmplitudeError + relativeWidthError * relativeWidthError));
+		localizationResult->integralDeviation = 2 * PI * localizationResult->integral * sqrt(relativeAmplitudeError * relativeAmplitudeError + 2 * relativeWidthError * relativeWidthError);
 		
 		fitted_positions->addPosition(localizationResult);
 	}
@@ -771,10 +771,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
 		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
 		
-		// use the rules for error propagation to calculate the error on the integrated intensity
-		// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
+		// calculate the uncertainty on the integrated intensity using error propagation
 		relativeAmplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0); // the relative error on the amplitude
-		localizationResult->integralDeviation  = sqrt(localizationResult->integral * localizationResult->integral * (relativeAmplitudeError * relativeAmplitudeError));
+		localizationResult->integralDeviation = 2 * PI * localizationResult->integral * localizationResult->width * localizationResult->width * sqrt(relativeAmplitudeError * relativeAmplitudeError);
 		
 		
 		fitted_positions->addPosition(localizationResult);
