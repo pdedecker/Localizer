@@ -593,7 +593,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
 		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
 		
-		localizationResult->integral = SQRT2PI * localizationResult->width * gsl_vector_get(fit_iterator->x, 0);
+		localizationResult->integral = 2 * PI * localizationResult->width * localizationResult->width * gsl_vector_get(fit_iterator->x, 1);
 		
 		// use the rules for error propagation to calculate the error on the integrated intensity
 		// http://en.wikipedia.org/wiki/Propagation_of_uncertainty
@@ -764,7 +764,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
 		
-		localizationResult->integral = SQRT2PI * localizationResult->width * gsl_vector_get(fit_iterator->x, 0);
+		localizationResult->integral = 2 * PI * localizationResult->width * localizationResult->width * gsl_vector_get(fit_iterator->x, 1);
 		
 		
 		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));

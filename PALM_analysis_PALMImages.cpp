@@ -39,10 +39,10 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 		// the amplitude to use when constructing the bitmap depends on the chosen weighing method
 		switch (this->emitterWeighingMethod) {
 			case PALMBITMAP_EMITTERWEIGHING_SAME:
-				calculatedAmplitude = 2 * PI * calculatedDeviation * calculatedDeviation;
+				calculatedAmplitude = 1 / (2 * PI * calculatedDeviation * calculatedDeviation);
 				break;
 			case PALMBITMAP_EMITTERWEIGHING_INTEGRAL:
-				calculatedAmplitude = fittedIntegral / (sqrt2pi * calculatedDeviation);
+				calculatedAmplitude = fittedIntegral / (2 * PI * calculatedDeviation * calculatedDeviation);
 				break;
 			default:
 				throw (std::runtime_error("Unrecognized emitter weighing method while calculating a PALM bitmap"));
