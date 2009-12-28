@@ -366,15 +366,10 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double ImageHeight;
 	int WFlagParamsSet[4];
 	
-	// Parameters for /WEIGHT flag group.
-	int WEIGHTFlagEncountered;
-	double weighing;
-	int WEIGHTFlagParamsSet[1];
-	
-	// Parameters for /E flag group.
-	int EFlagEncountered;
-	double exhaustive;
-	int EFlagParamsSet[1];
+	// Parameters for /WGHT flag group.
+	int WGHTFlagEncountered;
+	double emitterWeighing;
+	int WGHTFlagParamsSet[1];
 	
 	// Parameters for /P flag group.
 	int PFlagEncountered;
@@ -384,11 +379,6 @@ struct MakeBitmapPALMImageRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int colorWaveEncountered;
-	waveHndl colorWave;
-	int colorWaveParamsSet[1];
-	
-	// Parameters for simple main group #1.
 	int positionsWaveEncountered;
 	waveHndl positionsWave;
 	int positionsWaveParamsSet[1];
@@ -400,6 +390,7 @@ struct MakeBitmapPALMImageRuntimeParams {
 typedef struct MakeBitmapPALMImageRuntimeParams MakeBitmapPALMImageRuntimeParams;
 typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParamsPtr;
 #include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+
 
 // Runtime param structure for RipleyKFunctionClustering operation.
 #include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
@@ -1726,9 +1717,9 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->WEIGHTFlagEncountered) {
-		// Parameter: p->weighing
-		emitterWeighing = int(p->weighing + 0.5);
+	if (p->WGHTFlagEncountered) {
+		// Parameter: p->emitterWeighing
+		emitterWeighing = int(p->emitterWeighing + 0.5);
 		if ((emitterWeighing != 0) && (emitterWeighing != 1)) {
 			return EXPECT_POS_NUM;
 		}
@@ -1925,7 +1916,7 @@ static int RegisterMakeBitmapPALMImage(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WEIGHT=number:weighing /E=number:exhaustive /P=number:PSFWidth wave:colorWave, wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /P=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
