@@ -366,6 +366,16 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double ImageHeight;
 	int WFlagParamsSet[4];
 	
+	// Parameters for /WEIGHT flag group.
+	int WEIGHTFlagEncountered;
+	double weighing;
+	int WEIGHTFlagParamsSet[1];
+	
+	// Parameters for /E flag group.
+	int EFlagEncountered;
+	double exhaustive;
+	int EFlagParamsSet[1];
+	
 	// Parameters for /P flag group.
 	int PFlagEncountered;
 	double PSFWidth;
@@ -374,6 +384,11 @@ struct MakeBitmapPALMImageRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
+	int colorWaveEncountered;
+	waveHndl colorWave;
+	int colorWaveParamsSet[1];
+	
+	// Parameters for simple main group #1.
 	int positionsWaveEncountered;
 	waveHndl positionsWave;
 	int positionsWaveParamsSet[1];
@@ -1650,7 +1665,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	int method;
+	int method, emitterWeighing;
 	double scaleFactor, upperLimit, PSFWidth;
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
@@ -1711,6 +1726,16 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
+	if (p->WEIGHTFlagEncountered) {
+		// Parameter: p->weighing
+		emitterWeighing = int(p->weighing + 0.5);
+		if ((emitterWeighing != 0) && (emitterWeighing != 1)) {
+			return EXPECT_POS_NUM;
+		}
+	} else {
+		return TOO_FEW_PARAMETERS;
+	}
+	
 	if (p->PFlagEncountered) {
 		// Parameter: p->PSFWidth
 		if (p->PSFWidth <= 0) {
@@ -1767,7 +1792,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	
 	// do the actual calculation
 	try {
-		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator));
+		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
 		copy_PALMMatrix_float_to_IgorFPWave(image, string("M_PALM"));
@@ -1895,12 +1920,12 @@ static int RegisterConvolveImages(void) {
 }
 
 static int RegisterMakeBitmapPALMImage(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /P=number:PSFWidth wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WEIGHT=number:weighing /E=number:exhaustive /P=number:PSFWidth wave:colorWave, wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);

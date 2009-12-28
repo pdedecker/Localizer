@@ -24,8 +24,8 @@ class PALMBitmapImageDeviationCalculator;
  */
 class PALMBitmapImageCalculator {
 public:
-	PALMBitmapImageCalculator(boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs) {
-		devationCalculator = devationCalculator_rhs;
+	PALMBitmapImageCalculator(boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs, int emitterWeighingMethod_rhs) {
+		devationCalculator = devationCalculator_rhs; emitterWeighingMethod = emitterWeighingMethod_rhs;
 	}
 	~PALMBitmapImageCalculator() {;}
 	
@@ -35,6 +35,7 @@ public:
 	
 protected:
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
+	int emitterWeighingMethod;
 };
 
 

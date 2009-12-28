@@ -30,11 +30,22 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 		fittedXPos = positions->getXPosition(n);
 		fittedYPos = positions->getYPosition(n);
 		
-		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
-		calculatedAmplitude = fittedIntegral / (sqrt2pi * calculatedDeviation);	// keep the integrated intensity the same
-		
 		if ((fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
 			continue;
+		}
+		
+		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
+		
+		// the amplitude to use when constructing the bitmap depends on the chosen weighing method
+		switch (this->emitterWeighingMethod) {
+			case PALMBITMAP_EMITTERWEIGHING_SAME:
+				calculatedAmplitude = 2 * PI * calculatedDeviation * calculatedDeviation;
+				break;
+			case PALMBITMAP_EMITTERWEIGHING_INTEGRAL:
+				calculatedAmplitude = fittedIntegral / (sqrt2pi * calculatedDeviation);
+				break;
+			default:
+				throw (std::runtime_error("Unrecognized emitter weighing method while calculating a PALM bitmap"));
 		}
 		
 		centerX = (size_t)(fittedXPos * imageWidthScaleFactor + 0.5);
