@@ -134,7 +134,7 @@ public:
 	// or from a file containing positions written to disk
 	// the functions will discern the type of positions and return a LocalizedPositionsContainer of the correct type
 	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave);
-	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string& filePath);
+	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string filePath);
 	
 	// constructor and destructor
 	LocalizedPositionsContainer() {;}
@@ -170,8 +170,8 @@ public:
 	virtual void setFrameNumbers(size_t frameNumber) = 0;
 	
 	// save the positions localized this far under different formats
-	virtual waveHndl writePositionsToWave(std::string waveName) const = 0;
-	virtual void writePositionsToFile(std::string filePath) const = 0;
+	virtual waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const = 0;
+	virtual void writePositionsToFile(std::string filePath, std::string waveNote) const = 0;
 	
 	// sort the positions according to ascending frame number, with no guarantees
 	// for the sorting of positions within the same frame
@@ -187,7 +187,7 @@ class LocalizedPositionsContainer_2DGauss : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_2DGauss() {;}
 	LocalizedPositionsContainer_2DGauss(waveHndl wave);
-	LocalizedPositionsContainer_2DGauss(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	LocalizedPositionsContainer_2DGauss(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGauss() {;}
 	
@@ -223,8 +223,8 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const;
-	void writePositionsToFile(std::string filePath) const {;}
+	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGauss left, LocalizedPosition_2DGauss right) {
@@ -240,7 +240,7 @@ class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsC
 public:
 	LocalizedPositionsContainer_2DGaussFixedWidth() {;}
 	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
-	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGaussFixedWidth() {;}
 	
@@ -276,8 +276,8 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const;
-	void writePositionsToFile(std::string filePath) const {;}
+	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
@@ -294,7 +294,7 @@ class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer 
 public:
 	LocalizedPositionsContainer_Centroid() {;}
 	LocalizedPositionsContainer_Centroid(waveHndl wave);
-	LocalizedPositionsContainer_Centroid(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	LocalizedPositionsContainer_Centroid(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Centroid() {;}
 	
@@ -330,8 +330,8 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const;
-	void writePositionsToFile(std::string filePath) const {;}
+	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Centroid left, LocalizedPosition_Centroid right) {
@@ -347,7 +347,7 @@ class LocalizedPositionsContainer_Multiplication : public LocalizedPositionsCont
 public:
 	LocalizedPositionsContainer_Multiplication() {;}
 	LocalizedPositionsContainer_Multiplication(waveHndl wave);
-	LocalizedPositionsContainer_Multiplication(const std::string& filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	LocalizedPositionsContainer_Multiplication(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Multiplication() {;}
 	
@@ -383,8 +383,8 @@ public:
 		}
 	}
 	
-	waveHndl writePositionsToWave(std::string waveName) const;
-	void writePositionsToFile(std::string filePath) const {;}
+	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Multiplication left, LocalizedPosition_Multiplication right) {

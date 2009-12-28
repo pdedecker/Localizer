@@ -313,7 +313,7 @@ LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHnd
 	}
 }
 
-waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string waveName) const {
+waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string waveName, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -368,12 +368,10 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:symmetric 2D Gaussian;");
+	// set the waveNote to the string passed in
 	Handle waveNoteHandle = NewHandle(waveNote.length());
-	if (waveNoteHandle == NULL) {
+	if (waveNoteHandle == NULL)
 		throw std::bad_alloc();
-	}
 	
 	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
 	SetWaveNote(outputWave, waveNoteHandle);
@@ -440,7 +438,7 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 	}
 }
 
-waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std::string waveName) const {
+waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std::string waveName, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -492,8 +490,7 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:symmetric 2D Gaussian with fixed width;");
+	// set the wavenote to the string passed in
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
@@ -573,7 +570,7 @@ LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveH
 	}
 }
 
-waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string waveName) const {
+waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string waveName, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -604,8 +601,7 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:centroid calculation;");
+	// set the wave note to the string passed in
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
@@ -688,7 +684,7 @@ LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multipli
 	}
 }
 
-waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName) const {
+waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -722,8 +718,7 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// add a wavenote containing the type of localization method
-	std::string waveNote("LOCALIZATION METHOD:iterative multiplication;");
+	// set the wave note to the string passed in
 	Handle waveNoteHandle = NewHandle(waveNote.length());
 	if (waveNoteHandle == NULL) {
 		throw std::bad_alloc();
