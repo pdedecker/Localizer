@@ -436,6 +436,12 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	int quiet = 0;
 	int returnErrors = 1;
 	
+	std::ostringstream analysisOptionsStream;	// a stringstream that is built up during the options parsing
+												// and contains the settings that are used
+												// it can be used to add metadata to the fitted positions
+												// such as wave notes or file headers
+												// the information is added in semicolon-separated key:value pairs
+	
 	size_t preprocessing_method;
 	size_t thresholding_method;
 	size_t postprocessing_method;
@@ -465,11 +471,15 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// 0 means Gaussian fitting
 		// 1 means multiplication method (Thompson, Biophys J 2002)
 		method = (int)(p->method + 0.5);
+		analysisOptionsStream << "LOCALIZATION METHOD:" << method << ';';
+	} else {
+		return TOO_FEW_PARAMETERS;
 	}
 	
 	if (p->DFlagEncountered) {
 		// Parameter: p->thresholding_method
 		thresholding_method = (int)(p->thresholding_method + 0.5);
+		analysisOptionsStream << "THRESHOLD METHOD:" << thresholding_method << ';';
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -477,6 +487,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
 		camera_type = (size_t)(p->camera_type + 0.5);
+		analysisOptionsStream << "THRESHOLD METHOD:" << camera_type << ';';
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -492,9 +503,13 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		postprocessing_method = 0;
 	}
 	
+	analysisOptionsStream << "PREPROCESSING:" << preprocessing_method << ';';
+	analysisOptionsStream << "POSTPROCESSING:" << postprocessing_method << ';';
+	
 	if (p->FFlagEncountered) {
 		// Parameter: p->particle_finder
 		particle_finding_method = (int)(p->particle_finder + 0.5);
+		analysisOptionsStream << "PARTICLE FINDING METHOD:" << particle_finding_method << ';';
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -502,6 +517,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->TFlagEncountered) {
 		// Parameter: p->treshold_parameter
 		threshold_parameter = p->treshold_parameter;
+		if (thresholding_method == 0)
+			analysisOptionsStream << "PFA:" << threshold_parameter << ';';
+		if (thresholding_method == 8)
+			analysisOptionsStream << "ABSOLUTE THRESHOLD:" << threshold_parameter << ';';
+			
 	} else {
 		if ((thresholding_method == 0) || (thresholding_method == 8)) {
 			return TOO_FEW_PARAMETERS;
@@ -511,6 +531,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->BFlagEncountered) {
 		// Parameter: p->background
 		background = p->background;
+		analysisOptionsStream << "BACKGROUND:" << background << ';';
 	} else {
 		background = 1000;
 	}
@@ -518,16 +539,24 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->RFlagEncountered) {
 		// Parameter: p->radius
 		radiusBetweenParticles = p->radius;
+		if (particle_finding_method == 2) {
+			analysisOptionsStream << "MINIMUM DISTANCE BETWEEN PARTICLES:" << particle_finding_method << ';';
+		}
 	} else {
-		radiusBetweenParticles = 10;
+		if (particle_finding_method == 2) {
+			return TOO_FEW_PARAMETERS;
+		}
 	}
 	
 	if (p->WFlagEncountered) {
 		// Parameter: p->initial_width
 		initial_width = p->initial_width;
 	} else {
-		initial_width = 4;
+		initial_width = 2;
 	}
+	
+	if (method != 2)
+		analysisOptionsStream << "GAUSSIAN WIDTH:" << initial_width << ';';
 	
 	if (p->EFlagEncountered) {
 		// Parameter: p->min_distance_from_edge
@@ -536,12 +565,16 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		min_distance_from_edge = 11;
 	}
 	
+	analysisOptionsStream << "MIN DISTANCE FROM EDGE:" << min_distance_from_edge << ';';
+	
 	if (p->CFlagEncountered) {
 		// Parameter: p->cutoff_radius
 		cutoff_radius = p->cutoff_radius;
 	} else {
 		cutoff_radius = 10;
 	}
+	
+	analysisOptionsStream << "CUTOFF RADIUS:" << cutoff_radius << ';';
 	
 	if (p->SFlagEncountered) {
 		// Parameter: p->sigma
@@ -611,6 +644,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			}
 			
 			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
+			
+			analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
+			analysisOptionsStream << "CAMERA TYPE::" << camera_type << ';';
+			analysisOptionsStream << "X SIZE:" << image_loader->getXSize() << ';';
+			analysisOptionsStream << "Y SIZE:" << image_loader->getYSize() << ';';
 			
 		} else {	// file path parameter was not supplied from igor
 			return EXPECTED_STRING_EXPR;

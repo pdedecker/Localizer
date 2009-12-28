@@ -57,3 +57,6 @@ The type of localization routine used. Determines the type of positions returns 
 
 17. CALCULATION DATE:<date>
 The date on which the localization analysis was performed.
+
+18. CAMERA TYPE:<integer>
+The type of camera used
