@@ -646,7 +646,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
 			
 			analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
-			analysisOptionsStream << "CAMERA TYPE::" << camera_type << ';';
+			analysisOptionsStream << "CAMERA TYPE:" << camera_type << ';';
 			analysisOptionsStream << "X SIZE:" << image_loader->getXSize() << ';';
 			analysisOptionsStream << "Y SIZE:" << image_loader->getYSize() << ';';
 			
