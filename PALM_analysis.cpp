@@ -368,13 +368,15 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// set the waveNote to the string passed in
-	Handle waveNoteHandle = NewHandle(waveNote.length());
-	if (waveNoteHandle == NULL)
-		throw std::bad_alloc();
-	
-	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-	SetWaveNote(outputWave, waveNoteHandle);
+	if (waveNote.size() != 0) {
+		// set the waveNote to the string passed in
+		Handle waveNoteHandle = NewHandle(waveNote.length());
+		if (waveNoteHandle == NULL)
+			throw std::bad_alloc();
+		
+		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+		SetWaveNote(outputWave, waveNoteHandle);
+	}
 	
 	return outputWave;
 }
@@ -490,14 +492,15 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// set the wavenote to the string passed in
-	Handle waveNoteHandle = NewHandle(waveNote.length());
-	if (waveNoteHandle == NULL) {
-		throw std::bad_alloc();
+	if (waveNote.size() != 0) {
+		// set the waveNote to the string passed in
+		Handle waveNoteHandle = NewHandle(waveNote.length());
+		if (waveNoteHandle == NULL)
+			throw std::bad_alloc();
+		
+		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+		SetWaveNote(outputWave, waveNoteHandle);
 	}
-	
-	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-	SetWaveNote(outputWave, waveNoteHandle);
 	
 	return outputWave;
 }
@@ -601,14 +604,15 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// set the wave note to the string passed in
-	Handle waveNoteHandle = NewHandle(waveNote.length());
-	if (waveNoteHandle == NULL) {
-		throw std::bad_alloc();
+	if (waveNote.size() != 0) {
+		// set the waveNote to the string passed in
+		Handle waveNoteHandle = NewHandle(waveNote.length());
+		if (waveNoteHandle == NULL)
+			throw std::bad_alloc();
+		
+		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+		SetWaveNote(outputWave, waveNoteHandle);
 	}
-	
-	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-	SetWaveNote(outputWave, waveNoteHandle);
 	
 	return outputWave;
 }
@@ -718,14 +722,15 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
 	
-	// set the wave note to the string passed in
-	Handle waveNoteHandle = NewHandle(waveNote.length());
-	if (waveNoteHandle == NULL) {
-		throw std::bad_alloc();
+	if (waveNote.size() != 0) {
+		// set the waveNote to the string passed in
+		Handle waveNoteHandle = NewHandle(waveNote.length());
+		if (waveNoteHandle == NULL)
+			throw std::bad_alloc();
+		
+		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+		SetWaveNote(outputWave, waveNoteHandle);
 	}
-	
-	PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-	SetWaveNote(outputWave, waveNoteHandle);
 	
 	return outputWave;
 }
