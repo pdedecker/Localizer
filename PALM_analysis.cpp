@@ -197,24 +197,24 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 	if (findPosition == (size_t)-1)	// not found
 		throw std::runtime_error("The positions wave does not specify a localization method");
 	
-	findPosition = waveNote.find("LOCALIZATION METHOD:symmetric 2D Gaussian with fixed width");
-	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
-	}
-	
-	findPosition = waveNote.find("LOCALIZATION METHOD:symmetric 2D Gaussian");
+	findPosition = waveNote.find("LOCALIZATION METHOD:0;");
 	if (findPosition != (size_t)-1) {
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
 	}
 	
-	findPosition = waveNote.find("LOCALIZATION METHOD:centroid calculation");
+	findPosition = waveNote.find("LOCALIZATION METHOD:1;");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Centroid(positionsWave));
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
 	}
 	
-	findPosition = waveNote.find("LOCALIZATION METHOD:iterative multiplication");
+	findPosition = waveNote.find("LOCALIZATION METHOD:2");
 	if (findPosition != (size_t)-1) {
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Multiplication(positionsWave));
+	}
+	
+	findPosition = waveNote.find("LOCALIZATION METHOD:3");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Centroid(positionsWave));
 	}
 	
 	// if we are still here then we don't recognize the type of localization used
