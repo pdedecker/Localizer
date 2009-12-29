@@ -99,8 +99,6 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 		
 		// current_image now contains the subtracted image, we should write it to disk
 		output_writer->write_image(current_image);
-		
-		// the output_writer also takes care of freeing current_image
 	}
 	
 	return 0;

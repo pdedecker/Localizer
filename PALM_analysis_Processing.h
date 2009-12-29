@@ -27,13 +27,6 @@
 using namespace std;
 class ImageLoader;
 
-/**** format description: the format in which the data is returned from the fitting functions is as follows: ******/
-// each position has 11 entries, based on the Gaussian fitting
-// these entries are:
-// AMPLITUDE	WIDTH		X		Y		OFFSET		AMP_ERROR	WIDTH_ERROR		X_ERROR		Y_ERROR		OFFSET_ERROR		# OF ITERATIONS
-
-
-
 
 /**
  * @brief An abstract base class from which all other CCD processor classes must derive
