@@ -1785,20 +1785,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		if (p->positionsWave == NULL) {
 			return NOWAV;
 		}
-		
 		positionsWave = p->positionsWave;
-		
-		err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
-		if (err != 0) {
-			return err;
-		}
-		if (numDimensions != 2) {
-			return INCOMPATIBLE_DIMENSIONING;
-		}
-		if (dimensionSizes[1] != N_OUTPUT_PARAMS_PER_FITTED_POSITION + 1) {
-			return INCOMPATIBLE_DIMENSIONING;
-		}
-		
 	} else {
 		return NOWAV;
 	}
