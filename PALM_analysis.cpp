@@ -716,13 +716,13 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 		indices[1] = 1;
 		value[0] = this->positionsVector.at(i).width;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[2] = 1;
+		indices[1] = 2;
 		value[0] = this->positionsVector.at(i).xPosition;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[3] = 2;
+		indices[1] = 3;
 		value[0] = this->positionsVector.at(i).yPosition;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[4] = 3;
+		indices[1] = 4;
 		value[0] = this->positionsVector.at(i).nFramesPresent;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
