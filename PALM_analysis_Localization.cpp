@@ -987,6 +987,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	
 	double x0_initial, y0_initial, amplitude, background;
 	size_t iterations = 0;
+	int converged;
 	
 	double convergence_treshold_squared = convergence_threshold * convergence_threshold;
 	double delta_squared = 10 * convergence_treshold_squared;	// this test the convergence of the position determined by the iteration
@@ -1029,6 +1030,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		current_x = x0_initial - (double)x_offset;	// correct the x- and y-values for the fact that we analyze in a subset of the image rather than the complete frame
 		current_y = y0_initial - (double)y_offset;
 		
+		converged = 1;
 		while (delta_squared > convergence_treshold_squared) {
 			previous_position_x = current_x;
 			previous_position_y = current_y;
@@ -1036,8 +1038,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 			++iterations;
 			
 			if (iterations > 100) {	// the multiplication is not converging, we should stop
-				SetNaN64(&current_x);
-				SetNaN64(&current_y);
+				converged = 0;
 				break;
 			}
 			
@@ -1049,6 +1050,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 			
 			delta_squared = (current_x - previous_position_x) * (current_x - previous_position_x) + (current_y - previous_position_y) * (current_y - previous_position_y);
 		}
+		
+		if (converged == 0)
+			continue;
 		
 		delta_squared = 10 * convergence_treshold_squared;
 		
