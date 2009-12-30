@@ -693,31 +693,31 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		
 		// choose which thresholding we want to do
 		switch(thresholding_method) {
-			case 0:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(threshold_parameter, initial_width));
 				break;
-			case 1:	// Igor's iterative approach
+			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
 				break;
-			case 2:	// Igor's iterative approach
+			case THRESHOLD_METHOD_IGOR_BIMODAL:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
 				break;
-			case 3:	// Igor's adaptive approach
+			case THRESHOLD_METHOD_IGOR_ADAPTIVE:	// Igor's adaptive approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
 				break;
-			case 4:	// Igor's first fuzzy approach
+			case THRESHOLD_METHOD_IGOR_FUZZY_1:	// Igor's first fuzzy approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
 				break;
-			case 5:	// Igor's second fuzzy approach
+			case THRESHOLD_METHOD_IGOR_FUZZY_2:	// Igor's second fuzzy approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
 				break;
-			case 6:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 				break;
-			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+			case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
-			case 8:	// direct threshold
+			case THRESHOLD_METHOD_DIRECT:	// direct threshold
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold_parameter));
 				break;
 			default:
@@ -743,13 +743,13 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		
 		// which particle finding method do we wish to use?
 		switch (particle_finding_method) {
-			case 0:
+			case PARTICLEFINDER_ADJACENT4:
 				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4(min_distance_from_edge));
 				break;
-			case 1:
+			case PARTICLEFINDER_ADJACENT8:
 				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8(min_distance_from_edge));
 				break;
-			case 2:	// traditional radius approach
+			case PARTICLEFINDER_RADIUS:	// traditional radius approach
 				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(min_distance_from_edge, radiusBetweenParticles));
 				break;
 			default:

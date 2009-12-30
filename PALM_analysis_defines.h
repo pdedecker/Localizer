@@ -70,6 +70,20 @@ const int CAMERA_TYPE_SIMPLE = 4;	// a custom, very simple image format. Not cur
 const int CAMERA_TYPE_ZEISS = 5;	// Zeiss .lsm files. Not working currently
 const int CAMERA_TYPE_IGOR_WAVE = 6;
 
+const int THRESHOLD_METHOD_GLRT = 0;
+const int THRESHOLD_METHOD_IGOR_ITERATIVE = 1;
+const int THRESHOLD_METHOD_IGOR_BIMODAL = 2;
+const int THRESHOLD_METHOD_IGOR_ADAPTIVE = 3;
+const int THRESHOLD_METHOD_IGOR_FUZZY_1 = 4;
+const int THRESHOLD_METHOD_IGOR_FUZZY_2 = 5;
+const int THRESHOLD_METHOD_ISODATA = 6;
+const int THRESHOLD_METHOD_TRIANGLE = 7;
+const int THRESHOLD_METHOD_DIRECT = 8;
+
+const int PARTICLEFINDER_ADJACENT4 = 0;
+const int PARTICLEFINDER_ADJACENT8 = 1;
+const int PARTICLEFINDER_RADIUS = 2;
+
 const int IMAGE_OUTPUT_TYPE_TIFF = 0;
 const int IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF = 1;
 const int IMAGE_OUTPUT_TYPE_IGOR = 2;
