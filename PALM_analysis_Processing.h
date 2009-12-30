@@ -20,7 +20,6 @@
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
-#include "XOPStandardHeaders.h"
 
 
 

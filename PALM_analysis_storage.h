@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 #include "boost/smart_ptr.hpp"
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
