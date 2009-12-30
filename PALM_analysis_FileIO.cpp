@@ -153,7 +153,6 @@ uint32 getUINT32FromCharArray(char *array, size_t offset) {
 
 
 ImageLoader::ImageLoader() {
-	path.assign("");
 	total_number_of_images = 0;
 	x_size = 0;
 	y_size = 0;
@@ -183,10 +182,10 @@ ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
 	
 	header_length = 4100;
 	
-	file.open(path.c_str(), ios::binary | ios::in);
+	file.open(path, ios::binary | ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += path;
+		error += path.string();
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -261,7 +260,7 @@ void ImageLoaderSPE::parse_header_information() {
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
-			error += this->path;
+			error += this->path.string();
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
@@ -271,7 +270,7 @@ void ImageLoaderSPE::parse_header_information() {
 	if (file.fail() != 0) {
 		string error;
 		error = "Error parsing the header information in \"";
-		error += path;
+		error += path.string();
 		error += "\" assuming the SPE format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -311,7 +310,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 		default:
 			loadImagesMutex.unlock();
 			std::string error("Unable to determine the storage type used in ");
-			error += this->path;
+			error += this->path.string();
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
@@ -339,7 +338,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			default:
 				loadImagesMutex.unlock();
 				std::string error("Unable to determine the storage type used in ");
-				error += this->path;
+				error += this->path.string();
 				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 				break;
 		}
@@ -352,7 +351,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 		if (file.fail() != 0) {
 			string error;
 			error = "Error trying to read image data from \"";
-			error += path;
+			error += path.string();
 			error += "\" assuming the SPE format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
@@ -423,7 +422,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 			default:
 				loadImagesMutex.unlock();
 				std::string error("Unable to determine the storage type used in ");
-				error += this->path;
+				error += this->path.string();
 				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 				break;
 				
@@ -442,10 +441,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	
-	file.open(path.c_str(), ios::binary | ios::in);
+	file.open(path, ios::binary | ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Error opening the file at ");
-		error += path;
+		error += path.string();
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -518,7 +517,7 @@ void ImageLoaderAndor::parse_header_information() {
 	if (file.fail() != 0) {
 		string error;
 		error = "Error parsing the header information in \"";
-		error += path;
+		error += path.string();
 		error += "\" assuming the Andor format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -548,7 +547,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 		if (file.fail() != 0) {
 			string error;
 			error = "Error trying to read image data from \"";
-			error += path;
+			error += path.string();
 			error += "\" assuming the Andor format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
@@ -575,10 +574,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	
-	file.open(path.c_str(), ios::binary | ios::in);
+	file.open(path, ios::binary | ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += path;
+		error += path.string();
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -621,7 +620,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	if (header.storageFormat != 2) {	// not UINT16
 		string error;
 		error = "The file at \"";
-		error += path;
+		error += path.string();
 		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -635,7 +634,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	if (file.fail() != 0) {
 		string error;
 		error = "Error parsing the header information in \"";
-		error += path;
+		error += path.string();
 		error += "\" assuming the Hamamatsu format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -667,7 +666,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 		if (file.fail() != 0) {
 			string error;
 			error = "Error reading image data from \"";
-			error += path;
+			error += path.string();
 			error += "\" assuming the Hamamatsu format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
@@ -701,10 +700,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
 	path = rhs;
 	
-	file.open(path.c_str(), ios::binary | ios::in);
+	file.open(path, ios::binary | ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += path;
+		error += path.string();
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -741,7 +740,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 		if (file.fail() != 0) {
 			string error;
 			error = "Error reading image data from \"";
-			error += path;
+			error += path.string();
 			error += "\" assuming the simple image format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
@@ -779,7 +778,7 @@ void SimpleImageLoader::parse_header_information() {
 	if (file.fail() != 0) {
 		string error;
 		error = "Error parsing the header information in \"";
-		error += path;
+		error += path.string();
 		error += "\" assuming the simple image format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -790,10 +789,10 @@ ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
 	
 	tiff_file = NULL;
 	
-	tiff_file = TIFFOpen(path.c_str(), "r");
+	tiff_file = TIFFOpen(path.string().c_str(), "r");
 	if (tiff_file == NULL) {
 		std::string error ("Unable to open the file at ");
-		error += path;
+		error += path.string();
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -823,7 +822,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result != 1) {
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -831,7 +830,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -841,7 +840,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result != 1) {
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -849,7 +848,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" is not a grayscale image";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -872,7 +871,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		default:
 			string error;
 			error = "The SampleFormat of the image at\"";
-			error += path;
+			error += path.string();
 			error += "\" is unknown";
 			throw ERROR_READING_FILE_DATA(error);
 			break;
@@ -895,7 +894,7 @@ void ImageLoaderTIFF::parse_header_information() {
 			default:
 				string error;
 				error = "The SampleFormat of the image at\"";
-				error += path;
+				error += path.string();
 				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
@@ -911,7 +910,7 @@ void ImageLoaderTIFF::parse_header_information() {
 			default:
 				string error;
 				error = "The SampleFormat of the image at\"";
-				error += path;
+				error += path.string();
 				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
@@ -923,7 +922,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result != 1) {
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" does not specify a width";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -935,7 +934,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result != 1) {
 		string error;
 		error = "The image at\"";
-		error += path;
+		error += path.string();
 		error += "\" does not specify a height";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -972,7 +971,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	if (result != 1) {
 		string error;
 		error = "Unable to set the directory to '0' for the image at\"";
-		error += path;
+		error += path.string();
 		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -1015,7 +1014,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 			_TIFFfree(single_scanline_buffer);
 			string error;
 			error = "Unable to set the directory to '0' for the image at\"";
-			error += path;
+			error += path.string();
 			error += "\"";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
@@ -1027,7 +1026,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 				_TIFFfree(single_scanline_buffer);
 				string error;
 				error = "Unable to read a scanline from the image at\"";
-				error += path;
+				error += path.string();
 				error += "\"";
 				loadImagesMutex.unlock();
 				throw ERROR_READING_FILE_DATA(error);
@@ -1097,7 +1096,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 					_TIFFfree(single_scanline_buffer);
 					string error;
 					error = "Invalid floating point data size for the image at\"";
-					error += path;
+					error += path.string();
 					error += "\"";
 					loadImagesMutex.unlock();
 					throw ERROR_READING_FILE_DATA(error);
@@ -1113,7 +1112,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	if (result != 1) {
 		string error;
 		error = "Invalid to set the directory to '0' for the image at\"";
-		error += path;
+		error += path.string();
 		error += "\"";
 		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);

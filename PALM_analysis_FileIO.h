@@ -23,6 +23,8 @@
 #include "stdint.h"
 #include "XOPStandardHeaders.h"
 #include "boost/thread.hpp"
+#include "boost/filesystem.hpp"
+#include "boost/filesystem/fstream.hpp"
 
 using namespace std;
 
@@ -73,9 +75,10 @@ protected:
 	virtual void parse_header_information() = 0;
 	virtual vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
-	string path;
+	boost::filesystem::path path;
 	// ifstream file;
-	XOPFileHandler file;
+	// XOPFileHandler file;
+	boost::filesystem::ifstream file;
 	uint64_t header_length;
 	size_t total_number_of_images;
 	uint64_t x_size;
