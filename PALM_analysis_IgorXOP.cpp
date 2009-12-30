@@ -638,9 +638,16 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				return EXPECTED_STRING_EXPR;
 			}
 			
-			err = ConvertHandleToFilepathString(p->experiment_file, camera_type, data_file_path);
-			if (err != 0) {
-				return err;
+			if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
+				err = ConvertHandleToFilepathString(p->experiment_file, data_file_path);
+				if (err != 0) {
+					return err;
+				}
+			} else {	// if we are loading data from an Igor wave then there is no need to convert
+				err = ConvertHandleToString(p->experiment_file, data_file_path);
+				if (err != 0) {
+					return err;
+				}
 			}
 			
 			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
@@ -899,9 +906,17 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->experiment_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = ConvertHandleToFilepathString(p->experiment_file, camera_type, data_file_path);
-		if (err != 0) {
-			return err;
+		
+		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
+			err = ConvertHandleToFilepathString(p->experiment_file, data_file_path);
+			if (err != 0) {
+				return err;
+			}
+		} else {	// if we are loading data from an Igor wave then there is no need to convert
+			err = ConvertHandleToString(p->experiment_file, data_file_path);
+			if (err != 0) {
+				return err;
+			}
 		}
 		
 		
@@ -1069,9 +1084,16 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->input_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = ConvertHandleToFilepathString(p->input_file, camera_type, input_file_path);
-		if (err != 0) {
-			return err;
+		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
+			err = ConvertHandleToFilepathString(p->input_file, input_file_path);
+			if (err != 0) {
+				return err;
+			}
+		} else {	// if we are loading data from an Igor wave then there is no need to convert
+			err = ConvertHandleToString(p->input_file, input_file_path);
+			if (err != 0) {
+				return err;
+			}
 		}
 	} else {
 		return EXPECTED_STRING_EXPR;
@@ -1083,9 +1105,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			return EXPECTED_STRING_EXPR;
 		}
 		if (outputType == IMAGE_OUTPUT_TYPE_IGOR) {
-			err = ConvertHandleToFilepathString(p->output_file, CAMERA_TYPE_IGOR_WAVE, output_file_path);
+			err = ConvertHandleToString(p->output_file, output_file_path);
 		} else {
-			err = ConvertHandleToFilepathString(p->output_file, CAMERA_TYPE_TIFF, output_file_path);
+			err = ConvertHandleToFilepathString(p->output_file, output_file_path);
 		}
 		if (err != 0) {
 			return err;
@@ -1271,9 +1293,16 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		if (p->input_fileEncountered == 0) {
 			return EXPECTED_STRING_EXPR;
 		}
-		err = ConvertHandleToFilepathString(p->input_file, camera_type, input_file_path);
-		if (err != 0) {
-			return err;
+		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
+			err = ConvertHandleToFilepathString(p->input_file, input_file_path);
+			if (err != 0) {
+				return err;
+			}
+		} else {	// if we are loading data from an Igor wave then there is no need to convert
+			err = ConvertHandleToString(p->input_file, input_file_path);
+			if (err != 0) {
+				return err;
+			}
 		}
 		
 	} else {
@@ -2024,8 +2053,24 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 
 class INCOMPATIBLE_WAVE_FORMAT {};
 
+int ConvertHandleToString(Handle handle, std::string& convertedString) {
+	int err;
+	
+	// determine the type of positions being passed
+	size_t stringLength = GetHandleSize(handle);
+	boost::scoped_array<char> CStringWaveNote(new char[stringLength + 1]);
+	
+	err = GetCStringFromHandle(handle, CStringWaveNote.get(), stringLength);
+	if (err != 0)
+		return err;
+	
+	// save the wavenote as a std::string
+	convertedString.assign(CStringWaveNote.get());
+	
+	return 0;
+}
 
-int ConvertHandleToFilepathString(Handle handle, size_t cameraType, string &output_path) {
+int ConvertHandleToFilepathString(Handle handle, string &output_path) {
 	int err;
 	char handle_char[1024];
 	char handle_char_POSIX[1024];
@@ -2033,11 +2078,6 @@ int ConvertHandleToFilepathString(Handle handle, size_t cameraType, string &outp
 	err = GetCStringFromHandle(handle, handle_char, 1023);
 	if (err != 0) {
 		return err;
-	}
-	
-	if (cameraType == 6) {	// special case: if we are loading from an Igor wave then no conversion is required
-		output_path.assign(handle_char);
-		return 0;
 	}
 	
 	#ifdef _MACINTOSH_
