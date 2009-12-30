@@ -833,6 +833,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			this->errorReportingMutex.unlock();
 			
 			// does the user want to abort?
+#ifdef WITH_IGOR
 			status = CheckAbort(0);
 			if (status == -1) {
 				for (size_t j = 0; j < numberOfThreads; ++j) {
@@ -845,6 +846,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 				progressReporter->CalculationAborted();
 				throw USER_ABORTED("Analysis aborted on user request");
 			}
+#endif // WITH_IGOR
 			
 			// allow the reporter to update with new progress
 			this->acquireFrameForProcessingMutex.lock();
@@ -934,7 +936,6 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	}
 	catch (boost::thread_interrupted) {
 		// the main thread wants us to stop
-		XOPNotice("Interruption caught\r");
 		return;
 	}
 	catch (...) {
