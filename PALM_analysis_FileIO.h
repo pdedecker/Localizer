@@ -75,7 +75,7 @@ protected:
 	virtual void parse_header_information() = 0;
 	virtual vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
-	boost::filesystem::path path;
+	boost::filesystem::path filePath;
 	// ifstream file;
 	// XOPFileHandler file;
 	boost::filesystem::ifstream file;
