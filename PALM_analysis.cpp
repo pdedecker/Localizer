@@ -25,7 +25,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(bo
 	return thresholded_image;
 }
 
-
+#ifdef WITH_IGOR
 boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPositionsFromWave(waveHndl positionsWave) {
 	int err;
 	size_t findPosition;
@@ -77,6 +77,7 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 	// if we are still here then we don't recognize the type of localization used
 	throw std::runtime_error("Unknown localization method (check the wave note of the wave containing the positions)");
 }
+#endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGauss::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -108,6 +109,7 @@ void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<Localiz
 	}
 }
 
+#ifdef WITH_IGOR
 LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -237,7 +239,9 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	
 	return outputWave;
 }
+#endif // #ifdef WITH_IGOR
 
+#ifdef WITH_IGOR
 LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -361,6 +365,7 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 	
 	return outputWave;
 }
+#endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -392,6 +397,7 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_p
 	}
 }
 
+#ifdef WITH_IGOR
 LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -473,6 +479,7 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 	
 	return outputWave;
 }
+#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Centroid::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -504,6 +511,7 @@ void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<Locali
 	}
 }
 
+#ifdef WITH_IGOR
 LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multiplication(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -591,6 +599,7 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 	
 	return outputWave;
 }
+#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Multiplication::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -622,6 +631,7 @@ void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<
 	}
 }
 
+#ifdef WITH_IGOR
 LocalizedPositionsContainer_ZeissPALM::LocalizedPositionsContainer_ZeissPALM(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
 	long numDimensions;
@@ -715,6 +725,7 @@ waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(std::string
 	
 	return outputWave;
 }
+#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_ZeissPALM::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -938,6 +949,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	
 }
 
+#ifdef WITH_IGOR
 void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double percentDone) {
 	char XOPOut[10];
 	if (percentDone - previousPercentage > 10.0) {
@@ -946,6 +958,7 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 		XOPNotice(XOPOut);
 	}
 }
+#endif // WITH_IGOR
 
 boost::shared_ptr<vector<double> > RipleysKFunctionCalculator::CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth) {
 	size_t nBins = (size_t)ceil((endBin - startBin) / binWidth + 0.5);

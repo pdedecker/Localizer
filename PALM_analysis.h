@@ -7,7 +7,6 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
-#include "XOPStandardHeaders.h"
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_defines.h"
@@ -15,6 +14,10 @@
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_Localization.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#ifdef WITH_IGOR
+#include "XOPStandardHeaders.h"
+#endif
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
@@ -145,7 +148,9 @@ public:
 	// these functions handle creating a LocalizedPositionsContainer object from an igor wave
 	// or from a file containing positions written to disk
 	// the functions will discern the type of positions and return a LocalizedPositionsContainer of the correct type
+#ifdef WITH_IGOR
 	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave);
+#endif
 	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string filePath);
 	
 	// constructor and destructor
@@ -182,7 +187,9 @@ public:
 	virtual void setFrameNumbers(size_t frameNumber) = 0;
 	
 	// save the positions localized this far under different formats
+#ifdef WITH_IGOR
 	virtual waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const = 0;
+#endif
 	virtual void writePositionsToFile(std::string filePath, std::string waveNote) const = 0;
 	
 	// sort the positions according to ascending frame number, with no guarantees
@@ -198,7 +205,9 @@ public:
 class LocalizedPositionsContainer_2DGauss : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_2DGauss() {;}
+#ifdef WITH_IGOR
 	LocalizedPositionsContainer_2DGauss(waveHndl wave);
+#endif
 	LocalizedPositionsContainer_2DGauss(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGauss() {;}
@@ -235,7 +244,9 @@ public:
 		}
 	}
 	
+#ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
 	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -251,7 +262,9 @@ protected:
 class LocalizedPositionsContainer_2DGaussFixedWidth : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_2DGaussFixedWidth() {;}
+#ifdef WITH_IGOR
 	LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl wave);
+#endif
 	LocalizedPositionsContainer_2DGaussFixedWidth(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_2DGaussFixedWidth() {;}
@@ -288,7 +301,9 @@ public:
 		}
 	}
 	
+#ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
 	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -305,7 +320,9 @@ protected:
 class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_Centroid() {;}
+#ifdef WITH_IGOR
 	LocalizedPositionsContainer_Centroid(waveHndl wave);
+#endif
 	LocalizedPositionsContainer_Centroid(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Centroid() {;}
@@ -342,7 +359,9 @@ public:
 		}
 	}
 	
+#ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
 	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -358,7 +377,9 @@ protected:
 class LocalizedPositionsContainer_Multiplication : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_Multiplication() {;}
+#ifdef WITH_IGOR
 	LocalizedPositionsContainer_Multiplication(waveHndl wave);
+#endif
 	LocalizedPositionsContainer_Multiplication(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_Multiplication() {;}
@@ -395,7 +416,9 @@ public:
 		}
 	}
 	
+#ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
 	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -411,7 +434,9 @@ protected:
 class LocalizedPositionsContainer_ZeissPALM : public LocalizedPositionsContainer {
 public:
 	LocalizedPositionsContainer_ZeissPALM() {;}
+#ifdef WITH_IGOR
 	LocalizedPositionsContainer_ZeissPALM(waveHndl wave);
+#endif
 	LocalizedPositionsContainer_ZeissPALM(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
 	
 	~LocalizedPositionsContainer_ZeissPALM() {;}
@@ -448,7 +473,9 @@ public:
 		}
 	}
 	
+#ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
 	void writePositionsToFile(std::string filePath, std::string header) const {;}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -541,6 +568,7 @@ protected:
 	double previousPercentage;
 };
 
+#ifdef WITH_IGOR
 /**
  * @brief Print updates on the calculation progress to the Igor command line
  */
@@ -557,6 +585,7 @@ public:
 protected:
 	double previousPercentage;
 };
+#endif // WITH_IGOR
 
 class RipleysKFunctionCalculator {
 public:

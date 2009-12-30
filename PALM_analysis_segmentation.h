@@ -15,12 +15,15 @@
 #include "boost/thread/shared_mutex.hpp"
 #include "PALM_analysis_storage.h"
 #include <fftw3.h>
-#include "XOPStandardHeaders.h"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_histogram.h>
+
+#ifdef WITH_IGOR
+#include "XOPStandardHeaders.h"
+#endif
 
 class ThresholdImage {
 public:
@@ -42,6 +45,7 @@ protected:
 	double threshold;
 };
 
+#ifdef WITH_IGOR
 class ThresholdImage_Igor_Iterative : public ThresholdImage {
 	// making use of a built-in Igor operation
 public:
@@ -101,6 +105,7 @@ public:
 protected:
 	boost::mutex threadMutex;
 };
+#endif // WITH_IGOR
 
 class ThresholdImage_Isodata : public ThresholdImage {
 public:

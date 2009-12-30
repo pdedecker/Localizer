@@ -21,10 +21,13 @@
 #include "PALM_analysis.h"
 #include "tiffio.h"
 #include "stdint.h"
-#include "XOPStandardHeaders.h"
 #include "boost/thread.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
+
+#ifdef WITH_IGOR
+#include "XOPStandardHeaders.h"
+#endif
 
 using namespace std;
 
@@ -134,6 +137,7 @@ protected:
 	
 };
 
+#ifdef WITH_IGOR
 class ImageLoaderIgor : public ImageLoader {
 public:
 	ImageLoaderIgor(string waveName, size_t image_cache_size_rhs);
@@ -146,6 +150,7 @@ protected:
 	
 	waveHndl igor_data_wave;
 };
+#endif // WITH_IGOR
 
 
 
@@ -204,6 +209,7 @@ protected:
 	TIFF *tiff_file;
 };
 
+#ifdef WITH_IGOR
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
 	IgorImageOutputWriter(std::string waveName, size_t xSize, size_t ySize, size_t nImagesTotal, int overwrite);
@@ -219,6 +225,6 @@ protected:
 	waveHndl outputWave;
 	int overwrite;
 };
-
+#endif // WITH_IGOR
 
 #endif

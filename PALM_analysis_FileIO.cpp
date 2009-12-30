@@ -1015,6 +1015,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	return requestedImages;
 }
 
+#ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
 	int err;
 	size_t waveNameOffset;
@@ -1148,6 +1149,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFrom
 	
 	return requestedImages;
 }
+#endif // WITH_IGOR
 
 
 
@@ -1490,7 +1492,7 @@ int TIFFImageOutputWriter::flush_and_close() {
 	return 0;
 }
 
-
+#ifdef WITH_IGOR
 IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t xSize_rhs, size_t ySize_rhs, size_t nImages_rhs, int overwrite_rhs) {
 	this->waveName = waveName_rhs;
 	this->x_size = xSize_rhs;
@@ -1537,3 +1539,4 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > n
 	
 	++n_images_written;
 }
+#endif // WITH_IGOR

@@ -19,7 +19,6 @@
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
-#include "XOPStandardHeaders.h"
 #include <stdexcept>
 
 using namespace std;

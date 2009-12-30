@@ -139,11 +139,11 @@ CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutpu
 	endY = endY_rhs;
 	
 	if ((startX >= endX) || (startY >= endY)) {
-		throw kBadROIDimensions;
+		throw std::runtime_error("Bad limit values specified for cropping");
 	}
 	
 	if ((endX >= x_size) || (endY >= y_size)) {
-		throw kBadROIDimensions;
+		throw std::runtime_error("Bad limit values specified for cropping");
 	}
 	
 	croppedXSize = endX - startX + 1;

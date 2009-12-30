@@ -34,6 +34,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Direct::do_thresho
 	
 }
 
+#ifdef WITH_IGOR
 boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
@@ -523,6 +524,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 	
 	return thresholded_image;
 }
+#endif // WITH_IGOR
 
 boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
 	gsl_histogram *hist;
