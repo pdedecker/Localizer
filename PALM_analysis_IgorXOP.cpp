@@ -826,6 +826,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		XOPNotice("\r");
 		err = SYNERR;
 	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
+	}
 	
 	SetOperationNumVar("V_flag", err);
 	
@@ -969,6 +972,9 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		err = SYNERR;
+	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
 	}
 	
 	SetOperationNumVar("V_flag", err);
@@ -1203,6 +1209,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		XOPNotice("\r");
 		return SYNERR;
 	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
+	}
 	
 	SetOperationNumVar("V_flag", 0.0);
 	return err;
@@ -1355,6 +1364,9 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		return SYNERR;
+	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
 	}
 
 	return 0;
@@ -1641,6 +1653,9 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		XOPNotice("\r");
 		return SYNERR;
 	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
+	}
 	
 	return err;
 }
@@ -1714,6 +1729,9 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		return SYNERR;
+	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
 	}
 	
 	return err;
@@ -1868,6 +1886,9 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		return SYNERR;
+	}
+	catch (...) {
+		return WM_UNKNOWN_ERROR;
 	}
 	
 	return err;
