@@ -27,10 +27,6 @@ class ParticleFinder;
 class FitPositions;
 class PALMAnalysisProgressReporter;
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
-
-int parse_ccd_headers(ImageLoader *image_loader);
-
 
 boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
@@ -569,11 +565,5 @@ public:
 	
 	boost::shared_ptr<vector<double> > CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth);
 };
-
-int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
-
-int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
-
-void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
 #endif

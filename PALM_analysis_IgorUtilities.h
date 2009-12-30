@@ -16,6 +16,19 @@
 
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_storage.h"
+#include "PALM_analysis_FileIO.h"
+
+// Routines that return information on CCD files and image frames to Igor
+int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
+
+int parse_ccd_headers(ImageLoader *image_loader);
+
+// Routines that process CCD files and return data to Igor
+int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
+
+int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
+
+void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY);
 
 
 // Routines to convert between handles and C strings
