@@ -661,28 +661,27 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			return EXPECTED_STRING_EXPR;
 		}
 		
-		
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
-			case 0:	// no preprocessing
+			case PREPROCESSOR_NONE:	// no preprocessing
 				//preprocessor = NULL;	// this is the default for a shared_ptr
 				break;
-			case 1:	// 3x3 median filter
+			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
 				break;
-			case 2:	// 5x5 median filter
+			case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
 				break;
-			case 3:	// 1x1 Gaussian filter
+			case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
 				break;
-			case 4:	// 2x2 Gaussian filter
+			case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
 				break;
-			case 5:	// 3x3 mean filter
+			case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
 				break;
-			case 6:	// 5x5 mean filter
+			case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
 				break;
 			default:
@@ -727,13 +726,13 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		
 		// which postprocessing do we wish to do?
 		switch(postprocessing_method) {
-			case 0:	// no postprocessing
+			case POSTPROCESSOR_NONE:	// no postprocessing
 				//postprocessor = NULL;	// this is the default for a shared_ptr
 				break;
-			case 1:	// remove isolated pixels
+			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
-			case 2:	// reject 'on' pixels that have values below the intensity mean of the image
+			case POSTPROCESSOR_REJECT_PIXELS_BELOW_MEAN:	// reject 'on' pixels that have values below the intensity mean of the image
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemovePixelsBelowMean());
 				break;
 			default:
@@ -757,20 +756,19 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				break;
 		}
 		
-		
 		// which localization method do we wish to use?
 		if (p->MFlagEncountered) {
 			switch (method) {
-				case 0:
+				case LOCALIZATION_METHOD_2DGAUSS:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoff_radius, initial_width, sigma));
 					break;
-				case 1:
+				case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsGaussian_FixedWidth(cutoff_radius, initial_width, sigma));
 					break;
-				case 2:
+				case LOCALIZATION_METHOD_MULTIPLICATION:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, sigma));
 					break;
-				case 3:
+				case LOCALIZATION_METHOD_CENTROID:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
 					break;
 				default:
