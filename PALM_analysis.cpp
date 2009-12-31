@@ -241,6 +241,61 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 }
 #endif // #ifdef WITH_IGOR
 
+void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string filePath, std::string header) const {
+	boost::filesystem::ofstream outputFile;
+	size_t nPositions = this->positionsVector.size();
+	if (nPositions == 0) {
+		throw std::runtime_error("No positions localized!");
+	}
+	
+	outputFile.open(filePath, ios::trunc);
+	if (outputFile.fail()) {
+		throw std::runtime_error("Unable to create the output file");
+	}
+	
+	// write the header. Add an extra newline to be safe.
+	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
+	outputFile << header << "\n";
+	outputFile << "First frame" << "\t";
+	outputFile << "Integrated intensity" << "\t";
+	outputFile << "Fitted PSF standard deviation" << "\t";
+	outputFile << "X position (pixel)" << "\t";
+	outputFile << "Y position (pixel)" << "\t";
+	outputFile << "Background" << "Intensity deviation" << "\t";
+	outputFile << "PSF deviation" << "\t";
+	outputFile << "X position deviation" << "\t";
+	outputFile << "Y position deviation" << "\t";
+	outputFile << "Background deviation" << "\t";
+	outputFile << "Number of frames where this emitter is present" << "\n";
+	
+	// write the actual positions
+	for (std::vector<LocalizedPosition_2DGauss>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+		outputFile << (*it).frameNumber << "\t";
+		outputFile << (*it).integral << "\t";
+		outputFile << (*it).width << "\t";
+		outputFile << (*it).xPosition << "\t";
+		outputFile << (*it).yPosition << "\t";
+		outputFile << (*it).background << "\t";
+		outputFile << (*it).integralDeviation << "\t";
+		outputFile << (*it).widthDeviation << "\t";
+		outputFile << (*it).xPositionDeviation << "\t";
+		outputFile << (*it).yPositionDeviation << "\t";
+		outputFile << (*it).backgroundDeviation << "\t";
+		outputFile << (*it).nFramesPresent << "\t";
+		
+		if (outputFile.fail()) {
+			if (outputFile.is_open()) {
+				outputFile.close();
+			}
+			throw std::runtime_error("Error writing to the localized positions file");
+		}
+	}
+	
+	// write a terminating newline
+	outputFile << std::endl;
+	outputFile.close();
+}
+
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
@@ -367,6 +422,59 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 }
 #endif // #ifdef WITH_IGOR
 
+void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::string filePath, std::string header) const {
+	boost::filesystem::ofstream outputFile;
+	size_t nPositions = this->positionsVector.size();
+	if (nPositions == 0) {
+		throw std::runtime_error("No positions localized!");
+	}
+	
+	outputFile.open(filePath, ios::trunc);
+	if (outputFile.fail()) {
+		throw std::runtime_error("Unable to create the output file");
+	}
+	
+	// write the header. Add an extra newline to be safe.
+	outputFile << "Localized positions using symmetric 2D Gauss fitting with fixed PSF width" << "\n";
+	outputFile << header << "\n";
+	outputFile << "First frame" << "\t";
+	outputFile << "Integrated intensity" << "\t";
+	outputFile << "Fitted PSF standard deviation" << "\t";
+	outputFile << "X position (pixel)" << "\t";
+	outputFile << "Y position (pixel)" << "\t";
+	outputFile << "Background" << "Intensity deviation" << "\t";
+	outputFile << "X position deviation" << "\t";
+	outputFile << "Y position deviation" << "\t";
+	outputFile << "Background deviation" << "\t";
+	outputFile << "Number of frames where this emitter is present" << "\n";
+	
+	// write the actual positions
+	for (std::vector<LocalizedPosition_2DGaussFixedWidth>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+		outputFile << (*it).frameNumber << "\t";
+		outputFile << (*it).integral << "\t";
+		outputFile << (*it).width << "\t";
+		outputFile << (*it).xPosition << "\t";
+		outputFile << (*it).yPosition << "\t";
+		outputFile << (*it).background << "\t";
+		outputFile << (*it).integralDeviation << "\t";
+		outputFile << (*it).xPositionDeviation << "\t";
+		outputFile << (*it).yPositionDeviation << "\t";
+		outputFile << (*it).backgroundDeviation << "\t";
+		outputFile << (*it).nFramesPresent << "\t";
+		
+		if (outputFile.fail()) {
+			if (outputFile.is_open()) {
+				outputFile.close();
+			}
+			throw std::runtime_error("Error writing to the localized positions file");
+		}
+	}
+	
+	// write a terminating newline
+	outputFile << std::endl;
+	outputFile.close();
+}
+
 void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH)
@@ -480,6 +588,46 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 	return outputWave;
 }
 #endif // WITH_IGOR
+
+void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string filePath, std::string header) const {
+	boost::filesystem::ofstream outputFile;
+	size_t nPositions = this->positionsVector.size();
+	if (nPositions == 0) {
+		throw std::runtime_error("No positions localized!");
+	}
+	
+	outputFile.open(filePath, ios::trunc);
+	if (outputFile.fail()) {
+		throw std::runtime_error("Unable to create the output file");
+	}
+	
+	// write the header. Add an extra newline to be safe.
+	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
+	outputFile << header << "\n";
+	outputFile << "First frame" << "\t";
+	outputFile << "X position (pixel)" << "\t";
+	outputFile << "Y position (pixel)" << "\t";
+	outputFile << "Number of frames where this emitter is present" << "\n";
+	
+	// write the actual positions
+	for (std::vector<LocalizedPosition_Centroid>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+		outputFile << (*it).frameNumber << "\t";
+		outputFile << (*it).xPosition << "\t";
+		outputFile << (*it).yPosition << "\t";
+		outputFile << (*it).nFramesPresent << "\t";
+		
+		if (outputFile.fail()) {
+			if (outputFile.is_open()) {
+				outputFile.close();
+			}
+			throw std::runtime_error("Error writing to the localized positions file");
+		}
+	}
+	
+	// write a terminating newline
+	outputFile << std::endl;
+	outputFile.close();
+}
 
 void LocalizedPositionsContainer_Centroid::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -600,6 +748,48 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 	return outputWave;
 }
 #endif // WITH_IGOR
+
+void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::string filePath, std::string header) const {
+	boost::filesystem::ofstream outputFile;
+	size_t nPositions = this->positionsVector.size();
+	if (nPositions == 0) {
+		throw std::runtime_error("No positions localized!");
+	}
+	
+	outputFile.open(filePath, ios::trunc);
+	if (outputFile.fail()) {
+		throw std::runtime_error("Unable to create the output file");
+	}
+	
+	// write the header. Add an extra newline to be safe.
+	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
+	outputFile << header << "\n";
+	outputFile << "First frame" << "\t";
+	outputFile << "Used PSF standard deviation" << "\t";
+	outputFile << "X position (pixel)" << "\t";
+	outputFile << "Y position (pixel)" << "\t";
+	outputFile << "Number of frames where this emitter is present" << "\n";
+	
+	// write the actual positions
+	for (std::vector<LocalizedPosition_Multiplication>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+		outputFile << (*it).frameNumber << "\t";
+		outputFile << (*it).width << "\t";
+		outputFile << (*it).xPosition << "\t";
+		outputFile << (*it).yPosition << "\t";
+		outputFile << (*it).nFramesPresent << "\t";
+		
+		if (outputFile.fail()) {
+			if (outputFile.is_open()) {
+				outputFile.close();
+			}
+			throw std::runtime_error("Error writing to the localized positions file");
+		}
+	}
+	
+	// write a terminating newline
+	outputFile << std::endl;
+	outputFile.close();
+}
 
 void LocalizedPositionsContainer_Multiplication::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable

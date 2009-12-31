@@ -14,6 +14,8 @@
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_Localization.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/filesystem.hpp"
+#include "boost/filesystem/fstream.hpp"
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
@@ -247,7 +249,7 @@ public:
 #ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
 #endif
-	void writePositionsToFile(std::string filePath, std::string header) const {;}
+	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGauss left, LocalizedPosition_2DGauss right) {
@@ -304,7 +306,7 @@ public:
 #ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
 #endif
-	void writePositionsToFile(std::string filePath, std::string header) const {;}
+	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_2DGaussFixedWidth left, LocalizedPosition_2DGaussFixedWidth right) {
@@ -362,7 +364,7 @@ public:
 #ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
 #endif
-	void writePositionsToFile(std::string filePath, std::string header) const {;}
+	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Centroid left, LocalizedPosition_Centroid right) {
@@ -419,7 +421,7 @@ public:
 #ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
 #endif
-	void writePositionsToFile(std::string filePath, std::string header) const {;}
+	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_Multiplication left, LocalizedPosition_Multiplication right) {
@@ -476,7 +478,7 @@ public:
 #ifdef WITH_IGOR
 	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
 #endif
-	void writePositionsToFile(std::string filePath, std::string header) const {;}
+	void writePositionsToFile(std::string filePath, std::string header) const {throw std::runtime_error("There is no meaning to write Zeiss positions to a file");}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
 	static int sortCompareFrameNumber(LocalizedPosition_ZeissPALM left, LocalizedPosition_ZeissPALM right) {
