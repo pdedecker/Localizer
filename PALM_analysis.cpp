@@ -947,12 +947,11 @@ void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<Local
 	}
 }
 
-PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
+PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ThresholdImage> thresholder_rhs,
 											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
 											   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
-	imageLoader = imageLoader_rhs;
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
@@ -965,7 +964,8 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ImageLoader> im
 	this->errorMessage.assign("");
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis() {
+boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs) {
+	this->imageLoader = imageLoader_rhs;
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;

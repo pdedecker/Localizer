@@ -499,15 +499,16 @@ protected:
  */
 class PALMAnalysisController {
 public:
-	PALMAnalysisController(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ThresholdImage> thresholder_rhs,
+	PALMAnalysisController(boost::shared_ptr<ThresholdImage> thresholder_rhs,
 						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
 						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
 	~PALMAnalysisController() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis();
+	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs);
 	// runs a PALM analysis according to the parameters passed in as objects in the constructor
+	// on the data file represented by the imageloader
 	// returns a LocalizedPositionsContainer containing fitted PALM positions
 	
 protected:

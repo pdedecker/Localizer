@@ -785,11 +785,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		} else {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		}
-		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(image_loader, thresholder, preprocessor, 
+		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
 																								   postprocessor, particle_finder, positions_fitter,
 																								   progressReporter));
 		
-		localizedPositions = analysisController->DoPALMAnalysis();
+		localizedPositions = analysisController->DoPALMAnalysis(image_loader);
 		localizedPositions->writePositionsToWave(std::string("POS_out"), analysisOptionsStream.str());
 	}
 	catch (std::bad_alloc) {
