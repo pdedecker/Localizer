@@ -959,13 +959,13 @@ PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ThresholdImage>
 	fitPositions = fitPositions_rhs;
 	progressReporter = progressReporter_rhs;
 	
-	nImages = imageLoader->get_total_number_of_images();
-	
 	this->errorMessage.assign("");
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs) {
 	this->imageLoader = imageLoader_rhs;
+	this->nImages = imageLoader->get_total_number_of_images();
+	
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
 	vector<boost::shared_ptr<boost::thread> > threads;
@@ -1150,6 +1150,14 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 	}
 }
 #endif // WITH_IGOR
+
+void PALMAnalysisProgressReporter_stdout::UpdateCalculationProgress(double percentDone) {
+	if (percentDone - previousPercentage > 10.0) {
+		previousPercentage = floor(percentDone / 10.0) * 10.0;
+		cout << previousPercentage << "% ";
+		cout.flush();
+	}
+}
 
 boost::shared_ptr<vector<double> > RipleysKFunctionCalculator::CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth) {
 	size_t nBins = (size_t)ceil((endBin - startBin) / binWidth + 0.5);

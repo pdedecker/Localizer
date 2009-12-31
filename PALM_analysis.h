@@ -590,6 +590,20 @@ protected:
 };
 #endif // WITH_IGOR
 
+class PALMAnalysisProgressReporter_stdout : public PALMAnalysisProgressReporter {
+public:
+	PALMAnalysisProgressReporter_stdout() {previousPercentage = 0;}
+	~PALMAnalysisProgressReporter_stdout() {;}
+	
+	void CalculationStarted() {cout << "Running localization analysis... "; cout.flush();}
+	void UpdateCalculationProgress(double percentDone);
+	void CalculationDone() {cout << "Calculation finished!\n"; cout.flush();}
+	void CalculationAborted() {cout << "Abort requested by user\n"; cout.flush();}
+	
+protected:
+	double previousPercentage;
+};
+
 class RipleysKFunctionCalculator {
 public:
 	RipleysKFunctionCalculator() {;}
