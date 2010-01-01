@@ -69,7 +69,7 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n
 	return images.at(0);
 }
 
-ImageLoaderSPE::ImageLoaderSPE(string rhs, size_t image_cache_size_rhs) {
+ImageLoaderSPE::ImageLoaderSPE(string rhs) {
 	this->filePath = rhs;
 	
 	header_length = 4100;
@@ -330,7 +330,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 	return requestedImages;
 }
 
-ImageLoaderAndor::ImageLoaderAndor(string rhs, size_t image_cache_size_rhs) {
+ImageLoaderAndor::ImageLoaderAndor(string rhs) {
 	this->filePath = rhs;
 	
 	file.open(this->filePath, ios::binary | ios::in);
@@ -463,7 +463,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 	return requestedImages;
 }
 
-ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs, size_t image_cache_size_rhs) {
+ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
 	this->filePath = rhs;
 	
 	file.open(this->filePath, ios::binary | ios::in);
@@ -589,7 +589,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 	return requestedImages;
 }
 
-SimpleImageLoader::SimpleImageLoader(string rhs, size_t image_cache_size_rhs) {
+SimpleImageLoader::SimpleImageLoader(string rhs) {
 	this->filePath = rhs;
 	
 	file.open(this->filePath, ios::binary | ios::in);
@@ -676,7 +676,7 @@ void SimpleImageLoader::parse_header_information() {
 	}
 }
 
-ImageLoaderTIFF::ImageLoaderTIFF(string rhs, size_t image_cache_size_rhs) {
+ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
 	this->filePath = rhs;
 	
 	tiff_file = NULL;
@@ -1016,7 +1016,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 }
 
 #ifdef WITH_IGOR
-ImageLoaderIgor::ImageLoaderIgor(string waveName, size_t image_cache_size_rhs) {
+ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	int err;
 	size_t waveNameOffset;
 	string dataFolderPath;

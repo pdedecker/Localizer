@@ -34,7 +34,7 @@ using namespace std;
 
 HOST_IMPORT int main(IORecHandle ioRecHandle);
 
-boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t cache_size = N_SIMULTANEOUS_IMAGE_LOADS);
+boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path);
 
 #endif
 

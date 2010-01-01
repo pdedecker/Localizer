@@ -928,11 +928,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	try {
 		
 		// if we are here then everything should be okay
-		if ((end_image > start_image) && (end_image - start_image < N_SIMULTANEOUS_IMAGE_LOADS))	// if we only want to load a small number of images
-																									// then there's no point to fill up the full cache each time
-			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path, end_image - start_image);
-		else
-			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
+		image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
 		
 		if (header_only == 0) {
 			err = load_partial_ccd_image(image_loader.get(), start_image, end_image);
@@ -2073,32 +2069,31 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 class INCOMPATIBLE_WAVE_FORMAT {};
 
 
-boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path, size_t image_cache_size) {
-	// image_cache_size has a default value of N_SIMULTANEOUS_IMAGE_LOADS
+boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, string data_file_path) {
 	
 	boost::shared_ptr<ImageLoader> image_loader;
 	
 	switch (camera_type) {
 		case 0:	// spe files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
 			break;
 		case 1:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
 			break;
 		case 2:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
 			break;
 		case 3:	// 3 is reserved for TIFF files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
 		case 4:
-			image_loader = boost::shared_ptr<ImageLoader>(new SimpleImageLoader(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new SimpleImageLoader(data_file_path));
 			break;
 		case 5:	// Zeiss lsm files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
 		case 6: // Matrix wave in Igor
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path, image_cache_size));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
 			break;
 		default:
 			throw UNSUPPORTED_CCD_FILE_TYPE;
