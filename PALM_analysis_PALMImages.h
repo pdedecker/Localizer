@@ -19,8 +19,13 @@
 class PALMBitmapImageDeviationCalculator;
 
 /**
- * Given a set of positions, calculate a bitmap image adding an individual Gaussian for every position to the image.
- * Assumes that the positions given are a copy of the positions wave as it is produced in Igor by the fitting routine.
+ * @brief A class responsible for calculating a bitmap PALM output image by adding an individual Gaussian for every position to the image.
+ * The output image is returned as a PALMMatrix<float>.
+ * 
+ * PALMBitmapImageCalculator takes a set of positions in a LocalizedPositionsContainer and creates an output image (2D) with sizes (xSize, ySize).
+ * For every position it adds a Gaussian to the output image with an integrated contribution that is either equal to to integrated intensity
+ * of the fitted emission, or equal to one, depending on the value of emitterWeighingMethod_rhs. The standard deviation of the Gaussian
+ * is determined by which of the PALMBitmapImageDeviationCalculator is passed into the constructor.
  */
 class PALMBitmapImageCalculator {
 public:
@@ -38,7 +43,9 @@ protected:
 	int emitterWeighingMethod;
 };
 
-
+/**
+ * @brief An abstract base class from which the other PALMBitmapImageDeviationCalculators derive
+ */
 class PALMBitmapImageDeviationCalculator {
 public:
 	PALMBitmapImageDeviationCalculator() {;}
@@ -47,6 +54,12 @@ public:
 	virtual double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) = 0;
 };
 
+/**
+ * @brief Assumes that the uncertainty reported from the fit provides a reliable estimate of the fitting error,
+ * potentially scaled by a scalefactor (such that the standard deviation of the Gaussian is scaleFactor * reported error).
+ * The upperlimit value is present since occasionally the fitting routine may enter an unstable region produce erratic values.
+ * Points that have reported errors over upperLimit will be rejected.
+ */
 class PALMBitmapImageDeviationCalculator_FitUncertainty : public PALMBitmapImageDeviationCalculator {
 public:
 	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
@@ -59,6 +72,10 @@ private:
 	double upperLimit;
 };
 
+/**
+ * @brief Assumes that the positional error is more or less the same for every emitter and is given as an
+ * argument to the constructor.
+ */
 class PALMBitmapImageDeviationCalculator_Constant : public PALMBitmapImageDeviationCalculator {
 public:
 	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
@@ -70,6 +87,10 @@ private:
 	double deviation;
 };
 
+/**
+ * @brief Assumes that the positional error can be estimated as the width of the point-spread function divided
+ * by some scalefactor times the square root of the fitted intensity.
+ */
 class PALMBitmapImageDeviationCalculator_IntegralSquareRoot : public PALMBitmapImageDeviationCalculator {
 public:
 	PALMBitmapImageDeviationCalculator_IntegralSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}

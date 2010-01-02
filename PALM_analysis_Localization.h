@@ -45,7 +45,7 @@ public:
 };
 
 /**
- * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting.
+ * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting of a symmetric 2D Gaussian.
  */
 class FitPositionsGaussian : public FitPositions {
 public:
@@ -60,6 +60,9 @@ protected:
 	double r_initial;
 };
 
+/**
+ * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting of a symmetric 2D Gaussian with a fixed standard deviation
+ */
 class FitPositionsGaussian_FixedWidth : public FitPositions {
 public:
 	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
@@ -86,11 +89,11 @@ protected:
 	double r_initial;
 };*/
 
+/**
+ * @brief fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
+ * if this converges then we assume that we have found the actual position. A description is given in Thompson, Biophys J 82:2775 2002.
+ */
 class FitPositionsMultiplication : public FitPositions {
-	// fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
-	// if this converges then we assume that we have found the actual position
-	
-	// a description is given in Thompson, Biophys J 82:2775 2002
 public:
 	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
@@ -109,6 +112,9 @@ protected:
 	double r_initial;
 };
 
+/**
+ * @brief fits the positions by calculating weighted averages for x and y using the intensity of the emission at each point as the weight.
+ */
 class FitPositionsCentroid : public FitPositions {
 	// fits the positions by calculating a centroid for the pixel values
 	

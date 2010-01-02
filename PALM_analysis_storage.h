@@ -57,7 +57,9 @@ protected:
 	double background;
 };
 
-
+/**
+ * @brief The main storage class for containing 2D images.
+ */
 template <typename T> class PALMMatrix {
 public:
 	PALMMatrix(size_t xSize_rhs, size_t ySize_rhs);
@@ -378,7 +380,9 @@ template <typename T> const PALMMatrix<T> PALMMatrix<T>::RaiseToPower(const doub
 	return result;
 }
 
-
+/**
+ * @brief The main storage class for containing 3D volumes.
+ */
 template <typename T> class PALMVolume {
 public:
 	PALMVolume(size_t xSize_rhs, size_t ySize_rhs, size_t zSize_rhs);
