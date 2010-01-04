@@ -22,12 +22,12 @@ using namespace std;
 /**
  * @brief A simple container holding the coordinates of a single point in 3D space
  */
-class Point {
+class Point3D {
 public:
 	double xPosition;
 	double yPosition;
 	double zPosition;
-}
+};
 
 /**
  * @brief A more complex container containing the coordinates of a single point in 2D space
