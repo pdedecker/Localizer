@@ -112,21 +112,30 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
 	
 	for (size_t i = 0; i < nInputFiles; ++i) {
-		// get an imageloader and output file path
-		imageLoader = GetImageLoader(inputFiles.at(i));
-		outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
-		
-		// if there is more than one input file then tell the user which inputfile is being processed
-		if (nInputFiles > 1) {
-			cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
-			cout.flush();
+		try {
+			// get an imageloader and output file path
+			imageLoader = GetImageLoader(inputFiles.at(i));
+			outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
+			
+			// if there is more than one input file then tell the user which inputfile is being processed
+			if (nInputFiles > 1) {
+				cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
+				cout.flush();
+			}
+			
+			// do the analysis
+			fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
+			
+			// write the output
+			fittedPositions->writePositionsToFile(outputFilePath, std::string(""));
 		}
-		
-		// do the analysis
-		fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
-		
-		// write the output
-		fittedPositions->writePositionsToFile(outputFilePath, std::string(""));
+		catch (std::runtime_error e) {
+			cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
+		}
+		catch (...) {
+			cerr << "the file at " << inputFiles.at(i) << " failed for an unknown reason" << std::endl;
+		}
+			
 	}
 	
 	return 0;
@@ -216,7 +225,7 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cuto
 	if (name == std::string("multiplication"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoffRadius, psfWidth, sigma));
 	
-	if (name == std::string("centoid"))
+	if (name == std::string("centroid"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoffRadius));
 	
 	// if we get here then we didn't recognize the localizing algorithm
