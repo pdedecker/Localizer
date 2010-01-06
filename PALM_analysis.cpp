@@ -973,8 +973,10 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	int firstThreadHasFinished, status;
 	double percentDone;
 	
+	this->localizedPositions = boost::shared_ptr<LocalizedPositionsContainer>();
+	
 	if (this->nImages == 0) {	// if there are no images to load, do not do any processing
-		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
+		return this->localizedPositions;
 	}
 	
 	numberOfThreads = numberOfProcessors + 1;	// take one extra thread since every thread will be blocked on I/O sooner or later
