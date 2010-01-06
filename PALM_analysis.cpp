@@ -281,7 +281,7 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 		outputFile << (*it).xPositionDeviation << "\t";
 		outputFile << (*it).yPositionDeviation << "\t";
 		outputFile << (*it).backgroundDeviation << "\t";
-		outputFile << (*it).nFramesPresent << "\t";
+		outputFile << (*it).nFramesPresent << "\n";
 		
 		if (outputFile.fail()) {
 			if (outputFile.is_open()) {
@@ -460,7 +460,7 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 		outputFile << (*it).xPositionDeviation << "\t";
 		outputFile << (*it).yPositionDeviation << "\t";
 		outputFile << (*it).backgroundDeviation << "\t";
-		outputFile << (*it).nFramesPresent << "\t";
+		outputFile << (*it).nFramesPresent << "\n";
 		
 		if (outputFile.fail()) {
 			if (outputFile.is_open()) {
@@ -614,7 +614,7 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 		outputFile << (*it).frameNumber << "\t";
 		outputFile << (*it).xPosition << "\t";
 		outputFile << (*it).yPosition << "\t";
-		outputFile << (*it).nFramesPresent << "\t";
+		outputFile << (*it).nFramesPresent << "\n";
 		
 		if (outputFile.fail()) {
 			if (outputFile.is_open()) {
@@ -776,7 +776,7 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 		outputFile << (*it).width << "\t";
 		outputFile << (*it).xPosition << "\t";
 		outputFile << (*it).yPosition << "\t";
-		outputFile << (*it).nFramesPresent << "\t";
+		outputFile << (*it).nFramesPresent << "\n";
 		
 		if (outputFile.fail()) {
 			if (outputFile.is_open()) {
