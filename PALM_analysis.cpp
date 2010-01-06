@@ -977,7 +977,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
 	}
 	
-	numberOfThreads = numberOfProcessors * 2;	// take two threads for every processor since every thread will be blocked on I/O sooner or later
+	numberOfThreads = numberOfProcessors + 1;	// take one extra thread since every thread will be blocked on I/O sooner or later
 	if (numberOfThreads == 0) {
 		numberOfThreads = 1;
 	}
