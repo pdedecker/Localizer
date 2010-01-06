@@ -438,6 +438,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
+	}
+	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
@@ -614,6 +621,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 																								  size_t startPos, size_t endPos) {
 	
 	// some safety checks
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> (new LocalizedPositionsContainer_2DGaussFixedWidth());
+	}
+	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
@@ -968,6 +982,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 																							 size_t startPos, size_t endPos) {
 	
 	// some safety checks
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer_Multiplication> (new LocalizedPositionsContainer_Multiplication());
+	}
+	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
@@ -1124,6 +1145,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer_Centroid> (new LocalizedPositionsContainer_Centroid());
+	}
+	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsCentroid::fit_positions";
