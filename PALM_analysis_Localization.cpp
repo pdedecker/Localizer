@@ -425,20 +425,20 @@ int Ellipsoidal_Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, voi
  return GSL_SUCCESS;
  } */
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions) {
 	size_t startPosition, endPosition;
 	
 	startPosition = 0;
-	endPosition = positions->getXSize() - 1;
+	endPosition = positions->size() - 1;
 	
 	return fit_positions(image, positions, startPosition, endPosition);
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
+	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
@@ -507,10 +507,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	for (size_t i = startPos; i <= endPos; i++) {
 		iterations = 0;
 		
-		amplitude = positions->get(i, 0);
-		x0_initial = positions->get(i, 1);
-		y0_initial = positions->get(i, 2);
-		background = positions->get(i, 3);
+		amplitude = (*positions)[i].get_intensity();
+		x0_initial = (*positions)[i].get_x();
+		y0_initial = (*positions)[i].get_y();
+		background = (*positions)[i].get_background();
 		
 		x_offset = x0_initial - cutoff_radius;
 		y_offset = y0_initial - cutoff_radius;
@@ -610,11 +610,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																								  size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
+	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
@@ -683,10 +683,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 	for (size_t i = startPos; i <= endPos; i++) {
 		iterations = 0;
 		
-		amplitude = positions->get(i, 0);
-		x0_initial = positions->get(i, 1);
-		y0_initial = positions->get(i, 2);
-		background = positions->get(i, 3);
+		amplitude = (*positions)[i].get_intensity();
+		x0_initial = (*positions)[i].get_x();
+		y0_initial = (*positions)[i].get_y();
+		background = (*positions)[i].get_background();
 		
 		x_offset = x0_initial - cutoff_radius;
 		y_offset = y0_initial - cutoff_radius;
@@ -964,11 +964,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 }*/
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																							 size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
+	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
@@ -1005,10 +1005,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	image_subset_mask = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
 	
 	for (size_t i = startPos; i <= endPos; ++i) {
-		amplitude = positions->get(i, 0);
-		x0_initial = positions->get(i, 1);
-		y0_initial = positions->get(i, 2);
-		background = positions->get(i, 3);
+		amplitude = (*positions)[i].get_intensity();
+		x0_initial = (*positions)[i].get_x();
+		y0_initial = (*positions)[i].get_y();
+		background = (*positions)[i].get_background();
 		
 		x_offset = (size_t)x0_initial - cutoff_radius;
 		y_offset = (size_t)y0_initial - cutoff_radius;
@@ -1120,11 +1120,11 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<PALMMat
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
+	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsCentroid::fit_positions";
 		throw std::range_error(error);
@@ -1148,8 +1148,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
 	
 	for (size_t i = startPos; i <= endPos; ++i) {
-		x0_initial = positions->get(i, 1);
-		y0_initial = positions->get(i, 2);
+		x0_initial = (*positions)[i].get_x();
+		y0_initial = (*positions)[i].get_y();
 		current_x = 0;
 		current_y = 0;
 		denominator = 0;

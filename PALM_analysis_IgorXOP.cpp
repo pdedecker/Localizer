@@ -1379,7 +1379,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
 	boost::shared_ptr<PALMMatrix<double> > CCD_Frame;
-	boost::shared_ptr<PALMMatrix<double> > located_particles;
+	boost::shared_ptr<std::vector<position> > located_particles;
 	
 	// long numDimensions; 
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1614,8 +1614,33 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		if (output_located_particles == 1) {
 			located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
 			
-			string output_name = "M_locatedParticles";
-			copy_PALMMatrix_to_IgorDPWave(located_particles, output_name);
+			long dimensionSizes[MAX_DIMENSIONS+1];
+			long indices[MAX_DIMENSIONS];
+			waveHndl outputWave;
+			size_t nParticles = (*located_particles).size();
+			dimensionSizes[0] = nParticles;
+			dimensionSizes[1] = 4;	// warning: magic number
+			double value[2];
+			
+			err = MDMakeWave(&outputWave, "M_locatedParticles", NULL, dimensionSizes, NT_FP64, 1);
+			if (err != 0)
+				throw err;
+			
+			for (size_t i = 0; i < nParticles; ++i) {
+				indices[0] = i;
+				indices[1] = 0;
+				value[0] = (*located_particles)[i].get_intensity();
+				MDSetNumericWavePointValue(outputWave, indices, value);
+				indices[1] = 1;
+				value[0] = (*located_particles)[i].get_x();
+				MDSetNumericWavePointValue(outputWave, indices, value);
+				indices[1] = 2;
+				value[0] = (*located_particles)[i].get_y();
+				MDSetNumericWavePointValue(outputWave, indices, value);
+				indices[1] = 3;
+				value[0] = (*located_particles)[i].get_background();
+				MDSetNumericWavePointValue(outputWave, indices, value);
+			}
 		}
 		
 	}

@@ -31,7 +31,7 @@ public:
 	ParticleFinder() {minDistanceFromEdge = 0;}
 	virtual ~ParticleFinder() {;}
 	
-	virtual boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) = 0;
+	virtual boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) = 0;
 protected:
 	double minDistanceFromEdge;
 };
@@ -44,7 +44,7 @@ public:
 	ParticleFinder_radius(double dist, double rhs) {minDistanceFromEdge = dist; radius = rhs;}
 	~ParticleFinder_radius() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 protected:
 	double radius;
 };
@@ -57,7 +57,7 @@ public:
 	ParticleFinder_adjacent4(double rhs) {minDistanceFromEdge = rhs;}
 	~ParticleFinder_adjacent4() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
 	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
@@ -72,7 +72,7 @@ public:
 	ParticleFinder_adjacent8(double rhs) {minDistanceFromEdge = rhs;}
 	~ParticleFinder_adjacent8() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
 	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);

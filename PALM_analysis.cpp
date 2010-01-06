@@ -1066,7 +1066,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
 	boost::shared_ptr<PALMMatrix<double> > currentImage;
 	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
-	boost::shared_ptr<PALMMatrix<double> > locatedParticles;
+	boost::shared_ptr<std::vector<position> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	try {

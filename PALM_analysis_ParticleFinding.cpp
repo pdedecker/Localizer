@@ -9,16 +9,15 @@
 
 #include "PALM_analysis_ParticleFinding.h"
 
-boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
-	vector<position> positions;
-	position position;
+boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
+	boost::shared_ptr<std::vector<position> > positions (new vector<position>());
+	position currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
 	size_t x_size = image->getXSize(), y_size = image->getYSize();
 	size_t number_of_positions;
 	double current_intensity, previous_intensity, current_x, current_y;
 	double distance_squared;
 	double radius_squared = (double)(radius * radius);
-	int skip;
 	double x, y;
 	boost::shared_ptr<PALMMatrix<double> > output_positions;
 	double backgroundIntensity = 0;
@@ -47,66 +46,52 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_radius::findPositions(boos
 			
 			// if we are still here then we need to take a closer look at this point
 			// check if the current point overlaps with a previous point
-			skip = 0;
-			number_of_positions = positions.size();
+			number_of_positions = positions->size();
 			for (size_t k = 0; k < number_of_positions; k++) {
-				x = positions[k].get_x();
-				y = positions[k].get_y();
+				x = (*positions)[k].get_x();
+				y = (*positions)[k].get_y();
 				distance_squared = (current_x - x) * (current_x - x) + (current_y - y) * (current_y - y);
 				
 				if (distance_squared < radius_squared) {
 					// we need to skip one of the two pixels that we are comparing
 					// we will keep the pixel with the largest intensity
-					previous_intensity = positions[k].get_intensity();
+					previous_intensity = (*positions)[k].get_intensity();
 					if (current_intensity > previous_intensity) {
-						positions[k].set_intensity(current_intensity);
-						positions[k].set_x(current_x);
-						positions[k].set_y(current_y);
+						(*positions)[k].set_intensity(current_intensity);
+						(*positions)[k].set_x(current_x);
+						(*positions)[k].set_y(current_y);
 					}
-					skip = 1;
-					break;
+					continue;
 				}
 			}
 			
-			if (skip == 0) {	// we should store this point
-				position.set_intensity(current_intensity);
-				position.set_x(current_x);
-				position.set_y(current_y);
-				positions.push_back(position);
-			}
+			// this position is a new emitter
+			currentPosition.set_intensity(current_intensity);
+			currentPosition.set_x(current_x);
+			currentPosition.set_y(current_y);
+			positions->push_back(currentPosition);
 		}
 	}
 	
-	// now we need to store the data in the standard matrix format
-	// this means that the columns are oriented as intensity, x, y
-	
-	number_of_positions = positions.size();
-	
-	if (number_of_positions == 0) {	// no positions were found
-		return output_positions;	// is equal to NULL due to its initialization as a shared_ptr
-	}
-	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(number_of_positions, 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
-	for (size_t i = 0; i < number_of_positions; i++) {
-		(*output_positions)(i, 0) = positions[i].get_intensity() - backgroundIntensity;
-		(*output_positions)(i, 1) = positions[i].get_x();
-		(*output_positions)(i, 2) = positions[i].get_y();
-		(*output_positions)(i, 3) = backgroundIntensity;
+	// update the amplitudes/intensities on all of the positions
+	for (std::vector<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
+		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
+		(*it).set_background(backgroundIntensity);
 	}
 	
-	return output_positions;
+	
+	return positions;
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<PALMMatrix<double> > output_positions;
+	boost::shared_ptr<std::vector<position> > particles (new vector<position>());
 	list<position> positionsInCurrentParticleList;
 	vector<position> positionsInCurrentParticle;
 	position currentPosition;
-	vector<position> particles;
 	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
 	size_t x_size = image->getXSize();
 	size_t y_size = image->getYSize();
@@ -191,27 +176,19 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent4::findPositions(b
 			if ((average_y < minDistanceFromEdge) || (average_y > ((double)y_size - minDistanceFromEdge)))
 				continue;
 			
-			particles.push_back(currentPosition);
+			particles->push_back(currentPosition);
 		}
 	}
 	
-	// if we have found some particles then return them, else return a null pointer
-	if (particles.size() == 0) {
-		return output_positions;
-	}
-	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
-	// now copy the output to a gsl matrix
-	for (size_t k = 0; k < particles.size(); ++k) {
-		(*output_positions)(k, 0) = particles[k].get_intensity() - backgroundIntensity;
-		(*output_positions)(k, 1) = particles[k].get_x();
-		(*output_positions)(k, 2) = particles[k].get_y();
-		(*output_positions)(k, 3) = backgroundIntensity;
+	// update the amplitudes/intensities on all of the positions
+	for (std::vector<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
+		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
+		(*it).set_background(backgroundIntensity);
 	}
 	
-	return output_positions;
+	return particles;
 	
 }
 
@@ -301,13 +278,12 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<PALMMatrix<double> > output_positions;
 	list<position> positionsInCurrentParticleList;
 	vector<position> positionsInCurrentParticle;
 	position currentPosition;
-	vector<position> particles;
+	boost::shared_ptr<vector<position> > particles(new std::vector<position>);
 	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
 	size_t x_size = image->getXSize();
 	size_t y_size = image->getYSize();
@@ -393,27 +369,19 @@ boost::shared_ptr<PALMMatrix<double> > ParticleFinder_adjacent8::findPositions(b
 			if ((average_y < minDistanceFromEdge) || (average_y > ((double)y_size - minDistanceFromEdge)))
 				continue;
 			
-			particles.push_back(currentPosition);
+			particles->push_back(currentPosition);
 		}
 	}
 	
-	// if we have found some particles then return them, else return a null pointer
-	if (particles.size() == 0) {
-		return output_positions;
-	}
-	
-	output_positions = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(particles.size(), 4));
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
-	// now copy the output to a gsl matrix
-	for (size_t k = 0; k < particles.size(); ++k) {
-		output_positions->set(k, 0, particles[k].get_intensity() - backgroundIntensity);
-		output_positions->set(k, 1, particles[k].get_x());
-		output_positions->set(k, 2, particles[k].get_y());
-		(*output_positions)(k, 3) = backgroundIntensity;
+	// update the amplitudes/intensities on all of the positions
+	for (std::vector<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
+		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
+		(*it).set_background(backgroundIntensity);
 	}
 	
-	return output_positions;
+	return particles;
 	
 }
 
