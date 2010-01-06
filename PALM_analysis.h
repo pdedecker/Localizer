@@ -559,7 +559,7 @@ public:
 
 class PALMAnalysisProgressReporter_Silent : public PALMAnalysisProgressReporter {
 public:
-	PALMAnalysisProgressReporter_Silent() {previousPercentage = 0;}
+	PALMAnalysisProgressReporter_Silent() {;}
 	~PALMAnalysisProgressReporter_Silent() {;}
 	
 	void CalculationStarted() {;}
@@ -577,10 +577,10 @@ protected:
  */
 class PALMAnalysisProgressReporter_IgorCommandLine : public PALMAnalysisProgressReporter {
 public:
-	PALMAnalysisProgressReporter_IgorCommandLine() {previousPercentage = 0;}
+	PALMAnalysisProgressReporter_IgorCommandLine() {;}
 	~PALMAnalysisProgressReporter_IgorCommandLine() {;}
 	
-	void CalculationStarted() {XOPNotice("Running PALM analysis... ");}
+	void CalculationStarted() {previousPercentage = 0; XOPNotice("Running PALM analysis... ");}
 	void UpdateCalculationProgress(double percentDone);
 	void CalculationDone() {XOPNotice("Calculation finished!\r");}
 	void CalculationAborted() {XOPNotice("Abort requested by user\r");}
@@ -592,10 +592,10 @@ protected:
 
 class PALMAnalysisProgressReporter_stdout : public PALMAnalysisProgressReporter {
 public:
-	PALMAnalysisProgressReporter_stdout() {previousPercentage = 0;}
+	PALMAnalysisProgressReporter_stdout() {;}
 	~PALMAnalysisProgressReporter_stdout() {;}
 	
-	void CalculationStarted() {cout << "Running localization analysis... "; cout.flush();}
+	void CalculationStarted() {previousPercentage = 0; cout << "Running localization analysis... "; cout.flush();}
 	void UpdateCalculationProgress(double percentDone);
 	void CalculationDone() {cout << "Calculation finished!\n"; cout.flush();}
 	void CalculationAborted() {cout << "Abort requested by user\n"; cout.flush();}
