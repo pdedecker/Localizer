@@ -419,6 +419,40 @@ int ConvertHandleToFilepathString(Handle handle, string &output_path) {
 	
 }
 
+waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName) {
+	waveHndl DPWave;
+	
+	int err;
+	long indices[MAX_DIMENSIONS];
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	double value[2];
+	
+	
+	size_t nElements = vec->size();
+	
+	dimensionSizes[0] = nElements;
+	dimensionSizes[1] = 0;
+	dimensionSizes[2] = 0;
+	
+	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+	if (err != 0) {
+		throw err;
+	}
+	
+	indices[1] = 0;
+	for (size_t i = 0; i < nElements; ++i) {
+		indices[0] = i;
+		
+		value[0] = (*vec)[i];
+		
+		err = MDSetNumericWavePointValue(DPWave, indices, value);
+		if (err != 0) {
+			throw err;
+		}
+	}
+	
+	return DPWave;
+}
 
 
 boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {

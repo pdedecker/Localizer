@@ -27,6 +27,7 @@
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_PALMImages.h"
 #include "PALM_analysis_IgorUtilities.h"
+#include "PALM_analysis_PositionsProcessing.h"
 
 
 

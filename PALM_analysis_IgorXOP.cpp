@@ -397,12 +397,11 @@ typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParam
 struct RipleyKFunctionClusteringRuntimeParams {
 	// Flag parameters.
 	
-	// Parameters for /RANGE flag group.
-	int RANGEFlagEncountered;
-	double startBin;
-	double endBin;
+	// Parameters for /RNGE flag group.
+	int RNGEFlagEncountered;
 	double binWidth;
-	int RANGEFlagParamsSet[3];
+	double nBins;
+	int RNGEFlagParamsSet[2];
 	
 	// Main parameters.
 	
@@ -1915,19 +1914,51 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 
 static int ExecuteRipleyKFunctionClustering(RipleyKFunctionClusteringRuntimeParamsPtr p) {
 	int err = 0;
+	size_t nBins;
+	double binWidth;
 	
 	// Flag parameters.
 	
-	if (p->RANGEFlagEncountered) {
-		// Parameter: p->startBin
-		// Parameter: p->endBin
+	if (p->RNGEFlagEncountered) {
 		// Parameter: p->binWidth
+		// Parameter: p->nBins
+		if ((p->binWidth <= 0) || (p->nBins <= 0))
+			return EXPECT_POS_NUM;
+		
+		binWidth = p->binWidth;
+		nBins = (size_t)(p->nBins + 0.5);
+		
+	} else {
+		return EXPECT_POS_NUM;
 	}
 	
 	// Main parameters.
 	
 	if (p->positionsWaveEncountered) {
 		// Parameter: p->positionsWave (test for NULL handle before using)
+		if (p->positionsWave == NULL)
+			return NOWAV;
+	}
+	
+	
+	
+	try {
+		boost::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
+		boost::shared_ptr<std::vector<double> > kFunction = CalculateKFunctionClustering(positions, binWidth, nBins);
+		
+		double dimOffset = binWidth / 2.0;
+		double dimDelta = binWidth;
+		waveHndl outputWave = copy_vector_to_IgorDPWave(kFunction, std::string("W_KFunction"));
+		err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return SYNERR;
+	}
+	catch (...) {
+		XOPNotice("An unknown error occurred\r");
+		return SYNERR;
 	}
 	
 	return err;
@@ -2023,7 +2054,7 @@ static int RegisterRipleyKFunctionClustering(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the RipleyKFunctionClusteringRuntimeParams structure as well.
-	cmdTemplate = "RipleyKFunctionClustering /RANGE={number:startBin, number:endBin, number:binWidth} wave:positionsWave";
+	cmdTemplate = "RipleyKFunctionClustering /RNGE={number:binWidth, number:nBins} wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyKFunctionClusteringRuntimeParams), (void*)ExecuteRipleyKFunctionClustering, 0);
@@ -2060,6 +2091,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 	if (result = RegisterConvolveImages())
 		return result;
 	if (result = RegisterMakeBitmapPALMImage())
+		return result;
+	if (result = RegisterRipleyKFunctionClustering())
 		return result;
 	
 	// There are no more operations added by this XOP.

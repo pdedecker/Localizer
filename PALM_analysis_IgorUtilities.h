@@ -37,6 +37,8 @@ int ConvertHandleToString(Handle handle, std::string& convertedString);
 int ConvertHandleToFilepathString(Handle handle, string &output_string);
 
 // routines to convert data from and to Igor format
+waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
+
 boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
 
 waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName);
