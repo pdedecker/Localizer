@@ -1770,9 +1770,6 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMMatrix <float> > image;
 	
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	long numDimensions;
-	
 	// Flag parameters.
 	
 	if (p->MFlagEncountered) {
