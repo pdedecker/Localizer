@@ -1619,6 +1619,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			size_t nParticles = (*located_particles).size();
 			dimensionSizes[0] = nParticles;
 			dimensionSizes[1] = 4;	// warning: magic number
+			dimensionSizes[2] = 0;
 			double value[2];
 			
 			err = MDMakeWave(&outputWave, "M_locatedParticles", NULL, dimensionSizes, NT_FP64, 1);
