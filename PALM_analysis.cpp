@@ -256,6 +256,7 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 	// write the header. Add an extra newline to be safe.
 	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
 	outputFile << header << "\n";
+	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
 	outputFile << "Fitted PSF standard deviation" << "\t";
@@ -437,6 +438,7 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	// write the header. Add an extra newline to be safe.
 	outputFile << "Localized positions using symmetric 2D Gauss fitting with fixed PSF width" << "\n";
 	outputFile << header << "\n";
+	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
 	outputFile << "Fitted PSF standard deviation" << "\t";
@@ -604,7 +606,9 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 	// write the header. Add an extra newline to be safe.
 	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
 	outputFile << header << "\n";
+	
 	outputFile << "First frame" << "\t";
+	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
@@ -764,6 +768,7 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 	// write the header. Add an extra newline to be safe.
 	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
 	outputFile << header << "\n";
+	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Used PSF standard deviation" << "\t";
 	outputFile << "X position (pixel)" << "\t";

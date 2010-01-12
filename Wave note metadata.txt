@@ -4,7 +4,7 @@ Since this is the only place to put metadata, the wave note for a particular pos
 
 The order in which these pairs are stored is irrelevant, but every pair should have a semicolon ';' appended to it. Not all data needs to be stored in a given positions wave, but some downstream rountines may depend on the information contained in these pairs.
 
-Right now only the following pairs are used in the Igor routines: X SIZE, Y SIZE, and LOCALIZATION METHOD.
+Right now only the following pairs are essential for the Igor routines: X SIZE, Y SIZE, and LOCALIZATION METHOD.
 
 1. ORIGINAL FILE PATH:<string>
 A string containing the full path to the data file that the positions were derived from (the file that was analyzed by the localization routines).
