@@ -262,7 +262,8 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 	outputFile << "Fitted PSF standard deviation" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
-	outputFile << "Background" << "Intensity deviation" << "\t";
+	outputFile << "Background" << "\t";
+	outputFile << "Intensity deviation" << "\t";
 	outputFile << "PSF deviation" << "\t";
 	outputFile << "X position deviation" << "\t";
 	outputFile << "Y position deviation" << "\t";
@@ -292,8 +293,6 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 		}
 	}
 	
-	// write a terminating newline
-	outputFile << std::endl;
 	outputFile.close();
 }
 
@@ -444,7 +443,8 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	outputFile << "Fitted PSF standard deviation" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
-	outputFile << "Background" << "Intensity deviation" << "\t";
+	outputFile << "Background" << "\t";
+	outputFile << "Intensity deviation" << "\t";
 	outputFile << "X position deviation" << "\t";
 	outputFile << "Y position deviation" << "\t";
 	outputFile << "Background deviation" << "\t";
@@ -472,8 +472,6 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 		}
 	}
 	
-	// write a terminating newline
-	outputFile << std::endl;
 	outputFile.close();
 }
 
@@ -628,8 +626,6 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 		}
 	}
 	
-	// write a terminating newline
-	outputFile << std::endl;
 	outputFile.close();
 }
 
@@ -791,8 +787,6 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 		}
 	}
 	
-	// write a terminating newline
-	outputFile << std::endl;
 	outputFile.close();
 }
 
