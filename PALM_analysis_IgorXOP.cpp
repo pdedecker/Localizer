@@ -1456,7 +1456,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			return EXPECT_POS_NUM;
 		}
 	} else {
-		if (particle_finding_method == 0) {
+		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}
