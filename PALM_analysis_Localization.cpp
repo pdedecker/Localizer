@@ -576,7 +576,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * SQRT2 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * SQRT2 * 2.0)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 2.0)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
