@@ -612,6 +612,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
 	gsl_vector_free(fit_parameters);
+	gsl_matrix_free(covarianceMatrix);
 	
 	return fitted_positions;
 	
@@ -793,6 +794,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
 	gsl_vector_free(fit_parameters);
+	gsl_matrix_free(covarianceMatrix);
 	
 	return fitted_positions;
 	
