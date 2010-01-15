@@ -571,12 +571,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		}
 		
 		// are the fit results close enough to the initial values to be trusted?
-		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
+		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 2.0)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
