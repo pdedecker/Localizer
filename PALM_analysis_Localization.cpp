@@ -1214,3 +1214,101 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	
 	return fitted_positions;
 }
+
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos) {
+	// TODO: for now we ignore the starting positions and ending position provided as arguments
+	
+	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
+	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
+	boost::shared_ptr<PALMMatrix<double> > subtractedImage;
+	boost::shared_ptr<PALMMatrix <unsigned char> > segmentedImage;
+	boost::shared_ptr<std::vector<position> > locatedParticles;
+	
+	// get an initial set of positions to start from
+	positionsFittedThusFar = this->positionsFitter->fit_positions(image, positions);
+	
+	// if no positions were localized then don't bother
+	if (positionsFittedThusFar->getNPositions() == 0)
+		return positionsFittedThusFar;
+	
+	// check if the type of FitPositions provided returns the required information to reconstruct
+	// a Gaussian emitter
+	if ((positionsFittedThusFar->getIntegral(0) == 0) || (positionsFittedThusFar->getXWidth(0) == 0) || (positionsFittedThusFar->getYWidth(0) == 0) || (positionsFittedThusFar->getBackground(0) == 0))
+		throw std::runtime_error("The selected fitting algorithm does not provide sufficient information for deflation analysis");
+	
+	// set up for iteration
+	positionsLocalizedThisFrame = positionsFittedThusFar;
+	subtractedImage = image;
+	
+	while (positionsLocalizedThisFrame->getNPositions() != 0) {
+		// continue while new positions are still being localized
+		subtractedImage = this->subtractLocalizedPositions(subtractedImage, positionsLocalizedThisFrame);
+		
+		segmentedImage = do_processing_and_thresholding(subtractedImage, this->preprocessor, 
+																					  this->thresholder, this->postprocessor);
+		locatedParticles = this->particleFinder->findPositions(subtractedImage, segmentedImage);
+		positionsLocalizedThisFrame = this->positionsFitter->fit_positions(subtractedImage, locatedParticles);
+		
+		// if we found new particles then append them
+		if (positionsLocalizedThisFrame->getNPositions() != 0) {
+			positionsFittedThusFar->addPositions(positionsLocalizedThisFrame);
+		}
+	}
+	
+	return positionsFittedThusFar;
+	
+}
+
+
+boost::shared_ptr<PALMMatrix<double> > FitPositionsDeflate::subtractLocalizedPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions) {
+	double fittedXPos, fittedYPos, fittedIntegral, fittedXWidth, fittedYWidth;
+	double centerX, centerY, calculatedAmplitude;
+	size_t startX, endX, startY, endY;
+	double distanceXSquared, distanceYSquared, currentIntensity;
+	
+	size_t nPositions = positions->getNPositions();
+	size_t xSize = image->getXSize();
+	size_t ySize = image->getYSize();
+	boost::shared_ptr<PALMMatrix<double> > outputImage(new PALMMatrix<double> (xSize, ySize));
+	outputImage = image;
+	
+	for (size_t n = 0; n < nPositions; ++n) {
+		fittedIntegral = positions->getIntegral(n);
+		fittedXWidth = positions->getXWidth(n);
+		fittedYWidth = positions->getYWidth(n);
+		fittedXPos = positions->getXPosition(n);
+		fittedYPos = positions->getYPosition(n);
+		
+		calculatedAmplitude = fittedIntegral / (2 * PI * fittedXWidth * fittedYWidth);
+		
+		centerX = fittedXPos;
+		centerY = fittedYPos;
+		
+		startX = floor((double)centerX - 4.0 * fittedXWidth);	// only run the calculation over a subset of the image surrounding the position
+		startY = floor((double)centerY - 4.0 * fittedYWidth);
+		endX = ceil((double)centerX + 4.0 * fittedXWidth);
+		endY = ceil((double)centerY + 4.0 * fittedYWidth);
+		
+		if (startX < 0)
+			startX = 0;
+		if (endX >= xSize)
+			endX = xSize - 1;
+		if (startY < 0)
+			startY = 0;
+		if (endY >= ySize)
+			endY = ySize - 1;
+		
+		for (size_t i = startX; i <= endX; ++i) {
+			for (size_t j = startY; j < endY; ++j) {
+				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
+				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
+				currentIntensity = calculatedAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * fittedXWidth * fittedYWidth));
+				
+				(*outputImage)(i, j) = (*outputImage)(i, j) - currentIntensity;
+			}
+		}
+	}
+	return outputImage;
+}
+
+

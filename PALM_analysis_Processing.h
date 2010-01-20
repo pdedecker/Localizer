@@ -25,6 +25,7 @@
 
 using namespace std;
 class ImageLoader;
+class ImageOutputWriter;
 
 
 /**
