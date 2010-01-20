@@ -1523,7 +1523,7 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> 
 	x_size = image->getXSize();
 	y_size = image->getYSize();
 	
-	string error;
+	std::string error;
 	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()";
 	
 	hist = gsl_histogram_alloc(number_of_bins);

@@ -446,13 +446,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	}
 	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		string error;
+		std::string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
-		string error;
+		std::string error;
 		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
@@ -630,13 +630,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 	}
 	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		string error;
+		std::string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
-		string error;
+		std::string error;
 		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
@@ -992,13 +992,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	}
 	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		string error;
+		std::string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
-		string error;
+		std::string error;
 		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
@@ -1155,13 +1155,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	}
 	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		string error;
+		std::string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsCentroid::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
-		string error;
+		std::string error;
 		error = "Start is beyond end in FitPositionsCentroid::fit_positions";
 		throw std::range_error(error);
 	}

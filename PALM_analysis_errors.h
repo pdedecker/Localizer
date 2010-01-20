@@ -13,8 +13,6 @@
 #include <string>
 #include <stdexcept>
 
-using namespace std;
-
 class CANNOT_OPEN_FILE : public std::runtime_error {
 public:
 	CANNOT_OPEN_FILE(const std::string& error_message) :

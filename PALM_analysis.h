@@ -23,7 +23,6 @@
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
 
-using namespace std;
 class ImageLoader;
 class ThresholdImage;
 class ThresholdImage_Preprocessor;
@@ -595,10 +594,10 @@ public:
 	PALMAnalysisProgressReporter_stdout() {;}
 	~PALMAnalysisProgressReporter_stdout() {;}
 	
-	void CalculationStarted() {previousPercentage = 0; cout << "Running localization analysis... "; cout.flush();}
+	void CalculationStarted() {previousPercentage = 0; std::cout << "Running localization analysis... "; std::cout.flush();}
 	void UpdateCalculationProgress(double percentDone);
-	void CalculationDone() {cout << "Calculation finished!\n"; cout.flush();}
-	void CalculationAborted() {cout << "Abort requested by user\n"; cout.flush();}
+	void CalculationDone() {std::cout << "Calculation finished!\n"; std::cout.flush();}
+	void CalculationAborted() {std::cout << "Abort requested by user\n"; std::cout.flush();}
 	
 protected:
 	double previousPercentage;
@@ -609,7 +608,7 @@ public:
 	RipleysKFunctionCalculator() {;}
 	~RipleysKFunctionCalculator() {;}
 	
-	boost::shared_ptr<vector<double> > CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth);
+	boost::shared_ptr<std::vector<double> > CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth);
 };
 
 #endif

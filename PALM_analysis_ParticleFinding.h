@@ -14,8 +14,6 @@
 #include "boost/smart_ptr.hpp"
 #include <list>
 
-using namespace std;
-
 
 /**
  * @brief An abstract base class from which all other 'particle finder' classes must derive
@@ -60,7 +58,7 @@ public:
 	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
-	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
+	void growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
 	
 };
 
@@ -75,7 +73,7 @@ public:
 	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
 	
 protected:
-	void growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
+	void growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image);
 	
 };
 

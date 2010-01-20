@@ -57,7 +57,7 @@ ImageLoader::~ImageLoader() {
 }
 
 boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
-	vector<boost::shared_ptr<PALMMatrix <double> > > images;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > images;
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -69,12 +69,12 @@ boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n
 	return images.at(0);
 }
 
-ImageLoaderSPE::ImageLoaderSPE(string rhs) {
+ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
 	this->filePath = rhs;
 	
 	header_length = 4100;
 	
-	file.open(this->filePath, ios::binary | ios::in);
+	file.open(this->filePath, std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
 		error += this->filePath.string();
@@ -160,7 +160,7 @@ void ImageLoaderSPE::parse_header_information() {
 	
 	// was there an error sometime during this procedure that would have caused the reading to fail?
 	if (file.fail() != 0) {
-		string error;
+		std::string error;
 		error = "Error parsing the header information in \"";
 		error += this->filePath.string();
 		error += "\" assuming the SPE format";
@@ -170,15 +170,15 @@ void ImageLoaderSPE::parse_header_information() {
 	file.seekg(0);
 }
 
-vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
 	unsigned short current_unsigned_short = 0;
-	string error;
+	std::string error;
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
@@ -241,7 +241,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 		
 		file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
 		if (file.fail() != 0) {
-			string error;
+			std::string error;
 			error = "Error trying to read image data from \"";
 			error += this->filePath.string();
 			error += "\" assuming the SPE format";
@@ -330,10 +330,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromD
 	return requestedImages;
 }
 
-ImageLoaderAndor::ImageLoaderAndor(string rhs) {
+ImageLoaderAndor::ImageLoaderAndor(std::string rhs) {
 	this->filePath = rhs;
 	
-	file.open(this->filePath, ios::binary | ios::in);
+	file.open(this->filePath, std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Error opening the file at ");
 		error += this->filePath.string();
@@ -367,8 +367,8 @@ void ImageLoaderAndor::parse_header_information() {
 		}
 	}
 	
-	string headerString(headerBuffer.get());
-	stringstream ss(headerString, ios::in);
+	std::string headerString(headerBuffer.get());
+	std::stringstream ss(headerString, std::ios::in);
 	
 	// the important information on the measurement is on lines 22 and 23 (numbered from 1)
 	for (int i = 0; i < 21; ++i) {
@@ -407,7 +407,7 @@ void ImageLoaderAndor::parse_header_information() {
 	
 	// did some error happen while reading the file?
 	if (file.fail() != 0) {
-		string error;
+		std::string error;
 		error = "Error parsing the header information in \"";
 		error += this->filePath.string();
 		error += "\" assuming the Andor format";
@@ -415,12 +415,12 @@ void ImageLoaderAndor::parse_header_information() {
 	}
 }
 
-vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
@@ -437,7 +437,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 		
 		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
 		if (file.fail() != 0) {
-			string error;
+			std::string error;
 			error = "Error trying to read image data from \"";
 			error += this->filePath.string();
 			error += "\" assuming the Andor format";
@@ -463,10 +463,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFro
 	return requestedImages;
 }
 
-ImageLoaderHamamatsu::ImageLoaderHamamatsu(string rhs) {
+ImageLoaderHamamatsu::ImageLoaderHamamatsu(std::string rhs) {
 	this->filePath = rhs;
 	
-	file.open(this->filePath, ios::binary | ios::in);
+	file.open(this->filePath, std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
 		error += this->filePath.string();
@@ -510,7 +510,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	header.misc = getUINT32FromCharArray(headerBuffer, 32);
 	
 	if (header.storageFormat != 2) {	// not UINT16
-		string error;
+		std::string error;
 		error = "The file at \"";
 		error += this->filePath.string();
 		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.";
@@ -524,7 +524,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	
 	// was there an error reading the file?
 	if (file.fail() != 0) {
-		string error;
+		std::string error;
 		error = "Error parsing the header information in \"";
 		error += this->filePath.string();
 		error += "\" assuming the Hamamatsu format";
@@ -535,11 +535,11 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
@@ -556,7 +556,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 		
 		file.read(single_image_buffer.get(), n_bytes_per_image);
 		if (file.fail() != 0) {
-			string error;
+			std::string error;
 			error = "Error reading image data from \"";
 			error += this->filePath.string();
 			error += "\" assuming the Hamamatsu format";
@@ -589,10 +589,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImage
 	return requestedImages;
 }
 
-SimpleImageLoader::SimpleImageLoader(string rhs) {
+SimpleImageLoader::SimpleImageLoader(std::string rhs) {
 	this->filePath = rhs;
 	
-	file.open(this->filePath, ios::binary | ios::in);
+	file.open(this->filePath, std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
 		error += this->filePath.string();
@@ -608,11 +608,11 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	uint64_t offset;
 	size_t array_offset;
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
@@ -630,7 +630,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFr
 		
 		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
 		if (file.fail() != 0) {
-			string error;
+			std::string error;
 			error = "Error reading image data from \"";
 			error += this->filePath.string();
 			error += "\" assuming the simple image format";
@@ -668,7 +668,7 @@ void SimpleImageLoader::parse_header_information() {
 	file.read((char *)&total_number_of_images, sizeof(size_t));
 	
 	if (file.fail() != 0) {
-		string error;
+		std::string error;
 		error = "Error parsing the header information in \"";
 		error += this->filePath.string();
 		error += "\" assuming the simple image format";
@@ -676,7 +676,7 @@ void SimpleImageLoader::parse_header_information() {
 	}
 }
 
-ImageLoaderTIFF::ImageLoaderTIFF(string rhs) {
+ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 	this->filePath = rhs;
 	
 	tiff_file = NULL;
@@ -712,7 +712,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	// is the image in grayscale format?
 	result = TIFFGetField(tiff_file, TIFFTAG_PHOTOMETRIC, &result_uint16);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" is not a grayscale image";
@@ -720,7 +720,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 	
 	if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" is not a grayscale image";
@@ -730,7 +730,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	// is it a binary image?
 	result = TIFFGetField(tiff_file, TIFFTAG_BITSPERSAMPLE, &result_uint16);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" is not a grayscale image";
@@ -738,7 +738,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 	
 	if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" is not a grayscale image";
@@ -761,7 +761,7 @@ void ImageLoaderTIFF::parse_header_information() {
 			isInt = 0;
 			break;
 		default:
-			string error;
+			std::string error;
 			error = "The SampleFormat of the image at\"";
 			error += this->filePath.string();
 			error += "\" is unknown";
@@ -784,7 +784,7 @@ void ImageLoaderTIFF::parse_header_information() {
 				storage_type = STORAGE_TYPE_UINT32;
 				break;
 			default:
-				string error;
+				std::string error;
 				error = "The SampleFormat of the image at\"";
 				error += this->filePath.string();
 				error += "\" is unknown";
@@ -800,7 +800,7 @@ void ImageLoaderTIFF::parse_header_information() {
 				storage_type = STORAGE_TYPE_FP64;
 				break;
 			default:
-				string error;
+				std::string error;
 				error = "The SampleFormat of the image at\"";
 				error += this->filePath.string();
 				error += "\" is unknown";
@@ -812,7 +812,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	// what is the x size?
 	result = TIFFGetField(tiff_file, TIFFTAG_IMAGEWIDTH, &result_uint32);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" does not specify a width";
@@ -824,7 +824,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	// what is the y size?
 	result = TIFFGetField(tiff_file, TIFFTAG_IMAGELENGTH, &result_uint32);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "The image at\"";
 		error += this->filePath.string();
 		error += "\" does not specify a height";
@@ -861,7 +861,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	
 	result = TIFFSetDirectory(tiff_file, 0);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "Unable to set the directory to '0' for the image at\"";
 		error += this->filePath.string();
 		error += "\"";
@@ -869,7 +869,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 }
 
-vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	char *single_scanline_buffer;
 	char *scanline_pointer;
 	uint16_t current_uint16;
@@ -881,7 +881,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	float *floatPtr;
 	double *doublePtr;
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	int result;
 	
 	loadImagesMutex.lock();
@@ -904,7 +904,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 		result = TIFFSetDirectory(tiff_file, directoryIndices.at(i));
 		if (result != 1) {
 			_TIFFfree(single_scanline_buffer);
-			string error;
+			std::string error;
 			error = "Unable to set the directory to '0' for the image at\"";
 			error += this->filePath.string();
 			error += "\"";
@@ -916,7 +916,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 			result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
 			if (result != 1) {
 				_TIFFfree(single_scanline_buffer);
-				string error;
+				std::string error;
 				error = "Unable to read a scanline from the image at\"";
 				error += this->filePath.string();
 				error += "\"";
@@ -986,7 +986,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 					
 				default:
 					_TIFFfree(single_scanline_buffer);
-					string error;
+					std::string error;
 					error = "Invalid floating point data size for the image at\"";
 					error += this->filePath.string();
 					error += "\"";
@@ -1002,7 +1002,7 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 	_TIFFfree(single_scanline_buffer);
 	result = TIFFSetDirectory(tiff_file, 0);
 	if (result != 1) {
-		string error;
+		std::string error;
 		error = "Invalid to set the directory to '0' for the image at\"";
 		error += this->filePath.string();
 		error += "\"";
@@ -1016,10 +1016,10 @@ vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFrom
 }
 
 #ifdef WITH_IGOR
-ImageLoaderIgor::ImageLoaderIgor(string waveName) {
+ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	int err;
 	size_t waveNameOffset;
-	string dataFolderPath;
+	std::string dataFolderPath;
 	DataFolderHandle dataFolder;
 	size_t position;
 	int waveType;
@@ -1027,7 +1027,7 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	
 	// did we receive a wavename that does not reference any data folders? (no ':' in the name)
 	// in that case we assume that the wave is located in the current data folder
-	if (waveName.find(':') == string::npos) {
+	if (waveName.find(':') == std::string::npos) {
 		igor_data_wave = FetchWaveFromDataFolder(NULL, waveName.c_str());
 		if (igor_data_wave == NULL) {
 			throw NOWAV;
@@ -1051,7 +1051,7 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 		
 		// if the waveName part is quoted ('') then Igor chokes on this
 		// so we remove the quotes
-		while ((position = waveName.find('\'')) != string::npos) {
+		while ((position = waveName.find('\'')) != std::string::npos) {
 			waveName.erase(position, 1);
 		}
 		
@@ -1115,13 +1115,13 @@ ImageLoaderIgor::ImageLoaderIgor(string waveName) {
 	}
 }
 
-vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	double value[2];
 	long indices[3];
 	int result;
 	
 	boost::shared_ptr<PALMMatrix<double> > image;
-	vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
 	
 	// no mutex locking is required since these calls are all threadsafe
 	
@@ -1158,14 +1158,14 @@ ImageOutputWriter::ImageOutputWriter() {
 	n_images_written = 0;
 }
 
-ImageOutputWriter::ImageOutputWriter(const string &rhs, int overwrite) {
+ImageOutputWriter::ImageOutputWriter(const std::string &rhs, int overwrite) {
 	file_path.assign("");
 	n_images_written = 0;
 }
 
 
 
-SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite) {
+SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int overwrite) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
@@ -1180,20 +1180,20 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const string &rhs,int overwrite
 	}
 	
 	if (overwrite == 0) {
-		ifstream input_test;
-		input_test.open(file_path.c_str(), ios::in | ios::binary);
+		std::ifstream input_test;
+		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
 		input_test.close();
 		if (input_test.fail() == 0) {
 			std::string error("The output file at ");
 			error += this->file_path;
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		} else {
-			file.open(file_path.c_str(), ios::binary | ios::out);
+			file.open(file_path.c_str(), std::ios::binary | std::ios::out);
 		}
 	}
 	
 	if (overwrite != 0) {
-		file.open(file_path.c_str(), ios::binary | ios::out | ios::trunc);	// DANGER: OVERWRITING THE FILE
+		file.open(file_path.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
 	}
 	
 	if (file.fail() != 0) {
@@ -1297,7 +1297,7 @@ int SimpleImageOutputWriter::flush_and_close() {
 }
 
 
-TIFFImageOutputWriter::TIFFImageOutputWriter(const string &rhs,int overwrite, int compression_rhs) {
+TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
@@ -1305,8 +1305,8 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const string &rhs,int overwrite, in
 	compression = compression_rhs;
 	
 	if (overwrite == 0) {
-		ifstream input_test;
-		input_test.open(file_path.c_str(), ios::in | ios::binary);
+		std::ifstream input_test;
+		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
 		input_test.close();
 		if (input_test.fail() == 0) {
 			std::string error("The output file at ");
@@ -1375,7 +1375,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		// make sure that all the image tags have the correct values
 		result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the photometric type for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1385,7 +1385,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		current_uint32 = x_size;
 		result = TIFFSetField(tiff_file, TIFFTAG_IMAGEWIDTH, current_uint32);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the image width for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1395,7 +1395,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		current_uint32 = y_size;
 		result = TIFFSetField(tiff_file, TIFFTAG_IMAGELENGTH, current_uint32);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the image height for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1404,7 +1404,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		
 		result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);	// floating point values
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the SampleFormat for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1414,7 +1414,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		current_uint16 = 32;
 		result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, current_uint16);	// 32 bits per float
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the BitsPerSample for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1423,7 +1423,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		
 		result = TIFFSetField(tiff_file, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the SubFileType for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1433,7 +1433,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		current_uint16 = (uint16_t)n_images_written;
 		result = TIFFSetField(tiff_file, TIFFTAG_PAGENUMBER, current_uint16);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the PageNumber for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1442,7 +1442,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		
 		result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, compression);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to set the compression method for the image at\"";
 			error += file_path;
 			error += "\"";
@@ -1458,7 +1458,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			
 			result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
 			if (result != 1) {
-				string error;
+				std::string error;
 				error = "There was an error writing a scanline for the image at\"";
 				error += file_path;
 				error += "\"";
@@ -1469,7 +1469,7 @@ void TIFFImageOutputWriter::flush_cache() {
 		
 		result = TIFFWriteDirectory(tiff_file);
 		if (result != 1) {
-			string error;
+			std::string error;
 			error = "Unable to write a directory for the image at\"";
 			error += file_path;
 			error += "\"";

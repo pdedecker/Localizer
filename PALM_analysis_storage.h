@@ -17,8 +17,6 @@
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 
-using namespace std;
-
 /**
  * @brief A simple container holding the coordinates of a single point in 3D space
  */
@@ -415,7 +413,7 @@ protected:
 	size_t xSize;
 	size_t ySize;
 	size_t zSize;
-	vector <PALMMatrix<T> > data;
+	std::vector <PALMMatrix<T> > data;
 };
 
 template <typename T> PALMVolume<T>::PALMVolume(size_t xSize_rhs, size_t ySize_rhs, size_t zSize_rhs) {

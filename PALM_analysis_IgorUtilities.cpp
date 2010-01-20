@@ -157,7 +157,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	return 0;
 }
 
-int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
+int construct_summed_intensity_trace(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -215,7 +215,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, string output_wa
 	return 0;
 }
 
-int construct_average_image(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
+int construct_average_image(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -285,7 +285,7 @@ int construct_average_image(ImageLoader *image_loader, string output_wave_name, 
 }
 
 
-void calculateStandardDeviationImage(ImageLoader *image_loader, string output_wave_name, long startX, long startY, long endX, long endY) {
+void calculateStandardDeviationImage(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -384,7 +384,7 @@ int ConvertHandleToString(Handle handle, std::string& convertedString) {
 	return 0;
 }
 
-int ConvertHandleToFilepathString(Handle handle, string &output_path) {
+int ConvertHandleToFilepathString(Handle handle, std::string &output_path) {
 	int err;
 	char handle_char[1024];
 	char handle_char_POSIX[1024];
@@ -496,7 +496,7 @@ boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wa
 	return matrix;
 }
 
-waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, string waveName) {
+waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -552,7 +552,7 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 	return DPWave;
 }
 
-waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float> > matrix, string waveName) {
+waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float> > matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -650,7 +650,7 @@ boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl w
 	return volume;
 }
 
-waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume<double> > volume, string waveName) {
+waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume<double> > volume, std::string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -695,7 +695,7 @@ waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume<double> > vo
 }
 
 
-waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<unsigned short> > volume, string waveName) {
+waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<unsigned short> > volume, std::string waveName) {
 	
 	waveHndl DPWave;
 	

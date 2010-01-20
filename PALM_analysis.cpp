@@ -248,7 +248,7 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, ios::trunc);
+	outputFile.open(filePath, std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -429,7 +429,7 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, ios::trunc);
+	outputFile.open(filePath, std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -596,7 +596,7 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, ios::trunc);
+	outputFile.open(filePath, std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -756,7 +756,7 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, ios::trunc);
+	outputFile.open(filePath, std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -967,7 +967,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
-	vector<boost::shared_ptr<boost::thread> > threads;
+	std::vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	int firstThreadHasFinished, status;
 	double percentDone;
@@ -1113,7 +1113,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			controller->addLocalizedPositionsMutex.unlock();
 		}
 	}
-	catch (runtime_error &e) {
+	catch (std::runtime_error &e) {
 		// an error has appeared somewhere in this thread during the calculation
 		// since there seems to be no easy way to communicate the exception to the
 		// main thread, set an error message in the analysis controller.
@@ -1155,12 +1155,12 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 void PALMAnalysisProgressReporter_stdout::UpdateCalculationProgress(double percentDone) {
 	if (percentDone - previousPercentage > 10.0) {
 		previousPercentage = floor(percentDone / 10.0) * 10.0;
-		cout << previousPercentage << "% ";
-		cout.flush();
+		std::cout << previousPercentage << "% ";
+		std::cout.flush();
 	}
 }
 
-boost::shared_ptr<vector<double> > RipleysKFunctionCalculator::CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth) {
+boost::shared_ptr<std::vector<double> > RipleysKFunctionCalculator::CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth) {
 	size_t nBins = (size_t)ceil((endBin - startBin) / binWidth + 0.5);
 	size_t nPositions = positions->getXSize();
 	
@@ -1179,7 +1179,7 @@ boost::shared_ptr<vector<double> > RipleysKFunctionCalculator::CalculateRipleysK
 	}
 	
 	// allocate the output memory
-	boost::shared_ptr<vector <double> > kFunction(new vector<double>());
+	boost::shared_ptr<std::vector <double> > kFunction(new std::vector<double>());
 	kFunction->resize(nBins, double());
 	
 	// the main and slow calculation loop

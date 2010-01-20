@@ -21,7 +21,6 @@
 #include <gsl/gsl_blas.h>
 #include <stdexcept>
 
-using namespace std;
 class LocalizedPosition;
 class LocalizedPositionsContainer;
 

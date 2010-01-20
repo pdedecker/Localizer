@@ -10,7 +10,7 @@
 #include "PALM_analysis_ParticleFinding.h"
 
 boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
-	boost::shared_ptr<std::vector<position> > positions (new vector<position>());
+	boost::shared_ptr<std::vector<position> > positions (new std::vector<position>());
 	position currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
 	size_t x_size = image->getXSize(), y_size = image->getYSize();
@@ -88,9 +88,9 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 
 boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<std::vector<position> > particles (new vector<position>());
-	list<position> positionsInCurrentParticleList;
-	vector<position> positionsInCurrentParticle;
+	boost::shared_ptr<std::vector<position> > particles (new std::vector<position>());
+	std::list<position> positionsInCurrentParticleList;
+	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
 	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
 	size_t x_size = image->getXSize();
@@ -192,7 +192,7 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPosition
 	
 }
 
-void ParticleFinder_adjacent4::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
+void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -280,10 +280,10 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, list<positi
 
 boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) {
 	
-	list<position> positionsInCurrentParticleList;
-	vector<position> positionsInCurrentParticle;
+	std::list<position> positionsInCurrentParticleList;
+	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
-	boost::shared_ptr<vector<position> > particles(new std::vector<position>);
+	boost::shared_ptr<std::vector<position> > particles(new std::vector<position>);
 	boost::shared_ptr<PALMMatrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
 	size_t x_size = image->getXSize();
 	size_t y_size = image->getYSize();
@@ -385,7 +385,7 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPosition
 	
 }
 
-void ParticleFinder_adjacent8::growParticle(position centerPosition, list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
+void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image, boost::shared_ptr<PALMMatrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	

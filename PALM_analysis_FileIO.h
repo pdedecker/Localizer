@@ -29,15 +29,13 @@
 #include "XOPStandardHeaders.h"
 #endif
 
-using namespace std;
-
 uint16 getUINT16FromCharArray(char *array, size_t offset);
 uint32 getUINT32FromCharArray(char *array, size_t offset);
 
 class ImageLoader {
 public:
 	ImageLoader();
-	ImageLoader(const string rhs);
+	ImageLoader(const std::string rhs);
 	virtual ~ImageLoader();
 	
 	size_t get_total_number_of_images() const {return total_number_of_images;}
@@ -48,7 +46,7 @@ public:
 	
 protected:
 	virtual void parse_header_information() = 0;
-	virtual vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
+	virtual std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
 	boost::filesystem::path filePath;
 	boost::filesystem::ifstream file;
@@ -63,22 +61,22 @@ protected:
 
 class ImageLoaderSPE : public ImageLoader {
 public:
-	ImageLoaderSPE(string rhs);
+	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
 protected:
 	void parse_header_information();
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderAndor : public ImageLoader {
 public:
-	ImageLoaderAndor(string rhs);
+	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
 protected:
 	void parse_header_information();
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -100,38 +98,38 @@ public:
 
 class ImageLoaderHamamatsu : public ImageLoader {
 public:
-	ImageLoaderHamamatsu(string rhs);
+	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
 protected:
 	void parse_header_information();
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
 public:
-	SimpleImageLoader(string rhs);
+	SimpleImageLoader(std::string rhs);
 	~SimpleImageLoader();
 	
 protected:
 	void parse_header_information();
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
-	ImageLoaderTIFF(string rhs);
+	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
 protected:
 	void parse_header_information();
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
 	unsigned int sampleFormat;	// unsigned integer of floating point?
 	// 1 for uint, 3 for floating point (same as tiff specification)
-	vector<size_t> directoryIndices;	// some images in the TIFF format are not actual data, but low resolution previews of other images and such
+	std::vector<size_t> directoryIndices;	// some images in the TIFF format are not actual data, but low resolution previews of other images and such
 	// this means that the image at directory i is not necessarily the i-th experimental frame
 	// we correct for this using this array
 	
@@ -140,12 +138,12 @@ protected:
 #ifdef WITH_IGOR
 class ImageLoaderIgor : public ImageLoader {
 public:
-	ImageLoaderIgor(string waveName);
+	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
 protected:
 	void parse_header_information() {;}
-	vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	// technically we are not reading from disk, but we keep the name since it corresponds to a virtual method in the base class
 	
 	waveHndl igor_data_wave;
@@ -157,10 +155,10 @@ protected:
 class ImageOutputWriter {
 public:
 	ImageOutputWriter();
-	ImageOutputWriter(const string &rhs, int overwrite);
+	ImageOutputWriter(const std::string &rhs, int overwrite);
 	virtual ~ImageOutputWriter() {;}
 	
-	string get_file_path() const {return file_path;}
+	std::string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
 	
 	virtual void write_image(boost::shared_ptr<PALMMatrix<double> > new_image) = 0;
@@ -169,20 +167,20 @@ public:
 	
 protected:
 	
-	string file_path;
-	ofstream file;
+	std::string file_path;
+	std::ofstream file;
 	
 	size_t n_images_written;
 	size_t x_size;
 	size_t y_size;
 	
-	queue <boost::shared_ptr<PALMMatrix<double> > > image_buffer;
+	std::queue <boost::shared_ptr<PALMMatrix<double> > > image_buffer;
 };
 
 
 class SimpleImageOutputWriter : public ImageOutputWriter {
 public:
-	SimpleImageOutputWriter(const string &rhs, int overwrite);
+	SimpleImageOutputWriter(const std::string &rhs, int overwrite);
 	~SimpleImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
@@ -195,7 +193,7 @@ protected:
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	TIFFImageOutputWriter(const string &rhs, int overwrite, int compression_rhs);
+	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs);
 	~TIFFImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
