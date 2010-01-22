@@ -12,9 +12,10 @@
 boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
 	double fittedXPos, fittedYPos, fittedIntegral, fittedDeviation;
-	double centerX, centerY, calculatedAmplitude, calculatedDeviation;
+	double centerX, centerY, calculatedIntegral, calculatedDeviation;
 	size_t startX, endX, startY, endY;
-	double distanceXSquared, distanceYSquared, currentIntensity;
+	double integralX, integralY;
+	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
 	
 	size_t nPositions = positions->getNPositions();
 	boost::shared_ptr<PALMMatrix<float> > outputImage(new PALMMatrix<float> (imageWidth, imageHeight));
@@ -38,10 +39,10 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 		// the amplitude to use when constructing the bitmap depends on the chosen weighing method
 		switch (this->emitterWeighingMethod) {
 			case PALMBITMAP_EMITTERWEIGHING_SAME:
-				calculatedAmplitude = 1 / (2 * PI * calculatedDeviation * calculatedDeviation);
+				calculatedIntegral = 1;
 				break;
 			case PALMBITMAP_EMITTERWEIGHING_INTEGRAL:
-				calculatedAmplitude = fittedIntegral / (2 * PI * calculatedDeviation * calculatedDeviation);
+				calculatedIntegral = fittedIntegral;
 				break;
 			default:
 				throw (std::runtime_error("Unrecognized emitter weighing method while calculating a PALM bitmap"));
@@ -66,11 +67,18 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 		
 		for (size_t i = startX; i <= endX; ++i) {
 			for (size_t j = startY; j < endY; ++j) {
-				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
-				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
-				currentIntensity = calculatedAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * calculatedDeviation * calculatedDeviation));
+				// take into account that each pixel really should contain the integral of the Gaussian
+				// for that calculate the distance of the edge of every pixel to the emitter (in 1D)
+				lowerXEdgeDistance = centerX - (double)i - 0.5;
+				higherXEdgeDistance = centerX - (double)i + 0.5;
 				
-				(*outputImage)(i, j) = (*outputImage)(i, j) + currentIntensity;
+				lowerYEdgeDistance = centerY - (double)j - 0.5;
+				higherYEdgeDistance = centerY - (double)j + 0.5;
+				
+				integralX = gsl_cdf_gaussian_P(higherXEdgeDistance, calculatedDeviation) - gsl_cdf_gaussian_P(lowerXEdgeDistance, calculatedDeviation);
+				integralY = gsl_cdf_gaussian_P(higherYEdgeDistance, calculatedDeviation) - gsl_cdf_gaussian_P(lowerYEdgeDistance, calculatedDeviation);
+				
+				(*outputImage)(i, j) = (*outputImage)(i, j) + integralX * integralY * calculatedIntegral;
 			}
 		}
 	}

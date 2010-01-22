@@ -15,6 +15,7 @@
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
 #include "PALM_analysis_storage.h"
+#include <gsl/gsl_cdf.h>
 
 class PALMBitmapImageDeviationCalculator;
 
