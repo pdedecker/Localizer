@@ -11,6 +11,7 @@
 
 boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
+	int status;
 	double fittedXPos, fittedYPos, fittedIntegral, fittedDeviation;
 	double centerX, centerY, calculatedIntegral, calculatedDeviation;
 	size_t startX, endX, startY, endY;
@@ -33,6 +34,19 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 		if ((fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
 			continue;
 		}
+		
+		#ifdef WITH_IGOR
+		if (n%100 == 0) {
+			// every 100 iterations check if the user wants to abort the calculation
+			status = CheckAbort(0);
+			if (status == -1) {
+				// abort the calculation
+				// just return the image that has been calculated now
+				XOPNotice("Calculation incomplete due to user abort");
+				return outputImage;
+			}
+		}
+		#endif
 		
 		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
 		
