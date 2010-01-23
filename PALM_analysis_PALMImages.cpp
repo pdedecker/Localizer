@@ -12,7 +12,7 @@
 boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
 	int status;
-	double fittedXPos, fittedYPos, fittedIntegral, fittedDeviation;
+	double fittedXPos, fittedYPos, fittedIntegral;
 	double centerX, centerY, calculatedIntegral, calculatedDeviation;
 	size_t startX, endX, startY, endY;
 	double integralX, integralY;
@@ -27,7 +27,6 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 	
 	for (size_t n = 0; n < nPositions; ++n) {
 		fittedIntegral = positions->getIntegral(n);
-		fittedDeviation = positions->getXWidth(n);
 		fittedXPos = positions->getXPosition(n);
 		fittedYPos = positions->getYPosition(n);
 		
