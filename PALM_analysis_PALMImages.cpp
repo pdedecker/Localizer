@@ -25,6 +25,9 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;
 	double imageHeightScaleFactor = (double)(imageHeight - 1) / (double)ySize;
 	
+	// update the progress reporter
+	this->progressReporter->CalculationStarted();
+	
 	for (size_t n = 0; n < nPositions; ++n) {
 		fittedIntegral = positions->getIntegral(n);
 		fittedXPos = positions->getXPosition(n);
@@ -34,18 +37,20 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 			continue;
 		}
 		
-		#ifdef WITH_IGOR
 		if (n%100 == 0) {
-			// every 100 iterations check if the user wants to abort the calculation
+			// every 100 iterations provide a progress update
+			this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0);
+			
+			#ifdef WITH_IGOR
 			status = CheckAbort(0);
 			if (status == -1) {
 				// abort the calculation
 				// just return the image that has been calculated now
-				XOPNotice("Calculation incomplete due to user abort");
+				this->progressReporter->CalculationAborted();
 				return outputImage;
 			}
+			#endif
 		}
-		#endif
 		
 		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
 		
@@ -95,5 +100,8 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 			}
 		}
 	}
+	
+	this->progressReporter->CalculationDone();
+	
 	return outputImage;
 }

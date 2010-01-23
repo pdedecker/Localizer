@@ -579,7 +579,7 @@ public:
 	PALMAnalysisProgressReporter_IgorCommandLine() {;}
 	~PALMAnalysisProgressReporter_IgorCommandLine() {;}
 	
-	void CalculationStarted() {previousPercentage = 0; XOPNotice("Running PALM analysis... ");}
+	void CalculationStarted() {previousPercentage = 0; XOPNotice("Running calculation... ");}
 	void UpdateCalculationProgress(double percentDone);
 	void CalculationDone() {XOPNotice("Calculation finished!\r");}
 	void CalculationAborted() {XOPNotice("Abort requested by user\r");}
@@ -594,7 +594,7 @@ public:
 	PALMAnalysisProgressReporter_stdout() {;}
 	~PALMAnalysisProgressReporter_stdout() {;}
 	
-	void CalculationStarted() {previousPercentage = 0; std::cout << "Running localization analysis... "; std::cout.flush();}
+	void CalculationStarted() {previousPercentage = 0; std::cout << "Running calculation... "; std::cout.flush();}
 	void UpdateCalculationProgress(double percentDone);
 	void CalculationDone() {std::cout << "Calculation finished!\n"; std::cout.flush();}
 	void CalculationAborted() {std::cout << "Abort requested by user\n"; std::cout.flush();}
