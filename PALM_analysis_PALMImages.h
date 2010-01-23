@@ -18,6 +18,23 @@
 #include <gsl/gsl_cdf.h>
 
 class PALMBitmapImageDeviationCalculator;
+class NormalCDFLookupTable;
+
+/**
+ * A class that serves as a fast way of obtaining the cumulative distribution function of a normal distribution 
+ * with standard deviation sigma and mean equal to zero
+ *
+ */
+class NormalCDFLookupTable {
+public:
+	NormalCDFLookupTable();
+	~NormalCDFLookupTable() {;}
+	
+	double getNormalCDF(double x, double sigma); 
+	
+protected:
+	boost::shared_array<double> cdfTable;
+};
 
 /**
  * @brief A class responsible for calculating a bitmap PALM output image by adding an individual Gaussian for every position to the image.
@@ -43,6 +60,7 @@ public:
 protected:
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+	NormalCDFLookupTable cdfTable;
 	int emitterWeighingMethod;
 };
 
