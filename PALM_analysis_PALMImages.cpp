@@ -17,30 +17,7 @@ NormalCDFLookupTable::NormalCDFLookupTable() {
 	}
 }
 
-double NormalCDFLookupTable::getNormalCDF(double x, double sigma) {
-	assert (this->cdfTable.get() != NULL);
-	
-	double rescaledX, lowerBracketX;
-	size_t lowerBracket, upperBracket;
-	
-	// rescale the requested x to a distribution with stddev 1
-	rescaledX = x / sigma;
-	
-	if (rescaledX < -5.0)
-		return 0;
-	if (rescaledX > 5.0)
-		return 1;
-	
-	lowerBracket = (size_t)((rescaledX + 5.0) / 0.01);
-	upperBracket = lowerBracket + 1;
-	lowerBracketX = -5.0 + lowerBracket * 0.01;
-	
-	
-	// obtain the output value by linear interpolation
-	return cdfTable[lowerBracket] + (rescaledX - lowerBracketX) / 0.01 * (cdfTable[upperBracket] - cdfTable[lowerBracket]);
-}
-
-boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+boost::shared_ptr<PALMMatrix<double> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
 	int status;
 	double fittedXPos, fittedYPos, fittedIntegral;
@@ -50,7 +27,7 @@ boost::shared_ptr<PALMMatrix<float> > PALMBitmapImageCalculator::CalculateImage(
 	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
 	
 	size_t nPositions = positions->getNPositions();
-	boost::shared_ptr<PALMMatrix<float> > outputImage(new PALMMatrix<float> (imageWidth, imageHeight));
+	boost::shared_ptr<PALMMatrix<double> > outputImage(new PALMMatrix<double> (imageWidth, imageHeight));
 	outputImage->set_all(0);
 	
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;

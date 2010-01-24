@@ -30,7 +30,26 @@ public:
 	NormalCDFLookupTable();
 	~NormalCDFLookupTable() {;}
 	
-	double getNormalCDF(double x, double sigma); 
+	double getNormalCDF(double x, double sigma) {	// this function is defined here to make it inline
+		double rescaledX, lowerBracketX;
+		size_t lowerBracket, upperBracket;
+		
+		// rescale the requested x to a distribution with stddev 1
+		rescaledX = x / sigma;
+		
+		if (rescaledX < -5.0)
+			return 0;
+		if (rescaledX > 5.0)
+			return 1;
+		
+		lowerBracket = (size_t)((rescaledX + 5.0) / 0.01);
+		upperBracket = lowerBracket + 1;
+		lowerBracketX = -5.0 + lowerBracket * 0.01;
+		
+		
+		// obtain the output value by linear interpolation
+		return cdfTable[lowerBracket] + (rescaledX - lowerBracketX) / 0.01 * (cdfTable[upperBracket] - cdfTable[lowerBracket]);
+	}
 	
 protected:
 	boost::shared_array<double> cdfTable;
@@ -38,7 +57,7 @@ protected:
 
 /**
  * @brief A class responsible for calculating a bitmap PALM output image by adding an individual Gaussian for every position to the image.
- * The output image is returned as a PALMMatrix<float>.
+ * The output image is returned as a PALMMatrix<double>.
  * 
  * PALMBitmapImageCalculator takes a set of positions in a LocalizedPositionsContainer and creates an output image (2D) with sizes (xSize, ySize).
  * For every position it adds a Gaussian to the output image with an integrated contribution that is either equal to to integrated intensity
@@ -53,7 +72,7 @@ public:
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	boost::shared_ptr<PALMMatrix<float> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+	boost::shared_ptr<PALMMatrix<double> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	

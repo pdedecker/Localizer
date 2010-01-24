@@ -1767,7 +1767,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-	boost::shared_ptr<PALMMatrix <float> > image;
+	boost::shared_ptr<PALMMatrix <double> > image;
 	
 	// Flag parameters.
 	
@@ -1874,7 +1874,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
-		copy_PALMMatrix_float_to_IgorFPWave(image, std::string("M_PALM"));
+		copy_PALMMatrix_to_IgorDPWave(image, std::string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
