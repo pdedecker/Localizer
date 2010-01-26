@@ -69,7 +69,7 @@ resource 'XOPC' (1100) {
 		"MakeBitmapPALMImage",
 		XOPOp+utilOp+compilableOp,
 		
-		"RipleyKFunctionClustering",
+		"RipleyLFunctionClustering",
 		XOPOp+utilOp+compilableOp,
 	}
 };
