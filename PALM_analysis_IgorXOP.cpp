@@ -400,6 +400,14 @@ struct RipleyLFunctionClusteringRuntimeParams {
 	double nBins;
 	int RNGEFlagParamsSet[2];
 	
+	// Parameters for /REGN flag group.
+	int REGNFlagEncountered;
+	double lowerX;
+	double upperX;
+	double lowerY;
+	double upperY;
+	int REGNFlagParamsSet[4];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -1929,6 +1937,18 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 		return EXPECT_POS_NUM;
 	}
 	
+	double lowerX = 0, upperX = 0, lowerY = 0, upperY = 0;
+	if (p->REGNFlagEncountered) {
+		// Parameter: p->lowerX
+		// Parameter: p->upperX
+		// Parameter: p->lowerY
+		// Parameter: p->upperY
+		lowerX = p->lowerX;
+		upperX = p->upperX;
+		lowerY = p->lowerY;
+		upperY = p->upperY;
+	}
+	
 	// Main parameters.
 	
 	if (p->positionsWaveEncountered) {
@@ -1941,7 +1961,7 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 	
 	try {
 		boost::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
-		boost::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins);
+		boost::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
 		
 		binWidth = calculationRange / (double)nBins;
 		double dimOffset = binWidth;
@@ -2052,7 +2072,7 @@ static int RegisterRipleyLFunctionClustering(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the RipleyLFunctionClusteringRuntimeParams structure as well.
-	cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} wave:positionsWave";
+	cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);

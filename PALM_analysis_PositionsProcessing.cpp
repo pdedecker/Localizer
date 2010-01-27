@@ -9,32 +9,30 @@
 
 #include "PALM_analysis_PositionsProcessing.h"
 
-boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions, double plotFullScale, size_t nBins) {
+boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
+																	 double plotFullScale, size_t nBins, double lowerX, double upperX,
+																	 double lowerY, double upperY) {
 	size_t nPositions = positions->getNPositions();
 	double currentX, currentY;
 	
-	double minX = 1e200, maxX = -1, minY = 1e200, maxY = -1;
-	// get the x and y boundaries for the positions
-	for (size_t i = 0; i < nPositions; ++i) {
-		currentX = positions->getXPosition(i);
-		currentY = positions->getYPosition(i);
+	// get the x and y boundaries for the positions if they have not been provided
+	if (lowerX == upperX == lowerY == lowerX == 0) {
 		
-		if (currentX < minX)
-			minX = currentX;
-		if (currentX > maxX)
-			maxX = currentX;
-		if (currentY < minY)
-			minY = currentY;
-		if (currentY > maxY)
-			maxY = currentY;
+		double lowerX = 1e200, upperX = -1, lowerY = 1e200, upperY = -1;
+		for (size_t i = 0; i < nPositions; ++i) {
+			currentX = positions->getXPosition(i);
+			currentY = positions->getYPosition(i);
+			
+			if (currentX < lowerX)
+				lowerX = currentX;
+			if (currentX > upperX)
+				upperX = currentX;
+			if (currentY < lowerY)
+				lowerY = currentY;
+			if (currentY > upperY)
+				upperY = currentY;
+		}
 	}
-	
-	// not all positions can count as centers for the calculation
-	// since we need to take a margin on the edge
-	double regionLowerXLimit = minX;
-	double regionUpperXLimit = maxX;
-	double regionLowerYLimit = minY;
-	double regionUpperYLimit = maxY;
 	
 	// provide that positions as arrays suitable for the actual calculation
 	boost::scoped_array<double> xPositions(new double[nPositions]);
@@ -48,8 +46,8 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	
 	// run the actual calculation
 	VR_sp_pp2(xPositions.get(), yPositions.get(), &nPositions, &nBins,
-			  &((*lFunction)[0]), &plotFullScale, regionUpperXLimit, regionLowerXLimit,
-			  regionUpperYLimit, regionLowerYLimit);
+			  &((*lFunction)[0]), &plotFullScale, upperX, lowerX,
+			  upperY, lowerY);
 	
     // return the calculated function
 	return lFunction;

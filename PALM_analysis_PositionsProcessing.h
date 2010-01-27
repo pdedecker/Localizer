@@ -31,7 +31,8 @@
  */
 
 boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
-																	 double binWidth, size_t nBins);
+																	 double plotFullScale, size_t nBins, double lowerX, double upperX,
+																	 double lowerY, double upperY);
 
 /**
  * The code to calculate the L function, verbatim from the R spatial package by Ripley et al
