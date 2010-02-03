@@ -603,12 +603,4 @@ protected:
 	double previousPercentage;
 };
 
-class RipleysKFunctionCalculator {
-public:
-	RipleysKFunctionCalculator() {;}
-	~RipleysKFunctionCalculator() {;}
-	
-	boost::shared_ptr<std::vector<double> > CalculateRipleysKFunction(boost::shared_ptr<PALMMatrix<double> > positions, double startBin, double endBin, double binWidth);
-};
-
 #endif
