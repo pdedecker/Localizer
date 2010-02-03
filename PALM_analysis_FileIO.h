@@ -22,8 +22,10 @@
 #include "tiffio.h"
 #include "stdint.h"
 #include "boost/thread.hpp"
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/fstream.hpp"
+
+#ifdef _WIN32
+#include <stdio.h>
+#endif
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
@@ -31,6 +33,39 @@
 
 uint16 getUINT16FromCharArray(char *array, size_t offset);
 uint32 getUINT32FromCharArray(char *array, size_t offset);
+
+/**
+ * Provide an ifstream-like class for Windows that handles large file offset
+ */
+#ifdef _WIN32
+class WindowsFileStream {
+public:
+    WindowsFileStream() {fileRef = NULL;}
+    ~WindowsFileStream();
+    
+    void open(const char *path_rhs);
+    void open(const char *path_rhs, std::ios_base::openmode mode) {open (path_rhs);}    // for compatibility with the standard library
+    
+    void close();
+    int fail() {return ferror(fileRef);}    // we will let this class throw exceptions
+    // so if a failure occurs then the code will never be able to check for fail() since control will have passed to the error-handling function
+    // we keep the function anyway since it matches the standard ifstream classes so the class can be swapped in
+    
+    int is_open() {return (fileRef != NULL);}
+    
+    void get(char & c);
+    void read(char *buffer, size_t nBytes);
+    void getline(char *buffer, size_t nMax);
+    
+    uint64_t tellg();
+    void seekg(uint64_t pos);
+    
+    
+private:
+    FILE *fileRef;
+	std::string path;
+};
+#endif
 
 class ImageLoader {
 public:
@@ -48,8 +83,12 @@ protected:
 	virtual void parse_header_information() = 0;
 	virtual std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
-	boost::filesystem::path filePath;
-	boost::filesystem::ifstream file;
+	std::string filePath;
+#ifdef _WIN32
+	WindowsFileStream file;
+#else
+	std::ifstream file;
+#endif
 	uint64_t header_length;
 	size_t total_number_of_images;
 	uint64_t x_size;
