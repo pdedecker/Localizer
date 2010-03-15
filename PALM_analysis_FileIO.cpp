@@ -1397,12 +1397,13 @@ int SimpleImageOutputWriter::flush_and_close() {
 }
 
 
-TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs) {
+TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
-	file_path = rhs;
-	compression = compression_rhs;
+	this->file_path = rhs;
+	this->compression = compression_rhs;
+	this->storageType = storageType_rhs;
 	
 	if (overwrite == 0) {
 		std::ifstream input_test;
@@ -1411,6 +1412,7 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 		if (input_test.fail() == 0) {
 			std::string error("The output file at ");
 			error += this->file_path;
+			error += " already exists";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 	}
@@ -1453,7 +1455,7 @@ void TIFFImageOutputWriter::flush_cache() {
 	boost::shared_ptr<PALMMatrix<double> > current_image;
 	size_t n_pixels, offset;
 	
-	int result;
+	int result, sampleFormat, bitsPerSample;
 	uint16_t current_uint16;
 	uint32_t current_uint32;
 	
@@ -1467,7 +1469,58 @@ void TIFFImageOutputWriter::flush_cache() {
 	y_size = current_image->getYSize();
 	n_pixels = x_size * y_size;
 	
-	boost::scoped_array<float> scanLine(new float[x_size]);
+	// determine the output storage type
+	switch (this->storageType) {
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_INT8:
+			bitsPerSample = 8;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT8:
+			bitsPerSample = 8;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT16:
+			bitsPerSample = 16;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT16:
+			bitsPerSample = 16;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_FP32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_IEEEFP;
+			break;
+		case STORAGE_TYPE_FP64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_IEEEFP;
+			break;
+		default:
+			throw std::runtime_error("Unknown storage type requested for TIFF output");
+			break;
+	}
+	
+	// make a scoped_array that will act as a single scanline buffer
+	// make it a buffer of chars equal to the total number of bytes required
+	boost::scoped_array<char> scanLine(new char[x_size * bitsPerSample]);
 	
 	while (image_buffer.size() != 0) {
 		current_image = image_buffer.front();
@@ -1502,7 +1555,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
-		result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);	// floating point values
+		result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, sampleFormat);
 		if (result != 1) {
 			std::string error;
 			error = "Unable to set the SampleFormat for the image at\"";
@@ -1511,8 +1564,7 @@ void TIFFImageOutputWriter::flush_cache() {
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
 		
-		current_uint16 = 32;
-		result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, current_uint16);	// 32 bits per float
+		result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
 		if (result != 1) {
 			std::string error;
 			error = "Unable to set the BitsPerSample for the image at\"";
@@ -1551,9 +1603,80 @@ void TIFFImageOutputWriter::flush_cache() {
 		
 		for (size_t j = 0; j < y_size; j++) {
 			offset = 0;
-			for (size_t i = 0; i < x_size; i++) {
-				scanLine[offset] = (float)current_image->get(i, j);
-				offset++;
+			
+			switch (this->storageType) {
+				case STORAGE_TYPE_INT4:
+				case STORAGE_TYPE_UINT4:
+				case STORAGE_TYPE_INT8:
+					for (size_t i = 0; i < x_size; i++) {
+						int8_t* buffer = (int8_t *)scanLine.get();
+						buffer[offset] = (int8_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_UINT8:
+					for (size_t i = 0; i < x_size; i++) {
+						uint8_t *buffer = (uint8_t *)scanLine.get();
+						buffer[offset] = (uint8_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_INT16:
+					for (size_t i = 0; i < x_size; i++) {
+						int16_t *buffer = (int16_t *)scanLine.get();
+						buffer[offset] = (int16_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_UINT16:
+					for (size_t i = 0; i < x_size; i++) {
+						uint16_t *buffer = (uint16_t *)scanLine.get();
+						buffer[offset] = (uint16_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_INT32:
+					for (size_t i = 0; i < x_size; i++) {
+						int32_t *buffer = (int32_t *)scanLine.get();
+						buffer[offset] = (int32_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_UINT32:
+					for (size_t i = 0; i < x_size; i++) {
+						uint32_t *buffer = (uint32_t *)scanLine.get();
+						buffer[offset] = (uint32_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_INT64:
+					for (size_t i = 0; i < x_size; i++) {
+						int64_t *buffer = (int64_t *)scanLine.get();
+						buffer[offset] = (int64_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_UINT64:
+					for (size_t i = 0; i < x_size; i++) {
+						uint64_t *buffer = (uint64_t *)scanLine.get();
+						buffer[offset] = (uint64_t)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_FP32:
+					for (size_t i = 0; i < x_size; i++) {
+						float *buffer = (float *)scanLine.get();
+						buffer[offset] = (float)current_image->get(i, j);
+						offset++;
+					}
+					break;
+				case STORAGE_TYPE_FP64:
+					for (size_t i = 0; i < x_size; i++) {
+						double *buffer = (double *)scanLine.get();
+						buffer[offset] = (double)current_image->get(i, j);
+						offset++;
+					}
+					break;
 			}
 			
 			result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);

@@ -232,7 +232,7 @@ protected:
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs);
+	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
 	~TIFFImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
@@ -242,6 +242,7 @@ public:
 protected:
 	void flush_cache();
 	int compression;	// if 1 then don't compress the data, otherwise compress
+	int storageType;
 	
 	TIFF *tiff_file;
 };
