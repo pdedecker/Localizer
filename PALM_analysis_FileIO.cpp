@@ -1117,50 +1117,11 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 
 #ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
-	int err;
-	size_t waveNameOffset;
-	std::string dataFolderPath;
-	DataFolderHandle dataFolder;
-	size_t position;
 	int waveType;
+	
 	// try to get images from an Igor wave
 	
-	// did we receive a wavename that does not reference any data folders? (no ':' in the name)
-	// in that case we assume that the wave is located in the current data folder
-	if (waveName.find(':') == std::string::npos) {
-		igor_data_wave = FetchWaveFromDataFolder(NULL, waveName.c_str());
-		if (igor_data_wave == NULL) {
-			throw NOWAV;
-		}
-	} else {
-		// we found a ':' in the string
-		// therefore we're being passed a wave location that also includes datafolder information
-		// we need to parse this string to get out the data folder handle and the wave handle
-		waveNameOffset = waveName.rfind(':');
-		if (waveNameOffset != 0) {	// check for the case where the user specifies something like ":waveName"
-			dataFolderPath = waveName.substr(0, waveNameOffset);
-		} else {
-			dataFolderPath = ":";
-		}
-		err = GetNamedDataFolder(NULL, dataFolderPath.c_str(), &dataFolder);
-		if (err != 0)
-			throw err;
-		
-		// retain only the waveName part, discard the information about the data folder
-		waveName = waveName.substr(waveNameOffset + 1, waveName.length() - waveNameOffset - 1);
-		
-		// if the waveName part is quoted ('') then Igor chokes on this
-		// so we remove the quotes
-		while ((position = waveName.find('\'')) != std::string::npos) {
-			waveName.erase(position, 1);
-		}
-		
-		igor_data_wave = FetchWaveFromDataFolder(dataFolder, waveName.c_str());
-		if (igor_data_wave == NULL) {
-			throw NOWAV;
-		}
-	}
-	
+	this->igor_data_wave = FetchWaveUsingFullPath(waveName);
 	
 	long DimensionSizes[MAX_DIMENSIONS + 1];
 	long numDimensions;
@@ -1739,14 +1700,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > n
 		dimensionSizes[2] = this->nImagesTotal;
 		dimensionSizes[3] = 0;
 		
-		if (this->overwrite == 0) {
-			result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 0);
-		} else {
-			result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-		}
-		if (result != 0) {
-			throw result;
-		}
+		this->outputWave = MakeWaveUsingFullPath(this->waveName, dimensionSizes, NT_FP64, this->overwrite);
 	}
 	
 	indices[2] = n_images_written;

@@ -95,11 +95,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 			waveType = NT_FP64;
 	}
 	
-	result = MDMakeWave(&output_wave, "M_CCDFrames", NULL, dimension_sizes, waveType, 1);
-	
-	if (result != 0) {
-		throw result;
-	}
+	output_wave = MakeWaveUsingFullPath(std::string("M_CCDFrames"), dimension_sizes, waveType, 1);
 	
 	// load the data
 	for (size_t i = n_start; i <= n_end; i++) {
@@ -201,10 +197,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, std::string outp
 	}
 	
 	// try to create the output wave
-	result = MDMakeWave(&output_wave, output_wave_name.c_str(), NULL, dimension_sizes, NT_FP64, 1);
-	if (result != 0) {
-		throw result;
-	}
+	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
 	
 	// write the output data to the wave
 	result = MDStoreDPDataInNumericWave(output_wave, intensity_trace_buffer.get());
@@ -263,10 +256,7 @@ int construct_average_image(ImageLoader *image_loader, std::string output_wave_n
 	(*average_image) = (*average_image).DivideByScalar(n_images);
 	
 	// try to create the output wave
-	result = MDMakeWave(&output_wave, output_wave_name.c_str(), NULL, dimension_sizes, NT_FP64, 1);
-	if (result != 0) {
-		throw result;
-	}
+	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
 	
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {
@@ -347,10 +337,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, std::string outp
 	dimension_sizes[0] = xRange;
 	dimension_sizes[1] = yRange;
 	dimension_sizes[2] = 0;
-	result = MDMakeWave(&output_wave, output_wave_name.c_str(), NULL, dimension_sizes, NT_FP64, 1);
-	if (result != 0) {
-		throw result;
-	}
+	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
 	
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {
@@ -364,6 +351,96 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, std::string outp
 			}
 		}
 	}
+}
+
+waveHndl FetchWaveUsingFullPath(std::string wavePath) {
+	waveHndl fetchedWave;
+	DataFolderHandle dataFolder;
+	size_t wavePathOffset, position;
+	std::string dataFolderPath;
+	int err;
+	
+	// if the wavePath really is just a name, do not do any advanced processing
+	if (wavePath.find(':') == std::string::npos) {
+		fetchedWave = FetchWaveFromDataFolder(NULL, wavePath.c_str());
+		if (fetchedWave == NULL) {
+			throw NOWAV;
+		}
+	} else {
+		// we found a ':' in the string
+		// therefore we're being passed a wave location that also includes datafolder information
+		// we need to parse this string to get out the data folder handle and the wave handle
+		wavePathOffset = wavePath.rfind(':');
+		if (wavePathOffset != 0) {	// check for the case where the user specifies something like ":wavePath"
+			dataFolderPath = wavePath.substr(0, wavePathOffset);
+		} else {
+			dataFolderPath = ":";
+		}
+		err = GetNamedDataFolder(NULL, dataFolderPath.c_str(), &dataFolder);
+		if (err != 0)
+			throw err;
+		
+		// retain only the wavePath part, discard the information about the data folder
+		wavePath = wavePath.substr(wavePathOffset + 1, wavePath.length() - wavePathOffset - 1);
+		
+		// if the wavePath part is quoted ('') then Igor chokes on this
+		// so we remove the quotes
+		while ((position = wavePath.find('\'')) != std::string::npos) {
+			wavePath.erase(position, 1);
+		}
+		
+		fetchedWave = FetchWaveFromDataFolder(dataFolder, wavePath.c_str());
+		if (fetchedWave == NULL) {
+			throw NOWAV;
+		}
+	}
+	
+	return fetchedWave;
+}
+
+waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int type, int overwrite) {
+	waveHndl createdWave;
+	DataFolderHandle dataFolder;
+	size_t wavePathOffset, position;
+	std::string dataFolderPath;
+	int err;
+	
+	// if the wavePath really is just a name, do not do any advanced processing
+	if (wavePath.find(':') == std::string::npos) {
+		err = MDMakeWave(&createdWave, wavePath.c_str(), NULL, dimensionSizes, type, overwrite);
+		if (err != 0) {
+			throw err;
+		}
+	} else {
+		// we found a ':' in the string
+		// therefore we're being passed a wave location that also includes datafolder information
+		// we need to parse this string to get out the data folder handle and the wave handle
+		wavePathOffset = wavePath.rfind(':');
+		if (wavePathOffset != 0) {	// check for the case where the user specifies something like ":wavePath"
+			dataFolderPath = wavePath.substr(0, wavePathOffset);
+		} else {
+			dataFolderPath = ":";
+		}
+		err = GetNamedDataFolder(NULL, dataFolderPath.c_str(), &dataFolder);
+		if (err != 0)
+			throw err;
+		
+		// retain only the wavePath part, discard the information about the data folder
+		wavePath = wavePath.substr(wavePathOffset + 1, wavePath.length() - wavePathOffset - 1);
+		
+		// if the wavePath part is quoted ('') then Igor chokes on this
+		// so we remove the quotes
+		while ((position = wavePath.find('\'')) != std::string::npos) {
+			wavePath.erase(position, 1);
+		}
+		
+		err = MDMakeWave(&createdWave, wavePath.c_str(), dataFolder, dimensionSizes, type, overwrite);
+		if (err != 0) {
+			throw err;
+		}
+	}
+	
+	return createdWave;
 }
 
 
@@ -434,10 +511,7 @@ waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, 
 	dimensionSizes[1] = 0;
 	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0) {
-		throw err;
-	}
+	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	indices[1] = 0;
 	for (size_t i = 0; i < nElements; ++i) {
@@ -513,10 +587,7 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 		dimensionSizes[1] = 0;
 		dimensionSizes[2] = 0;
 		
-		err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-		if (err != 0) {
-			throw err;
-		}
+		DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 		
 		return DPWave;
 		
@@ -530,10 +601,7 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 	dimensionSizes[1] = y_size;
 	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0) {
-		throw err;
-	}
+	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -569,10 +637,7 @@ waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float>
 		dimensionSizes[1] = 0;
 		dimensionSizes[2] = 0;
 		
-		err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP32, 1);
-		if (err != 0) {
-			throw err;
-		}
+		DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP32, 1);
 		
 		return DPWave;
 		
@@ -586,10 +651,7 @@ waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float>
 	dimensionSizes[1] = y_size;
 	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP32, 1);
-	if (err != 0) {
-		throw err;
-	}
+	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP32, 1);
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -669,10 +731,7 @@ waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume<double> > vo
 	dimensionSizes[2] = z_size;
 	dimensionSizes[3] = 0;
 	
-	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0) {
-		throw err;
-	}
+	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	for (size_t k = 0; k < z_size; ++k) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -714,10 +773,7 @@ waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<u
 	dimensionSizes[2] = z_size;
 	dimensionSizes[3] = 0;
 	
-	err = MDMakeWave(&DPWave, waveName.c_str(), NULL, dimensionSizes, NT_I16 | NT_UNSIGNED, 1);
-	if (err != 0) {
-		throw err;
-	}
+	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_I16 | NT_UNSIGNED, 1);
 	
 	for (size_t k = 0; k < z_size; ++k) {
 		for (size_t j = 0; j < y_size; ++j) {

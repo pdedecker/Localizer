@@ -1593,10 +1593,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		dimensionSizes[1] = y_size;
 		dimensionSizes[2] = 0;
 		
-		err = MDMakeWave(&threshold_image_wave, "M_ImageThresh", NULL, dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
-		if (err != 0) {
-			return err;
-		}
+		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_ImageThresh"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
 		
 		for (long j = 0; j < y_size; j++) {
 			for (long i = 0; i < x_size; i++) {
@@ -1625,9 +1622,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			dimensionSizes[2] = 0;
 			double value[2];
 			
-			err = MDMakeWave(&outputWave, "M_locatedParticles", NULL, dimensionSizes, NT_FP64, 1);
-			if (err != 0)
-				throw err;
+			outputWave = MakeWaveUsingFullPath(std::string("M_locatedParticles"), dimensionSizes, NT_FP64, 1);
 			
 			for (size_t i = 0; i < nParticles; ++i) {
 				indices[0] = i;

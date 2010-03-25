@@ -29,6 +29,7 @@
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
+#include "PALM_analysis_IgorUtilities.h"
 #endif
 
 uint16 getUINT16FromCharArray(char *array, size_t offset);

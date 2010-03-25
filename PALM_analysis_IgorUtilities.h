@@ -18,6 +18,8 @@
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
 
+class ImageLoader;
+
 // Routines that return information on CCD files and image frames to Igor
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
 
@@ -30,6 +32,9 @@ int construct_average_image(ImageLoader *image_loader, std::string output_wave_n
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY);
 
+// Routines that can fetch and make waves from datafolders
+waveHndl FetchWaveUsingFullPath(std::string wavePath);
+waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int type, int overwrite);
 
 // Routines to convert between handles and C strings
 int ConvertHandleToString(Handle handle, std::string& convertedString);

@@ -184,9 +184,7 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 12;	// magic number
 	dimensionSizes[2] = 0;
-	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
+	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -368,9 +366,7 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 11;	// magic number
 	dimensionSizes[2] = 0;
-	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
+	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -556,9 +552,7 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 4;	// magic number
 	dimensionSizes[2] = 0;
-	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
+	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -713,9 +707,7 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 5;	// magic number
 	dimensionSizes[2] = 0;
-	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
+	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -877,9 +869,7 @@ waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(std::string
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 6;	// magic number
 	dimensionSizes[2] = 0;
-	err = MDMakeWave(&outputWave, waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
+	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
