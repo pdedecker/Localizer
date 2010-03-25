@@ -1716,34 +1716,38 @@ int TIFFImageOutputWriter::flush_and_close() {
 }
 
 #ifdef WITH_IGOR
-IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t xSize_rhs, size_t ySize_rhs, size_t nImages_rhs, int overwrite_rhs) {
+IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nImages_rhs, int overwrite_rhs) {
+	this->outputWave = NULL;
 	this->waveName = waveName_rhs;
-	this->x_size = xSize_rhs;
-	this->y_size = ySize_rhs;
 	this->nImagesTotal = nImages_rhs;
 	this->n_images_written = 0;
-	
-	long dimensionSizes[MAX_DIMENSIONS + 1];
-	dimensionSizes[0] = this->x_size;
-	dimensionSizes[1] = this->y_size;
-	dimensionSizes[2] = this->nImagesTotal;
-	dimensionSizes[3] = 0;
-	int result;
-	
-	if (overwrite == 0) {
-		result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 0);
-	} else {
-		result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
-	}
-	if (result != 0) {
-		throw result;
-	}
+	this->overwrite = overwrite_rhs;
 }
 
 void IgorImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
 	long indices[MAX_DIMENSIONS + 1];
 	int result;
 	double value[2];
+	
+	if (this->outputWave == NULL) {
+		// the outputwave has not been created yet, do it now
+		this->x_size = new_image->getXSize();
+		this->y_size = new_image->getYSize();
+		long dimensionSizes[MAX_DIMENSIONS + 1];
+		dimensionSizes[0] = this->x_size;
+		dimensionSizes[1] = this->y_size;
+		dimensionSizes[2] = this->nImagesTotal;
+		dimensionSizes[3] = 0;
+		
+		if (this->overwrite == 0) {
+			result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 0);
+		} else {
+			result = MDMakeWave(&(this->outputWave), this->waveName.c_str(), NULL, dimensionSizes, NT_FP64, 1);
+		}
+		if (result != 0) {
+			throw result;
+		}
+	}
 	
 	indices[2] = n_images_written;
 	

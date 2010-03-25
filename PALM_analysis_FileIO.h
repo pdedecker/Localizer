@@ -250,7 +250,7 @@ protected:
 #ifdef WITH_IGOR
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
-	IgorImageOutputWriter(std::string waveName, size_t xSize, size_t ySize, size_t nImagesTotal, int overwrite);
+	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite);
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);

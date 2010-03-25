@@ -1132,9 +1132,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, image_loader->getStorageType()));
 				break;
 			case IMAGE_OUTPUT_TYPE_IGOR:
-				output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getXSize(), 
-																							   image_loader->getYSize(), 
-																							   image_loader->get_total_number_of_images(), 
+				output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images(), 
 																							   overwrite));
 				break;
 			default:
