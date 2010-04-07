@@ -75,18 +75,18 @@ protected:
 	double r_initial;
 };
 
-/*class FitPositionsEllipsoidalGaussian : public FitPositions {
+class FitPositionsEllipsoidalGaussian : public FitPositions {
 public:
 	FitPositionsEllipsoidalGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
 	~FitPositionsEllipsoidalGaussian() {;}
 	
-	boost::shared_ptr<std::vector<LocalizedPosition> > fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
 	size_t cutoff_radius;
 	double r_initial;
-};*/
+};
 
 /**
  * @brief fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
@@ -167,7 +167,7 @@ int EllipsoidalGauss_2D_fit_function(const gsl_vector *params, void *measured_in
 
 int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
-int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Ellipsoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
 int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);

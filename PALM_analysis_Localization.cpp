@@ -18,7 +18,7 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->getXSize();
-	size_t ySize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getYSize();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -58,7 +58,7 @@ int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *fitData_rhs
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->getXSize();
-	size_t ySize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getYSize();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -98,19 +98,23 @@ int Ellipsoidal_Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rh
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->getXSize();
-	size_t ySize = imageSubset->getXSize();
+	size_t ySize = imageSubset->getYSize();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
 	double sigma = fitDataLocal->sigma;
 	
 	double amplitude = gsl_vector_get(params, 0);
-	double a = gsl_vector_get(params, 1);
-	double b = gsl_vector_get(params, 2);
-	double c = gsl_vector_get(params, 3);
-	double x0 = gsl_vector_get(params, 4);
-	double y0 = gsl_vector_get(params, 5);
+	double sigmaX = gsl_vector_get(params, 1);
+	double sigmaY = gsl_vector_get(params, 2);
+	double x0 = gsl_vector_get(params, 3);
+	double y0 = gsl_vector_get(params, 4);
+	double corr = gsl_vector_get(params, 5);
 	double offset = gsl_vector_get(params, 6);
+	
+	if ((sigmaX == 0) || (sigmaY == 0)) {
+		return GSL_FAILURE;
+	}
 	
 	double x,y, function_value, square_deviation;
 	
@@ -118,7 +122,9 @@ int Ellipsoidal_Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rh
 		for (size_t j = 0; j < ySize; ++j) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
-			function_value = offset + amplitude * exp(- a * (x - x0) * (x - x0) - 2 * b * (x - x0) * (y - y0) - c * (y - y0) * (y - y0));
+			function_value = amplitude * exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX 
+																						 + (y - y0) * (y - y0) / sigmaY / sigmaY 
+																						 - 2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY)) + offset;
 			square_deviation = (function_value - imageSubset->get(i, j)) / sigma;
 			gsl_vector_set(deviations, arrayOffset, square_deviation);
 			++arrayOffset;
@@ -227,20 +233,7 @@ int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fi
 	
 }
 
-/*	Maxima code to generate the required derivatives for a 2D ellipsoidal Gaussian
- g: A * %e^(-(a * (x - x0)**2 + 2*b*(x - x0)*(y-y0) + c * (y - y0)**2)) + offset;
- \begin{align}
- g &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,A+z_0 \\
- \frac{\partial g}{\partial A} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2} \\
- \frac{\partial g}{\partial x_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\, \left(2\,b\,\left(y-{\it y_0}\right)+2\,a\,\left(x-{\it x_0}\right) \right)\,A \\
- \frac{\partial g}{\partial y_0} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(2\,c\,\left(y-{\it y_0}\right)+2\,b\,\left(x-{\it x_0}\right)\right)\,A \\
- \frac{\partial g}{\partial a} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)^2\,A \\
- \frac{\partial g}{\partial b} &= e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)\,A \\
- \frac{\partial g}{\partial c} &= -e^{-c\,\left(y-{\it y_0}\right)^2-2\,b\,\left(x-{\it x_0}\right)\,\left(y-{\it y_0}\right)-a\,\left(x-{\it x_0}\right)^2}\,\left(y-{\it y_0}\right)^2\,A \\
- \frac{\partial g}{\partial z_0} &= 1
- \end{align}
- */
-int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+int Ellipsoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
@@ -249,38 +242,48 @@ int Elliposoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
 	
 	double amplitude = gsl_vector_get(params, 0);
-	double a = gsl_vector_get(params, 1);
-	double b = gsl_vector_get(params, 2);
-	double c = gsl_vector_get(params, 3);
-	double x0 = gsl_vector_get(params, 4);
-	double y0 = gsl_vector_get(params, 5);
+	double sigmaX = gsl_vector_get(params, 1);
+	double sigmaY = gsl_vector_get(params, 2);
+	double x0 = gsl_vector_get(params, 3);
+	double y0 = gsl_vector_get(params, 4);
+	double corr = gsl_vector_get(params, 5);
 	
-	double x,y, exp_factor;
-	double dfdA, dfda, dfdb, dfdc, dfdx0, dfdy0,dfdoffset;
+	double x,y, exp_factor, denominator;
+	double dfdA, dfdsigmaX, dfdsigmaY, dfdx0, dfdy0, dfdcorr,dfdoffset;
+	
+	if ((sigmaX == 0) || (sigmaY == 0)) {
+		return GSL_FAILURE;
+	}
+	
+	denominator = 2 * (1 - corr * corr) * sigma;
 	
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
-			exp_factor = exp(- a * (x - x0) * (x - x0) - 2 * b * (x - x0) * (y - y0) - b * (y - y0) * (y - y0));
+			exp_factor = exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX 
+															+ (y - y0) * (y - y0) / sigmaY / sigmaY
+															- 2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY));
 			
-			dfdA = exp_factor;
-			dfda = amplitude * (x - x0) * (x - x0) * exp_factor;
-			dfdb = amplitude * (x - x0) * (y - y0) * exp_factor;
-			dfdc = amplitude * (y - y0) * (y - y0) * exp_factor;
-			dfdx0 = amplitude * (2 * b * (y - y0) + 2 * a * (x - x0)) * exp_factor;
-			dfdy0 = amplitude * (2 * c * (y - y0) + 2 * b * (x - x0)) * exp_factor;
-			dfdoffset = 1.0;
+			dfdA = exp_factor / sigma;
+			dfdsigmaX = - amplitude * (2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaX / sigmaY - 2.0 * (x - x0) * (x - x0) / sigmaX / sigmaX / sigmaX) * exp_factor / denominator;
+			dfdsigmaY = - amplitude * (2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY / sigmaY - 2.0 * (y - y0) * (y - y0) / sigmaY / sigmaY / sigmaY) * exp_factor / denominator;
+			dfdx0 = - amplitude * (2 * corr * (y - y0) / sigmaX / sigmaY - 2 * (x - x0) / sigmaX / sigmaX) * exp_factor / denominator;
+			dfdy0 = - amplitude * (2 * corr * (x - x0) / sigmaX / sigmaY - 2 * (y - y0) / sigmaY / sigmaY) * exp_factor / denominator;
+			dfdcorr = amplitude * ((x - x0) * (y - y0) / (1 - corr * corr) / sigmaX / sigmaY - corr * (- 2 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY 
+								+ (y - y0) * (y - y0) / sigmaY / sigmaY + (x - x0) * (x - x0) / sigmaX / sigmaX) / (1 - corr * corr) / (1 - corr * corr)) * exp_factor / sigma;
+			dfdoffset = 1.0 / sigma;
 			
 			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
-			gsl_matrix_set(jacobian, arrayOffset, 1, dfda);
-			gsl_matrix_set(jacobian, arrayOffset, 2, dfdb);
-			gsl_matrix_set(jacobian, arrayOffset, 3, dfdc);
-			gsl_matrix_set(jacobian, arrayOffset, 4, dfdx0);
-			gsl_matrix_set(jacobian, arrayOffset, 5, dfdy0);
+			gsl_matrix_set(jacobian, arrayOffset, 1, dfdsigmaX);
+			gsl_matrix_set(jacobian, arrayOffset, 2, dfdsigmaY);
+			gsl_matrix_set(jacobian, arrayOffset, 3, dfdx0);
+			gsl_matrix_set(jacobian, arrayOffset, 4, dfdy0);
+			gsl_matrix_set(jacobian, arrayOffset, 5, dfdcorr);
 			gsl_matrix_set(jacobian, arrayOffset, 6, dfdoffset);
 			++arrayOffset;
 		}
@@ -295,7 +298,7 @@ int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_
 	result = Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
 	if (result != GSL_SUCCESS)
 		return result;
-	Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
+	result = Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
 	if (result != GSL_SUCCESS)
 		return result;
 	return GSL_SUCCESS;
@@ -315,10 +318,10 @@ int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void
 
 int Ellipsoidal_Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
 	int result;
-	Ellipsoidal_Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	result = Ellipsoidal_Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
 	if (result != GSL_SUCCESS)
 		return result;
-	Elliposoidal_Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
+	result = Ellipsoidal_Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
 	if (result != GSL_SUCCESS)
 		return result;
 	
@@ -557,8 +560,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 			if (status != 0)
 				break;
 			
-			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
-		} while ((status = GSL_CONTINUE) && (iterations < 200));
+			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
+		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
 			continue;
@@ -742,15 +745,15 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 			if (status != 0)
 				break;
 			
-			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
-		} while ((status = GSL_CONTINUE) && (iterations < 200));
+			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
+		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
 			continue;
 		}
 		
 		// are the reported positions within the window?
-		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < x_offset) || (gsl_vector_get(fit_iterator->x, 1) > x_max) || (gsl_vector_get(fit_iterator->x, 2) < y_offset) || (gsl_vector_get(fit_iterator->x, 2) > y_max)) {
 			// the reported positions are not within the window, we should reject them
 			continue;
 		}
@@ -801,41 +804,45 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 }
 
 
-/*boost::shared_ptr<std::vector<LocalizedPosition> > FitPositionsEllipsoidalGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix<double> > positions, 
-																					   size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsEllipsoidalGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions,
+															 size_t startPos, size_t endPos) {
 	
 	// some safety checks
-	if ((endPos >= positions->getXSize()) || (startPos >= positions->getXSize())) {
-		string error;
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+	}
+	
+	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
+		std::string error;
 		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
-		string error;
+		std::string error;
 		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
-	size_t number_of_positions = endPos - startPos + 1;
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
 	
-	double x0_initial, y0_initial, amplitude, background;
+	double x0_initial, y0_initial, amplitude, background, correlation_initial;
 	double chi, degreesOfFreedom, c;
 	long iterations = 0;
 	int status;
 	
 	boost::shared_ptr<PALMMatrix<double> > image_subset;
-	boost::shared_ptr<std::vector<LocalizedPosition> > fitted_positions (new std::vector<LocalizedPosition>);
-	LocalizedPosition localizationResult;
+	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
 	
 	image_subset = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(size_of_subset, size_of_subset));
-	
-	fitted_positions->reserve(number_of_positions);
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -863,11 +870,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		throw std::bad_alloc();
 	}
 	
-	f.f = &Gauss_2D_fit_function;
-	f.df = &Gauss_2D_fit_function_Jacobian;
-	f.fdf = &Gauss_2D_fit_function_and_Jacobian;
+	f.f = &Ellipsoidal_Gauss_2D_fit_function;
+	f.df = &Ellipsoidal_Gauss_2D_fit_function_Jacobian;
+	f.fdf = &Ellipsoidal_Gauss_2D_fit_function_and_Jacobian;
 	f.n = number_of_intensities;
-	f.p = 5;
+	f.p = 7;
 	f.params = (void *)&fitData;
 	
 	
@@ -875,10 +882,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 	for (size_t i = startPos; i <= endPos; i++) {
 		iterations = 0;
 		
-		amplitude = positions->get(i, 0);
-		x0_initial = positions->get(i, 1);
-		y0_initial = positions->get(i, 2);
-		background = positions->get(i, 3);
+		amplitude = (*positions)[i].get_intensity();
+		x0_initial = (*positions)[i].get_x();
+		y0_initial = (*positions)[i].get_y();
+		correlation_initial = 0.0;
+		background = (*positions)[i].get_background();
 		
 		x_offset = x0_initial - cutoff_radius;
 		y_offset = y0_initial - cutoff_radius;
@@ -903,10 +911,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		gsl_vector_set(fit_parameters, 1, r_initial * SQRT2);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
-		gsl_vector_set(fit_parameters, 2, x0_initial);
-		gsl_vector_set(fit_parameters, 3, y0_initial);
-		gsl_vector_set(fit_parameters, 4, background);
+		gsl_vector_set(fit_parameters, 1, this->r_initial);
+		gsl_vector_set(fit_parameters, 2, this->r_initial);
+		gsl_vector_set(fit_parameters, 3, x0_initial);
+		gsl_vector_set(fit_parameters, 4, y0_initial);
+		gsl_vector_set(fit_parameters, 5, correlation_initial);
+		gsl_vector_set(fit_parameters, 6, background);
 		
 		// set the solver
 		gsl_multifit_fdfsolver_set(fit_iterator, &f, fit_parameters);
@@ -915,29 +925,32 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		do {
 			iterations++;
 			status = gsl_multifit_fdfsolver_iterate(fit_iterator);
-			if (status != 0)
-				break;
-			
-			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 10, 10);
-		} while ((status = GSL_CONTINUE) && (iterations < 200));
+			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
+		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
 			continue;
 		}
 		
 		// are the reported positions within the window?
-		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
+		if ((gsl_vector_get(fit_iterator->x, 3) < x_offset) || (gsl_vector_get(fit_iterator->x, 3) > x_max) || (gsl_vector_get(fit_iterator->x, 4) < y_offset) || (gsl_vector_get(fit_iterator->x, 4) > y_max)) {
 			// the reported positions are not within the window, we should reject them
 			continue;
 		}
 		
 		// are the fit results close enough to the initial values to be trusted?
-		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
+		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial * SQRT2 / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * SQRT2 * 2.0)) {
+		// are the standard deviations in the x and y direction close enough?
+		if ((0.75 * gsl_vector_get(fit_iterator->x, 1) > gsl_vector_get(fit_iterator->x, 2)) || (1.25 * gsl_vector_get(fit_iterator->x, 1) < gsl_vector_get(fit_iterator->x, 2))) {
+			// the standard deviations in x and y differ by more than 25%, drop this point
+			continue;
+		}
+		
+		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
@@ -949,35 +962,43 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 		
 		// store the fitted parameters
-		localizationResult.amplitude = gsl_vector_get(fit_iterator->x, 0);
-		localizationResult.width = gsl_vector_get(fit_iterator->x, 1);
-		localizationResult.xPos = gsl_vector_get(fit_iterator->x, 2);
-		localizationResult.yPos = gsl_vector_get(fit_iterator->x, 3);
-		localizationResult.offset = gsl_vector_get(fit_iterator->x, 4);
 		
-		localizationResult.amplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0));
-		localizationResult.widthError = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-		localizationResult.xPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
-		localizationResult.yPosError = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
-		localizationResult.offsetError = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
+		localizationResult->xWidth = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult->yWidth = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 3);
+		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
+		localizationResult->correlation = gsl_vector_get(fit_iterator->x, 5);
+		localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
 		
-		// store the number of iterations
-		localizationResult.nIterations = iterations;
+		localizationResult->xWidthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		localizationResult->yWidthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
+		localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
+		localizationResult->correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
+		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
 		
-		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
-		// so we correct for that
-		localizationResult.width = localizationResult.width / SQRT2;
-		localizationResult.widthError = localizationResult.widthError / SQRT2;	// the same for the error
+		localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation 
+										* localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
+		localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation * localizationResult->correlation)
+												* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
+												* c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
+												+ localizationResult->correlation * localizationResult->correlation * localizationResult->correlationDeviation
+												* localizationResult->correlationDeviation / (1 - localizationResult->correlation * localizationResult->correlation)
+												/ (1 - localizationResult->correlation * localizationResult->correlation) + localizationResult->xWidthDeviation
+												* localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
+												+ localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
+												/ localizationResult->yWidth);
 		
-		fitted_positions->push_back(localizationResult);
+		fitted_positions->addPosition(localizationResult);
 	}
 	
 	gsl_multifit_fdfsolver_free(fit_iterator);
 	gsl_vector_free(fit_parameters);
+	gsl_matrix_free(covarianceMatrix);
 	
 	return fitted_positions;
 	
-}*/
+}
 
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 

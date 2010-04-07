@@ -775,6 +775,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				case LOCALIZATION_METHOD_CENTROID:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
 					break;
+				case LOCALIZATION_METHOD_ELLIPSOIDAL_2DGAUSS:
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsEllipsoidalGaussian(cutoff_radius, initial_width, sigma));
+					break;
 				default:
 					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
 					break;

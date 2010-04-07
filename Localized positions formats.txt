@@ -67,3 +67,21 @@ Currently we support the following localization methods and formats:
 3. y position
 4. deviation on the position
 5. number of frames in which the emitter is assumed to be present
+
+- Fitting with an ellipsoidal 2D Gaussian, identified by the string "LOCALIZATION METHOD:5". The actual positions wave has 16 columns for every localized position:
+0. frame number
+1. integrated intensity
+2. standard deviation in x direction
+3. standard deviation in y direction
+4. x position
+5. y position
+6. correlation between x and y
+7. background level (offset)
+8. deviation on the integrated intensity
+9. deviation on the standard deviation in x direction
+10. deviation on the standard deviation in y direction
+11. deviation on the x position
+12. deviation on the y position
+13. deviation on the correlation
+14. deviation on the background
+15. number of frames in which the emitter is assumed to be present

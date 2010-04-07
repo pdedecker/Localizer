@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 		("cutoff-radius", po::value<int>()->default_value(11), "Cutout radius for fitting")
 		("min-distance-from-edge", po::value<int>()->default_value(11), "Minimal distance a localized position has to be from the edge of the image")
 		("min-radius-between-particles", po::value<double>()->default_value(4), "Minimal radius between particles to be accept (only for \"radius\" particle finding)")
-		("input-file", po::value< vector<string> >(), "Input file containing CCD images")
+	("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
 	
 	// tell program options that arguments without a flag are input CCD files
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	
 	// did the user specify any input files?
 	if (vm.count("input-file") == 0) {
-		cout << "No input files specified. Aborting...\n";
+		std::cout << "No input files specified. Aborting...\n";
 		return 1;
 	}
 	
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
 	std::string localizationName = vm["localization"].as<std::string>();
-	vector<std::string> inputFiles = vm["input-file"].as<vector <std::string> >();
+	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
 	
 	// glrt and direct thresholding require extra parameters
 	double pfa, directThreshold;
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 	// run the PALM analysis for every input file
 	size_t nInputFiles = inputFiles.size();
 	if (nInputFiles == 0)
-		cout << "No input files specified!\n";
+		std::cout << "No input files specified!\n";
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
 	std::string outputFilePath;
@@ -121,8 +121,8 @@ int main(int argc, char *argv[]) {
 			
 			// if there is more than one input file then tell the user which inputfile is being processed
 			if (nInputFiles > 1) {
-				cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
-				cout.flush();
+				std::cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
+				std::cout.flush();
 			}
 			
 			// do the analysis
@@ -142,10 +142,10 @@ int main(int argc, char *argv[]) {
 			fittedPositions->writePositionsToFile(outputFilePath, header);
 		}
 		catch (std::runtime_error e) {
-			cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
+			std::cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
 		}
 		catch (...) {
-			cerr << "the file at " << inputFiles.at(i) << " failed for an unknown reason" << std::endl;
+			std::cerr << "the file at " << inputFiles.at(i) << " failed for an unknown reason" << std::endl;
 		}
 			
 	}

@@ -94,6 +94,33 @@ public:
 	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_2DGAUSS_FIXED_WIDTH;}
 };
 
+class LocalizedPosition_Ellipsoidal2DGauss : public LocalizedPosition {
+public:
+	LocalizedPosition_Ellipsoidal2DGauss() : nFramesPresent(1) {}
+	~LocalizedPosition_Ellipsoidal2DGauss() {;}
+	
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double integral;
+	double xWidth;
+	double yWidth;
+	double xPosition;
+	double yPosition;
+	double correlation;
+	double background;
+	
+	double integralDeviation;
+	double xWidthDeviation;
+	double yWidthDeviation;
+	double xPositionDeviation;
+	double yPositionDeviation;
+	double correlationDeviation;
+	double backgroundDeviation;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_ELLIPSOIDAL2DGAUSS;}
+};
+
 class LocalizedPosition_Centroid : public LocalizedPosition {
 public:
 	LocalizedPosition_Centroid() : nFramesPresent(1) {}
@@ -164,7 +191,7 @@ public:
 	virtual double getIntegral(size_t index) const = 0;
 	virtual double getXWidth(size_t index) const = 0;
 	virtual double getYWidth(size_t index) const = 0;
-	virtual double getRotationAngle(size_t index) const = 0;
+	virtual double getCorrelation(size_t index) const = 0;
 	virtual double getXPosition(size_t index) const = 0;
 	virtual double getYPosition(size_t index) const = 0;
 	virtual double getZPosition(size_t index) const = 0;
@@ -174,7 +201,7 @@ public:
 	virtual double getIntegralDeviation(size_t index) const = 0;
 	virtual double getXWidthDeviation(size_t index) const = 0;
 	virtual double getYWidthDeviation(size_t index) const = 0;
-	virtual double getRotationAngleDeviation(size_t index) const = 0;
+	virtual double getCorrelationDeviation(size_t index) const = 0;
 	virtual double getXPositionDeviation(size_t index) const = 0;
 	virtual double getYPositionDeviation(size_t index) const = 0;
 	virtual double getZPositionDeviation(size_t index) const = 0;
@@ -219,7 +246,7 @@ public:
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getRotationAngle(size_t index) const {return 0;}
+	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -228,7 +255,7 @@ public:
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
 	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
 	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
-	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
 	double getZPositionDeviation(size_t index) const {return 0;}
@@ -276,7 +303,7 @@ public:
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getRotationAngle(size_t index) const {return 0;}
+	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -285,7 +312,7 @@ public:
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
 	double getXWidthDeviation(size_t index) const {return 0;}
 	double getYWidthDeviation(size_t index) const {return 0;}
-	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
 	double getZPositionDeviation(size_t index) const {return 0;}
@@ -317,6 +344,65 @@ protected:
 	std::vector<LocalizedPosition_2DGaussFixedWidth> positionsVector;
 };
 
+/**
+ * @brief Contain localized positions created by fitting an ellipsoidal 2D Gaussian
+ */
+class LocalizedPositionsContainer_Ellipsoidal2DGaussian : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_Ellipsoidal2DGaussian() {;}
+#ifdef WITH_IGOR
+	LocalizedPositionsContainer_Ellipsoidal2DGaussian(waveHndl wave);
+#endif
+	LocalizedPositionsContainer_Ellipsoidal2DGaussian(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	
+	~LocalizedPositionsContainer_Ellipsoidal2DGaussian() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
+	double getXWidth(size_t index) const {return positionsVector.at(index).xWidth;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).yWidth;}
+	double getCorrelation(size_t index) const {return positionsVector.at(index).correlation;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
+	double getBackground(size_t index) const {return positionsVector.at(index).background;}
+	
+	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
+	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).xWidthDeviation;}
+	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).yWidthDeviation;}
+	double getCorrelationDeviation(size_t index) const {return positionsVector.at(index).correlationDeviation;}
+	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
+	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
+	double getZPositionDeviation(size_t index) const {return 0;}
+	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
+	
+	// adding new positions
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_Ellipsoidal2DGauss>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
+#ifdef WITH_IGOR
+	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+#endif
+	void writePositionsToFile(std::string filePath, std::string header) const;
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_Ellipsoidal2DGauss left, LocalizedPosition_Ellipsoidal2DGauss right) {
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_ELLIPSOIDAL2DGAUSS;}
+	
+protected:
+	std::vector<LocalizedPosition_Ellipsoidal2DGauss> positionsVector;
+};
 
 class LocalizedPositionsContainer_Centroid : public LocalizedPositionsContainer {
 public:
@@ -334,7 +420,7 @@ public:
 	double getIntegral(size_t index) const {return 0;}
 	double getXWidth(size_t index) const {return 0;}
 	double getYWidth(size_t index) const {return 0;}
-	double getRotationAngle(size_t index) const {return 0;}
+	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -343,7 +429,7 @@ public:
 	double getIntegralDeviation(size_t index) const {return 0;}
 	double getXWidthDeviation(size_t index) const {return 0;}
 	double getYWidthDeviation(size_t index) const {return 0;}
-	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return 0;}
 	double getYPositionDeviation(size_t index) const {return 0;}
 	double getZPositionDeviation(size_t index) const {return 0;}
@@ -391,7 +477,7 @@ public:
 	double getIntegral(size_t index) const {return 0;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getRotationAngle(size_t index) const {return 0;}
+	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -400,7 +486,7 @@ public:
 	double getIntegralDeviation(size_t index) const {return 0;}
 	double getXWidthDeviation(size_t index) const {return 0;}
 	double getYWidthDeviation(size_t index) const {return 0;}
-	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return 0;}
 	double getYPositionDeviation(size_t index) const {return 0;}
 	double getZPositionDeviation(size_t index) const {return 0;}
@@ -448,7 +534,7 @@ public:
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return 0;}
 	double getYWidth(size_t index) const {return 0;}
-	double getRotationAngle(size_t index) const {return 0;}
+	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -457,7 +543,7 @@ public:
 	double getIntegralDeviation(size_t index) const {return 0;}
 	double getXWidthDeviation(size_t index) const {return 0;}
 	double getYWidthDeviation(size_t index) const {return 0;}
-	double getRotationAngleDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	double getZPositionDeviation(size_t index) const {return 0;}
