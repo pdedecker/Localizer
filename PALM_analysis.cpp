@@ -266,15 +266,15 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
-	outputFile << "Fitted PSF standard deviation" << "\t";
+	outputFile << "Fitted PSF standard deviation (pixel)" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Background" << "\t";
 	outputFile << "Intensity deviation" << "\t";
-	outputFile << "PSF deviation" << "\t";
-	outputFile << "X position deviation" << "\t";
-	outputFile << "Y position deviation" << "\t";
-	outputFile << "Background deviation" << "\t";
+	outputFile << "PSF width deviation (pixel)" << "\t";
+	outputFile << "X position deviation (pixel)" << "\t";
+	outputFile << "Y position deviation (pixel)" << "\t";
+	outputFile << "Background deviation (pixel)" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
 	
 	// write the actual positions
@@ -445,13 +445,13 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
-	outputFile << "Fitted PSF standard deviation" << "\t";
+	outputFile << "Fitted PSF standard deviation (pixel)" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Background" << "\t";
 	outputFile << "Intensity deviation" << "\t";
-	outputFile << "X position deviation" << "\t";
-	outputFile << "Y position deviation" << "\t";
+	outputFile << "X position deviation (pixel)" << "\t";
+	outputFile << "Y position deviation (pixel)" << "\t";
 	outputFile << "Background deviation" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
 	
@@ -712,17 +712,17 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
-	outputFile << "Fitted PSF standard deviation along x" << "\t";
-	outputFile << "Fitted PSF standard deviation along y" << "\t";
+	outputFile << "Fitted PSF standard deviation along x (pixel)" << "\t";
+	outputFile << "Fitted PSF standard deviation along y (pixel)" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Correlation between x and y" << "\t";
 	outputFile << "Background" << "\t";
 	outputFile << "Intensity deviation" << "\t";
-	outputFile << "PSF deviation along x" << "\t";
-	outputFile << "PSF deviation along y" << "\t";
-	outputFile << "X position deviation" << "\t";
-	outputFile << "Y position deviation" << "\t";
+	outputFile << "PSF width deviation along x (pixel)" << "\t";
+	outputFile << "PSF width deviation along y (pixel)" << "\t";
+	outputFile << "X position deviation (pixel)" << "\t";
+	outputFile << "Y position deviation (pixel)" << "\t";
 	outputFile << "Correlation deviation" << "\t";
 	outputFile << "Background deviation" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
@@ -852,11 +852,11 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 	}
 	
 	// write the header. Add an extra newline to be safe.
-	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
+	outputFile << "Localized positions using centroid calculation" << "\n";
 	outputFile << header << "\n";
 	
-	outputFile << "First frame" << "\t";
 	outputFile << "DATA FOLLOWS" << "\n";
+	outputFile << "First frame" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
@@ -1010,7 +1010,7 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 	}
 	
 	// write the header. Add an extra newline to be safe.
-	outputFile << "Localized positions using symmetric 2D Gauss fitting" << "\n";
+	outputFile << "Localized positions using iterative multiplication" << "\n";
 	outputFile << header << "\n";
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
