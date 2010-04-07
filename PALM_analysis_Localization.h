@@ -46,10 +46,10 @@ public:
 /**
  * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting of a symmetric 2D Gaussian.
  */
-class FitPositionsGaussian : public FitPositions {
+class FitPositions_SymmetricGaussian : public FitPositions {
 public:
-	FitPositionsGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
-	~FitPositionsGaussian() {;}
+	FitPositions_SymmetricGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	~FitPositions_SymmetricGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
@@ -62,10 +62,10 @@ protected:
 /**
  * @brief Localizes the particles using nonlinear least-squares Levenberg-Marquardt fitting of a symmetric 2D Gaussian with a fixed standard deviation
  */
-class FitPositionsGaussian_FixedWidth : public FitPositions {
+class FitPositions_FixedWidthGaussian : public FitPositions {
 public:
-	FitPositionsGaussian_FixedWidth(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
-	~FitPositionsGaussian_FixedWidth() {;}
+	FitPositions_FixedWidthGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	~FitPositions_FixedWidthGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
@@ -75,10 +75,10 @@ protected:
 	double r_initial;
 };
 
-class FitPositionsEllipsoidalGaussian : public FitPositions {
+class FitPositions_EllipsoidalGaussian : public FitPositions {
 public:
-	FitPositionsEllipsoidalGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
-	~FitPositionsEllipsoidalGaussian() {;}
+	FitPositions_EllipsoidalGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	~FitPositions_EllipsoidalGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
@@ -160,18 +160,18 @@ protected:
 
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
 
-int Gauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
-int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
-int EllipsoidalGauss_2D_fit_function(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
+int FitFunction_SymmetricGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
+int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
+int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 
 
-int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
-int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
-int Ellipsoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Jacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
-int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
-int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
-int EllipsoidalGauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
 class measured_data_Gauss_fits {
 public:	

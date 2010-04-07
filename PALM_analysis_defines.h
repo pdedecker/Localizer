@@ -102,7 +102,7 @@ const int LOCALIZATION_METHOD_2DGAUSS = 0;
 const int LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH = 1;
 const int LOCALIZATION_METHOD_MULTIPLICATION = 2;
 const int LOCALIZATION_METHOD_CENTROID = 3;
-const int LOCALIZATION_METHOD_ELLIPSOIDAL_2DGAUSS = 5; // 5 since Igor reserves 4 for positions fitted with Zeiss software
+const int LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL = 5; // 5 since Igor reserves 4 for positions fitted with Zeiss software
 
 const int IMAGE_OUTPUT_TYPE_TIFF = 0;
 const int IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF = 1;

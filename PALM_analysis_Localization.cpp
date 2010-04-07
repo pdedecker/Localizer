@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_Localization.h"
 
-int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
 	// params contains the current values of the parameters - amplitude, width, etc.
 	// fitData is an object that contains the experimental data
 	
@@ -49,7 +49,7 @@ int Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vecto
 	return GSL_SUCCESS;
 }
 
-int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
 	// params contains the current values of the parameters - amplitude, width, etc.
 	// fitData is an object that contains the experimental data
 	
@@ -89,7 +89,7 @@ int Gauss_2D_fit_function_FixedWidth(const gsl_vector *params, void *fitData_rhs
 	return GSL_SUCCESS;
 }
 
-int Ellipsoidal_Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
 	// params contains the current values of the parameters - amplitude, width, etc.
 	// fitData is an object that contains the experimental data
 	
@@ -133,7 +133,7 @@ int Ellipsoidal_Gauss_2D_fit_function(const gsl_vector *params, void *fitData_rh
 	return GSL_SUCCESS;
 }
 
-int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
@@ -183,7 +183,7 @@ int Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, 
 	
 }
 
-int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
@@ -233,7 +233,7 @@ int Gauss_2D_fit_function_Jacobian_FixedWidth(const gsl_vector *params, void *fi
 	
 }
 
-int Ellipsoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<PALMMatrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
@@ -293,35 +293,35 @@ int Ellipsoidal_Gauss_2D_fit_function_Jacobian(const gsl_vector *params, void *f
 	
 }
 
-int Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
 	int result;
-	result = Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	result = FitFunction_SymmetricGaussian(params, measured_intensities_struct, model_values);
 	if (result != GSL_SUCCESS)
 		return result;
-	result = Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
+	result = Jacobian_SymmetricGaussian(params, measured_intensities_struct, jacobian);
 	if (result != GSL_SUCCESS)
 		return result;
 	return GSL_SUCCESS;
 }
 
-int Gauss_2D_fit_function_and_Jacobian_FixedWidth(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
 	int result;
-	result = Gauss_2D_fit_function_FixedWidth(params, measured_intensities_struct, model_values);
+	result = FitFunction_FixedWidthGaussian(params, measured_intensities_struct, model_values);
 	if (result != GSL_SUCCESS)
 		return result;
-	result = Gauss_2D_fit_function_Jacobian_FixedWidth(params, measured_intensities_struct, jacobian);
+	result = Jacobian_FixedWidthGaussian(params, measured_intensities_struct, jacobian);
 	if (result != GSL_SUCCESS)
 		return result;
 	
 	return GSL_SUCCESS;
 }
 
-int Ellipsoidal_Gauss_2D_fit_function_and_Jacobian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
 	int result;
-	result = Ellipsoidal_Gauss_2D_fit_function(params, measured_intensities_struct, model_values);
+	result = FitFunction_EllipsoidalGaussian(params, measured_intensities_struct, model_values);
 	if (result != GSL_SUCCESS)
 		return result;
-	result = Ellipsoidal_Gauss_2D_fit_function_Jacobian(params, measured_intensities_struct, jacobian);
+	result = Jacobian_EllipsoidalGaussian(params, measured_intensities_struct, jacobian);
 	if (result != GSL_SUCCESS)
 		return result;
 	
@@ -337,7 +337,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions::fit_positions(const
 	return fit_positions(image, positions, startPosition, endPosition);
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																					   size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -350,13 +350,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	
 	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
 		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
+		error = "Requested start and end positions are outside the range of positions supplied in FitPositions_SymmetricGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
 	if (startPos > endPos) {
 		std::string error;
-		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
+		error = "Start is beyond end in FitPositions_SymmetricGaussian::fit_positions";
 		throw std::range_error(error);
 	}
 	
@@ -405,9 +405,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 		throw std::bad_alloc();
 	}
 	
-	f.f = &Gauss_2D_fit_function;
-	f.df = &Gauss_2D_fit_function_Jacobian;
-	f.fdf = &Gauss_2D_fit_function_and_Jacobian;
+	f.f = &FitFunction_SymmetricGaussian;
+	f.df = &Jacobian_SymmetricGaussian;
+	f.fdf = &FitFunctionAndJacobian_SymmetricGaussian;
 	f.n = number_of_intensities;
 	f.p = 5;
 	f.params = (void *)&fitData;
@@ -521,7 +521,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian::fit_positio
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
 																								  size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -589,9 +589,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 		throw std::bad_alloc();
 	}
 	
-	f.f = &Gauss_2D_fit_function_FixedWidth;
-	f.df = &Gauss_2D_fit_function_Jacobian_FixedWidth;
-	f.fdf = &Gauss_2D_fit_function_and_Jacobian_FixedWidth;
+	f.f = &FitFunction_FixedWidthGaussian;
+	f.df = &Jacobian_FixedWidthGaussian;
+	f.fdf = &FitFunctionAndJacobian_FixedWidthGaussian;
 	f.n = number_of_intensities;
 	f.p = 4;
 	f.params = (void *)&fitData;
@@ -704,7 +704,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsGaussian_FixedWidth::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsEllipsoidalGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions,
 															 size_t startPos, size_t endPos) {
 	
 	// some safety checks
@@ -770,9 +770,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsEllipsoidalGaussian::
 		throw std::bad_alloc();
 	}
 	
-	f.f = &Ellipsoidal_Gauss_2D_fit_function;
-	f.df = &Ellipsoidal_Gauss_2D_fit_function_Jacobian;
-	f.fdf = &Ellipsoidal_Gauss_2D_fit_function_and_Jacobian;
+	f.f = &FitFunction_EllipsoidalGaussian;
+	f.df = &Jacobian_EllipsoidalGaussian;
+	f.fdf = &FitFunctionAndJacobian_EllipsoidalGaussian;
 	f.n = number_of_intensities;
 	f.p = 7;
 	f.params = (void *)&fitData;

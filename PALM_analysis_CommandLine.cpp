@@ -229,10 +229,10 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cuto
 	double sigma = 0.1;
 	
 	if (name == std::string("2dgauss"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsGaussian(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(cutoffRadius, psfWidth, sigma));
 	
 	if (name == std::string("2dgaussfixedwidth"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsGaussian_FixedWidth(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(cutoffRadius, psfWidth, sigma));
 	
 	if (name == std::string("multiplication"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoffRadius, psfWidth, sigma));
