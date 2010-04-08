@@ -1273,46 +1273,6 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_Remo
 	return processed_thresholded_image;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemovePixelsBelowMean::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
-	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->getXSize();
-	size_t y_size = thresholded_image->getYSize();
-	unsigned char value;
-	double meanIntensity = 0;
-	
-	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
-	
-	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-	
-	processed_thresholded_image->set_all(0);
-	
-	// calculate the mean intensity
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			meanIntensity += image->get(i, j);
-		}
-	}
-	meanIntensity /= x_size * y_size;
-	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
-			
-			value = thresholded_image->get(i, j);
-			if (value < 128) {	// this is an 'off' pixel
-				continue;
-			}
-			
-			// if we are here then the current pixel is active
-			// we only mark the pixel as active in the processed image if it is above the mean
-			if (image->get(i, j) > meanIntensity) {
-				processed_thresholded_image->set(i, j, 255);
-			}
-		}
-	}
-	
-	return processed_thresholded_image;
-}
-
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 	if (forwardPlan != NULL) {
 		fftw_destroy_plan(forwardPlan);

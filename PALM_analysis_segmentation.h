@@ -263,15 +263,6 @@ public:
 	boost::shared_ptr<PALMMatrix <unsigned char> > do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image);
 };
 
-class ThresholdImage_Postprocessor_RemovePixelsBelowMean : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
-	// but that are below the mean in the image
-public:
-	ThresholdImage_Postprocessor_RemovePixelsBelowMean() {;}
-	~ThresholdImage_Postprocessor_RemovePixelsBelowMean() {;}
-	
-	boost::shared_ptr<PALMMatrix <unsigned char> > do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image);
-};
-
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins);
 
 #endif
