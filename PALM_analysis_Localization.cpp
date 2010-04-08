@@ -422,10 +422,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - (double)cutoff_radius;
-		y_offset = y0_initial - (double)cutoff_radius;
-		x_max = x0_initial + (double)cutoff_radius;
-		y_max = y0_initial + (double)cutoff_radius;
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -606,10 +606,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - (double)cutoff_radius;
-		y_offset = y0_initial - (double)cutoff_radius;
-		x_max = x0_initial + (double)cutoff_radius;
-		y_max = y0_initial + (double)cutoff_radius;
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -788,10 +788,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		correlation_initial = 0.0;
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - (double)cutoff_radius;
-		y_offset = y0_initial - (double)cutoff_radius;
-		x_max = x0_initial + (double)cutoff_radius;
-		y_max = y0_initial + (double)cutoff_radius;
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -825,6 +825,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		do {
 			iterations++;
 			status = gsl_multifit_fdfsolver_iterate(fit_iterator);
+			if (status != 0)
+				break;
+			
 			status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
 		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
@@ -954,10 +957,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - (double)cutoff_radius;
-		y_offset = y0_initial - (double)cutoff_radius;
-		x_max = x0_initial + (double)cutoff_radius;
-		y_max = y0_initial + (double)cutoff_radius;
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
 			continue;
@@ -1105,10 +1108,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		current_y = 0;
 		denominator = 0;
 		
-		x_offset = x0_initial - (double)cutoff_radius;
-		y_offset = y0_initial - (double)cutoff_radius;
-		x_max = x0_initial + (double)cutoff_radius;
-		y_max = y0_initial + (double)cutoff_radius;
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// the point is too close to the edge
 			continue;
