@@ -48,7 +48,7 @@ public:
  */
 class FitPositions_SymmetricGaussian : public FitPositions {
 public:
-	FitPositions_SymmetricGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
+	FitPositions_SymmetricGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_SymmetricGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -64,7 +64,7 @@ protected:
  */
 class FitPositions_FixedWidthGaussian : public FitPositions {
 public:
-	FitPositions_FixedWidthGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
+	FitPositions_FixedWidthGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_FixedWidthGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -77,7 +77,7 @@ protected:
 
 class FitPositions_EllipsoidalGaussian : public FitPositions {
 public:
-	FitPositions_EllipsoidalGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
+	FitPositions_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_EllipsoidalGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -94,7 +94,7 @@ protected:
  */
 class FitPositionsMultiplication : public FitPositions {
 public:
-	FitPositionsMultiplication(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; convergence_threshold = convergence_rhs;}
+	FitPositionsMultiplication(double initialPSFWidth_rhs, double convergence_rhs) {initialPSFWidth = initialPSFWidth_rhs; convergence_threshold = convergence_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositionsMultiplication() {;}
 	
 	// initialPSFWidth should be the standard deviation of the Gaussian
@@ -118,7 +118,7 @@ class FitPositionsCentroid : public FitPositions {
 	// fits the positions by calculating a centroid for the pixel values
 	
 public:
-	FitPositionsCentroid(size_t cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
+	FitPositionsCentroid(double initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositionsCentroid() {;}
 	
 	// initialPSFWidth should be the standard deviation of the Gaussian
