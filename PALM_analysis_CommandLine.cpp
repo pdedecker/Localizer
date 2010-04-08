@@ -25,8 +25,6 @@ int main(int argc, char *argv[]) {
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
 		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
-		("cutoff-radius", po::value<int>()->default_value(11), "Cutout radius for fitting.")
-		("min-distance-from-edge", po::value<int>()->default_value(11), "Minimal distance a localized position has to be from the edge of the image. Should be larger than or equal to cutoff-radius.")
 		("min-radius-between-particles", po::value<double>()->default_value(4), "Minimal radius between particles to be accept (only for \"radius\" particle finding)")
 		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
@@ -78,8 +76,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	double psfWidth = vm["psf-width"].as<double>();
-	int cutoffRadius = vm["cutoff-radius"].as<int>();
-	int minDistanceFromEdge = vm["min-distance-from-edge"].as<int>();
 	double radiusBetweenParticles = vm["min-radius-between-particles"].as<double>();
 	
 	// get the pre- and postprocessors
@@ -90,10 +86,10 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
 	
 	// get the particle finder
-	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName, minDistanceFromEdge, radiusBetweenParticles);
+	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName, radiusBetweenParticles);
 	
 	// get the positions fitter
-	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, cutoffRadius, psfWidth);
+	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
 	
 	// get a progress reporter
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout());
@@ -211,21 +207,21 @@ boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double p
 	throw std::runtime_error("Unknown segmentation algorithm");
 }
 
-boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, int minDistanceFromEdge, double radiusBetweenParticles) {
+boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, double radiusBetweenParticles) {
 	if (name == std::string("4way"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4(minDistanceFromEdge));
+		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 	
 	if (name == std::string("8way"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8(minDistanceFromEdge));
+		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
 	
 	if (name == std::string("radius"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(minDistanceFromEdge, radiusBetweenParticles));
+		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 	
 	// if we get here then we didn't recognize the particlefinder
 	throw std::runtime_error("Unknown particle finding algorithm");
 }
 
-boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cutoffRadius, double psfWidth) {
+boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth) {
 	double sigma = 1;
 	
 	if (name == std::string("symmetric2dgauss"))
@@ -241,7 +237,7 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cuto
 		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
 	
 	if (name == std::string("centroid"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoffRadius));
+		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
 	
 	// if we get here then we didn't recognize the localizing algorithm
 	throw std::runtime_error("Unknown localization algorithm");

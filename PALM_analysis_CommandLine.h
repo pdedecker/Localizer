@@ -27,8 +27,8 @@ int main(int argc, char *argv[]);
 boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name);
 boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name);
 boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth);
-boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, int minDistanceFromEdge, double radiusBetweenParticles);
-boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cutoffRadius, double psfWidth);
+boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, double radiusBetweenParticles);
+boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth);
 
 // function that will guess the CCD file type and return an image loader
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);

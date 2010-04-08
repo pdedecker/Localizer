@@ -62,16 +62,6 @@ struct AnalyzePALMImagesRuntimeParams {
 	double initial_width;
 	int WFlagParamsSet[1];
 	
-	// Parameters for /E flag group.
-	int EFlagEncountered;
-	double min_distance_from_edge;
-	int EFlagParamsSet[1];
-	
-	// Parameters for /C flag group.
-	int CFlagEncountered;
-	double cutoff_radius;
-	int CFlagParamsSet[1];
-	
 	// Parameters for /S flag group.
 	int SFlagEncountered;
 	double sigma;
@@ -427,7 +417,7 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	double threshold_parameter, radiusBetweenParticles, initial_width, min_distance_from_edge, cutoff_radius, sigma, background;
+	double threshold_parameter, radiusBetweenParticles, initial_width, sigma, background;
 	std::string name_of_output_wave;
 	std::string data_file_path;
 	size_t camera_type;
@@ -561,24 +551,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	
 	if (method != 2)
 		analysisOptionsStream << "GAUSSIAN WIDTH:" << initial_width << ';';
-	
-	if (p->EFlagEncountered) {
-		// Parameter: p->min_distance_from_edge
-		min_distance_from_edge = p->min_distance_from_edge;
-	} else {
-		min_distance_from_edge = 11;
-	}
-	
-	analysisOptionsStream << "MIN DISTANCE FROM EDGE:" << min_distance_from_edge << ';';
-	
-	if (p->CFlagEncountered) {
-		// Parameter: p->cutoff_radius
-		cutoff_radius = p->cutoff_radius;
-	} else {
-		cutoff_radius = 10;
-	}
-	
-	analysisOptionsStream << "CUTOFF RADIUS:" << cutoff_radius << ';';
 	
 	if (p->SFlagEncountered) {
 		// Parameter: p->sigma
@@ -747,13 +719,13 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// which particle finding method do we wish to use?
 		switch (particle_finding_method) {
 			case PARTICLEFINDER_ADJACENT4:
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4(min_distance_from_edge));
+				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 				break;
 			case PARTICLEFINDER_ADJACENT8:
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8(min_distance_from_edge));
+				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
 				break;
 			case PARTICLEFINDER_RADIUS:	// traditional radius approach
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(min_distance_from_edge, radiusBetweenParticles));
+				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1572,13 +1544,13 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		if (output_located_particles == 1) {
 			switch (particle_finding_method) {
 				case 0:
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4(10));
+					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 					break;
 				case 1:
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8(10));
+					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
 					break;
 				case 2:	// traditional radius approach
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(10, radiusBetweenParticles));
+					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 					break;
 				default:
 					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1984,11 +1956,12 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /E=number:min_distance_from_edge /C=number:cutoff_radius /S=number:sigma /P=wave:positions_wave /Q /Z name:name_of_output_wave, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z name:name_of_output_wave, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);
 }
+
 static int RegisterReadCCDImages(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
