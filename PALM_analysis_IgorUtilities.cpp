@@ -153,7 +153,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	return 0;
 }
 
-int construct_summed_intensity_trace(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
+int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -197,7 +197,9 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, std::string outp
 	}
 	
 	// try to create the output wave
-	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
+	result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
+	if (result != 0)
+		throw result;
 	
 	// write the output data to the wave
 	result = MDStoreDPDataInNumericWave(output_wave, intensity_trace_buffer.get());
@@ -208,7 +210,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, std::string outp
 	return 0;
 }
 
-int construct_average_image(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
+int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -256,7 +258,9 @@ int construct_average_image(ImageLoader *image_loader, std::string output_wave_n
 	(*average_image) = (*average_image).DivideByScalar(n_images);
 	
 	// try to create the output wave
-	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
+	result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
+	if (result != 0)
+		throw result;
 	
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {
@@ -275,7 +279,7 @@ int construct_average_image(ImageLoader *image_loader, std::string output_wave_n
 }
 
 
-void calculateStandardDeviationImage(ImageLoader *image_loader, std::string output_wave_name, long startX, long startY, long endX, long endY) {
+void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->get_total_number_of_images();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -337,7 +341,9 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, std::string outp
 	dimension_sizes[0] = xRange;
 	dimension_sizes[1] = yRange;
 	dimension_sizes[2] = 0;
-	output_wave = MakeWaveUsingFullPath(output_wave_name, dimension_sizes, NT_FP64, 1);
+	result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
+	if (result != 0)
+		throw result;
 	
 	// write the output data to the wave
 	for (size_t i = startX; i <= endX; ++i) {

@@ -218,18 +218,18 @@ struct AnalyzeCCDImagesRuntimeParams {
 	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
-	double RFlagNumber0;
-	double RFlagNumber1;
-	double RFlagNumber2;
-	double RFlagNumber3;
+	double startX;
+	double endX;
+	double startY;
+	double endY;
 	int RFlagParamsSet[4];
 	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int output_waveEncountered;
-	char output_wave[MAX_OBJ_NAME+1];
-	int output_waveParamsSet[1];
+	int outputWaveParamsEncountered;
+	DataFolderAndName outputWaveParams;
+	int outputWaveParamsParamsSet[1];
 	
 	// Parameters for simple main group #1.
 	int input_fileEncountered;
@@ -1192,10 +1192,10 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	int camera_type;
 	int method;
 	
+	DataFolderAndName outputWaveParams;
 	long startX, startY, endX, endY, swap;
 	
 	std::string input_file_path;
-	std::string name_of_output_wave;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
 	
@@ -1217,23 +1217,23 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	}
 	
 	if (p->RFlagEncountered) {
-		// Parameter: p->RFlagNumber0
-		// Parameter: p->RFlagNumber0
-		// Parameter: p->RFlagNumber0
-		// Parameter: p->RFlagNumber0
+		// Parameter: p->startX
+		// Parameter: p->endX
+		// Parameter: p->startY
+		// Parameter: p->endY
 		
 		// check that they are all positive
-		if ((p->RFlagNumber0 < 0) || (p->RFlagNumber1 < 0) || (p->RFlagNumber2 < 0) || (p->RFlagNumber3 < 0)) {
+		if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
 			return EXPECT_POS_NUM;
 		}
-		if ((p->RFlagNumber0 >= p->RFlagNumber1) || (p->RFlagNumber2 >= p->RFlagNumber3)) {
+		if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
 			return EXPECT_POS_NUM;	// update this with the proper error message
 		}
 		
-		startX = (long)(p->RFlagNumber0 + 0.5);
-		endX = (long)(p->RFlagNumber1 + 0.5);
-		startY = (long)(p->RFlagNumber2 + 0.5);
-		endY = (long)(p->RFlagNumber3 + 0.5);
+		startX = (long)(p->startX + 0.5);
+		endX = (long)(p->endX + 0.5);
+		startY = (long)(p->startY + 0.5);
+		endY = (long)(p->endY + 0.5);
 		
 		if (startX < 0)
 			startX = 0;
@@ -1258,9 +1258,9 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	
 	// Main parameters.
 	
-	if (p->output_waveEncountered) {
-		// Parameter: p->output_wave
-		name_of_output_wave.assign(p->output_wave);
+	if (p->outputWaveParamsEncountered) {
+		// Parameter: p->outputWaveParams
+		outputWaveParams = p->outputWaveParams;
 	} else {
 		return EXPECTED_NAME;
 	}
@@ -1291,13 +1291,13 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	
 		switch (method) {
 			case 0:
-				err = construct_summed_intensity_trace(image_loader.get(), name_of_output_wave, startX, startY, endX, endY);
+				err = construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			case 1:
-				err = construct_average_image(image_loader.get(), name_of_output_wave, startX, startY, endX, endY);
+				err = construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			case 2:
-				calculateStandardDeviationImage(image_loader.get(), name_of_output_wave, startX, startY, endX, endY);
+				calculateStandardDeviationImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_ANALYSIS_METHOD;
@@ -1981,12 +1981,12 @@ static int RegisterProcessCCDImages(void) {
 }
 
 static int RegisterAnalyzeCCDImages(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /R={number, number, number, number} name:output_wave, string:input_file";
+	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /R={number:startX, number:endX, number:startY, number:endY} DataFolderAndName:{outputWaveParams, real}, string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, 0);
