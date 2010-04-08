@@ -764,19 +764,19 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		if (p->MFlagEncountered) {
 			switch (method) {
 				case LOCALIZATION_METHOD_2DGAUSS:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
 					break;
 				case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
 					break;
 				case LOCALIZATION_METHOD_MULTIPLICATION:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
 					break;
 				case LOCALIZATION_METHOD_CENTROID:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoff_radius));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
 					break;
 				case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(cutoff_radius, initial_width, sigma));
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
 					break;
 				default:
 					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -784,7 +784,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			}
 			
 		} else {
-			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(cutoff_radius, initial_width, sigma));
+			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
 		}
 		
 		if (quiet == 1) {

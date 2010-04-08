@@ -229,16 +229,16 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cuto
 	double sigma = 1;
 	
 	if (name == std::string("symmetric2dgauss"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
 	
 	if (name == std::string("symmetric2dgaussfixedwidth"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
 	
 	if (name == std::string("ellipsoidal2dgauss"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
 	
 	if (name == std::string("multiplication"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoffRadius, psfWidth, sigma));
+		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
 	
 	if (name == std::string("centroid"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(cutoffRadius));
