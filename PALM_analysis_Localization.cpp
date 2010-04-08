@@ -361,7 +361,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
-	size_t x_offset, y_offset, x_max, y_max;
+	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
@@ -422,10 +422,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - cutoff_radius;
-		y_offset = y0_initial - cutoff_radius;
-		x_max = x0_initial + cutoff_radius;
-		y_max = y0_initial + cutoff_radius;
+		x_offset = x0_initial - (double)cutoff_radius;
+		y_offset = y0_initial - (double)cutoff_radius;
+		x_max = x0_initial + (double)cutoff_radius;
+		y_max = y0_initial + (double)cutoff_radius;
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -438,8 +438,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 			}
 		}
 		
-		fitData.xOffset = (double)x_offset;
-		fitData.yOffset = (double)y_offset;
+		fitData.xOffset = x_offset;
+		fitData.yOffset = y_offset;
 		fitData.imageSubset = image_subset;
 		fitData.sigma = sigma;
 		
@@ -545,7 +545,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
-	size_t x_offset, y_offset, x_max, y_max;
+	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
@@ -606,10 +606,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - cutoff_radius;
-		y_offset = y0_initial - cutoff_radius;
-		x_max = x0_initial + cutoff_radius;
-		y_max = y0_initial + cutoff_radius;
+		x_offset = x0_initial - (double)cutoff_radius;
+		y_offset = y0_initial - (double)cutoff_radius;
+		x_max = x0_initial + (double)cutoff_radius;
+		y_max = y0_initial + (double)cutoff_radius;
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -622,8 +622,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 			}
 		}
 		
-		fitData.xOffset = (double)x_offset;
-		fitData.yOffset = (double)y_offset;
+		fitData.xOffset = x_offset;
+		fitData.yOffset = y_offset;
 		fitData.imageSubset = image_subset;
 		fitData.sigma = sigma;
 		fitData.width = initialPSFWidth;
@@ -728,7 +728,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
-	size_t x_offset, y_offset, x_max, y_max;
+	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
@@ -788,10 +788,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		correlation_initial = 0.0;
 		background = (*positions)[i].get_background();
 		
-		x_offset = x0_initial - cutoff_radius;
-		y_offset = y0_initial - cutoff_radius;
-		x_max = x0_initial + cutoff_radius;
-		y_max = y0_initial + cutoff_radius;
+		x_offset = x0_initial - (double)cutoff_radius;
+		y_offset = y0_initial - (double)cutoff_radius;
+		x_max = x0_initial + (double)cutoff_radius;
+		y_max = y0_initial + (double)cutoff_radius;
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
@@ -804,8 +804,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 			}
 		}
 		
-		fitData.xOffset = (double)x_offset;
-		fitData.yOffset = (double)y_offset;
+		fitData.xOffset = x_offset;
+		fitData.yOffset = y_offset;
 		fitData.imageSubset = image_subset;
 		fitData.sigma = sigma;
 		
@@ -927,7 +927,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
-	size_t x_offset, y_offset, x_max, y_max;
+	double x_offset, y_offset, x_max, y_max;
 	
 	double x0_initial, y0_initial, amplitude, background;
 	size_t iterations = 0;
@@ -954,10 +954,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		y0_initial = (*positions)[i].get_y();
 		background = (*positions)[i].get_background();
 		
-		x_offset = (size_t)x0_initial - cutoff_radius;
-		y_offset = (size_t)y0_initial - cutoff_radius;
-		x_max = (size_t)x0_initial + cutoff_radius;
-		y_max = (size_t)y0_initial + cutoff_radius;
+		x_offset = x0_initial - (double)cutoff_radius;
+		y_offset = y0_initial - (double)cutoff_radius;
+		x_max = x0_initial + (double)cutoff_radius;
+		y_max = y0_initial + (double)cutoff_radius;
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
 			continue;
@@ -971,8 +971,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		
 		iterations = 0;
 		
-		current_x = x0_initial - (double)x_offset;	// correct the x- and y-values for the fact that we analyze in a subset of the image rather than the complete frame
-		current_y = y0_initial - (double)y_offset;
+		current_x = x0_initial - x_offset;	// correct the x- and y-values for the fact that we analyze in a subset of the image rather than the complete frame
+		current_y = y0_initial - y_offset;
 		
 		converged = 1;
 		while (delta_squared > convergence_treshold_squared) {
@@ -1089,7 +1089,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	
 	size_t xSize = image->getXSize();
 	size_t ySize = image->getYSize();
-	size_t x_offset, y_offset, x_max, y_max;
+	double x_offset, y_offset, x_max, y_max;
 	
 	size_t x0_initial, y0_initial;
 	double current_x, current_y;
@@ -1105,14 +1105,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		current_y = 0;
 		denominator = 0;
 		
-		x_offset = x0_initial - cutoff_radius;
-		y_offset = y0_initial - cutoff_radius;
-		x_max = x0_initial + cutoff_radius;
-		y_max = y0_initial + cutoff_radius;
+		x_offset = x0_initial - (double)cutoff_radius;
+		y_offset = y0_initial - (double)cutoff_radius;
+		x_max = x0_initial + (double)cutoff_radius;
+		y_max = y0_initial + (double)cutoff_radius;
 		
-		if ((x_offset > xSize) || (x_max > (xSize - 1)) || (y_offset > ySize) || (y_max > (ySize - 1))) {	// the point is too close to the edge
-			// because all the variables are unsigned, a negative value will
-			// actually end up being larger than xSize or ySize
+		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// the point is too close to the edge
 			continue;
 		}
 		
