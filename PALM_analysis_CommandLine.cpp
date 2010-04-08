@@ -17,18 +17,18 @@ int main(int argc, char *argv[]) {
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help", "produce help message")
-		("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing")
-		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing")
-		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use")
-		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use")
-		("localization", po::value<std::string>()->default_value("2dgauss"), "localization algorithm to use")
-		("pfa", po::value<double>(), "Threshold parameter for GLRT localization")
-		("threshold", po::value<double>(), "Threshold parameter for direct thresholding")
-		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF")
-		("cutoff-radius", po::value<int>()->default_value(11), "Cutout radius for fitting")
-		("min-distance-from-edge", po::value<int>()->default_value(11), "Minimal distance a localized position has to be from the edge of the image")
+		("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing. Typically not required.")
+		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
+		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
+		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", \"8way\", and \"radius\".")
+		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
+		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
+		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
+		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
+		("cutoff-radius", po::value<int>()->default_value(11), "Cutout radius for fitting.")
+		("min-distance-from-edge", po::value<int>()->default_value(11), "Minimal distance a localized position has to be from the edge of the image. Should be larger than or equal to cutoff-radius.")
 		("min-radius-between-particles", po::value<double>()->default_value(4), "Minimal radius between particles to be accept (only for \"radius\" particle finding)")
-	("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
+		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
 	
 	// tell program options that arguments without a flag are input CCD files
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	
 	// did the user specify any input files?
 	if (vm.count("input-file") == 0) {
-		std::cout << "No input files specified. Aborting...\n";
+		std::cout << "No input files specified. Aborting... (try adding \"--help\" to get a help message)\n";
 		return 1;
 	}
 	
@@ -226,13 +226,16 @@ boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, int mi
 }
 
 boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double cutoffRadius, double psfWidth) {
-	double sigma = 0.1;
+	double sigma = 1;
 	
-	if (name == std::string("2dgauss"))
+	if (name == std::string("symmetric2dgauss"))
 		return boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(cutoffRadius, psfWidth, sigma));
 	
-	if (name == std::string("2dgaussfixedwidth"))
+	if (name == std::string("symmetric2dgaussfixedwidth"))
 		return boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(cutoffRadius, psfWidth, sigma));
+	
+	if (name == std::string("ellipsoidal2dgauss"))
+		return boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(cutoffRadius, psfWidth, sigma));
 	
 	if (name == std::string("multiplication"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(cutoffRadius, psfWidth, sigma));
