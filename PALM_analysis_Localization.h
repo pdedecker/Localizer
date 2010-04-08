@@ -48,7 +48,7 @@ public:
  */
 class FitPositions_SymmetricGaussian : public FitPositions {
 public:
-	FitPositions_SymmetricGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	FitPositions_SymmetricGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
 	~FitPositions_SymmetricGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -56,7 +56,7 @@ public:
 protected:
 	double sigma;
 	size_t cutoff_radius;
-	double r_initial;
+	double initialPSFWidth;
 };
 
 /**
@@ -64,7 +64,7 @@ protected:
  */
 class FitPositions_FixedWidthGaussian : public FitPositions {
 public:
-	FitPositions_FixedWidthGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	FitPositions_FixedWidthGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
 	~FitPositions_FixedWidthGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -72,12 +72,12 @@ public:
 protected:
 	double sigma;
 	size_t cutoff_radius;
-	double r_initial;
+	double initialPSFWidth;
 };
 
 class FitPositions_EllipsoidalGaussian : public FitPositions {
 public:
-	FitPositions_EllipsoidalGaussian(size_t cutoff_radius_rhs, double r_initial_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; sigma = sigma_rhs;}
+	FitPositions_EllipsoidalGaussian(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double sigma_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs;}
 	~FitPositions_EllipsoidalGaussian() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
@@ -85,7 +85,7 @@ public:
 protected:
 	double sigma;
 	size_t cutoff_radius;
-	double r_initial;
+	double initialPSFWidth;
 };
 
 /**
@@ -94,10 +94,10 @@ protected:
  */
 class FitPositionsMultiplication : public FitPositions {
 public:
-	FitPositionsMultiplication(size_t cutoff_radius_rhs, double r_initial_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; r_initial = r_initial_rhs; convergence_threshold = convergence_rhs;}
+	FitPositionsMultiplication(size_t cutoff_radius_rhs, double initialPSFWidth_rhs, double convergence_rhs) {cutoff_radius = cutoff_radius_rhs; initialPSFWidth = initialPSFWidth_rhs; convergence_threshold = convergence_rhs;}
 	~FitPositionsMultiplication() {;}
 	
-	// r_initial should be the standard deviation of the Gaussian
+	// initialPSFWidth should be the standard deviation of the Gaussian
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
@@ -108,7 +108,7 @@ protected:
 	
 	double convergence_threshold;
 	size_t cutoff_radius;
-	double r_initial;
+	double initialPSFWidth;
 };
 
 /**
@@ -121,7 +121,7 @@ public:
 	FitPositionsCentroid(size_t cutoff_radius_rhs) {cutoff_radius = cutoff_radius_rhs;}
 	~FitPositionsCentroid() {;}
 	
-	// r_initial should be the standard deviation of the Gaussian
+	// initialPSFWidth should be the standard deviation of the Gaussian
 	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:

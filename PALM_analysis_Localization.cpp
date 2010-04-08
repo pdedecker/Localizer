@@ -445,7 +445,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		gsl_vector_set(fit_parameters, 1, r_initial);
+		gsl_vector_set(fit_parameters, 1, initialPSFWidth);
 		gsl_vector_set(fit_parameters, 2, x0_initial);
 		gsl_vector_set(fit_parameters, 3, y0_initial);
 		gsl_vector_set(fit_parameters, 4, background);
@@ -479,7 +479,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.5)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
@@ -626,11 +626,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		fitData.yOffset = (double)y_offset;
 		fitData.imageSubset = image_subset;
 		fitData.sigma = sigma;
-		fitData.width = r_initial;
+		fitData.width = initialPSFWidth;
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		// gsl_vector_set(fit_parameters, 1, r_initial * 1.414213562373095);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
+		// gsl_vector_set(fit_parameters, 1, initialPSFWidth * 1.414213562373095);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
 		gsl_vector_set(fit_parameters, 1, x0_initial);
 		gsl_vector_set(fit_parameters, 2, y0_initial);
 		gsl_vector_set(fit_parameters, 3, background);
@@ -675,7 +675,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		
 		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
 		// so we correct for that
-		localizationResult->width = r_initial;
+		localizationResult->width = initialPSFWidth;
 		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 1);
 		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
@@ -811,8 +811,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		gsl_vector_set(fit_parameters, 1, this->r_initial);
-		gsl_vector_set(fit_parameters, 2, this->r_initial);
+		gsl_vector_set(fit_parameters, 1, this->initialPSFWidth);
+		gsl_vector_set(fit_parameters, 2, this->initialPSFWidth);
 		gsl_vector_set(fit_parameters, 3, x0_initial);
 		gsl_vector_set(fit_parameters, 4, y0_initial);
 		gsl_vector_set(fit_parameters, 5, correlation_initial);
@@ -850,7 +850,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 			continue;
 		}
 		
-		if ((gsl_vector_get(fit_iterator->x, 1) < r_initial / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > r_initial * 1.5)) {
+		if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
 			continue;
 		}
@@ -986,7 +986,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 				break;
 			}
 			
-			multiply_with_gaussian(image_subset, image_subset_mask, current_x, current_y, r_initial, background, amplitude);
+			multiply_with_gaussian(image_subset, image_subset_mask, current_x, current_y, initialPSFWidth, background, amplitude);
 			determine_x_y_position(image_subset_mask, current_x, current_y);
 			
 			if (iterations == 1)	// this is the first iteration, we should not check for termination
@@ -1000,7 +1000,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		
 		delta_squared = 10 * convergence_treshold_squared;
 		
-		localizationResult->width = r_initial;
+		localizationResult->width = initialPSFWidth;
 		localizationResult->xPosition = (double)current_x + (double)x_offset;
 		localizationResult->yPosition = (double)current_y + (double)y_offset;
 		
