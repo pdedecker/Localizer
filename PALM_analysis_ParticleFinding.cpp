@@ -24,8 +24,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 	size_t nBackgroundPixels = 0;
 	
 	// we run over all the points in the image to see if they are above the treshold
-	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; j++) {
-		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; i++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			
 			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -37,12 +37,6 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 			
 			current_x = (double)i;
 			current_y = (double)j;
-			
-			// is this point too close to the edge of the image?
-			if ((current_x < minDistanceFromEdge) || (current_x > (x_size - minDistanceFromEdge)))
-				continue;
-			if ((current_y < minDistanceFromEdge) || (current_y > (y_size - minDistanceFromEdge)))
-				continue;
 			
 			// if we are still here then we need to take a closer look at this point
 			// check if the current point overlaps with a previous point
@@ -106,8 +100,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPosition
 	
 	mapped_image->set_all(-1);
 	
-	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
-		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {	// loop over the entire image
 			
 			if ((*threshold_image)(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -170,12 +164,6 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPosition
 			currentPosition.set_x(average_x);
 			currentPosition.set_y(average_y);
 			
-			// we store the particle only if it is not too close to the edge of the frame
-			if ((average_x < minDistanceFromEdge) || (average_x > ((double)x_size - minDistanceFromEdge)))
-				continue;
-			if ((average_y < minDistanceFromEdge) || (average_y > ((double)y_size - minDistanceFromEdge)))
-				continue;
-			
 			particles->push_back(currentPosition);
 		}
 	}
@@ -209,11 +197,6 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<p
 	size_t y = (size_t)(centerPosition.get_y() + 0.5);
 	
 	long particleIndex = (*mapped_image)(x, y);
-	
-	if ((x < minDistanceFromEdge) || (x > x_size - minDistanceFromEdge - 1))
-		return;
-	if ((y < minDistanceFromEdge) || (y > y_size - minDistanceFromEdge - 1))
-		return;
 	
 	// is the pixel to the left of the current one active?
 	if (x > 0) {
@@ -298,8 +281,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPosition
 	
 	mapped_image->set_all(-1);
 	
-	for (size_t j = minDistanceFromEdge; j < y_size - minDistanceFromEdge; ++j) {
-		for (size_t i = minDistanceFromEdge; i < x_size - minDistanceFromEdge; ++i) {	// loop over the entire image
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {	// loop over the entire image
 			
 			if (threshold_image->get(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -363,12 +346,6 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPosition
 			currentPosition.set_x(average_x);
 			currentPosition.set_y(average_y);
 			
-			// we store the particle only if it is not too close to the edge of the frame
-			if ((average_x < minDistanceFromEdge) || (average_x > ((double)x_size - minDistanceFromEdge)))
-				continue;
-			if ((average_y < minDistanceFromEdge) || (average_y > ((double)y_size - minDistanceFromEdge)))
-				continue;
-			
 			particles->push_back(currentPosition);
 		}
 	}
@@ -401,19 +378,18 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<p
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);
 	size_t y = (size_t)(centerPosition.get_y() + 0.5);
 	
+	// make sure that we don't cross the boundaries of the image
+	size_t lowerXBound = (x - 1) == (size_t)-1 ? 0 : x - 1;
+	size_t upperXBound = (x + 1) >= x_size ? x_size - 1 : x + 1;
+	size_t lowerYBound = (y - 1) == (size_t)-1 ? 0 : y - 1;
+	size_t upperYBound = (y + 1) >= y_size ? y_size - 1 : y + 1;
+	
 	long particleIndex = mapped_image->get(x, y);
 	
-	if ((x < minDistanceFromEdge) || (x > x_size - minDistanceFromEdge - 1))
-		return;
-	if ((y < minDistanceFromEdge) || (y > y_size - minDistanceFromEdge - 1))
-		return;
-	
-	assert((x > 0) && (y > 0));
-	
-	for (size_t j = y - 1; j <= y + 1; ++j) {
-		for (size_t i = x - 1; i <= x + 1; ++i) {
+	for (size_t j = lowerYBound; j <= upperYBound; ++j) {
+		for (size_t i = lowerXBound; i <= upperXBound; ++i) {
 			
-			if ((i == 0) && (j == 0))
+			if ((i == x) && (j == y))
 				continue;
 			
 			if (threshold_image->get(i, j) < 128)

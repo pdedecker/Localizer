@@ -26,12 +26,11 @@
  */
 class ParticleFinder {
 public:
-	ParticleFinder() {minDistanceFromEdge = 0;}
+	ParticleFinder() {;}
 	virtual ~ParticleFinder() {;}
 	
 	virtual boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image) = 0;
 protected:
-	double minDistanceFromEdge;
 };
 
 /**
@@ -39,7 +38,7 @@ protected:
  */
 class ParticleFinder_radius : public ParticleFinder {
 public:
-	ParticleFinder_radius(double dist, double rhs) {minDistanceFromEdge = dist; radius = rhs;}
+	ParticleFinder_radius(double radius_rhs) {radius = radius_rhs;}
 	~ParticleFinder_radius() {;}
 	
 	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
@@ -52,7 +51,7 @@ protected:
  */
 class ParticleFinder_adjacent4 : public ParticleFinder {
 public:
-	ParticleFinder_adjacent4(double rhs) {minDistanceFromEdge = rhs;}
+	ParticleFinder_adjacent4() {;}
 	~ParticleFinder_adjacent4() {;}
 	
 	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
@@ -67,7 +66,7 @@ protected:
  */
 class ParticleFinder_adjacent8 : public ParticleFinder {
 public:
-	ParticleFinder_adjacent8(double rhs) {minDistanceFromEdge = rhs;}
+	ParticleFinder_adjacent8() {;}
 	~ParticleFinder_adjacent8() {;}
 	
 	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image);
