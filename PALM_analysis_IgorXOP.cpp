@@ -47,6 +47,11 @@ struct AnalyzePALMImagesRuntimeParams {
 	double treshold_parameter;
 	int TFlagParamsSet[1];
 	
+	// Parameters for /PFA flag group.
+	int PFAFlagEncountered;
+	double PFA;
+	int PFAFlagParamsSet[1];
+	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
 	double radius;
@@ -412,7 +417,7 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	double threshold_parameter, radiusBetweenParticles, initial_width, sigma;
+	double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
 	DataFolderAndName outputWaveParams;
 	std::string data_file_path;
 	size_t camera_type;
@@ -505,17 +510,20 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	
 	if (p->TFlagEncountered) {
 		// Parameter: p->treshold_parameter
-		threshold_parameter = p->treshold_parameter;
-		if (thresholding_method == 0)
-			analysisOptionsStream << "PFA:" << threshold_parameter << ';';
-		if (thresholding_method == 8)
-			analysisOptionsStream << "ABSOLUTE THRESHOLD:" << threshold_parameter << ';';
-			
-	} else {
-		if ((thresholding_method == 0) || (thresholding_method == 8)) {
+		directThreshold = p->treshold_parameter;
+		if (thresholding_method == THRESHOLD_METHOD_DIRECT)
+			analysisOptionsStream << "ABSOLUTE THRESHOLD:" << directThreshold << ';';	
+	} else if (thresholding_method == THRESHOLD_METHOD_DIRECT)
 			return TOO_FEW_PARAMETERS;
-		}
-	}
+	
+	if (p->PFAFlagEncountered) {
+		// Parameter: p->PFA
+		PFA = p->PFA;
+		if (thresholding_method == THRESHOLD_METHOD_GLRT)
+			analysisOptionsStream << "PFA:" << PFA << ';';
+	} else if (thresholding_method == THRESHOLD_METHOD_GLRT)
+		return TOO_FEW_PARAMETERS;
+	
 	
 	if (p->RFlagEncountered) {
 		// Parameter: p->radius
@@ -656,7 +664,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// choose which thresholding we want to do
 		switch(thresholding_method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(threshold_parameter, initial_width));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
 				break;
 			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -680,7 +688,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case THRESHOLD_METHOD_DIRECT:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold_parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1937,7 +1945,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);
