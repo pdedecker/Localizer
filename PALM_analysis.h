@@ -216,7 +216,7 @@ public:
 	
 	// save the positions localized this far under different formats
 #ifdef WITH_IGOR
-	virtual waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const = 0;
+	virtual waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const = 0;
 #endif
 	virtual void writePositionsToFile(std::string filePath, std::string waveNote) const = 0;
 	
@@ -273,7 +273,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
@@ -330,7 +330,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
@@ -390,7 +390,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
@@ -447,7 +447,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
@@ -504,7 +504,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
@@ -561,7 +561,7 @@ public:
 	}
 	
 #ifdef WITH_IGOR
-	waveHndl writePositionsToWave(std::string waveName, std::string waveNote) const;
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
 #endif
 	void writePositionsToFile(std::string filePath, std::string header) const {throw std::runtime_error("There is no meaning to write Zeiss positions to a file");}
 	

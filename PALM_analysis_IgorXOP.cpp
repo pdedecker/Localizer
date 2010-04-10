@@ -83,9 +83,9 @@ struct AnalyzePALMImagesRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int name_of_output_waveEncountered;
-	char name_of_output_wave[MAX_OBJ_NAME+1];
-	int name_of_output_waveParamsSet[1];
+	int outputWaveParamsEncountered;
+	DataFolderAndName outputWaveParams;
+	int outputWaveParamsParamsSet[1];
 	
 	// Parameters for simple main group #1.
 	int experiment_fileEncountered;
@@ -418,7 +418,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	double threshold_parameter, radiusBetweenParticles, initial_width, sigma, background;
-	std::string name_of_output_wave;
+	DataFolderAndName outputWaveParams;
 	std::string data_file_path;
 	size_t camera_type;
 	int method;
@@ -599,9 +599,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	
 	// Main parameters.
 	
-	if (p->name_of_output_waveEncountered) {
-		// Parameter: p->name_of_output_wave
-		name_of_output_wave.assign(p->name_of_output_wave);
+	if (p->outputWaveParamsEncountered) {
+		// Parameter: p->outputWaveParams
+		outputWaveParams = p->outputWaveParams;
 	} else {
 		return EXPECTED_NAME;
 	}
@@ -766,7 +766,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 																								   progressReporter));
 		
 		localizedPositions = analysisController->DoPALMAnalysis(image_loader);
-		localizedPositions->writePositionsToWave(std::string("POS_out"), analysisOptionsStream.str());
+		localizedPositions->writePositionsToWave(outputWaveParams, analysisOptionsStream.str());
 	}
 	catch (std::bad_alloc) {
 		err = NOMEM;
@@ -1950,7 +1950,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z name:name_of_output_wave, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);

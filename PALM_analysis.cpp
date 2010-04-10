@@ -181,7 +181,7 @@ LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHnd
 	}
 }
 
-waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -189,7 +189,10 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(std::string w
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 12;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+		
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -363,7 +366,7 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 	}
 }
 
-waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -371,7 +374,10 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(std
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 11;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -615,7 +621,7 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 	}
 }
 
-waveHndl LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -623,7 +629,10 @@ waveHndl LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToWave
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 16;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -796,7 +805,7 @@ LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveH
 	}
 }
 
-waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -804,7 +813,10 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(std::string 
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 4;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -951,7 +963,7 @@ LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multipli
 	}
 }
 
-waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -959,7 +971,10 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(std::s
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 5;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
@@ -1113,7 +1128,7 @@ LocalizedPositionsContainer_ZeissPALM::LocalizedPositionsContainer_ZeissPALM(wav
 	}
 }
 
-waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(std::string waveName, std::string waveNote) const {
+waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
 	long dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	waveHndl outputWave;
@@ -1121,7 +1136,10 @@ waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(std::string
 	dimensionSizes[0] = nPositions;
 	dimensionSizes[1] = 6;	// magic number
 	dimensionSizes[2] = 0;
-	outputWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
 	
 	long indices[MAX_DIMENSIONS];
 	double value[2];
