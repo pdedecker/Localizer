@@ -47,11 +47,6 @@ struct AnalyzePALMImagesRuntimeParams {
 	double treshold_parameter;
 	int TFlagParamsSet[1];
 	
-	// Parameters for /B flag group.
-	int BFlagEncountered;
-	double background;
-	int BFlagParamsSet[1];
-	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
 	double radius;
@@ -417,7 +412,7 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	double threshold_parameter, radiusBetweenParticles, initial_width, sigma, background;
+	double threshold_parameter, radiusBetweenParticles, initial_width, sigma;
 	DataFolderAndName outputWaveParams;
 	std::string data_file_path;
 	size_t camera_type;
@@ -520,14 +515,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		if ((thresholding_method == 0) || (thresholding_method == 8)) {
 			return TOO_FEW_PARAMETERS;
 		}
-	}
-	
-	if (p->BFlagEncountered) {
-		// Parameter: p->background
-		background = p->background;
-		analysisOptionsStream << "BACKGROUND:" << background << ';';
-	} else {
-		background = 1000;
 	}
 	
 	if (p->RFlagEncountered) {
@@ -1950,7 +1937,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /B=number:background /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);
