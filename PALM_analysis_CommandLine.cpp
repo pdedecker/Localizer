@@ -20,12 +20,11 @@ int main(int argc, char *argv[]) {
 		("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing. Typically not required.")
 		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
-		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", \"8way\", and \"radius\".")
+		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
 		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
 		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
-		("min-radius-between-particles", po::value<double>()->default_value(4), "Minimal radius between particles to be accept (only for \"radius\" particle finding)")
 		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
 	
@@ -76,7 +75,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	double psfWidth = vm["psf-width"].as<double>();
-	double radiusBetweenParticles = vm["min-radius-between-particles"].as<double>();
 	
 	// get the pre- and postprocessors
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
@@ -86,7 +84,7 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
 	
 	// get the particle finder
-	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName, radiusBetweenParticles);
+	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
 	
 	// get the positions fitter
 	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
@@ -183,9 +181,6 @@ boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string
 	if (name == std::string("removeisolated"))
 		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 	
-	if (name == std::string("removebelowmean"))
-		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemovePixelsBelowMean());
-	
 	// if we get here then we didn't recognize the postprocessor
 	throw std::runtime_error("Unknown postprocessor algorithm");
 }
@@ -207,15 +202,12 @@ boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double p
 	throw std::runtime_error("Unknown segmentation algorithm");
 }
 
-boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name, double radiusBetweenParticles) {
+boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name) {
 	if (name == std::string("4way"))
 		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 	
 	if (name == std::string("8way"))
 		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
-	
-	if (name == std::string("radius"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 	
 	// if we get here then we didn't recognize the particlefinder
 	throw std::runtime_error("Unknown particle finding algorithm");
