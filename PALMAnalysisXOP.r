@@ -14,25 +14,7 @@ resource 'vers' (2) {						// Igor version info.
 
 resource 'STR#' (1100) { // Custom error messages 
 	{ 
-		"get_nth_image returned NULL",
-		"The last image should have a larger or equal index to the starting image",
-		"get_nth_image requested an image index beyond the number of images in the file",
-		"get_nth_image reported that there is no file open to load from",
-		"Invalid SPE storage type in get_nth_image()",
-		"Cannot open the input file.",
-		"Unable to create the output file.",
-		"The size of a 'char' variable is not one byte, I cannot continue like this",
-		"The size of a 'float' variable is not four bytes, I cannot continue like this",
-		"The output file already exists. Use '/O' to overwrite",
-		"The number of frames to average over should be an odd number",
-		"Unknown method (/M flag)",
-		"Unknown or unsupported CCD file type (/Y flag)",
-		"Unknown method (/M flag)",
-		"Unknown threshold preprocessing method (/G flag)",
-		"Unknown threshold postprocessing method (/G flag)",
-		"There was an error reading from the data file",
-		"There was an error writing to the output file",
-		
+		"An error occurred while performing the requested operation. See the command window (command-J or control-J) for more information.",
 	} 
 };
 

@@ -455,13 +455,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	
-	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
-	if (sizeof(char) != 1)
-		return SIZE_OF_CHAR_IS_NOT_ONE_BYTE_DEF;
-	if (sizeof(float) != 4)
-		return SIZE_OF_FLOAT_IS_NOT_FOUR_BYTES_DEF;
-	
-	
 	// Flag parameters.
 	
 	if (p->MFlagEncountered) {
@@ -661,7 +654,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
 				break;
 			default:
-				return UNKNOWN_THRESHOLD_PREPROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation preprocessing method");
 				break;
 		}
 		
@@ -696,7 +689,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
 				break;
 			default:
-				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation method");
 				break;
 		}
 		
@@ -709,7 +702,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
 			default:
-				return UNKNOWN_THRESHOLD_POSTPROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation postprocessing method");
 				break;
 		}
 		
@@ -725,7 +718,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 				break;
 			default:
-				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+				throw std::runtime_error("Unknown particle finding method");
 				break;
 		}
 		
@@ -748,7 +741,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
 					break;
 				default:
-					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+					throw std::runtime_error("Unknown localization method");
 					break;
 			}
 			
@@ -771,37 +764,16 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		err = NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		err = FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		err = FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		err = END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		XOPNotice("\r");
-	}
-	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		err = IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
-	}
-	catch (USER_ABORTED e) {
-		err = USER_ABORT;
-	}
 	catch (int e) {
 		err = e;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		err = SYNERR;
+		err = PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (...) {
-		return WM_UNKNOWN_ERROR;
+		err = WM_UNKNOWN_ERROR;
 	}
 	
 	SetOperationNumVar("V_flag", err);
@@ -824,14 +796,6 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	int header_only = 0;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
-	
-	
-	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
-	if (sizeof(char) != 1)
-		return SIZE_OF_CHAR_IS_NOT_ONE_BYTE_DEF;
-	if (sizeof(float) != 4)
-		return SIZE_OF_FLOAT_IS_NOT_FOUR_BYTES_DEF;
-		
 	
 	// Flag parameters.
 	
@@ -916,35 +880,16 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		err = NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		err =  FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		err =  FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		err =  END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error error) {
-		XOPNotice(error.what());
-		XOPNotice("\r");
-		err =  INDEX_OUT_OF_RANGE;
-	}
 	catch (int e) {
-		err =  e;
-	}
-	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		err =  IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+		err = e;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		err = SYNERR;
+		err = PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (...) {
-		return WM_UNKNOWN_ERROR;
+		err = WM_UNKNOWN_ERROR;
 	}
 	
 	SetOperationNumVar("V_flag", err);
@@ -974,13 +919,6 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<ImageLoader> image_loader;
 	boost::shared_ptr<ImageOutputWriter> output_writer;
 	boost::shared_ptr<CCDImagesProcessor> ccd_image_processor;
-	
-	// SOME STUFF THAT WE HAVE TO GET OUT OF THE WAY
-	if (sizeof(char) != 1)
-		return SIZE_OF_CHAR_IS_NOT_ONE_BYTE_DEF;
-	if (sizeof(float) != 4)
-		return SIZE_OF_FLOAT_IS_NOT_FOUR_BYTES_DEF;
-	
 	
 	
 	// Flag parameters.
@@ -1108,8 +1046,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 																							   overwrite));
 				break;
 			default:
-				XOPNotice("Unknown output format (/OUT flag)\r");
-				return UNSUPPORTED_CCD_FILE_TYPE;
+				throw std::runtime_error("Unsupported output format (/OUT flag)");
 		}
 		
 		// do the actual procedure
@@ -1127,7 +1064,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader.get(), output_writer.get(), startX, endX, startY, endY));
 				break;
 			default:
-				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+				throw std::runtime_error("Unknown CCD postprocessing method");
 				break;
 		}
 		
@@ -1137,36 +1074,6 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		SetOperationNumVar("V_flag", NOMEM);
 		return NOMEM;
-	}
-	catch (CANNOT_OPEN_FILE) {
-		SetOperationNumVar("V_flag", FILE_OPEN_ERROR);
-		return FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		SetOperationNumVar("V_flag", FILE_READ_ERROR);
-		return FILE_READ_ERROR;
-	}
-	catch (ERROR_WRITING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		SetOperationNumVar("V_flag", FILE_WRITE_ERROR);
-		return FILE_WRITE_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		SetOperationNumVar("V_flag", END_SHOULD_BE_LARGER_THAN_START_DEF);
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error err) {
-		SetOperationNumVar("V_flag", INDEX_OUT_OF_RANGE);
-		XOPNotice(err.what());
-		XOPNotice("\r");
-		return INDEX_OUT_OF_RANGE;
-	}
-	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		SetOperationNumVar("V_flag", IMAGE_INDEX_BEYOND_N_IMAGES_DEF);
-		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
 	}
 	catch (int e) {
 		SetOperationNumVar("V_flag", e);
@@ -1178,7 +1085,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		return SYNERR;
 	}
 	catch (...) {
-		return WM_UNKNOWN_ERROR;
+		err = WM_UNKNOWN_ERROR;
 	}
 	
 	SetOperationNumVar("V_flag", 0.0);
@@ -1300,30 +1207,16 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 				calculateStandardDeviationImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			default:
-				return UNKNOWN_CCD_IMAGES_ANALYSIS_METHOD;
+				throw std::runtime_error("Unknown analysis method");
 		}
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		return FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
 	catch (std::range_error err) {
 		XOPNotice(err.what());
 		XOPNotice("\r");
-		return INDEX_OUT_OF_RANGE;
-	}
-	catch (IMAGE_INDEX_BEYOND_N_IMAGES) {
-		return IMAGE_INDEX_BEYOND_N_IMAGES_DEF;
+		return PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (int e) {
 		return e;
@@ -1486,7 +1379,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
 				break;
 			default:
-				return UNKNOWN_THRESHOLD_PREPROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation preprocessing method");
 				break;
 		}
 		switch(method) {
@@ -1518,7 +1411,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
 				break;
 			default:
-				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation method");
 				break;
 		}
 		
@@ -1532,7 +1425,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
 			default:
-				return UNKNOWN_THRESHOLD_POSTPROCESSING_METHOD;
+				throw std::runtime_error("Unknown segmentation postprocessing method");
 				break;
 		}
 		
@@ -1550,7 +1443,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 					break;
 				default:
-					return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
+					throw std::runtime_error("Unknown particle finding method");
 					break;
 			}
 		}
@@ -1618,29 +1511,13 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		return FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		XOPNotice("\r");
-		return INDEX_OUT_OF_RANGE;
-	}
 	catch (int e) {
 		return e;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return SYNERR;
+		return PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (...) {
 		return WM_UNKNOWN_ERROR;
@@ -1695,29 +1572,13 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		return FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		XOPNotice("\r");
-		return INDEX_OUT_OF_RANGE;
-	}
 	catch (int e) {
 		return e;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return SYNERR;
+		return PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (...) {
 		return WM_UNKNOWN_ERROR;
@@ -1824,24 +1685,23 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return NOWAV;
 	}
 	
-	
-	// get the object that will calculate the standard deviation
-	switch (method) {
-		case 0:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
-			break;
-		case 1:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
-			break;
-		case 2:
-			deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_IntegralSquareRoot(PSFWidth, scaleFactor));
-			break;
-		default:
-			return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
-	}
+	try {
+		// get the object that will calculate the standard deviation
+		switch (method) {
+			case 0:
+				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
+				break;
+			case 1:
+				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
+				break;
+			case 2:
+				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_IntegralSquareRoot(PSFWidth, scaleFactor));
+				break;
+			default:
+				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
+		}
 	
 	// do the actual calculation
-	try {
 		progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
@@ -1851,29 +1711,13 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (CANNOT_OPEN_FILE) {
-		return FILE_OPEN_ERROR;
-	}
-	catch (ERROR_READING_FILE_DATA e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return FILE_READ_ERROR;
-	}
-	catch (END_SHOULD_BE_LARGER_THAN_START) {
-		return END_SHOULD_BE_LARGER_THAN_START_DEF;
-	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		XOPNotice("\r");
-		return INDEX_OUT_OF_RANGE;
-	}
 	catch (int e) {
 		return e;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return SYNERR;
+		return PALM_ANALYSIS_XOP_ERROR;
 	}
 	catch (...) {
 		return WM_UNKNOWN_ERROR;
@@ -1937,11 +1781,14 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
-		return SYNERR;
+		return PALM_ANALYSIS_XOP_ERROR;
+	}
+	catch (int e) {
+		return e;
 	}
 	catch (...) {
 		XOPNotice("An unknown error occurred\r");
-		return SYNERR;
+		return WM_UNKNOWN_ERROR;
 	}
 	
 	return err;
@@ -2138,7 +1985,7 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
 			break;
 		default:
-			throw UNSUPPORTED_CCD_FILE_TYPE;
+			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
 			break;
 	}
 	
