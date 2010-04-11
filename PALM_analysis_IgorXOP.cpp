@@ -254,15 +254,20 @@ struct TestThresholdRuntimeParams {
 	double method;
 	int MFlagParamsSet[1];
 	
-	// Parameters for /T flag group.
-	int TFlagEncountered;
-	double parameter;
-	int TFlagParamsSet[1];
+	// Parameters for /ABS flag group.
+	int ABSFlagEncountered;
+	double absoluteThreshold;
+	int ABSFlagParamsSet[1];
 	
-	// Parameters for /P flag group.
-	int PFlagEncountered;
-	double parameter2;
-	int PFlagParamsSet[1];
+	// Parameters for /PFA flag group.
+	int PFAFlagEncountered;
+	double PFA;
+	int PFAFlagParamsSet[1];
+	
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
+	double PSFWidth;
+	int WDTHFlagParamsSet[1];
 	
 	// Parameters for /G flag group.
 	int GFlagEncountered;
@@ -1343,7 +1348,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	size_t preprocessing_method, postprocessing_method;
 	size_t particle_finding_method;
 	int output_located_particles;
-	double parameter, parameter2;
+	double absoluteThreshold, PFA, PSFWidth;
 	double radiusBetweenParticles;
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
@@ -1375,23 +1380,26 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->TFlagEncountered) {
-		// Parameter: p->parameter
-		parameter = p->parameter;
-	} else {
-		if ((method == 0) || (method == 8)) {
-			return TOO_FEW_PARAMETERS;
-		}
-	}
+	if (p->ABSFlagEncountered) {
+		// Parameter: p->absoluteThreshold
+		absoluteThreshold = p->absoluteThreshold;
+	} else if (method == THRESHOLD_METHOD_DIRECT)
+		return TOO_FEW_PARAMETERS;
 	
-	if (p->PFlagEncountered) {
-		// Parameter: p->parameter2
-		parameter2 = p->parameter2;
-	} else {
-		if (method == 0) {
-			return TOO_FEW_PARAMETERS;
-		}
-	}
+	
+	if (p->PFAFlagEncountered) {
+		// Parameter: p->PFA
+		PFA = p->PFA;
+	} else if (method == THRESHOLD_METHOD_GLRT)
+		return TOO_FEW_PARAMETERS;
+	
+	if (p->WDTHFlagEncountered) {
+		// Parameter: p->PSFWidth
+		PSFWidth = p->PSFWidth;
+		if (PSFWidth <= 0)
+			return EXPECT_POS_NUM;
+	} else if (method == THRESHOLD_METHOD_GLRT)
+		return TOO_FEW_PARAMETERS;
 	
 	if (p->GFlagEncountered) {
 		// Parameter: p->preprocessing
@@ -1483,7 +1491,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		}
 		switch(method) {
 			case 0:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(parameter, parameter2));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
 				break;
 			case 1:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -1507,7 +1515,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
 			case 8:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(parameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
 				break;
 			default:
 				return UNKNOWN_CCD_IMAGES_PROCESSING_METHOD;
@@ -1988,12 +1996,12 @@ static int RegisterAnalyzeCCDImages(void) {
 }
 
 static int RegisterTestThreshold(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the TestThresholdRuntimeParams structure as well.
-	cmdTemplate = "TestThreshold /M=number:method /T=number:parameter /P=number:parameter2 /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(TestThresholdRuntimeParams), (void*)ExecuteTestThreshold, 0);
