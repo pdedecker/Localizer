@@ -1460,8 +1460,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		
 		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_ImageThresh"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
 		
-		for (long j = 0; j < y_size; j++) {
-			for (long i = 0; i < x_size; i++) {
+		for (long i = 0; i < x_size; i++) {
+			for (long j = 0; j < y_size; j++) {
 				indices[0] = i;
 				indices[1] = j;
 				

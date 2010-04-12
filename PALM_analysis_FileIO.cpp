@@ -1190,8 +1190,8 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderIgor::ReadIm
 		indices[2] = n;
 		image = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(x_size, y_size));
 		
-		for (size_t j = 0; j < y_size; j++) {
-			for (size_t i = 0; i < x_size; i++) {
+		for (size_t i = 0; i < x_size; i++) {
+			for (size_t j  = 0; j < y_size; j++) {
 				indices[0] = (long)i;
 				indices[1] = (long)j;
 				
@@ -1705,8 +1705,8 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> 
 	
 	indices[2] = n_images_written;
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j  = 0; j < y_size; j++) {
 			indices[0] = i;
 			indices[1] = j;
 			

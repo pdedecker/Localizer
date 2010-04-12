@@ -104,8 +104,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 		indices[2] = i - n_start;
 		
 		// store the data in the output wave
-		for (size_t k = 0; k < y_size; k++) {
-			for (size_t j = 0; j < x_size; j++) {
+		for (size_t j = 0; j < x_size; j++) {
+			for (size_t k = 0; k < y_size; k++) {
 				current_value = (*current_image)(j, k);
 				
 				indices[0] = j;
@@ -187,8 +187,8 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndNam
 		current_image = image_loader->get_nth_image(i);
 		
 		// calculate the total sum of the image
-		for (size_t k = startY; k <= endY; k++) {
-			for (size_t j = startX; j <= endX; j++) {
+		for (size_t j = startX; j <= endX; j++) {
+			for (size_t k = startY; k <= endY; k++) {
 				summed_intensity += (*current_image)(j, k);
 			}
 		}
@@ -560,8 +560,8 @@ boost::shared_ptr<ublas::matrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl
 	
 	boost::shared_ptr<ublas::matrix<double> > matrix(new ublas::matrix<double>(x_size, y_size));
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -610,8 +610,8 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<ublas::matrix<double> >
 	
 	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -660,8 +660,8 @@ waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<ublas::matrix<flo
 	
 	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP32, 1);
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
+	for (size_t i = 0; i < x_size; ++i) {
+		for (size_t j = 0; j < y_size; ++j) {
 			indices[0] = i;
 			indices[1] = j;
 			

@@ -24,8 +24,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 	size_t nBackgroundPixels = 0;
 	
 	// we run over all the points in the image to see if they are above the treshold
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			
 			if ((*threshold_image)(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -104,8 +104,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPosition
 		}
 	}
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {	// loop over the entire image
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {	// loop over the entire image
 			
 			if ((*threshold_image)(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -289,8 +289,8 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPosition
 		}
 	}
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {	// loop over the entire image
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {	// loop over the entire image
 			
 			if ((*threshold_image)(i, j) < 128) { // we don't care about this point, it's not included in the thresholded image
 				backgroundIntensity += (*image)(i, j);	// but use it to estimate the background intensity
@@ -394,8 +394,8 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<p
 	
 	long particleIndex = (*mapped_image)(x, y);
 	
-	for (size_t j = lowerYBound; j <= upperYBound; ++j) {
-		for (size_t i = lowerXBound; i <= upperXBound; ++i) {
+	for (size_t i = lowerXBound; i <= upperXBound; ++i) {
+		for (size_t j = lowerYBound; j <= upperYBound; ++j) {
 			
 			if ((i == x) && (j == y))
 				continue;

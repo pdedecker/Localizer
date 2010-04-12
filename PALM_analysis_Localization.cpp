@@ -966,8 +966,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 			continue;
 		}
 		
-		for (size_t k = y_offset; k <= y_max; ++k) {
-			for (size_t j = x_offset; j <= x_max; ++j) {
+		for (size_t j = x_offset; j <= x_max; ++j) {
+			for (size_t k = y_offset; k <= y_max; ++k) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -1027,8 +1027,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<ublas::
 		throw DIMENSIONS_SHOULD_BE_EQUAL(std::string("Matrix dimensions are not equal in FitPositionsMultiplication::multiply_with_gaussian"));
 	}
 	
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			distance_squared = (x - (double)i) * (x - (double)i) + (y - (double)j) * (y - (double)j);
 			
 			gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev)) + background;
@@ -1051,8 +1051,8 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<ublas::
 	double numerator_y = 0;
 	
 	// start with determining the x-position
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j = 0; j < y_size; j++) {
 			numerator_x += (double)i * (*masked_image)(i, j);
 			numerator_y += (double)j * (*masked_image)(i, j);
 			denominator += (*masked_image)(i, j);
