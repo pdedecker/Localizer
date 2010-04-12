@@ -1245,7 +1245,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double radiusBetweenParticles;
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
-	boost::shared_ptr<PALMMatrix<double> > CCD_Frame;
+	boost::shared_ptr<ublas::matrix<double> > CCD_Frame;
 	boost::shared_ptr<std::vector<position> > located_particles;
 	
 	// long numDimensions; 
@@ -1255,7 +1255,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double value[2];
 	
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image;
 	
 	
 	boost::shared_ptr<ThresholdImage> thresholder;
@@ -1352,8 +1352,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// copy the Igor wave with the CCD Frame into a new gsl_matrix
 		CCD_Frame = copy_IgorDPWave_to_gsl_matrix(CCD_Frame_wave);
 		
-		x_size = CCD_Frame->getXSize();
-		y_size = CCD_Frame->getYSize();
+		x_size = CCD_Frame->size1();
+		y_size = CCD_Frame->size2();
 		
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
@@ -1530,9 +1530,9 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	boost::shared_ptr<PALMMatrix<double> > firstImage;
-	boost::shared_ptr<PALMMatrix<double> > secondImage;
-	boost::shared_ptr<PALMMatrix<double> > outputImage;
+	boost::shared_ptr<ublas::matrix<double> > firstImage;
+	boost::shared_ptr<ublas::matrix<double> > secondImage;
+	boost::shared_ptr<ublas::matrix<double> > outputImage;
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;
@@ -1600,7 +1600,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-	boost::shared_ptr<PALMMatrix <double> > image;
+	boost::shared_ptr<ublas::matrix <double> > image;
 	
 	// Flag parameters.
 	

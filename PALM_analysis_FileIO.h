@@ -22,6 +22,7 @@
 #include "tiffio.h"
 #include "stdint.h"
 #include "boost/thread.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -31,6 +32,8 @@
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis_IgorUtilities.h"
 #endif
+
+namespace ublas = boost::numeric::ublas;
 
 uint16 getUINT16FromCharArray(char *array, size_t offset);
 uint32 getUINT32FromCharArray(char *array, size_t offset);
@@ -78,11 +81,11 @@ public:
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	int getStorageType() const {return storage_type;}
-	boost::shared_ptr<PALMMatrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
+	boost::shared_ptr<ublas::matrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual void parse_header_information() = 0;
-	virtual std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
+	virtual std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
 	std::string filePath;
 #ifdef _WIN32
@@ -106,7 +109,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderAndor : public ImageLoader {
@@ -116,7 +119,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -143,7 +146,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
@@ -153,7 +156,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -163,7 +166,7 @@ public:
 	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
@@ -183,7 +186,7 @@ public:
 	
 protected:
 	void parse_header_information() {;}
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	// technically we are not reading from disk, but we keep the name since it corresponds to a virtual method in the base class
 	
 	waveHndl igor_data_wave;
@@ -201,7 +204,7 @@ public:
 	std::string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
 	
-	virtual void write_image(boost::shared_ptr<PALMMatrix<double> > new_image) = 0;
+	virtual void write_image(boost::shared_ptr<ublas::matrix<double> > new_image) = 0;
 	
 	virtual int flush_and_close() = 0;
 	
@@ -214,7 +217,7 @@ protected:
 	size_t x_size;
 	size_t y_size;
 	
-	std::queue <boost::shared_ptr<PALMMatrix<double> > > image_buffer;
+	std::queue <boost::shared_ptr<ublas::matrix<double> > > image_buffer;
 };
 
 
@@ -223,7 +226,7 @@ public:
 	SimpleImageOutputWriter(const std::string &rhs, int overwrite);
 	~SimpleImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
+	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
 	
 	int flush_and_close();
 	
@@ -236,7 +239,7 @@ public:
 	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
 	~TIFFImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
+	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
 	
 	int flush_and_close();
 	
@@ -254,7 +257,7 @@ public:
 	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite);
 	~IgorImageOutputWriter() {;}
 	
-	void write_image(boost::shared_ptr<PALMMatrix<double> > new_image);
+	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
 	
 	int flush_and_close() {return 0;}
 	

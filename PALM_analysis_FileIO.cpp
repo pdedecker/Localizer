@@ -156,8 +156,8 @@ ImageLoader::~ImageLoader() {
 		file.close();
 }
 
-boost::shared_ptr<PALMMatrix<double> > ImageLoader::get_nth_image(const size_t n) {
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > images;
+boost::shared_ptr<ublas::matrix<double> > ImageLoader::get_nth_image(const size_t n) {
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > images;
 	if (n >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -270,15 +270,15 @@ void ImageLoaderSPE::parse_header_information() {
 	file.seekg(0);
 }
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
 	short current_short = 0;
 	unsigned short current_unsigned_short = 0;
 	std::string error;
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
@@ -312,7 +312,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImages
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
 		
-		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
 		switch(storage_type) {
 			case STORAGE_TYPE_FP32:	// 4 byte float
@@ -356,7 +356,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImages
 					for (size_t i = 0; i < x_size; i++) {
 						current_float = single_image_buffer_float[cache_offset];
 						
-						image->set(i, j, (double)current_float);
+						(*image)(i, j) = (double)current_float;
 						
 						cache_offset++;
 					}
@@ -374,7 +374,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImages
 						current_long *= 256;
 						current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 0]);
 						
-						image->set(i, j, (double)current_long);
+						(*image)(i, j) = (double)current_long;
 						
 						cache_offset += 4;
 					}
@@ -388,7 +388,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImages
 						current_short *= 256;
 						current_short = current_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
 						
-						image->set(i, j, (double)current_short);
+						(*image)(i, j) = (double)current_short;
 						
 						cache_offset += 2;
 					}
@@ -402,7 +402,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderSPE::ReadImages
 						current_unsigned_short *= 256;
 						current_unsigned_short = current_unsigned_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
 						
-						image->set(i, j, (double)current_unsigned_short);
+						(*image)(i, j) = (double)current_unsigned_short;
 						
 						cache_offset += 2;
 						
@@ -515,12 +515,12 @@ void ImageLoaderAndor::parse_header_information() {
 	}
 }
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
@@ -528,7 +528,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImag
 	uint64_t cache_offset;
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
 		offset = header_length + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
@@ -550,7 +550,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderAndor::ReadImag
 		for (size_t j  = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
 				current_float = single_image_buffer[cache_offset];
-				image->set(i, j, (double)current_float);
+				(*image)(i, j) = (double)current_float;
 				cache_offset++;
 			}
 		}
@@ -635,11 +635,11 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
@@ -649,7 +649,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::Read
 	uint64_t cache_offset;
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
 		offset = (i + 1) * header_length + i * (x_size) * (y_size) * 2;	// assume a 16-bit format
 		file.seekg(offset);
@@ -672,7 +672,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderHamamatsu::Read
 				current_uint *= 256;
 				current_uint = current_uint | (0x000000FF & single_image_buffer[cache_offset]);
 				
-				image->set(i, j, (double)current_uint);
+				(*image)(i, j) = (double)current_uint;
 				
 				cache_offset += 2;	// TWO bytes per value (UINT16)
 			}
@@ -708,18 +708,18 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	uint64_t offset;
 	size_t array_offset;
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
 		offset = 3 * sizeof(size_t) + i * (x_size) * (y_size) * sizeof(float);
 		file.seekg(offset);
@@ -740,7 +740,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > SimpleImageLoader::ReadIma
 		
 		for (size_t j  = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
-				image->set(i, j, single_image_buffer[array_offset]);
+				(*image)(i, j) = single_image_buffer[array_offset];
 				array_offset++;
 			}
 		}
@@ -969,7 +969,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 }
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	char *single_scanline_buffer;
 	char *scanline_pointer;
 	uint16_t current_uint16;
@@ -980,8 +980,8 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 	uint32_t *uint32Ptr;
 	float *floatPtr;
 	double *doublePtr;
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	int result;
 	
 	loadImagesMutex.lock();
@@ -993,7 +993,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 	
 	for (size_t i = nStart; i <= nEnd; i++) {
 		try {
-			image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+			image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		}
 		catch (std::bad_alloc) {
 			_TIFFfree(single_scanline_buffer);
@@ -1030,10 +1030,10 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					for (size_t k = 0; k < x_size; ++k) {
 						if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
 							current_uint16 = 0x0000000F & (*scanline_pointer);
-							image->set(k, j, (double)current_uint16);
+							(*image)(k, j) = (double)current_uint16;
 						} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
 							current_uint16 = 0x000000F0 & (*scanline_pointer);
-							image->set(k, j, (double)current_uint16);
+							(*image)(k, j) = (double)current_uint16;
 							scanline_pointer += 1;
 						}
 					}
@@ -1043,7 +1043,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					scanline_pointer = single_scanline_buffer;
 					for (size_t k = 0; k < x_size; ++k) {
 						current_uint16 = (uint16_t)(*scanline_pointer);
-						image->set(k, j, (double)current_uint16);
+						(*image)(k, j) = (double)current_uint16;
 						scanline_pointer += 1;
 					}
 					break;
@@ -1052,7 +1052,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					uint16Ptr = (uint16_t*)single_scanline_buffer;
 					for (size_t k = 0; k < x_size; ++k) {
 						current_uint16 = (*uint16Ptr);
-						image->set(k, j, (double)current_uint16);
+						(*image)(k, j) = (double)current_uint16;
 						uint16Ptr += 1;
 					}
 					break;
@@ -1061,7 +1061,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					uint32Ptr = (uint32_t*)single_scanline_buffer;
 					for (size_t k = 0; k < x_size; ++k) {
 						current_uint32 = (*uint32Ptr);
-						image->set(k, j, (double)current_uint32);
+						(*image)(k, j) = (double)current_uint32;
 						uint32Ptr += 1;
 					}
 					break;
@@ -1070,7 +1070,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					floatPtr = (float *)single_scanline_buffer;
 					for (size_t k = 0; k < x_size; ++k) {
 						current_float = *floatPtr;
-						image->set(k, j, (double)current_float);
+						(*image)(k, j) = (double)current_float;
 						floatPtr += 1;
 					}
 					break;
@@ -1079,7 +1079,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderTIFF::ReadImage
 					doublePtr = (double *)single_scanline_buffer;
 					for (size_t k = 0; k < x_size; ++k) {
 						current_double = *doublePtr;
-						image->set(k, j, current_double);
+						(*image)(k, j) = current_double;
 						floatPtr += 1;
 					}
 					break;
@@ -1176,19 +1176,19 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	}
 }
 
-std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	double value[2];
 	long indices[3];
 	int result;
 	
-	boost::shared_ptr<PALMMatrix<double> > image;
-	std::vector<boost::shared_ptr<PALMMatrix <double> > > requestedImages;
+	boost::shared_ptr<ublas::matrix<double> > image;
+	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	// no mutex locking is required since these calls are all threadsafe
 	
 	for (size_t n = nStart; n <= nEnd; ++n) {
 		indices[2] = n;
-		image = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(x_size, y_size));
 		
 		for (size_t j = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
@@ -1200,7 +1200,7 @@ std::vector<boost::shared_ptr<PALMMatrix <double> > > ImageLoaderIgor::ReadImage
 					throw result;
 				}
 				
-				image->set(i, j, value[0]);
+				(*image)(i, j) = value[0];
 			}
 		}
 		
@@ -1283,7 +1283,7 @@ SimpleImageOutputWriter::~SimpleImageOutputWriter() {
 
 
 
-void SimpleImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
+void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1297,7 +1297,7 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> >
 
 
 void SimpleImageOutputWriter::flush_cache() {
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	size_t n_pixels, offset;
 	
 	if (image_buffer.size() == 0) {
@@ -1306,8 +1306,8 @@ void SimpleImageOutputWriter::flush_cache() {
 	
 	// determine the size of the frames
 	current_image = image_buffer.front();
-	x_size = current_image->getXSize();
-	y_size = current_image->getYSize();
+	x_size = current_image->size1();
+	y_size = current_image->size2();
 	n_pixels = x_size * y_size;
 	
 	float *single_image_buffer = new float[n_pixels];	// a temporary buffer for writing a single image
@@ -1323,7 +1323,7 @@ void SimpleImageOutputWriter::flush_cache() {
 		
 		for (size_t j = 0; j < y_size; j++) {
 			for (size_t i = 0; i < x_size; i++) {
-				single_image_buffer[offset] = (float)current_image->get(i, j);
+				single_image_buffer[offset] = (float)(*current_image)(i, j);
 				offset++;
 			}
 		}
@@ -1400,7 +1400,7 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 
 
 
-void TIFFImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
+void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
 	
 	// check whether we should write the cache to disk
 	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
@@ -1413,7 +1413,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > n
 
 
 void TIFFImageOutputWriter::flush_cache() {
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	size_t n_pixels, offset;
 	
 	int result, sampleFormat, bitsPerSample;
@@ -1426,8 +1426,8 @@ void TIFFImageOutputWriter::flush_cache() {
 	
 	// determine the size of the frames
 	current_image = image_buffer.front();
-	x_size = current_image->getXSize();
-	y_size = current_image->getYSize();
+	x_size = current_image->size1();
+	y_size = current_image->size2();
 	n_pixels = x_size * y_size;
 	
 	// determine the output storage type
@@ -1571,70 +1571,70 @@ void TIFFImageOutputWriter::flush_cache() {
 				case STORAGE_TYPE_INT8:
 					for (size_t i = 0; i < x_size; i++) {
 						int8_t* buffer = (int8_t *)scanLine.get();
-						buffer[offset] = (int8_t)current_image->get(i, j);
+						buffer[offset] = (int8_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_UINT8:
 					for (size_t i = 0; i < x_size; i++) {
 						uint8_t *buffer = (uint8_t *)scanLine.get();
-						buffer[offset] = (uint8_t)current_image->get(i, j);
+						buffer[offset] = (uint8_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_INT16:
 					for (size_t i = 0; i < x_size; i++) {
 						int16_t *buffer = (int16_t *)scanLine.get();
-						buffer[offset] = (int16_t)current_image->get(i, j);
+						buffer[offset] = (int16_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_UINT16:
 					for (size_t i = 0; i < x_size; i++) {
 						uint16_t *buffer = (uint16_t *)scanLine.get();
-						buffer[offset] = (uint16_t)current_image->get(i, j);
+						buffer[offset] = (uint16_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_INT32:
 					for (size_t i = 0; i < x_size; i++) {
 						int32_t *buffer = (int32_t *)scanLine.get();
-						buffer[offset] = (int32_t)current_image->get(i, j);
+						buffer[offset] = (int32_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_UINT32:
 					for (size_t i = 0; i < x_size; i++) {
 						uint32_t *buffer = (uint32_t *)scanLine.get();
-						buffer[offset] = (uint32_t)current_image->get(i, j);
+						buffer[offset] = (uint32_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_INT64:
 					for (size_t i = 0; i < x_size; i++) {
 						int64_t *buffer = (int64_t *)scanLine.get();
-						buffer[offset] = (int64_t)current_image->get(i, j);
+						buffer[offset] = (int64_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_UINT64:
 					for (size_t i = 0; i < x_size; i++) {
 						uint64_t *buffer = (uint64_t *)scanLine.get();
-						buffer[offset] = (uint64_t)current_image->get(i, j);
+						buffer[offset] = (uint64_t)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_FP32:
 					for (size_t i = 0; i < x_size; i++) {
 						float *buffer = (float *)scanLine.get();
-						buffer[offset] = (float)current_image->get(i, j);
+						buffer[offset] = (float)(*current_image)(i, j);
 						offset++;
 					}
 					break;
 				case STORAGE_TYPE_FP64:
 					for (size_t i = 0; i < x_size; i++) {
 						double *buffer = (double *)scanLine.get();
-						buffer[offset] = (double)current_image->get(i, j);
+						buffer[offset] = (double)(*current_image)(i, j);
 						offset++;
 					}
 					break;
@@ -1685,15 +1685,15 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	this->overwrite = overwrite_rhs;
 }
 
-void IgorImageOutputWriter::write_image(boost::shared_ptr<PALMMatrix<double> > new_image) {
+void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
 	long indices[MAX_DIMENSIONS + 1];
 	int result;
 	double value[2];
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
-		this->x_size = new_image->getXSize();
-		this->y_size = new_image->getYSize();
+		this->x_size = new_image->size1();
+		this->y_size = new_image->size2();
 		long dimensionSizes[MAX_DIMENSIONS + 1];
 		dimensionSizes[0] = this->x_size;
 		dimensionSizes[1] = this->y_size;

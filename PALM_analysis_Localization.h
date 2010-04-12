@@ -10,16 +10,19 @@
 #ifndef PALM_ANALYSIS_LOCALIZATION_H
 #define PALM_ANALYSIS_LOCALIZATION_H
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
 
 #include "PALM_analysis.h"
 #include "PALM_analysis_storage.h"
 #include "boost/smart_ptr.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
 #include <stdexcept>
+
+namespace ublas = boost::numeric::ublas;
 
 class LocalizedPosition;
 class LocalizedPositionsContainer;
@@ -37,8 +40,8 @@ public:
 	FitPositions() {;}
 	virtual ~FitPositions() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions);
-	virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> >, size_t startPos, size_t endPos) = 0;
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions);
+	virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> >, size_t startPos, size_t endPos) = 0;
 	// the second function fits the positions between startPos and endPos (indices in the array passed in positions)
 	// it's mainly provided to help with multithreading
 };
@@ -51,7 +54,7 @@ public:
 	FitPositions_SymmetricGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_SymmetricGaussian() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -67,7 +70,7 @@ public:
 	FitPositions_FixedWidthGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_FixedWidthGaussian() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -80,7 +83,7 @@ public:
 	FitPositions_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
 	~FitPositions_EllipsoidalGaussian() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	double sigma;
@@ -98,13 +101,13 @@ public:
 	~FitPositionsMultiplication() {;}
 	
 	// initialPSFWidth should be the standard deviation of the Gaussian
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
-	int multiply_with_gaussian(boost::shared_ptr<PALMMatrix<double> > original_image, boost::shared_ptr<PALMMatrix<double> > masked_image, double x, double y,
+	int multiply_with_gaussian(boost::shared_ptr<ublas::matrix<double> > original_image, boost::shared_ptr<ublas::matrix<double> > masked_image, double x, double y,
 							   double std_dev, double background, double amplitude);
 	// masked_image should be provided with the same dimensions as original_image. It will be overwritten with the contents of the multiplication
-	int determine_x_y_position(boost::shared_ptr<PALMMatrix<double> > masked_image, double &x, double &y);
+	int determine_x_y_position(boost::shared_ptr<ublas::matrix<double> > masked_image, double &x, double &y);
 	
 	double convergence_threshold;
 	size_t cutoff_radius;
@@ -122,7 +125,7 @@ public:
 	~FitPositionsCentroid() {;}
 	
 	// initialPSFWidth should be the standard deviation of the Gaussian
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
 	size_t cutoff_radius;
@@ -146,10 +149,10 @@ public:
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos);
 	
 protected:
-	boost::shared_ptr<PALMMatrix<double> > subtractLocalizedPositions(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions);
+	boost::shared_ptr<ublas::matrix<double> > subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions);
 	
 	boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor;
@@ -182,7 +185,7 @@ public:
 	double yOffset;
 	double sigma;
 	double width;
-	boost::shared_ptr<PALMMatrix<double> > imageSubset;
+	boost::shared_ptr<ublas::matrix<double> > imageSubset;
 };
 
 

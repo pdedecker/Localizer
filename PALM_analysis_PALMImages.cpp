@@ -17,7 +17,7 @@ NormalCDFLookupTable::NormalCDFLookupTable() {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+boost::shared_ptr<ublas::matrix<double> > PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
 	int status;
 	double fittedXPos, fittedYPos, fittedIntegral;
@@ -27,8 +27,8 @@ boost::shared_ptr<PALMMatrix<double> > PALMBitmapImageCalculator::CalculateImage
 	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
 	
 	size_t nPositions = positions->getNPositions();
-	boost::shared_ptr<PALMMatrix<double> > outputImage(new PALMMatrix<double> (imageWidth, imageHeight));
-	outputImage->set_all(0);
+	boost::shared_ptr<ublas::matrix<double> > outputImage(new ublas::matrix<double> (imageWidth, imageHeight));
+	outputImage->clear();
 	
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;
 	double imageHeightScaleFactor = (double)(imageHeight - 1) / (double)ySize;

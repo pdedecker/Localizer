@@ -1,13 +1,13 @@
 #include "PALM_analysis.h"
 
 
-boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
-	boost::shared_ptr<PALMMatrix<double> > preprocessed_image;
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image;
-	boost::shared_ptr<PALMMatrix <unsigned char> > postprocessed_image;
+	boost::shared_ptr<ublas::matrix<double> > preprocessed_image;
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<ublas::matrix <unsigned char> > postprocessed_image;
 	
 	if (preprocessor.get() != NULL) {
 		preprocessed_image = preprocessor->do_preprocessing(image);
@@ -1329,8 +1329,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 
 void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
-	boost::shared_ptr<PALMMatrix<double> > currentImage;
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholdedImage;
+	boost::shared_ptr<ublas::matrix<double> > currentImage;
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholdedImage;
 	boost::shared_ptr<std::vector<position> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	

@@ -9,19 +9,20 @@
 #ifndef PALM_ANALYSIS_PROCESSING_H
 #define PALM_ANALYSIS_PROCESSING_H
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
 
 #include <vector>
 #include <queue>
 #include <list>
 #include <string>
 #include "boost/smart_ptr.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
 
-
+namespace ublas = boost::numeric::ublas;
 
 class ImageLoader;
 class ImageOutputWriter;

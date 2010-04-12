@@ -20,7 +20,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	long indices[MAX_DIMENSIONS];
 	
 	int result;
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	double current_value;
 	double current_value_array[2];
 	
@@ -158,7 +158,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndNam
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	double summed_intensity;
 	
 	waveHndl output_wave;
@@ -232,8 +232,8 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::shared_ptr<PALMMatrix<double> > current_image;
-	boost::shared_ptr<PALMMatrix<double> > average_image(new PALMMatrix<double>(xRange, yRange));
+	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > average_image(new ublas::matrix<double>(xRange, yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -244,7 +244,7 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 	double current_value[2];
 	int result;
 	
-	average_image->set_all(0);
+	average_image->clear();
 	
 	
 	for (size_t i = 0; i < n_images; i++) {
@@ -255,7 +255,7 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 	}
 	
 	// divide by the number of images
-	(*average_image) = (*average_image).DivideByScalar(n_images);
+	*average_image /= (double)n_images;
 	
 	// try to create the output wave
 	result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
@@ -307,12 +307,12 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<PALMMatrix<double> > stdDevImage(new PALMMatrix<double>(xRange, yRange));
-	boost::scoped_ptr<PALMMatrix<double> > average_image(new PALMMatrix<double>(xRange, yRange));
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::scoped_ptr<ublas::matrix<double> > stdDevImage(new ublas::matrix<double>(xRange, yRange));
+	boost::scoped_ptr<ublas::matrix<double> > average_image(new ublas::matrix<double>(xRange, yRange));
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	
-	average_image->set_all(0);
-	stdDevImage->set_all(0);
+	average_image->clear();
+	stdDevImage->clear();
 	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
@@ -323,19 +323,20 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	}
 	
 	// divide by the number of images
-	(*average_image) = (*average_image).DivideByScalar(n_images);
+	*average_image /= (double)n_images;
 	
 	// now loop over the images again, calculating the standard deviation of each pixel
 	for (size_t i = 0; i < n_images; i++) {
 		current_image = image_loader->get_nth_image(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
-		(*stdDevImage) += (((*current_image) - (*average_image)) * ((*current_image) - (*average_image)));
+		(*stdDevImage) = (*stdDevImage) + element_prod((*current_image) - (*average_image), (*current_image) - (*average_image));
 	}
 	
 	// divide by the number of images to get the average deviation, and take the square root
-	(*stdDevImage) = (*stdDevImage).DivideByScalar(n_images);
-	(*stdDevImage) = (*stdDevImage).RaiseToPower(0.5);
+	*stdDevImage /= (double)n_images;
+	std::transform(stdDevImage->begin1(), stdDevImage->end1(), stdDevImage->begin1(), sqrt);
+	//(*stdDevImage) = (*stdDevImage).RaiseToPower(0.5);
 	
 	// try to create the output wave
 	dimension_sizes[0] = xRange;
@@ -535,7 +536,7 @@ waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, 
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {
+boost::shared_ptr<ublas::matrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
@@ -557,7 +558,7 @@ boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wa
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<PALMMatrix<double> > matrix(new PALMMatrix<double>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > matrix(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -569,14 +570,14 @@ boost::shared_ptr<PALMMatrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wa
 				throw err;
 			}
 			
-			matrix->set(i, j, value[0]);
+			(*matrix)(i, j) = value[0];
 		}
 	}
 	
 	return matrix;
 }
 
-waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > matrix, std::string waveName) {
+waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -600,8 +601,8 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 	}
 	
 	
-	size_t x_size = (size_t)matrix->getXSize();
-	size_t y_size = (size_t)matrix->getYSize();
+	size_t x_size = (size_t)matrix->size1();
+	size_t y_size = (size_t)matrix->size2();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;
@@ -626,7 +627,7 @@ waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<PALMMatrix<double> > ma
 	return DPWave;
 }
 
-waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float> > matrix, std::string waveName) {
+waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<ublas::matrix<float> > matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	
@@ -650,8 +651,8 @@ waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<PALMMatrix<float>
 	}
 	
 	
-	size_t x_size = (size_t)matrix->getXSize();
-	size_t y_size = (size_t)matrix->getYSize();
+	size_t x_size = (size_t)matrix->size1();
+	size_t y_size = (size_t)matrix->size2();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;

@@ -14,8 +14,11 @@
 #include "PALM_analysis_defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_storage.h"
 #include <gsl/gsl_cdf.h>
+
+namespace ublas = boost::numeric::ublas;
 
 class PALMBitmapImageDeviationCalculator;
 class NormalCDFLookupTable;
@@ -57,7 +60,7 @@ protected:
 
 /**
  * @brief A class responsible for calculating a bitmap PALM output image by adding an individual Gaussian for every position to the image.
- * The output image is returned as a PALMMatrix<double>.
+ * The output image is returned as a ublas::matrix<double>.
  * 
  * PALMBitmapImageCalculator takes a set of positions in a LocalizedPositionsContainer and creates an output image (2D) with sizes (xSize, ySize).
  * For every position it adds a Gaussian to the output image with an integrated contribution that is either equal to to integrated intensity
@@ -72,7 +75,7 @@ public:
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	boost::shared_ptr<PALMMatrix<double> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+	boost::shared_ptr<ublas::matrix<double> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	

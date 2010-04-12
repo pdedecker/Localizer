@@ -32,19 +32,19 @@ int CCDImagesProcessorAverageSubtraction::convert_images() {
 
 void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	size_t n;
-	boost::shared_ptr<PALMMatrix<double> > average_image;
-	boost::shared_ptr<PALMMatrix<double> > loaded_image;
-	boost::shared_ptr<PALMMatrix<double> > subtracted_image;
+	boost::shared_ptr<ublas::matrix<double> > average_image;
+	boost::shared_ptr<ublas::matrix<double> > loaded_image;
+	boost::shared_ptr<ublas::matrix<double> > subtracted_image;
 	
 	// we pass through the images two times:
 	// the first pass calculates the average,
 	// the second pass subtracts it from the image
 	// fortunately out intermediate format uses doubles to store the data!
 	
-	average_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
-	subtracted_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	average_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	subtracted_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	average_image->set_all(0);	// zero the matrix
+	average_image->clear();	// zero the matrix
 	
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
@@ -53,7 +53,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	}
 	
 	// now divide each point so that we get the average
-	(*average_image) = (*average_image).DivideByScalar(this->n_frames_averaging);
+	*average_image /= (double)this->n_frames_averaging;
 	
 	// now subtract the average for each frame
 	for (n = 0; n < total_number_of_images; n++) {
@@ -77,8 +77,8 @@ CCDImagesProcessorDifferenceImage::CCDImagesProcessorDifferenceImage(ImageLoader
 
 int CCDImagesProcessorDifferenceImage::convert_images() {
 	
-	boost::shared_ptr<PALMMatrix<double> > current_image;
-	boost::shared_ptr<PALMMatrix<double> > next_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > next_image;
 	
 	// we start by loading the first image in next_image
 	// this is required so the loop that follows can start properly
@@ -116,7 +116,7 @@ CCDImagesProcessorConvertToSimpleFileFormat::CCDImagesProcessorConvertToSimpleFi
 
 int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	
-	boost::shared_ptr<PALMMatrix<double> > current_image;
+	boost::shared_ptr<ublas::matrix<double> > current_image;
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->get_nth_image(n);
@@ -151,12 +151,12 @@ CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutpu
 }
 
 int CCDImagesProcessorCrop::convert_images() {
-	boost::shared_ptr<PALMMatrix <double> > croppedImage;
-	boost::shared_ptr<PALMMatrix <double> > loadedImage;
+	boost::shared_ptr<ublas::matrix <double> > croppedImage;
+	boost::shared_ptr<ublas::matrix <double> > loadedImage;
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->get_nth_image(n);
-		croppedImage = boost::shared_ptr<PALMMatrix<double> > (new PALMMatrix<double> (croppedXSize, croppedYSize));
+		croppedImage = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double> (croppedXSize, croppedYSize));
 		
 		for (size_t x = startX; x <= endX; ++x) {
 			for (size_t y = startY; y <= endY; ++y) {

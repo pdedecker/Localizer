@@ -12,6 +12,7 @@
 #include <vector>
 #include <cmath>
 #include "boost/smart_ptr.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"
@@ -21,6 +22,8 @@
 // throws an error on std::min and std::max
 #undef min
 #undef max
+
+namespace ublas = boost::numeric::ublas;
 
 /**
  * Given a set of input positions, calculate the L-function to analyze clustering

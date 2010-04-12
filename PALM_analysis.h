@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
+#include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_defines.h"
@@ -21,7 +22,9 @@
 #include "XOPStandardHeaders.h"
 #endif
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since PALMMatrix<double> does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
+
+namespace ublas = boost::numeric::ublas;
 
 class ImageLoader;
 class ThresholdImage;
@@ -32,7 +35,7 @@ class FitPositions;
 class PALMAnalysisProgressReporter;
 
 
-boost::shared_ptr<PALMMatrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<PALMMatrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 /**

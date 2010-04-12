@@ -9,23 +9,23 @@
 
 #include "PALM_analysis_segmentation.h"
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	
 	size_t x_size, y_size;
 	double current_value;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image(new PALMMatrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
-			current_value = image->get(i, j);
+			current_value = (*image)(i, j);
 			if (current_value >= threshold) {
-				thresholded_image->set(i, j, 255);
+				(*thresholded_image)(i, j) = 255;
 			} else {
-				thresholded_image->set(i, j, 0);
+				(*thresholded_image)(i, j) = 0;
 			}
 		}
 	}
@@ -35,7 +35,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Direct::do_thresho
 }
 
 #ifdef WITH_IGOR
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -51,8 +51,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -68,7 +68,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do
 		throw result;
 	}
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -76,7 +76,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = image->get(i, j);
+			value[0] = (*image)(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -104,7 +104,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			thresholded_image->set(i, j, threshold_result);
+			(*thresholded_image)(i, j) = threshold_result;
 		}
 	}
 	
@@ -120,7 +120,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Iterative::do
 	return thresholded_image;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -136,8 +136,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_t
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -152,7 +152,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_t
 		throw result;
 	}
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -160,7 +160,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_t
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = image->get(i, j);
+			value[0] = (*image)(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -188,7 +188,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_t
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			thresholded_image->set(i, j, threshold_result);
+			(*thresholded_image)(i, j) = threshold_result;
 		}
 	}
 	
@@ -204,7 +204,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_t
 	return thresholded_image;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -217,18 +217,18 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_
 	double value[2];
 	int result;
 	unsigned char threshold_result;
-	boost::shared_ptr<PALMMatrix <unsigned char> > original_thresholded;
-	boost::shared_ptr<PALMMatrix <unsigned char> > transposed_tresholded;
+	boost::shared_ptr<ublas::matrix <unsigned char> > original_thresholded;
+	boost::shared_ptr<ublas::matrix <unsigned char> > transposed_tresholded;
 	
 	waveHndl tmp_storage_wave;
 	waveHndl thresholded_wave;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	// we make two images for the original and the transposed threshold
-	original_thresholded = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-	transposed_tresholded = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	original_thresholded = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	transposed_tresholded = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -249,7 +249,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = image->get(i, j);
+			value[0] = (*image)(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -283,7 +283,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			original_thresholded->set(i, j, threshold_result);
+			(*original_thresholded)(i, j) = threshold_result;
 		}
 	}
 	
@@ -323,19 +323,19 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			transposed_tresholded->set(i, j, threshold_result);
+			(*transposed_tresholded)(i, j) = threshold_result;
 		}
 	}
 	
 	// now construct the combined threshold image by AND'ing the original and transpose together
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
-			if (original_thresholded->get(i, j) < 128) {	// below the threshold, we skip it
+			if ((*original_thresholded)(i, j) < 128) {	// below the threshold, we skip it
 				continue;
 			} else {
 				// is the transposed matrix also above the threshold?
-				if (transposed_tresholded->get(i, j) < 128) {	// below the threshold. We should not include this point
-					original_thresholded->set(i, j, 0);
+				if ((*transposed_tresholded)(i, j) < 128) {	// below the threshold. We should not include this point
+					(*original_thresholded)(i, j) = 0;
 				} else {
 					continue;
 				}
@@ -357,7 +357,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_
 	return original_thresholded;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -373,8 +373,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_th
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -389,7 +389,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_th
 		throw result;
 	}
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -397,7 +397,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_th
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = image->get(i, j);
+			value[0] = (*image)(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -425,7 +425,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_th
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			thresholded_image->set(i, j, threshold_result);
+			(*thresholded_image)(i, j) = threshold_result;
 		}
 	}
 	
@@ -441,7 +441,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_th
 	return thresholded_image;	
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -457,8 +457,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -473,7 +473,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 		throw result;
 	}
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -481,7 +481,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = image->get(i, j);
+			value[0] = (*image)(i, j);
 			
 			result = MDSetNumericWavePointValue(tmp_storage_wave, indices, value) ;
 			if (result != 0) {
@@ -509,7 +509,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 			
 			threshold_result = (unsigned char)(value[0] + 0.5);
 			
-			thresholded_image->set(i, j, threshold_result);
+			(*thresholded_image)(i, j) = threshold_result;
 		}
 	}
 	
@@ -526,12 +526,12 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_th
 }
 #endif // WITH_IGOR
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	gsl_histogram *hist;
-	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
+	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
 	
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	
 	size_t number_of_bins = 256;
 	size_t current_threshold_bin = 127;
@@ -587,8 +587,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresh
 	
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
 		// to indicate this we set everything to 'off' (0)
-		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-		threshold_image->set_all(0);
+		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image->clear();
 		return threshold_image;
 	}
 	
@@ -612,7 +612,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Isodata::do_thresh
 	return threshold_image;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	gsl_histogram *hist;
 	size_t number_of_bins = 256;
 	size_t maximum_bin;
@@ -626,9 +626,9 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	size_t max_index;
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
@@ -643,8 +643,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	// catch an unlikely case where the maximum corresponds to the last bin
 	if (maximum_bin == (number_of_bins - 1)) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-		threshold_image->set_all(0);
+		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image->clear();
 		return threshold_image;
 	}
 	
@@ -655,8 +655,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 	// catch an unlikely case where the connecting line is flat (the histogram is apparently uniform)
 	if (slope == 0) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-		threshold_image->set_all(0);
+		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image->clear();
 		return threshold_image;
 	}
 	
@@ -707,19 +707,19 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Triangle::do_thres
 }
 
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
-	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	
-	boost::shared_ptr<PALMMatrix<double> > averages(new PALMMatrix<double> (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
-	boost::shared_ptr<PALMMatrix<double> > image_squared(new PALMMatrix<double> (x_size, y_size));
-	boost::shared_ptr<PALMMatrix<double> > summed_squares(new PALMMatrix<double> (x_size, y_size));
-	boost::shared_ptr<PALMMatrix<double> > null_hypothesis(new PALMMatrix<double> (x_size, y_size));
-	boost::shared_ptr<PALMMatrix<double> > Gaussian_window(new PALMMatrix<double> (x_size, y_size));
-	boost::shared_ptr<PALMMatrix<double> > image_Gaussian_convolved(new PALMMatrix<double> (x_size, y_size));	// this is 'alpha' in the original matlab code
-	boost::shared_ptr<PALMMatrix<double> > hypothesis_test(new PALMMatrix<double> (x_size, y_size));	// this is 'test' in the original matlab code
+	boost::shared_ptr<ublas::matrix<double> > averages(new ublas::matrix<double> (x_size, y_size));	// contains an estimation of the average value at every position, calculation over the number of pixels in the window
+	boost::shared_ptr<ublas::matrix<double> > image_squared(new ublas::matrix<double> (x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > summed_squares(new ublas::matrix<double> (x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > null_hypothesis(new ublas::matrix<double> (x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > Gaussian_window(new ublas::matrix<double> (x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved(new ublas::matrix<double> (x_size, y_size));	// this is 'alpha' in the original matlab code
+	boost::shared_ptr<ublas::matrix<double> > hypothesis_test(new ublas::matrix<double> (x_size, y_size));	// this is 'test' in the original matlab code
 	
 	
 	double average = 0;
@@ -733,20 +733,20 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 	double sum_squared_Gaussian;
 	
 	
-	threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-	threshold_image->set_all(0);
+	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	threshold_image->clear();
 	
-	averages->set_all(0);
-	summed_squares->set_all(0);
-	hypothesis_test->set_all(0);
+	averages->clear();
+	summed_squares->clear();
+	hypothesis_test->clear();
 	
 	// calculate the square of the pixel values
 	// we'll use this later
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
-			current_value = image->get(i, j);
+			current_value = (*image)(i, j);
 			current_value = current_value * current_value;
-			image_squared->set(i, j, current_value);
+			(*image_squared)(i, j) = current_value;
 		}
 	}
 	
@@ -764,12 +764,12 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 			
 			for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
 				for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
-					average += image->get(i, j);
+					average += (*image)(i, j);
 				}
 			}
 			average /= double_window_pixels;
 			
-			averages->set(k, l, average);
+			(*averages)(k, l) = average;
 		}
 	}
 	
@@ -780,18 +780,18 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 			current_value = 0;
 			for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
 				for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
-					current_value += image_squared->get(i, j);
+					current_value += (*image_squared)(i, j);
 				}
 			}
-			summed_squares->set(k, l, current_value);	// summed_squares is now equal to "Sim2" in the orignal matlab code
+			(*summed_squares)(k, l) = current_value;	// summed_squares is now equal to "Sim2" in the orignal matlab code
 		}
 	}
 	
 	// now calculate the null hypothesis image-> This is T_sig0_2 in the original matlab source
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			current_value = summed_squares->get(k, l) - double_window_pixels * averages->get(k, l) * averages->get(k, l);
-			null_hypothesis->set(k, l, current_value);
+			current_value = (*summed_squares)(k, l) - double_window_pixels * (*averages)(k, l) * (*averages)(k, l);
+			(*null_hypothesis)(k, l) = current_value;
 		}
 	}
 	
@@ -807,7 +807,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 			distance_y = (double)half_window_size - (double)j;
 			current_value = 1.0 / (1.77245385 * gaussianWidth) * exp(- 1.0 / (2.0 * gaussianWidth * gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
 			
-			Gaussian_window->set(i, j, current_value);
+			(*Gaussian_window)(i, j) = current_value;
 			
 			sum += current_value;	// we will use this below
 		}
@@ -819,9 +819,9 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 	sum_squared_Gaussian = 0;
 	for (size_t j = 0; j < window_size; j++) {
 		for (size_t i = 0; i < window_size; i++) {
-			current_value = Gaussian_window->get(i, j);
+			current_value = (*Gaussian_window)(i, j);
 			current_value = current_value - sum;
-			Gaussian_window->set(i, j, current_value);
+			(*Gaussian_window)(i, j) = current_value;
 			sum_squared_Gaussian += current_value * current_value;	// this is 'Sgc2' in the original code
 		}
 	}
@@ -834,13 +834,13 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 			sum = 0;
 			for (size_t j = l - half_window_size; j <= l + half_window_size; j++) {
 				for (size_t i = k - half_window_size; i <= k + half_window_size; i++) {
-					current_value = Gaussian_window->get(i - k + half_window_size, j - l + half_window_size);
-					current_value *= image->get(i, j);
+					current_value = (*Gaussian_window)(i - k + half_window_size, j - l + half_window_size);
+					current_value *= (*image)(i, j);
 					sum += current_value;
 				}
 			}
 			sum /= sum_squared_Gaussian;
-			image_Gaussian_convolved->set(k, l, sum);
+			(*image_Gaussian_convolved)(k, l) = sum;
 		}
 	}
 	
@@ -849,10 +849,10 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			current_value = 1 - (sum_squared_Gaussian * image_Gaussian_convolved->get(k, l) * image_Gaussian_convolved->get(k, l)) / null_hypothesis->get(k , l);
+			current_value = 1 - (sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
 			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) ->* test + (test <= 0) in the original code
 			current_value = - double_window_pixels * log(current_value);
-			hypothesis_test->set(k, l, current_value);
+			(*hypothesis_test)(k, l) = current_value;
 		}
 	}
 	
@@ -860,8 +860,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 	// check where we have to reject the hypothesis test
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			if (hypothesis_test->get(k, l) > PFA) {
-				threshold_image->set(k, l, 255);
+			if ((*hypothesis_test)(k, l) > PFA) {
+				(*threshold_image)(k, l) = 255;
 			}
 		}
 	}
@@ -870,19 +870,19 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT::do_threshold
 }
 
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
-	boost::shared_ptr<PALMMatrix <unsigned char> > threshold_image;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	
-	boost::shared_ptr<PALMMatrix<double> > averages;
-	boost::shared_ptr<PALMMatrix<double> > image_squared;
-	boost::shared_ptr<PALMMatrix<double> > summed_squares;
-	boost::shared_ptr<PALMMatrix<double> > null_hypothesis;
-	boost::shared_ptr<PALMMatrix<double> > image_Gaussian_convolved;
-	boost::shared_ptr<PALMMatrix<double> > hypothesis_test;
-	boost::shared_ptr<PALMMatrix<double> > Gaussian_window;
+	boost::shared_ptr<ublas::matrix<double> > averages;
+	boost::shared_ptr<ublas::matrix<double> > image_squared;
+	boost::shared_ptr<ublas::matrix<double> > summed_squares;
+	boost::shared_ptr<ublas::matrix<double> > null_hypothesis;
+	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved;
+	boost::shared_ptr<ublas::matrix<double> > hypothesis_test;
+	boost::shared_ptr<ublas::matrix<double> > Gaussian_window;
 	
 	size_t window_size = ceil(4 * this->gaussianWidth);
 	if ((window_size % 2) == 0)	// window_size must be odd
@@ -897,29 +897,29 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	double distance_x, distance_y;
 	double sum;
 	
-	threshold_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
-	threshold_image->set_all(0);
+	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	threshold_image->clear();
 	
-	averages = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
-	averages->set_all(0);
+	averages = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	averages->clear();
 	
-	image_squared = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	summed_squares = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
-	summed_squares->set_all(0);
+	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	summed_squares->clear();
 	
-	null_hypothesis = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	Gaussian_window = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	Gaussian_window = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	image_Gaussian_convolved = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));	// this is 'alpha' in the original matlab code
+	image_Gaussian_convolved = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));	// this is 'alpha' in the original matlab code
 	
-	hypothesis_test = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));	// this is 'test' in the original matlab code
-	hypothesis_test->set_all(0);
+	hypothesis_test = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));	// this is 'test' in the original matlab code
+	hypothesis_test->clear();
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	(*image_squared) = (*image) * (*image);
+	(*image_squared) = element_prod((*image), (*image));
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -935,13 +935,13 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	if ((average_kernel.get() == NULL) || (averageKernelXSize != x_size) || (averageKernelYSize != y_size)) {
 		averageCalculationMutex.lock();	// get a unique lock
 		
-		average_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		average_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
-		average_kernel->set_all(0);
+		average_kernel->clear();
 		
 		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 			for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-				average_kernel->set(i, j, 1);
+				(*average_kernel)(i, j) = 1;
 			}
 		}
 		
@@ -962,10 +962,11 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	averageCalculationMutex.unlock_shared();
 	
 	// normalize the result, so that we get averages
-	(*averages) = (*averages).DivideByScalar(double_window_pixels);
+	(*averages) /= double_window_pixels;
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
-	(*null_hypothesis) = (*summed_squares) - (((*averages) * (*averages)).MultiplyWithScalar(double_window_pixels));
+	(*null_hypothesis) = (*summed_squares) - (element_prod((*averages), (*averages)) * double_window_pixels);
+	//(*null_hypothesis) = (*summed_squares) - (((*averages) * (*averages)).MultiplyWithScalar(double_window_pixels));
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -976,9 +977,9 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	
 	if ((Gaussian_kernel.get() == NULL) || (GaussianKernelXSize != x_size) || (GaussianKernelYSize != y_size)) {
 		gaussianCalculationMutex.lock();	// get a unique lock
-		Gaussian_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+		Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
-		Gaussian_window = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(window_size, window_size));
+		Gaussian_window = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(window_size, window_size));
 		
 		sum = 0;
 		for (size_t j = 0; j < window_size; j++) {
@@ -988,7 +989,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 				distance_y = (double)half_window_size - (double)j;
 				current_value = 1.0 / (1.77245385 * gaussianWidth) * exp(- 1.0 / (2.0 * gaussianWidth * gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
 				
-				Gaussian_window->set(i, j, current_value);
+				(*Gaussian_window)(i, j) = current_value;
 				
 				sum += current_value;	// we will use this below
 			}
@@ -1000,19 +1001,19 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 		sum_squared_Gaussian = 0;
 		for (size_t j = 0; j < window_size; j++) {
 			for (size_t i = 0; i < window_size; i++) {
-				current_value = Gaussian_window->get(i, j);
+				current_value = (*Gaussian_window)(i, j);
 				current_value = current_value - sum;
-				Gaussian_window->set(i, j, current_value);
+				(*Gaussian_window)(i, j) = current_value;
 				sum_squared_Gaussian += current_value * current_value;	// this is 'Sgc2' in the original code
 			}
 		}
 		
 		// now introduce this small kernel into a larger one that is the same size as the image
-		Gaussian_kernel->set_all(0);
+		Gaussian_kernel->clear();
 		
 		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 			for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-				Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
+				(*Gaussian_kernel)(i, j) = (*Gaussian_window)(i - center_x + half_window_size, j - center_y + half_window_size);
 			}
 		}
 		
@@ -1032,15 +1033,15 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	gaussianCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
-	(*image_Gaussian_convolved) = (*image_Gaussian_convolved).DivideByScalar(sum_squared_Gaussian);
+	(*image_Gaussian_convolved) /= sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			current_value = 1 - (sum_squared_Gaussian * image_Gaussian_convolved->get(k, l) * image_Gaussian_convolved->get(k, l)) / null_hypothesis->get(k , l);
+			current_value = 1 - (sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
 			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) .* test + (test <= 0) in the original code
 			current_value = - double_window_pixels * log(current_value);
-			hypothesis_test->set(k, l, current_value);
+			(*hypothesis_test)(k, l) = current_value;
 		}
 	}
 	
@@ -1048,8 +1049,8 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 	// check where we have to reject the hypothesis test
 	for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
 		for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
-			if (hypothesis_test->get(k, l) > PFA) {
-				threshold_image->set(k, l, (unsigned char)255);
+			if ((*hypothesis_test)(k, l) > PFA) {
+				(*threshold_image)(k, l) = (unsigned char)255;
 			}
 		}
 	}
@@ -1058,18 +1059,18 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thres
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	size_t offset;
 	double value, median;
 	
 	gsl_vector *median_environment;
-	boost::shared_ptr<PALMMatrix<double> > filtered_image;
+	boost::shared_ptr<ublas::matrix<double> > filtered_image;
 	
 	// allocate a gsl_vector with the correct size
 	median_environment = gsl_vector_alloc(kernel_size);
@@ -1078,11 +1079,11 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MedianFilter:
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
-	filtered_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
-			filtered_image->set(i, j, image->get(i, j));
+			(*filtered_image)(i, j) = (*image)(i, j);
 		}
 	}
 	
@@ -1096,14 +1097,14 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MedianFilter:
 			offset = 0;
 			for (size_t l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
 				for (size_t k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
-					value = image->get(k, l);
+					value = (*image)(k, l);
 					gsl_vector_set(median_environment, offset, value);
 					offset++;
 				}
 			}
 			gsl_sort_vector(median_environment);
 			median = gsl_vector_get(median_environment, sorted_center);
-			filtered_image->set(i, j, median);
+			(*filtered_image)(i, j) = median;
 		}
 	}
 	
@@ -1121,9 +1122,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
-	boost::shared_ptr<PALMMatrix<double> > Gaussian_window(new PALMMatrix<double>(window_size, window_size));
+	boost::shared_ptr<ublas::matrix<double> > Gaussian_window(new ublas::matrix<double>(window_size, window_size));
 	
-	Gaussian_kernel = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
@@ -1135,16 +1136,16 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 			current_value = 1.0 / (6.28318531 * width * width) * exp(- 1.0 / (2.0 * width * width) * (distance_x * distance_x + distance_y * distance_y));
 			// normalized Gaussian in two dimensions
 			
-			Gaussian_window->set(i, j, current_value);
+			(*Gaussian_window)(i, j) = current_value;
 		}
 	}
 	
 	// now introduce this small kernel into a larger one that is the same size as the image
-	Gaussian_kernel->set_all(0);
+	Gaussian_kernel->clear();
 	
 	for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-			Gaussian_kernel->set(i, j, Gaussian_window->get(i - center_x + half_window_size, j - center_y + half_window_size));
+			(*Gaussian_kernel)(i, j) = (*Gaussian_window)(i - center_x + half_window_size, j - center_y + half_window_size);
 		}
 	}
 }
@@ -1152,11 +1153,11 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 
 
 
-boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
 	
-	boost::shared_ptr<PALMMatrix<double> > filtered_image;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	boost::shared_ptr<ublas::matrix<double> > filtered_image;
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	generateKernelMutex.lock();
@@ -1166,7 +1167,7 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_GaussianSmoot
 		
 	} else {	// we already have a kernel stored, is it the correct size?
 		// if not we will calculate a new one
-		if ((x_size != Gaussian_kernel->getXSize()) || (y_size != Gaussian_kernel->getYSize())) {
+		if ((x_size != Gaussian_kernel->size1()) || (y_size != Gaussian_kernel->size2())) {
 			generate_Gaussian_kernel(x_size, y_size);
 		}
 	}
@@ -1178,26 +1179,26 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_GaussianSmoot
 }
 
 
-boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	double double_kernel_pixels = (double)kernel_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->getXSize();
-	size_t y_size = image->getYSize();
+	size_t x_size = image->size1();
+	size_t y_size = image->size2();
 	double mean;
 	
-	boost::shared_ptr<PALMMatrix<double> > filtered_image;
+	boost::shared_ptr<ublas::matrix<double> > filtered_image;
 	
 	// make a copy of the image
 	// this copy will be mean-filtered
 	// close to the edges, where the kernel doesn't fit we will not modify the image
-	filtered_image = boost::shared_ptr<PALMMatrix<double> >(new PALMMatrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
-			filtered_image->set(i, j, image->get(i, j));
+			(*filtered_image)(i, j) = (*image)(i, j);
 		}
 	}
 	
@@ -1211,31 +1212,31 @@ boost::shared_ptr<PALMMatrix<double> > ThresholdImage_Preprocessor_MeanFilter::d
 			mean = 0;
 			for (size_t l = j - half_kernel_size_y; l <= j + half_kernel_size_y; l++) {
 				for (size_t k = i - half_kernel_size_x; k <= i + half_kernel_size_x; k++) {
-					mean += image->get(k, l);
+					mean += (*image)(k, l);
 				}
 			}
 			mean /= double_kernel_pixels;
-			filtered_image->set(i, j, mean);
+			(*filtered_image)(i, j) = mean;
 		}
 	}
 	
 	return filtered_image;
 }
 
-boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<PALMMatrix <unsigned char> > thresholded_image, boost::shared_ptr<PALMMatrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image, boost::shared_ptr<ublas::matrix<double> > image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->getXSize();
-	size_t y_size = thresholded_image->getYSize();
+	size_t x_size = thresholded_image->size1();
+	size_t y_size = thresholded_image->size2();
 	unsigned char value;
 	bool neighbour_found;
 	
-	boost::shared_ptr<PALMMatrix <unsigned char> > processed_thresholded_image;
+	boost::shared_ptr<ublas::matrix <unsigned char> > processed_thresholded_image;
 	
-	processed_thresholded_image = boost::shared_ptr<PALMMatrix <unsigned char> >(new PALMMatrix<unsigned char>(x_size, y_size));
+	processed_thresholded_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
-			processed_thresholded_image->set(i, j, thresholded_image->get(i, j));
+			(*processed_thresholded_image)(i, j) = (*thresholded_image)(i, j);
 		}
 	}
 	
@@ -1244,7 +1245,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_Remo
 	for (size_t j = 1; j < y_size - 1; j++) {
 		for (size_t i = 1; i < x_size - 1; i++) {
 			
-			value = thresholded_image->get(i, j);
+			value = (*thresholded_image)(i, j);
 			if (value < 128) {	// this is an 'off' pixel
 				continue;
 			}
@@ -1256,7 +1257,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_Remo
 						continue;	// this is the pixel that we are considering itself, not the environment
 					}
 					
-					if (thresholded_image->get(k, l) > 128) {
+					if ((*thresholded_image)(k, l) > 128) {
 						neighbour_found = 1;
 						break;
 					}
@@ -1265,7 +1266,7 @@ boost::shared_ptr<PALMMatrix <unsigned char> > ThresholdImage_Postprocessor_Remo
 			
 			if (neighbour_found == 0) {
 				// we didn't find an active point in the neighborhood, it was an isolated pixel
-				processed_thresholded_image->set(i, j, 0);
+				(*processed_thresholded_image)(i, j) = 0;
 			}
 		}
 	}
@@ -1282,13 +1283,13 @@ ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 	}
 }
 
-boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<PALMMatrix<double> > image1, boost::shared_ptr<PALMMatrix<double> > image2) {
+boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<ublas::matrix<double> > image1, boost::shared_ptr<ublas::matrix<double> > image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	
-	x_size1 = image1->getXSize();
-	y_size1 = image1->getYSize();
-	x_size2 = image2->getXSize();
-	y_size2 = image2->getYSize();
+	x_size1 = image1->size1();
+	y_size1 = image1->size2();
+	x_size2 = image2->size1();
+	y_size2 = image2->size2();
 	
 	size_t n_pixels, offset;
 	size_t FFT_xSize, FFT_ySize;
@@ -1300,7 +1301,7 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	fftw_complex *array1_FFT;
 	fftw_complex *array2_FFT;
 	fftw_complex complex_value;
-	boost::shared_ptr<PALMMatrix<double> > convolved_image(new PALMMatrix<double>(x_size1, y_size1));
+	boost::shared_ptr<ublas::matrix<double> > convolved_image(new ublas::matrix<double>(x_size1, y_size1));
 	
 	// are the dimensions equal?
 	if ((x_size1 != x_size2) || (y_size1 != y_size2)) {
@@ -1345,8 +1346,8 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 	for (size_t i = 0; i < FFT_xSize; i++) {
 		for (size_t j = 0; j < FFT_ySize; j++) {
 			// IMPORTANT: the data in the array is assumed to be in ROW-MAJOR order, so we loop over y first
-			array1[offset] = image1->get(i, j);
-			array2[offset] = image2->get(i, j);
+			array1[offset] = (*image1)(i, j);
+			array2[offset] = (*image2)(i, j);
 			
 			offset++;
 		}
@@ -1476,15 +1477,15 @@ boost::shared_ptr<PALMMatrix<double> > ConvolveMatricesWithFFTClass::ConvolveMat
 }
 
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<PALMMatrix<double> > image, size_t number_of_bins) {
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<ublas::matrix<double> > image, size_t number_of_bins) {
 	size_t x_size, y_size;
 	gsl_histogram *hist;
 	double min = 1e100;
 	double max = -1e100;
 	double current_value;
 	
-	x_size = image->getXSize();
-	y_size = image->getYSize();
+	x_size = image->size1();
+	y_size = image->size2();
 	
 	std::string error;
 	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()";
