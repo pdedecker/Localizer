@@ -1350,7 +1350,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	try {
 		
 		// copy the Igor wave with the CCD Frame into a new gsl_matrix
-		CCD_Frame = copy_IgorDPWave_to_gsl_matrix(CCD_Frame_wave);
+		CCD_Frame = CopyIgorDPWaveToMatrix(CCD_Frame_wave);
 		
 		x_size = CCD_Frame->size1();
 		y_size = CCD_Frame->size2();
@@ -1560,13 +1560,13 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	}
 	
 	try {
-		firstImage = copy_IgorDPWave_to_gsl_matrix(firstWave);
-		secondImage = copy_IgorDPWave_to_gsl_matrix(secondWave);
+		firstImage = CopyIgorDPWaveToMatrix(firstWave);
+		secondImage = CopyIgorDPWaveToMatrix(secondWave);
 		ConvolveMatricesWithFFTClass matrixConvolver;
 		
 		outputImage = matrixConvolver.ConvolveMatricesWithFFT(firstImage,secondImage);
 		
-		outputWave = copy_PALMMatrix_to_IgorDPWave(outputImage, "M_Convolved");
+		outputWave = CopyMatrixToIgorDPWave(outputImage, "M_Convolved");
 		
 	}
 	catch (std::bad_alloc) {
@@ -1706,7 +1706,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
-		copy_PALMMatrix_to_IgorDPWave(image, std::string("M_PALM"));
+		CopyMatrixToIgorDPWave(image, std::string("M_PALM"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
@@ -1775,7 +1775,7 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 		binWidth = calculationRange / (double)nBins;
 		double dimOffset = binWidth;
 		double dimDelta = binWidth;
-		waveHndl outputWave = copy_vector_to_IgorDPWave(kFunction, std::string("W_LFunction"));
+		waveHndl outputWave = CopyVectorToIgorDPWave(kFunction, std::string("W_LFunction"));
 		err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
 	}
 	catch (std::runtime_error e) {

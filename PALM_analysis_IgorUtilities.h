@@ -45,11 +45,11 @@ int ConvertHandleToString(Handle handle, std::string& convertedString);
 int ConvertHandleToFilepathString(Handle handle, std::string &output_string);
 
 // routines to convert data from and to Igor format
-waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
+waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
 
-boost::shared_ptr<ublas::matrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave);
+boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave);
 
-waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName);
+waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName);
 
 waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<ublas::matrix<float> > matrix, std::string waveName);
 

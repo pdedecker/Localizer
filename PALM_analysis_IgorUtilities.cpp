@@ -503,7 +503,7 @@ int ConvertHandleToFilepathString(Handle handle, std::string &output_path) {
 	
 }
 
-waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName) {
+waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName) {
 	waveHndl DPWave;
 	
 	int err;
@@ -536,7 +536,7 @@ waveHndl copy_vector_to_IgorDPWave(boost::shared_ptr<std::vector<double> > vec, 
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl wave) {
+boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave) {
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
@@ -577,7 +577,7 @@ boost::shared_ptr<ublas::matrix<double> > copy_IgorDPWave_to_gsl_matrix(waveHndl
 	return matrix;
 }
 
-waveHndl copy_PALMMatrix_to_IgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName) {
+waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	
