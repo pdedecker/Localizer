@@ -335,7 +335,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	
 	// divide by the number of images to get the average deviation, and take the square root
 	*stdDevImage /= (double)n_images;
-	std::transform(stdDevImage->begin1(), stdDevImage->end1(), stdDevImage->begin1(), sqrt);
+	std::transform(stdDevImage->begin1(), stdDevImage->end1(), stdDevImage->begin1(), static_cast<double(*)(double)>(sqrt));
 	//(*stdDevImage) = (*stdDevImage).RaiseToPower(0.5);
 	
 	// try to create the output wave
