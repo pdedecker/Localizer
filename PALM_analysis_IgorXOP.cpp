@@ -1855,9 +1855,9 @@ static int RegisterTestThreshold(void) {
 }
 
 static int RegisterConvolveImages(void) {
-	char* cmdTemplate;
-	char* runtimeNumVarList;
-	char* runtimeStrVarList;
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ConvolveImagesRuntimeParams structure as well.
 	cmdTemplate = "ConvolveImages wave:firstImage, wave:secondImage";
