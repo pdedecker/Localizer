@@ -17,8 +17,11 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	
 	// get the x and y boundaries for the positions if they have not been provided
 	if ((lowerX == 0) && (upperX == 0) && (lowerY == 0) && (lowerX == 0)) {
+		lowerX = 1e200;
+		upperX = -1;
+		lowerY = 1e200; 
+		upperY = -1;
 		
-		double lowerX = 1e200, upperX = -1, lowerY = 1e200, upperY = -1;
 		for (size_t i = 0; i < nPositions; ++i) {
 			currentX = positions->getXPosition(i);
 			currentY = positions->getYPosition(i);
