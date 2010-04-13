@@ -53,10 +53,4 @@ waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix
 
 waveHndl copy_PALMMatrix_float_to_IgorFPWave(boost::shared_ptr<ublas::matrix<float> > matrix, std::string waveName);
 
-boost::shared_ptr<PALMVolume <double> > copy_IgorDPWave_to_gsl_volume(waveHndl wave);
-
-waveHndl copy_PALMVolume_to_IgorDPWave(boost::shared_ptr<PALMVolume <double> > volume, std::string waveName);
-
-waveHndl copy_PALMVolume_ushort_to_IgorUINT16wave(boost::shared_ptr<PALMVolume<unsigned short> > volume, std::string waveName);
-
 #endif
