@@ -31,18 +31,17 @@ Currently we support the following localization methods and formats:
 11. number of frames in which the emitter is assumed to be present
 
 
-- Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:1". The actual positions wave itself has 11 columns for every position, in the following format:
+- Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:1". The actual positions wave itself has 10 columns for every position, in the following format:
 0. frame number
 1. integrated intensity
-2. standard deviation (width)
-3. x position
-4. y position
-5. background level (offset)
-6. deviation on the integrated intensity
-7. deviation on the x position
-8. deviation on the y position
-9. deviation on the background
-10. number of frames in which the emitter is assumed to be present
+2. x position
+3. y position
+4. background level (offset)
+5. deviation on the integrated intensity
+6. deviation on the x position
+7. deviation on the y position
+8. deviation on the background
+9. number of frames in which the emitter is assumed to be present
 
 
 - An iterative multiplication technique in which the spot is localized by repeated multiplication with a Gaussian function centered at different positions. The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:2". The actual positions wave itself has 4 columns for every localized position:
