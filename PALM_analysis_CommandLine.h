@@ -10,6 +10,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include "boost/program_options.hpp"
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_segmentation.h"

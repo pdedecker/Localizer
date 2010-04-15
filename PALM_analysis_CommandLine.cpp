@@ -103,8 +103,7 @@ int main(int argc, char *argv[]) {
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
 	std::string outputFilePath;
-	char output[500];
-	std::string header;
+	std::ostringstream header;
 	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
 	
 	for (size_t i = 0; i < nInputFiles; ++i) {
@@ -123,17 +122,14 @@ int main(int argc, char *argv[]) {
 			fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
 			
 			// write a header
-			sprintf(output, "X SIZE:%lu\n", imageLoader->getXSize());
-			header = output;
-			sprintf(output, "Y SIZE:%lu\n", imageLoader->getYSize());
-			header += output;
-			sprintf(output, "PFA:%g\n", pfa);
-			header += output;
-			sprintf(output, "PSF WIDTH:%g\n", psfWidth);
-			header += output;
+			header.str("");
+			header << "X SIZE:" << imageLoader->getXSize() << "\n";
+			header << "Y SIZE:" << imageLoader->getYSize() << "\n";
+			header << "PFA:" << pfa << "\n";
+			header << "PSF WIDTH:" << psfWidth << "\n";
 			
 			// write the output
-			fittedPositions->writePositionsToFile(outputFilePath, header);
+			fittedPositions->writePositionsToFile(outputFilePath, header.str());
 		}
 		catch (std::runtime_error e) {
 			std::cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
