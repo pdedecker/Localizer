@@ -33,7 +33,7 @@ Currently we support the following localization methods and formats:
 
 - Fitting with a circularly symmetric 2D Gaussian with a fixed standard deviation (width). The wavenote must list this type of localization method by containing the string "LOCALIZATION METHOD:1". The actual positions wave itself has 10 columns for every position, in the following format:
 0. frame number
-1. integrated intensity
+1. integrated intensity	
 2. x position
 3. y position
 4. background level (offset)

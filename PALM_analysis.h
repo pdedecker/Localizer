@@ -303,8 +303,8 @@ public:
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
-	double getXWidth(size_t index) const {0;}
-	double getYWidth(size_t index) const {0;}
+	double getXWidth(size_t index) const {return 0;}
+	double getYWidth(size_t index) const {return 0;}
 	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
