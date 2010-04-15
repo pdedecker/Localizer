@@ -84,7 +84,6 @@ public:
 	size_t nFramesPresent;	// the number of frames this position was localized in
 	
 	double integral;
-	double width;
 	double xPosition;
 	double yPosition;
 	double background;
@@ -304,8 +303,8 @@ public:
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
-	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getXWidth(size_t index) const {0;}
+	double getYWidth(size_t index) const {0;}
 	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}

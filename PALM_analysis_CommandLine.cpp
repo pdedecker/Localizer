@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 			header += output;
 			sprintf(output, "PFA:%g\n", pfa);
 			header += output;
-			sprintf(output, "GAUSSIAN WIDTH:%g\n", psfWidth);
+			sprintf(output, "PSF WIDTH:%g\n", psfWidth);
 			header += output;
 			
 			// write the output

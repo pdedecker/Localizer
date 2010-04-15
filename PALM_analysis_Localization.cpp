@@ -672,15 +672,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		
 		// store the data
 		// store the fitted parameters
-		
-		// the width returned by the fit function is not equal to the standard deviation (a factor of sqrt 2 is missing)
-		// so we correct for that
-		localizationResult->width = initialPSFWidth;
 		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 1);
 		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
 		
-		localizationResult->integral = 2 * PI * localizationResult->width * localizationResult->width * gsl_vector_get(fit_iterator->x, 0);
+		localizationResult->integral = 2 * PI * initialPSFWidth * initialPSFWidth * gsl_vector_get(fit_iterator->x, 0);
 		
 		
 		localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
@@ -689,7 +685,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		
 		// calculate the uncertainty on the integrated intensity using error propagation
 		relativeAmplitudeError = c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0); // the relative error on the amplitude
-		localizationResult->integralDeviation = 2 * PI * localizationResult->integral * localizationResult->width * localizationResult->width * sqrt(relativeAmplitudeError * relativeAmplitudeError);
+		localizationResult->integralDeviation = 2 * PI * localizationResult->integral * initialPSFWidth * initialPSFWidth * sqrt(relativeAmplitudeError * relativeAmplitudeError);
 		
 		
 		fitted_positions->addPosition(localizationResult);

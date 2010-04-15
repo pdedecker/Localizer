@@ -315,7 +315,7 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
 	
-	if ((numDimensions != 2) || (dimensionSizes[1] != 11)) {	// invalid dimensions (warning: magic numbers)
+	if ((numDimensions != 2) || (dimensionSizes[1] != 10)) {	// invalid dimensions (warning: magic numbers)
 		throw (std::runtime_error("Invalid positions wave"));
 	}
 	
@@ -336,29 +336,26 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 		singlePosition.integral = value[0];
 		indices[1] = 2;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.width = value[0];
+		singlePosition.xPosition = value[0];
 		indices[1] = 3;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.xPosition = value[0];
+		singlePosition.yPosition = value[0];
 		indices[1] = 4;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.yPosition = value[0];
+		singlePosition.background = value[0];
 		indices[1] = 5;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.background = value[0];
+		singlePosition.integralDeviation = value[0];
 		indices[1] = 6;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.integralDeviation = value[0];
+		singlePosition.xPositionDeviation = value[0];
 		indices[1] = 7;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.xPositionDeviation = value[0];
+		singlePosition.yPositionDeviation = value[0];
 		indices[1] = 8;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.yPositionDeviation = value[0];
-		indices[1] = 9;
-		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.backgroundDeviation = value[0];
-		indices[1] = 10;
+		indices[1] = 9;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.nFramesPresent = value[0];
 		
@@ -372,7 +369,7 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(Dat
 	waveHndl outputWave;
 	size_t nPositions = this->positionsVector.size();
 	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 11;	// magic number
+	dimensionSizes[1] = 10;	// magic number
 	dimensionSizes[2] = 0;
 	
 	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
@@ -391,30 +388,27 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(Dat
 		value[0] = this->positionsVector.at(i).integral;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).width;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
 		value[0] = this->positionsVector.at(i).xPosition;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
+		indices[1] = 3;
 		value[0] = this->positionsVector.at(i).yPosition;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
+		indices[1] = 4;
 		value[0] = this->positionsVector.at(i).background;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 6;
+		indices[1] = 5;
 		value[0] = this->positionsVector.at(i).integralDeviation;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 7;
+		indices[1] = 6;
 		value[0] = this->positionsVector.at(i).xPositionDeviation;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 8;
+		indices[1] = 7;
 		value[0] = this->positionsVector.at(i).yPositionDeviation;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 9;
+		indices[1] = 8;
 		value[0] = this->positionsVector.at(i).backgroundDeviation;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 10;
+		indices[1] = 9;
 		value[0] = this->positionsVector.at(i).nFramesPresent;
 		err = MDSetNumericWavePointValue(outputWave, indices, value);
 	}
@@ -451,7 +445,6 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
-	outputFile << "Fitted PSF standard deviation (pixel)" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
 	outputFile << "Background" << "\t";
@@ -465,7 +458,6 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	for (std::vector<LocalizedPosition_2DGaussFixedWidth>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
 		outputFile << (*it).frameNumber << "\t";
 		outputFile << (*it).integral << "\t";
-		outputFile << (*it).width << "\t";
 		outputFile << (*it).xPosition << "\t";
 		outputFile << (*it).yPosition << "\t";
 		outputFile << (*it).background << "\t";

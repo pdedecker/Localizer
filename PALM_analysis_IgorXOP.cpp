@@ -542,8 +542,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		initial_width = 2;
 	}
 	
-	if (method != 2)
-		analysisOptionsStream << "GAUSSIAN WIDTH:" << initial_width << ';';
+	if (method != LOCALIZATION_METHOD_CENTROID)
+		analysisOptionsStream << "PSF WIDTH:" << initial_width << ';';
 	
 	if (p->SFlagEncountered) {
 		// Parameter: p->sigma
