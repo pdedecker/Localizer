@@ -49,7 +49,9 @@ public:
 	PALMAnalysisController(boost::shared_ptr<ThresholdImage> thresholder_rhs,
 						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
+						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
+						   boost::shared_ptr<ParticleVerifier> particleVerifier_rhs,
+						   boost::shared_ptr<FitPositions> fitPositions_rhs,
 						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
 	~PALMAnalysisController() {;}
 	
@@ -71,6 +73,7 @@ protected:
 	boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
 	boost::shared_ptr<ParticleFinder> particleFinder;
+	boost::shared_ptr<ParticleVerifier> particleVerifier;
 	boost::shared_ptr<FitPositions> fitPositions;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 	

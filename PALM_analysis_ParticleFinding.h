@@ -11,6 +11,7 @@
 #define PALM_ANALYSIS_PARTICLEFINDING_H
 
 #include "PALM_analysis_storage.h"
+#include "PALM_analysis_Localization.h"
 #include "boost/smart_ptr.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <list>
@@ -76,6 +77,57 @@ public:
 protected:
 	void growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image);
 	
+};
+
+/**
+ * @brief An abstract base class from which all other 'particle verifer' classes must derive
+ * 
+ * This family of classes accepts lists of particles, derived from the segmented image, and the image itself and attempts to verify if these
+ * positions are eligible as single emitters.
+ */
+class ParticleVerifier {
+public:
+	ParticleVerifier() {;}
+	virtual ~ParticleVerifier() {;}
+	
+	/**
+	 * Verify the positions. Does not return anything, but rather directly deletes elements from positions if not eligible
+	 */
+	virtual void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) = 0;
+protected:
+};
+
+
+/**
+ * Verify the particles by seeing if they pass the fitting of a FitPositions_SymmetricGaussian class
+ */
+class ParticleVerifier_SymmetricGaussian : public ParticleVerifier {
+public:
+	ParticleVerifier_SymmetricGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_SymmetricGaussian(initialPSFWidth_rhs, sigma_rhs)) {}
+	~ParticleVerifier_SymmetricGaussian() {;}
+	
+	
+	void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+		verifier.fit_positions(image, positions, positions->begin(), positions->end());
+	}
+protected:
+	FitPositions_SymmetricGaussian verifier;
+};
+
+/**
+ * Verify the particles by seeing if they pass the fitting of a FitPositions_EllipsoidalGaussian class
+ */
+class ParticleVerifier_EllipsoidalGaussian : public ParticleVerifier {
+public:
+	ParticleVerifier_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian(initialPSFWidth_rhs, sigma_rhs)) {}
+	~ParticleVerifier_EllipsoidalGaussian() {;}
+	
+	
+	void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+		verifier.fit_positions(image, positions, positions->begin(), positions->end());
+	}
+protected:
+	FitPositions_EllipsoidalGaussian verifier;
 };
 
 #endif

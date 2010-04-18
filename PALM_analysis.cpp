@@ -26,15 +26,18 @@ boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding
 }
 
 
-PALMAnalysisController::PALMAnalysisController(boost::shared_ptr<ThresholdImage> thresholder_rhs,
-											   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
-											   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-											   boost::shared_ptr<ParticleFinder> particleFinder_rhs, boost::shared_ptr<FitPositions> fitPositions_rhs,
-											   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
+PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage> thresholder_rhs,
+												boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+												boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+												boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
+												boost::shared_ptr<ParticleVerifier> particleVerifier_rhs,
+												boost::shared_ptr<FitPositions> fitPositions_rhs,
+												boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
 	particleFinder = particleFinder_rhs;
+	particleVerifier = particleVerifier_rhs;
 	fitPositions = fitPositions_rhs;
 	progressReporter = progressReporter_rhs;
 	
@@ -170,9 +173,16 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			
 			// we need to process the image with index currentImageToProcess
 			currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
+			
 			thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 															  controller->thresholdImagePostprocessor);
+			
 			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
+			
+			// if the located particles are to be verified before fitting then do so
+			if (controller->particleVerifier.get() != NULL)
+				controller->particleVerifier->VerifyParticles(currentImage, locatedParticles);
+			
 			localizedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
 			
 			// the localization routines have no idea what frame number the processed frame was
