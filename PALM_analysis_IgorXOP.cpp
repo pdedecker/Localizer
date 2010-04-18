@@ -42,6 +42,11 @@ struct AnalyzePALMImagesRuntimeParams {
 	double particle_finder;
 	int FFlagParamsSet[1];
 	
+	// Parameters for /PVER flag group.
+	int PVERFlagEncountered;
+	double particleVerifier;
+	int PVERFlagParamsSet[1];
+	
 	// Parameters for /T flag group.
 	int TFlagEncountered;
 	double treshold_parameter;
@@ -280,6 +285,11 @@ struct TestThresholdRuntimeParams {
 	double particle_finder;
 	int FFlagParamsSet[1];
 	
+	// Parameters for /PVER flag group.
+	int PVERFlagEncountered;
+	double particleVerifier;
+	int PVERFlagParamsSet[1];
+	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
 	double radiusBetweenParticles;
@@ -427,7 +437,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	std::string data_file_path;
 	size_t camera_type;
 	int method;
-	int particle_finding_method;
+	int particle_finding_method, particleVerifierMethod;
 	int fitting_positions_supplied_in_wave = 0;	// determines if we have to determine the positions to fit in ourselves, or if we can read them from the wave
 	long numDimensions;
 	long dimensionSizes[MAX_DIMENSIONS + 1];
@@ -451,6 +461,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particle_finder;
+	boost::shared_ptr<ParticleVerifier> particleVerifier;
 	boost::shared_ptr<PALMAnalysisController> analysisController;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
@@ -504,6 +515,23 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		analysisOptionsStream << "PARTICLE FINDING METHOD:" << particle_finding_method << ';';
 	} else {
 		return TOO_FEW_PARAMETERS;
+	}
+	
+	if (p->PVERFlagEncountered) {
+		// Parameter: p->particleVerifier
+		if (p->particleVerifier < 0)
+			return EXPECT_POS_NUM;
+		particleVerifierMethod = p->particleVerifier;
+		
+		if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
+			// there's no need to fit the same positions with the same algorithm twice, drop the verification
+			particleVerifierMethod = PARTICLEVERIFIER_NONE;
+		} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
+			particleVerifierMethod = PARTICLEVERIFIER_NONE;
+		}
+		
+	} else {
+		particleVerifierMethod = PARTICLEVERIFIER_NONE;
 	}
 	
 	if (p->TFlagEncountered) {
@@ -722,6 +750,22 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				break;
 		}
 		
+		// what particle verification do we wish to use?
+		switch (particleVerifierMethod) {
+			case PARTICLEVERIFIER_NONE:
+				particleVerifier = boost::shared_ptr<ParticleVerifier>();
+				break;
+			case PARTICLEVERIFIER_SYMMETRICGAUSS:
+				particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma));
+				break;
+			case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+				particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma));
+				break;
+			default:
+				throw std::runtime_error("Unknown particle verifying method");
+				break;
+		}
+		
 		// which localization method do we wish to use?
 		if (p->MFlagEncountered) {
 			switch (method) {
@@ -755,7 +799,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		}
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
-																								   postprocessor, particle_finder, positions_fitter,
+																								   postprocessor, particle_finder, particleVerifier,
+																								   positions_fitter,
 																								   progressReporter));
 		
 		localizedPositions = analysisController->DoPALMAnalysis(image_loader);
@@ -1238,7 +1283,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	size_t method;
-	size_t preprocessing_method, postprocessing_method;
+	size_t preprocessing_method, postprocessing_method, particleVerifierMethod;
 	size_t particle_finding_method;
 	size_t offset;
 	int output_located_particles;
@@ -1263,6 +1308,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particlefinder;
+	boost::shared_ptr<ParticleVerifier> particleVerifier;
 	
 	
 	// Flag parameters.
@@ -1292,8 +1338,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		PSFWidth = p->PSFWidth;
 		if (PSFWidth <= 0)
 			return EXPECT_POS_NUM;
-	} else if (method == THRESHOLD_METHOD_GLRT)
-		return TOO_FEW_PARAMETERS;
+	} else
+		PSFWidth = 2.0;
 	
 	if (p->GFlagEncountered) {
 		// Parameter: p->preprocessing
@@ -1321,6 +1367,15 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			return TOO_FEW_PARAMETERS;
 	}
 	
+	if (p->PVERFlagEncountered) {
+		// Parameter: p->particleVerifier
+		if (p->particleVerifier < 0)
+			return EXPECT_POS_NUM;
+		particleVerifierMethod = p->particleVerifier;
+	} else {
+		particleVerifierMethod = 0;
+	}
+	
 	if (p->RFlagEncountered) {
 		// Parameter: p->radiusBetweenParticles
 		radiusBetweenParticles = p->radiusBetweenParticles;
@@ -1332,8 +1387,6 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}
-			
-		
 	
 	// Main parameters.
 	
@@ -1447,6 +1500,22 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 					throw std::runtime_error("Unknown particle finding method");
 					break;
 			}
+			
+			// do we also want to do particle verification?
+			switch (particleVerifierMethod) {
+				case PARTICLEVERIFIER_NONE:
+					particleVerifier = boost::shared_ptr<ParticleVerifier>();
+					break;
+				case PARTICLEVERIFIER_SYMMETRICGAUSS:
+					particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0));
+					break;
+				case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+					particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1.0));
+					break;
+				default:
+					throw std::runtime_error("Unknown particle verifying method");
+					break;
+			}
 		}
 		
 		
@@ -1478,6 +1547,9 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// if it is requested then output the positions
 		if (output_located_particles == 1) {
 			located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
+			
+			if (particleVerifierMethod != PARTICLEVERIFIER_NONE)
+				particleVerifier->VerifyParticles(CCD_Frame, located_particles);
 			
 			long dimensionSizes[MAX_DIMENSIONS+1];
 			long indices[MAX_DIMENSIONS];
@@ -1803,7 +1875,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER=number:particleVerifier /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);
@@ -1851,7 +1923,7 @@ static int RegisterTestThreshold(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the TestThresholdRuntimeParams structure as well.
-	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER=number:particleVerifier /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(TestThresholdRuntimeParams), (void*)ExecuteTestThreshold, 0);

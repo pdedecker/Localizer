@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
 		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
+		("particleverifier", po::value<std::string>()->default_value("none"), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
 		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
 	std::string postprocessingName = vm["postprocessing"].as<std::string>();
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
+	std::string particleVerifierName = vm["particleverifier"].as<std::string>();
 	std::string localizationName = vm["localization"].as<std::string>();
 	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
 	
@@ -86,6 +88,9 @@ int main(int argc, char *argv[]) {
 	// get the particle finder
 	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
 	
+	// get the positions verifier
+	boost::shared_ptr<ParticleVerifier> particleVerifier = GetParticleVerifierType(particleVerifierName, psfWidth, 1.0);
+	
 	// get the positions fitter
 	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
 	
@@ -94,8 +99,9 @@ int main(int argc, char *argv[]) {
 	
 	// get an analysis controller
 	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
-																							   postprocessor, particleFinder, positionsFitter,
-																							   progressReporter));
+																							postprocessor, particleFinder, particleVerifier,
+																							positionsFitter,
+																							progressReporter));
 	// run the PALM analysis for every input file
 	size_t nInputFiles = inputFiles.size();
 	if (nInputFiles == 0)
@@ -208,6 +214,21 @@ boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name) {
 	// if we get here then we didn't recognize the particlefinder
 	throw std::runtime_error("Unknown particle finding algorithm");
 }
+
+boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma) {
+	if (name == std::string("none"))
+		return boost::shared_ptr<ParticleVerifier>();
+	
+	if (name == std::string("symmetric2dgauss"))
+		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_SymmetricGaussian(psfWidth, sigma));
+	
+	if (name == std::string("ellipsoidal2dgauss"))
+		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_EllipsoidalGaussian(psfWidth, sigma));
+	
+	// if we get here then we didn't recognize the particleverifier
+	throw std::runtime_error("Unknown particle verification algorithm");
+}
+	
 
 boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth) {
 	double sigma = 1;
