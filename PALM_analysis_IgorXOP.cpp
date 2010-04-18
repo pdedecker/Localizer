@@ -1323,7 +1323,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	if (p->RFlagEncountered) {
 		// Parameter: p->radiusBetweenParticles
 		radiusBetweenParticles = p->radiusBetweenParticles;
-		if ((radiusBetweenParticles <= 0) && (particle_finding_method = 0)) {
+		if ((radiusBetweenParticles <= 0) && (particle_finding_method == PARTICLEFINDER_RADIUS)) {
 			return EXPECT_POS_NUM;
 		}
 	} else {
