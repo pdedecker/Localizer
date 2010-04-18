@@ -417,6 +417,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -452,23 +454,31 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the reported positions within the window?
 		if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
 			// the reported positions are not within the window, we should reject them
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -589,6 +599,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -625,18 +637,24 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the reported positions within the window?
 		if ((gsl_vector_get(fit_iterator->x, 1) < x_offset) || (gsl_vector_get(fit_iterator->x, 1) > x_max) || (gsl_vector_get(fit_iterator->x, 2) < y_offset) || (gsl_vector_get(fit_iterator->x, 2) > y_max)) {
 			// the reported positions are not within the window, we should reject them
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -755,6 +773,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
 			// we cannot include it
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -792,29 +812,39 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		} while ((status == GSL_CONTINUE) && (iterations < 200));
 		
 		if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the reported positions within the window?
 		if ((gsl_vector_get(fit_iterator->x, 3) < x_offset) || (gsl_vector_get(fit_iterator->x, 3) > x_max) || (gsl_vector_get(fit_iterator->x, 4) < y_offset) || (gsl_vector_get(fit_iterator->x, 4) > y_max)) {
 			// the reported positions are not within the window, we should reject them
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the fit results close enough to the initial values to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		// are the standard deviations in the x and y direction close enough?
 		if ((0.75 * gsl_vector_get(fit_iterator->x, 1) > gsl_vector_get(fit_iterator->x, 2)) || (1.25 * gsl_vector_get(fit_iterator->x, 1) < gsl_vector_get(fit_iterator->x, 2))) {
 			// the standard deviations in x and y differ by more than 25%, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
 		if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -911,6 +941,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
@@ -1050,6 +1082,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		y_max = floor(y0_initial + (double)cutoff_radius);
 		
 		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// the point is too close to the edge
+			positions->erase(it);
+			--it;
 			continue;
 		}
 		
