@@ -12,7 +12,8 @@
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
 
-#include "PALM_analysis.h"
+#include <list>
+#include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_storage.h"
 #include "boost/smart_ptr.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
@@ -129,36 +130,6 @@ public:
 	
 protected:
 	size_t cutoff_radius;
-};
-
-/**
- * @brief A higher-level positions fitter that implements deflation, but needs another FitPositions to do the actual fitting work
- *
- * Deflation is the idea that fitted positions can be effectively subtracted from the image to reveal other underlying emitters that were obscured
- * at first. The validity of this approach is open to debate, however, some papers in the literature make use of this approach.
- * This class does no fitting by itself, it merely takes another FitPositions as well as all the classes required for segmentation.
- * The process is iterative: the class will keep running localize-deflate circles until no more positions are recovered.
- * The returned positions will contain all positions localized, both originally and after deflation.
- */
-class FitPositionsDeflate : public FitPositions {
-public:
-	FitPositionsDeflate(boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor_rhs, boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor_rhs,
-						boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
-						boost::shared_ptr<FitPositions> positionsFitter_rhs) {
-		preprocessor = preprocessor_rhs; postprocessor = postprocessor_rhs; thresholder = thresholder_rhs; positionsFitter = positionsFitter_rhs; positionsFitter = positionsFitter_rhs;}
-	
-	~FitPositionsDeflate() {;}
-	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt);
-	
-protected:
-	boost::shared_ptr<ublas::matrix<double> > subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions);
-	
-	boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
-	boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor;
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ParticleFinder> particleFinder;
-	boost::shared_ptr<FitPositions> positionsFitter;
 };
 
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
