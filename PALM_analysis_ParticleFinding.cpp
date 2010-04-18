@@ -9,8 +9,8 @@
 
 #include "PALM_analysis_ParticleFinding.h"
 
-boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
-	boost::shared_ptr<std::vector<position> > positions (new std::vector<position>());
+boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+	boost::shared_ptr<std::list<position> > positions (new std::list<position>());
 	position currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
 	size_t x_size = image->size1(), y_size = image->size2();
@@ -41,19 +41,19 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 			// if we are still here then we need to take a closer look at this point
 			// check if the current point overlaps with a previous point
 			number_of_positions = positions->size();
-			for (size_t k = 0; k < number_of_positions; k++) {
-				x = (*positions)[k].get_x();
-				y = (*positions)[k].get_y();
+			for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
+				x = (*it).get_x();
+				y = (*it).get_y();
 				distance_squared = (current_x - x) * (current_x - x) + (current_y - y) * (current_y - y);
 				
 				if (distance_squared < radius_squared) {
 					// we need to skip one of the two pixels that we are comparing
 					// we will keep the pixel with the largest intensity
-					previous_intensity = (*positions)[k].get_intensity();
+					previous_intensity = (*it).get_intensity();
 					if (current_intensity > previous_intensity) {
-						(*positions)[k].set_intensity(current_intensity);
-						(*positions)[k].set_x(current_x);
-						(*positions)[k].set_y(current_y);
+						(*it).set_intensity(current_intensity);
+						(*it).set_x(current_x);
+						(*it).set_y(current_y);
 					}
 					continue;
 				}
@@ -70,7 +70,7 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// update the amplitudes/intensities on all of the positions
-	for (std::vector<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
+	for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
 		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
 		(*it).set_background(backgroundIntensity);
 	}
@@ -80,9 +80,9 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_radius::findPositions(b
 }
 
 
-boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
 	
-	boost::shared_ptr<std::vector<position> > particles (new std::vector<position>());
+	boost::shared_ptr<std::list<position> > particles (new std::list<position>());
 	std::list<position> positionsInCurrentParticleList;
 	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
@@ -175,7 +175,7 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent4::findPosition
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// update the amplitudes/intensities on all of the positions
-	for (std::vector<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
+	for (std::list<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
 		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
 		(*it).set_background(backgroundIntensity);
 	}
@@ -265,12 +265,12 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<p
 }
 
 
-boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
 	
 	std::list<position> positionsInCurrentParticleList;
 	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
-	boost::shared_ptr<std::vector<position> > particles(new std::vector<position>);
+	boost::shared_ptr<std::list<position> > particles(new std::list<position>);
 	boost::shared_ptr<ublas::matrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
 	size_t x_size = image->size1();
 	size_t y_size = image->size2();
@@ -361,7 +361,7 @@ boost::shared_ptr<std::vector<position> > ParticleFinder_adjacent8::findPosition
 	backgroundIntensity /= (double)nBackgroundPixels;
 	
 	// update the amplitudes/intensities on all of the positions
-	for (std::vector<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
+	for (std::list<position>::iterator it = particles->begin(); it != particles->end(); ++it) {
 		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
 		(*it).set_background(backgroundIntensity);
 	}

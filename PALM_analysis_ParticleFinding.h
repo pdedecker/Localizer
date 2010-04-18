@@ -31,7 +31,7 @@ public:
 	ParticleFinder() {;}
 	virtual ~ParticleFinder() {;}
 	
-	virtual boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) = 0;
+	virtual boost::shared_ptr<std::list<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) = 0;
 protected:
 };
 
@@ -43,7 +43,7 @@ public:
 	ParticleFinder_radius(double radius_rhs) {radius = radius_rhs;}
 	~ParticleFinder_radius() {;}
 	
-	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::list<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
 protected:
 	double radius;
 };
@@ -56,7 +56,7 @@ public:
 	ParticleFinder_adjacent4() {;}
 	~ParticleFinder_adjacent4() {;}
 	
-	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::list<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
 	
 protected:
 	void growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image);
@@ -71,7 +71,7 @@ public:
 	ParticleFinder_adjacent8() {;}
 	~ParticleFinder_adjacent8() {;}
 	
-	boost::shared_ptr<std::vector<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
+	boost::shared_ptr<std::list<position> > findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image);
 	
 protected:
 	void growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image);

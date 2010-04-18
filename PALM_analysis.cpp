@@ -1323,7 +1323,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
 	boost::shared_ptr<ublas::matrix<double> > currentImage;
 	boost::shared_ptr<ublas::matrix <unsigned char> > thresholdedImage;
-	boost::shared_ptr<std::vector<position> > locatedParticles;
+	boost::shared_ptr<std::list<position> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	try {

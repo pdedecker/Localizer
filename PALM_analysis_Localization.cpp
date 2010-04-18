@@ -328,36 +328,24 @@ int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *m
 	return GSL_SUCCESS;
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions) {
-	size_t startPosition, endPosition;
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+	std::list<position>::iterator startPosition, endPosition;
 	
-	startPosition = 0;
-	endPosition = positions->size() - 1;
+	startPosition = positions->begin();
+	endPosition = positions->end();
 	
 	return fit_positions(image, positions, startPosition, endPosition);
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
-																					   size_t startPos, size_t endPos) {
-	
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
+																							 boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
+																			
 	// some safety checks
 	if (positions->size() == 0) {
 		// if no positions were found then there is no reason to run the analysis
 		// we need to catch this here and not upstream since then we can return an appropriate
 		// instance of LocalizedPositionsContainer
 		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
-	}
-	
-	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositions_SymmetricGaussian::fit_positions";
-		throw std::range_error(error);
-	}
-	
-	if (startPos > endPos) {
-		std::string error;
-		error = "Start is beyond end in FitPositions_SymmetricGaussian::fit_positions";
-		throw std::range_error(error);
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -414,13 +402,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	
 	
 	// iterate over all the determined positions
-	for (size_t i = startPos; i <= endPos; i++) {
+	for (std::list<position>::iterator it = startIt; it != endIt; ++it) {
 		iterations = 0;
 		
-		amplitude = (*positions)[i].get_intensity();
-		x0_initial = (*positions)[i].get_x();
-		y0_initial = (*positions)[i].get_y();
-		background = (*positions)[i].get_background();
+		amplitude = (*it).get_intensity();
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
+		background = (*it).get_background();
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -521,8 +509,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
-																								  size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
+																							  boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -530,18 +518,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		// we need to catch this here and not upstream since then we can return an appropriate
 		// instance of LocalizedPositionsContainer
 		return boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> (new LocalizedPositionsContainer_2DGaussFixedWidth());
-	}
-	
-	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
-	}
-	
-	if (startPos > endPos) {
-		std::string error;
-		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -598,13 +574,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	
 	
 	// iterate over all the determined positions
-	for (size_t i = startPos; i <= endPos; i++) {
+	for (std::list<position>::iterator it = startIt; it != endIt; ++it) {
 		iterations = 0;
 		
-		amplitude = (*positions)[i].get_intensity();
-		x0_initial = (*positions)[i].get_x();
-		y0_initial = (*positions)[i].get_y();
-		background = (*positions)[i].get_background();
+		amplitude = (*it).get_intensity();
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
+		background = (*it).get_background();
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -700,8 +676,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions,
-															 size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
+																							   boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -709,18 +685,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		// we need to catch this here and not upstream since then we can return an appropriate
 		// instance of LocalizedPositionsContainer
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
-	}
-	
-	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
-	}
-	
-	if (startPos > endPos) {
-		std::string error;
-		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -775,14 +739,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	
 	
 	// iterate over all the determined positions
-	for (size_t i = startPos; i <= endPos; i++) {
+	for (std::list<position>::iterator it = startIt; it != endIt; ++it) {
 		iterations = 0;
 		
-		amplitude = (*positions)[i].get_intensity();
-		x0_initial = (*positions)[i].get_x();
-		y0_initial = (*positions)[i].get_y();
+		amplitude = (*it).get_intensity();
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
 		correlation_initial = 0.0;
-		background = (*positions)[i].get_background();
+		background = (*it).get_background();
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -900,8 +864,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
-																							 size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
+																						 boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -909,18 +873,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 		// we need to catch this here and not upstream since then we can return an appropriate
 		// instance of LocalizedPositionsContainer
 		return boost::shared_ptr<LocalizedPositionsContainer_Multiplication> (new LocalizedPositionsContainer_Multiplication());
-	}
-	
-	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
-	}
-	
-	if (startPos > endPos) {
-		std::string error;
-		error = "Start is beyond end in FitPositionsGaussian::fit_positions";
-		throw std::range_error(error);
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -947,11 +899,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	image_subset = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(size_of_subset, size_of_subset));
 	image_subset_mask = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(size_of_subset, size_of_subset));
 	
-	for (size_t i = startPos; i <= endPos; ++i) {
-		amplitude = (*positions)[i].get_intensity();
-		x0_initial = (*positions)[i].get_x();
-		y0_initial = (*positions)[i].get_y();
-		background = (*positions)[i].get_background();
+	for (std::list<position>::iterator it = startIt; it != endIt; ++it) {
+		amplitude = (*it).get_intensity();
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
+		background = (*it).get_background();
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -1063,8 +1015,8 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<ublas::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, 
-																					   size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
+																				   boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -1072,18 +1024,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		// we need to catch this here and not upstream since then we can return an appropriate
 		// instance of LocalizedPositionsContainer
 		return boost::shared_ptr<LocalizedPositionsContainer_Centroid> (new LocalizedPositionsContainer_Centroid());
-	}
-	
-	if ((endPos >= positions->size()) || (startPos >= positions->size())) {
-		std::string error;
-		error = "Requested start and end positions are outside the range of positions supplied in FitPositionsCentroid::fit_positions";
-		throw std::range_error(error);
-	}
-	
-	if (startPos > endPos) {
-		std::string error;
-		error = "Start is beyond end in FitPositionsCentroid::fit_positions";
-		throw std::range_error(error);
 	}
 	
 	size_t xSize = image->size1();
@@ -1097,9 +1037,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	boost::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
 	boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
 	
-	for (size_t i = startPos; i <= endPos; ++i) {
-		x0_initial = (*positions)[i].get_x();
-		y0_initial = (*positions)[i].get_y();
+	for (std::list<position>::iterator it = startIt; it != endIt; ++it) {
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
 		current_x = 0;
 		current_y = 0;
 		denominator = 0;
@@ -1133,14 +1073,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	return fitted_positions;
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::vector<position> > positions, size_t startPos, size_t endPos) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
 	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
 	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
 	boost::shared_ptr<ublas::matrix<double> > subtractedImage;
 	boost::shared_ptr<ublas::matrix <unsigned char> > segmentedImage;
-	boost::shared_ptr<std::vector<position> > locatedParticles;
+	boost::shared_ptr<std::list<position> > locatedParticles;
 	
 	// get an initial set of positions to start from
 	positionsFittedThusFar = this->positionsFitter->fit_positions(image, positions);
