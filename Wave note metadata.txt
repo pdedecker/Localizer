@@ -40,6 +40,9 @@ The method used to convert the binary thresholded image to a list of (x,y) posit
 	8a. MINIMUM DISTANCE BETWEEN PARTICLES:<double>
 	The minimum distance allowed for two active pixels to be considered as belonging to different particles
 
+12. PARTICLE VERIFICATION:<integer>
+The method used to verify that a particular spot is likely to be a single emitter.
+
 12. GAUSSIAN WIDTH:<double>
 The initial guess for the standard deviation of the point-spread function, provided by the user. Used by the GLRT thresholding method and most of the localization routines.
 

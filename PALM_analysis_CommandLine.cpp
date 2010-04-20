@@ -133,6 +133,10 @@ int main(int argc, char *argv[]) {
 			header << "Y SIZE:" << imageLoader->getYSize() << "\n";
 			header << "PFA:" << pfa << "\n";
 			header << "PSF WIDTH:" << psfWidth << "\n";
+			header << "THRESHOLD METHOD:" << segmentationName << "\n";
+			header << "PARTICLE FINDING:" << particleFinderName << "\n";
+			header << "PARTICLE VERIFIER:" << particleVerifierName << "\n";
+			header << "LOCALIZATION METHOD:" << localizationName << "\n";
 			
 			// write the output
 			fittedPositions->writePositionsToFile(outputFilePath, header.str());
