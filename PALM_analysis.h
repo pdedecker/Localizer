@@ -145,13 +145,10 @@ public:
 	PALMAnalysisProgressReporter_stdout() {;}
 	~PALMAnalysisProgressReporter_stdout() {;}
 	
-	void CalculationStarted() {previousPercentage = 0; std::cout << "Running calculation... "; std::cout.flush();}
-	void UpdateCalculationProgress(double percentDone);
-	void CalculationDone() {std::cout << "Calculation finished!\n"; std::cout.flush();}
-	void CalculationAborted() {std::cout << "Abort requested by user\n"; std::cout.flush();}
-	
-protected:
-	double previousPercentage;
+	void CalculationStarted() {std::cout << "Running calculation... "; std::cout.flush();}
+	void UpdateCalculationProgress(double percentDone) {printf("\rRunning calculation... %4.1f%%", percentDone); std::cout.flush();}
+	void CalculationDone() {std::cout << "\rRunning calculation... Finished!\n"; std::cout.flush();}
+	void CalculationAborted() {std::cout << " Abort requested by user\n"; std::cout.flush();}
 };
 
 /**

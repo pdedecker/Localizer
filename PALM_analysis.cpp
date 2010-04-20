@@ -242,14 +242,6 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 }
 #endif // WITH_IGOR
 
-void PALMAnalysisProgressReporter_stdout::UpdateCalculationProgress(double percentDone) {
-	if (percentDone - previousPercentage > 10.0) {
-		previousPercentage = floor(percentDone / 10.0) * 10.0;
-		std::cout << previousPercentage << "% ";
-		std::cout.flush();
-	}
-}
-
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
