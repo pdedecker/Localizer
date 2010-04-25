@@ -454,64 +454,77 @@ void ImageLoaderAndor::parse_header_information() {
 	size_t xBinning, yBinning;
 	size_t frameXSize, frameYSize;
 	size_t xStart, yStart, xEnd, yEnd;
+	int result;
 	boost::scoped_array<char> headerBuffer(new char[60001]);
+	boost::scoped_array<char> singleLineBuffer(new char[4096]);
+	std::string singleLine;
 	
 	storage_type = STORAGE_TYPE_FP32;
 	
-	file.read(headerBuffer.get(), 60000);
-	headerBuffer[60000] = '\0';	// NULL-terminate the string
+	this->file.read(headerBuffer.get(), 60001);
+	if (this->file.good() != 1)
+		throw std::runtime_error(std::string("Error encountered assuming the Andor format on the file at ") + this->filePath);
 	
-	for (int i = 0; i < 1000; ++i) {	// make sure that there are not intermediate NULL characters
+	headerBuffer[60000] = '\0';
+	// look for and replace any intermediate nul characters
+	for (int i = 0; i < 60000; ++i) {	// make sure that there are no intermediate NULL characters
 		if (headerBuffer[i] == '\0') {
 			headerBuffer[i] = '1';
 		}
 	}
 	
-	std::string headerString(headerBuffer.get());
-	std::stringstream ss(headerString, std::ios::in);
+	std::stringstream ss(headerBuffer.get(), std::ios::in);
+	ss.getline(singleLineBuffer.get(), 4096);
+	singleLine = singleLineBuffer.get();
 	
-	// the important information on the measurement is on lines 22 and 23 (numbered from 1)
-	for (int i = 0; i < 21; ++i) {
-		ss.getline(headerBuffer.get(), 1024);
+	if (singleLine.find("Andor Technology Multi-Channel File") == std::string::npos) {
+		throw std::runtime_error(std::string("the file at ") + this->filePath + "does not appear to be an Andor data file");
 	}
 	
-	// get the first information
-	temp = ss.tellg();
-	ss.seekg(temp + 12);	// skip the "Pixel number"
-	ss >> temp;	// extracts "65538"
-	ss >> temp;	// extracts "1"
-	ss >> frameYSize;
-	ss >> frameXSize;
-	ss >> temp;	// extracts "1"
-	ss >> total_number_of_images;
-	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
+	for (size_t i = 0;; ++i) {
+		ss.getline(singleLineBuffer.get(), 4096);
+		singleLine = singleLineBuffer.get();
+		if ((ss.eof() == 1) || (ss.fail() == 1))
+			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+		if (singleLine.find("Pixel number65") != std::string::npos) {
+			// this is the first line containing info required to read the data
+			break;
+		}
+	}
 	
-	ss >> temp;	// extracts "65538"
-	ss >> xStart;
-	ss >> yEnd;
-	ss >> xEnd;
-	ss >> yStart;
-	ss >> xBinning;
-	ss >> yBinning;
-	ss.getline(headerBuffer.get(), 1024);	// discard the rest of the line
+	result = sscanf(singleLine.c_str(), "Pixel number%zu 1 %zu %zu 1 %zu", &temp, &frameYSize, &frameXSize, &this->total_number_of_images);
+	if (result != 4)
+		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
-	x_size = (xEnd - xStart + 1) / xBinning;
-	y_size = (yEnd - yStart + 1) / yBinning;	// integer division
+	ss.getline(singleLineBuffer.get(), 4096);
+	singleLine = singleLineBuffer.get();
+	
+	
+	result = sscanf(singleLine.c_str(), "%zu %zu %zu %zu %zu %zu %zu", &temp, &xStart, &yEnd, &xEnd, &yStart, &xBinning, &yBinning);
+	if (result != 7)
+		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
+	
+	this->x_size = (xEnd - xStart + 1) / xBinning;
+	this->y_size = (yEnd - yStart + 1) / yBinning;	// integer division
 	
 	// now there are some lines that may contain timestamps. There are as many lines as there are images
 	for (size_t i = 0;  i < total_number_of_images; i++) {
-		ss.getline(headerBuffer.get(), 1024);
+		ss.getline(singleLineBuffer.get(), 4096);
 	}
 	
-	header_length = ss.tellg();
+	this->header_length = ss.tellg();
+	
+	// the line after this may be a single line containing just a zero without any spaces
+	// in that case add it to the header offset
+	ss.getline(singleLineBuffer.get(), 4096);
+	singleLine = singleLineBuffer.get();
+	if (singleLine == "0") {
+		this->header_length = ss.tellg();
+	}
 	
 	// did some error happen while reading the file?
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error parsing the header information in \"";
-		error += this->filePath;
-		error += "\" assuming the Andor format";
-		throw ERROR_READING_FILE_DATA(error);
+	if (ss.bad() == 1) {
+		throw ERROR_READING_FILE_DATA(std::string("Error parsing the header information in \"") + this->filePath + "\" assuming the Andor format");
 	}
 }
 

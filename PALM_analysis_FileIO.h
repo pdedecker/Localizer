@@ -15,6 +15,7 @@
 #include <sstream>
 #include <queue>
 #include <list>
+#include <string>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_defines.h"
