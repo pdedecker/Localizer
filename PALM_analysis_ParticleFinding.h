@@ -108,7 +108,7 @@ public:
 	
 	
 	void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
-		verifier.fit_positions(image, positions, positions->begin(), positions->end());
+		verifier.fit_positions(image, positions);
 	}
 protected:
 	FitPositions_SymmetricGaussian verifier;
@@ -124,7 +124,7 @@ public:
 	
 	
 	void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
-		verifier.fit_positions(image, positions, positions->begin(), positions->end());
+		verifier.fit_positions(image, positions);
 	}
 protected:
 	FitPositions_EllipsoidalGaussian verifier;
