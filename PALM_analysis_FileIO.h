@@ -52,9 +52,9 @@ public:
     void open(const char *path_rhs, std::ios_base::openmode mode) {open (path_rhs);}    // for compatibility with the standard library
     
     void close();
-    int fail() {return ferror(fileRef);}    // we will let this class throw exceptions
-    // so if a failure occurs then the code will never be able to check for fail() since control will have passed to the error-handling function
-    // we keep the function anyway since it matches the standard ifstream classes so the class can be swapped in
+	
+    int fail() {return ferror(fileRef);}
+	int good() {return !ferror(fileRef);}
     
     int is_open() {return (fileRef != NULL);}
     
