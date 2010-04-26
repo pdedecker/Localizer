@@ -1081,10 +1081,28 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 		switch (outputType) {
 			case IMAGE_OUTPUT_TYPE_TIFF:
-				output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, image_loader->getStorageType()));
+				// the storage type depends on the method
+				switch (method) {
+					case 0:
+					case 1:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, STORAGE_TYPE_FP32));
+						break;
+					default:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, image_loader->getStorageType()));
+						break;
+				}
 				break;
 			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-				output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, image_loader->getStorageType()));
+				// the storage type depends on the method
+				switch (method) {
+					case 0:
+					case 1:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, STORAGE_TYPE_FP32));
+						break;
+					default:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, image_loader->getStorageType()));
+						break;
+				}
 				break;
 			case IMAGE_OUTPUT_TYPE_IGOR:
 				output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images(), 
