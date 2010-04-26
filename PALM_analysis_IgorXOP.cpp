@@ -1083,8 +1083,8 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			case IMAGE_OUTPUT_TYPE_TIFF:
 				// the storage type depends on the method
 				switch (method) {
-					case 0:
-					case 1:
+					case PROCESSING_AVERAGESUBTRACTION:
+					case PROCESSING_DIFFERENCEIMAGE:
 						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, STORAGE_TYPE_FP32));
 						break;
 					default:
@@ -1095,8 +1095,8 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
 				// the storage type depends on the method
 				switch (method) {
-					case 0:
-					case 1:
+					case PROCESSING_AVERAGESUBTRACTION:
+					case PROCESSING_DIFFERENCEIMAGE:
 						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, STORAGE_TYPE_FP32));
 						break;
 					default:
@@ -1114,16 +1114,16 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 		// do the actual procedure
 		switch (method) {
-			case 0:		// subtract an average from the trace
+			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader.get(), output_writer.get(), 0));
 				break;
-			case 1:		// generate a difference image
+			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader.get(), output_writer.get()));
 				break;
-			case 2:		// convert to a different form (determined by the output writer)
+			case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
 				break;
-			case 3:		// output a cropped version of the image
+			case PROCESSING_CROP:		// output a cropped version of the image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader.get(), output_writer.get(), startX, endX, startY, endY));
 				break;
 			default:
