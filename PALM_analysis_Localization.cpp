@@ -196,10 +196,9 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 	double r = fitDataLocal->width;
 	
 	double amplitude = gsl_vector_get(params, 0);
-	double x0 = gsl_vector_get(params, 2);
-	double y0 = gsl_vector_get(params, 3);
-	// double offset = gsl_vector_get(params, 4);
-	
+	double x0 = gsl_vector_get(params, 1);
+	double y0 = gsl_vector_get(params, 2);
+		
 	double x,y, exp_factor;
 	double dfdA, dfdx0, dfdy0,dfdoffset;
 	
@@ -215,13 +214,11 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 			exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
 			
 			dfdA = exp_factor / sigma;
-			// dfdr = (2 * (y - y0) * (y - y0) / r / r / r + 2 * (x - x0) * (x - x0) / r / r / r) * exp_factor * amplitude / sigma;
 			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
 			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
 			dfdoffset = 1/sigma;
 			
 			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
-			// gsl_matrix_set(jacobian, arrayOffset, 1, dfdr);
 			gsl_matrix_set(jacobian, arrayOffset, 1, dfdx0);
 			gsl_matrix_set(jacobian, arrayOffset, 2, dfdy0);
 			gsl_matrix_set(jacobian, arrayOffset, 3, dfdoffset);
@@ -621,7 +618,6 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 		
 		// provide the initial parameters
 		gsl_vector_set(fit_parameters, 0, amplitude);
-		// gsl_vector_set(fit_parameters, 1, initialPSFWidth * 1.414213562373095);	// because the fitting function is of the form 1/r^2, but standard deviation is 1/(2 r^2), we have to correct by sqrt(2)
 		gsl_vector_set(fit_parameters, 1, x0_initial);
 		gsl_vector_set(fit_parameters, 2, y0_initial);
 		gsl_vector_set(fit_parameters, 3, background);
