@@ -812,6 +812,10 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	catch (int e) {
 		err = e;
 	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
+	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
@@ -927,6 +931,10 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		err = e;
+	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
@@ -1142,6 +1150,10 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		SetOperationNumVar("V_flag", e);
 		return e;
 	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
+	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
@@ -1276,13 +1288,12 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	catch (std::bad_alloc) {
 		return NOMEM;
 	}
-	catch (std::range_error err) {
-		XOPNotice(err.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
 	catch (int e) {
 		return e;
+	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
@@ -1607,6 +1618,10 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	catch (int e) {
 		return e;
 	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
+	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
@@ -1667,6 +1682,10 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	}
 	catch (int e) {
 		return e;
+	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
 	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
@@ -1807,6 +1826,10 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	catch (int e) {
 		return e;
 	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
+	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
@@ -1875,6 +1898,10 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		return PALM_ANALYSIS_XOP_ERROR;
+	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
 	}
 	catch (int e) {
 		return e;
