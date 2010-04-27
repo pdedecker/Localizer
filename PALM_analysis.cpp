@@ -118,7 +118,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 					threads.at(j)->join();
 				}
 				progressReporter->CalculationAborted();
-				throw USER_ABORTED("Analysis aborted on user request");
+				this->localizedPositions->sortPositionsByFrameNumber();
+				return this->localizedPositions;
 			}
 #endif // WITH_IGOR
 			
