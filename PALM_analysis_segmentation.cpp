@@ -882,8 +882,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	boost::shared_ptr<ublas::matrix<double> > null_hypothesis;
 	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved;
 	boost::shared_ptr<ublas::matrix<double> > hypothesis_test;
-	boost::shared_ptr<ublas::matrix<double> > Gaussian_window;
-	
+		
 	size_t window_size = ceil(4 * this->gaussianWidth);
 	if ((window_size % 2) == 0)	// window_size must be odd
 		window_size += 1;
@@ -909,8 +908,6 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	summed_squares->clear();
 	
 	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	
-	Gaussian_window = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	image_Gaussian_convolved = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));	// this is 'alpha' in the original matlab code
 	
@@ -978,19 +975,15 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		gaussianCalculationMutex.lock();	// get a unique lock
 		Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
-		Gaussian_window = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(window_size, window_size));
-		
 		sum = 0;
-		for (size_t i = 0; i < window_size; i++) {
-			for (size_t j = 0; j < window_size; j++) {
-				// the Gaussian is assumed to be in the center of the window
-				distance_x = (double)half_window_size - (double)i;
-				distance_y = (double)half_window_size - (double)j;
-				current_value = 1.0 / (1.77245385 * gaussianWidth) * exp(- 1.0 / (2.0 * gaussianWidth * gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
-				
-				(*Gaussian_window)(i, j) = current_value;
-				
-				sum += current_value;	// we will use this below
+		Gaussian_kernel->clear();
+		
+		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
+			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
+				distance_x = (double)center_x - (double)i;
+				distance_y = (double)center_y - (double)j;
+				(*Gaussian_kernel)(i, j) = 1.0 / (1.77245385 * gaussianWidth) * exp(- 1.0 / (2.0 * gaussianWidth * gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
+				sum += (*Gaussian_kernel)(i, j);
 			}
 		}
 		
@@ -998,21 +991,10 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		// at this point Gaussian_window becomes equal to 'gc' in the original matlab code
 		sum /= double_window_pixels;
 		sum_squared_Gaussian = 0;
-		for (size_t i = 0; i < window_size; i++) {
-			for (size_t j = 0; j < window_size; j++) {
-				current_value = (*Gaussian_window)(i, j);
-				current_value = current_value - sum;
-				(*Gaussian_window)(i, j) = current_value;
-				sum_squared_Gaussian += current_value * current_value;	// this is 'Sgc2' in the original code
-			}
-		}
-		
-		// now introduce this small kernel into a larger one that is the same size as the image
-		Gaussian_kernel->clear();
-		
 		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-				(*Gaussian_kernel)(i, j) = (*Gaussian_window)(i - center_x + half_window_size, j - center_y + half_window_size);
+				(*Gaussian_kernel)(i, j) = (*Gaussian_kernel)(i, j) - sum;
+				sum_squared_Gaussian += (*Gaussian_kernel)(i, j) * (*Gaussian_kernel)(i, j);	// this is 'Sgc2' in the original code
 			}
 		}
 		
