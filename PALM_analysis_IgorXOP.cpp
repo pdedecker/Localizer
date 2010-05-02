@@ -1894,14 +1894,14 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 		waveHndl outputWave = CopyVectorToIgorDPWave(kFunction, std::string("W_LFunction"));
 		err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
 	}
+	catch (USER_ABORTED e) {
+		XOPNotice(e.what());
+		err = USER_ABORT;
+	}
 	catch (std::runtime_error e) {
 		XOPNotice(e.what());
 		XOPNotice("\r");
 		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
 	}
 	catch (int e) {
 		return e;

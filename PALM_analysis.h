@@ -169,7 +169,7 @@ public:
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions);
 	
 protected:
 	boost::shared_ptr<ublas::matrix<double> > subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions);

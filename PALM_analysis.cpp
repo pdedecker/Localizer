@@ -243,7 +243,7 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 }
 #endif // WITH_IGOR
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions, std::list<position>::iterator startIt, std::list<position>::iterator endIt) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
 	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
