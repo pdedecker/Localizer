@@ -44,8 +44,8 @@ struct AnalyzePALMImagesRuntimeParams {
 	
 	// Parameters for /PVER flag group.
 	int PVERFlagEncountered;
-	double particleVerifier;
-	int PVERFlagParamsSet[1];
+	double particleVerifiers[100];			// Optional parameter.
+	int PVERFlagParamsSet[100];
 	
 	// Parameters for /T flag group.
 	int TFlagEncountered;
@@ -437,7 +437,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	std::string data_file_path;
 	size_t camera_type;
 	int method;
-	int particle_finding_method, particleVerifierMethod;
+	int particle_finding_method;
 	int fitting_positions_supplied_in_wave = 0;	// determines if we have to determine the positions to fit in ourselves, or if we can read them from the wave
 	long numDimensions;
 	long dimensionSizes[MAX_DIMENSIONS + 1];
@@ -454,6 +454,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	size_t preprocessing_method;
 	size_t thresholding_method;
 	size_t postprocessing_method;
+	std::vector<size_t> particleVerifierMethods;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
 	boost::shared_ptr<FitPositions> positions_fitter;
@@ -461,7 +462,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particle_finder;
-	boost::shared_ptr<ParticleVerifier> particleVerifier;
+	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
 	boost::shared_ptr<PALMAnalysisController> analysisController;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
@@ -518,20 +519,24 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	}
 	
 	if (p->PVERFlagEncountered) {
-		// Parameter: p->particleVerifier
-		if (p->particleVerifier < 0)
-			return EXPECT_POS_NUM;
-		particleVerifierMethod = p->particleVerifier;
+		int* paramsSet = &p->PVERFlagParamsSet[0];
+		size_t particleVerifierMethod;
 		
-		if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
-			// there's no need to fit the same positions with the same algorithm twice, drop the verification
-			particleVerifierMethod = PARTICLEVERIFIER_NONE;
-		} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
-			particleVerifierMethod = PARTICLEVERIFIER_NONE;
+		for (int i=0; i<100; i++) {
+			if (paramsSet[i] == 0)
+				break;		// No more parameters.
+			if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
+				// there's no need to fit the same positions with the same algorithm twice, drop this verification
+				continue;
+			} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
+				continue;
+			}
+			
+			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+			particleVerifierMethods.push_back(particleVerifierMethod);
 		}
-		
 	} else {
-		particleVerifierMethod = PARTICLEVERIFIER_NONE;
+		particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
 	}
 	
 	if (p->TFlagEncountered) {
@@ -751,19 +756,25 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		}
 		
 		// what particle verification do we wish to use?
-		switch (particleVerifierMethod) {
-			case PARTICLEVERIFIER_NONE:
-				particleVerifier = boost::shared_ptr<ParticleVerifier>();
-				break;
-			case PARTICLEVERIFIER_SYMMETRICGAUSS:
-				particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma));
-				break;
-			case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-				particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma));
-				break;
-			default:
-				throw std::runtime_error("Unknown particle verifying method");
-				break;
+		// several particle verifiers can be used
+		for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
+			switch (*it) {
+				case PARTICLEVERIFIER_NONE:
+					// no particle verification requested for this entry, do nothing
+					break;
+				case PARTICLEVERIFIER_SYMMETRICGAUSS:
+					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
+					break;
+				case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
+					break;
+				case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
+					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
+					break;
+				default:
+					throw std::runtime_error("Unknown particle verifying method");
+					break;
+			}
 		}
 		
 		// which localization method do we wish to use?
@@ -799,7 +810,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		}
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
-																								   postprocessor, particle_finder, particleVerifier,
+																								   postprocessor, particle_finder, particleVerifiers,
 																								   positions_fitter,
 																								   progressReporter));
 		
@@ -1920,7 +1931,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER=number:particleVerifier /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /P=wave:positions_wave /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);

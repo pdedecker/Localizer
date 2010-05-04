@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
-		("particleverifier", po::value<std::string>()->default_value("none"), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
+		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
 		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 	std::string postprocessingName = vm["postprocessing"].as<std::string>();
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
-	std::string particleVerifierName = vm["particleverifier"].as<std::string>();
+	std::vector<std::string> particleVerifierNames = vm["particleverifier"].as<std::vector<std::string> >();
 	std::string localizationName = vm["localization"].as<std::string>();
 	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
 	
@@ -89,7 +89,10 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
 	
 	// get the positions verifier
-	boost::shared_ptr<ParticleVerifier> particleVerifier = GetParticleVerifierType(particleVerifierName, psfWidth, 1.0);
+	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+	for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
+		particleVerifiers.push_back(GetParticleVerifierType(*it, psfWidth, 1.0));
+	}
 	
 	// get the positions fitter
 	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
@@ -99,7 +102,7 @@ int main(int argc, char *argv[]) {
 	
 	// get an analysis controller
 	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
-																							postprocessor, particleFinder, particleVerifier,
+																							postprocessor, particleFinder, particleVerifiers,
 																							positionsFitter,
 																							progressReporter));
 	// run the PALM analysis for every input file
@@ -135,7 +138,13 @@ int main(int argc, char *argv[]) {
 			header << "PSF WIDTH:" << psfWidth << "\n";
 			header << "THRESHOLD METHOD:" << segmentationName << "\n";
 			header << "PARTICLE FINDING:" << particleFinderName << "\n";
-			header << "PARTICLE VERIFIER:" << particleVerifierName << "\n";
+			header << "PARTICLE VERIFIER:";
+			for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
+				std::cout << *it << ',';
+			}
+			if (particleVerifierNames.size() == 0)
+				std::cout << "none";
+			std::cout << "\n";
 			header << "LOCALIZATION METHOD:" << localizationName << "\n";
 			
 			// write the output

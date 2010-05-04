@@ -30,14 +30,14 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 												boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 												boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
 												boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
-												boost::shared_ptr<ParticleVerifier> particleVerifier_rhs,
+												std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
 												boost::shared_ptr<FitPositions> fitPositions_rhs,
 												boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
 	particleFinder = particleFinder_rhs;
-	particleVerifier = particleVerifier_rhs;
+	particleVerifiers = particleVerifiers_rhs;
 	fitPositions = fitPositions_rhs;
 	progressReporter = progressReporter_rhs;
 	
@@ -181,8 +181,9 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
 			
 			// if the located particles are to be verified before fitting then do so
-			if (controller->particleVerifier.get() != NULL)
-				controller->particleVerifier->VerifyParticles(currentImage, locatedParticles);
+			for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = controller->particleVerifiers.begin(); it != controller->particleVerifiers.end(); ++it) {
+				(*it)->VerifyParticles(currentImage, locatedParticles);
+			}
 			
 			localizedPositions = controller->fitPositions->fit_positions(currentImage, locatedParticles);
 			
