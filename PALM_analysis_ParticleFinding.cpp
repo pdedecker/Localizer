@@ -415,3 +415,32 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<p
 		}
 	}
 }
+
+void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+	double distance;
+	double minDistance = 4.0 * this->psfWidth;
+	
+	for (std::list<position>::iterator it1 = positions->begin(); it1 != positions->end(); ++it1) {
+		// since the list::iterator does not support operator+() we have to be kludgy
+		for (std::list<position>::iterator it2 = (++it1)--; it2 != positions->end(); ++it2) {
+			distance = sqrt(((*it1).get_x() - (*it2).get_x()) * ((*it1).get_x() - (*it2).get_x()) + ((*it1).get_y() - (*it2).get_y()) * ((*it1).get_y() - (*it2).get_y()));
+			if (distance < minDistance) {
+				// these two points should be deleted
+				// don't delete them now since there might be a third point overlapping with one of them
+				// instead just mark them as needing deletion by changing their amplitude to some
+				// unlikely value
+				(*it1).set_intensity(-1.0e200);
+				(*it2).set_intensity(-1.0e200);
+			}
+		}
+	}
+	
+	// now delete the positions that failed the test
+	for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
+		if ((*it).get_intensity() == -1.0e200) {
+			it = positions->erase(it);
+			--it;
+		}
+	}
+	
+}

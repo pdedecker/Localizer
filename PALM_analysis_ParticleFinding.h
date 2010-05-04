@@ -97,6 +97,20 @@ public:
 protected:
 };
 
+/**
+ * Verify the particles by eliminating any two that are within 4 times the PSF deviation
+ */
+class ParticleVerifier_RemoveOverlappingParticles : public ParticleVerifier {
+public:
+	ParticleVerifier_RemoveOverlappingParticles(double psfWidth_rhs) : psfWidth(psfWidth_rhs) {}
+	~ParticleVerifier_RemoveOverlappingParticles() {;}
+	
+	
+	void VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions);
+protected:
+	double psfWidth;
+};
+
 
 /**
  * Verify the particles by seeing if they pass the fitting of a FitPositions_SymmetricGaussian class
