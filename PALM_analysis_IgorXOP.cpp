@@ -287,8 +287,8 @@ struct TestThresholdRuntimeParams {
 	
 	// Parameters for /PVER flag group.
 	int PVERFlagEncountered;
-	double particleVerifier;
-	int PVERFlagParamsSet[1];
+	double particleVerifiers[100];			// Optional parameter.
+	int PVERFlagParamsSet[100];
 	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
@@ -525,6 +525,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		for (int i=0; i<100; i++) {
 			if (paramsSet[i] == 0)
 				break;		// No more parameters.
+			
+			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+			
 			if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
 				// there's no need to fit the same positions with the same algorithm twice, drop this verification
 				continue;
@@ -532,7 +535,6 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				continue;
 			}
 			
-			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
 			particleVerifierMethods.push_back(particleVerifierMethod);
 		}
 	} else {
@@ -1323,7 +1325,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	size_t method;
-	size_t preprocessing_method, postprocessing_method, particleVerifierMethod;
+	size_t preprocessing_method, postprocessing_method;
 	size_t particle_finding_method;
 	size_t offset;
 	int output_located_particles;
@@ -1333,6 +1335,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	waveHndl threshold_image_wave;
 	boost::shared_ptr<ublas::matrix<double> > CCD_Frame;
 	boost::shared_ptr<std::list<position> > located_particles;
+	std::vector<size_t> particleVerifierMethods;
 	
 	// long numDimensions; 
 	long dimensionSizes[MAX_DIMENSIONS+1];
@@ -1348,6 +1351,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ParticleFinder> particlefinder;
+	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
 	boost::shared_ptr<ParticleVerifier> particleVerifier;
 	
 	
@@ -1408,24 +1412,26 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	}
 	
 	if (p->PVERFlagEncountered) {
-		// Parameter: p->particleVerifier
-		if (p->particleVerifier < 0)
-			return EXPECT_POS_NUM;
-		particleVerifierMethod = p->particleVerifier;
-	} else {
-		particleVerifierMethod = 0;
-	}
-	
-	if (p->RFlagEncountered) {
-		// Parameter: p->radiusBetweenParticles
-		radiusBetweenParticles = p->radiusBetweenParticles;
-		if ((radiusBetweenParticles <= 0) && (particle_finding_method == PARTICLEFINDER_RADIUS)) {
-			return EXPECT_POS_NUM;
+		int* paramsSet = &p->PVERFlagParamsSet[0];
+		size_t particleVerifierMethod;
+		
+		for (int i=0; i<100; i++) {
+			if (paramsSet[i] == 0)
+				break;		// No more parameters.
+			
+			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+			
+			if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
+				// there's no need to fit the same positions with the same algorithm twice, drop this verification
+				continue;
+			} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
+				continue;
+			}
+			
+			particleVerifierMethods.push_back(particleVerifierMethod);
 		}
 	} else {
-		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
-			return TOO_FEW_PARAMETERS;
-		}
+		particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
 	}
 	
 	// Main parameters.
@@ -1541,20 +1547,26 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 					break;
 			}
 			
-			// do we also want to do particle verification?
-			switch (particleVerifierMethod) {
-				case PARTICLEVERIFIER_NONE:
-					particleVerifier = boost::shared_ptr<ParticleVerifier>();
-					break;
-				case PARTICLEVERIFIER_SYMMETRICGAUSS:
-					particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0));
-					break;
-				case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-					particleVerifier = boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1.0));
-					break;
-				default:
-					throw std::runtime_error("Unknown particle verifying method");
-					break;
+			// what particle verification do we wish to use?
+			// several particle verifiers can be used
+			for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
+				switch (*it) {
+					case PARTICLEVERIFIER_NONE:
+						// no particle verification requested for this entry, do nothing
+						break;
+					case PARTICLEVERIFIER_SYMMETRICGAUSS:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1)));
+						break;
+					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1)));
+						break;
+					case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
+						break;
+					default:
+						throw std::runtime_error("Unknown particle verifying method");
+						break;
+				}
 			}
 		}
 		
@@ -1588,8 +1600,10 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		if (output_located_particles == 1) {
 			located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
 			
-			if (particleVerifierMethod != PARTICLEVERIFIER_NONE)
-				particleVerifier->VerifyParticles(CCD_Frame, located_particles);
+			// if the located particles are to be verified before fitting then do so
+			for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
+				(*it)->VerifyParticles(CCD_Frame, located_particles);
+			}
 			
 			long dimensionSizes[MAX_DIMENSIONS+1];
 			long indices[MAX_DIMENSIONS];
@@ -1979,7 +1993,7 @@ static int RegisterTestThreshold(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the TestThresholdRuntimeParams structure as well.
-	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER=number:particleVerifier /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(TestThresholdRuntimeParams), (void*)ExecuteTestThreshold, 0);
