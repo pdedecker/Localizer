@@ -561,11 +561,11 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	if (p->RFlagEncountered) {
 		// Parameter: p->radius
 		radiusBetweenParticles = p->radius;
-		if (particle_finding_method == 2) {
+		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
 			analysisOptionsStream << "MINIMUM DISTANCE BETWEEN PARTICLES:" << particle_finding_method << ';';
 		}
 	} else {
-		if (particle_finding_method == 2) {
+		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}
@@ -1008,7 +1008,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	
 	if (p->NFlagEncountered) {
 		// Parameter: p->method_parameter
-		if ((method == 0) && (p->method_parameter < 0)) {
+		if ((method == PROCESSING_AVERAGESUBTRACTION) && (p->method_parameter < 0)) {
 			return EXPECT_POS_NUM;
 		}
 		n_parameter = p->method_parameter;
@@ -1017,7 +1017,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				// for now this isn't a problem, but if we implement a method
 				// that requires a parameter then we have to return an error here
 		
-		if (method == 0)	// subtract an average
+		if (method == PROCESSING_AVERAGESUBTRACTION)	// subtract an average
 			n_parameter = 0;	// if we don't specify /N then we want to subtract an average for the entire trace
 		
 	}
@@ -1052,7 +1052,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		startY = (size_t)(p->startY + 0.5);
 		endY = (size_t)(p->endY + 0.5);
 	} else {
-		if (method == 4) {	// export a cropped version
+		if (method == PROCESSING_CROP) {	// export a cropped version
 			return TOO_FEW_PARAMETERS;
 		}
 	}
@@ -1457,25 +1457,25 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
-			case 0:	// no preprocessing
+			case PREPROCESSOR_NONE:	// no preprocessing
 				// preprocessor = NULL;	// this is the default for a smart pointer
 				break;
-			case 1:	// 3x3 median filter
+			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
 				break;
-			case 2:	// 5x5 median filter
+			case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
 				break;
-			case 3:	// 1x1 Gaussian filter
+			case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
 				break;
-			case 4:	// 2x2 Gaussian filter
+			case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
 				break;
-			case 5:	// 3x3 mean filter
+			case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
 				break;
-			case 6:	// 5x5 mean filter
+			case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
 				break;
 			default:
@@ -1483,31 +1483,31 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				break;
 		}
 		switch(method) {
-			case 0:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
 				break;
-			case 1:	// Igor's iterative approach
+			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
 				break;
-			case 2:	// Igor's iterative approach
+			case THRESHOLD_METHOD_IGOR_BIMODAL:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
 				break;
-			case 3:	// Igor's adaptive approach
+			case THRESHOLD_METHOD_IGOR_ADAPTIVE:	// Igor's adaptive approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
 				break;
-			case 4:	// Igor's first fuzzy approach
+			case THRESHOLD_METHOD_IGOR_FUZZY_1:	// Igor's first fuzzy approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
 				break;
-			case 5:	// Igor's second fuzzy approach
+			case THRESHOLD_METHOD_IGOR_FUZZY_2:	// Igor's second fuzzy approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
 				break;
-			case 6:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 				break;
-			case 7:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+			case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 				break;
-			case 8:	// direct threshold
+			case THRESHOLD_METHOD_DIRECT:	// direct threshold
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
 				break;
 			default:
@@ -1518,10 +1518,10 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		
 		// which postprocessing do we wish to do?
 		switch(postprocessing_method) {
-			case 0:	// no postprocessing
+			case POSTPROCESSOR_NONE:	// no postprocessing
 				//postprocessor = NULL;	// this is the default for a shared_ptr
 				break;
-			case 1:	// remove isolated pixels
+			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 				break;
 			default:
@@ -1533,13 +1533,13 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// which method do we want to use?
 		if (output_located_particles == 1) {
 			switch (particle_finding_method) {
-				case 0:
+				case PARTICLEFINDER_ADJACENT4:
 					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 					break;
-				case 1:
+				case PARTICLEFINDER_ADJACENT8:
 					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
 					break;
-				case 2:	// traditional radius approach
+				case PARTICLEFINDER_RADIUS:	// traditional radius approach
 					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
 					break;
 				default:
@@ -1767,7 +1767,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			return EXPECT_POS_NUM;
 		upperLimit = p->upperLimit;
 	} else {
-		if (method == 1) {	// calculate the width using the uncertainty from the fits
+		if (method == PALMBITMAP_DEVIATION_FITUNCERTAINTY) {	// calculate the width using the uncertainty from the fits
 			return TOO_FEW_PARAMETERS;
 		}
 	}
@@ -1806,7 +1806,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		PSFWidth = p->PSFWidth;
 		
 	} else {
-		if (method == 2) {
+		if (method == PALMBITMAP_DEVIATION_INTEGRALSQUAREROOT) {
 			return TOO_FEW_PARAMETERS;
 		}
 	}
@@ -1825,13 +1825,13 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	try {
 		// get the object that will calculate the standard deviation
 		switch (method) {
-			case 0:
+			case PALMBITMAP_DEVIATION_SAME:
 				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
 				break;
-			case 1:
+			case PALMBITMAP_DEVIATION_FITUNCERTAINTY:
 				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
 				break;
-			case 2:
+			case PALMBITMAP_DEVIATION_INTEGRALSQUAREROOT:
 				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_IntegralSquareRoot(PSFWidth, scaleFactor));
 				break;
 			default:
@@ -2108,25 +2108,25 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 	boost::shared_ptr<ImageLoader> image_loader;
 	
 	switch (camera_type) {
-		case 0:	// spe files
+		case CAMERA_TYPE_WINSPEC:	// spe files
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
 			break;
-		case 1:
+		case CAMERA_TYPE_ANDOR:
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
 			break;
-		case 2:
+		case CAMERA_TYPE_HAMAMATSU:
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
 			break;
-		case 3:	// 3 is reserved for TIFF files
+		case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
-		case 4:
+		case CAMERA_TYPE_SIMPLE:
 			image_loader = boost::shared_ptr<ImageLoader>(new SimpleImageLoader(data_file_path));
 			break;
-		case 5:	// Zeiss lsm files
+		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
-		case 6: // Matrix wave in Igor
+		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
 			break;
 		default:
