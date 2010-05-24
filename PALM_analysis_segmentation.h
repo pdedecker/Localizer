@@ -125,17 +125,6 @@ public:
 	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<ublas::matrix<double> > image);
 };
 
-class ThresholdImage_GLRT : public ThresholdImage {
-public:
-	ThresholdImage_GLRT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param;} 
-	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<ublas::matrix<double> > image);
-	
-protected:
-	double PFA;
-	double gaussianWidth;
-};
-
 class ConvolveMatricesWithFFTClass {
 public:
 	ConvolveMatricesWithFFTClass() {forwardPlan = NULL; reversePlan = NULL; forwardPlanXSize = 0; forwardPlanYSize = 0; reversePlanXSize = 0; reversePlanYSize = 0;}
