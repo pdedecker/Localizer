@@ -54,9 +54,14 @@ int main(int argc, char *argv[]) {
 	std::string postprocessingName = vm["postprocessing"].as<std::string>();
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
-	std::vector<std::string> particleVerifierNames = vm["particleverifier"].as<std::vector<std::string> >();
 	std::string localizationName = vm["localization"].as<std::string>();
 	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
+	
+	std::vector<std::string> particleVerifierNames;
+	if (vm.count("particleverifier") != 0) {
+		particleVerifierNames = vm["particleverifier"].as<std::vector<std::string> >();
+	}
+	
 	
 	// glrt and direct thresholding require extra parameters
 	double pfa, directThreshold;
