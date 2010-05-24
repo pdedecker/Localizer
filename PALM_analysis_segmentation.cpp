@@ -982,7 +982,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 				distance_x = (double)center_x - (double)i;
 				distance_y = (double)center_y - (double)j;
-				(*Gaussian_kernel)(i, j) = 1.0 / (1.77245385 * gaussianWidth) * exp(- 1.0 / (2.0 * gaussianWidth * gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
+				(*Gaussian_kernel)(i, j) = 1.0 / (1.77245385 * this->gaussianWidth) * exp(- 1.0 / (2.0 * this->gaussianWidth * this->gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
 				sum += (*Gaussian_kernel)(i, j);
 			}
 		}
@@ -990,11 +990,11 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		// now we re-normalize this Gaussian matrix
 		// at this point Gaussian_window becomes equal to 'gc' in the original matlab code
 		sum /= double_window_pixels;
-		sum_squared_Gaussian = 0;
+		this->sum_squared_Gaussian = 0;
 		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 				(*Gaussian_kernel)(i, j) = (*Gaussian_kernel)(i, j) - sum;
-				sum_squared_Gaussian += (*Gaussian_kernel)(i, j) * (*Gaussian_kernel)(i, j);	// this is 'Sgc2' in the original code
+				this->sum_squared_Gaussian += (*Gaussian_kernel)(i, j) * (*Gaussian_kernel)(i, j);	// this is 'Sgc2' in the original code
 			}
 		}
 		
@@ -1014,12 +1014,12 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	gaussianCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
-	(*image_Gaussian_convolved) /= sum_squared_Gaussian;
+	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t k = half_window_size; k < x_size - half_window_size; k++) {
 		for (size_t l = half_window_size; l < y_size - half_window_size; l++) {
-			current_value = 1 - (sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
+			current_value = 1 - (this->sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
 			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) .* test + (test <= 0) in the original code
 			current_value = - double_window_pixels * log(current_value);
 			(*hypothesis_test)(k, l) = current_value;
