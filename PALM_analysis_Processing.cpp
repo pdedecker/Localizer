@@ -59,7 +59,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
-		(*subtracted_image) = (*loaded_image) - (*average_image);
+		ublas::noalias(*subtracted_image) = (*loaded_image) - (*average_image);
 		
 		output_writer->write_image(subtracted_image);
 	}

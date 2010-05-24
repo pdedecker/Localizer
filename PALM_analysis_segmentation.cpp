@@ -916,7 +916,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	(*image_squared) = element_prod((*image), (*image));
+	ublas::noalias(*image_squared) = element_prod((*image), (*image));
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -961,7 +961,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	(*averages) /= double_window_pixels;
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
-	(*null_hypothesis) = (*summed_squares) - (element_prod((*averages), (*averages)) * double_window_pixels);
+	ublas::noalias(*null_hypothesis) = (*summed_squares) - (element_prod((*averages), (*averages)) * double_window_pixels);
 	//(*null_hypothesis) = (*summed_squares) - (((*averages) * (*averages)).MultiplyWithScalar(double_window_pixels));
 	
 	// calculate the hypothesis H1 that there is an emitter
