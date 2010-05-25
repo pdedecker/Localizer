@@ -1421,13 +1421,6 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 			
 			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
 			
-			if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
-				// there's no need to fit the same positions with the same algorithm twice, drop this verification
-				continue;
-			} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
-				continue;
-			}
-			
 			particleVerifierMethods.push_back(particleVerifierMethod);
 		}
 	} else {
