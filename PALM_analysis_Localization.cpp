@@ -461,7 +461,16 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 			continue;
 		}
 		
-		// are the fit results close enough to the initial values to be trusted?
+		// are the fitted coordinates close enough to the initial guess?
+		if ((fabs(gsl_vector_get(fit_iterator->x, 2) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 3) - y0_initial) > 2.0 * initialPSFWidth)) {
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// is the amplitude close enough to the initial value to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
 			it = positions->erase(it);
@@ -653,7 +662,16 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 			continue;
 		}
 		
-		// are the fit results close enough to the initial values to be trusted?
+		// are the fitted coordinates close enough to the initial guess?
+		if ((fabs(gsl_vector_get(fit_iterator->x, 1) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 2) - y0_initial) > 2.0 * initialPSFWidth)) {
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// is the fitted amplitude close enough to the initial value to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
 			it = positions->erase(it);
@@ -836,7 +854,16 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 			continue;
 		}
 		
-		// are the fit results close enough to the initial values to be trusted?
+		// are the fitted coordinates close enough to the initial guess?
+		if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// is the fitted amplitude close enough to the initial value to be trusted?
 		if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
 			// the output fit amplitude is more than a factor of two different from the initial value, drop this point
 			it = positions->erase(it);
