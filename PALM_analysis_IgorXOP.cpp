@@ -1427,6 +1427,18 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
 	}
 	
+	if (p->RFlagEncountered) {
+		// Parameter: p->radiusBetweenParticles
+		radiusBetweenParticles = p->radiusBetweenParticles;
+		if ((radiusBetweenParticles <= 0) && (particle_finding_method == PARTICLEFINDER_RADIUS)) {
+			return EXPECT_POS_NUM;
+		}
+	} else {
+		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
+			return TOO_FEW_PARAMETERS;
+		}
+	}
+	
 	// Main parameters.
 	
 	if (p->CCD_FrameEncountered) {
