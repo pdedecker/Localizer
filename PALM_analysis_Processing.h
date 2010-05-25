@@ -15,6 +15,7 @@
 #include <queue>
 #include <list>
 #include <string>
+#include <algorithm>
 #include "boost/smart_ptr.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_defines.h"

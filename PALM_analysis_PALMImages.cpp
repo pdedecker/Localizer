@@ -28,7 +28,7 @@ boost::shared_ptr<ublas::matrix<double> > PALMBitmapImageCalculator::CalculateIm
 	
 	size_t nPositions = positions->getNPositions();
 	boost::shared_ptr<ublas::matrix<double> > outputImage(new ublas::matrix<double> (imageWidth, imageHeight));
-	outputImage->clear();
+	std::fill(outputImage->data().begin(), outputImage->data().end(), double(0.0));
 	
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;
 	double imageHeightScaleFactor = (double)(imageHeight - 1) / (double)ySize;

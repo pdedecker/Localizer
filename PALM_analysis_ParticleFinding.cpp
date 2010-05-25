@@ -97,12 +97,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	size_t nBackgroundPixels = 0;
 	
 	mapped_image = boost::shared_ptr<ublas::matrix<long> >(new ublas::matrix<long>(x_size, y_size));
-	
-	for (size_t i = 0; i < x_size; ++i) {
-		for (size_t j = 0; j < y_size; ++j) {
-			(*mapped_image)(i, j) = -1;
-		}
-	}
+	std::fill(mapped_image->data().begin(), mapped_image->data().end(), long(-1));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {	// loop over the entire image
@@ -282,12 +277,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	size_t nBackgroundPixels = 0;
 	
 	mapped_image = boost::shared_ptr<ublas::matrix<long> >(new ublas::matrix<long>(x_size, y_size));
-	
-	for (size_t i = 0; i < x_size; ++i) {
-		for (size_t j = 0; j < y_size; ++j) {
-			(*mapped_image)(i, j) = -1;
-		}
-	}
+	std::fill(mapped_image->data().begin(), mapped_image->data().end(), long(-1));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {	// loop over the entire image

@@ -10,6 +10,7 @@
 #ifndef PALM_ANALYSIS_PARTICLEFINDING_H
 #define PALM_ANALYSIS_PARTICLEFINDING_H
 
+#include <algorithm>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_Localization.h"
 #include "boost/smart_ptr.hpp"

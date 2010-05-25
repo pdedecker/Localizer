@@ -588,7 +588,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Isodata::do_thr
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
 		// to indicate this we set everything to 'off' (0)
 		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
-		threshold_image->clear();
+		std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 		return threshold_image;
 	}
 	
@@ -644,7 +644,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_th
 	if (maximum_bin == (number_of_bins - 1)) {
 		gsl_histogram_free(hist);
 		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
-		threshold_image->clear();
+		std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 		return threshold_image;
 	}
 	
@@ -656,7 +656,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_th
 	if (slope == 0) {
 		gsl_histogram_free(hist);
 		threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
-		threshold_image->clear();
+		std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 		return threshold_image;
 	}
 	
@@ -734,22 +734,22 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	double sum;
 	
 	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(x_size, y_size));
-	threshold_image->clear();
+	std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 	
 	averages = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	averages->clear();
+	std::fill(averages->data().begin(), averages->data().end(), double(0.0));
 	
 	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	summed_squares->clear();
+	std::fill(summed_squares->data().begin(), summed_squares->data().end(), double(0.0));
 	
 	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	image_Gaussian_convolved = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));	// this is 'alpha' in the original matlab code
 	
 	hypothesis_test = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));	// this is 'test' in the original matlab code
-	hypothesis_test->clear();
+	std::fill(hypothesis_test->data().begin(), hypothesis_test->data().end(), double(0.0));
 	
 	// calculate the square of the pixel values
 	// we'll use this later
@@ -770,8 +770,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		averageCalculationMutex.lock();	// get a unique lock
 		
 		average_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+		std::fill(average_kernel->data().begin(), average_kernel->data().end(), double(0.0));
 		
-		average_kernel->clear();
 		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
 				(*average_kernel)(i, j) = 1;
@@ -813,7 +813,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 		
 		sum = 0;
-		Gaussian_kernel->clear();
+		std::fill(Gaussian_kernel->data().begin(), Gaussian_kernel->data().end(), double(0.0));
 		
 		for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 			for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
@@ -959,7 +959,7 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	}
 	
 	// now introduce this small kernel into a larger one that is the same size as the image
-	Gaussian_kernel->clear();
+	std::fill(Gaussian_kernel->data().begin(), Gaussian_kernel->data().end(), double(0.0));
 	
 	for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
 		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {

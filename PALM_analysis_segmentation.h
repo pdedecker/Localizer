@@ -10,6 +10,7 @@
 #ifndef PALM_ANALYSIS_SEGMENTATION_H
 #define PALM_ANALYSIS_SEGMENTATION_H
 
+#include <algorithm>
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"

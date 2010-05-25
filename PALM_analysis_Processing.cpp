@@ -44,7 +44,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	average_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	subtracted_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	average_image->clear();	// zero the matrix
+	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);

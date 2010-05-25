@@ -244,7 +244,7 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 	double current_value[2];
 	int result;
 	
-	average_image->clear();
+	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
 	
 	for (size_t i = 0; i < n_images; i++) {
@@ -311,8 +311,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	boost::scoped_ptr<ublas::matrix<double> > average_image(new ublas::matrix<double>(xRange, yRange));
 	boost::shared_ptr<ublas::matrix<double> > current_image;
 	
-	average_image->clear();
-	stdDevImage->clear();
+	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
+	std::fill(stdDevImage->data().begin(), stdDevImage->data().end(), double(0.0));
 	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
