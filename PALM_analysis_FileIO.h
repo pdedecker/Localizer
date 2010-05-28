@@ -205,9 +205,7 @@ public:
 	std::string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
 	
-	virtual void write_image(boost::shared_ptr<ublas::matrix<double> > new_image) = 0;
-	
-	virtual int flush_and_close() = 0;
+	virtual void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) = 0;
 	
 protected:
 	
@@ -215,8 +213,6 @@ protected:
 	std::ofstream file;
 	
 	size_t n_images_written;
-	size_t x_size;
-	size_t y_size;
 	
 	std::queue <boost::shared_ptr<ublas::matrix<double> > > image_buffer;
 };
@@ -227,12 +223,10 @@ public:
 	SimpleImageOutputWriter(const std::string &rhs, int overwrite);
 	~SimpleImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
-	
-	int flush_and_close();
+	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
 	
 protected:
-	void flush_cache();
+	size_t x_size, y_size;
 };
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
@@ -240,12 +234,8 @@ public:
 	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
 	~TIFFImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
-	
-	int flush_and_close();
-	
+	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
 protected:
-	void flush_cache();
 	int compression;	// if 1 then don't compress the data, otherwise compress
 	int storageType;
 	
@@ -259,8 +249,6 @@ public:
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
-	
-	int flush_and_close() {return 0;}
 	
 protected:
 	size_t nImagesTotal;

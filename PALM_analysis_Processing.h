@@ -61,7 +61,7 @@ protected:
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
 	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t nFramesAveraging);
-	~CCDImagesProcessorAverageSubtraction() {output_writer->flush_and_close();}
+	~CCDImagesProcessorAverageSubtraction() {;}
 
 	int convert_images();
 	
@@ -79,7 +79,7 @@ protected:
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, ImageOutputWriter *o_writer);
-	~CCDImagesProcessorDifferenceImage() {output_writer->flush_and_close();}
+	~CCDImagesProcessorDifferenceImage() {;}
 	
 	int convert_images();
 	
@@ -92,7 +92,7 @@ public:
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, ImageOutputWriter *o_writer);
-	~CCDImagesProcessorConvertToSimpleFileFormat() {output_writer->flush_and_close();}
+	~CCDImagesProcessorConvertToSimpleFileFormat() {;}
 	
 	int convert_images();
 	
@@ -106,7 +106,7 @@ public:
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
 	CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
-	~CCDImagesProcessorCrop() {output_writer->flush_and_close();}
+	~CCDImagesProcessorCrop() {;}
 	
 	int convert_images();
 	

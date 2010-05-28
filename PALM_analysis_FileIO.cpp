@@ -1290,86 +1290,39 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 SimpleImageOutputWriter::~SimpleImageOutputWriter() {
 	
 	if (file.is_open() != 0) {
-		flush_and_close();
+		file.seekp(0);
+		file.write((char *)&x_size, sizeof(size_t));
+		file.write((char *)&y_size, sizeof(size_t));
+		file.write((char *)&n_images_written, sizeof(size_t));
+		
+		file.close();
 	}
 }
 
 
 
-void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
-	
-	// check whether we should write the cache to disk
-	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
-		flush_cache();
-	}
-	
-	// add the new image to the queue
-	image_buffer.push(new_image);
-	n_images_written++;
-}
-
-
-void SimpleImageOutputWriter::flush_cache() {
-	boost::shared_ptr<ublas::matrix<double> > current_image;
-	size_t n_pixels, offset;
-	
-	if (image_buffer.size() == 0) {
-		return;
-	}
+void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	
 	// determine the size of the frames
-	current_image = image_buffer.front();
-	x_size = current_image->size1();
-	y_size = current_image->size2();
-	n_pixels = x_size * y_size;
+	size_t x_size = imageToWrite->size1();
+	size_t y_size = imageToWrite->size2();
+	size_t n_pixels = x_size * y_size;
 	
-	float *single_image_buffer = new float[n_pixels];	// a temporary buffer for writing a single image
-	if (single_image_buffer == NULL) {
-		throw std::bad_alloc();
-	}
+	this->x_size = x_size;
+	this->y_size = y_size;
 	
-	while (image_buffer.size() != 0) {
-		offset = 0;
-		
-		current_image = image_buffer.front();
-		
-		
-		for (size_t j = 0; j < y_size; j++) {
-			for (size_t i = 0; i < x_size; i++) {
-				single_image_buffer[offset] = (float)(*current_image)(i, j);
-				offset++;
-			}
+	boost::scoped_array<float> single_image_buffer (new float[n_pixels]);
+	
+	size_t offset = 0;
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
+			single_image_buffer[offset] = (float)(*imageToWrite)(i, j);
+			offset++;
 		}
-		
-		file.write((char *)single_image_buffer, (n_pixels * sizeof(float)));
-		
-		// gsl_matrix_free(current_image);
-		image_buffer.pop();
 	}
 	
-	delete[] single_image_buffer;
-	
+	file.write((char *)single_image_buffer.get(), (n_pixels * sizeof(float)));
 }
-
-int SimpleImageOutputWriter::flush_and_close() {
-	try {
-		flush_cache();
-	}
-	catch (std::bad_alloc) {
-		file.close();
-		throw;
-	}
-	
-	file.seekp(0);
-	file.write((char *)&x_size, sizeof(size_t));
-	file.write((char *)&y_size, sizeof(size_t));
-	file.write((char *)&n_images_written, sizeof(size_t));
-	
-	file.close();
-	
-	return 0;
-}
-
 
 TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
@@ -1398,50 +1351,27 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
-	x_size = 0;
-	y_size = 0;
 	n_images_written = 0;
 }
 
 
 TIFFImageOutputWriter::~TIFFImageOutputWriter() {
-	
 	if (tiff_file != NULL) {
-		flush_and_close();
+		TIFFClose(tiff_file);
+		tiff_file = NULL;
 	}
 }
 
 
 
-void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
+void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	
-	// check whether we should write the cache to disk
-	if (image_buffer.size() == N_SIMULTANEOUS_IMAGE_WRITES) {	// we need to flush the cache before accepting a new image
-		flush_cache();
-	}
-	
-	// add the new image to the queue
-	image_buffer.push(new_image);
-}
-
-
-void TIFFImageOutputWriter::flush_cache() {
-	boost::shared_ptr<ublas::matrix<double> > current_image;
-	size_t n_pixels, offset;
+	size_t x_size = imageToWrite->size1();
+	size_t y_size = imageToWrite->size2();
 	
 	int result, sampleFormat, bitsPerSample;
 	uint16_t current_uint16;
 	uint32_t current_uint32;
-	
-	if (image_buffer.size() == 0) {
-		return;
-	}
-	
-	// determine the size of the frames
-	current_image = image_buffer.front();
-	x_size = current_image->size1();
-	y_size = current_image->size2();
-	n_pixels = x_size * y_size;
 	
 	// determine the output storage type
 	switch (this->storageType) {
@@ -1496,197 +1426,182 @@ void TIFFImageOutputWriter::flush_cache() {
 	// make it a buffer of chars equal to the total number of bytes required
 	boost::scoped_array<char> scanLine(new char[x_size * bitsPerSample]);
 	
-	while (image_buffer.size() != 0) {
-		current_image = image_buffer.front();
-		
-		// make sure that all the image tags have the correct values
-		result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the photometric type for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		current_uint32 = x_size;
-		result = TIFFSetField(tiff_file, TIFFTAG_IMAGEWIDTH, current_uint32);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the image width for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		current_uint32 = y_size;
-		result = TIFFSetField(tiff_file, TIFFTAG_IMAGELENGTH, current_uint32);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the image height for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, sampleFormat);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the SampleFormat for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the BitsPerSample for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		result = TIFFSetField(tiff_file, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the SubFileType for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		current_uint16 = (uint16_t)n_images_written;
-		result = TIFFSetField(tiff_file, TIFFTAG_PAGENUMBER, current_uint16);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the PageNumber for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, compression);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the compression method for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		for (size_t j = 0; j < y_size; j++) {
-			offset = 0;
-			
-			switch (this->storageType) {
-				case STORAGE_TYPE_INT4:
-				case STORAGE_TYPE_UINT4:
-				case STORAGE_TYPE_INT8:
-					for (size_t i = 0; i < x_size; i++) {
-						int8_t* buffer = (int8_t *)scanLine.get();
-						buffer[offset] = (int8_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_UINT8:
-					for (size_t i = 0; i < x_size; i++) {
-						uint8_t *buffer = (uint8_t *)scanLine.get();
-						buffer[offset] = (uint8_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_INT16:
-					for (size_t i = 0; i < x_size; i++) {
-						int16_t *buffer = (int16_t *)scanLine.get();
-						buffer[offset] = (int16_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_UINT16:
-					for (size_t i = 0; i < x_size; i++) {
-						uint16_t *buffer = (uint16_t *)scanLine.get();
-						buffer[offset] = (uint16_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_INT32:
-					for (size_t i = 0; i < x_size; i++) {
-						int32_t *buffer = (int32_t *)scanLine.get();
-						buffer[offset] = (int32_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_UINT32:
-					for (size_t i = 0; i < x_size; i++) {
-						uint32_t *buffer = (uint32_t *)scanLine.get();
-						buffer[offset] = (uint32_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_INT64:
-					for (size_t i = 0; i < x_size; i++) {
-						int64_t *buffer = (int64_t *)scanLine.get();
-						buffer[offset] = (int64_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_UINT64:
-					for (size_t i = 0; i < x_size; i++) {
-						uint64_t *buffer = (uint64_t *)scanLine.get();
-						buffer[offset] = (uint64_t)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_FP32:
-					for (size_t i = 0; i < x_size; i++) {
-						float *buffer = (float *)scanLine.get();
-						buffer[offset] = (float)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-				case STORAGE_TYPE_FP64:
-					for (size_t i = 0; i < x_size; i++) {
-						double *buffer = (double *)scanLine.get();
-						buffer[offset] = (double)(*current_image)(i, j);
-						offset++;
-					}
-					break;
-			}
-			
-			result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
-			if (result != 1) {
-				std::string error;
-				error = "There was an error writing a scanline for the image at\"";
-				error += file_path;
-				error += "\"";
-				throw ERROR_WRITING_FILE_DATA(error);
-			}
-			
-		}
-		
-		result = TIFFWriteDirectory(tiff_file);
-		if (result != 1) {
-			std::string error;
-			error = "Unable to write a directory for the image at\"";
-			error += file_path;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-		image_buffer.pop();
-		++n_images_written;
+	// make sure that all the image tags have the correct values
+	result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the photometric type for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-}
-
-int TIFFImageOutputWriter::flush_and_close() {
-	if (tiff_file != NULL) {
-		flush_cache();
-		TIFFClose(tiff_file);
-		tiff_file = NULL;
+	current_uint32 = x_size;
+	result = TIFFSetField(tiff_file, TIFFTAG_IMAGEWIDTH, current_uint32);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the image width for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-	return 0;
+	current_uint32 = y_size;
+	result = TIFFSetField(tiff_file, TIFFTAG_IMAGELENGTH, current_uint32);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the image height for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, sampleFormat);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the SampleFormat for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the BitsPerSample for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	result = TIFFSetField(tiff_file, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the SubFileType for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	current_uint16 = (uint16_t)n_images_written;
+	result = TIFFSetField(tiff_file, TIFFTAG_PAGENUMBER, current_uint16);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the PageNumber for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, compression);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the compression method for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	size_t offset = 0;
+	for (size_t j = 0; j < y_size; j++) {
+		offset = 0;
+		
+		switch (this->storageType) {
+			case STORAGE_TYPE_INT4:
+			case STORAGE_TYPE_UINT4:
+			case STORAGE_TYPE_INT8:
+				for (size_t i = 0; i < x_size; i++) {
+					int8_t* buffer = (int8_t *)scanLine.get();
+					buffer[offset] = (int8_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_UINT8:
+				for (size_t i = 0; i < x_size; i++) {
+					uint8_t *buffer = (uint8_t *)scanLine.get();
+					buffer[offset] = (uint8_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_INT16:
+				for (size_t i = 0; i < x_size; i++) {
+					int16_t *buffer = (int16_t *)scanLine.get();
+					buffer[offset] = (int16_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_UINT16:
+				for (size_t i = 0; i < x_size; i++) {
+					uint16_t *buffer = (uint16_t *)scanLine.get();
+					buffer[offset] = (uint16_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_INT32:
+				for (size_t i = 0; i < x_size; i++) {
+					int32_t *buffer = (int32_t *)scanLine.get();
+					buffer[offset] = (int32_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_UINT32:
+				for (size_t i = 0; i < x_size; i++) {
+					uint32_t *buffer = (uint32_t *)scanLine.get();
+					buffer[offset] = (uint32_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_INT64:
+				for (size_t i = 0; i < x_size; i++) {
+					int64_t *buffer = (int64_t *)scanLine.get();
+					buffer[offset] = (int64_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_UINT64:
+				for (size_t i = 0; i < x_size; i++) {
+					uint64_t *buffer = (uint64_t *)scanLine.get();
+					buffer[offset] = (uint64_t)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_FP32:
+				for (size_t i = 0; i < x_size; i++) {
+					float *buffer = (float *)scanLine.get();
+					buffer[offset] = (float)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+			case STORAGE_TYPE_FP64:
+				for (size_t i = 0; i < x_size; i++) {
+					double *buffer = (double *)scanLine.get();
+					buffer[offset] = (double)(*imageToWrite)(i, j);
+					offset++;
+				}
+				break;
+		}
+		
+		result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
+		if (result != 1) {
+			std::string error;
+			error = "There was an error writing a scanline for the image at\"";
+			error += file_path;
+			error += "\"";
+			throw ERROR_WRITING_FILE_DATA(error);
+		}
+		
+	}
+	
+	result = TIFFWriteDirectory(tiff_file);
+	if (result != 1) {
+		std::string error;
+		error = "Unable to write a directory for the image at\"";
+		error += file_path;
+		error += "\"";
+		throw ERROR_WRITING_FILE_DATA(error);
+	}
+	
+	++this->n_images_written;
 }
 
 #ifdef WITH_IGOR
@@ -1698,18 +1613,19 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	this->overwrite = overwrite_rhs;
 }
 
-void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > new_image) {
+void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	long indices[MAX_DIMENSIONS + 1];
 	int result;
 	double value[2];
 	
+	size_t x_size = imageToWrite->size1();
+	size_t y_size = imageToWrite->size2();
+	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
-		this->x_size = new_image->size1();
-		this->y_size = new_image->size2();
 		long dimensionSizes[MAX_DIMENSIONS + 1];
-		dimensionSizes[0] = this->x_size;
-		dimensionSizes[1] = this->y_size;
+		dimensionSizes[0] = x_size;
+		dimensionSizes[1] = y_size;
 		dimensionSizes[2] = this->nImagesTotal;
 		dimensionSizes[3] = 0;
 		
@@ -1723,7 +1639,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> 
 			indices[0] = i;
 			indices[1] = j;
 			
-			value[0] = (*new_image)(i,j);
+			value[0] = (*imageToWrite)(i,j);
 			result = MDSetNumericWavePointValue(outputWave, indices, value);
 			if (result != 0) {
 				throw result;
