@@ -191,6 +191,24 @@ public:
 	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_ZEISSPALM;}
 };
 
+class LocalizedPosition_MLEwG : public LocalizedPosition {
+public:
+	LocalizedPosition_MLEwG() : nFramesPresent(1) {}
+	~LocalizedPosition_MLEwG() {;}
+	
+	size_t frameNumber;
+	size_t nFramesPresent;	// the number of frames this position was localized in
+	
+	double integral;
+	double xPosition;
+	double yPosition;
+	double positionDeviation;
+	double width;
+	double background;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_MLEWG;}
+};
+
 /**
  * @brief An abstract base class that holds localized positions. Has derived classes that handle specific types of positions.
  * Can import positions from waves or files, and write to them. The base class contains accessor methods for every data possible,
@@ -598,6 +616,63 @@ public:
 	
 protected:
 	std::vector<LocalizedPosition_ZeissPALM> positionsVector;
+};
+
+class LocalizedPositionsContainer_MLEwG : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_MLEwG() {;}
+#ifdef WITH_IGOR
+	LocalizedPositionsContainer_MLEwG(waveHndl wave);
+#endif
+	LocalizedPositionsContainer_MLEwG(const std::string filePath) {throw std::runtime_error("Loading positions from files is not yet supported");}
+	
+	~LocalizedPositionsContainer_MLEwG() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
+	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
+	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
+	double getCorrelation(size_t index) const {return 0;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	double getZPosition(size_t index) const {return 0;}
+	double getBackground(size_t index) const {return positionsVector.at(index).background;}
+	
+	double getIntegralDeviation(size_t index) const {return 0;}
+	double getXWidthDeviation(size_t index) const {return 0;}
+	double getYWidthDeviation(size_t index) const {return 0;}
+	double getCorrelationDeviation(size_t index) const {return 0;}
+	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
+	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
+	double getZPositionDeviation(size_t index) const {return 0;}
+	double getBackgroundDeviation(size_t index) const {return 0;}
+	
+	// adding new positions
+	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {
+		for (std::vector<LocalizedPosition_MLEwG>::iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+			(*it).frameNumber = frameNumber;
+		}
+	}
+	
+#ifdef WITH_IGOR
+	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
+#endif
+	void writePositionsToFile(std::string filePath, std::string header) const;
+	
+	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
+	static int sortCompareFrameNumber(LocalizedPosition_MLEwG left, LocalizedPosition_MLEwG right) {
+		return ((left.frameNumber < right.frameNumber) ? 1 : 0);}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_MLEWG;}
+	
+protected:
+	std::vector<LocalizedPosition_MLEwG> positionsVector;
 };
 
 #endif

@@ -68,6 +68,11 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian(positionsWave));
 	}
 	
+	findPosition = waveNote.find("LOCALIZATION METHOD:6");
+	if (findPosition != (size_t)-1) {
+		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_MLEwG(positionsWave));
+	}
+	
 	// if we are still here then we don't recognize the type of localization used
 	throw std::runtime_error("Unknown localization method (check the wave note of the wave containing the positions)");
 }
@@ -1183,6 +1188,192 @@ void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<Local
 	boost::shared_ptr<LocalizedPositionsContainer_ZeissPALM> newPositionsContainer_ZeissPALM(boost::static_pointer_cast<LocalizedPositionsContainer_ZeissPALM> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_ZeissPALM>::iterator it = newPositionsContainer_ZeissPALM->positionsVector.begin(); it != newPositionsContainer_ZeissPALM->positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
+}
+
+#ifdef WITH_IGOR
+LocalizedPositionsContainer_MLEwG::LocalizedPositionsContainer_MLEwG(waveHndl positionsWave) {
+	// initialize a new PositionsContainer from a wave that contains positions of the correct type
+	long numDimensions;
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	
+	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+	
+	if ((numDimensions != 2) || (dimensionSizes[1] != 8)) {	// invalid dimensions (warning: magic numbers)
+		throw (std::runtime_error("Invalid positions wave"));
+	}
+	
+	LocalizedPosition_MLEwG singlePosition;
+	size_t nPositions = dimensionSizes[0];
+	this->positionsVector.reserve(nPositions);
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		// get all the relevant data out of the wave and into a position object
+		indices[0] = i;
+		indices[1] = 0;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.frameNumber = value[0];
+		indices[1] = 1;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integral = value[0];
+		indices[1] = 2;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.width = value[0];
+		indices[1] = 3;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPosition = value[0];
+		indices[1] = 4;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPosition = value[0];
+		indices[1] = 5;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.background = value[0];
+		indices[1] = 6;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.positionDeviation = value[0];
+		indices[1] = 7;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.nFramesPresent = value[0];
+		
+		this->positionsVector.push_back(singlePosition);
+	}
+}
+
+waveHndl LocalizedPositionsContainer_MLEwG::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
+	long dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	waveHndl outputWave;
+	size_t nPositions = this->positionsVector.size();
+	dimensionSizes[0] = nPositions;
+	dimensionSizes[1] = 8;	// magic number
+	dimensionSizes[2] = 0;
+	
+	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
+	
+	long indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		indices[0] = i;
+		indices[1] = 0;
+		value[0] = this->positionsVector.at(i).frameNumber;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 1;
+		value[0] = this->positionsVector.at(i).integral;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 2;
+		value[0] = this->positionsVector.at(i).width;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 3;
+		value[0] = this->positionsVector.at(i).xPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 4;
+		value[0] = this->positionsVector.at(i).yPosition;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 5;
+		value[0] = this->positionsVector.at(i).background;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 6;
+		value[0] = this->positionsVector.at(i).positionDeviation;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		indices[1] = 7;
+		value[0] = this->positionsVector.at(i).nFramesPresent;
+		err = MDSetNumericWavePointValue(outputWave, indices, value);
+	}
+	
+	if (waveNote.size() != 0) {
+		// set the waveNote to the string passed in
+		Handle waveNoteHandle = NewHandle(waveNote.length());
+		if (waveNoteHandle == NULL)
+			throw std::bad_alloc();
+		
+		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+		SetWaveNote(outputWave, waveNoteHandle);
+	}
+	
+	return outputWave;
+}
+#endif // WITH_IGOR
+
+void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePath, std::string header) const {
+	boost::filesystem::ofstream outputFile;
+	size_t nPositions = this->positionsVector.size();
+	if (nPositions == 0) {
+		throw std::runtime_error("No positions localized!");
+	}
+	
+	outputFile.open(filePath, std::ios::trunc);
+	if (outputFile.fail()) {
+		throw std::runtime_error("Unable to create the output file");
+	}
+	
+	// write the header. Add an extra newline to be safe.
+	outputFile << "Localized positions using MLEwG estimation" << "\n";
+	outputFile << header << "\n";
+	outputFile << "DATA FOLLOWS" << "\n";
+	outputFile << "First frame" << "\t";
+	outputFile << "Integrated intensity" << "\t";
+	outputFile << "Fitted PSF standard deviation (pixel)" << "\t";
+	outputFile << "X position (pixel)" << "\t";
+	outputFile << "Y position (pixel)" << "\t";
+	outputFile << "Background" << "\t";
+	outputFile << "Position deviation (pixel)" << "\t";
+	outputFile << "Number of frames where this emitter is present" << "\n";
+	
+	// write the actual positions
+	for (std::vector<LocalizedPosition_2DGauss>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+		outputFile << (*it).frameNumber << "\t";
+		outputFile << (*it).integral << "\t";
+		outputFile << (*it).width << "\t";
+		outputFile << (*it).xPosition << "\t";
+		outputFile << (*it).yPosition << "\t";
+		outputFile << (*it).background << "\t";
+		outputFile << (*it).positionDeviation << "\t";
+		outputFile << (*it).nFramesPresent << "\n";
+		
+		if (outputFile.fail()) {
+			if (outputFile.is_open()) {
+				outputFile.close();
+			}
+			throw std::runtime_error("Error writing to the localized positions file");
+		}
+	}
+	
+	outputFile.close();
+}
+
+void LocalizedPositionsContainer_MLEwG::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+	// check if the type of positions that we are adding is suitable
+	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_MLEWG)
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPosition_MLEwG> newPosition_MLEwG(boost::static_pointer_cast<LocalizedPosition_MLEwG> (newPosition));
+	
+	this->positionsVector.push_back(*newPosition_MLEwG);
+}
+
+void LocalizedPositionsContainer_ZeissMLEwG::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// are we trying to add the same container to itself?
+	if (this == newPositionsContainer.get()) {
+		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_MLEwG to itself");
+	}
+	
+	// check if the positions container is of the right type
+	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_MLEWG) {
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
+	}
+	
+	// cast the pointer to the more specific type
+	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> newPositionsContainer_MLEwG(boost::static_pointer_cast<LocalizedPositionsContainer_MLEwG> (newPositionsContainer));
+	
+	for (std::vector<LocalizedPosition_MLEwG>::iterator it = newPositionsContainer_MLEwG->positionsVector.begin(); it != newPositionsContainer_MLEwG->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
 	}
 }
