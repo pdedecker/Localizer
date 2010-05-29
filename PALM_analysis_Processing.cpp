@@ -108,6 +108,8 @@ void CCDImagesProcessorCrop::convert_images() {
 }
 
 void CCDImagesProcessorConvertToPhotons::convert_images() {
+	assert(this->multiplicationFactor > 0.0);
+	
 	this->total_number_of_images = image_loader->get_total_number_of_images();
 	this->x_size = image_loader->getXSize();
 	this->y_size = image_loader->getYSize();

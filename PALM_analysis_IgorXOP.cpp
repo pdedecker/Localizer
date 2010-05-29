@@ -164,10 +164,11 @@ struct ProcessCCDImagesRuntimeParams {
 	double method;
 	int MFlagParamsSet[1];
 	
-	// Parameters for /N flag group.
-	int NFlagEncountered;
-	double method_parameter;
-	int NFlagParamsSet[1];
+	// Parameters for /CAL flag group.
+	int CALFlagEncountered;
+	double offset;
+	double multiplicationFactor;
+	int CALFlagParamsSet[2];
 	
 	// Parameters for /R flag group.
 	int RFlagEncountered;
@@ -974,10 +975,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	int camera_type;
 	int method;
 	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
-	int outputType;
+	int outputType, compression;
 	size_t startX, endX, startY, endY;
-	
-	double n_parameter;	// the value that corresponds to the /N flag
+	double cameraOffset, cameraMultiplicationFactor;
 	
 	std::string input_file_path;
 	std::string output_file_path;
@@ -1006,20 +1006,15 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->NFlagEncountered) {
-		// Parameter: p->method_parameter
-		if ((method == PROCESSING_AVERAGESUBTRACTION) && (p->method_parameter < 0)) {
+	if (p->CALFlagEncountered) {
+		// Parameter: p->offset
+		// Parameter: p->multiplicationFactor
+		cameraOffset = p->offset;
+		cameraMultiplicationFactor = p->multiplicationFactor;
+		if (cameraMultiplicationFactor <= 0.0)
 			return EXPECT_POS_NUM;
-		}
-		n_parameter = p->method_parameter;
-		
-	} else {	// we didn't encounter the /N flag
-				// for now this isn't a problem, but if we implement a method
-				// that requires a parameter then we have to return an error here
-		
-		if (method == PROCESSING_AVERAGESUBTRACTION)	// subtract an average
-			n_parameter = 0;	// if we don't specify /N then we want to subtract an average for the entire trace
-		
+	} else if (method == PROCESSING_CONVERTTOPHOTONS) {
+		return EXPECT_POS_NUM;
 	}
 	
 	if (p->OUTFlagEncountered) {
@@ -1102,35 +1097,37 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 		switch (outputType) {
 			case IMAGE_OUTPUT_TYPE_TIFF:
-				// the storage type depends on the method
-				switch (method) {
-					case PROCESSING_AVERAGESUBTRACTION:
-					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, STORAGE_TYPE_FP32));
-						break;
-					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_NONE, image_loader->getStorageType()));
-						break;
-				}
+				compression = COMPRESSION_NONE;
 				break;
+			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
+				compression = COMPRESSION_DEFLATE;
+				break;
+			default:
+				throw std::runtime_error("Unsupported output format (/OUT flag)");
+				break;
+		}
+		
+		// the output number type depends on the requested information
+		switch (outputType) {
+			case IMAGE_OUTPUT_TYPE_TIFF:
 			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
 				// the storage type depends on the method
 				switch (method) {
 					case PROCESSING_AVERAGESUBTRACTION:
 					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, STORAGE_TYPE_FP32));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_FP32));
+						break;
+					case PROCESSING_CONVERTTOPHOTONS:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_UINT32));
 						break;
 					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, COMPRESSION_DEFLATE, image_loader->getStorageType()));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, image_loader->getStorageType()));
 						break;
 				}
 				break;
-			case IMAGE_OUTPUT_TYPE_IGOR:
-				output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images(), 
-																							   overwrite));
-				break;
 			default:
 				throw std::runtime_error("Unsupported output format (/OUT flag)");
+				break;
 		}
 		
 		// do the actual procedure
@@ -1146,6 +1143,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				break;
 			case PROCESSING_CROP:		// output a cropped version of the image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader, output_writer, startX, endX, startY, endY));
+				break;
+			case PROCESSING_CONVERTTOPHOTONS:
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(image_loader, output_writer, cameraMultiplicationFactor, cameraOffset));
 				break;
 			default:
 				throw std::runtime_error("Unknown CCD postprocessing method");
@@ -1974,7 +1974,7 @@ static int RegisterProcessCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /N=number:method_parameter /R={number:startX, number:endX, number:startY, number:endY} /OUT=number:outputType /O string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /R={number:startX, number:endX, number:startY, number:endY} /OUT=number:outputType /O string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
