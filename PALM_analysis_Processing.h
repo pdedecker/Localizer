@@ -16,7 +16,7 @@
 #include <list>
 #include <string>
 #include <algorithm>
-#include "boost/smart_ptr.hpp"
+#include <boost/smart_ptr.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
@@ -115,8 +115,21 @@ protected:
 	size_t croppedXSize, croppedYSize;
 };
 
-
-
+/**
+ * @brief Tries to convert a recorded CCD movie to represent the intensity in number of photons.
+ */
+class CCDImagesProcessorConvertToPhotons : public CCDImagesProcessor {
+public:
+	CCDImagesProcessorConvertToPhotons(ImageLoader *i_loader, ImageOutputWriter *o_writer, double multiplicationFactor_rhs, double offset_rhs) :
+		image_loader(i_loader), output_writer(o_writer), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
+	~CCDImagesProcessorConvertToPhotons() {;}
+	
+	int convert_images();
+	
+protected:
+	double multiplicationFactor;
+	double offset;
+};
 
 
 #endif

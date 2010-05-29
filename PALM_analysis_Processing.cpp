@@ -169,4 +169,23 @@ int CCDImagesProcessorCrop::convert_images() {
 	return 0;
 }
 
+int CCDImagesProcessorConvertToPhotons::convert_images() {
+	this->total_number_of_images = image_loader->get_total_number_of_images();
+	this->x_size = image_loader->getXSize();
+	this->y_size = image_loader->getYSize();
+	
+	boost::shared_ptr<ublas::matrix <double> > loadedImage;
+	boost::shared_ptr<ublas::matrix <double> > convertedImage;
+	
+	for (size_t n = 0; n < this->total_number_of_images; ++n) {
+		loadedImage = image_loader->get_nth_image(n);
+		for (size_t i = 0; i < this->x_size; ++i) {
+			for (size_t j = 0; j < this->y_size; ++j) {
+				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;
+			}
+		}
+		output_writer->write_image(convertedImage);
+	}
+	return 0;
+}
 
