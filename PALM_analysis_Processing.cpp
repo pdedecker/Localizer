@@ -49,7 +49,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	for (n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
-		(*average_image) = (*average_image) + (*loaded_image);
+		(*average_image) += (*loaded_image);
 	}
 	
 	// now divide each point so that we get the average
