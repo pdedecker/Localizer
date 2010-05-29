@@ -18,6 +18,8 @@
 #include "boost/smart_ptr.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
 #include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
@@ -90,6 +92,21 @@ protected:
 };
 
 /**
+ * @brief fits the positions using a Poissonian-based MLE estimation, as described in 10.1038/NMETH.1447
+ */
+class FitPositions_MLEwG : public FitPositions {
+public:
+	FitPositions_MLEwG(double initialPSFWidth_rhs) : initialPSFWidth(initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+	~FitPositions_MLEwG() {;}
+	
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions);
+	
+protected:
+	size_t cutoff_radius;
+	double initialPSFWidth;
+};
+
+/**
  * @brief fits the positions by doing an interative multiplication of the data with a Gaussian at the current best-guess position
  * if this converges then we assume that we have found the actual position. A description is given in Thompson, Biophys J 82:2775 2002.
  */
@@ -143,6 +160,8 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intens
 int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+
+double MinimizationFunction_MLEwG(const gsl_vector fittedParams, void *fitData_rhs);
 
 class measured_data_Gauss_fits {
 public:	

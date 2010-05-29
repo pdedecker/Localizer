@@ -325,6 +325,37 @@ int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *m
 	return GSL_SUCCESS;
 }
 
+double MinimizationFunction_MLEwG(const gsl_vector fittedParams, void *fitData_rhs) {
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<ublas::matrix<double> > imageSubset = fitDataLocal->imageSubset;
+	
+	size_t xSize = imageSubset->size1();
+	size_t ySize = imageSubset->size2();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	
+	double x0 = gsl_vector_get(fittedParams, 0);
+	double y0 = gsl_vector_get(fittedParams, 1);
+	double stdDev = gsl_vector_get(fittedParams, 2);
+	double background = gsl_vector_get(fittedParams, 3);
+	double nPhotons = gsl_vector_get(fittedParams, 4);
+	
+	double expectationValue, recordedSignal; summedLikelihood;
+	
+	summedLikelihood = 0.0
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			recordedSignal = (*imageSubset)(i, j);
+			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background * background
+			summedLikelihood += - expectationValue + recordedSignal * log(expectationValue) - gsl_sf_lngamma(recordedSignal);
+		}
+	}
+	return (-1.0 * summedLikelihood);	// make the number negative since what we really want is maximization
+}
+
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
 																							 boost::shared_ptr<std::list<position> > positions) {
 																			
@@ -937,6 +968,119 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	
 }
 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+	
+	// some safety checks
+	if (positions->size() == 0) {
+		// if no positions were found then there is no reason to run the analysis
+		// we need to catch this here and not upstream since then we can return an appropriate
+		// instance of LocalizedPositionsContainer
+		return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
+	}
+	
+	size_t size_of_subset = 2 * cutoff_radius + 1;
+	double x_offset, y_offset, x_max, y_max;
+	size_t number_of_intensities = size_of_subset * size_of_subset;
+	size_t xSize = image->size1();
+	size_t ySize = image->size2();
+	
+	double x0_initial, y0_initial, amplitude, background;
+	double chi, degreesOfFreedom, c;
+	long iterations = 0;
+	int status;
+	double size;
+		
+	boost::shared_ptr<ublas::matrix<double> > image_subset;
+	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
+	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
+	
+	image_subset = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(size_of_subset, size_of_subset));
+	
+	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
+	gsl_multimin_fminimizer *s = NULL;
+	gsl_multimin_function minex_func;
+	
+	measured_data_Gauss_fits fitData;
+	
+	gsl_vector *fit_parameters = gsl_vector_alloc(5);
+	if (fit_parameters == NULL) {
+		throw std::bad_alloc();
+	}
+	gsl_vector *stepSizes = gsl_vector_alloc(5);
+	if (stepSizes == NULL) {
+		gsl_vector_free(fit_parameters);
+		throw std::bad_alloc();
+	}
+	
+	minex_func.n = 5;
+	minex_func.f = MinimizationFunction_MLEwG;
+	minex_func.params = (void *)fitData;
+	
+	s = gsl_multimin_fminimizer_alloc (T, 5);
+	if (s == NULL) {
+		gsl_vector_free(fit_parameters);
+		gsl_vector_free(stepSizes);
+		throw std::bad_alloc();
+	}
+	
+	// iterate over all the determined positions
+	for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
+		iterations = 0;
+		
+		amplitude = (*it).get_intensity();
+		x0_initial = (*it).get_x();
+		y0_initial = (*it).get_y();
+		background = (*it).get_background();
+		
+		x_offset = floor(x0_initial - (double)cutoff_radius);
+		y_offset = floor(y0_initial - (double)cutoff_radius);
+		x_max = floor(x0_initial + (double)cutoff_radius);
+		y_max = floor(y0_initial + (double)cutoff_radius);
+		
+		if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
+			// we cannot include it
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		for (size_t j = x_offset; j <= x_max; j++) {
+			for (size_t k = y_offset; k <= y_max; k++) {
+				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
+			}
+		}
+		
+		fitData.xOffset = x_offset;
+		fitData.yOffset = y_offset;
+		fitData.imageSubset = image_subset;
+		
+		// provide the initial parameters
+		gsl_vector_set(fit_parameters, 0, x0_initial);
+		gsl_vector_set(fit_parameters, 1, y0_initial);
+		gsl_vector_set(fit_parameters, 2, this->initialPSFWidth);
+		gsl_vector_set(fit_parameters, 3, background);
+		gsl_vector_set(fit_parameters, 4, amplitude);
+		
+		// set the step sizes to 1
+		gsl_vector_set_all(stepSizes, 1.0);
+		// set the solver
+		gsl_multimin_fminimizer_set(s, &minex_func, fit_parameters, stepSizes);
+		
+		// iterate
+		do {
+			iterations++;
+			status = gsl_multimin_fminimizer_iterate(s);
+			if (status != 0)
+				break;
+			
+			size = gsl_multimin_fminimizer_size (s);
+			status = gsl_multimin_test_size (size, 1e-2);
+		} while ((status == GSL_CONTINUE) && (iterations < 200));
+	}
+	
+}
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
 																						 boost::shared_ptr<std::list<position> > positions) {
