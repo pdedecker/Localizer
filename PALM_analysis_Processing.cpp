@@ -10,18 +10,6 @@
 
 #include "PALM_analysis_Processing.h"
 
-
-CCDImagesProcessorAverageSubtraction::CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t nFramesAveraging) {
-	image_loader = i_loader;
-	output_writer = o_writer;
-	
-	this->total_number_of_images = image_loader->get_total_number_of_images();
-	this->x_size = image_loader->getXSize();
-	this->y_size = image_loader->getYSize();
-	
-	this->n_frames_averaging = nFramesAveraging;
-}
-
 int CCDImagesProcessorAverageSubtraction::convert_images() {
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
@@ -64,16 +52,6 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 		output_writer->write_image(subtracted_image);
 	}
 }
-	
-	
-CCDImagesProcessorDifferenceImage::CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, ImageOutputWriter *o_writer) {
-	image_loader = i_loader;
-	output_writer = o_writer;
-	
-	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->getXSize();
-	y_size = image_loader->getYSize();
-}
 
 int CCDImagesProcessorDifferenceImage::convert_images() {
 	
@@ -103,16 +81,6 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 	
 	return 0;
 }
-		
-
-CCDImagesProcessorConvertToSimpleFileFormat::CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, ImageOutputWriter *o_writer) {
-	image_loader = i_loader;
-	output_writer = o_writer;
-	
-	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->getXSize();
-	y_size = image_loader->getYSize();
-}
 
 int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	
@@ -123,31 +91,6 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 		output_writer->write_image(current_image);
 	}
 	return 0;
-}
-
-CCDImagesProcessorCrop::CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) {
-	image_loader = i_loader;
-	output_writer = o_writer;
-	
-	total_number_of_images = image_loader->get_total_number_of_images();
-	x_size = image_loader->getXSize();
-	y_size = image_loader->getYSize();
-	
-	startX = startX_rhs;
-	endX = endX_rhs;
-	startY = startY_rhs;
-	endY = endY_rhs;
-	
-	if ((startX >= endX) || (startY >= endY)) {
-		throw std::runtime_error("Bad limit values specified for cropping");
-	}
-	
-	if ((endX >= x_size) || (endY >= y_size)) {
-		throw std::runtime_error("Bad limit values specified for cropping");
-	}
-	
-	croppedXSize = endX - startX + 1;
-	croppedYSize = endY - startY + 1;
 }
 
 int CCDImagesProcessorCrop::convert_images() {

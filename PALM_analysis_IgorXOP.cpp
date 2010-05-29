@@ -1136,16 +1136,16 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		// do the actual procedure
 		switch (method) {
 			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader.get(), output_writer.get(), 0));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader, output_writer, 0));
 				break;
 			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader.get(), output_writer.get()));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader, output_writer));
 				break;
 			case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader.get(), output_writer.get()));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader, output_writer));
 				break;
 			case PROCESSING_CROP:		// output a cropped version of the image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader.get(), output_writer.get(), startX, endX, startY, endY));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader, output_writer, startX, endX, startY, endY));
 				break;
 			default:
 				throw std::runtime_error("Unknown CCD postprocessing method");

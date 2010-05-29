@@ -41,7 +41,8 @@ class ImageOutputWriter;
  */
 class CCDImagesProcessor {
 public:
-	CCDImagesProcessor() {;}
+	CCDImagesProcessor(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs) :
+		image_loader(imageLoader_rhs), output_writer(outputWriter_rhs), total_number_of_images(0), x_size(0), y_size(0) {}
 	
 	virtual ~CCDImagesProcessor() {;}
 	
@@ -51,8 +52,8 @@ protected:
 	size_t x_size;
 	size_t y_size;
 	
-	ImageLoader *image_loader;
-	ImageOutputWriter *output_writer;
+	boost::shared_ptr<ImageLoader> image_loader;
+	boost::shared_ptr<ImageOutputWriter> output_writer;
 };
 
 /**
@@ -60,7 +61,9 @@ protected:
  */
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
-	CCDImagesProcessorAverageSubtraction(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t nFramesAveraging);
+	CCDImagesProcessorAverageSubtraction(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs, size_t nFramesAveraging_rhs) :
+		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs), n_frames_averaging(nFramesAveraging_rhs) {}
+	
 	~CCDImagesProcessorAverageSubtraction() {;}
 
 	int convert_images();
@@ -78,7 +81,9 @@ protected:
  */
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorDifferenceImage(ImageLoader *i_loader, ImageOutputWriter *o_writer);
+	CCDImagesProcessorDifferenceImage(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs) :
+		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs) {}
+	
 	~CCDImagesProcessorDifferenceImage() {;}
 	
 	int convert_images();
@@ -91,8 +96,10 @@ public:
  */
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToSimpleFileFormat(ImageLoader *i_loader, ImageOutputWriter *o_writer);
+	CCDImagesProcessorConvertToSimpleFileFormat(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs) :
+		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs) {}
 	~CCDImagesProcessorConvertToSimpleFileFormat() {;}
+	
 	
 	int convert_images();
 	
@@ -105,7 +112,21 @@ public:
  */
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorCrop(ImageLoader *i_loader, ImageOutputWriter *o_writer, size_t startX, size_t endX, size_t startY, size_t endY);
+	CCDImagesProcessorCrop(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs,
+						   size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) :
+		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs), startX(startX_rhs), endX(endX_rhs), startY(startY_rhs), endY(endY_rhs) {
+			if ((startX >= endX) || (startY >= endY)) {
+				throw std::runtime_error("Bad limit values specified for cropping");
+			}
+			
+			if ((endX >= x_size) || (endY >= y_size)) {
+				throw std::runtime_error("Bad limit values specified for cropping");
+			}
+			
+			croppedXSize = endX - startX + 1;
+			croppedYSize = endY - startY + 1;
+		}
+	
 	~CCDImagesProcessorCrop() {;}
 	
 	int convert_images();
@@ -120,8 +141,9 @@ protected:
  */
 class CCDImagesProcessorConvertToPhotons : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToPhotons(ImageLoader *i_loader, ImageOutputWriter *o_writer, double multiplicationFactor_rhs, double offset_rhs) :
-		image_loader(i_loader), output_writer(o_writer), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
+	CCDImagesProcessorConvertToPhotons(boost::shared_ptr<ImageLoader> imageLoader_rhs, boost::shared_ptr<ImageOutputWriter> outputWriter_rhs,
+									   double multiplicationFactor_rhs, double offset_rhs) :
+		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
 	~CCDImagesProcessorConvertToPhotons() {;}
 	
 	int convert_images();
