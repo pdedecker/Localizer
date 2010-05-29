@@ -10,12 +10,11 @@
 
 #include "PALM_analysis_Processing.h"
 
-int CCDImagesProcessorAverageSubtraction::convert_images() {
+void CCDImagesProcessorAverageSubtraction::convert_images() {
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
 	this->n_frames_averaging = this->total_number_of_images;
 	subtract_average_of_entire_trace();
-	return 0;
 }
 
 void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
@@ -53,7 +52,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	}
 }
 
-int CCDImagesProcessorDifferenceImage::convert_images() {
+void CCDImagesProcessorDifferenceImage::convert_images() {
 	
 	boost::shared_ptr<ublas::matrix<double> > current_image;
 	boost::shared_ptr<ublas::matrix<double> > next_image;
@@ -78,11 +77,9 @@ int CCDImagesProcessorDifferenceImage::convert_images() {
 		// current_image now contains the subtracted image, we should write it to disk
 		output_writer->write_image(current_image);
 	}
-	
-	return 0;
 }
 
-int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
+void CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	
 	boost::shared_ptr<ublas::matrix<double> > current_image;
 	
@@ -90,10 +87,9 @@ int CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 		current_image = image_loader->get_nth_image(n);
 		output_writer->write_image(current_image);
 	}
-	return 0;
 }
 
-int CCDImagesProcessorCrop::convert_images() {
+void CCDImagesProcessorCrop::convert_images() {
 	boost::shared_ptr<ublas::matrix <double> > croppedImage;
 	boost::shared_ptr<ublas::matrix <double> > loadedImage;
 	
@@ -109,10 +105,9 @@ int CCDImagesProcessorCrop::convert_images() {
 		
 		output_writer->write_image(croppedImage);
 	}
-	return 0;
 }
 
-int CCDImagesProcessorConvertToPhotons::convert_images() {
+void CCDImagesProcessorConvertToPhotons::convert_images() {
 	this->total_number_of_images = image_loader->get_total_number_of_images();
 	this->x_size = image_loader->getXSize();
 	this->y_size = image_loader->getYSize();
@@ -129,6 +124,5 @@ int CCDImagesProcessorConvertToPhotons::convert_images() {
 		}
 		output_writer->write_image(convertedImage);
 	}
-	return 0;
 }
 

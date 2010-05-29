@@ -46,7 +46,7 @@ public:
 	
 	virtual ~CCDImagesProcessor() {;}
 	
-	virtual int convert_images() = 0;
+	virtual void convert_images() = 0;
 protected:
 	size_t total_number_of_images;
 	size_t x_size;
@@ -66,7 +66,7 @@ public:
 	
 	~CCDImagesProcessorAverageSubtraction() {;}
 
-	int convert_images();
+	void convert_images();
 	
 	size_t get_n_frames_averaging() const {return n_frames_averaging;}
 	
@@ -86,7 +86,7 @@ public:
 	
 	~CCDImagesProcessorDifferenceImage() {;}
 	
-	int convert_images();
+	void convert_images();
 	
 // there are no protected members
 };
@@ -101,7 +101,7 @@ public:
 	~CCDImagesProcessorConvertToSimpleFileFormat() {;}
 	
 	
-	int convert_images();
+	void convert_images();
 	
 	// there are no protected members
 };
@@ -129,7 +129,7 @@ public:
 	
 	~CCDImagesProcessorCrop() {;}
 	
-	int convert_images();
+	void convert_images();
 	
 protected:
 	size_t startX, endX, startY, endY;	// the points between which we should crop
@@ -146,7 +146,7 @@ public:
 		CCDImagesProcessor(imageLoader_rhs, outputWriter_rhs), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
 	~CCDImagesProcessorConvertToPhotons() {;}
 	
-	int convert_images();
+	void convert_images();
 	
 protected:
 	double multiplicationFactor;
