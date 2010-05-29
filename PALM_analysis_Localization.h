@@ -161,7 +161,7 @@ int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *mea
 int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
-double MinimizationFunction_MLEwG(const gsl_vector fittedParams, void *fitData_rhs);
+double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_rhs);
 
 class measured_data_Gauss_fits {
 public:	

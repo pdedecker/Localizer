@@ -875,7 +875,7 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 
 void LocalizedPositionsContainer_Centroid::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
-	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_CENTROID)
+	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Centroid");
 	
 	// cast the pointer to the more specific type
@@ -1037,7 +1037,7 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 
 void LocalizedPositionsContainer_Multiplication::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
-	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_CENTROID)
+	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
 	
 	// cast the pointer to the more specific type
@@ -1164,7 +1164,7 @@ waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(DataFolderA
 
 void LocalizedPositionsContainer_ZeissPALM::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
-	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_ZEISSPALM)
+	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
 	
 	// cast the pointer to the more specific type
@@ -1327,7 +1327,7 @@ void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePat
 	outputFile << "Number of frames where this emitter is present" << "\n";
 	
 	// write the actual positions
-	for (std::vector<LocalizedPosition_2DGauss>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
+	for (std::vector<LocalizedPosition_MLEwG>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
 		outputFile << (*it).frameNumber << "\t";
 		outputFile << (*it).integral << "\t";
 		outputFile << (*it).width << "\t";
@@ -1350,7 +1350,7 @@ void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePat
 
 void LocalizedPositionsContainer_MLEwG::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
-	if (newPosition->getPositionType() != LOCALIZED_POSITIONS_TYPE_MLEWG)
+	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
 	
 	// cast the pointer to the more specific type
@@ -1359,14 +1359,14 @@ void LocalizedPositionsContainer_MLEwG::addPosition(boost::shared_ptr<LocalizedP
 	this->positionsVector.push_back(*newPosition_MLEwG);
 }
 
-void LocalizedPositionsContainer_ZeissMLEwG::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_MLEwG::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_MLEwG to itself");
 	}
 	
 	// check if the positions container is of the right type
-	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_MLEWG) {
+	if (newPositionsContainer->getPositionsType() != this->getPositionsType()) {
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
 	}
 	

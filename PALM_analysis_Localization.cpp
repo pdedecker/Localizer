@@ -325,13 +325,12 @@ int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *m
 	return GSL_SUCCESS;
 }
 
-double MinimizationFunction_MLEwG(const gsl_vector fittedParams, void *fitData_rhs) {
+double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_rhs) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<ublas::matrix<double> > imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->size1();
 	size_t ySize = imageSubset->size2();
-	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
 	
@@ -341,15 +340,15 @@ double MinimizationFunction_MLEwG(const gsl_vector fittedParams, void *fitData_r
 	double background = gsl_vector_get(fittedParams, 3);
 	double nPhotons = gsl_vector_get(fittedParams, 4);
 	
-	double expectationValue, recordedSignal; summedLikelihood;
+	double expectationValue, recordedSignal, summedLikelihood, x, y;
 	
-	summedLikelihood = 0.0
+	summedLikelihood = 0.0;
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			recordedSignal = (*imageSubset)(i, j);
-			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background * background
+			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background * background;
 			summedLikelihood += - expectationValue + recordedSignal * log(expectationValue) - gsl_sf_lngamma(recordedSignal);
 		}
 	}
@@ -980,24 +979,22 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	double x_offset, y_offset, x_max, y_max;
-	size_t number_of_intensities = size_of_subset * size_of_subset;
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	
 	double x0_initial, y0_initial, amplitude, background;
-	double chi, degreesOfFreedom, c;
 	long iterations = 0;
 	int status;
 	double size;
 		
 	boost::shared_ptr<ublas::matrix<double> > image_subset;
-	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
-	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
+	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
+	boost::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
 	
 	image_subset = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(size_of_subset, size_of_subset));
 	
 	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
-	gsl_multimin_fminimizer *s = NULL;
+	gsl_multimin_fminimizer *fit_iterator = NULL;
 	gsl_multimin_function minex_func;
 	
 	measured_data_Gauss_fits fitData;
@@ -1014,10 +1011,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	
 	minex_func.n = 5;
 	minex_func.f = MinimizationFunction_MLEwG;
-	minex_func.params = (void *)fitData;
+	minex_func.params = (void *)&fitData;
 	
-	s = gsl_multimin_fminimizer_alloc (T, 5);
-	if (s == NULL) {
+	fit_iterator = gsl_multimin_fminimizer_alloc (T, 5);
+	if (fit_iterator == NULL) {
 		gsl_vector_free(fit_parameters);
 		gsl_vector_free(stepSizes);
 		throw std::bad_alloc();
@@ -1066,19 +1063,70 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 		// set the step sizes to 1
 		gsl_vector_set_all(stepSizes, 1.0);
 		// set the solver
-		gsl_multimin_fminimizer_set(s, &minex_func, fit_parameters, stepSizes);
+		gsl_multimin_fminimizer_set(fit_iterator, &minex_func, fit_parameters, stepSizes);
 		
 		// iterate
 		do {
 			iterations++;
-			status = gsl_multimin_fminimizer_iterate(s);
+			status = gsl_multimin_fminimizer_iterate(fit_iterator);
 			if (status != 0)
 				break;
 			
-			size = gsl_multimin_fminimizer_size (s);
+			size = gsl_multimin_fminimizer_size (fit_iterator);
 			status = gsl_multimin_test_size (size, 1e-2);
 		} while ((status == GSL_CONTINUE) && (iterations < 200));
+		
+		if (gsl_vector_get(fit_iterator->x, 4) <= 0) {	// reject fits that have negative amplitudes
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// are the reported positions within the window?
+		if ((gsl_vector_get(fit_iterator->x, 0) < x_offset) || (gsl_vector_get(fit_iterator->x, 0) > x_max) || (gsl_vector_get(fit_iterator->x, 1) < y_offset) || (gsl_vector_get(fit_iterator->x, 1) > y_max)) {
+			// the reported positions are not within the window, we should reject them
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// are the fitted coordinates close enough to the initial guess?
+		if ((fabs(gsl_vector_get(fit_iterator->x, 0) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 1) - y0_initial) > 2.0 * initialPSFWidth)) {
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		if ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5)) {
+			// the output fit width is more than a factor of two different from the initial value, drop this point
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
+		// store the fitted parameters
+		localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 0);
+		localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 1);
+		localizationResult->width = gsl_vector_get(fit_iterator->x, 2);
+		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
+		localizationResult->integral = gsl_vector_get(fit_iterator->x, 4);
+		
+		fitted_positions->addPosition(localizationResult);
 	}
+	
+	gsl_multimin_fminimizer_free(fit_iterator);
+	gsl_vector_free(fit_parameters);
+	gsl_vector_free(stepSizes);
+	
+	return fitted_positions;
 	
 }
 

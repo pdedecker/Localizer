@@ -798,6 +798,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 				case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
 					break;
+				case LOCALIZATION_METHOD_MLEwG:
+					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
 				default:
 					throw std::runtime_error("Unknown localization method");
 					break;
