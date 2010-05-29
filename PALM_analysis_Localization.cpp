@@ -349,7 +349,8 @@ double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_
 			y = yOffset + (double)j;
 			recordedSignal = (*imageSubset)(i, j);
 			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background * background;
-			summedLikelihood += - expectationValue + recordedSignal * log(expectationValue) - gsl_sf_lngamma(recordedSignal);
+			if (recordedSignal >= 0.0)
+				summedLikelihood += - expectationValue + recordedSignal * log(expectationValue) - gsl_sf_lngamma(recordedSignal + 1.0);
 		}
 	}
 	return (-1.0 * summedLikelihood);	// make the number negative since what we really want is maximization
@@ -982,10 +983,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	
-	double x0_initial, y0_initial, amplitude, background;
+	double x0_initial, y0_initial, integral, background;
 	long iterations = 0;
 	int status;
 	double size;
+	double dummy;
 		
 	boost::shared_ptr<ublas::matrix<double> > image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
@@ -1024,7 +1026,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
 		iterations = 0;
 		
-		amplitude = (*it).get_intensity();
+		integral = (*it).get_intensity() * 2.0 * M_PI * this->initialPSFWidth * this->initialPSFWidth;;
 		x0_initial = (*it).get_x();
 		y0_initial = (*it).get_y();
 		background = (*it).get_background();
@@ -1058,7 +1060,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 		gsl_vector_set(fit_parameters, 1, y0_initial);
 		gsl_vector_set(fit_parameters, 2, this->initialPSFWidth);
 		gsl_vector_set(fit_parameters, 3, background);
-		gsl_vector_set(fit_parameters, 4, amplitude);
+		gsl_vector_set(fit_parameters, 4, integral);
 		
 		// set the step sizes to 1
 		gsl_vector_set_all(stepSizes, 1.0);
@@ -1103,8 +1105,19 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 			continue;
 		}
 		
+		// is the amplitude close enough to the initial value to be trusted?
+		if ((gsl_vector_get(fit_iterator->x, 4) < integral / 2.0) || (gsl_vector_get(fit_iterator->x, 4) > integral * 1.5)) {
+			// the output fit integral is more than a factor of two different from the initial value, drop this point
+			it = positions->erase(it);
+			if (it != positions->begin()) {
+				--it;
+			}
+			continue;
+		}
+		
 		if ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5)) {
 			// the output fit width is more than a factor of two different from the initial value, drop this point
+			dummy = gsl_vector_get(fit_iterator->x, 2);
 			it = positions->erase(it);
 			if (it != positions->begin()) {
 				--it;

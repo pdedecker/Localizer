@@ -800,6 +800,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 					break;
 				case LOCALIZATION_METHOD_MLEwG:
 					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
+					break;
 				default:
 					throw std::runtime_error("Unknown localization method");
 					break;

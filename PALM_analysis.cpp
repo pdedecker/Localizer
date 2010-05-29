@@ -69,6 +69,9 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 		numberOfThreads = nImages;
 	}
 	
+	// TODO: REMOVE
+	numberOfThreads = 1;
+	
 	// fill the queue holding the frames to be processed with the frames in the sequence
 	for (size_t i = 0; i < this->nImages; ++i) {
 		this->framesToBeProcessed.push(i);
