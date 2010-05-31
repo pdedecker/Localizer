@@ -1239,16 +1239,13 @@ ImageOutputWriter::ImageOutputWriter(const std::string &rhs, int overwrite) {
 
 
 
-SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int overwrite) {
+SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
-	int header_length = 3 * sizeof(size_t);
+	int header_length = 4 * sizeof(uint32_t);
 	
-	char *header = new char[header_length];
-	if (header == NULL) {
-		throw std::bad_alloc();
-	}
+	boost::scoped_array<char> header(new char[header_length]);
 	for (int i = 0; i < header_length; i++) {
 		header[i] = 0;
 	}
@@ -1276,30 +1273,40 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
-	x_size = 0;
-	y_size = 0;
-	n_images_written = 0;
+	this->x_size = 0;
+	this->y_size = 0;
+	this->n_images_written = 0;
+	this->storageType = storageType_rhs;
 	
 	// the first 3 * 4 bytes of the file should be written in advance, we will fill them in later
 	// by convention they are x_size, y_size, and n_images
-	file.write(header, header_length);
-	delete[] header;
+	file.write(header.get(), header_length);
 }
 
 
 SimpleImageOutputWriter::~SimpleImageOutputWriter() {
-	
 	if (file.is_open() != 0) {
-		file.seekp(0);
-		file.write((char *)&x_size, sizeof(size_t));
-		file.write((char *)&y_size, sizeof(size_t));
-		file.write((char *)&n_images_written, sizeof(size_t));
-		
 		file.close();
 	}
 }
 
-
+void SimpleImageOutputWriter::WriteHeader() {
+	assert(sizeof(x_size) == 4);
+	assert(sizeof(y_size) == 4);
+	assert(sizeof(n_images_written) == 4);
+	assert(sizeof(storageType) == 4);
+	
+	uint32_t endiannessMarker = 1;
+	
+	if (file.is_open()) {
+		file.seekp(0);
+		file.write((char *)&endiannessMarker, sizeof(endiannessMarker));
+		file.write((char *)&x_size, sizeof(x_size));
+		file.write((char *)&y_size, sizeof(y_size));
+		file.write((char *)&n_images_written, sizeof(n_images_written));
+		file.write((char *)&storageType, sizeof(storageType));
+	}
+}
 
 void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	
@@ -1308,20 +1315,60 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double
 	size_t y_size = imageToWrite->size2();
 	size_t n_pixels = x_size * y_size;
 	
-	this->x_size = x_size;
-	this->y_size = y_size;
-	
-	boost::scoped_array<float> single_image_buffer (new float[n_pixels]);
-	
 	size_t offset = 0;
-	for (size_t j = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
-			single_image_buffer[offset] = (float)(*imageToWrite)(i, j);
-			offset++;
-		}
+	
+	if (this->n_images_written == 0) {
+		this->x_size = x_size;
+		this->y_size = y_size;
+	} else {
+		assert((x_size == this->x_size) && (y_size == this->y_size));
 	}
 	
-	file.write((char *)single_image_buffer.get(), (n_pixels * sizeof(float)));
+	switch (this->storageType) {
+		case STORAGE_TYPE_UINT16:
+		{
+			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
+			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+				buffer[offset] = (uint16_t)(*it);
+				++offset;
+			}
+			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint16_t));
+			break;
+		}
+		case STORAGE_TYPE_UINT32:
+		{
+			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
+			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+				buffer[offset] = (uint32_t)(*it);
+				++offset;
+			}
+			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint32_t));
+			break;
+		}
+		case STORAGE_TYPE_FP32:
+		{
+			boost::scoped_array<float> buffer(new float[n_pixels]);
+			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+				buffer[offset] = (float)(*it);
+				++offset;
+			}
+			this->file.write((char *)buffer.get(), n_pixels * sizeof(float));
+			break;
+		}
+		case STORAGE_TYPE_FP64:
+		{
+			boost::scoped_array<double> buffer(new double[n_pixels]);
+			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+				buffer[offset] = (double)(*it);
+				++offset;
+			}
+			this->file.write((char *)buffer.get(), n_pixels * sizeof(double));
+			break;
+		}
+		default:
+			throw std::runtime_error("Unsupport file type requested in the simple output format");
+	}
+	++this->n_images_written;
 }
 
 TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {

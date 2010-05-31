@@ -220,13 +220,16 @@ protected:
 
 class SimpleImageOutputWriter : public ImageOutputWriter {
 public:
-	SimpleImageOutputWriter(const std::string &rhs, int overwrite);
+	SimpleImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
 	~SimpleImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
 	
 protected:
-	size_t x_size, y_size;
+	void WriteHeader();
+	
+	uint32_t x_size, y_size;
+	uint32_t storageType;
 };
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
