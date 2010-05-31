@@ -1100,6 +1100,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 		switch (outputType) {
 			case IMAGE_OUTPUT_TYPE_TIFF:
+			case IMAGE_OUTPUT_TYPE_IGOR:
 				compression = COMPRESSION_NONE;
 				break;
 			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
@@ -1125,6 +1126,16 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 						break;
 					default:
 						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, image_loader->getStorageType()));
+						break;
+				}
+				break;
+			case IMAGE_OUTPUT_TYPE_IGOR:
+				switch (method) {
+					case PROCESSING_DIFFERENCEIMAGE:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images() - 1, 1));
+						break;
+					default:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images(), 1));
 						break;
 				}
 				break;
