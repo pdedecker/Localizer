@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
 	std::string localizationName = vm["localization"].as<std::string>();
+	std::string processorName;
 	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
 	
 	std::vector<std::string> particleVerifierNames;
@@ -66,7 +67,7 @@ int main(int argc, char *argv[]) {
 		particleVerifierNames = vm["particleverifier"].as<std::vector<std::string> >();
 	}
 	
-	double pfa, directThreshold;
+	double pfa, directThreshold, psfWidth;
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
 	boost::shared_ptr<ThresholdImage> thresholder;
@@ -97,7 +98,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		
-		double psfWidth = vm["psf-width"].as<double>();
+		psfWidth = vm["psf-width"].as<double>();
 		
 		// get the pre- and postprocessors
 		preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
@@ -118,7 +119,7 @@ int main(int argc, char *argv[]) {
 		positionsFitter = GetPositionsFitter(localizationName, psfWidth);
 		
 		// get a progress reporter
-		progressReporter(new PALMAnalysisProgressReporter_stdout());
+		progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_stdout());
 		
 		// get an analysis controller
 		boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
@@ -127,7 +128,7 @@ int main(int argc, char *argv[]) {
 																								progressReporter));
 	} else {	// we want to process the images, not localize
 		// get the processor
-		std::string processorName = vm["process"].as<std::string>();
+		processorName = vm["process"].as<std::string>();
 		size_t nFramesAveraging = vm["averaging"].as<size_t>();
 		
 		double cameraMultiplicationFactor, cameraOffset;
@@ -153,44 +154,58 @@ int main(int argc, char *argv[]) {
 		std::cout << "No input files specified!\n";
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
+	boost::shared_ptr<ImageOutputWriter> imageOutputWriter;
 	std::string outputFilePath;
 	std::ostringstream header;
 	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
 	
 	for (size_t i = 0; i < nInputFiles; ++i) {
 		try {
-			// get an imageloader and output file path
-			imageLoader = GetImageLoader(inputFiles.at(i));
-			outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
-			
 			// if there is more than one input file then tell the user which inputfile is being processed
 			if (nInputFiles > 1) {
 				std::cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
 				std::cout.flush();
 			}
 			
-			// do the analysis
-			fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
+			// are we interested in localization or processing?
+			if (vm.count("process") != 0) {
+				// get an imageloader and output file path
+				imageLoader = GetImageLoader(inputFiles.at(i));
+				outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
+				
+				// do the analysis
+				fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
+				
+				// write a header
+				header.str("");
+				header << "X SIZE:" << imageLoader->getXSize() << "\n";
+				header << "Y SIZE:" << imageLoader->getYSize() << "\n";
+				header << "PFA:" << pfa << "\n";
+				header << "PSF WIDTH:" << psfWidth << "\n";
+				header << "THRESHOLD METHOD:" << segmentationName << "\n";
+				header << "PARTICLE FINDING:" << particleFinderName << "\n";
+				header << "PARTICLE VERIFIER:";
+				for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
+					std::cout << *it << ',';
+				}
+				if (particleVerifierNames.size() == 0)
+					std::cout << "none";
+				std::cout << "\n";
+				header << "LOCALIZATION METHOD:" << localizationName << "\n";
+				
+				// write the output
+				fittedPositions->writePositionsToFile(outputFilePath, header.str());
 			
-			// write a header
-			header.str("");
-			header << "X SIZE:" << imageLoader->getXSize() << "\n";
-			header << "Y SIZE:" << imageLoader->getYSize() << "\n";
-			header << "PFA:" << pfa << "\n";
-			header << "PSF WIDTH:" << psfWidth << "\n";
-			header << "THRESHOLD METHOD:" << segmentationName << "\n";
-			header << "PARTICLE FINDING:" << particleFinderName << "\n";
-			header << "PARTICLE VERIFIER:";
-			for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
-				std::cout << *it << ',';
+			} else {	// we want to processing, not localization
+				// get an imageloader and output writer
+				imageLoader = GetImageLoader(inputFiles.at(i));
+				outputFilePath = GetOutputProcessedImagesFilePath(inputFiles.at(i));
+				imageOutputWriter = GetImageOutputWriter(processorName, outputFilePath, COMPRESSION_NONE);
+				
+				// do the processing
+				ccdImagesProcessor->convert_images(imageLoader, imageOutputWriter);
 			}
-			if (particleVerifierNames.size() == 0)
-				std::cout << "none";
-			std::cout << "\n";
-			header << "LOCALIZATION METHOD:" << localizationName << "\n";
-			
-			// write the output
-			fittedPositions->writePositionsToFile(outputFilePath, header.str());
+				
 		}
 		catch (std::runtime_error e) {
 			std::cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
@@ -314,10 +329,10 @@ boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, si
 	if (name == std::string("subtractaverage"))
 		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorAverageSubtraction(nFramesAveraging));
 	
-	if (name == std::string"differenceimage"))
+	if (name == std::string("differenceimage"))
 		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorDifferenceImage());
 	
-	if (name == std::string(converttophotons))
+	if (name == std::string("converttophotons"))
 		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorConvertToPhotons(cameraMultiplier, cameraOffset));
 	
 	// if we get here then we didn't recognize the processing algorithm
@@ -348,12 +363,35 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	
 }
 
+boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, std::string outputFilePath, size_t compression) {
+	if (processMethodName == std::string("subtractaverage"))
+		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
+	
+	if (processMethodName == std::string("differenceimage"))
+		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
+	
+	if (processMethodName == std::string("converttophotons"))
+		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_UINT32));
+	
+	// if we get here then we didn't recognize the processing algorithm
+	throw std::runtime_error("Unknown processing algorithm");
+}
+
 std::string GetOutputPositionsFilePath(std::string dataFilePath) {
 	// remove the last 4 characters and replace with "_positions.txt"
 	
 	std::string outputPath = dataFilePath;
 	outputPath.erase(outputPath.length() - 4, 4);
 	outputPath += "_positions.txt";
+	return outputPath;
+}
+
+std::string GetOutputProcessedImagesFilePath(std::string dataFilePath) {
+	// remove the last 4 characters and replace with "_processed.tif"
+	
+	std::string outputPath = dataFilePath;
+	outputPath.erase(outputPath.length() - 4, 4);
+	outputPath += "_processed.tif";
 	return outputPath;
 }
 
