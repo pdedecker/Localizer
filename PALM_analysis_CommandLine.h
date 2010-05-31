@@ -25,13 +25,14 @@
 int main(int argc, char *argv[]);
 
 // function that will parse the string command line arguments
-// and convert them to integer constants
+// and convert them to the appropriate objects
 boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name);
 boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name);
 boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth);
 boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name);
 boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma);
 boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth);
+boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset);
 
 // function that will guess the CCD file type and return an image loader
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
