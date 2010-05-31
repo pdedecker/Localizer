@@ -721,27 +721,111 @@ SimpleImageLoader::~SimpleImageLoader() {
 	}
 }
 
+void SimpleImageLoader::parse_header_information() {
+	file.seekg(0);
+	
+	uint32_t endiannessMarker;
+	uint32_t nImages_uint32;
+	uint32_t xSize_uint32;
+	uint32_t ySize_uint32;
+	uint32_t storageFormat;
+	
+	
+	// the first 12 bytes of the file contain this information
+	
+	file.read((char *)&endiannessMarker, sizeof(uint32_t));
+	file.read((char *)&nImages_uint32, sizeof(uint32_t));
+	file.read((char *)&xSize_uint32, sizeof(uint32_t));
+	file.read((char *)&ySize_uint32, sizeof(uint32_t));
+	file.read((char *)&storageFormat, sizeof(uint32_t));
+	
+	if (file.fail() != 0) {
+		std::string error;
+		error = "Error parsing the header information in \"";
+		error += this->filePath;
+		error += "\" assuming the simple image format";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	if (endiannessMarker != 27)
+		throw std::runtime_error("The data is either not in the PDE format or of a different endianness");
+	
+	this->total_number_of_images = nImages_uint32;
+	this->x_size = xSize_uint32;
+	this->y_size = ySize_uint32;
+	this->storage_type = storageFormat;
+	this->header_length = 5 * sizeof(uint32_t);
+}
+
 std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	uint64_t offset;
-	size_t array_offset;
 	boost::shared_ptr<ublas::matrix<double> > image;
 	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
+	size_t n_pixels = this->x_size * this->y_size;
 	
 	loadImagesMutex.lock();
 	
-	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	
 	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
 		
-		offset = 3 * sizeof(size_t) + i * (x_size) * (y_size) * sizeof(float);
-		file.seekg(offset);
+		switch (this->storage_type) {
+			case STORAGE_TYPE_UINT16:
+			{
+				offset = header_length + i * n_pixels * sizeof(uint16_t);
+				boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
+				file.seekg(offset);
+				file.read((char *)buffer.get(), n_pixels * sizeof(uint16_t));
+				offset = 0;
+				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+					*it = buffer[offset];
+					++offset;
+				}
+				break;
+			}
+			case STORAGE_TYPE_UINT32:
+			{
+				offset = header_length + i * n_pixels * sizeof(uint32_t);
+				boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
+				file.seekg(offset);
+				file.read((char *)buffer.get(), n_pixels * sizeof(uint32_t));
+				offset = 0;
+				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+					*it = buffer[offset];
+					++offset;
+				}
+				break;
+			}
+			case STORAGE_TYPE_FP32:
+			{
+				offset = header_length + i * n_pixels * sizeof(float);
+				boost::scoped_array<float> buffer(new float[n_pixels]);
+				file.seekg(offset);
+				file.read((char *)buffer.get(), n_pixels * sizeof(float));
+				offset = 0;
+				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+					*it = buffer[offset];
+					++offset;
+				}
+				break;
+			}
+			case STORAGE_TYPE_FP64:
+			{
+				offset = header_length + i * n_pixels * sizeof(double);
+				boost::scoped_array<double> buffer(new double[n_pixels]);
+				file.seekg(offset);
+				file.read((char *)buffer.get(), n_pixels * sizeof(double));
+				offset = 0;
+				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+					*it = buffer[offset];
+					++offset;
+				}
+				break;
+			}
+			default:
+				throw std::runtime_error("The data file does appear to contain a recognized storage type");
+				break;
+		}
 		
-		array_offset = 0;
-		
-		// this is currently only safe on little-endian systems!
-		
-		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
@@ -749,13 +833,6 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 			error += "\" assuming the simple image format";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
-		}
-		
-		for (size_t j  = 0; j < y_size; j++) {
-			for (size_t i = 0; i < x_size; i++) {
-				(*image)(i, j) = single_image_buffer[array_offset];
-				array_offset++;
-			}
 		}
 		
 		requestedImages.push_back(image);
@@ -766,27 +843,6 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 	loadImagesMutex.unlock();
 	
 	return requestedImages;
-}
-
-
-void SimpleImageLoader::parse_header_information() {
-	
-	storage_type = STORAGE_TYPE_FP64;
-	
-	file.seekg(0);
-	
-	// the first 12 bytes of the file contain this information
-	file.read((char *)&x_size, sizeof(size_t));
-	file.read((char *)&y_size, sizeof(size_t));
-	file.read((char *)&total_number_of_images, sizeof(size_t));
-	
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error parsing the header information in \"";
-		error += this->filePath;
-		error += "\" assuming the simple image format";
-		throw ERROR_READING_FILE_DATA(error);
-	}
 }
 
 ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
@@ -1296,7 +1352,7 @@ void SimpleImageOutputWriter::WriteHeader() {
 	assert(sizeof(n_images_written) == 4);
 	assert(sizeof(storageType) == 4);
 	
-	uint32_t endiannessMarker = 1;
+	uint32_t endiannessMarker = 27;
 	
 	if (file.is_open()) {
 		file.seekp(0);
