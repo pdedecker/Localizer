@@ -1136,26 +1136,26 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		// do the actual procedure
 		switch (method) {
 			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(image_loader, output_writer, 0));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(0));
 				break;
 			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(image_loader, output_writer));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage());
 				break;
 			case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(image_loader, output_writer));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat());
 				break;
 			case PROCESSING_CROP:		// output a cropped version of the image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(image_loader, output_writer, startX, endX, startY, endY));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(startX, endX, startY, endY));
 				break;
 			case PROCESSING_CONVERTTOPHOTONS:
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(image_loader, output_writer, cameraMultiplicationFactor, cameraOffset));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(cameraMultiplicationFactor, cameraOffset));
 				break;
 			default:
 				throw std::runtime_error("Unknown CCD postprocessing method");
 				break;
 		}
 		
-		ccd_image_processor->convert_images();
+		ccd_image_processor->convert_images(image_loader, output_writer);
 	}
 	
 	catch (std::bad_alloc) {

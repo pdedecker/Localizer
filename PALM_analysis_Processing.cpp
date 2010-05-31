@@ -10,15 +10,13 @@
 
 #include "PALM_analysis_Processing.h"
 
-void CCDImagesProcessorAverageSubtraction::convert_images() {
+void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
-	this->n_frames_averaging = this->total_number_of_images;
-	subtract_average_of_entire_trace();
-}
-
-void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
-	size_t n;
+	
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
+	size_t total_number_of_images = image_loader->get_total_number_of_images();
 	boost::shared_ptr<ublas::matrix<double> > average_image;
 	boost::shared_ptr<ublas::matrix<double> > loaded_image;
 	boost::shared_ptr<ublas::matrix<double> > subtracted_image;
@@ -33,7 +31,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
-	for (n = 0; n < total_number_of_images; n++) {
+	for (size_t n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
 		(*average_image) += (*loaded_image);
@@ -43,7 +41,7 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	*average_image /= (double)this->n_frames_averaging;
 	
 	// now subtract the average for each frame
-	for (n = 0; n < total_number_of_images; n++) {
+	for (size_t n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->get_nth_image(n);
 		
 		ublas::noalias(*subtracted_image) = (*loaded_image) - (*average_image);
@@ -52,10 +50,10 @@ void CCDImagesProcessorAverageSubtraction::subtract_average_of_entire_trace() {
 	}
 }
 
-void CCDImagesProcessorDifferenceImage::convert_images() {
-	
+void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<ublas::matrix<double> > current_image;
 	boost::shared_ptr<ublas::matrix<double> > next_image;
+	size_t total_number_of_images = image_loader->get_total_number_of_images();
 	
 	// we start by loading the first image in next_image
 	// this is required so the loop that follows can start properly
@@ -79,9 +77,9 @@ void CCDImagesProcessorDifferenceImage::convert_images() {
 	}
 }
 
-void CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
-	
+void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<ublas::matrix<double> > current_image;
+	size_t total_number_of_images = image_loader->get_total_number_of_images();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->get_nth_image(n);
@@ -89,7 +87,20 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images() {
 	}
 }
 
-void CCDImagesProcessorCrop::convert_images() {
+void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	
+	if ((startX >= endX) || (startY >= endY)) {
+		throw std::runtime_error("Bad limit values specified for cropping");
+	}
+	
+	if ((endX >= image_loader->getXSize()) || (endY >= image_loader->getYSize())) {
+		throw std::runtime_error("Bad limit values specified for cropping");
+	}
+	
+	this->croppedXSize = endX - startX + 1;
+	this->croppedYSize = endY - startY + 1;
+	
 	boost::shared_ptr<ublas::matrix <double> > croppedImage;
 	boost::shared_ptr<ublas::matrix <double> > loadedImage;
 	
@@ -107,20 +118,20 @@ void CCDImagesProcessorCrop::convert_images() {
 	}
 }
 
-void CCDImagesProcessorConvertToPhotons::convert_images() {
+void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	assert(this->multiplicationFactor > 0.0);
 	
-	this->total_number_of_images = image_loader->get_total_number_of_images();
-	this->x_size = image_loader->getXSize();
-	this->y_size = image_loader->getYSize();
+	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t x_size = image_loader->getXSize();
+	size_t y_size = image_loader->getYSize();
 	
 	boost::shared_ptr<ublas::matrix <double> > loadedImage;
 	boost::shared_ptr<ublas::matrix <double> > convertedImage (new ublas::matrix<double>(x_size, y_size));;
 	
-	for (size_t n = 0; n < this->total_number_of_images; ++n) {
+	for (size_t n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->get_nth_image(n);
-		for (size_t i = 0; i < this->x_size; ++i) {
-			for (size_t j = 0; j < this->y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
+			for (size_t j = 0; j < y_size; ++j) {
 				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;
 			}
 		}
