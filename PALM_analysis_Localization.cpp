@@ -357,29 +357,14 @@ double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_
 }
 
 double CalculateMLEwGVariance(double PSFWidth, double nPhotons, double background) {
-	// based on eq54 in the supplemental in nmeth.1447
-	double variance, sigmaStar, integral, absError;
-	int result;
-	size_t nEvaluations;
+	// based on eq 6 in the Mortensen paper since eq 5 does not seem very stable
+	double variance, sigmaA;
 	
-	sigmaStar = PSFWidth - 1.0 / 12.0;
+	sigmaA = PSFWidth * PSFWidth + 1.0 / 12.0;
 	
-	// wrap the parameters up in an array to pass to the integration routine
-	boost::scoped_array<double> params(new double[3]);
-	params[0] = sigmaStar;
-	params[1] = nPhotons;
-	params[2] = background;
+	variance = sigmaA * sigmaA / nPhotons * (16.0 / 9.0 + 8 * M_PI * PSFWidth * PSFWidth * background / nPhotons);
 	
-	// numerically calculate the integral in the equation
-	gsl_function F;
-	F.function = &MLEwGIntegrand;
-	F.params = params.get();
-	result = gsl_integration_qng(&F, 1.0e-5, 1, 0.1, 0.1, &integral, &absError, &nEvaluations);
-	if (result != GSL_SUCCESS) {
-		throw std::runtime_error("Unsuccessful integration in CalculateMLEwGVariance");
-	}
-	
-	return (PSFWidth * PSFWidth / nPhotons / integral);
+	return variance;
 }
 
 double MLEwGIntegrand(double t, void *params_rhs) {
@@ -1167,7 +1152,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 		localizationResult->width = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
 		localizationResult->integral = gsl_vector_get(fit_iterator->x, 4);
-		localizationResult->positionDeviation = CalculateMLEwGVariance(initialPSFWidth, localizationResult->integral, localizationResult->background);
+		localizationResult->positionDeviation = sqrt(CalculateMLEwGVariance(initialPSFWidth, localizationResult->integral, localizationResult->background));
 		
 		fitted_positions->addPosition(localizationResult);
 	}
