@@ -115,7 +115,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images() {
 	this->y_size = image_loader->getYSize();
 	
 	boost::shared_ptr<ublas::matrix <double> > loadedImage;
-	boost::shared_ptr<ublas::matrix <double> > convertedImage;
+	boost::shared_ptr<ublas::matrix <double> > convertedImage (new ublas::matrix<double>(x_size, y_size));;
 	
 	for (size_t n = 0; n < this->total_number_of_images; ++n) {
 		loadedImage = image_loader->get_nth_image(n);
