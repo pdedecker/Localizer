@@ -348,12 +348,48 @@ double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			recordedSignal = (*imageSubset)(i, j);
-			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background * background;
+			expectationValue = nPhotons / (2 * PI * stdDev * stdDev) * exp(-((x - x0) * (x - x0) + (y - y0) * (y - y0)) / stdDev / stdDev) + background;
 			if (recordedSignal >= 0.0)
 				summedLikelihood += - expectationValue + recordedSignal * log(expectationValue) - gsl_sf_lngamma(recordedSignal + 1.0);
 		}
 	}
 	return (-1.0 * summedLikelihood);	// make the number negative since what we really want is maximization
+}
+
+double CalculateMLEwGVariance(double PSFWidth, double nPhotons, double background) {
+	// based on eq54 in the supplemental in nmeth.1447
+	double variance, sigmaStar, integral, absError;
+	int result;
+	size_t nEvaluations;
+	
+	sigmaStar = PSFWidth - 1.0 / 12.0;
+	
+	// wrap the parameters up in an array to pass to the integration routine
+	boost::scoped_array<double> params(new double[3]);
+	params[0] = sigmaStar;
+	params[1] = nPhotons;
+	params[2] = background;
+	
+	// numerically calculate the integral in the equation
+	gsl_function F;
+	F.function = &MLEwGIntegrand;
+	F.params = params.get();
+	result = gsl_integration_qng(&F, 1.0e-5, 1, 0.1, 0.1, &integral, &absError, &nEvaluations);
+	if (result != GSL_SUCCESS) {
+		throw std::runtime_error("Unsuccessful integration in CalculateMLEwGVariance");
+	}
+	
+	return (PSFWidth * PSFWidth / nPhotons / integral);
+}
+
+double MLEwGIntegrand(double t, void *params_rhs) {
+	double *params = (double *)params_rhs;
+	
+	double sigmaStar = params[0];
+	double nPhotons = params[1];
+	double background = params[2];
+	
+	return (log(t) / (1 + t / (2 * M_PI * sigmaStar * sigmaStar * background / nPhotons)));
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image,
@@ -1131,6 +1167,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 		localizationResult->width = gsl_vector_get(fit_iterator->x, 2);
 		localizationResult->background = gsl_vector_get(fit_iterator->x, 3);
 		localizationResult->integral = gsl_vector_get(fit_iterator->x, 4);
+		localizationResult->positionDeviation = CalculateMLEwGVariance(initialPSFWidth, localizationResult->integral, localizationResult->background);
 		
 		fitted_positions->addPosition(localizationResult);
 	}

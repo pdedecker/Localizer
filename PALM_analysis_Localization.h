@@ -19,6 +19,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
+#include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
@@ -162,6 +163,8 @@ int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *me
 int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
 double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_rhs);
+double CalculateMLEwGVariance(double PSFWidth, double nPhotons, double background);
+double MLEwGIntegrand(double t, void *params_rhs);
 
 class measured_data_Gauss_fits {
 public:	
