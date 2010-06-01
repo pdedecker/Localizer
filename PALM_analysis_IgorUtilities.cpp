@@ -11,7 +11,7 @@
 
 
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end) {
-	size_t total_n_images = image_loader->get_total_number_of_images();
+	size_t total_n_images = image_loader->GetNImages();
 	size_t n_images_to_load;
 	size_t x_size, y_size;
 	int storage_type, waveType;
@@ -128,7 +128,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 
 
 int parse_ccd_headers(ImageLoader *image_loader) {
-	size_t total_n_images = image_loader->get_total_number_of_images();
+	size_t total_n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -154,7 +154,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 }
 
 int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
-	size_t n_images = image_loader->get_total_number_of_images();
+	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -211,7 +211,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndNam
 }
 
 int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
-	size_t n_images = image_loader->get_total_number_of_images();
+	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -280,7 +280,7 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 
 
 void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
-	size_t n_images = image_loader->get_total_number_of_images();
+	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	int result;

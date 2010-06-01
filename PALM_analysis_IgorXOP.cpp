@@ -1129,10 +1129,10 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			case IMAGE_OUTPUT_TYPE_IGOR:
 				switch (method) {
 					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images() - 1, 1));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages() - 1, 1));
 						break;
 					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->get_total_number_of_images(), 1));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages(), 1));
 						break;
 				}
 				break;

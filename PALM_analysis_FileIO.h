@@ -78,7 +78,7 @@ public:
 	ImageLoader(const std::string rhs);
 	virtual ~ImageLoader();
 	
-	size_t get_total_number_of_images() const {return total_number_of_images;}
+	size_t GetNImages() const {return total_number_of_images;}
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	int getStorageType() const {return storage_type;}

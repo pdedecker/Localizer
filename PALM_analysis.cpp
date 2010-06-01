@@ -46,7 +46,7 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 
 boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs) {
 	this->imageLoader = imageLoader_rhs;
-	this->nImages = imageLoader->get_total_number_of_images();
+	this->nImages = imageLoader->GetNImages();
 	
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;

@@ -16,7 +16,7 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
-	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t total_number_of_images = image_loader->GetNImages();
 	boost::shared_ptr<ublas::matrix<double> > average_image;
 	boost::shared_ptr<ublas::matrix<double> > loaded_image;
 	boost::shared_ptr<ublas::matrix<double> > subtracted_image;
@@ -53,7 +53,7 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<ublas::matrix<double> > current_image;
 	boost::shared_ptr<ublas::matrix<double> > next_image;
-	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t total_number_of_images = image_loader->GetNImages();
 	
 	// we start by loading the first image in next_image
 	// this is required so the loop that follows can start properly
@@ -79,7 +79,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 
 void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<ublas::matrix<double> > current_image;
-	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t total_number_of_images = image_loader->GetNImages();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->get_nth_image(n);
@@ -88,7 +88,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 }
 
 void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t total_number_of_images = image_loader->GetNImages();
 	
 	if ((startX >= endX) || (startY >= endY)) {
 		throw std::runtime_error("Bad limit values specified for cropping");
@@ -121,7 +121,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	assert(this->multiplicationFactor > 0.0);
 	
-	size_t total_number_of_images = image_loader->get_total_number_of_images();
+	size_t total_number_of_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
