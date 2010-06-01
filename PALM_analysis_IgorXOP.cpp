@@ -1155,22 +1155,25 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				break;
 		}
 		
+		// get a progress reporter
+		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_IgorCommandLine);
+		
 		// do the actual procedure
 		switch (method) {
 			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(0));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, 0));
 				break;
 			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage());
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
 				break;
 			case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat());
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(progressReporter));
 				break;
 			case PROCESSING_CROP:		// output a cropped version of the image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(startX, endX, startY, endY));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(progressReporter, startX, endX, startY, endY));
 				break;
 			case PROCESSING_CONVERTTOPHOTONS:
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(cameraMultiplicationFactor, cameraOffset));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplicationFactor, cameraOffset));
 				break;
 			default:
 				throw std::runtime_error("Unknown CCD postprocessing method");

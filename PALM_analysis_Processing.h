@@ -41,10 +41,13 @@ class ImageOutputWriter;
  */
 class CCDImagesProcessor {
 public:
-	CCDImagesProcessor() {;}
+	CCDImagesProcessor(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) : progressReporter(progressReporter_rhs) {}
 	virtual ~CCDImagesProcessor() {;}
 	
 	virtual void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) = 0;
+	
+protected:
+	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
 };
 
 /**
@@ -52,7 +55,7 @@ public:
  */
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
-	CCDImagesProcessorAverageSubtraction(size_t nFramesAveraging_rhs) : n_frames_averaging(nFramesAveraging_rhs) {}
+	CCDImagesProcessorAverageSubtraction(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs, size_t nFramesAveraging_rhs) : CCDImagesProcessor(progressReporter_rhs), n_frames_averaging(nFramesAveraging_rhs) {}
 	~CCDImagesProcessorAverageSubtraction() {;}
 
 	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
@@ -68,7 +71,7 @@ protected:
  */
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorDifferenceImage() {;}
+	CCDImagesProcessorDifferenceImage(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
 	~CCDImagesProcessorDifferenceImage() {;}
 	
 	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
@@ -81,7 +84,7 @@ public:
  */
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToSimpleFileFormat() {;}
+	CCDImagesProcessorConvertToSimpleFileFormat(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
 	~CCDImagesProcessorConvertToSimpleFileFormat() {;}
 	
 	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
@@ -95,7 +98,7 @@ public:
  */
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorCrop(size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) : startX(startX_rhs), endX(endX_rhs), startY(startY_rhs), endY(endY_rhs) {}
+	CCDImagesProcessorCrop(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) : CCDImagesProcessor(progressReporter_rhs), startX(startX_rhs), endX(endX_rhs), startY(startY_rhs), endY(endY_rhs) {}
 	~CCDImagesProcessorCrop() {;}
 	
 	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
@@ -110,7 +113,7 @@ protected:
  */
 class CCDImagesProcessorConvertToPhotons : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToPhotons(double multiplicationFactor_rhs, double offset_rhs) : multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
+	CCDImagesProcessorConvertToPhotons(boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs, double multiplicationFactor_rhs, double offset_rhs) : CCDImagesProcessor(progressReporter_rhs), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
 	~CCDImagesProcessorConvertToPhotons() {;}
 	
 	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);

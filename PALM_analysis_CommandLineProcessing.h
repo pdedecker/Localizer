@@ -9,6 +9,7 @@
 
 #include <string>
 #include "boost/program_options.hpp"
+#include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_Processing.h"
@@ -19,7 +20,7 @@ int main(int argc, char *argv[]);
 
 // function that will parse the string command line arguments
 // and convert them to the appropriate objects
-boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset);
+boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset);
 
 // function that will guess the CCD file type and return an image loader
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);

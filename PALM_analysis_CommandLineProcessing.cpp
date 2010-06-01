@@ -71,7 +71,10 @@ int main(int argc, char *argv[]) {
 			cameraOffset = vm["cameraoffset"].as<double>();
 	}
 	
-	ccdImagesProcessor = GetCCDImagesProcessor(processorName, nFramesAveraging, cameraMultiplicationFactor, cameraOffset);
+	// get a progress reporter
+	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout);
+	
+	ccdImagesProcessor = GetCCDImagesProcessor(processorName, progressReporter, nFramesAveraging, cameraMultiplicationFactor, cameraOffset);
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
 	boost::shared_ptr<ImageOutputWriter> imageOutputWriter;
@@ -106,15 +109,15 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset) {
+boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset) {
 	if (name == std::string("subtractaverage"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorAverageSubtraction(nFramesAveraging));
+		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
 	
 	if (name == std::string("differenceimage"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorDifferenceImage());
+		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorDifferenceImage(progressReporter));
 	
 	if (name == std::string("converttophotons"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorConvertToPhotons(cameraMultiplier, cameraOffset));
+		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplier, cameraOffset));
 	
 	// if we get here then we didn't recognize the processing algorithm
 	throw std::runtime_error("Unknown processing algorithm");
