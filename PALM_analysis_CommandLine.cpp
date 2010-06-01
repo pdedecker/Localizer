@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
 		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
-		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
+		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
 		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
@@ -265,6 +265,9 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfW
 	
 	if (name == std::string("centroid"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
+	
+	if (name == std::string("mlewg"))
+		return boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
 	
 	// if we get here then we didn't recognize the localizing algorithm
 	throw std::runtime_error("Unknown localization algorithm");
