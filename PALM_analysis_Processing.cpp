@@ -26,6 +26,9 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	// the second pass subtracts it from the image
 	// fortunately out intermediate format uses doubles to store the data!
 	
+	if (this->n_frames_averaging == 0)
+		this->n_frames_averaging = total_number_of_images;
+	
 	average_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	subtracted_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
