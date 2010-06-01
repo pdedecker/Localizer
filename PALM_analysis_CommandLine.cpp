@@ -22,14 +22,10 @@ int main(int argc, char *argv[]) {
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
 		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
-		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
+		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", and \"centroid\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
 		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
-		("process", po::value<std::string>(), "Process the CCD files and save them as a converted stack. If this options is present then it takes precedence and no localization will be done! Options are \"subtractaverage\", \"differenceimage\", \"converttophotons\".")
-		("averaging", po::value<size_t>()->default_value(0), "subtractaverage: number of frames to average over.")
-		("cameramultiplier", po::value<double>(), "converttophotons: camera multiplication factor.")
-		("cameraoffset", po::value<double>(), "converttophotons: camera offset.")
 		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
 	
@@ -59,7 +55,6 @@ int main(int argc, char *argv[]) {
 	std::string segmentationName = vm["segmentation"].as<std::string>();
 	std::string particleFinderName = vm["particlefinding"].as<std::string>();
 	std::string localizationName = vm["localization"].as<std::string>();
-	std::string processorName;
 	std::vector<std::string> inputFiles = vm["input-file"].as<std::vector <std::string> >();
 	
 	std::vector<std::string> particleVerifierNames;
@@ -67,145 +62,98 @@ int main(int argc, char *argv[]) {
 		particleVerifierNames = vm["particleverifier"].as<std::vector<std::string> >();
 	}
 	
-	double pfa, directThreshold, psfWidth;
-	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
-	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ParticleFinder> particleFinder;
-	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-	boost::shared_ptr<FitPositions> positionsFitter;
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-	boost::shared_ptr<PALMAnalysisController> analysisController;
-	boost::shared_ptr<CCDImagesProcessor> ccdImagesProcessor;
 	
-	// switch the code path depending on whether we want to localize or process
-	if (vm.count("process") != 0) {
-	
-		// glrt and direct thresholding require extra parameters
-		if (segmentationName == std::string("glrt")) {
-			if (vm.count("pfa") == 0) {
-				throw std::runtime_error("The 'glrt' segmentation algorithm was chosen, but a pfa value was not specified (--pfa flag)");
-			} else {
-				pfa = vm["pfa"].as<double>();
-			}
+	// glrt and direct thresholding require extra parameters
+	double pfa, directThreshold;
+	if (segmentationName == std::string("glrt")) {
+		if (vm.count("pfa") == 0) {
+			throw std::runtime_error("The 'glrt' segmentation algorithm was chosen, but a pfa value was not specified (--pfa flag)");
+		} else {
+			pfa = vm["pfa"].as<double>();
 		}
-		
-		if (segmentationName == std::string("direct")) {
-			if (vm.count("pfa") == 0) {
-				throw std::runtime_error("The 'direct' segmentation algorithm was chosen, but a threshold value was not specified (--threshold flag)");
-			} else {
-				directThreshold = vm["threshold"].as<double>();
-			}
-		}
-		
-		psfWidth = vm["psf-width"].as<double>();
-		
-		// get the pre- and postprocessors
-		preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
-		postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
-		
-		// get the thresholder
-		thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
-		
-		// get the particle finder
-		particleFinder = GetParticleFinderType(particleFinderName);
-		
-		// get the positions verifier
-		for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
-			particleVerifiers.push_back(GetParticleVerifierType(*it, psfWidth, 1.0));
-		}
-		
-		// get the positions fitter
-		positionsFitter = GetPositionsFitter(localizationName, psfWidth);
-		
-		// get a progress reporter
-		progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_stdout());
-		
-		// get an analysis controller
-		boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
-																								postprocessor, particleFinder, particleVerifiers,
-																								positionsFitter,
-																								progressReporter));
-	} else {	// we want to process the images, not localize
-		// get the processor
-		processorName = vm["process"].as<std::string>();
-		size_t nFramesAveraging = vm["averaging"].as<size_t>();
-		
-		double cameraMultiplicationFactor, cameraOffset;
-		// check if the required options are available
-		if (processorName == std::string("converttophotons")) {
-			if (vm.count("cameramultiplier") == 0)
-				throw std::runtime_error("A camera multiplier factor needs to be specified when converting to photons");
-			else
-				cameraMultiplicationFactor = vm["cameramultiplier"].as<double>();
-			
-			if (vm.count("cameraoffset") == 0)
-				throw std::runtime_error("A camera offset needs to be specified when converting to photons");
-			else
-				cameraOffset = vm["cameraoffset"].as<double>();
-		}
-		
-		ccdImagesProcessor = GetCCDImagesProcessor(processorName, nFramesAveraging, cameraMultiplicationFactor, cameraOffset);
 	}
 	
-	// test if some input files have been provided
+	if (segmentationName == std::string("direct")) {
+		if (vm.count("pfa") == 0) {
+			throw std::runtime_error("The 'direct' segmentation algorithm was chosen, but a threshold value was not specified (--threshold flag)");
+		} else {
+			directThreshold = vm["threshold"].as<double>();
+		}
+	}
+	
+	double psfWidth = vm["psf-width"].as<double>();
+	
+	// get the pre- and postprocessors
+	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
+	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
+	
+	// get the thresholder
+	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
+	
+	// get the particle finder
+	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
+	
+	// get the positions verifier
+	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+	for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
+		particleVerifiers.push_back(GetParticleVerifierType(*it, psfWidth, 1.0));
+	}
+	
+	// get the positions fitter
+	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
+	
+	// get a progress reporter
+	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout());
+	
+	// get an analysis controller
+	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
+																							postprocessor, particleFinder, particleVerifiers,
+																							positionsFitter,
+																							progressReporter));
+	// run the PALM analysis for every input file
 	size_t nInputFiles = inputFiles.size();
 	if (nInputFiles == 0)
 		std::cout << "No input files specified!\n";
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
-	boost::shared_ptr<ImageOutputWriter> imageOutputWriter;
 	std::string outputFilePath;
 	std::ostringstream header;
 	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
 	
 	for (size_t i = 0; i < nInputFiles; ++i) {
 		try {
+			// get an imageloader and output file path
+			imageLoader = GetImageLoader(inputFiles.at(i));
+			outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
+			
 			// if there is more than one input file then tell the user which inputfile is being processed
 			if (nInputFiles > 1) {
 				std::cout << "Now processing " << inputFiles.at(i) << " (" << i + 1 << " of " << nInputFiles << ")\n";
 				std::cout.flush();
 			}
 			
-			// are we interested in localization or processing?
-			if (vm.count("process") != 0) {
-				// get an imageloader and output file path
-				imageLoader = GetImageLoader(inputFiles.at(i));
-				outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
-				
-				// do the analysis
-				fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
-				
-				// write a header
-				header.str("");
-				header << "X SIZE:" << imageLoader->getXSize() << "\n";
-				header << "Y SIZE:" << imageLoader->getYSize() << "\n";
-				header << "PFA:" << pfa << "\n";
-				header << "PSF WIDTH:" << psfWidth << "\n";
-				header << "THRESHOLD METHOD:" << segmentationName << "\n";
-				header << "PARTICLE FINDING:" << particleFinderName << "\n";
-				header << "PARTICLE VERIFIER:";
-				for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
-					std::cout << *it << ',';
-				}
-				if (particleVerifierNames.size() == 0)
-					std::cout << "none";
-				std::cout << "\n";
-				header << "LOCALIZATION METHOD:" << localizationName << "\n";
-				
-				// write the output
-				fittedPositions->writePositionsToFile(outputFilePath, header.str());
+			// do the analysis
+			fittedPositions = analysisController->DoPALMAnalysis(imageLoader);
 			
-			} else {	// we want to processing, not localization
-				// get an imageloader and output writer
-				imageLoader = GetImageLoader(inputFiles.at(i));
-				outputFilePath = GetOutputProcessedImagesFilePath(inputFiles.at(i));
-				imageOutputWriter = GetImageOutputWriter(processorName, outputFilePath, COMPRESSION_NONE);
-				
-				// do the processing
-				ccdImagesProcessor->convert_images(imageLoader, imageOutputWriter);
+			// write a header
+			header.str("");
+			header << "X SIZE:" << imageLoader->getXSize() << "\n";
+			header << "Y SIZE:" << imageLoader->getYSize() << "\n";
+			header << "PFA:" << pfa << "\n";
+			header << "PSF WIDTH:" << psfWidth << "\n";
+			header << "THRESHOLD METHOD:" << segmentationName << "\n";
+			header << "PARTICLE FINDING:" << particleFinderName << "\n";
+			header << "PARTICLE VERIFIER:";
+			for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
+				std::cout << *it << ',';
 			}
-				
+			if (particleVerifierNames.size() == 0)
+				std::cout << "none";
+			std::cout << "\n";
+			header << "LOCALIZATION METHOD:" << localizationName << "\n";
+			
+			// write the output
+			fittedPositions->writePositionsToFile(outputFilePath, header.str());
 		}
 		catch (std::runtime_error e) {
 			std::cerr << "the file at " << inputFiles.at(i) << " failed due to " << e.what() << std::endl;
@@ -318,27 +266,10 @@ boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfW
 	if (name == std::string("centroid"))
 		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
 	
-	if (name == std::string("mlewg"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
-	
 	// if we get here then we didn't recognize the localizing algorithm
 	throw std::runtime_error("Unknown localization algorithm");
 }
 
-boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset) {
-	if (name == std::string("subtractaverage"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorAverageSubtraction(nFramesAveraging));
-	
-	if (name == std::string("differenceimage"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorDifferenceImage());
-	
-	if (name == std::string("converttophotons"))
-		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorConvertToPhotons(cameraMultiplier, cameraOffset));
-	
-	// if we get here then we didn't recognize the processing algorithm
-	throw std::runtime_error("Unknown processing algorithm");
-}
-							
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	// look at the file extension
 	std::string fileExtension = filePath.substr(filePath.length() - 3, 3);
@@ -363,35 +294,12 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	
 }
 
-boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, std::string outputFilePath, size_t compression) {
-	if (processMethodName == std::string("subtractaverage"))
-		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
-	
-	if (processMethodName == std::string("differenceimage"))
-		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
-	
-	if (processMethodName == std::string("converttophotons"))
-		return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_UINT32));
-	
-	// if we get here then we didn't recognize the processing algorithm
-	throw std::runtime_error("Unknown processing algorithm");
-}
-
 std::string GetOutputPositionsFilePath(std::string dataFilePath) {
 	// remove the last 4 characters and replace with "_positions.txt"
 	
 	std::string outputPath = dataFilePath;
 	outputPath.erase(outputPath.length() - 4, 4);
 	outputPath += "_positions.txt";
-	return outputPath;
-}
-
-std::string GetOutputProcessedImagesFilePath(std::string dataFilePath) {
-	// remove the last 4 characters and replace with "_processed.tif"
-	
-	std::string outputPath = dataFilePath;
-	outputPath.erase(outputPath.length() - 4, 4);
-	outputPath += "_processed.tif";
 	return outputPath;
 }
 
