@@ -1098,16 +1098,13 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	try {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
 		
+		// set up compression for those files that use it
 		switch (outputType) {
 			case IMAGE_OUTPUT_TYPE_TIFF:
-			case IMAGE_OUTPUT_TYPE_IGOR:
 				compression = COMPRESSION_NONE;
 				break;
 			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
 				compression = COMPRESSION_DEFLATE;
-				break;
-			default:
-				throw std::runtime_error("Unsupported output format (/OUT flag)");
 				break;
 		}
 		

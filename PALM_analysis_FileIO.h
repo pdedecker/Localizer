@@ -232,6 +232,17 @@ protected:
 	uint32_t storageType;
 };
 
+struct PDEFormatHeader {
+	uint32_t magic;
+	uint32_t version;
+	uint32_t nImages;
+	uint32_t xSize;
+	uint32_t ySize;
+	uint32_t storageFormat;
+};
+typedef struct PDEFormatHeader PDEFormatHeader;
+
+
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
 	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);

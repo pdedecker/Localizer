@@ -724,20 +724,9 @@ SimpleImageLoader::~SimpleImageLoader() {
 void SimpleImageLoader::parse_header_information() {
 	file.seekg(0);
 	
-	uint32_t endiannessMarker;
-	uint32_t nImages_uint32;
-	uint32_t xSize_uint32;
-	uint32_t ySize_uint32;
-	uint32_t storageFormat;
+	PDEFormatHeader header;
 	
-	
-	// the first 12 bytes of the file contain this information
-	
-	file.read((char *)&endiannessMarker, sizeof(uint32_t));
-	file.read((char *)&nImages_uint32, sizeof(uint32_t));
-	file.read((char *)&xSize_uint32, sizeof(uint32_t));
-	file.read((char *)&ySize_uint32, sizeof(uint32_t));
-	file.read((char *)&storageFormat, sizeof(uint32_t));
+	file.read((char *)&header, sizeof(header));
 	
 	if (file.fail() != 0) {
 		std::string error;
@@ -747,14 +736,16 @@ void SimpleImageLoader::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	if (endiannessMarker != 27)
+	if (header.magic != 27)
 		throw std::runtime_error("The data is either not in the PDE format or of a different endianness");
+	if (header.version != 1)
+		throw std::runtime_error("Unsupported version of the PDE format. Perhaps you need to upgrade?");
 	
-	this->total_number_of_images = nImages_uint32;
-	this->x_size = xSize_uint32;
-	this->y_size = ySize_uint32;
-	this->storage_type = storageFormat;
-	this->header_length = 5 * sizeof(uint32_t);
+	this->total_number_of_images = header.nImages;
+	this->x_size = header.xSize;
+	this->y_size = header.ySize;
+	this->storage_type = header.storageFormat;
+	this->header_length = sizeof(header);
 }
 
 std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
@@ -776,7 +767,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 				file.seekg(offset);
 				file.read((char *)buffer.get(), n_pixels * sizeof(uint16_t));
 				offset = 0;
-				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 					*it = buffer[offset];
 					++offset;
 				}
@@ -789,7 +780,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 				file.seekg(offset);
 				file.read((char *)buffer.get(), n_pixels * sizeof(uint32_t));
 				offset = 0;
-				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 					*it = buffer[offset];
 					++offset;
 				}
@@ -802,7 +793,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 				file.seekg(offset);
 				file.read((char *)buffer.get(), n_pixels * sizeof(float));
 				offset = 0;
-				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 					*it = buffer[offset];
 					++offset;
 				}
@@ -815,7 +806,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::Read
 				file.seekg(offset);
 				file.read((char *)buffer.get(), n_pixels * sizeof(double));
 				offset = 0;
-				for (ublas::matrix<double>::iterator1 it = image->begin1(); it != image->end1(); ++it) {
+				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 					*it = buffer[offset];
 					++offset;
 				}
@@ -1301,11 +1292,6 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 	file_path = rhs;
 	int header_length = 4 * sizeof(uint32_t);
 	
-	boost::scoped_array<char> header(new char[header_length]);
-	for (int i = 0; i < header_length; i++) {
-		header[i] = 0;
-	}
-	
 	if (overwrite == 0) {
 		std::ifstream input_test;
 		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
@@ -1329,6 +1315,14 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
+	PDEFormatHeader header;
+	header.magic = 0;
+	header.version = 0;
+	header.nImages = 0;
+	header.xSize = 0;
+	header.ySize = 0;
+	header.storageFormat = 0;
+	
 	this->x_size = 0;
 	this->y_size = 0;
 	this->n_images_written = 0;
@@ -1336,31 +1330,32 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 	
 	// the first 3 * 4 bytes of the file should be written in advance, we will fill them in later
 	// by convention they are x_size, y_size, and n_images
-	file.write(header.get(), header_length);
+	file.write((char *)&header, sizeof(header));
 }
 
 
 SimpleImageOutputWriter::~SimpleImageOutputWriter() {
 	if (file.is_open() != 0) {
+		WriteHeader();
 		file.close();
 	}
 }
 
 void SimpleImageOutputWriter::WriteHeader() {
-	assert(sizeof(x_size) == 4);
-	assert(sizeof(y_size) == 4);
-	assert(sizeof(n_images_written) == 4);
-	assert(sizeof(storageType) == 4);
+	PDEFormatHeader header;
 	
-	uint32_t endiannessMarker = 27;
+	header.magic = 27;
+	header.version = 1;
+	header.nImages = this->n_images_written;
+	header.xSize = this->x_size;
+	header.ySize = this->y_size;
+	header.storageFormat = this->storageType;
 	
 	if (file.is_open()) {
-		file.seekp(0);
-		file.write((char *)&endiannessMarker, sizeof(endiannessMarker));
-		file.write((char *)&x_size, sizeof(x_size));
-		file.write((char *)&y_size, sizeof(y_size));
-		file.write((char *)&n_images_written, sizeof(n_images_written));
-		file.write((char *)&storageType, sizeof(storageType));
+		file.seekp(0, std::ios_base::beg);
+		file.write((char *)&header, sizeof(header));
+		if (file.fail())
+			throw std::runtime_error("Error trying to write the header");
 	}
 }
 
@@ -1384,7 +1379,7 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double
 		case STORAGE_TYPE_UINT16:
 		{
 			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (uint16_t)(*it);
 				++offset;
 			}
@@ -1394,7 +1389,7 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double
 		case STORAGE_TYPE_UINT32:
 		{
 			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (uint32_t)(*it);
 				++offset;
 			}
@@ -1404,7 +1399,7 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double
 		case STORAGE_TYPE_FP32:
 		{
 			boost::scoped_array<float> buffer(new float[n_pixels]);
-			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (float)(*it);
 				++offset;
 			}
@@ -1414,7 +1409,7 @@ void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double
 		case STORAGE_TYPE_FP64:
 		{
 			boost::scoped_array<double> buffer(new double[n_pixels]);
-			for (ublas::matrix<double>::const_iterator1 it = imageToWrite->begin1(); it != imageToWrite->end1(); ++it) {
+			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (double)(*it);
 				++offset;
 			}
