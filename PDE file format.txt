@@ -1,0 +1,17 @@
+The simple image format or PDE format consists of a small header followed by image data.
+
+The header consists of a series of 32-bit unsigned integers:
+0. (bytes 0-3)		endianness marker: the value 27
+1. (bytes 4-7)		the number of images in the file
+2. (bytes 8-11)		the x size of an image
+3. (bytes 12-15)	the y size of an image
+4. (bytes 17-21)	the storage type of a single pixel:
+						5:	UINT16
+						7:	UINT32
+						10:	FP32
+						11:	FP64
+
+Following this short header the images are stored sequentially, one after the other, with nothing in between, in row-major order
+(first writing a values for a given x coordinate, going through y, and then moving to the next x-coordinate).
+
+All output is written in little-endian format.

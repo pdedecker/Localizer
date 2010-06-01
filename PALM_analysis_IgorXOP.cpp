@@ -1139,6 +1139,20 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 						break;
 				}
 				break;
+			case IMAGE_OUTPUT_TYPE_PDE:
+				switch (method) {
+					case PROCESSING_AVERAGESUBTRACTION:
+					case PROCESSING_DIFFERENCEIMAGE:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
+						break;
+					case PROCESSING_CONVERTTOPHOTONS:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
+						break;
+					default:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
+						break;
+				}
+				break;
 			default:
 				throw std::runtime_error("Unsupported output format (/OUT flag)");
 				break;
@@ -2139,7 +2153,7 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 		case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
-		case CAMERA_TYPE_SIMPLE:
+		case CAMERA_TYPE_PDE:
 			image_loader = boost::shared_ptr<ImageLoader>(new SimpleImageLoader(data_file_path));
 			break;
 		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
