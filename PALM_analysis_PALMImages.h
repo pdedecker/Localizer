@@ -131,19 +131,20 @@ private:
 };
 
 /**
- * @brief Assumes that the positional error can be estimated as the width of the point-spread function divided
- * by some scalefactor times the square root of the fitted intensity.
+ * @brief Makes use of the the equation for the variance proposed by Mortensen et al in nmeth.1447. This requires
+ * approximate knowledge of the detected number of photons for a given position, which we estimate
+ * by taking the multiplication factor of the camera as an argument.
  */
-class PALMBitmapImageDeviationCalculator_IntegralSquareRoot : public PALMBitmapImageDeviationCalculator {
+class PALMBitmapImageDeviationCalculator_GaussianMask : public PALMBitmapImageDeviationCalculator {
 public:
-	PALMBitmapImageDeviationCalculator_IntegralSquareRoot(double PSFWidth_rhs, double scaleFactor_rhs) {PSFWidth = PSFWidth_rhs; scaleFactor = scaleFactor_rhs;}
-	PALMBitmapImageDeviationCalculator_IntegralSquareRoot() {;}
+	PALMBitmapImageDeviationCalculator_GaussianMask(double PSFWidth_rhs, double cameraMultiplicationFactor_rhs) : PSFWidth(PSFWidth_rhs), cameraMultiplicationFactor(cameraMultiplicationFactor_rhs) {}
+	~PALMBitmapImageDeviationCalculator_GaussianMask() {;}
 	
-	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return PSFWidth / (scaleFactor * sqrt(positions->getIntegral(index)));}
+	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return sqrt(PSFWidth * PSFWidth / (positions->getIntegral(index) / cameraMultiplicationFactor) * (16.0 / 9.0 + 8.0 * M_PI * PSFWidth * PSFWidth / (positions->getIntegral(index) / cameraMultiplicationFactor)));}
 	
 private:
 	double PSFWidth;
-	double scaleFactor;
+	double cameraMultiplicationFactor;
 };
 
 #endif

@@ -341,7 +341,6 @@ typedef struct ConvolveImagesRuntimeParams ConvolveImagesRuntimeParams;
 typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
 #include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
 
-
 // Runtime param structure for MakeBitmapPALMImage operation.
 #include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
 struct MakeBitmapPALMImageRuntimeParams {
@@ -375,10 +374,15 @@ struct MakeBitmapPALMImageRuntimeParams {
 	double emitterWeighing;
 	int WGHTFlagParamsSet[1];
 	
-	// Parameters for /P flag group.
-	int PFlagEncountered;
+	// Parameters for /MULT flag group.
+	int MULTFlagEncountered;
+	double cameraMultiplicationFactor;
+	int MULTFlagParamsSet[1];
+	
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
 	double PSFWidth;
-	int PFlagParamsSet[1];
+	int WDTHFlagParamsSet[1];
 	
 	// Main parameters.
 	
@@ -1762,7 +1766,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int method, emitterWeighing;
-	double scaleFactor, upperLimit, PSFWidth;
+	double scaleFactor, upperLimit, PSFWidth, cameraMultiplicationFactor;
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
 	waveHndl positionsWave;
@@ -1790,7 +1794,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		if (p->scaleFactor <= 0)
 			return EXPECT_POS_NUM;
 		scaleFactor = p->scaleFactor;
-	} else {
+	} else if ((method == PALMBITMAP_DEVIATION_SAME) || (method == PALMBITMAP_DEVIATION_FITUNCERTAINTY)) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
@@ -1830,7 +1834,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->PFlagEncountered) {
+	if (p->WDTHFlagEncountered) {
 		// Parameter: p->PSFWidth
 		if (p->PSFWidth <= 0) {
 			return EXPECT_POS_NUM;
@@ -1839,9 +1843,18 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 		PSFWidth = p->PSFWidth;
 		
 	} else {
-		if (method == PALMBITMAP_DEVIATION_INTEGRALSQUAREROOT) {
+		if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
 			return TOO_FEW_PARAMETERS;
 		}
+	}
+	
+	if (p->MULTFlagEncountered) {
+		// Parameter: p->cameraMultiplicationFactor
+		cameraMultiplicationFactor = p->cameraMultiplicationFactor;
+		if (cameraMultiplicationFactor <= 0)
+			return EXPECT_POS_NUM;
+	} else if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
+		return TOO_FEW_PARAMETERS;
 	}
 	
 	// Main parameters.	
@@ -1864,8 +1877,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			case PALMBITMAP_DEVIATION_FITUNCERTAINTY:
 				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
 				break;
-			case PALMBITMAP_DEVIATION_INTEGRALSQUAREROOT:
-				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_IntegralSquareRoot(PSFWidth, scaleFactor));
+			case PALMBITMAP_DEVIATION_GAUSSIANMASK:
+				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraMultiplicationFactor));
 				break;
 			default:
 				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
@@ -2050,7 +2063,7 @@ static int RegisterMakeBitmapPALMImage(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /P=number:PSFWidth wave:positionsWave";
+	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
