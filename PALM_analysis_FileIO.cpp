@@ -702,7 +702,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderHamamatsu::R
 	return requestedImages;
 }
 
-SimpleImageLoader::SimpleImageLoader(std::string rhs) {
+ImageLoaderPDE::ImageLoaderPDE(std::string rhs) {
 	this->filePath = rhs;
 	
 	file.open(this->filePath.c_str(), std::ios::binary | std::ios::in);
@@ -715,13 +715,13 @@ SimpleImageLoader::SimpleImageLoader(std::string rhs) {
 	parse_header_information();
 }
 
-SimpleImageLoader::~SimpleImageLoader() {
+ImageLoaderPDE::~ImageLoaderPDE() {
 	if (file.is_open() == 1) {
 		file.close();
 	}
 }
 
-void SimpleImageLoader::parse_header_information() {
+void ImageLoaderPDE::parse_header_information() {
 	file.seekg(0);
 	
 	PDEFormatHeader header;
@@ -748,7 +748,7 @@ void SimpleImageLoader::parse_header_information() {
 	this->header_length = sizeof(header);
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > SimpleImageLoader::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderPDE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
 	uint64_t offset;
 	boost::shared_ptr<ublas::matrix<double> > image;
 	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
@@ -1286,7 +1286,7 @@ ImageOutputWriter::ImageOutputWriter(const std::string &rhs, int overwrite) {
 
 
 
-SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
+PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
@@ -1334,14 +1334,14 @@ SimpleImageOutputWriter::SimpleImageOutputWriter(const std::string &rhs,int over
 }
 
 
-SimpleImageOutputWriter::~SimpleImageOutputWriter() {
+PDEImageOutputWriter::~PDEImageOutputWriter() {
 	if (file.is_open() != 0) {
 		WriteHeader();
 		file.close();
 	}
 }
 
-void SimpleImageOutputWriter::WriteHeader() {
+void PDEImageOutputWriter::WriteHeader() {
 	PDEFormatHeader header;
 	
 	header.magic = 27;
@@ -1359,7 +1359,7 @@ void SimpleImageOutputWriter::WriteHeader() {
 	}
 }
 
-void SimpleImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
+void PDEImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	
 	// determine the size of the frames
 	size_t x_size = imageToWrite->size1();

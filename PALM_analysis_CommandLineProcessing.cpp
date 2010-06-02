@@ -174,16 +174,16 @@ boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMet
 	
 	if (requestedFormat == std::string("pde")) {
 		if (processMethodName == std::string("subtractaverage"))
-			return boost::shared_ptr<ImageOutputWriter> (new SimpleImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("differenceimage"))
-			return boost::shared_ptr<ImageOutputWriter> (new SimpleImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("converttophotons"))
-			return boost::shared_ptr<ImageOutputWriter> (new SimpleImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_UINT32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_UINT32));
 		
 		if (processMethodName == std::string("convertfileformat"))
-			return boost::shared_ptr<ImageOutputWriter> (new SimpleImageOutputWriter(outputFilePath, 1, originalStorageFormat));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, originalStorageFormat));
 		
 		// if we get here then we didn't recognize the processing algorithm
 		throw std::runtime_error("Unknown processing algorithm");

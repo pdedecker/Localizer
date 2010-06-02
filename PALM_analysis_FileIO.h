@@ -150,10 +150,10 @@ protected:
 	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
-class SimpleImageLoader : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
+class ImageLoaderPDE : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
 public:
-	SimpleImageLoader(std::string rhs);
-	~SimpleImageLoader();
+	ImageLoaderPDE(std::string rhs);
+	~ImageLoaderPDE();
 	
 protected:
 	void parse_header_information();
@@ -218,10 +218,10 @@ protected:
 };
 
 
-class SimpleImageOutputWriter : public ImageOutputWriter {
+class PDEImageOutputWriter : public ImageOutputWriter {
 public:
-	SimpleImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
-	~SimpleImageOutputWriter();
+	PDEImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
+	~PDEImageOutputWriter();
 	
 	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
 	

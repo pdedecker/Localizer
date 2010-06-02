@@ -1140,13 +1140,13 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				switch (method) {
 					case PROCESSING_AVERAGESUBTRACTION:
 					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
 						break;
 					case PROCESSING_CONVERTTOPHOTONS:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
 						break;
 					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new SimpleImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
 						break;
 				}
 				break;
@@ -2154,7 +2154,7 @@ boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_ty
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
 		case CAMERA_TYPE_PDE:
-			image_loader = boost::shared_ptr<ImageLoader>(new SimpleImageLoader(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(data_file_path));
 			break;
 		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
 			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
