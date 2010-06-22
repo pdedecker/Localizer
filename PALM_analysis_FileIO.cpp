@@ -626,7 +626,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 		std::string error;
 		error = "The file at \"";
 		error += this->filePath;
-		error += "\" specifies that it doesn't use UINT16 for storage. Please ask Peter for help.";
+		error += "\" specifies that it doesn't use UINT16 for storage. This usually means that the manufacturer's software corrupted the file.";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
