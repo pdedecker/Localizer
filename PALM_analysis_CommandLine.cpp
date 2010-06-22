@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
 		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
-		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Options are \"none\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
+		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Multiple options are allowed. Options are \"none\", \"removeoverlapping\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
 		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
@@ -236,6 +236,9 @@ boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name) {
 boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma) {
 	if (name == std::string("none"))
 		return boost::shared_ptr<ParticleVerifier>();
+	
+	if (name == std::string("removeoverlapping"))
+		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_RemoveOverlappingParticles(psfWidth));
 	
 	if (name == std::string("symmetric2dgauss"))
 		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_SymmetricGaussian(psfWidth, sigma));
