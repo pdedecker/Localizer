@@ -1140,7 +1140,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadIm
 					for (size_t k = 0; k < x_size; ++k) {
 						current_double = *doublePtr;
 						(*image)(k, j) = current_double;
-						floatPtr += 1;
+						doublePtr += 1;
 					}
 					break;
 					
