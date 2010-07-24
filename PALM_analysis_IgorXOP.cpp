@@ -1132,11 +1132,17 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 				break;
 			case IMAGE_OUTPUT_TYPE_IGOR:
 				switch (method) {
+					case PROCESSING_AVERAGESUBTRACTION:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages(), 1, STORAGE_TYPE_FP32));
+						break;
 					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages() - 1, 1));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages() - 1, 1, STORAGE_TYPE_FP32));
+						break;
+					case PROCESSING_CONVERTTOPHOTONS:
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages(), 1, STORAGE_TYPE_UINT16));
 						break;
 					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages(), 1));
+						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->GetNImages(), 1, image_loader->getStorageType()));
 						break;
 				}
 				break;

@@ -259,7 +259,7 @@ protected:
 #ifdef WITH_IGOR
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
-	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite);
+	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite, int storageType);
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
@@ -269,6 +269,7 @@ protected:
 	std::string waveName;
 	waveHndl outputWave;
 	int overwrite;
+	int storageType;
 };
 #endif // WITH_IGOR
 
