@@ -1290,7 +1290,6 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	file_path = rhs;
-	int header_length = 4 * sizeof(uint32_t);
 	
 	if (overwrite == 0) {
 		std::ifstream input_test;
