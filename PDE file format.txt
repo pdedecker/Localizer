@@ -2,10 +2,11 @@ The simple image format or PDE format consists of a small header followed by ima
 
 The header consists of a series of 32-bit unsigned integers:
 0. (bytes 0-3)		endianness marker: the value 27
-1. (bytes 4-7)		the number of images in the file
-2. (bytes 8-11)		the x size of an image
-3. (bytes 12-15)	the y size of an image
-4. (bytes 17-21)	the storage type of a single pixel:
+1. (bytes 4-7)		version of the file format (currently 1)
+2. (bytes 8-11)		the number of images in the file
+3. (bytes 12-15)	the x size of an image
+4. (bytes 16-19)	the y size of an image
+5. (bytes 20-23)	the storage type of a single pixel:
 						5:	UINT16
 						7:	UINT32
 						10:	FP32
