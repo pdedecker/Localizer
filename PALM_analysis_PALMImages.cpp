@@ -22,7 +22,7 @@ boost::shared_ptr<ublas::matrix<double> > PALMBitmapImageCalculator::CalculateIm
 	int status;
 	double fittedXPos, fittedYPos, fittedIntegral;
 	double centerX, centerY, calculatedIntegral, calculatedDeviation;
-	size_t startX, endX, startY, endY;
+	long startX, endX, startY, endY;
 	double integralX, integralY;
 	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
 	

@@ -292,7 +292,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_position
 boost::shared_ptr<ublas::matrix<double> > FitPositionsDeflate::subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions) {
 	double fittedXPos, fittedYPos, fittedIntegral, fittedXWidth, fittedYWidth;
 	double centerX, centerY, calculatedAmplitude;
-	size_t startX, endX, startY, endY;
+	long startX, endX, startY, endY;
 	double distanceXSquared, distanceYSquared, currentIntensity;
 	
 	size_t nPositions = positions->getNPositions();
