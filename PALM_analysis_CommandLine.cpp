@@ -145,11 +145,11 @@ int main(int argc, char *argv[]) {
 			header << "PARTICLE FINDING:" << particleFinderName << "\n";
 			header << "PARTICLE VERIFIER:";
 			for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
-				std::cout << *it << ',';
+				header << *it << ',';
 			}
 			if (particleVerifierNames.size() == 0)
-				std::cout << "none";
-			std::cout << "\n";
+				header << "none";
+			header << "\n";
 			header << "LOCALIZATION METHOD:" << localizationName << "\n";
 			
 			// write the output
