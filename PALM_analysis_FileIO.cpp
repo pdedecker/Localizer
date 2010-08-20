@@ -837,6 +837,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderPDE::ReadIma
 }
 
 ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
+	TIFFSetWarningHandler(NULL);
 	this->filePath = rhs;
 	
 	tiff_file = NULL;
@@ -1425,6 +1426,7 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
+	TIFFSetWarningHandler(NULL);
 	this->file_path = rhs;
 	this->compression = compression_rhs;
 	this->storageType = storageType_rhs;

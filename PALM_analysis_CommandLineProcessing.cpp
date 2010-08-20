@@ -146,8 +146,11 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	if (fileExtension == std::string("his"))
 		return boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
 	
-	if (fileExtension == std::string("sif"))
+	if (fileExtension == std::string("tif"))
 		return boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
+	
+	if (fileExtension == std::string("pde"))
+		return boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
 	
 	// if we get here then we don't recognize the file type
 	throw (std::runtime_error("Unknown data file type with extension " + fileExtension));
