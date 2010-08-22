@@ -156,19 +156,6 @@ ImageLoader::~ImageLoader() {
 		file.close();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoader::get_nth_image(const size_t n) {
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > images;
-	if (n >= total_number_of_images)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
-	size_t firstImageToLoad = n;
-	size_t lastImageToLoad = n;
-	
-	images = ReadImagesFromDisk(firstImageToLoad, lastImageToLoad);
-	
-	return images.at(0);
-}
-
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
 	this->filePath = rhs;
 	
@@ -270,7 +257,10 @@ void ImageLoaderSPE::parse_header_information() {
 	file.seekg(0);
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderSPE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	uint64_t offset;
 	long current_long = 0;
 	float current_float = 0;
@@ -278,7 +268,6 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderSPE::ReadIma
 	unsigned short current_unsigned_short = 0;
 	std::string error;
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
@@ -310,124 +299,118 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderSPE::ReadIma
 	boost::scoped_array<float> single_image_buffer_float(new float[x_size * y_size]);
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
 	
-	for (uint64_t i = nStart; i <= nEnd; i++) {
-		
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-		
-		switch(storage_type) {
-			case STORAGE_TYPE_FP32:	// 4 byte float
-				offset = header_length + i * (x_size) * (y_size) * 4;
-				break;
-			case STORAGE_TYPE_UINT32:	// 4-byte long
-				offset = header_length + i * (x_size) * (y_size) * 4;
-				break;
-			case STORAGE_TYPE_INT16:	// 2 byte signed short
-				offset = header_length + i * (x_size) * (y_size) * 2;
-				break;
-			case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
-				offset = header_length + i * (x_size) * (y_size) * 2;
-				break;
-			default:
-				loadImagesMutex.unlock();
-				std::string error("Unable to determine the storage type used in ");
-				error += this->filePath;
-				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
-				break;
-		}
-		
-		
-		file.seekg(offset);
-		cache_offset = 0;
-		
-		file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
-		if (file.fail() != 0) {
-			std::string error;
-			error = "Error trying to read image data from \"";
-			error += this->filePath;
-			error += "\" assuming the SPE format";
+	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	
+	switch(storage_type) {
+		case STORAGE_TYPE_FP32:	// 4 byte float
+			offset = header_length + index * (x_size) * (y_size) * 4;
+			break;
+		case STORAGE_TYPE_UINT32:	// 4-byte long
+			offset = header_length + index * (x_size) * (y_size) * 4;
+			break;
+		case STORAGE_TYPE_INT16:	// 2 byte signed short
+			offset = header_length + index * (x_size) * (y_size) * 2;
+			break;
+		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
+			offset = header_length + index * (x_size) * (y_size) * 2;
+			break;
+		default:
 			loadImagesMutex.unlock();
-			throw ERROR_READING_FILE_DATA(error);
-		}
-		
-		switch(storage_type) {
-			case STORAGE_TYPE_FP32:	// 4-byte float
-				// this is currently only safe on little-endian systems!
-				for (size_t j  = 0; j < y_size; j++) {
-					for (size_t i = 0; i < x_size; i++) {
-						current_float = single_image_buffer_float[cache_offset];
-						
-						(*image)(i, j) = (double)current_float;
-						
-						cache_offset++;
-					}
+			std::string error("Unable to determine the storage type used in ");
+			error += this->filePath;
+			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
+			break;
+	}
+	
+	
+	file.seekg(offset);
+	cache_offset = 0;
+	
+	file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
+	if (file.fail() != 0) {
+		std::string error;
+		error = "Error trying to read image data from \"";
+		error += this->filePath;
+		error += "\" assuming the SPE format";
+		loadImagesMutex.unlock();
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	switch(storage_type) {
+		case STORAGE_TYPE_FP32:	// 4-byte float
+			// this is currently only safe on little-endian systems!
+			for (size_t j  = 0; j < y_size; j++) {
+				for (size_t i = 0; i < x_size; i++) {
+					current_float = single_image_buffer_float[cache_offset];
+					
+					(*image)(i, j) = (double)current_float;
+					
+					cache_offset++;
 				}
-				break;
-				
-			case STORAGE_TYPE_UINT32:	// 4-byte long
-				for (size_t j  = 0; j < y_size; j++) {
-					for (size_t i = 0; i < x_size; i++) {
-						current_long = 0x000000FF & single_image_buffer[cache_offset + 3];	// little endian
-						current_long *= 256;
-						current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 2]);
-						current_long *= 256;
-						current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 1]);
-						current_long *= 256;
-						current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 0]);
-						
-						(*image)(i, j) = (double)current_long;
-						
-						cache_offset += 4;
-					}
+			}
+			break;
+			
+		case STORAGE_TYPE_UINT32:	// 4-byte long
+			for (size_t j  = 0; j < y_size; j++) {
+				for (size_t i = 0; i < x_size; i++) {
+					current_long = 0x000000FF & single_image_buffer[cache_offset + 3];	// little endian
+					current_long *= 256;
+					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 2]);
+					current_long *= 256;
+					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 1]);
+					current_long *= 256;
+					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 0]);
+					
+					(*image)(i, j) = (double)current_long;
+					
+					cache_offset += 4;
 				}
-				break;
-				
-			case STORAGE_TYPE_INT16:	// 2-byte signed short
-				for (size_t j  = 0; j < y_size; j++) {
-					for (size_t i = 0; i < x_size; i++) {
-						current_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-						current_short *= 256;
-						current_short = current_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
-						
-						(*image)(i, j) = (double)current_short;
-						
-						cache_offset += 2;
-					}
+			}
+			break;
+			
+		case STORAGE_TYPE_INT16:	// 2-byte signed short
+			for (size_t j  = 0; j < y_size; j++) {
+				for (size_t i = 0; i < x_size; i++) {
+					current_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
+					current_short *= 256;
+					current_short = current_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
+					
+					(*image)(i, j) = (double)current_short;
+					
+					cache_offset += 2;
 				}
-				break;
-				
-			case STORAGE_TYPE_UINT16: // 2-byte unsigned short
-				for (size_t j  = 0; j < y_size; j++) {
-					for (size_t i = 0; i < x_size; i++) {
-						current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-						current_unsigned_short *= 256;
-						current_unsigned_short = current_unsigned_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
-						
-						(*image)(i, j) = (double)current_unsigned_short;
-						
-						cache_offset += 2;
-						
-						//	current_unsigned_short = 0;
-					}
+			}
+			break;
+			
+		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
+			for (size_t j  = 0; j < y_size; j++) {
+				for (size_t i = 0; i < x_size; i++) {
+					current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
+					current_unsigned_short *= 256;
+					current_unsigned_short = current_unsigned_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
+					
+					(*image)(i, j) = (double)current_unsigned_short;
+					
+					cache_offset += 2;
+					
+					//	current_unsigned_short = 0;
 				}
-				break;
-				
-			default:
-				loadImagesMutex.unlock();
-				std::string error("Unable to determine the storage type used in ");
-				error += this->filePath;
-				throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
-				break;
-				
-		}
-		
-		requestedImages.push_back(image);
+			}
+			break;
+			
+		default:
+			loadImagesMutex.unlock();
+			std::string error("Unable to determine the storage type used in ");
+			error += this->filePath;
+			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
+			break;
 	}
 	
 	file.seekg(0);
 	
 	loadImagesMutex.unlock();
 	
-	return requestedImages;
+	return image;
 }
 
 ImageLoaderAndor::ImageLoaderAndor(std::string rhs) {
@@ -528,52 +511,50 @@ void ImageLoaderAndor::parse_header_information() {
 	}
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderAndor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
 	loadImagesMutex.lock();
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	uint64_t cache_offset;
 	
-	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-		
-		offset = header_length + i * (x_size) * (y_size) * sizeof(float);
-		file.seekg(offset);
-		
-		cache_offset = 0;
-		
-		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
-		if (file.fail() != 0) {
-			std::string error;
-			error = "Error trying to read image data from \"";
-			error += this->filePath;
-			error += "\" assuming the Andor format";
-			loadImagesMutex.unlock();
-			throw ERROR_READING_FILE_DATA(error);
+	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	
+	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
+	file.seekg(offset);
+	
+	cache_offset = 0;
+	
+	file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
+	if (file.fail() != 0) {
+		std::string error;
+		error = "Error trying to read image data from \"";
+		error += this->filePath;
+		error += "\" assuming the Andor format";
+		loadImagesMutex.unlock();
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	
+	// this is currently only safe on little-endian systems!
+	for (size_t j  = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
+			current_float = single_image_buffer[cache_offset];
+			(*image)(i, j) = (double)current_float;
+			cache_offset++;
 		}
-		
-		
-		// this is currently only safe on little-endian systems!
-		for (size_t j  = 0; j < y_size; j++) {
-			for (size_t i = 0; i < x_size; i++) {
-				current_float = single_image_buffer[cache_offset];
-				(*image)(i, j) = (double)current_float;
-				cache_offset++;
-			}
-		}
-		
-		requestedImages.push_back(image);
 	}
 	
 	loadImagesMutex.unlock();
 	
-	return requestedImages;
+	return image;
 }
 
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(std::string rhs) {
@@ -648,7 +629,10 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderHamamatsu::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {	
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	
 	boost::shared_ptr<ublas::matrix<double> > image;
@@ -661,45 +645,40 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderHamamatsu::R
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	uint64_t cache_offset;
 	
-	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-		
-		offset = (i + 1) * header_length + i * (x_size) * (y_size) * 2;	// assume a 16-bit format
-		file.seekg(offset);
-		
-		file.read(single_image_buffer.get(), n_bytes_per_image);
-		if (file.fail() != 0) {
-			std::string error;
-			error = "Error reading image data from \"";
-			error += this->filePath;
-			error += "\" assuming the Hamamatsu format";
-			loadImagesMutex.unlock();
-			throw ERROR_READING_FILE_DATA(error);
+	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	
+	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
+	file.seekg(offset);
+	
+	file.read(single_image_buffer.get(), n_bytes_per_image);
+	if (file.fail() != 0) {
+		std::string error;
+		error = "Error reading image data from \"";
+		error += this->filePath;
+		error += "\" assuming the Hamamatsu format";
+		loadImagesMutex.unlock();
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	cache_offset = 0;
+	
+	for (size_t j  = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
+			current_uint = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
+			current_uint *= 256;
+			current_uint = current_uint | (0x000000FF & single_image_buffer[cache_offset]);
+			
+			(*image)(i, j) = (double)current_uint;
+			
+			cache_offset += 2;	// TWO bytes per value (UINT16)
 		}
-		
-		cache_offset = 0;
-		
-		for (size_t j  = 0; j < y_size; j++) {
-			for (size_t i = 0; i < x_size; i++) {
-				current_uint = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-				current_uint *= 256;
-				current_uint = current_uint | (0x000000FF & single_image_buffer[cache_offset]);
-				
-				(*image)(i, j) = (double)current_uint;
-				
-				cache_offset += 2;	// TWO bytes per value (UINT16)
-			}
-		}
-		
-		
-		requestedImages.push_back(image);
 	}
 	
 	file.seekg(0);
 	
 	loadImagesMutex.unlock();
 	
-	return requestedImages;
+	return image;
 }
 
 ImageLoaderPDE::ImageLoaderPDE(std::string rhs) {
@@ -748,92 +727,90 @@ void ImageLoaderPDE::parse_header_information() {
 	this->header_length = sizeof(header);
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderPDE::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	uint64_t offset;
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	size_t n_pixels = this->x_size * this->y_size;
 	
 	loadImagesMutex.lock();
 	
-	for (uint64_t i = nStart; i <= nEnd; i++) {
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
-		
-		switch (this->storage_type) {
-			case STORAGE_TYPE_UINT16:
-			{
-				offset = header_length + i * n_pixels * sizeof(uint16_t);
-				boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-				file.seekg(offset);
-				file.read((char *)buffer.get(), n_pixels * sizeof(uint16_t));
-				offset = 0;
-				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-					*it = buffer[offset];
-					++offset;
-				}
-				break;
+	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
+	
+	switch (this->storage_type) {
+		case STORAGE_TYPE_UINT16:
+		{
+			offset = header_length + index * n_pixels * sizeof(uint16_t);
+			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
+			file.seekg(offset);
+			file.read((char *)buffer.get(), n_pixels * sizeof(uint16_t));
+			offset = 0;
+			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+				*it = buffer[offset];
+				++offset;
 			}
-			case STORAGE_TYPE_UINT32:
-			{
-				offset = header_length + i * n_pixels * sizeof(uint32_t);
-				boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-				file.seekg(offset);
-				file.read((char *)buffer.get(), n_pixels * sizeof(uint32_t));
-				offset = 0;
-				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-					*it = buffer[offset];
-					++offset;
-				}
-				break;
-			}
-			case STORAGE_TYPE_FP32:
-			{
-				offset = header_length + i * n_pixels * sizeof(float);
-				boost::scoped_array<float> buffer(new float[n_pixels]);
-				file.seekg(offset);
-				file.read((char *)buffer.get(), n_pixels * sizeof(float));
-				offset = 0;
-				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-					*it = buffer[offset];
-					++offset;
-				}
-				break;
-			}
-			case STORAGE_TYPE_FP64:
-			{
-				offset = header_length + i * n_pixels * sizeof(double);
-				boost::scoped_array<double> buffer(new double[n_pixels]);
-				file.seekg(offset);
-				file.read((char *)buffer.get(), n_pixels * sizeof(double));
-				offset = 0;
-				for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-					*it = buffer[offset];
-					++offset;
-				}
-				break;
-			}
-			default:
-				throw std::runtime_error("The data file does appear to contain a recognized storage type");
-				break;
+			break;
 		}
-		
-		if (file.fail() != 0) {
-			std::string error;
-			error = "Error reading image data from \"";
-			error += this->filePath;
-			error += "\" assuming the simple image format";
-			loadImagesMutex.unlock();
-			throw ERROR_READING_FILE_DATA(error);
+		case STORAGE_TYPE_UINT32:
+		{
+			offset = header_length + index * n_pixels * sizeof(uint32_t);
+			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
+			file.seekg(offset);
+			file.read((char *)buffer.get(), n_pixels * sizeof(uint32_t));
+			offset = 0;
+			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+				*it = buffer[offset];
+				++offset;
+			}
+			break;
 		}
-		
-		requestedImages.push_back(image);
+		case STORAGE_TYPE_FP32:
+		{
+			offset = header_length + index * n_pixels * sizeof(float);
+			boost::scoped_array<float> buffer(new float[n_pixels]);
+			file.seekg(offset);
+			file.read((char *)buffer.get(), n_pixels * sizeof(float));
+			offset = 0;
+			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+				*it = buffer[offset];
+				++offset;
+			}
+			break;
+		}
+		case STORAGE_TYPE_FP64:
+		{
+			offset = header_length + index * n_pixels * sizeof(double);
+			boost::scoped_array<double> buffer(new double[n_pixels]);
+			file.seekg(offset);
+			file.read((char *)buffer.get(), n_pixels * sizeof(double));
+			offset = 0;
+			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+				*it = buffer[offset];
+				++offset;
+			}
+			break;
+		}
+		default:
+			throw std::runtime_error("The data file does appear to contain a recognized storage type");
+			break;
+	}
+	
+	if (file.fail() != 0) {
+		std::string error;
+		error = "Error reading image data from \"";
+		error += this->filePath;
+		error += "\" assuming the simple image format";
+		loadImagesMutex.unlock();
+		throw ERROR_READING_FILE_DATA(error);
 	}
 	
 	file.seekg(0);
 	
 	loadImagesMutex.unlock();
 	
-	return requestedImages;
+	return image;
 }
 
 ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
@@ -1030,7 +1007,10 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	char *single_scanline_buffer;
 	char *scanline_pointer;
 	uint16_t current_uint16;
@@ -1042,7 +1022,6 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadIm
 	float *floatPtr;
 	double *doublePtr;
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	int result;
 	
 	loadImagesMutex.lock();
@@ -1052,112 +1031,108 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadIm
 		throw std::bad_alloc();
 	}
 	
-	for (size_t i = nStart; i <= nEnd; i++) {
-		try {
-			image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-		}
-		catch (std::bad_alloc) {
-			_TIFFfree(single_scanline_buffer);
-			loadImagesMutex.unlock();
-			throw std::bad_alloc();
-		}
-		
-		result = TIFFSetDirectory(tiff_file, directoryIndices.at(i));
+	try {
+		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	}
+	catch (std::bad_alloc) {
+		_TIFFfree(single_scanline_buffer);
+		loadImagesMutex.unlock();
+		throw std::bad_alloc();
+	}
+	
+	result = TIFFSetDirectory(tiff_file, directoryIndices.at(index));
+	if (result != 1) {
+		_TIFFfree(single_scanline_buffer);
+		std::string error;
+		error = "Unable to set the directory to '0' for the image at\"";
+		error += this->filePath;
+		error += "\"";
+		loadImagesMutex.unlock();
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	for (size_t j = 0; j < y_size; ++j) {
+		result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
 		if (result != 1) {
 			_TIFFfree(single_scanline_buffer);
 			std::string error;
-			error = "Unable to set the directory to '0' for the image at\"";
+			error = "Unable to read a scanline from the image at\"";
 			error += this->filePath;
 			error += "\"";
 			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
-		for (size_t j = 0; j < y_size; ++j) {
-			result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
-			if (result != 1) {
+		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
+			case STORAGE_TYPE_UINT4:
+				scanline_pointer = single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
+						current_uint16 = 0x0000000F & (*scanline_pointer);
+						(*image)(k, j) = (double)current_uint16;
+					} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
+						current_uint16 = 0x000000F0 & (*scanline_pointer);
+						(*image)(k, j) = (double)current_uint16;
+						scanline_pointer += 1;
+					}
+				}
+				break;
+				
+			case STORAGE_TYPE_UINT8:
+				scanline_pointer = single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					current_uint16 = (uint16_t)(*scanline_pointer);
+					(*image)(k, j) = (double)current_uint16;
+					scanline_pointer += 1;
+				}
+				break;
+				
+			case STORAGE_TYPE_UINT16:
+				uint16Ptr = (uint16_t*)single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					current_uint16 = (*uint16Ptr);
+					(*image)(k, j) = (double)current_uint16;
+					uint16Ptr += 1;
+				}
+				break;
+				
+			case STORAGE_TYPE_UINT32:
+				uint32Ptr = (uint32_t*)single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					current_uint32 = (*uint32Ptr);
+					(*image)(k, j) = (double)current_uint32;
+					uint32Ptr += 1;
+				}
+				break;
+				
+			case STORAGE_TYPE_FP32:
+				floatPtr = (float *)single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					current_float = *floatPtr;
+					(*image)(k, j) = (double)current_float;
+					floatPtr += 1;
+				}
+				break;
+				
+			case STORAGE_TYPE_FP64:
+				doublePtr = (double *)single_scanline_buffer;
+				for (size_t k = 0; k < x_size; ++k) {
+					current_double = *doublePtr;
+					(*image)(k, j) = current_double;
+					doublePtr += 1;
+				}
+				break;
+				
+			default:
 				_TIFFfree(single_scanline_buffer);
 				std::string error;
-				error = "Unable to read a scanline from the image at\"";
+				error = "Invalid floating point data size for the image at\"";
 				error += this->filePath;
 				error += "\"";
 				loadImagesMutex.unlock();
 				throw ERROR_READING_FILE_DATA(error);
-			}
-			
-			switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
-				case STORAGE_TYPE_UINT4:
-					scanline_pointer = single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
-							current_uint16 = 0x0000000F & (*scanline_pointer);
-							(*image)(k, j) = (double)current_uint16;
-						} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
-							current_uint16 = 0x000000F0 & (*scanline_pointer);
-							(*image)(k, j) = (double)current_uint16;
-							scanline_pointer += 1;
-						}
-					}
-					break;
-					
-				case STORAGE_TYPE_UINT8:
-					scanline_pointer = single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						current_uint16 = (uint16_t)(*scanline_pointer);
-						(*image)(k, j) = (double)current_uint16;
-						scanline_pointer += 1;
-					}
-					break;
-					
-				case STORAGE_TYPE_UINT16:
-					uint16Ptr = (uint16_t*)single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						current_uint16 = (*uint16Ptr);
-						(*image)(k, j) = (double)current_uint16;
-						uint16Ptr += 1;
-					}
-					break;
-					
-				case STORAGE_TYPE_UINT32:
-					uint32Ptr = (uint32_t*)single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						current_uint32 = (*uint32Ptr);
-						(*image)(k, j) = (double)current_uint32;
-						uint32Ptr += 1;
-					}
-					break;
-					
-				case STORAGE_TYPE_FP32:
-					floatPtr = (float *)single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						current_float = *floatPtr;
-						(*image)(k, j) = (double)current_float;
-						floatPtr += 1;
-					}
-					break;
-					
-				case STORAGE_TYPE_FP64:
-					doublePtr = (double *)single_scanline_buffer;
-					for (size_t k = 0; k < x_size; ++k) {
-						current_double = *doublePtr;
-						(*image)(k, j) = current_double;
-						doublePtr += 1;
-					}
-					break;
-					
-				default:
-					_TIFFfree(single_scanline_buffer);
-					std::string error;
-					error = "Invalid floating point data size for the image at\"";
-					error += this->filePath;
-					error += "\"";
-					loadImagesMutex.unlock();
-					throw ERROR_READING_FILE_DATA(error);
-					break;
-			}
+				break;
 		}
-		
-		requestedImages.push_back(image);
 	}
 	
 	_TIFFfree(single_scanline_buffer);
@@ -1173,7 +1148,7 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderTIFF::ReadIm
 	
 	loadImagesMutex.unlock();
 	
-	return requestedImages;
+	return image;
 }
 
 #ifdef WITH_IGOR
@@ -1237,7 +1212,10 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	}
 }
 
-std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderIgor::ReadImagesFromDisk(size_t const nStart, size_t const nEnd) {
+boost::shared_ptr<ublas::matrix<double> > ImageLoaderIgor::readImage(const size_t index) {
+	if (index >= total_number_of_images)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
 	double value[2];
 	long indices[3];
 	int result;
@@ -1247,29 +1225,24 @@ std::vector<boost::shared_ptr<ublas::matrix <double> > > ImageLoaderIgor::ReadIm
 	
 	// no mutex locking is required since these calls are all threadsafe
 	
-	for (size_t n = nStart; n <= nEnd; ++n) {
-		indices[2] = n;
-		image = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(x_size, y_size));
-		
-		for (size_t i = 0; i < x_size; i++) {
-			for (size_t j  = 0; j < y_size; j++) {
-				indices[0] = (long)i;
-				indices[1] = (long)j;
-				
-				result = MDGetNumericWavePointValue(igor_data_wave, indices, value);
-				if (result != 0) {
-					throw result;
-				}
-				
-				(*image)(i, j) = value[0];
+	indices[2] = index;
+	image = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(x_size, y_size));
+	
+	for (size_t i = 0; i < x_size; i++) {
+		for (size_t j  = 0; j < y_size; j++) {
+			indices[0] = (long)i;
+			indices[1] = (long)j;
+			
+			result = MDGetNumericWavePointValue(igor_data_wave, indices, value);
+			if (result != 0) {
+				throw result;
 			}
+			
+			(*image)(i, j) = value[0];
 		}
-		
-		requestedImages.push_back(image);
-		
 	}
 	
-	return requestedImages;
+	return image;
 }
 #endif // WITH_IGOR
 

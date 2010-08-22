@@ -82,11 +82,10 @@ public:
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	int getStorageType() const {return storage_type;}
-	boost::shared_ptr<ublas::matrix<double> > get_nth_image(const size_t n);	// images are numbered from 0 to N - 1
+	virtual boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index) = 0;	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual void parse_header_information() = 0;
-	virtual std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd) = 0;
 	
 	std::string filePath;
 #ifdef _WIN32
@@ -108,9 +107,10 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderAndor : public ImageLoader {
@@ -118,9 +118,10 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderHamamatsu_HeaderStructure {
@@ -145,9 +146,10 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderPDE : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
@@ -155,9 +157,10 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -165,9 +168,10 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information();
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
 	
 	TIFF* tiff_file;
 	unsigned int bitsPerPixel;
@@ -185,10 +189,10 @@ public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
+	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	
 protected:
 	void parse_header_information() {;}
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > ReadImagesFromDisk(size_t const nStart, size_t const nEnd);
-	// technically we are not reading from disk, but we keep the name since it corresponds to a virtual method in the base class
 	
 	waveHndl igor_data_wave;
 };

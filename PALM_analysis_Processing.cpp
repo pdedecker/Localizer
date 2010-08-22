@@ -37,7 +37,7 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; n++) {
-		loaded_image = image_loader->get_nth_image(n);
+		loaded_image = image_loader->readImage(n);
 		
 		(*average_image) += (*loaded_image);
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0);
@@ -48,7 +48,7 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	
 	// now subtract the average for each frame
 	for (size_t n = 0; n < total_number_of_images; n++) {
-		loaded_image = image_loader->get_nth_image(n);
+		loaded_image = image_loader->readImage(n);
 		
 		ublas::noalias(*subtracted_image) = (*loaded_image) - (*average_image);
 		
@@ -70,7 +70,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 	// we start by loading the first image in next_image
 	// this is required so the loop that follows can start properly
 	
-	next_image = image_loader->get_nth_image(0);
+	next_image = image_loader->readImage(0);
 	
 	this->progressReporter->CalculationStarted();
 	
@@ -80,7 +80,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 		// so we have to shift it down
 		current_image = next_image;
 		
-		next_image = image_loader->get_nth_image(n + 1);
+		next_image = image_loader->readImage(n + 1);
 		
 		// now do the actual subtraction
 		*current_image = *current_image - *next_image;
@@ -100,7 +100,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
-		current_image = image_loader->get_nth_image(n);
+		current_image = image_loader->readImage(n);
 		output_writer->write_image(current_image);
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0);
 	}
@@ -127,7 +127,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
-		loadedImage = image_loader->get_nth_image(n);
+		loadedImage = image_loader->readImage(n);
 		croppedImage = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double> (croppedXSize, croppedYSize));
 		
 		for (size_t x = startX; x <= endX; ++x) {
@@ -156,7 +156,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
-		loadedImage = image_loader->get_nth_image(n);
+		loadedImage = image_loader->readImage(n);
 		for (size_t i = 0; i < x_size; ++i) {
 			for (size_t j = 0; j < y_size; ++j) {
 				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;

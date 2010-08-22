@@ -173,7 +173,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			controller->acquireFrameForProcessingMutex.unlock();
 			
 			// we need to process the image with index currentImageToProcess
-			currentImage = controller->imageLoader->get_nth_image(currentImageToProcess);
+			currentImage = controller->imageLoader->readImage(currentImageToProcess);
 			
 			thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 															  controller->thresholdImagePostprocessor);

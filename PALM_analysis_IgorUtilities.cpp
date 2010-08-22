@@ -99,7 +99,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	
 	// load the data
 	for (size_t i = n_start; i <= n_end; i++) {
-		current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->readImage(i);
 		
 		indices[2] = i - n_start;
 		
@@ -184,7 +184,7 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndNam
 	
 	for (size_t i = 0; i < n_images; i++) {
 		summed_intensity = 0;
-		current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->readImage(i);
 		
 		// calculate the total sum of the image
 		for (size_t j = startX; j <= endX; j++) {
@@ -248,7 +248,7 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 	
 	
 	for (size_t i = 0; i < n_images; i++) {
-		current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->readImage(i);
 		
 		// add the values of the newly loaded image to the average image
 		(*average_image) += (*current_image);
@@ -316,7 +316,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
-		current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->readImage(i);
 		
 		// add the values of the newly loaded image to the average image
 		(*average_image) += (*current_image);
@@ -327,7 +327,7 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 	
 	// now loop over the images again, calculating the standard deviation of each pixel
 	for (size_t i = 0; i < n_images; i++) {
-		current_image = image_loader->get_nth_image(i);
+		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
 		(*stdDevImage) = (*stdDevImage) + element_prod((*current_image) - (*average_image), (*current_image) - (*average_image));
