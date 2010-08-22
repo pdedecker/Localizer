@@ -272,7 +272,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	uint64_t n_bytes_in_single_image;
 	uint64_t cache_offset;
 	
-	loadImagesMutex.lock();
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	// determine how big we have to make the single image buffer
 	switch(storage_type) {
@@ -289,7 +289,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 			n_bytes_in_single_image = x_size * y_size * 2;
 			break;
 		default:
-			loadImagesMutex.unlock();
 			std::string error("Unable to determine the storage type used in ");
 			error += this->filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
@@ -315,7 +314,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 			offset = header_length + index * (x_size) * (y_size) * 2;
 			break;
 		default:
-			loadImagesMutex.unlock();
 			std::string error("Unable to determine the storage type used in ");
 			error += this->filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
@@ -332,7 +330,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 		error = "Error trying to read image data from \"";
 		error += this->filePath;
 		error += "\" assuming the SPE format";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -399,7 +396,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 			break;
 			
 		default:
-			loadImagesMutex.unlock();
 			std::string error("Unable to determine the storage type used in ");
 			error += this->filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
@@ -407,8 +403,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	}
 	
 	file.seekg(0);
-	
-	loadImagesMutex.unlock();
 	
 	return image;
 }
@@ -520,7 +514,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size
 	
 	boost::shared_ptr<ublas::matrix<double> > image;
 	
-	loadImagesMutex.lock();
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
 	uint64_t cache_offset;
@@ -538,7 +532,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size
 		error = "Error trying to read image data from \"";
 		error += this->filePath;
 		error += "\" assuming the Andor format";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -551,8 +544,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size
 			cache_offset++;
 		}
 	}
-	
-	loadImagesMutex.unlock();
 	
 	return image;
 }
@@ -638,7 +629,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 	boost::shared_ptr<ublas::matrix<double> > image;
 	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
 	
-	loadImagesMutex.lock();
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	unsigned int current_uint;
 	size_t n_bytes_per_image = x_size * y_size * 2;
@@ -656,7 +647,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 		error = "Error reading image data from \"";
 		error += this->filePath;
 		error += "\" assuming the Hamamatsu format";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -675,8 +665,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 	}
 	
 	file.seekg(0);
-	
-	loadImagesMutex.unlock();
 	
 	return image;
 }
@@ -735,7 +723,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 	boost::shared_ptr<ublas::matrix<double> > image;
 	size_t n_pixels = this->x_size * this->y_size;
 	
-	loadImagesMutex.lock();
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
 	
@@ -802,13 +790,10 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 		error = "Error reading image data from \"";
 		error += this->filePath;
 		error += "\" assuming the simple image format";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
 	file.seekg(0);
-	
-	loadImagesMutex.unlock();
 	
 	return image;
 }
@@ -1024,7 +1009,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 	boost::shared_ptr<ublas::matrix<double> > image;
 	int result;
 	
-	loadImagesMutex.lock();
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
 	if (single_scanline_buffer == NULL) {
@@ -1036,7 +1021,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 	}
 	catch (std::bad_alloc) {
 		_TIFFfree(single_scanline_buffer);
-		loadImagesMutex.unlock();
 		throw std::bad_alloc();
 	}
 	
@@ -1047,7 +1031,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		error = "Unable to set the directory to '0' for the image at\"";
 		error += this->filePath;
 		error += "\"";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
@@ -1059,7 +1042,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 			error = "Unable to read a scanline from the image at\"";
 			error += this->filePath;
 			error += "\"";
-			loadImagesMutex.unlock();
 			throw ERROR_READING_FILE_DATA(error);
 		}
 		
@@ -1129,7 +1111,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 				error = "Invalid floating point data size for the image at\"";
 				error += this->filePath;
 				error += "\"";
-				loadImagesMutex.unlock();
 				throw ERROR_READING_FILE_DATA(error);
 				break;
 		}
@@ -1142,11 +1123,8 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		error = "Invalid to set the directory to '0' for the image at\"";
 		error += this->filePath;
 		error += "\"";
-		loadImagesMutex.unlock();
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
-	loadImagesMutex.unlock();
 	
 	return image;
 }
