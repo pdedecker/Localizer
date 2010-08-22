@@ -262,31 +262,28 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	uint64_t offset;
-	long current_long = 0;
-	float current_float = 0;
-	short current_short = 0;
-	unsigned short current_unsigned_short = 0;
+	uint32_t *currentUint32t = 0;
+	float *currentFloat = 0;
+	int16_t *currentInt16t = 0;
+	uint16_t *currentUint16t = 0;
 	std::string error;
 	boost::shared_ptr<ublas::matrix<double> > image;
 	
 	uint64_t n_bytes_in_single_image;
-	uint64_t cache_offset;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
-	// determine how big we have to make the single image buffer
+	// determine how big we have to make the single image buffer and the offset
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4 byte float
-			n_bytes_in_single_image = x_size * y_size * 4;
-			break;
 		case STORAGE_TYPE_UINT32:	// 4-byte long
 			n_bytes_in_single_image = x_size * y_size * 4;
+			offset = header_length + index * (x_size) * (y_size) * 4;
 			break;
 		case STORAGE_TYPE_INT16:	// 2 byte signed short
-			n_bytes_in_single_image = x_size * y_size * 2;
-			break;
 		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
 			n_bytes_in_single_image = x_size * y_size * 2;
+			offset = header_length + index * (x_size) * (y_size) * 2;
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
@@ -295,34 +292,11 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 			break;
 	}
 	
-	boost::scoped_array<float> single_image_buffer_float(new float[x_size * y_size]);
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
 	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	switch(storage_type) {
-		case STORAGE_TYPE_FP32:	// 4 byte float
-			offset = header_length + index * (x_size) * (y_size) * 4;
-			break;
-		case STORAGE_TYPE_UINT32:	// 4-byte long
-			offset = header_length + index * (x_size) * (y_size) * 4;
-			break;
-		case STORAGE_TYPE_INT16:	// 2 byte signed short
-			offset = header_length + index * (x_size) * (y_size) * 2;
-			break;
-		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
-			offset = header_length + index * (x_size) * (y_size) * 2;
-			break;
-		default:
-			std::string error("Unable to determine the storage type used in ");
-			error += this->filePath;
-			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
-			break;
-	}
-	
-	
 	file.seekg(offset);
-	cache_offset = 0;
 	
 	file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
 	if (file.fail() != 0) {
@@ -335,62 +309,41 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4-byte float
-			// this is currently only safe on little-endian systems!
+			currentFloat = (float *)single_image_buffer.get();
 			for (size_t j  = 0; j < y_size; j++) {
 				for (size_t i = 0; i < x_size; i++) {
-					current_float = single_image_buffer_float[cache_offset];
-					
-					(*image)(i, j) = (double)current_float;
-					
-					cache_offset++;
+					(*image)(i, j) = *currentFloat;
+					++currentFloat;
 				}
 			}
 			break;
 			
 		case STORAGE_TYPE_UINT32:	// 4-byte long
+			currentUint32t = (uint32_t *)single_image_buffer.get();
 			for (size_t j  = 0; j < y_size; j++) {
 				for (size_t i = 0; i < x_size; i++) {
-					current_long = 0x000000FF & single_image_buffer[cache_offset + 3];	// little endian
-					current_long *= 256;
-					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 2]);
-					current_long *= 256;
-					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 1]);
-					current_long *= 256;
-					current_long = current_long | (0x000000FF & single_image_buffer[cache_offset + 0]);
-					
-					(*image)(i, j) = (double)current_long;
-					
-					cache_offset += 4;
+					(*image)(i, j) = *currentUint32t;
+					++currentUint32t;
 				}
 			}
 			break;
 			
 		case STORAGE_TYPE_INT16:	// 2-byte signed short
+			currentInt16t = (int16_t *) single_image_buffer.get();
 			for (size_t j  = 0; j < y_size; j++) {
 				for (size_t i = 0; i < x_size; i++) {
-					current_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-					current_short *= 256;
-					current_short = current_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
-					
-					(*image)(i, j) = (double)current_short;
-					
-					cache_offset += 2;
+					(*image)(i, j) = *currentInt16t;
+					++currentInt16t;				
 				}
 			}
 			break;
 			
 		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
+			currentUint16t = (uint16_t *)single_image_buffer.get();
 			for (size_t j  = 0; j < y_size; j++) {
 				for (size_t i = 0; i < x_size; i++) {
-					current_unsigned_short = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-					current_unsigned_short *= 256;
-					current_unsigned_short = current_unsigned_short | (0x000000FF & single_image_buffer[cache_offset + 0]);
-					
-					(*image)(i, j) = (double)current_unsigned_short;
-					
-					cache_offset += 2;
-					
-					//	current_unsigned_short = 0;
+					(*image)(i, j) = *currentUint16t;
+					++currentUint16t;
 				}
 			}
 			break;
