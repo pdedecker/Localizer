@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 			// get an imageloader and output writer
 			imageLoader = GetImageLoader(inputFiles.at(i));
 			originalStorageFormat = imageLoader->getStorageType();
-			outputFilePath = GetOutputProcessedImagesFilePath(inputFiles.at(i), outputFormat);
+			outputFilePath = GetOutputProcessedImagesFilePath(inputFiles.at(i), processorName, outputFormat);
 			imageOutputWriter = GetImageOutputWriter(processorName, originalStorageFormat, outputFormat, outputFilePath, COMPRESSION_NONE);
 			
 			// do the processing
@@ -205,12 +205,17 @@ std::string GetOutputPositionsFilePath(std::string dataFilePath) {
 	return outputPath;
 }
 
-std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::string outputFormat) {
+std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::string processMethodName, std::string outputFormat) {
 	// remove the last 4 characters and replace with "_processed.extension"
 	
 	std::string outputPath = dataFilePath;
 	outputPath.erase(outputPath.length() - 4, 4);
-	outputPath += "_processed.";
+	
+	if (processMethodName != std::string("convertfileformat") {
+		outputPath += "_processed.";
+	} else {
+		outputPath += ".";
+	}
 	
 	if (outputFormat == std::string("tiff"))
 		outputPath += "tif";

@@ -29,4 +29,4 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
 boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, int originalStorageFormat, std::string requestedFormat, std::string outputFilePath, size_t compression);
 
 // function that takes the CCD file path and return an output string for the processed images
-std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::string outputFormat);
+std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::string processMethodName, std::string outputFormat);
