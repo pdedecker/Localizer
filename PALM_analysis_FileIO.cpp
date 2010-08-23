@@ -1388,7 +1388,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> 
 	
 	// make a scoped_array that will act as a single scanline buffer
 	// make it a buffer of chars equal to the total number of bytes required
-	boost::scoped_array<char> scanLine(new char[x_size * bitsPerSample]);
+	boost::scoped_array<char> scanLine(new char[x_size * bitsPerSample / 8]);
 	
 	// make sure that all the image tags have the correct values
 	result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
@@ -1474,75 +1474,85 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> 
 			case STORAGE_TYPE_INT4:
 			case STORAGE_TYPE_UINT4:
 			case STORAGE_TYPE_INT8:
+			{
+				int8_t* charPtr = (int8_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					int8_t* buffer = (int8_t *)scanLine.get();
-					buffer[offset] = (int8_t)(*imageToWrite)(i, j);
-					offset++;
+					charPtr[i] = (int8_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_UINT8:
+			{
+				uint8_t* uCharPtr = (uint8_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					uint8_t *buffer = (uint8_t *)scanLine.get();
-					buffer[offset] = (uint8_t)(*imageToWrite)(i, j);
-					offset++;
+					uCharPtr[i] = (uint8_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_INT16:
+			{
+				int16_t* int16Ptr = (int16_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					int16_t *buffer = (int16_t *)scanLine.get();
-					buffer[offset] = (int16_t)(*imageToWrite)(i, j);
-					offset++;
+					int16Ptr[i] = (int16_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_UINT16:
+			{
+				uint16_t* uInt16Ptr = (uint16_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					uint16_t *buffer = (uint16_t *)scanLine.get();
-					buffer[offset] = (uint16_t)(*imageToWrite)(i, j);
-					offset++;
+					uInt16Ptr[i] = (uint16_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_INT32:
+			{
+				int32_t* int32Ptr = (int32_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					int32_t *buffer = (int32_t *)scanLine.get();
-					buffer[offset] = (int32_t)(*imageToWrite)(i, j);
-					offset++;
+					int32Ptr[i] = (int32_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_UINT32:
+			{
+				uint32_t* uInt32Ptr = (uint32_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					uint32_t *buffer = (uint32_t *)scanLine.get();
-					buffer[offset] = (uint32_t)(*imageToWrite)(i, j);
-					offset++;
+					uInt32Ptr[i] = (uint32_t)(*imageToWrite)(i, j);
 				}
 				break;
+			};
 			case STORAGE_TYPE_INT64:
+			{
+				int64_t* int64Ptr = (int64_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					int64_t *buffer = (int64_t *)scanLine.get();
-					buffer[offset] = (int64_t)(*imageToWrite)(i, j);
-					offset++;
+					int64Ptr[i] = (int64_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_UINT64:
+			{
+				uint64_t* uInt64Ptr = (uint64_t *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					uint64_t *buffer = (uint64_t *)scanLine.get();
-					buffer[offset] = (uint64_t)(*imageToWrite)(i, j);
-					offset++;
+					uInt64Ptr[i] = (uint64_t)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_FP32:
+			{
+				float* floatPtr = (float *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					float *buffer = (float *)scanLine.get();
-					buffer[offset] = (float)(*imageToWrite)(i, j);
-					offset++;
+					floatPtr[i] = (float)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 			case STORAGE_TYPE_FP64:
+			{
+				double* doublePtr = (double *)scanLine.get();
 				for (size_t i = 0; i < x_size; i++) {
-					double *buffer = (double *)scanLine.get();
-					buffer[offset] = (double)(*imageToWrite)(i, j);
-					offset++;
+					doublePtr[i] = (double)(*imageToWrite)(i, j);
 				}
 				break;
+			}
 		}
 		
 		result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
