@@ -789,6 +789,8 @@ void ImageLoaderTIFF::parse_header_information() {
 	uint16_t result_uint16;
 	uint32_t result_uint32;
 	int isInt;
+	size_t bitsPerPixel;
+	
 	
 	
 	// is the image in grayscale format?
@@ -932,37 +934,20 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	char *single_scanline_buffer;
-	char *scanline_pointer;
-	uint16_t current_uint16;
-	uint32_t current_uint32;
-	float current_float;
-	double current_double;
-	uint16_t *uint16Ptr;
-	uint32_t *uint32Ptr;
-	float *floatPtr;
-	double *doublePtr;
 	boost::shared_ptr<ublas::matrix<double> > image;
 	int result;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
-	single_scanline_buffer = (char *)_TIFFmalloc(TIFFScanlineSize(tiff_file));
-	if (single_scanline_buffer == NULL) {
+	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
+	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}
 	
-	try {
-		image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	}
-	catch (std::bad_alloc) {
-		_TIFFfree(single_scanline_buffer);
-		throw std::bad_alloc();
-	}
+	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
 	result = TIFFSetDirectory(tiff_file, index);
 	if (result != 1) {
-		_TIFFfree(single_scanline_buffer);
 		std::string error;
 		error = "Unable to set the directory to '0' for the image at\"";
 		error += this->filePath;
@@ -971,9 +956,8 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 	}
 	
 	for (size_t j = 0; j < y_size; ++j) {
-		result = TIFFReadScanline(tiff_file, single_scanline_buffer, j, 0);	// sample is ignored
+		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
 		if (result != 1) {
-			_TIFFfree(single_scanline_buffer);
 			std::string error;
 			error = "Unable to read a scanline from the image at\"";
 			error += this->filePath;
@@ -983,66 +967,61 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		
 		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
 			case STORAGE_TYPE_UINT4:
-				scanline_pointer = single_scanline_buffer;
-				for (size_t k = 0; k < x_size; ++k) {
-					if ((k % 2) == 0) {	// this is an even pixel, we use only the first 4 bits
-						current_uint16 = 0x0000000F & (*scanline_pointer);
-						(*image)(k, j) = (double)current_uint16;
-					} else {	// this is an odd pixel, use the last 4 bits and increment the scanline_pointer
-						current_uint16 = 0x000000F0 & (*scanline_pointer);
-						(*image)(k, j) = (double)current_uint16;
-						scanline_pointer += 1;
-					}
+			{
+				char *charPtr = (char *)single_scanline_buffer.get();
+				for (size_t k = 0; k < x_size; k+=2) {
+					(*image)(k, j) = (double)(0x0000000F & (*charPtr));
+					(*image)(k + 1, j) = (double)((0x000000F0 & (*charPtr)) / 16);			  
+					++charPtr;
 				}
 				break;
-				
+			}
 			case STORAGE_TYPE_UINT8:
-				scanline_pointer = single_scanline_buffer;
+			{
+				char *charPtr = (char *)single_scanline_buffer.get();
 				for (size_t k = 0; k < x_size; ++k) {
-					current_uint16 = (uint16_t)(*scanline_pointer);
-					(*image)(k, j) = (double)current_uint16;
-					scanline_pointer += 1;
+					(*image)(k, j) = (double)(*charPtr);
+					++charPtr;
 				}
 				break;
-				
+			}
 			case STORAGE_TYPE_UINT16:
-				uint16Ptr = (uint16_t*)single_scanline_buffer;
+			{
+				uint16_t *uint16tPtr = (uint16_t *)single_scanline_buffer.get();
 				for (size_t k = 0; k < x_size; ++k) {
-					current_uint16 = (*uint16Ptr);
-					(*image)(k, j) = (double)current_uint16;
-					uint16Ptr += 1;
+					(*image)(k, j) = (double)(*uint16tPtr);
+					++uint16tPtr;
 				}
 				break;
-				
+			}
 			case STORAGE_TYPE_UINT32:
-				uint32Ptr = (uint32_t*)single_scanline_buffer;
+			{
+				uint32_t *uint32tPtr = (uint32_t *)single_scanline_buffer.get();
 				for (size_t k = 0; k < x_size; ++k) {
-					current_uint32 = (*uint32Ptr);
-					(*image)(k, j) = (double)current_uint32;
-					uint32Ptr += 1;
+					(*image)(k, j) = (double)(*uint32tPtr);
+					++uint32tPtr;
 				}
 				break;
-				
+			}
 			case STORAGE_TYPE_FP32:
-				floatPtr = (float *)single_scanline_buffer;
+			{
+				float *floatPtr = (float *)single_scanline_buffer.get();
 				for (size_t k = 0; k < x_size; ++k) {
-					current_float = *floatPtr;
-					(*image)(k, j) = (double)current_float;
-					floatPtr += 1;
+					(*image)(k, j) = (double)(*floatPtr);
+					++floatPtr;
 				}
 				break;
-				
+			}
 			case STORAGE_TYPE_FP64:
-				doublePtr = (double *)single_scanline_buffer;
+			{
+				double *doublePtr = (double *)single_scanline_buffer.get();
 				for (size_t k = 0; k < x_size; ++k) {
-					current_double = *doublePtr;
-					(*image)(k, j) = current_double;
-					doublePtr += 1;
+					(*image)(k, j) = (double)(*doublePtr);
+					++doublePtr;
 				}
 				break;
-				
+			}
 			default:
-				_TIFFfree(single_scanline_buffer);
 				std::string error;
 				error = "Invalid floating point data size for the image at\"";
 				error += this->filePath;
@@ -1052,7 +1031,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		}
 	}
 	
-	_TIFFfree(single_scanline_buffer);
 	result = TIFFSetDirectory(tiff_file, 0);
 	if (result != 1) {
 		std::string error;

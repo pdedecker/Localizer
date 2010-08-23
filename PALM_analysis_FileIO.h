@@ -174,10 +174,6 @@ protected:
 	void parse_header_information();
 	
 	TIFF* tiff_file;
-	unsigned int bitsPerPixel;
-	unsigned int sampleFormat;	// unsigned integer of floating point?
-	// 1 for uint, 3 for floating point (same as tiff specification)
-	
 };
 
 #ifdef WITH_IGOR
