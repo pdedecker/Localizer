@@ -177,9 +177,6 @@ protected:
 	unsigned int bitsPerPixel;
 	unsigned int sampleFormat;	// unsigned integer of floating point?
 	// 1 for uint, 3 for floating point (same as tiff specification)
-	std::vector<size_t> directoryIndices;	// some images in the TIFF format are not actual data, but low resolution previews of other images and such
-	// this means that the image at directory i is not necessarily the i-th experimental frame
-	// we correct for this using this array
 	
 };
 

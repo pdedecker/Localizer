@@ -789,7 +789,6 @@ void ImageLoaderTIFF::parse_header_information() {
 	uint16_t result_uint16;
 	uint32_t result_uint32;
 	int isInt;
-	size_t index = 0;
 	
 	
 	// is the image in grayscale format?
@@ -917,30 +916,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	y_size = (size_t)(result_uint32);
 	
 	
-	// how many images are there in the file?
-	// the first image needs to be treated as a special case
-	result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
-	if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
-		++index;
-	} else {
-		directoryIndices.push_back(index);
-		++index;
-	}
-	
-	while (TIFFReadDirectory(tiff_file) != 0) {
-		result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
-		if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
-			++index;
-			continue;
-		}
-		
-		directoryIndices.push_back(index);
-		
-		++index;
-	}
-	
-	
-	total_number_of_images = directoryIndices.size();
+	this->total_number_of_images = TIFFNumberOfDirectories(tiff_file);
 	
 	result = TIFFSetDirectory(tiff_file, 0);
 	if (result != 1) {
@@ -984,7 +960,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		throw std::bad_alloc();
 	}
 	
-	result = TIFFSetDirectory(tiff_file, directoryIndices.at(index));
+	result = TIFFSetDirectory(tiff_file, index);
 	if (result != 1) {
 		_TIFFfree(single_scanline_buffer);
 		std::string error;
