@@ -672,9 +672,9 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	uint64_t offset;
 	boost::shared_ptr<ublas::matrix<double> > image;
 	size_t n_pixels = this->x_size * this->y_size;
+	size_t offset, imageSize;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
@@ -682,54 +682,61 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
-		{
+			imageSize = n_pixels * 2;
 			offset = header_length + index * n_pixels * sizeof(uint16_t);
-			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			file.seekg(offset);
-			file.read((char *)buffer.get(), n_pixels * sizeof(uint16_t));
-			offset = 0;
+			break;
+		case STORAGE_TYPE_UINT32:
+		case STORAGE_TYPE_FP32:
+			imageSize = n_pixels * 4;
+			offset = header_length + index * n_pixels * sizeof(uint32_t);
+			break;
+		case STORAGE_TYPE_FP64:
+			imageSize = n_pixels * 8;
+			offset = header_length + index * n_pixels * sizeof(double);
+			break;
+		default:
+			throw std::runtime_error("The data file does not appear to contain a recognized storage type");
+			break;
+	}
+	
+	boost::scoped_array<char> buffer(new char[imageSize]);
+	file.seekg(offset);
+	file.read(buffer.get(), imageSize);
+	
+	switch (this->storage_type) {
+		case STORAGE_TYPE_UINT16:
+		{
+			uint16_t *currentUint16t = (uint16_t *)buffer.get();
 			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = buffer[offset];
-				++offset;
+				*it = *currentUint16t;
+				++currentUint16t;
 			}
 			break;
 		}
 		case STORAGE_TYPE_UINT32:
 		{
-			offset = header_length + index * n_pixels * sizeof(uint32_t);
-			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			file.seekg(offset);
-			file.read((char *)buffer.get(), n_pixels * sizeof(uint32_t));
-			offset = 0;
+			uint32_t *currentUint32t = (uint32_t *)buffer.get();
 			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = buffer[offset];
-				++offset;
+				*it = *currentUint32t;
+				++currentUint32t;
 			}
 			break;
 		}
 		case STORAGE_TYPE_FP32:
 		{
-			offset = header_length + index * n_pixels * sizeof(float);
-			boost::scoped_array<float> buffer(new float[n_pixels]);
-			file.seekg(offset);
-			file.read((char *)buffer.get(), n_pixels * sizeof(float));
-			offset = 0;
+			float *currentFloat = (float *)buffer.get();
 			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = buffer[offset];
-				++offset;
+				*it = *currentFloat;
+				++currentFloat;
 			}
 			break;
 		}
 		case STORAGE_TYPE_FP64:
 		{
-			offset = header_length + index * n_pixels * sizeof(double);
-			boost::scoped_array<double> buffer(new double[n_pixels]);
-			file.seekg(offset);
-			file.read((char *)buffer.get(), n_pixels * sizeof(double));
-			offset = 0;
+			double *currentDouble = (double *)buffer.get();
 			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = buffer[offset];
-				++offset;
+				*it = *currentDouble;
+				++currentDouble;
 			}
 			break;
 		}
