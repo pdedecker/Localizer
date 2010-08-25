@@ -580,14 +580,11 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
-	
+		
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
-	unsigned int current_uint;
 	size_t n_bytes_per_image = x_size * y_size * 2;
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	uint64_t cache_offset;
 	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
@@ -603,17 +600,12 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	cache_offset = 0;
+	uint16_t *uint16tPtr = (uint16_t *)single_image_buffer.get();
 	
 	for (size_t j  = 0; j < y_size; j++) {
 		for (size_t i = 0; i < x_size; i++) {
-			current_uint = 0x000000FF & single_image_buffer[cache_offset + 1];	// little endian
-			current_uint *= 256;
-			current_uint = current_uint | (0x000000FF & single_image_buffer[cache_offset]);
-			
-			(*image)(i, j) = (double)current_uint;
-			
-			cache_offset += 2;	// TWO bytes per value (UINT16)
+			(*image)(i, j) = (double)(*uint16tPtr);
+			++uint16tPtr;
 		}
 	}
 	
@@ -1113,8 +1105,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderIgor::readImage(const size_
 	int result;
 	
 	boost::shared_ptr<ublas::matrix<double> > image;
-	std::vector<boost::shared_ptr<ublas::matrix <double> > > requestedImages;
-	
+		
 	// no mutex locking is required since these calls are all threadsafe
 	
 	indices[2] = index;
