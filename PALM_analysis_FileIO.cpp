@@ -595,11 +595,16 @@ ImageLoaderPDE::~ImageLoaderPDE() {
 }
 
 void ImageLoaderPDE::parse_header_information() {
-	file.seekg(0);
 	
 	PDEFormatHeader header;
 	
-	file.read((char *)&header, sizeof(header));
+	file.seekg(0);
+	file.read((char *)&(header.magic), sizeof(header.magic));
+	file.read((char *)&(header.version), sizeof(header.version));
+	file.read((char *)&(header.nImages), sizeof(header.nImages));
+	file.read((char *)&(header.xSize), sizeof(header.xSize));
+	file.read((char *)&(header.ySize), sizeof(header.ySize));
+	file.read((char *)&(header.storageFormat), sizeof(header.storageFormat));
 	
 	if (file.fail() != 0) {
 		std::string error;
@@ -612,7 +617,7 @@ void ImageLoaderPDE::parse_header_information() {
 	if (header.magic != 27)
 		throw std::runtime_error("The data is either not in the PDE format or of a different endianness");
 	if (header.version != 1)
-		throw std::runtime_error("Unsupported version of the PDE format. Perhaps you need to upgrade?");
+		throw std::runtime_error("Unsupported version of the PDE format.");
 	
 	this->total_number_of_images = header.nImages;
 	this->x_size = header.xSize;
@@ -1170,9 +1175,14 @@ void PDEImageOutputWriter::WriteHeader() {
 	
 	if (file.is_open()) {
 		file.seekp(0, std::ios_base::beg);
-		file.write((char *)&header, sizeof(header));
+		file.write((char *)&(header.magic), sizeof(header.magic));
+		file.write((char *)&(header.version), sizeof(header.version));
+		file.write((char *)&(header.nImages), sizeof(header.nImages));
+		file.write((char *)&(header.xSize), sizeof(header.xSize));
+		file.write((char *)&(header.ySize), sizeof(header.ySize));
+		file.write((char *)&(header.storageFormat), sizeof(header.storageFormat));
 		if (file.fail())
-			throw std::runtime_error("Error trying to write the header");
+			throw std::runtime_error("Error trying to write to the PDE file");
 	}
 }
 
