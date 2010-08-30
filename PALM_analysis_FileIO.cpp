@@ -9,40 +9,6 @@
 
 #include "PALM_analysis_FileIO.h"
 
-uint16 getUINT16FromCharArray(char *array, size_t offset) {
-	char byteReader1, byteReader2;
-	uint16 result;
-	
-	byteReader1 = array[offset];
-	byteReader2 = array[offset + 1];
-	
-	result = 0xFF & byteReader2;
-	result *= 256;
-	result = result | (0x000000FF & byteReader1);
-	
-	return result;
-}
-
-uint32 getUINT32FromCharArray(char *array, size_t offset) {
-	char byteReader1, byteReader2, byteReader3, byteReader4;
-	uint32 result;
-	
-	byteReader1 = array[offset];
-	byteReader2 = array[offset + 1];
-	byteReader3 = array[offset + 2];
-	byteReader4 = array[offset + 3];
-	
-	result = 0xFF & byteReader4;
-	result *= 256;
-	result = result | (0x000000FF & byteReader3);
-	result *= 256;
-	result = result | (0x000000FF & byteReader2);
-	result *= 256;
-	result = result | (0x000000FF & byteReader1);
-	
-	return result;
-}
-
 #ifdef WIN32
 WindowsFileStream::~WindowsFileStream() {
     if (this->fileRef != NULL) {
@@ -521,31 +487,26 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 
 
 void ImageLoaderHamamatsu::parse_header_information() {
-	char headerBuffer[64];	// too large, but we'd better be safe
+	
 	ImageLoaderHamamatsu_HeaderStructure header;
 	
-	storage_type = STORAGE_TYPE_UINT16;
+	this->storage_type = STORAGE_TYPE_UINT16;
 	
-	// first we load a set of data
 	file.seekg(0);
-	file.read(headerBuffer, 63);
-	headerBuffer[63] = '\0';
 	
-	
-	// from the char array build up a complete header structure
-	header.magic = getUINT16FromCharArray(headerBuffer, 0);
-	header.commentLength = getUINT16FromCharArray(headerBuffer, 2);
-	header.xSize = getUINT16FromCharArray(headerBuffer, 4);
-	header.ySize = getUINT16FromCharArray(headerBuffer, 6);
-	header.xBinning = getUINT16FromCharArray(headerBuffer, 8);
-	header.yBinning = getUINT16FromCharArray(headerBuffer, 10);
-	header.storageFormat = getUINT16FromCharArray(headerBuffer, 12);
-	header.nImages = getUINT32FromCharArray(headerBuffer, 14);
-	header.nChannels = getUINT16FromCharArray(headerBuffer, 18);
-	header.channel = getUINT16FromCharArray(headerBuffer, 20);
-	// skip the timestamp for now
-	header.marker = getUINT32FromCharArray(headerBuffer, 28);
-	header.misc = getUINT32FromCharArray(headerBuffer, 32);
+	file.read((char *)&(header.magic), sizeof(header.magic));
+	file.read((char *)&(header.commentLength), sizeof(header.commentLength));
+	file.read((char *)&(header.xSize), sizeof(header.xSize));
+	file.read((char *)&(header.ySize), sizeof(header.ySize));
+	file.read((char *)&(header.xBinning), sizeof(header.xBinning));
+	file.read((char *)&(header.yBinning), sizeof(header.yBinning));
+	file.read((char *)&(header.storageFormat), sizeof(header.storageFormat));
+	file.read((char *)&(header.nImages), sizeof(header.nImages));
+	file.read((char *)&(header.nChannels), sizeof(header.nChannels));
+	file.read((char *)&(header.channel), sizeof(header.channel));
+	file.read((char *)&(header.timeStamp), sizeof(header.timeStamp));
+	file.read((char *)&(header.marker), sizeof(header.marker));
+	file.read((char *)&(header.misc), sizeof(header.misc));
 	
 	if (header.storageFormat != 2) {	// not UINT16
 		std::string error;
@@ -555,10 +516,10 @@ void ImageLoaderHamamatsu::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	header_length = header.commentLength + 64;
-	x_size = header.xSize;
-	y_size = header.ySize;
-	total_number_of_images = header.nImages;
+	this->header_length = header.commentLength + 64;
+	this->x_size = header.xSize;
+	this->y_size = header.ySize;
+	this->total_number_of_images = header.nImages;
 	
 	// was there an error reading the file?
 	if (file.fail() != 0) {

@@ -36,9 +36,6 @@
 
 namespace ublas = boost::numeric::ublas;
 
-uint16 getUINT16FromCharArray(char *array, size_t offset);
-uint32 getUINT32FromCharArray(char *array, size_t offset);
-
 /**
  * Provide an ifstream-like class for Windows that handles large file offset
  */
