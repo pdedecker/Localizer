@@ -160,16 +160,16 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, int originalStorageFormat, std::string requestedFormat, std::string outputFilePath, size_t compression) {
 	if (requestedFormat == std::string("tiff")) {
 		if (processMethodName == std::string("subtractaverage"))
-			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 0, compression, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("differenceimage"))
-			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 0, compression, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("converttophotons"))
-			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, STORAGE_TYPE_UINT32));
+			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 0, compression, STORAGE_TYPE_UINT32));
 		
 		if (processMethodName == std::string("convertfileformat"))
-			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 1, compression, originalStorageFormat));
+			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 0, compression, originalStorageFormat));
 		
 		// if we get here then we didn't recognize the processing algorithm
 		throw std::runtime_error("Unknown processing algorithm");
@@ -177,16 +177,16 @@ boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMet
 	
 	if (requestedFormat == std::string("pde")) {
 		if (processMethodName == std::string("subtractaverage"))
-			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 0, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("differenceimage"))
-			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_FP32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 0, STORAGE_TYPE_FP32));
 		
 		if (processMethodName == std::string("converttophotons"))
-			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, STORAGE_TYPE_UINT32));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 0, STORAGE_TYPE_UINT32));
 		
 		if (processMethodName == std::string("convertfileformat"))
-			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 1, originalStorageFormat));
+			return boost::shared_ptr<ImageOutputWriter> (new PDEImageOutputWriter(outputFilePath, 0, originalStorageFormat));
 		
 		// if we get here then we didn't recognize the processing algorithm
 		throw std::runtime_error("Unknown processing algorithm");
@@ -211,7 +211,7 @@ std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::stri
 	std::string outputPath = dataFilePath;
 	outputPath.erase(outputPath.length() - 4, 4);
 	
-	if (processMethodName != std::string("convertfileformat") {
+	if (processMethodName != std::string("convertfileformat")) {
 		outputPath += "_processed.";
 	} else {
 		outputPath += ".";
