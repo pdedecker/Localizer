@@ -1117,20 +1117,14 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 	if (overwrite == 0) {
 		std::ifstream input_test;
 		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
-		input_test.close();
-		if (input_test.fail() == 0) {
+		if (input_test.good() == 1) {
 			std::string error("The output file at ");
 			error += this->file_path;
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
-		} else {
-			file.open(file_path.c_str(), std::ios::binary | std::ios::out);
 		}
 	}
-	
-	if (overwrite != 0) {
-		file.open(file_path.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
-	}
-	
+		
+	file.open(file_path.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
 	if (file.fail() != 0) {
 		std::string error("Cannot create an output file at ");
 		error += this->file_path;
@@ -1261,13 +1255,13 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 	if (overwrite == 0) {
 		std::ifstream input_test;
 		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
-		input_test.close();
-		if (input_test.fail() == 0) {
+		if (input_test.good() == 1) {
 			std::string error("The output file at ");
 			error += this->file_path;
 			error += " already exists";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
+		input_test.close();
 	}
 	
 	tiff_file = TIFFOpen(file_path.c_str(), "w");
