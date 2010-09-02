@@ -1120,6 +1120,7 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 		if (input_test.good() == 1) {
 			std::string error("The output file at ");
 			error += this->file_path;
+			error += " already exists.";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 	}
@@ -1258,7 +1259,7 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 		if (input_test.good() == 1) {
 			std::string error("The output file at ");
 			error += this->file_path;
-			error += " already exists";
+			error += " already exists.";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 		input_test.close();
