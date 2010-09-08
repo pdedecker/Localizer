@@ -1537,12 +1537,23 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> 
 
 #ifdef WITH_IGOR
 IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nImages_rhs, int overwrite_rhs, int storageType_rhs) {
+	
+	this->overwrite = overwrite_rhs;
 	this->outputWave = NULL;
 	this->waveName = waveName_rhs;
 	this->nImagesTotal = nImages_rhs;
 	this->n_images_written = 0;
-	this->overwrite = overwrite_rhs;
 	this->storageType = storageType_rhs;
+	
+	// check if the output wave already exists
+	if (this->overwrite != 1) {
+		waveHndl wave = FetchWaveUsingFullPath(waveName_rhs);
+		if (wave != NULL) {
+			std::string error ("the output wave ");
+			error += waveName_rhs;
+			error += " already exists and was not overwritten (/O flag)";
+		}
+	}
 }
 
 void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
