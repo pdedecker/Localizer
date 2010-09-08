@@ -84,6 +84,12 @@ public:
 protected:
 	virtual void parse_header_information() = 0;
 	
+	/**
+	 * Check if the values parsed from the header (xSize etc)
+	 * are reasonable. If not throw an std::runtime error
+	 */
+	void checkForReasonableValues();
+	
 	std::string filePath;
 #ifdef _WIN32
 	WindowsFileStream file;

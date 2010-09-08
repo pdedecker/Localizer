@@ -20,6 +20,11 @@
 #define PALM_ANALYSIS_XOP_ERROR 1 + FIRST_XOP_ERR
 #endif // WITH_IGOR
 
+// some 'reasonable' upper limits for various quantities
+// values over these limits will be considered as errors
+const int kMaxImageDimension = 10000;
+const int kMaxNFrames = 1000000;
+
 const int STORAGE_TYPE_INT4 = 0;
 const int STORAGE_TYPE_UINT4 = 1;
 const int STORAGE_TYPE_INT8 = 2;

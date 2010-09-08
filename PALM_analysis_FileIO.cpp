@@ -122,6 +122,16 @@ ImageLoader::~ImageLoader() {
 		file.close();
 }
 
+void ImageLoader::checkForReasonableValues() {
+	if ((this->x_size > kMaxImageDimension) || (this->y_size > kMaxImageDimension)) {
+		throw std::runtime_error("the reported frame size is unreasonably large");
+	}
+	
+	if (this->total_number_of_images > kMaxNFrames) {
+		throw std::runtime_error("the reported number of frames is unreasonably large");
+	}
+}
+
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
 	this->filePath = rhs;
 	
@@ -221,6 +231,7 @@ void ImageLoaderSPE::parse_header_information() {
 	}
 	
 	file.seekg(0);
+	this->checkForReasonableValues();
 }
 
 boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t index) {
@@ -422,6 +433,8 @@ void ImageLoaderAndor::parse_header_information() {
 	if (ss.bad() == 1) {
 		throw ERROR_READING_FILE_DATA(std::string("Error parsing the header information in \"") + this->filePath + "\" assuming the Andor format");
 	}
+	
+	this->checkForReasonableValues();
 }
 
 boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size_t index) {
@@ -531,6 +544,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	}
 	
 	file.seekg(0);
+	this->checkForReasonableValues();
 }
 
 
@@ -624,6 +638,8 @@ void ImageLoaderPDE::parse_header_information() {
 	this->y_size = header.ySize;
 	this->storage_type = header.storageFormat;
 	this->header_length = sizeof(header);
+	
+	this->checkForReasonableValues();
 }
 
 boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t index) {
@@ -886,6 +902,8 @@ void ImageLoaderTIFF::parse_header_information() {
 		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
 	}
+	
+	this->checkForReasonableValues();
 }
 
 boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_t index) {
@@ -1060,6 +1078,8 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 		default:
 			storage_type = STORAGE_TYPE_FP64;
 	}
+	
+	this->checkForReasonableValues();
 }
 
 boost::shared_ptr<ublas::matrix<double> > ImageLoaderIgor::readImage(const size_t index) {
