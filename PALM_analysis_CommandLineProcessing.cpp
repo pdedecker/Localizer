@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	po::options_description desc("Allowed options");
 	desc.add_options()
 	("help", "produce help message")
-	("process", po::value<std::string>(), "Process the CCD files and save them as a converted stack. Options are \"subtractaverage\", \"differenceimage\", \"converttophotons\", \"convertfileformat\".")
+	("process", po::value<std::string>()->default_value("convertfileformat"), "Process the CCD files and save them as a converted stack. Options are \"subtractaverage\", \"differenceimage\", \"converttophotons\", \"convertfileformat\".")
 	("outputformat", po::value<std::string>()->default_value("pde"), "Select the output format: \"tiff\" or \"pde\".")
 	("averaging", po::value<size_t>()->default_value(0), "subtractaverage: number of frames to average over.")
 	("cameramultiplier", po::value<double>(), "converttophotons: camera multiplication factor.")
