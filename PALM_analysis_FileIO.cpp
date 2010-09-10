@@ -738,7 +738,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 	
 	tiff_file = NULL;
 	
-	tiff_file = TIFFOpen(this->filePath.c_str(), "r");
+	tiff_file = TIFFOpen(this->filePath.c_str(), "rm");
 	if (tiff_file == NULL) {
 		std::string error ("Unable to open the file at ");
 		error += this->filePath;
