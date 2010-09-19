@@ -72,6 +72,12 @@ struct AnalyzePALMImagesRuntimeParams {
 	double sigma;
 	int SFlagParamsSet[1];
 	
+	// Parameters for /RNG flag group.
+	int RNGFlagEncountered;
+	double firstFrame;
+	double lastFrame;
+	int RNGFlagParamsSet[2];
+	
 	// Parameters for /Q flag group.
 	int QFlagEncountered;
 	// There are no fields for this group because it has no parameters.
@@ -438,9 +444,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	size_t camera_type;
 	int method;
 	int particle_finding_method;
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS + 1];
-	waveHndl fitting_positions = NULL;
+	size_t firstFrameToAnalyze, lastFrameToAnalyze;
 	int quiet = 0;
 	int returnErrors = 1;
 	
@@ -584,6 +588,24 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		sigma = p->sigma;
 	} else {
 		sigma = 1;
+	}
+	
+	if (p->RNGFlagEncountered) {
+		// Parameter: p->firstFrame
+		// Parameter: p->lastFrame
+		if (p->firstFrame < 0) {
+			firstFrameToAnalyze = (size_t)-1;
+		} else {
+			firstFrameToAnalyze = (size_t)(p->firstFrame + 0.5);
+		}
+		if (p->lastFrame < 0) {
+			lastFrameToAnalyze = (size_t)-1;
+		} else {
+			lastFrameToAnalyze = (size_t)(p->lastFrame + 0.5);
+		}
+	} else {
+		firstFrameToAnalyze = (size_t)-1;
+		lastFrameToAnalyze = (size_t)-1;
 	}
 	
 	if (p->QFlagEncountered) {
@@ -790,7 +812,8 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
 																								   postprocessor, particle_finder, particleVerifiers,
 																								   positions_fitter,
-																								   progressReporter));
+																								   progressReporter, firstFrameToAnalyze,
+																								   lastFrameToAnalyze));
 		
 		localizedPositions = analysisController->DoPALMAnalysis(image_loader);
 		localizedPositions->writePositionsToWave(outputWaveParams, analysisOptionsStream.str());
@@ -1965,7 +1988,7 @@ static int RegisterAnalyzePALMImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzePALMImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "AnalyzePALMImages /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzePALMImagesRuntimeParams), (void*)ExecuteAnalyzePALMImages, 0);

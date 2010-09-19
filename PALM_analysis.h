@@ -52,7 +52,8 @@ public:
 						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
 						   std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
 						   boost::shared_ptr<FitPositions> fitPositions_rhs,
-						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs);
+						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs,
+						   size_t firstFrame = (size_t)-1, size_t lastFrame = (size_t)-1);
 	~PALMAnalysisController() {;}
 	
 	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs);
@@ -62,6 +63,8 @@ public:
 	
 protected:
 	size_t nImages;
+	size_t firstFrameToAnalyze;
+	size_t lastFrameToAnalyze;
 	
 	std::queue<size_t> framesToBeProcessed;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;

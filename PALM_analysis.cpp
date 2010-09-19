@@ -32,7 +32,8 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 												boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
 												std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
 												boost::shared_ptr<FitPositions> fitPositions_rhs,
-												boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs) {
+												boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs,
+												size_t firstFrame, size_t lastFrame) {
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
 	thresholdImagePostprocessor = thresholdImagePostprocessor_rhs;
@@ -40,6 +41,9 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 	particleVerifiers = particleVerifiers_rhs;
 	fitPositions = fitPositions_rhs;
 	progressReporter = progressReporter_rhs;
+	
+	this->firstFrameToAnalyze = firstFrame;
+	this->lastFrameToAnalyze = lastFrame;
 	
 	this->errorMessage.assign("");
 }
@@ -50,6 +54,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	
 	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
+	size_t firstFrame;
+	size_t lastFrame;
 	std::vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	int firstThreadHasFinished, status;
@@ -70,7 +76,20 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	}
 	
 	// fill the queue holding the frames to be processed with the frames in the sequence
-	for (size_t i = 0; i < this->nImages; ++i) {
+	firstFrame = this->firstFrameToAnalyze;
+	lastFrame = this->lastFrameToAnalyze;
+	if (firstFrame == (size_t)-1) {
+		firstFrame = 0;
+	} else if (firstFrame >= this->nImages) {
+		throw std::runtime_error("Invalid first frame to analyze specified");
+	}
+	if (lastFrame == (size_t)-1) {
+		lastFrame = this->nImages - 1;
+	} else if ((lastFrame >= this->nImages) || (lastFrame < firstFrame)) {
+		throw std::runtime_error("Invalid last frame to analyze specified");
+	}
+	
+	for (size_t i = firstFrame; i <= lastFrame; ++i) {
 		this->framesToBeProcessed.push(i);
 	}
 	
