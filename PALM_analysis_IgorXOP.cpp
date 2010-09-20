@@ -2132,8 +2132,11 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 	int result;
 	
 	XOPInit(ioRecHandle);							// Do standard XOP initialization.
-	
 	SetXOPEntry(XOPEntry);							// Set entry point for future calls.
+	if (igorVersion < 600) {
+		SetXOPResult(IGOR_OBSOLETE);
+		return EXIT_FAILURE;
+	}
 	
 	if (result = RegisterOperations()) {
 		SetXOPResult(result);
@@ -2141,6 +2144,7 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 	else {
 		SetXOPResult(0);
 	}
+	return EXIT_SUCCESS;
 }
 
 class INCOMPATIBLE_WAVE_FORMAT {};
