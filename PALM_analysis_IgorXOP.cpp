@@ -107,7 +107,7 @@ typedef struct AnalyzePALMImagesRuntimeParams* AnalyzePALMImagesRuntimeParamsPtr
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ReadCCDImages operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ReadCCDImagesRuntimeParams {
 	// Flag parameters.
 	
@@ -148,10 +148,10 @@ struct ReadCCDImagesRuntimeParams {
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ProcessCCDImages operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ProcessCCDImagesRuntimeParams {
 	// Flag parameters.
 	
@@ -206,10 +206,10 @@ struct ProcessCCDImagesRuntimeParams {
 };
 typedef struct ProcessCCDImagesRuntimeParams ProcessCCDImagesRuntimeParams;
 typedef struct ProcessCCDImagesRuntimeParams* ProcessCCDImagesRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for AnalyzeCCDImages operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct AnalyzeCCDImagesRuntimeParams {
 	// Flag parameters.
 	
@@ -249,10 +249,10 @@ struct AnalyzeCCDImagesRuntimeParams {
 };
 typedef struct AnalyzeCCDImagesRuntimeParams AnalyzeCCDImagesRuntimeParams;
 typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for TestThreshold operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct TestThresholdRuntimeParams {
 	// Flag parameters.
 	
@@ -315,10 +315,10 @@ struct TestThresholdRuntimeParams {
 };
 typedef struct TestThresholdRuntimeParams TestThresholdRuntimeParams;
 typedef struct TestThresholdRuntimeParams* TestThresholdRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ConvolveImages operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ConvolveImagesRuntimeParams {
 	// Flag parameters.
 	
@@ -340,10 +340,10 @@ struct ConvolveImagesRuntimeParams {
 };
 typedef struct ConvolveImagesRuntimeParams ConvolveImagesRuntimeParams;
 typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for MakeBitmapPALMImage operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct MakeBitmapPALMImageRuntimeParams {
 	// Flag parameters.
 	
@@ -398,10 +398,10 @@ struct MakeBitmapPALMImageRuntimeParams {
 };
 typedef struct MakeBitmapPALMImageRuntimeParams MakeBitmapPALMImageRuntimeParams;
 typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for RipleyLFunctionClustering operation.
-#include "XOPStructureAlignmentTwoByte.h"	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct RipleyLFunctionClusteringRuntimeParams {
 	// Flag parameters.
 	
@@ -432,7 +432,7 @@ struct RipleyLFunctionClusteringRuntimeParams {
 };
 typedef struct RipleyLFunctionClusteringRuntimeParams RipleyLFunctionClusteringRuntimeParams;
 typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClusteringRuntimeParamsPtr;
-#include "XOPStructureAlignmentReset.h"		// Reset structure alignment to default.
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 
 static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
