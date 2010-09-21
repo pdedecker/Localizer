@@ -1027,11 +1027,11 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	
 	this->igor_data_wave = FetchWaveUsingFullPath(waveName);
 	
-	long DimensionSizes[MAX_DIMENSIONS + 1];
-	long numDimensions;
+	size_t DimensionSizes[MAX_DIMENSIONS + 1];
+	int numDimensions;
 	int result;
 	
-	result = MDGetWaveDimensions(igor_data_wave, &numDimensions, DimensionSizes);
+	result = MDGetWaveDimensions(igor_data_wave, &numDimensions, (CountInt *)DimensionSizes);
 	if (result != 0) {
 		throw result;
 	}

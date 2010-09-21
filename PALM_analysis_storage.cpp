@@ -111,8 +111,8 @@ void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<Localiz
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -299,8 +299,8 @@ void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string fileP
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGaussFixedWidth(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -531,8 +531,8 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPositions(boost::shar
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_Ellipsoidal2DGaussian(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -751,8 +751,8 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -906,8 +906,8 @@ void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<Locali
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multiplication(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -1068,8 +1068,8 @@ void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_ZeissPALM::LocalizedPositionsContainer_ZeissPALM(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
@@ -1195,8 +1195,8 @@ void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<Local
 #ifdef WITH_IGOR
 LocalizedPositionsContainer_MLEwG::LocalizedPositionsContainer_MLEwG(waveHndl positionsWave) {
 	// initialize a new PositionsContainer from a wave that contains positions of the correct type
-	long numDimensions;
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	int err;
 	
 	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);

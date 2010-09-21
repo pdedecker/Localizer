@@ -471,7 +471,6 @@ int ConvertHandleToString(Handle handle, std::string& convertedString) {
 int ConvertHandleToFilepathString(Handle handle, std::string &output_path) {
 	int err;
 	char handle_char[1024];
-	char handle_char_POSIX[1024];
 	
 	err = GetCStringFromHandle(handle, handle_char, 1023);
 	if (err != 0) {
@@ -540,8 +539,8 @@ boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave) 
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
-	long numDimensions; 
-	long dimensionSizes[MAX_DIMENSIONS+1];
+	int numDimensions; 
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	size_t x_size, y_size;
 	long indices[MAX_DIMENSIONS];
 	double value[2];
