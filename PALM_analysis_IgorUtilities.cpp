@@ -477,20 +477,21 @@ int ConvertHandleToFilepathString(Handle handle, std::string &output_path) {
 		return err;
 	}
 	
-#ifdef _MACINTOSH_
+#ifdef MACIGOR
 	err = WinToMacPath(handle_char);
 	if (err != 0) {
 		return err;
 	}
 	
+	char posixPATH[MAX_PATH_LEN+1];
 	
-	err = HFSToPosixPath(handle_char, handle_char_POSIX, 0);
+	err = HFSToPosixPath(handle_char, posixPATH, 0);
 	if (err != 0) {
 		return err;
 	}
-	output_path.assign(handle_char_POSIX);
+	output_path.assign(posixPATH);
 #endif
-#ifdef _WINDOWS_
+#ifdef WINIGOR
 	err = MacToWinPath(handle_char);
 	if (err != 0) {
 		return err;
