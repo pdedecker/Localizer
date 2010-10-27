@@ -29,11 +29,11 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 int parse_ccd_headers(ImageLoader *image_loader);
 
 // Routines that process CCD files and return data to Igor
-int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
+waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
 
-int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
+waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
 
-void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
+waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);

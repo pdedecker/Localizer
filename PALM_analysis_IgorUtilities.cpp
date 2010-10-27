@@ -153,7 +153,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	return 0;
 }
 
-int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -207,10 +207,10 @@ int construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndNam
 		throw result;
 	}
 	
-	return 0;
+	return output_wave;
 }
 
-int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -275,11 +275,11 @@ int construct_average_image(ImageLoader *image_loader, DataFolderAndName outputW
 		}
 	}
 	
-	return 0;
+	return output_wave;
 }
 
 
-void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -358,6 +358,8 @@ void calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndNam
 			}
 		}
 	}
+	
+	return output_wave;
 }
 
 waveHndl FetchWaveUsingFullPath(std::string wavePath) {
