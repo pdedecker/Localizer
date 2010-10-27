@@ -177,6 +177,8 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 		if ((startX >= x_size) || (endX >= x_size) || (startY >= y_size) || (endY >= y_size)) {
 			throw kBadROIDimensions;
 		}
+		if ((startX > endX) || (startY > endY))
+			throw kBadROIDimensions;
 	}
 	
 	// try to allocate a buffer that will hold the intensity trace
