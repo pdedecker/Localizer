@@ -1314,14 +1314,17 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
 	
 		switch (method) {
-			case 0:
+			case ANALYZING_SUMMEDTRACE:
 				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
-			case 1:
+			case ANALYZING_AVERAGEIMAGE:
 				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
-			case 2:
+			case ANALYZING_STDDEVIATIONIMAGE:
 				calculateStandardDeviationImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+				break;
+			case ANALYZING_AVERAGETRACE:
+				construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			default:
 				throw std::runtime_error("Unknown analysis method");
