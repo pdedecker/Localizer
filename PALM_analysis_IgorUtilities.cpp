@@ -210,6 +210,39 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	return output_wave;
 }
 
+waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+	
+	waveHndl waveH;
+	int* numDimensionsPtr;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
+	IndexInt indices[MAX_DIMENSIONS];
+	double value[2];
+	int result;
+	
+	// start by calculating the summed intensity
+	waveHndl outputWave = construct_summed_intensity_trace(image_loader, outputWaveParams, startX, startY, endX, endY);
+	
+	MDGetWaveDimensions(waveH, numDimensionsPtr, dimensionSizes);
+	
+	size_t nFrames = dimensionSizes[0];
+	int xSize = endX - startX + 1;
+	int ySize = endY - startY + 1;
+	double nPixels = xSize * ySize;
+	
+	for (size_t i = 0; i < nFrames; ++i) {
+		indices[0] = i;
+		result = MDGetNumericWavePointValue(outputWave, indices, value);
+		if (result != 0) {
+			throw result;
+		}
+		value[0] /= nPixels;
+		MDSetNumericWavePointValue(outputWave, indices, value);
+	}
+	
+	return outputWave;
+	
+}
+
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
