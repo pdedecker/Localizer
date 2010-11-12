@@ -214,8 +214,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 
 waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	
-	waveHndl waveH;
-	int* numDimensionsPtr;
+	int numDimensions;
 	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	IndexInt indices[MAX_DIMENSIONS];
 	double value[2];
@@ -224,7 +223,7 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 	// start by calculating the summed intensity
 	waveHndl outputWave = construct_summed_intensity_trace(image_loader, outputWaveParams, startX, startY, endX, endY);
 	
-	MDGetWaveDimensions(waveH, numDimensionsPtr, dimensionSizes);
+	MDGetWaveDimensions(outputWave, &numDimensions, dimensionSizes);
 	
 	size_t nFrames = dimensionSizes[0];
 	int xSize = endX - startX + 1;
