@@ -124,6 +124,11 @@ struct ReadCCDImagesRuntimeParams {
 	int ZFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -144,7 +149,7 @@ struct ReadCCDImagesRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	struct tag_UserFuncThreadInfo *tp;		// If not null, we are running from a ThreadSafe function.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
@@ -855,6 +860,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	size_t start_image, end_image;
 	std::string data_file_path;
 	int header_only = 0;
+	DataFolderAndName dataFolderAndName;
 	
 	boost::shared_ptr<ImageLoader> image_loader;
 	
@@ -878,6 +884,15 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		returnErrors = 0;
 	} else {
 		returnErrors = 1;
+	}
+	
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		dataFolderAndName = p->dest;
+	} else {
+		// not default destination was provided, use a default instead
+		dataFolderAndName.dfH = NULL;
+		strcpy(dataFolderAndName.name, "M_CCDFrames");
 	}
 	
 	// Main parameters.
@@ -932,7 +947,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
 		
 		if (header_only == 0) {
-			err = load_partial_ccd_image(image_loader.get(), start_image, end_image);
+			err = load_partial_ccd_image(image_loader.get(), start_image, end_image, dataFolderAndName);
 		} else {
 			err = parse_ccd_headers(image_loader.get());
 		}
@@ -2003,7 +2018,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z number:start_image, number:end_image, string:experiment_file";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z /DEST=DataFolderAndName:{dest,real} number:start_image, number:end_image, string:experiment_file";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);

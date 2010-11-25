@@ -10,7 +10,7 @@
 #include "PALM_analysis_IgorUtilities.h"
 
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end) {
+int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination) {
 	size_t total_n_images = image_loader->GetNImages();
 	size_t n_images_to_load;
 	size_t x_size, y_size;
@@ -18,6 +18,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
 	long indices[MAX_DIMENSIONS];
+	int destWaveCreated;
 	
 	int result;
 	boost::shared_ptr<ublas::matrix<double> > current_image;
@@ -95,7 +96,9 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 			waveType = NT_FP64;
 	}
 	
-	output_wave = MakeWaveUsingFullPath(std::string("M_CCDFrames"), dimension_sizes, waveType, 1);
+	result = MDMakeWave(&output_wave, destination.name, destination.dfH, dimension_sizes, waveType, 1);
+	if (result != 0)
+		throw result;
 	
 	// load the data
 	for (size_t i = n_start; i <= n_end; i++) {

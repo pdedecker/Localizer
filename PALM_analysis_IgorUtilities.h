@@ -24,7 +24,7 @@ namespace ublas = boost::numeric::ublas;
 class ImageLoader;
 
 // Routines that return information on CCD files and image frames to Igor
-int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end);
+int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination);
 
 int parse_ccd_headers(ImageLoader *image_loader);
 
