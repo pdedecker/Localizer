@@ -177,6 +177,7 @@ protected:
 	void parse_header_information();
 	
 	TIFF* tiff_file;
+	std::vector<size_t> directoryIndices;
 };
 
 #ifdef WITH_IGOR

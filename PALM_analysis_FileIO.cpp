@@ -765,7 +765,39 @@ void ImageLoaderTIFF::parse_header_information() {
 	int isInt;
 	size_t bitsPerPixel;
 	
+	// how many images are there in the file?
+	// because there is a possibility of a file with different
+	// subfile types (e.g. Zeiss LSM files), we need to go over all of them
+	// and look at which subfiles are the ones we're interested in
+	result = TIFFSetDirectory(tiff_file, 0);
+	if (result != 1)
+		throw std::runtime_error("Error reading from the file");
 	
+	for (size_t index = 0; ; ++index) {
+		result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
+		
+		if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
+			// this is one of the subtypes that we don't support
+			// do nothing with it
+		} else {
+			// if we're here then the image is appropriate, store its index
+			directoryIndices.push_back(index);
+		}
+		
+		if (TIFFReadDirectory(tiff_file) != 1) {
+			// there are no more directories in the file,
+			break;
+		}
+	}
+	
+	
+	this->total_number_of_images = directoryIndices.size();
+	
+	// obtain some properties from the first image in the file
+	// we assume that these properties are the for all other valid subfiles
+	result = TIFFSetDirectory(tiff_file, directoryIndices[0]);
+	if (result != 1)
+		throw std::runtime_error("Error reading from the file");
 	
 	// is the image in grayscale format?
 	result = TIFFGetField(tiff_file, TIFFTAG_PHOTOMETRIC, &result_uint16);
@@ -891,13 +923,10 @@ void ImageLoaderTIFF::parse_header_information() {
 	
 	y_size = (size_t)(result_uint32);
 	
-	
-	this->total_number_of_images = TIFFNumberOfDirectories(tiff_file);
-	
-	result = TIFFSetDirectory(tiff_file, 0);
+	result = TIFFSetDirectory(tiff_file, directoryIndices[0]);
 	if (result != 1) {
 		std::string error;
-		error = "Unable to set the directory to '0' for the image at\"";
+		error = "Unable to set the directory for the image at\"";
 		error += this->filePath;
 		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
@@ -922,10 +951,10 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	result = TIFFSetDirectory(tiff_file, index);
+	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
 	if (result != 1) {
 		std::string error;
-		error = "Unable to set the directory to '0' for the image at\"";
+		error = "Unable to set the directory for the image at\"";
 		error += this->filePath;
 		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
@@ -1005,15 +1034,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 				throw ERROR_READING_FILE_DATA(error);
 				break;
 		}
-	}
-	
-	result = TIFFSetDirectory(tiff_file, 0);
-	if (result != 1) {
-		std::string error;
-		error = "Invalid to set the directory to '0' for the image at\"";
-		error += this->filePath;
-		error += "\"";
-		throw ERROR_READING_FILE_DATA(error);
 	}
 	
 	return image;
