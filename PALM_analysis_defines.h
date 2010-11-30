@@ -18,6 +18,7 @@
 
 #ifdef WITH_IGOR
 #define PALM_ANALYSIS_XOP_ERROR 1 + FIRST_XOP_ERR
+#define ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES 2 + FIRST_XOP_ERR
 #endif // WITH_IGOR
 
 // some 'reasonable' upper limits for various quantities

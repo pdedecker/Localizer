@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <queue>
+#include <deque>
 #include <list>
 #include <string>
 #include <algorithm>
@@ -64,6 +65,9 @@ public:
 	
 protected:
 	size_t n_frames_averaging;	// how many frames do we average over?
+	
+	void subtractAverageOfEntireMovie(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage);
 };
 
 /**

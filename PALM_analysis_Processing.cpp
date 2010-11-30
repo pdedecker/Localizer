@@ -11,6 +11,15 @@
 #include "PALM_analysis_Processing.h"
 
 void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+	// depending on the value of this->n_frames_averaging we either need to subtract the entire movie or just a small part
+	if (this->n_frames_averaging == 0) {
+		this->subtractAverageOfEntireMovie(image_loader, output_writer);
+	} else {
+		this->subtractRollingAverage(image_loader, output_writer, this->n_frames_averaging);
+	}
+}
+
+void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {	
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
 	
@@ -24,7 +33,6 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	// we pass through the images two times:
 	// the first pass calculates the average,
 	// the second pass subtracts it from the image
-	// fortunately out intermediate format uses doubles to store the data!
 	
 	if (this->n_frames_averaging == 0)
 		this->n_frames_averaging = total_number_of_images;
@@ -56,6 +64,77 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0);
 	}
 	this->progressReporter->CalculationDone();
+}
+
+void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
+	
+	boost::shared_ptr<ublas::matrix<double> > currentImage;
+	size_t xSize = image_loader->getXSize();
+	size_t ySize = image_loader->getYSize();
+	size_t nFramesInMovie = image_loader->GetNImages();
+	int nFramesSurroundingFrame = nFramesInAverage / 2;
+	
+	if (nFramesInAverage > nFramesInMovie) {
+		throw std::runtime_error("The number of frames requested in the rolling average is larger than the total number of frames in the movie");
+	}
+	if (nFramesInAverage % 2 == 0) {
+		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
+	}
+	
+	boost::shared_ptr<ublas::matrix<double> > averageImage (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<ublas::matrix<double> > summedImages (new ublas::matrix<double>(xSize, ySize));
+	std::deque<boost::shared_ptr<ublas::matrix<double> > > frameBuffer;
+	
+	std::fill(summedImages->data().begin(), summedImages->data().end(), double(0.0));
+	
+	// start by loading a full set of images
+	for (size_t i = 0; i < nFramesInAverage; ++i) {
+		currentImage = image_loader->readImage(i);
+		frameBuffer.push_front(currentImage);
+		(*summedImages) += (*currentImage);
+	}
+	
+	(*averageImage) = (*summedImages) / (double)nFramesInAverage;
+	
+	// loop over all frames in the movie
+	for (int n = 0; n < nFramesInMovie; ++n) {
+		currentImage = image_loader->readImage(n);
+		if (n - nFramesSurroundingFrame < 0) {
+			// we're too close to the beginning of the movie to get a full rolling average
+			// subtract the average made from the first set of frames instead
+			*currentImage -= *averageImage;
+			output_writer->write_image(currentImage);
+			
+		} else if (n + nFramesSurroundingFrame >= nFramesInMovie) {
+			// we're too close to the end of the movie to get a full rolling average
+			// subtract the average made from the last set of frames instead
+			*currentImage -= *averageImage;
+			output_writer->write_image(currentImage);
+			
+		} else {
+		
+			// if we're here then we're in the middle of the movie
+			// first remove the contribution of the frame that will go out of scope
+			// from the sum of frames
+			*summedImages -= *(frameBuffer.back());
+			// now remove the frame from the buffer
+			frameBuffer.pop_back();
+			// now add a new frame to the buffer
+			currentImage = image_loader->readImage(n + nFramesSurroundingFrame);
+			frameBuffer.push_front(currentImage);
+			// now add the contribution of the new frame
+			*summedImages += *currentImage;
+			*averageImage = *summedImages / (double)nFramesInAverage;
+			
+			// get the frame that we want to subtract from
+			currentImage = image_loader->readImage(n);
+			*currentImage -= *averageImage;
+			
+			output_writer->write_image(currentImage);
+		}
+		
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)nFramesInMovie * 100.0);
+	}
 }
 
 void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {

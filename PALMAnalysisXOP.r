@@ -15,6 +15,7 @@ resource 'vers' (2) {						// Igor version info.
 resource 'STR#' (1100) { // Custom error messages 
 	{ 
 		"An error occurred while performing the requested operation. See the command window (command-J or control-J) for more information.",
+		"A rolling average requires an odd number of frames to be specified (/AVG flag)",
 	} 
 };
 

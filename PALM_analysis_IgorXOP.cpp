@@ -184,6 +184,11 @@ struct ProcessCCDImagesRuntimeParams {
 	double endY;
 	int RFlagParamsSet[4];
 	
+	// Parameters for /AVG flag group.
+	int AVGFlagEncountered;
+	double framesAveraging;
+	int AVGFlagParamsSet[1];
+	
 	// Parameters for /OUT flag group.
 	int OUTFlagEncountered;
 	double outputType;
@@ -988,6 +993,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	int camera_type;
 	int method;
 	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
+	int nFramesAveraging;
 	int outputType, compression;
 	size_t startX, endX, startY, endY;
 	double cameraOffset, cameraMultiplicationFactor;
@@ -1028,6 +1034,19 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 			return EXPECT_POS_NUM;
 	} else if (method == PROCESSING_CONVERTTOPHOTONS) {
 		return EXPECT_POS_NUM;
+	}
+	
+	if (p->AVGFlagEncountered) {
+		// Parameter: p->framesAveraging
+		nFramesAveraging = (int)(p->framesAveraging + 0.5);
+		if (nFramesAveraging < 0)
+			return EXPECT_POS_NUM;
+		
+		if ((method == PROCESSING_AVERAGESUBTRACTION) && (nFramesAveraging % 2 == 0)) {
+			return ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES;
+		}
+	} else {
+		nFramesAveraging = 0;
 	}
 	
 	if (p->OUTFlagEncountered) {
@@ -1177,7 +1196,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		// do the actual procedure
 		switch (method) {
 			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, 0));
+				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
 				break;
 			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
 				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
@@ -2030,7 +2049,7 @@ static int RegisterProcessCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /R={number:startX, number:endX, number:startY, number:endY} /OUT=number:outputType /O string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /R={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
