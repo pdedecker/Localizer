@@ -12,11 +12,15 @@
 
 void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	// depending on the value of this->n_frames_averaging we either need to subtract the entire movie or just a small part
+	this->progressReporter->CalculationStarted();
+	
 	if (this->n_frames_averaging == 0) {
 		this->subtractAverageOfEntireMovie(image_loader, output_writer);
 	} else {
 		this->subtractRollingAverage(image_loader, output_writer, this->n_frames_averaging);
 	}
+	
+	this->progressReporter->CalculationDone();
 }
 
 void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {	
@@ -42,8 +46,6 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
-	this->progressReporter->CalculationStarted();
-	
 	for (size_t n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->readImage(n);
 		
@@ -63,7 +65,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 		output_writer->write_image(subtracted_image);
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0);
 	}
-	this->progressReporter->CalculationDone();
+	
 }
 
 void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
