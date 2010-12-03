@@ -248,8 +248,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	
 	uint64_t n_bytes_in_single_image;
 	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
-	
 	// determine how big we have to make the single image buffer and the offset
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4 byte float
@@ -270,18 +268,19 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
 	
-	file.seekg(offset);
-	
-	file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error trying to read image data from \"";
-		error += this->filePath;
-		error += "\" assuming the SPE format";
-		throw ERROR_READING_FILE_DATA(error);
+	{
+		boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+		file.seekg(offset);
+		file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
+		if (file.fail() != 0) {
+			std::string error;
+			error = "Error trying to read image data from \"";
+			error += this->filePath;
+			error += "\" assuming the SPE format";
+			throw ERROR_READING_FILE_DATA(error);
+		}
 	}
 	
 	switch(storage_type) {
@@ -331,8 +330,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
-	
-	file.seekg(0);
 	
 	return image;
 }
@@ -443,28 +440,24 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size
 	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
-	
-	boost::shared_ptr<ublas::matrix<double> > image;
-	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	uint64_t cache_offset;
-	
-	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<ublas::matrix<double> > image (new ublas::matrix<double>(x_size, y_size));
 	
 	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
-	file.seekg(offset);
 	
-	cache_offset = 0;
-	
-	file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error trying to read image data from \"";
-		error += this->filePath;
-		error += "\" assuming the Andor format";
-		throw ERROR_READING_FILE_DATA(error);
+	{
+		boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+		file.seekg(offset);
+		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
+		if (file.fail() != 0) {
+			std::string error;
+			error = "Error trying to read image data from \"";
+			error += this->filePath;
+			error += "\" assuming the Andor format";
+			throw ERROR_READING_FILE_DATA(error);
+		}
 	}
 	
 	
@@ -553,26 +546,23 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
-	
-	boost::shared_ptr<ublas::matrix<double> > image;
-		
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
-	
 	size_t n_bytes_per_image = x_size * y_size * 2;
-	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	
-	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	
 	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
-	file.seekg(offset);
 	
-	file.read(single_image_buffer.get(), n_bytes_per_image);
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error reading image data from \"";
-		error += this->filePath;
-		error += "\" assuming the Hamamatsu format";
-		throw ERROR_READING_FILE_DATA(error);
+	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
+	boost::shared_ptr<ublas::matrix<double> > image (new ublas::matrix<double>(x_size, y_size));
+	
+	{
+		boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+		file.seekg(offset);
+		file.read(single_image_buffer.get(), n_bytes_per_image);
+		if (file.fail() != 0) {
+			std::string error;
+			error = "Error reading image data from \"";
+			error += this->filePath;
+			error += "\" assuming the Hamamatsu format";
+			throw ERROR_READING_FILE_DATA(error);
+		}
 	}
 	
 	uint16_t *uint16tPtr = (uint16_t *)single_image_buffer.get();
@@ -583,8 +573,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 			++uint16tPtr;
 		}
 	}
-	
-	file.seekg(0);
 	
 	return image;
 }
@@ -650,8 +638,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 	size_t n_pixels = this->x_size * this->y_size;
 	size_t offset, imageSize;
 	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
-	
 	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
 	
 	switch (this->storage_type) {
@@ -674,8 +660,20 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 	}
 	
 	boost::scoped_array<char> buffer(new char[imageSize]);
-	file.seekg(offset);
-	file.read(buffer.get(), imageSize);
+	
+	{
+		boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+		file.seekg(offset);
+		file.read(buffer.get(), imageSize);
+		if (file.fail() != 0) {
+			std::string error;
+			error = "Error reading image data from \"";
+			error += this->filePath;
+			error += "\" assuming the simple image format";
+			throw ERROR_READING_FILE_DATA(error);
+		}
+	}
+	
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -718,16 +716,6 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t
 			throw std::runtime_error("The data file does appear to contain a recognized storage type");
 			break;
 	}
-	
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error reading image data from \"";
-		error += this->filePath;
-		error += "\" assuming the simple image format";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	file.seekg(0);
 	
 	return image;
 }
