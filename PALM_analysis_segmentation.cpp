@@ -783,19 +783,11 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 	
 	averages = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	std::fill(averages->data().begin(), averages->data().end(), double(0.0));
-	
 	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	
 	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	std::fill(summed_squares->data().begin(), summed_squares->data().end(), double(0.0));
-	
 	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	
 	image_Gaussian_convolved = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));	// this is 'alpha' in the original matlab code
-	
 	hypothesis_test = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));	// this is 'test' in the original matlab code
-	std::fill(hypothesis_test->data().begin(), hypothesis_test->data().end(), double(0.0));
 	
 	// calculate the square of the pixel values
 	// we'll use this later
