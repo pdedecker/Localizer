@@ -702,7 +702,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// choose which thresholding we want to do
 		switch(thresholding_method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width, image_loader->getXSize(), image_loader->getYSize()));
 				break;
 			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -1555,7 +1555,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		}
 		switch(method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth, x_size, y_size));
 				break;
 			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());

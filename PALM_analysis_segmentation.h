@@ -160,7 +160,7 @@ protected:
 
 class ThresholdImage_GLRT_FFT : public ThresholdImage {
 public:
-	ThresholdImage_GLRT_FFT(double PFA_param, double width_param) {PFA = PFA_param; gaussianWidth = width_param; averageKernelXSize = 0; averageKernelYSize = 0; GaussianKernelXSize = 0; GaussianKernelYSize = 0;} 
+	ThresholdImage_GLRT_FFT(double PFA_param, double width_param, size_t xSize_rhs, size_t ySize_rhs);
 	~ThresholdImage_GLRT_FFT() {;}
 	
 	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding();
@@ -171,19 +171,12 @@ protected:
 	
 	double PFA;
 	double gaussianWidth;
+	size_t xSize, ySize;
 	boost::shared_ptr<ublas::matrix<double> > Gaussian_kernel;
 	boost::shared_ptr<ublas::matrix<double> > average_kernel;
-	size_t averageKernelXSize, averageKernelYSize;
-	size_t GaussianKernelXSize, GaussianKernelYSize;
 	double sum_squared_Gaussian;
-	
-	boost::mutex GaussianKernelMutex;
-	boost::mutex AverageKernelMutex;
-	
-	boost::shared_mutex gaussianCalculationMutex;
-	boost::shared_mutex averageCalculationMutex;
-	
-	// for an explanation of the many mutexes see ConvolveMatricesWithFFTClass
+	double double_window_pixels;
+	size_t half_window_size;
 };
 
 class ThresholdImage_Preprocessor {
