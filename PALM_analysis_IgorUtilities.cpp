@@ -18,7 +18,6 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
 	long indices[MAX_DIMENSIONS];
-	int destWaveCreated;
 	
 	int result;
 	boost::shared_ptr<ublas::matrix<double> > current_image;
