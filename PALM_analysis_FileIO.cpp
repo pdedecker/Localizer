@@ -395,15 +395,29 @@ void ImageLoaderAndor::parse_header_information() {
 		}
 	}
 	
+	// as usual Visual Studio is failing for whatever reason on these conversions
+	// (no, a %Iu format specifier doesn't work either)
+	// so we'll have to handle them the ugly way. Thanks again, Microsoft!
+#ifdef WIN32
+	int wTemp, wFrameYSize, wFrameXSize, WNImages;
+	result = sscanf(singleLine.c_str(), "Pixel number%d 1 %d %d 1 %d", &wTemp, &wFrameYSize, &wFrameXSize, &WNImages);
+	frameYSize = wFrameYSize; frameXSize = wFrameXSize; this->total_number_of_images = WNImages;
+#else
 	result = sscanf(singleLine.c_str(), "Pixel number%zu 1 %zu %zu 1 %zu", &temp, &frameYSize, &frameXSize, &this->total_number_of_images);
+#endif
 	if (result != 4)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
 	ss.getline(singleLineBuffer.get(), 4096);
 	singleLine = singleLineBuffer.get();
 	
-	
+#ifdef WIN32
+	int wXStart, wYStart, wYEnd, wXEnd, wXBinning, wYBinning;
+	result = sscanf(singleLine.c_str(), "%d %d %d %d %d %d %d", &wTemp, &wXStart, &wYEnd, &wXEnd, &wYStart, &wXBinning, &wYBinning);
+	xStart = wXStart; yEnd = wYEnd; xEnd = wXEnd; yStart = wYStart; xBinning = wXBinning; yBinning = wYBinning;
+#else
 	result = sscanf(singleLine.c_str(), "%zu %zu %zu %zu %zu %zu %zu", &temp, &xStart, &yEnd, &xEnd, &yStart, &xBinning, &yBinning);
+#endif
 	if (result != 7)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
