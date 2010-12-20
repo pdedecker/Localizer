@@ -429,7 +429,8 @@ void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_
 	for (std::list<position>::iterator it = positions->begin(); it != positions->end(); ++it) {
 		if ((*it).get_intensity() == -1.0e200) {
 			it = positions->erase(it);
-			--it;
+			if (it != positions->begin())
+				--it;
 		}
 	}
 	
