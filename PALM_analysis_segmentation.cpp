@@ -775,7 +775,6 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	boost::shared_ptr<ublas::matrix<double> > summed_squares;
 	boost::shared_ptr<ublas::matrix<double> > null_hypothesis;
 	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved;
-	boost::shared_ptr<ublas::matrix<double> > hypothesis_test;
 	
 	double current_value;
 	
@@ -785,7 +784,6 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
 	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
 	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	hypothesis_test = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));	// this is 'test' in the original matlab code
 	
 	// calculate the square of the pixel values
 	// we'll use this later
@@ -822,18 +820,9 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	for (size_t k = this->half_window_size; k < this->xSize - this->half_window_size; k++) {
 		for (size_t l = this->half_window_size; l < this->ySize - this->half_window_size; l++) {
 			current_value = 1 - (this->sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
-			current_value = (current_value > 0) * current_value + (current_value <= 0);	// the equivalent of test = (test > 0) .* test + (test <= 0) in the original code
-			current_value = - this->double_window_pixels * log(current_value);
-			(*hypothesis_test)(k, l) = current_value;
-		}
-	}
-	
-	// at this point 'hypothesis_test' is equal to 'carte_MV' in the original image
-	// check where we have to reject the hypothesis test
-	for (size_t k = this->half_window_size; k < this->xSize - this->half_window_size; k++) {
-		for (size_t l = this->half_window_size; l < this->ySize - this->half_window_size; l++) {
-			if ((*hypothesis_test)(k, l) > PFA) {
-				(*threshold_image)(k, l) = (unsigned char)255;
+			if (current_value > 0.0) {
+				if (- this->double_window_pixels * log(current_value) > PFA)
+					(*threshold_image)(k, l) = (unsigned char)255;
 			}
 		}
 	}
