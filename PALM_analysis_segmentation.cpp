@@ -761,6 +761,9 @@ ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_
 		}
 	}
 	
+	// now calculate the FFTs of the kernels
+	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(this->Gaussian_kernel, this->FFT_xSize, this->FFT_ySize);
+	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(this->average_kernel, this->FFT_xSize, this->FFT_ySize);
 }
 
 boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
@@ -796,10 +799,12 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	
 	// convolve the image with a "box function", that will get us the average
-	averages = matrixConvolver.ConvolveMatricesWithFFT(image, this->average_kernel);
+	//averages = matrixConvolver.ConvolveMatricesWithFFT(image, this->average_kernel);
+	averages = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->averageKernelFFT, this->FFT_xSize, this->FFT_ySize);
 	
 	// do the same for the squared image
-	summed_squares = matrixConvolver.ConvolveMatricesWithFFT(image_squared, this->average_kernel);
+	//summed_squares = matrixConvolver.ConvolveMatricesWithFFT(image_squared, this->average_kernel);
+	summed_squares = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->averageKernelFFT, this->FFT_xSize, this->FFT_ySize);
 	
 	// normalize the result, so that we get averages
 	(*averages) /= this->double_window_pixels;
@@ -811,7 +816,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// we now do this using the FFT
-	image_Gaussian_convolved = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
+	//image_Gaussian_convolved = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
+	image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->GaussianKernelFFT, this->FFT_xSize, this->FFT_ySize);
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
@@ -1245,7 +1251,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	}
 	
 	// get the missing FFT
-	boost::shared_ptr<fftw_complex> array1_FFT = this->DoFFT(image, FFT_xSize1, FFT_ySize1);
+	boost::shared_ptr<fftw_complex> array1_FFT = this->DoForwardFFT(image, FFT_xSize1, FFT_ySize1);
 	
 	if ((FFT_xSize1 != FFT_xSize2) || (FFT_ySize1 != FFT_ySize2)) {
 		std::string error("Tried to convolve images with unequal dimensions using a given FFT");
@@ -1302,9 +1308,11 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 			offset++;
 		}
 	}
+	
+	return convolved_image;
 }
 
-boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoFFT(boost::shared_ptr<ublas::matrix<double> > image, size_t &FFT_xSize, size_t &FFT_ySize) {
+boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image, size_t &FFT_xSize, size_t &FFT_ySize) {
 	
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
@@ -1371,6 +1379,52 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoFFT(boost::share
 	forwardCalculationMutex.unlock_shared();
 	
 	return array_FFT;
+}
+
+boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t FFT_xSize, size_t FFT_ySize, size_t xSize, size_t ySize) {
+	
+	size_t offset;
+	
+	boost::shared_ptr<ublas::matrix<double> > image(new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<double> array((double *)fftw_malloc(xSize * ySize * sizeof(double)), fftw_free);
+	
+	double normalization_factor = (double)(FFT_xSize * FFT_ySize);
+	
+	reversePlanMutex.lock();
+	if ((reversePlan == NULL) || (reversePlanXSize != FFT_xSize) || (reversePlanYSize != FFT_ySize)) {
+		reverseCalculationMutex.lock();	// require exclusive ownership
+		if (reversePlan != NULL) {
+			fftw_destroy_plan(reversePlan);
+		}
+		
+		reversePlanXSize = FFT_xSize;
+		reversePlanYSize = FFT_ySize;
+		
+		reversePlan = fftw_plan_dft_c2r_2d((int)(FFT_xSize), (int)(FFT_ySize), array_FFT.get(), array.get(), FFTW_ESTIMATE);
+		reverseCalculationMutex.unlock();
+	}
+	
+	reverseCalculationMutex.lock_shared();
+	reversePlanMutex.unlock();
+	
+	fftw_execute_dft_c2r(reversePlan, array_FFT.get(), array.get());
+	
+	reverseCalculationMutex.unlock_shared();
+	
+	// and store the result (we don't overwrite the input arguments)
+	offset = 0;
+	for (size_t i = 0; i < FFT_xSize; i++) {
+		for (size_t j = 0; j < FFT_ySize; j++) {
+			// the data in the array is assumed to be in ROW-MAJOR order, so we loop over x first
+			// we also normalize the result
+			(*image)(i, j) = array.get()[offset] / normalization_factor;
+			
+			offset++;
+		}
+	}
+	
+	// TODO: what to do about the missing pixels?
+	return image;
 }
 
 
