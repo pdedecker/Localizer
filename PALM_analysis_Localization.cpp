@@ -1229,14 +1229,57 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 	
 }
 
-int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
-	int result;
-	result = FitFunction_SymmetricGaussian(params, measured_intensities_struct, model_values);
-	if (result != GSL_SUCCESS)
-		return result;
-	result = Jacobian_SymmetricGaussian(params, measured_intensities_struct, jacobian);
-	if (result != GSL_SUCCESS)
-		return result;
+int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *model_values, gsl_matrix *jacobian) {
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+	boost::shared_ptr<ublas::matrix<double> > imageSubset = fitDataLocal->imageSubset;
+	
+	size_t xSize = imageSubset->size1();
+	size_t ySize = imageSubset->size2();
+	size_t arrayOffset = 0;
+	double xOffset = fitDataLocal->xOffset;
+	double yOffset = fitDataLocal->yOffset;
+	double sigma = fitDataLocal->sigma;
+	
+	double amplitude = gsl_vector_get(params, 0);
+	double r = gsl_vector_get(params, 1);
+	double x0 = gsl_vector_get(params, 2);
+	double y0 = gsl_vector_get(params, 3);
+	double offset = gsl_vector_get(params, 4);
+	
+	double x,y, function_value, square_deviation, exp_factor;
+	double dfdA, dfdr, dfdx0, dfdy0, dfdoffset;
+	
+	if (r == 0) {
+		return GSL_FAILURE;
+	}
+	
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			x = xOffset + (double)i;
+			y = yOffset + (double)j;
+			
+			exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
+			
+			function_value = offset + amplitude * exp_factor;
+			square_deviation = (function_value - (*imageSubset)(i, j)) / sigma;
+			
+			dfdA = exp_factor / sigma;
+			dfdr = (2 * (y - y0) * (y - y0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r) + 2 * (x - x0) * (x - x0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r)) * exp_factor * amplitude / sigma;
+			dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
+			dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
+			dfdoffset = 1/sigma;
+			
+			gsl_vector_set(model_values, arrayOffset, square_deviation);
+			
+			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
+			gsl_matrix_set(jacobian, arrayOffset, 1, dfdr);
+			gsl_matrix_set(jacobian, arrayOffset, 2, dfdx0);
+			gsl_matrix_set(jacobian, arrayOffset, 3, dfdy0);
+			gsl_matrix_set(jacobian, arrayOffset, 4, dfdoffset);
+			
+			++arrayOffset;
+		}
+	}
 	return GSL_SUCCESS;
 }
 

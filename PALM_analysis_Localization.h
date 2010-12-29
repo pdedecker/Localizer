@@ -158,7 +158,7 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensit
 int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
-int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
