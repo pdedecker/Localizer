@@ -132,7 +132,14 @@ public:
 	~ConvolveMatricesWithFFTClass();
 	
 	boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFT(boost::shared_ptr<ublas::matrix<double> > image1, boost::shared_ptr<ublas::matrix<double> > image2);
+	boost::shared_ptr<ublas::matrix<double> > ConvolveMatrixWithGivenFFT(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2);
 	
+	
+	/**
+	 * Get the FFT of a single image, possibly for later use in a convolution.
+	 * The x and y size of the transformed image will be returned by reference in FFT_xSize and FFT_ySize.
+	 */
+	boost::shared_ptr<fftw_complex> DoFFT(boost::shared_ptr<ublas::matrix<double> > image, size_t &FFT_xSize, size_t &FFT_ySize);
 protected:
 	fftw_plan forwardPlan;
 	fftw_plan reversePlan;
