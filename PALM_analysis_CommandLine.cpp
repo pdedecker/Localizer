@@ -87,9 +87,6 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
 	
-	// get the thresholder
-	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
-	
 	// get the particle finder
 	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
 	
@@ -105,17 +102,14 @@ int main(int argc, char *argv[]) {
 	// get a progress reporter
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout());
 	
-	// get an analysis controller
-	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
-																							postprocessor, particleFinder, particleVerifiers,
-																							positionsFitter,
-																							progressReporter));
 	// run the PALM analysis for every input file
 	size_t nInputFiles = inputFiles.size();
 	if (nInputFiles == 0)
 		std::cout << "No input files specified!\n";
 	
 	boost::shared_ptr<ImageLoader> imageLoader;
+	boost::shared_ptr<ThresholdImage> thresholder;
+	boost::shared_ptr<PALMAnalysisController> analysisController;
 	std::string outputFilePath;
 	std::ostringstream header;
 	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
@@ -125,6 +119,13 @@ int main(int argc, char *argv[]) {
 			// get an imageloader and output file path
 			imageLoader = GetImageLoader(inputFiles.at(i));
 			outputFilePath = GetOutputPositionsFilePath(inputFiles.at(i));
+			
+			// get the thresholder and analysis controller
+			thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth, imageLoader->getXSize(), imageLoader->getYSize());
+			analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
+																									   postprocessor, particleFinder, particleVerifiers,
+																									   positionsFitter,
+																									   progressReporter));
 			
 			// if there is more than one input file then tell the user which inputfile is being processed
 			if (nInputFiles > 1) {
@@ -205,9 +206,9 @@ boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string
 	throw std::runtime_error("Unknown postprocessor algorithm");
 }
 
-boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth) {
+boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth, size_t xWidth, size_t yWidth) {
 	if (name == std::string("glrt"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
+		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(pfa, psfWidth, xWidth, yWidth));
 	
 	if (name == std::string("isodata"))
 		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
