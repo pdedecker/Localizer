@@ -1081,6 +1081,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	boost::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2, FFT_xSize, FFT_ySize);
 	
 	n_FFT_values = FFT_xSize * FFT_ySize;
+	nColumns = FFT_ySize / 2 + 1;
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
@@ -1142,11 +1143,12 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	}
 	
 	n_FFT_values = FFT_xSize1 * FFT_ySize1;
+	nColumns = FFT_ySize1 / 2 + 1;
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
-		complex_value[0] = array1_FFT.get()[i][0] * array2_FFT.get()[i][0] - array1_FFT.get()[i][1] * array2_FFT.get()[i][1];
-		complex_value[1] = array1_FFT.get()[i][0] * array2_FFT.get()[i][1] + array1_FFT.get()[i][1] * array2_FFT.get()[i][0];
+		complex_value[0] = (array1_FFT.get()[i][0] * array2_FFT.get()[i][0]) - (array1_FFT.get()[i][1] * array2_FFT.get()[i][1]);
+		complex_value[1] = (array1_FFT.get()[i][0] * array2_FFT.get()[i][1]) + (array1_FFT.get()[i][1] * array2_FFT.get()[i][0]);
 		
 		// store the result in the first array
 		// we add in a comb function so the origin is at the center of the image
