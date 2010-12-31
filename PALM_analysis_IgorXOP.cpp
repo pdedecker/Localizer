@@ -702,7 +702,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// choose which thresholding we want to do
 		switch(thresholding_method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width, image_loader->getXSize(), image_loader->getYSize()));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
 				break;
 			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -1555,7 +1555,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		}
 		switch(method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth, x_size, y_size));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
 				break;
 			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
@@ -1676,14 +1676,11 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 				(*it)->VerifyParticles(CCD_Frame, located_particles);
 			}
 			
-			long dimensionSizes[MAX_DIMENSIONS+1];
-			long indices[MAX_DIMENSIONS];
 			waveHndl outputWave;
 			size_t nParticles = (*located_particles).size();
 			dimensionSizes[0] = nParticles;
 			dimensionSizes[1] = 4;	// warning: magic number
 			dimensionSizes[2] = 0;
-			double value[2];
 			
 			outputWave = MakeWaveUsingFullPath(std::string("M_locatedParticles"), dimensionSizes, NT_FP64, 1);
 			

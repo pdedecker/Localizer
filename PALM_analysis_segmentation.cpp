@@ -706,27 +706,32 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_th
 	return threshold_image;
 }
 
-ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_param, size_t xSize_rhs, size_t ySize_rhs) {
+ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_param) {
 	this->PFA = PFA_param;
 	this->gaussianWidth = width_param;
-	this->xSize = xSize_rhs;
-	this->ySize = ySize_rhs;
+	this->kernelXSize = 0;
+	this->kernelYSize = 0;
+}
+
+void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	
 	// calculate all kernels that will be needed for images of the requested size
 	size_t window_size = ceil(4 * this->gaussianWidth);
 	if ((window_size % 2) == 0)	// window_size must be odd
 		window_size += 1;
 	
+	this->kernelXSize = xSize;
+	this->kernelYSize = ySize;
 	this->double_window_pixels = (double)window_size * (double)window_size;
 	this->half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
 	
-	size_t center_x = this->xSize / 2;
-	size_t center_y = this->ySize / 2;
+	size_t center_x = xSize / 2;
+	size_t center_y = ySize / 2;
 	double sum;
 	double distance_x, distance_y;
 	
 	// calculate the average kernel
-	this->average_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
+	boost::shared_ptr<ublas::matrix<double> > average_kernel(new ublas::matrix<double>(xSize, ySize));
 	std::fill(average_kernel->data().begin(), average_kernel->data().end(), double(0.0));
 	
 	for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
@@ -736,7 +741,7 @@ ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_
 	}
 	
 	// calculate the Gaussian kernel
-	Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
+	boost::shared_ptr<ublas::matrix<double> > Gaussian_kernel(new ublas::matrix<double>(xSize, ySize));
 	
 	sum = 0;
 	std::fill(Gaussian_kernel->data().begin(), Gaussian_kernel->data().end(), double(0.0));
@@ -762,17 +767,16 @@ ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_
 	}
 	
 	// now calculate the FFTs of the kernels
-	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(this->average_kernel, this->FFT_xSize, this->FFT_ySize);
-	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(this->Gaussian_kernel, this->FFT_xSize, this->FFT_ySize);
+	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(average_kernel, this->FFT_xSize, this->FFT_ySize);
+	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel, this->FFT_xSize, this->FFT_ySize);
 }
 
 boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
+	size_t xSize = image->size1();
+	size_t ySize = image->size2();
+	
 	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
-	
-	if ((image->size1() != this->xSize) || (image->size2() != ySize))
-		throw std::runtime_error("An image with unexpected dimensions was passed into the GLRT segmentation routine");
-	
 	boost::shared_ptr<ublas::matrix<double> > averages;
 	boost::shared_ptr<ublas::matrix<double> > image_squared;
 	boost::shared_ptr<ublas::matrix<double> > summed_squares;
@@ -781,12 +785,29 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	double current_value;
 	
-	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(this->xSize, this->ySize));
+	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(xSize, ySize));
 	std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 	
-	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
-	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->xSize, this->ySize));
+	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
+	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
+	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
+	
+	// do we have kernels of the appropriate size?
+	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
+	if ((this->GaussianKernelFFT.get() == NULL) || (this->kernelXSize != xSize) || (this->kernelYSize != ySize)) {
+		// the kernels need to be created or updated
+		// no other thread can be performing a calculation
+		// while this thread modifies the kernels
+		this->segmentationCalculationMutex.lock();
+		
+		this->MakeKernels(xSize, ySize);
+		
+		this->segmentationCalculationMutex.unlock();
+	}
+	
+	// many threads can run a calculation, but only one can modify
+	this->segmentationCalculationMutex.lock_shared();
+	this->kernelCalculationMutex.unlock();
 	
 	// calculate the square of the pixel values
 	// we'll use this later
@@ -820,8 +841,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
-	for (size_t k = this->half_window_size; k < this->xSize - this->half_window_size; k++) {
-		for (size_t l = this->half_window_size; l < this->ySize - this->half_window_size; l++) {
+	for (size_t k = this->half_window_size; k < xSize - this->half_window_size; k++) {
+		for (size_t l = this->half_window_size; l < ySize - this->half_window_size; l++) {
 			current_value = 1 - (this->sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
 			if (current_value > 0.0) {
 				if (- this->double_window_pixels * log(current_value) > PFA)

@@ -172,22 +172,24 @@ protected:
 
 class ThresholdImage_GLRT_FFT : public ThresholdImage {
 public:
-	ThresholdImage_GLRT_FFT(double PFA_param, double width_param, size_t xSize_rhs, size_t ySize_rhs);
+	ThresholdImage_GLRT_FFT(double PFA_param, double width_param);
 	~ThresholdImage_GLRT_FFT() {;}
 	
 	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding();
 	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<ublas::matrix<double> > image);
 	
 protected:
+	void MakeKernels(size_t xSize, size_t ySize);
+	
 	ConvolveMatricesWithFFTClass matrixConvolver;
 	
 	double PFA;
 	double gaussianWidth;
-	size_t xSize, ySize;
 	
-	boost::shared_ptr<ublas::matrix<double> > Gaussian_kernel;
-	boost::shared_ptr<ublas::matrix<double> > average_kernel;
+	boost::mutex kernelCalculationMutex;
+	boost::shared_mutex segmentationCalculationMutex;
 	
+	size_t kernelXSize, kernelYSize;
 	boost::shared_ptr<fftw_complex> GaussianKernelFFT;
 	boost::shared_ptr<fftw_complex> averageKernelFFT;
 	size_t FFT_xSize, FFT_ySize;
