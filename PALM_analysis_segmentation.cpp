@@ -1258,7 +1258,10 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 		forwardPlanXSize = FFT_xSize;
 		forwardPlanYSize = FFT_ySize;
 		
+		FFTWPlannerMutex.lock();
 		forwardPlan = fftw_plan_dft_r2c_2d((int)(FFT_xSize), (int)(FFT_ySize), array.get(), array_FFT.get(), FFTW_ESTIMATE);
+		FFTWPlannerMutex.unlock();
+		
 		forwardCalculationMutex.unlock();
 	}
 	
@@ -1291,7 +1294,10 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 		reversePlanXSize = FFT_xSize;
 		reversePlanYSize = FFT_ySize;
 		
+		FFTWPlannerMutex.lock();
 		reversePlan = fftw_plan_dft_c2r_2d((int)(FFT_xSize), (int)(FFT_ySize), array_FFT.get(), array.get(), FFTW_ESTIMATE);
+		FFTWPlannerMutex.unlock();
+		
 		reverseCalculationMutex.unlock();
 	}
 	
