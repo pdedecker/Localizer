@@ -52,7 +52,6 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	this->imageLoader = imageLoader_rhs;
 	this->nImages = imageLoader->GetNImages();
 	
-	size_t numberOfProcessors = boost::thread::hardware_concurrency();
 	size_t numberOfThreads;
 	size_t firstFrame;
 	size_t lastFrame;
@@ -67,7 +66,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 		return this->localizedPositions;
 	}
 	
-	numberOfThreads = numberOfProcessors + 1;	// take one extra thread since every thread will be blocked on I/O sooner or later
+	numberOfThreads = boost::thread::hardware_concurrency();
 	if (numberOfThreads == 0) {
 		numberOfThreads = 1;
 	}
