@@ -1068,6 +1068,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Postprocessor_R
 	return processed_thresholded_image;
 }
 
+boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
+
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 	if (forwardPlan != NULL) {
 		fftw_destroy_plan(forwardPlan);
@@ -1250,7 +1252,10 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	// if there is no forward plan yet then create it
 	forwardPlanMutex.lock();
 	if ((forwardPlan == NULL) || (forwardPlanXSize != FFT_xSize) || (forwardPlanYSize != FFT_ySize)) {
-		forwardCalculationMutex.lock();	// require exclusive ownership
+		// the plan is unsuitable for the requested transform
+		// let all other threads finish calculations with the current plan first
+		forwardCalculationMutex.lock();
+		FFTWPlannerMutex.lock();
 		if (forwardPlan != NULL) {
 			fftw_destroy_plan(forwardPlan);
 		}
@@ -1258,10 +1263,9 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 		forwardPlanXSize = FFT_xSize;
 		forwardPlanYSize = FFT_ySize;
 		
-		FFTWPlannerMutex.lock();
 		forwardPlan = fftw_plan_dft_r2c_2d((int)(FFT_xSize), (int)(FFT_ySize), array.get(), array_FFT.get(), FFTW_ESTIMATE);
-		FFTWPlannerMutex.unlock();
 		
+		FFTWPlannerMutex.unlock();
 		forwardCalculationMutex.unlock();
 	}
 	
@@ -1286,7 +1290,10 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 	
 	reversePlanMutex.lock();
 	if ((reversePlan == NULL) || (reversePlanXSize != FFT_xSize) || (reversePlanYSize != FFT_ySize)) {
-		reverseCalculationMutex.lock();	// require exclusive ownership
+		// the plan is unsuitable for the requested transform
+		// let all other threads finish calculations with the current plan first
+		reverseCalculationMutex.lock();
+		FFTWPlannerMutex.lock();
 		if (reversePlan != NULL) {
 			fftw_destroy_plan(reversePlan);
 		}
@@ -1294,10 +1301,9 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 		reversePlanXSize = FFT_xSize;
 		reversePlanYSize = FFT_ySize;
 		
-		FFTWPlannerMutex.lock();
 		reversePlan = fftw_plan_dft_c2r_2d((int)(FFT_xSize), (int)(FFT_ySize), array_FFT.get(), array.get(), FFTW_ESTIMATE);
-		FFTWPlannerMutex.unlock();
 		
+		FFTWPlannerMutex.unlock();
 		reverseCalculationMutex.unlock();
 	}
 	

@@ -157,7 +157,7 @@ protected:
 	boost::mutex forwardPlanMutex;
 	boost::mutex reversePlanMutex;
 	
-	boost::shared_mutex FFTWPlannerMutex;
+	static boost::mutex FFTWPlannerMutex;
 	
 	boost::shared_mutex forwardCalculationMutex;
 	boost::shared_mutex reverseCalculationMutex;
