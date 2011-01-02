@@ -242,13 +242,13 @@ waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(DataFolderAnd
 #endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -418,13 +418,13 @@ waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(Dat
 #endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -686,13 +686,13 @@ waveHndl LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToWave
 #endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -834,13 +834,13 @@ waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(DataFolderAn
 #endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -995,13 +995,13 @@ waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(DataFo
 #endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}
@@ -1302,13 +1302,13 @@ waveHndl LocalizedPositionsContainer_MLEwG::writePositionsToWave(DataFolderAndNa
 #endif // WITH_IGOR
 
 void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePath, std::string header) const {
-	boost::filesystem::ofstream outputFile;
+	std::ofstream outputFile;
 	size_t nPositions = this->positionsVector.size();
 	if (nPositions == 0) {
 		throw std::runtime_error("No positions localized!");
 	}
 	
-	outputFile.open(filePath, std::ios::trunc);
+	outputFile.open(filePath.c_str(), std::ios::trunc);
 	if (outputFile.fail()) {
 		throw std::runtime_error("Unable to create the output file");
 	}

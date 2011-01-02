@@ -13,9 +13,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <iostream>
+#include <fstream>
 #include "boost/smart_ptr.hpp"
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/fstream.hpp"
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 
