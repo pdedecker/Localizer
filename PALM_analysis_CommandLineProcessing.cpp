@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 	desc.add_options()
 	("help", "produce help message")
 	("process", po::value<std::string>()->default_value("convertfileformat"), "Process the CCD files and save them as a converted stack. Options are \"subtractaverage\", \"differenceimage\", \"converttophotons\", \"convertfileformat\".")
-	("outputformat", po::value<std::string>()->default_value("pde"), "Select the output format: \"tiff\" or \"pde\".")
+	("outputformat", po::value<std::string>()->default_value("pde"), "Select the output format: \"tiff\", \"compressedtiff\" or \"pde\".")
 	("averaging", po::value<size_t>()->default_value(0), "subtractaverage: number of frames to average over.")
 	("cameramultiplier", po::value<double>(), "converttophotons: camera multiplication factor.")
 	("cameraoffset", po::value<double>(), "converttophotons: camera offset.")
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 			imageLoader = GetImageLoader(inputFiles.at(i));
 			originalStorageFormat = imageLoader->getStorageType();
 			outputFilePath = GetOutputProcessedImagesFilePath(inputFiles.at(i), processorName, outputFormat);
-			imageOutputWriter = GetImageOutputWriter(processorName, originalStorageFormat, outputFormat, outputFilePath, COMPRESSION_NONE);
+			imageOutputWriter = GetImageOutputWriter(processorName, originalStorageFormat, outputFormat, outputFilePath);
 			
 			// do the processing
 			ccdImagesProcessor->convert_images(imageLoader, imageOutputWriter);
@@ -157,8 +157,15 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	
 }
 
-boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, int originalStorageFormat, std::string requestedFormat, std::string outputFilePath, size_t compression) {
-	if (requestedFormat == std::string("tiff")) {
+boost::shared_ptr<ImageOutputWriter> GetImageOutputWriter(std::string processMethodName, int originalStorageFormat, std::string requestedFormat, std::string outputFilePath) {
+	size_t compression;
+	
+	if ((requestedFormat == std::string("tiff")) || (requestedFormat == std::string("compressedtiff"))) {
+		if (requestedFormat == std::string("compressedtiff"))
+			compression = COMPRESSION_DEFLATE;
+		else
+			compression = COMPRESSION_NONE;
+
 		if (processMethodName == std::string("subtractaverage"))
 			return boost::shared_ptr<ImageOutputWriter> (new TIFFImageOutputWriter(outputFilePath, 0, compression, STORAGE_TYPE_FP32));
 		
@@ -217,7 +224,7 @@ std::string GetOutputProcessedImagesFilePath(std::string dataFilePath, std::stri
 		outputPath += ".";
 	}
 	
-	if (outputFormat == std::string("tiff"))
+	if ((outputFormat == std::string("tiff")) || (outputFormat == std::string("compressedtiff")))
 		outputPath += "tif";
 	else if (outputFormat == std::string("pde"))
 		outputPath += "pde";
