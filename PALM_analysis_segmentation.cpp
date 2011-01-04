@@ -789,8 +789,6 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
 	
 	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
-	summed_squares = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
-	null_hypothesis = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -829,6 +827,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	(*averages) /= this->double_window_pixels;
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
+	// recycle image_squared since it's already allocated and we won't use it again
+	null_hypothesis = image_squared;
 	ublas::noalias(*null_hypothesis) = (*summed_squares) - (element_prod((*averages), (*averages)) * this->double_window_pixels);
 	
 	// calculate the hypothesis H1 that there is an emitter
