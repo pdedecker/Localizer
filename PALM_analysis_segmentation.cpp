@@ -767,8 +767,8 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	}
 	
 	// now calculate the FFTs of the kernels
-	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(average_kernel, this->FFT_xSize, this->FFT_ySize);
-	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel, this->FFT_xSize, this->FFT_ySize);
+	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(average_kernel);
+	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
 boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
@@ -818,10 +818,10 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	
 	// convolve the image with a "box function", that will get us the average
-	averages = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->averageKernelFFT, this->FFT_xSize, this->FFT_ySize);
+	averages = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->averageKernelFFT, this->kernelXSize, this->kernelYSize);
 	
 	// do the same for the squared image
-	summed_squares = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->averageKernelFFT, this->FFT_xSize, this->FFT_ySize);
+	summed_squares = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->averageKernelFFT, this->kernelXSize, this->kernelYSize);
 	
 	// normalize the result, so that we get averages
 	(*averages) /= this->double_window_pixels;
@@ -835,7 +835,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// we now do this using the FFT
-	image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->FFT_xSize, this->FFT_ySize);
+	image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->kernelXSize, this->kernelYSize);
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
@@ -1087,9 +1087,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	x_size2 = image2->size1();
 	y_size2 = image2->size2();
 	
-	size_t FFT_xSize, FFT_ySize;
 	size_t n_FFT_values, nColumns;
-	size_t lastRow, lastCol;
 	
 	fftw_complex complex_value;
 	
@@ -1100,11 +1098,11 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	}
 	
 	// do the forward transforms
-	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image1, FFT_xSize, FFT_ySize);
-	boost::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2, FFT_xSize, FFT_ySize);
+	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image1);
+	boost::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2);
 	
-	n_FFT_values = FFT_xSize * FFT_ySize;
-	nColumns = FFT_ySize / 2 + 1;
+	n_FFT_values = x_size1 * y_size1;
+	nColumns = y_size1 / 2 + 1;
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
@@ -1117,28 +1115,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, FFT_xSize, FFT_ySize, x_size1, y_size1);
-	
-	// if the number of rows was odd, make the last row (not included in the fft) a copy of that before it
-	if ((x_size1 % 2) == 1) {
-		lastRow = x_size1 - 1;
-		for (size_t j = 0; j < y_size1; ++j) {
-			(*convolved_image)(lastRow, j) = (*convolved_image)(lastRow - 1, j);
-		}
-	}
-	
-	// if the number of columns was odd, make the last column (not included in the fft) a copy of that before it
-	if ((y_size1 % 2) == 1) {
-		lastCol = y_size1 - 1;
-		for (size_t i = 0; i < x_size1; ++i) {
-			(*convolved_image)(i, lastCol) = (*convolved_image)(i, lastCol - 1);
-		}
-	}
-	
-	// if both the number of columns and the number of rows was odd, then the pixel at the top left (highest x, highest y) will be incorrect
-	if (((x_size1 % 2) == 1) && ((y_size1 % 2) == 1)) {
-		(*convolved_image)(x_size1 - 1, y_size1 - 1) = (*convolved_image)(x_size1 - 2, y_size1 - 2);
-	}
+	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 	
@@ -1150,23 +1127,20 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	x_size1 = image->size1();
 	y_size1 = image->size2();
 	
-	size_t FFT_xSize1, FFT_ySize1;
 	size_t n_FFT_values, nColumns;
-	size_t lastRow, lastCol;
 	
 	fftw_complex complex_value;
 	
-	// do the forward transforms
-	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image, FFT_xSize1, FFT_ySize1);
-	
-	// are the dimensions equal?
-	if ((FFT_xSize1 != FFT_xSize2) || (FFT_ySize1 != FFT_ySize2)) {
+	if ((x_size1 != FFT_xSize2) || (y_size1 != FFT_ySize2)) {
 		std::string error("Tried to convolve images with unequal dimensions with given FFT");
 		throw DIMENSIONS_SHOULD_BE_EQUAL(error);
 	}
 	
-	n_FFT_values = FFT_xSize1 * FFT_ySize1;
-	nColumns = FFT_ySize1 / 2 + 1;
+	// do the forward transforms
+	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image);
+	
+	n_FFT_values = x_size1 * y_size1;
+	nColumns = y_size1 / 2 + 1;
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
@@ -1179,56 +1153,18 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, FFT_xSize1, FFT_ySize1, x_size1, y_size1);
-	
-	// if the number of rows was odd, make the last row (not included in the fft) a copy of that before it
-	if ((x_size1 % 2) == 1) {
-		lastRow = x_size1 - 1;
-		for (size_t j = 0; j < y_size1; ++j) {
-			(*convolved_image)(lastRow, j) = (*convolved_image)(lastRow - 1, j);
-		}
-	}
-	
-	// if the number of columns was odd, make the last column (not included in the fft) a copy of that before it
-	if ((y_size1 % 2) == 1) {
-		lastCol = y_size1 - 1;
-		for (size_t i = 0; i < x_size1; ++i) {
-			(*convolved_image)(i, lastCol) = (*convolved_image)(i, lastCol - 1);
-		}
-	}
-	
-	// if both the number of columns and the number of rows was odd, then the pixel at the top left (highest x, highest y) will be incorrect
-	if (((x_size1 % 2) == 1) && ((y_size1 % 2) == 1)) {
-		(*convolved_image)(x_size1 - 1, y_size1 - 1) = (*convolved_image)(x_size1 - 2, y_size1 - 2);
-	}
+	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 }
 
-boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image, size_t &FFT_xSize, size_t &FFT_ySize) {
+boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image) {
 	
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	size_t nPixels = xSize * ySize;
-	size_t offset;
 	
-	// does the image have dimension sizes that are odd? if so remove one column and/or row so that it becomes even
-	// we will correct for this when returning the image by copying the values back in
-	if ((xSize % 2) == 1) {	// odd x size
-		FFT_xSize = xSize - 1;
-	} else {	// even size, nothing needs to happen
-		FFT_xSize = xSize;
-	}
-	
-	if ((ySize % 2) == 1) {	// odd y size
-		FFT_ySize = ySize - 1;
-	} else {	// even size, nothing needs to happen
-		FFT_ySize = ySize;
-	}
-	
-	size_t n_FFT_values = FFT_xSize * FFT_ySize;
-	
-	boost::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * n_FFT_values), fftw_free);
+	boost::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nPixels), fftw_free);
 	if (array_FFT.get() == NULL) {
 		throw std::bad_alloc();
 	}
@@ -1236,7 +1172,7 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	// prepare the transform and execute it on the first array
 	// if there is no forward plan yet then create it
 	forwardPlanMutex.lock();
-	if ((forwardPlan == NULL) || (forwardPlanXSize != FFT_xSize) || (forwardPlanYSize != FFT_ySize)) {
+	if ((forwardPlan == NULL) || (forwardPlanXSize != xSize) || (forwardPlanYSize != ySize)) {
 		// the plan is unsuitable for the requested transform
 		// let all other threads finish calculations with the current plan first
 		forwardCalculationMutex.lock();
@@ -1245,10 +1181,10 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 			fftw_destroy_plan(forwardPlan);
 		}
 		
-		forwardPlanXSize = FFT_xSize;
-		forwardPlanYSize = FFT_ySize;
+		forwardPlanXSize = xSize;
+		forwardPlanYSize = ySize;
 		
-		forwardPlan = fftw_plan_dft_r2c_2d((int)(FFT_xSize), (int)(FFT_ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
 		
 		FFTWPlannerMutex.unlock();
 		forwardCalculationMutex.unlock();
@@ -1264,14 +1200,14 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	return array_FFT;
 }
 
-boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t FFT_xSize, size_t FFT_ySize, size_t xSize, size_t ySize) {
+boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
 	boost::shared_ptr<ublas::matrix<double> > image(new ublas::matrix<double>(xSize, ySize));
 	
-	double normalization_factor = (double)(FFT_xSize * FFT_ySize);
+	double normalization_factor = (double)(xSize * ySize);
 	
 	reversePlanMutex.lock();
-	if ((reversePlan == NULL) || (reversePlanXSize != FFT_xSize) || (reversePlanYSize != FFT_ySize)) {
+	if ((reversePlan == NULL) || (reversePlanXSize != xSize) || (reversePlanYSize != ySize)) {
 		// the plan is unsuitable for the requested transform
 		// let all other threads finish calculations with the current plan first
 		reverseCalculationMutex.lock();
@@ -1280,10 +1216,10 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 			fftw_destroy_plan(reversePlan);
 		}
 		
-		reversePlanXSize = FFT_xSize;
-		reversePlanYSize = FFT_ySize;
+		reversePlanXSize = xSize;
+		reversePlanYSize = ySize;
 		
-		reversePlan = fftw_plan_dft_c2r_2d((int)(FFT_xSize), (int)(FFT_ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
+		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
 		
 		FFTWPlannerMutex.unlock();
 		reverseCalculationMutex.unlock();
@@ -1298,7 +1234,6 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 	
 	*image /= normalization_factor;
 	
-	// TODO: what to do about the missing pixels?
 	return image;
 }
 

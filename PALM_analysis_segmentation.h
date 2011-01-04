@@ -139,12 +139,12 @@ public:
 	 * Get the FFT of a single image, possibly for later use in a convolution.
 	 * The x and y size of the transformed image will be returned by reference in FFT_xSize and FFT_ySize.
 	 */
-	boost::shared_ptr<fftw_complex> DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image, size_t &FFT_xSize, size_t &FFT_ySize);
+	boost::shared_ptr<fftw_complex> DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image);
 	
 	/**
 	 * Calculate the reverse FFT
 	 */
-	boost::shared_ptr<ublas::matrix<double> > DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t FFT_xSize, size_t FFT_ySize, size_t xSize, size_t ySize);
+	boost::shared_ptr<ublas::matrix<double> > DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize);
 protected:
 	fftw_plan forwardPlan;
 	fftw_plan reversePlan;
@@ -194,7 +194,6 @@ protected:
 	size_t kernelXSize, kernelYSize;
 	boost::shared_ptr<fftw_complex> GaussianKernelFFT;
 	boost::shared_ptr<fftw_complex> averageKernelFFT;
-	size_t FFT_xSize, FFT_ySize;
 	
 	double sum_squared_Gaussian;
 	double double_window_pixels;
