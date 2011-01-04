@@ -53,8 +53,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	this->nImages = imageLoader->GetNImages();
 	
 	size_t numberOfThreads;
-	size_t firstFrame;
-	size_t lastFrame;
+	size_t firstFrame, lastFrame;
+	size_t nFramesToBeAnalyzed;
 	std::vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	int firstThreadHasFinished, status;
@@ -87,6 +87,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	} else if ((lastFrame >= this->nImages) || (lastFrame < firstFrame)) {
 		throw std::runtime_error("Invalid last frame to analyze specified");
 	}
+	nFramesToBeAnalyzed = lastFrame - firstFrame + 1;
 	
 	for (size_t i = firstFrame; i <= lastFrame; ++i) {
 		this->framesToBeProcessed.push(i);
@@ -143,7 +144,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			
 			// allow the reporter to update with new progress
 			this->acquireFrameForProcessingMutex.lock();
-			percentDone = (double)(nImages - framesToBeProcessed.size()) / (double)(this->nImages) * 100.0;
+			percentDone = (double)(nFramesToBeAnalyzed - framesToBeProcessed.size()) / (double)(nFramesToBeAnalyzed) * 100.0;
 			progressReporter->UpdateCalculationProgress(percentDone);
 			this->acquireFrameForProcessingMutex.unlock();
 			continue;
