@@ -784,9 +784,33 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved;
 	
 	double current_value;
+	int imageNeedsResizing = 0;
 	
 	threshold_image = boost::shared_ptr<ublas::matrix <unsigned char> >(new ublas::matrix<unsigned char>(xSize, ySize));
 	std::fill(threshold_image->data().begin(), threshold_image->data().end(), 0);
+	// if the image has odd dimensions then the convolution will be throw an error
+	// so in that case the segmentation will have to run on a slightly smaller image
+	// by allocating the threshold_image first we make sure that the it will have
+	// the correct (original) size
+	
+	if (xSize % 2 != 0) {
+		xSize -= 1;
+		imageNeedsResizing = 1;
+	}
+	if (ySize % 2 != 0) {
+		ySize -= 1;
+		imageNeedsResizing = 1;
+	}
+	
+	if (imageNeedsResizing == 1) {
+		boost::shared_ptr<ublas::matrix<double> > reducedImage(new ublas::matrix<double>(xSize, ySize));
+		for (size_t i = 0; i < xSize; ++i) {
+			for (size_t j = 0; j < ySize; ++j) {
+				(*reducedImage)(i,j) = (*image)(i,j);
+			}
+		}
+		image = reducedImage;	// modify the smart_ptr
+	}
 	
 	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
 	
