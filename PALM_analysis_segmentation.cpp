@@ -841,7 +841,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	
 	
 	// convolve the image with a "box function", that will get us the average
-	averages = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->averageKernelFFT, this->kernelXSize, this->kernelYSize);
+	averages = matrixConvolver.ConvolveMatrixWithFlatKernel(image, 2 * this->half_window_size + 1, 2 * this->half_window_size + 1);
 	
 	// do the same for the squared image
 	summed_squares = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->averageKernelFFT, this->kernelXSize, this->kernelYSize);
@@ -866,8 +866,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
-	for (size_t k = this->half_window_size; k < xSize - this->half_window_size; k++) {
-		for (size_t l = this->half_window_size; l < ySize - this->half_window_size; l++) {
+	for (size_t k = this->half_window_size + 1; k < xSize - this->half_window_size; k++) {
+		for (size_t l = this->half_window_size + 1; l < ySize - this->half_window_size; l++) {
 			current_value = 1 - (this->sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
 			if (current_value > 0.0) {
 				if (- this->double_window_pixels * log(current_value) > PFA)
@@ -1187,7 +1187,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	
-	if ((xSize % 2 != 1) || (ySize % 2 != 1)) {
+	if ((kernelXSize % 2 != 1) || (kernelYSize % 2 != 1)) {
 		throw std::runtime_error("A kernel with even dimensions was passed to ConvolveMatrixWithFlatKernel");
 	}
 	
@@ -1196,7 +1196,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	boost::shared_ptr<ublas::matrix<double> > convolvedImage(new ublas::matrix<double> (xSize, ySize));
 	
 	// populate the leftmost column of the matrix
-	for (size_t i = 0; i < ySize; ++i) {
+	for (size_t i = 0; i < xSize; ++i) {
 		(*accumulatedImage)(i, 0) = (*image)(i, 0);
 	}
 	
@@ -1216,10 +1216,10 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	
 	// do the actual convolution
 	// the value of the convolution in the boundary region is undefined
-	for (size_t i = kernelXSize / 2; i < xSize - (kernelXSize / 2); ++i) {
-		for (size_t j = kernelYSize / 2; j < ySize - (kernelYSize / 2); ++j) {
-			(*convolvedImage)(i, j) = (*accumulatedImage)(i + kernelXSize / 2, j + kernelXSize / 2) - (*accumulatedImage)(i - kernelXSize / 2, j + kernelXSize / 2)
-			- (*accumulatedImage)(i + kernelXSize / 2, j - kernelXSize / 2) + (*accumulatedImage)(i - kernelXSize / 2, j - kernelXSize / 2);
+	for (size_t i = kernelXSize / 2 + 1; i < xSize - (kernelXSize / 2); ++i) {
+		for (size_t j = kernelYSize / 2 + 1; j < ySize - (kernelYSize / 2); ++j) {
+			(*convolvedImage)(i, j) = (*accumulatedImage)(i + kernelXSize / 2, j + kernelXSize / 2) - (*accumulatedImage)(i - kernelXSize / 2 - 1, j + kernelXSize / 2)
+			- (*accumulatedImage)(i + kernelXSize / 2, j - kernelXSize / 2 - 1) + (*accumulatedImage)(i - kernelXSize / 2 - 1, j - kernelXSize / 2 - 1);
 		}
 	}
 	
