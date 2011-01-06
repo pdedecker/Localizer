@@ -1183,6 +1183,49 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	return convolved_image;
 }
 
+boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(boost::shared_ptr<ublas::matrix<double> > image, size_t kernelXSize, size_t kernelYSize) {
+	size_t xSize = image->size1();
+	size_t ySize = image->size2();
+	
+	if ((xSize % 2 != 1) || (ySize % 2 != 1)) {
+		throw std::runtime_error("A kernel with even dimensions was passed to ConvolveMatrixWithFlatKernel");
+	}
+	
+	// calculate an accumulated image
+	boost::shared_ptr<ublas::matrix<double> > accumulatedImage(new ublas::matrix<double> (xSize, ySize));
+	boost::shared_ptr<ublas::matrix<double> > convolvedImage(new ublas::matrix<double> (xSize, ySize));
+	
+	// populate the leftmost column of the matrix
+	for (size_t i = 0; i < ySize; ++i) {
+		(*accumulatedImage)(i, 0) = (*image)(i, 0);
+	}
+	
+	// first loop: calculate the sum of every pixel along the rows
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 1; j < ySize; ++j) {
+			(*accumulatedImage)(i, j) = (*image)(i, j) + (*accumulatedImage)(i, j - 1);
+		}
+	}
+	
+	// second loop: calculate the sum along the columns
+	for (size_t i = 1; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*accumulatedImage)(i, j);
+		}
+	}
+	
+	// do the actual convolution
+	// the value of the convolution in the boundary region is undefined
+	for (size_t i = kernelXSize / 2; i < xSize - (kernelXSize / 2); ++i) {
+		for (size_t j = kernelYSize / 2; j < ySize - (kernelYSize / 2); ++j) {
+			(*convolvedImage)(i, j) = (*accumulatedImage)(i + kernelXSize / 2, j + kernelXSize / 2) - (*accumulatedImage)(i - kernelXSize / 2, j + kernelXSize / 2)
+			- (*accumulatedImage)(i + kernelXSize / 2, j - kernelXSize / 2) + (*accumulatedImage)(i - kernelXSize / 2, j - kernelXSize / 2);
+		}
+	}
+	
+	return convolvedImage;
+}
+
 boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image) {
 	
 	size_t xSize = image->size1();
