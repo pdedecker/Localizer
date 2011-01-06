@@ -143,12 +143,14 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 #endif // WITH_IGOR
 			
 			// allow the reporter to update with new progress
-			this->acquireFrameForProcessingMutex.lock();
-			percentDone = (double)(nFramesToBeAnalyzed - framesToBeProcessed.size()) / (double)(nFramesToBeAnalyzed) * 100.0;
-			progressReporter->UpdateCalculationProgress(percentDone);
-			this->acquireFrameForProcessingMutex.unlock();
+			{
+				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
+				percentDone = (double)(nFramesToBeAnalyzed - framesToBeProcessed.size()) / (double)(nFramesToBeAnalyzed) * 100.0;
+				progressReporter->UpdateCalculationProgress(percentDone);
+			}
 			continue;
 		} else {
+			// the first thread has finished
 			break;
 		}
 	}
@@ -181,15 +183,15 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			}
 			
 			// start by a acquiring an image to process
-			controller->acquireFrameForProcessingMutex.lock();
-			if (controller->framesToBeProcessed.size() == 0) {
-				// no more frames to be processed
-				controller->acquireFrameForProcessingMutex.unlock();
-				return;
+			{
+				boost::lock_guard<boost::mutex> locker(controller->acquireFrameForProcessingMutex);
+				if (controller->framesToBeProcessed.size() == 0) {
+					// no more frames to be processed
+					return;
+				}
+				currentImageToProcess = controller->framesToBeProcessed.front();
+				controller->framesToBeProcessed.pop();
 			}
-			currentImageToProcess = controller->framesToBeProcessed.front();
-			controller->framesToBeProcessed.pop();
-			controller->acquireFrameForProcessingMutex.unlock();
 			
 			// we need to process the image with index currentImageToProcess
 			currentImage = controller->imageLoader->readImage(currentImageToProcess);
@@ -211,17 +213,17 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			localizedPositions->setFrameNumbers(currentImageToProcess);
 			
 			// pass the result to the output queue
-			controller->addLocalizedPositionsMutex.lock();
-			// if this is the first time that positions are being returned then controller will contain a NULL pointer
-			// set it to the positions we are now returning
-			// this way ThreadPoolWorker does not need to know what the type of positions is
-			if (controller->localizedPositions.get() == NULL) {
-				controller->localizedPositions = localizedPositions;
-			} else {
-				controller->localizedPositions->addPositions(localizedPositions);
+			{
+				boost::lock_guard<boost::mutex> locker(controller->addLocalizedPositionsMutex);
+				// if this is the first time that positions are being returned then controller will contain a NULL pointer
+				// set it to the positions we are now returning
+				// this way ThreadPoolWorker does not need to know what the type of positions is
+				if (controller->localizedPositions.get() == NULL) {
+					controller->localizedPositions = localizedPositions;
+				} else {
+					controller->localizedPositions->addPositions(localizedPositions);
+				}
 			}
-			
-			controller->addLocalizedPositionsMutex.unlock();
 		}
 	}
 	catch (std::runtime_error &e) {
