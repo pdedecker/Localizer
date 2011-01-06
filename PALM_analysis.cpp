@@ -240,6 +240,13 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		// the main thread wants us to stop
 		return;
 	}
+	catch (std::exception &e) {
+		controller->errorReportingMutex.lock();
+		controller->errorMessage.assign(e.what());
+		controller->errorReportingMutex.unlock();
+		
+		return;
+	}
 	catch (...) {
 		// catch any other exception not handled by the above block
 		controller->errorReportingMutex.lock();
