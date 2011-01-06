@@ -1133,8 +1133,8 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		
 		// store the result in the first array
 		// we add in a comb function so the origin is at the center of the image
-		array1_FFT.get()[i][0] = (2.0 * (double)(i % 2) - 1.0) * -1.0 * complex_value[0];
-		array1_FFT.get()[i][1] = (2.0 * (double)(i % 2) - 1.0) * -1.0 * complex_value[1];
+		array1_FFT.get()[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
 	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
@@ -1174,8 +1174,8 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		
 		// store the result in the first array
 		// we add in a comb function so the origin is at the center of the image
-		array1_FFT.get()[i][0] = (2.0 * (double)(i % 2) - 1.0) * -1.0 * complex_value[0];
-		array1_FFT.get()[i][1] = (2.0 * (double)(i % 2) - 1.0) * -1.0 * complex_value[1];
+		array1_FFT.get()[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
 	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
