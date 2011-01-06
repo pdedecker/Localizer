@@ -820,11 +820,10 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		// the kernels need to be created or updated
 		// no other thread can be performing a calculation
 		// while this thread modifies the kernels
-		this->segmentationCalculationMutex.lock();
-		
-		this->MakeKernels(xSize, ySize);
-		
-		this->segmentationCalculationMutex.unlock();
+		{
+			boost::lock_guard<boost::shared_mutex> locker(this->segmentationCalculationMutex);
+			this->MakeKernels(xSize, ySize);
+		}
 	}
 	
 	// many threads can run a calculation, but only one can modify
@@ -860,6 +859,8 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// we now do this using the FFT
 	image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->kernelXSize, this->kernelYSize);
+	
+	this->segmentationCalculationMutex.unlock_shared();
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
