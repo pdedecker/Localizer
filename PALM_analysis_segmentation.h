@@ -128,7 +128,7 @@ public:
 
 class ConvolveMatricesWithFFTClass {
 public:
-	ConvolveMatricesWithFFTClass() {forwardPlan = NULL; reversePlan = NULL; forwardPlanXSize = 0; forwardPlanYSize = 0; reversePlanXSize = 0; reversePlanYSize = 0;}
+	ConvolveMatricesWithFFTClass() {;}
 	~ConvolveMatricesWithFFTClass();
 	
 	boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFT(boost::shared_ptr<ublas::matrix<double> > image1, boost::shared_ptr<ublas::matrix<double> > image2);
@@ -146,17 +146,6 @@ public:
 	 */
 	boost::shared_ptr<ublas::matrix<double> > DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize);
 protected:
-	fftw_plan forwardPlan;
-	fftw_plan reversePlan;
-	
-	size_t forwardPlanXSize;
-	size_t forwardPlanYSize;
-	size_t reversePlanXSize;
-	size_t reversePlanYSize;
-	
-	boost::mutex forwardPlanMutex;
-	boost::mutex reversePlanMutex;
-	
 	static boost::mutex FFTWPlannerMutex;
 	
 	boost::shared_mutex forwardCalculationMutex;

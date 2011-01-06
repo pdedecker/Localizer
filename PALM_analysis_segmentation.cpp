@@ -1095,12 +1095,6 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Postprocessor_R
 boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
-	if (forwardPlan != NULL) {
-		fftw_destroy_plan(forwardPlan);
-	}
-	if (reversePlan != NULL) {
-		fftw_destroy_plan(reversePlan);
-	}
 }
 
 boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<ublas::matrix<double> > image1, boost::shared_ptr<ublas::matrix<double> > image2) {
@@ -1199,33 +1193,15 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 		throw std::bad_alloc();
 	}
 	
-	// prepare the transform and execute it on the first array
-	// if there is no forward plan yet then create it
-	forwardPlanMutex.lock();
-	if ((forwardPlan == NULL) || (forwardPlanXSize != xSize) || (forwardPlanYSize != ySize)) {
-		// the plan is unsuitable for the requested transform
-		// let all other threads finish calculations with the current plan first
-		forwardCalculationMutex.lock();
-		FFTWPlannerMutex.lock();
-		if (forwardPlan != NULL) {
-			fftw_destroy_plan(forwardPlan);
-		}
-		
-		forwardPlanXSize = xSize;
-		forwardPlanYSize = ySize;
-		
-		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
-		
-		FFTWPlannerMutex.unlock();
-		forwardCalculationMutex.unlock();
-	}
+	FFTWPlannerMutex.lock();
+	fftw_plan forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
+	FFTWPlannerMutex.unlock();
 	
-	forwardCalculationMutex.lock_shared();
-	forwardPlanMutex.unlock();
+	fftw_execute(forwardPlan);
 	
-	fftw_execute_dft_r2c(forwardPlan, &(image->data()[0]), array_FFT.get());
-	
-	forwardCalculationMutex.unlock_shared();
+	FFTWPlannerMutex.lock();
+	fftw_destroy_plan(forwardPlan);
+	FFTWPlannerMutex.unlock();
 	
 	return array_FFT;
 }
@@ -1236,29 +1212,15 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 	
 	double normalization_factor = (double)(xSize * ySize);
 	
-	reversePlanMutex.lock();
-	if ((reversePlan == NULL) || (reversePlanXSize != xSize) || (reversePlanYSize != ySize)) {
-		// the plan is unsuitable for the requested transform
-		// let all other threads finish calculations with the current plan first
-		reverseCalculationMutex.lock();
-		FFTWPlannerMutex.lock();
-		if (reversePlan != NULL) {
-			fftw_destroy_plan(reversePlan);
-		}
-		
-		reversePlanXSize = xSize;
-		reversePlanYSize = ySize;
-		
-		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
-		
-		FFTWPlannerMutex.unlock();
-		reverseCalculationMutex.unlock();
-	}
+	FFTWPlannerMutex.lock();
+	fftw_plan reversePlan = reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
+	FFTWPlannerMutex.unlock();
 	
-	reverseCalculationMutex.lock_shared();
-	reversePlanMutex.unlock();
+	fftw_execute(reversePlan);
 	
-	fftw_execute_dft_c2r(reversePlan, array_FFT.get(), &(image->data()[0]));
+	FFTWPlannerMutex.lock();
+	fftw_destroy_plan(reversePlan);
+	FFTWPlannerMutex.unlock();
 	
 	reverseCalculationMutex.unlock_shared();
 	
