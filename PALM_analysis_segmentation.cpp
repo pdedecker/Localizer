@@ -1184,22 +1184,20 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	boost::shared_ptr<ublas::matrix<double> > accumulatedImage(new ublas::matrix<double> (xSize, ySize));
 	boost::shared_ptr<ublas::matrix<double> > convolvedImage(new ublas::matrix<double> (xSize, ySize));
 	
-	// populate the leftmost column of the matrix
-	for (size_t i = 0; i < xSize; ++i) {
-		(*accumulatedImage)(i, 0) = (*image)(i, 0);
-	}
+	// populate the upper row of the matrix
+	memcpy(&(accumulatedImage->data()[0]), &(image->data()[0]), ySize * sizeof(double));
 	
-	// first loop: calculate the sum of every pixel along the rows
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 1; j < ySize; ++j) {
-			(*accumulatedImage)(i, j) = (*image)(i, j) + (*accumulatedImage)(i, j - 1);
+	// first loop: calculate the sum along the columns
+	for (size_t i = 1; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*image)(i, j);
 		}
 	}
 	
-	// second loop: calculate the sum along the columns
-	for (size_t i = 1; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
-			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*accumulatedImage)(i, j);
+	// second loop: calculate the sum of every pixel along the rows
+	for (size_t i = 0; i < xSize; ++i) {
+		for (size_t j = 1; j < ySize; ++j) {
+			(*accumulatedImage)(i, j) = (*accumulatedImage)(i, j) + (*accumulatedImage)(i, j - 1);
 		}
 	}
 	
