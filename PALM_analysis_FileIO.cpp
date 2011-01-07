@@ -1225,17 +1225,19 @@ void PDEImageOutputWriter::WriteHeader() {
 void PDEImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
 	
 	// determine the size of the frames
-	size_t x_size = imageToWrite->size1();
-	size_t y_size = imageToWrite->size2();
-	size_t n_pixels = x_size * y_size;
+	size_t currentXSize = imageToWrite->size1();
+	size_t currentYSize = imageToWrite->size2();
+	size_t n_pixels = currentXSize * currentYSize;
 	
 	size_t offset = 0;
 	
 	if (this->n_images_written == 0) {
-		this->x_size = x_size;
-		this->y_size = y_size;
+		this->x_size = currentXSize;
+		this->y_size = currentYSize;
 	} else {
-		assert((x_size == this->x_size) && (y_size == this->y_size));
+		if ((currentXSize != this->x_size) || (currentYSize != this->y_size)) {
+			throw std::runtime_error("Tried to write an image with different dimensions to an SPE file");
+		}
 	}
 	
 	switch (this->storageType) {
