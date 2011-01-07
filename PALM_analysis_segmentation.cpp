@@ -730,16 +730,6 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	double sum;
 	double distance_x, distance_y;
 	
-	// calculate the average kernel
-	boost::shared_ptr<ublas::matrix<double> > average_kernel(new ublas::matrix<double>(xSize, ySize));
-	std::fill(average_kernel->data().begin(), average_kernel->data().end(), double(0.0));
-	
-	for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-			(*average_kernel)(i, j) = 1;
-		}
-	}
-	
 	// calculate the Gaussian kernel
 	boost::shared_ptr<ublas::matrix<double> > Gaussian_kernel(new ublas::matrix<double>(xSize, ySize));
 	
@@ -766,8 +756,7 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 		}
 	}
 	
-	// now calculate the FFTs of the kernels
-	this->averageKernelFFT = this->matrixConvolver.DoForwardFFT(average_kernel);
+	// now calculate the FFTs of the kernel
 	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
@@ -844,7 +833,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	averages = matrixConvolver.ConvolveMatrixWithFlatKernel(image, 2 * this->half_window_size + 1, 2 * this->half_window_size + 1);
 	
 	// do the same for the squared image
-	summed_squares = matrixConvolver.ConvolveMatrixWithGivenFFT(image_squared, this->averageKernelFFT, this->kernelXSize, this->kernelYSize);
+	summed_squares = matrixConvolver.ConvolveMatrixWithFlatKernel(image_squared, 2 * this->half_window_size + 1, 2 * this->half_window_size + 1);
 	
 	// normalize the result, so that we get averages
 	(*averages) /= this->double_window_pixels;

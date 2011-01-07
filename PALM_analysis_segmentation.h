@@ -184,7 +184,6 @@ protected:
 	
 	size_t kernelXSize, kernelYSize;
 	boost::shared_ptr<fftw_complex> GaussianKernelFFT;
-	boost::shared_ptr<fftw_complex> averageKernelFFT;
 	
 	double sum_squared_Gaussian;
 	double double_window_pixels;
