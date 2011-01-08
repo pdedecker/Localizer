@@ -85,6 +85,8 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	
 	boost::shared_ptr<ublas::matrix<double> > averageImage (new ublas::matrix<double>(xSize, ySize));
 	boost::shared_ptr<ublas::matrix<double> > summedImages (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<ublas::matrix<double> > activeImage (new ublas::matrix<double>(xSize, ySize));
+	
 	std::deque<boost::shared_ptr<ublas::matrix<double> > > frameBuffer;
 	
 	std::fill(summedImages->data().begin(), summedImages->data().end(), double(0.0));
@@ -96,43 +98,57 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		(*summedImages) += (*currentImage);
 	}
 	
-	(*averageImage) = (*summedImages) / (double)nFramesInAverage;
-	
 	// loop over all frames in the movie
 	for (int n = 0; n < nFramesInMovie; ++n) {
-		currentImage = image_loader->readImage(n);
-		if (n - nFramesSurroundingFrame < 0) {
+		// the queue should be as long as nFramesInAverage at all times
+		assert(frameBuffer.size() == nFramesInAverage);
+		
+		if (n - nFramesSurroundingFrame <= 0) {
 			// we're too close to the beginning of the movie to get a full rolling average
 			// subtract the average made from the first set of frames instead
-			*currentImage -= *averageImage;
-			output_writer->write_image(currentImage);
+			*activeImage = *frameBuffer.at(n);
+			
+			// do not take the current frame into account when calculating the average
+			*summedImages -= *activeImage;
+			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			*summedImages += *activeImage;
+			
+			*activeImage -= *averageImage;
+			output_writer->write_image(activeImage);
 			
 		} else if (n + nFramesSurroundingFrame >= nFramesInMovie) {
 			// we're too close to the end of the movie to get a full rolling average
 			// subtract the average made from the last set of frames instead
-			*currentImage -= *averageImage;
-			output_writer->write_image(currentImage);
+			*activeImage = *frameBuffer.at(nFramesInAverage - (nFramesInMovie - n));
+			
+			// subtract the contribution of the current frame
+			*summedImages -= *activeImage;
+			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			*summedImages += *activeImage;
+			
+			*activeImage -= *averageImage;
+			output_writer->write_image(activeImage);
 			
 		} else {
-		
 			// if we're here then we're in the middle of the movie
 			// first remove the contribution of the frame that will go out of scope
 			// from the sum of frames
 			*summedImages -= *(frameBuffer.back());
-			// now remove the frame from the buffer
 			frameBuffer.pop_back();
+			
 			// now add a new frame to the buffer
-			currentImage = image_loader->readImage(n + nFramesSurroundingFrame);
-			frameBuffer.push_front(currentImage);
-			// now add the contribution of the new frame
-			*summedImages += *currentImage;
-			*averageImage = *summedImages / (double)nFramesInAverage;
+			frameBuffer.push_front(image_loader->readImage(n + nFramesSurroundingFrame));
+			// add the contribution of the new frame
+			*summedImages += *(frameBuffer.front());
 			
-			// get the frame that we want to subtract from
-			currentImage = image_loader->readImage(n);
-			*currentImage -= *averageImage;
+			*activeImage = *frameBuffer.at(nFramesInAverage / 2);
+			*summedImages -= *activeImage;
+			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			*summedImages += *activeImage;
 			
-			output_writer->write_image(currentImage);
+			*activeImage -= *averageImage;
+			
+			output_writer->write_image(activeImage);
 		}
 		
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)nFramesInMovie * 100.0);
