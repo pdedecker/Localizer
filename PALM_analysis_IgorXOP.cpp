@@ -618,6 +618,9 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		lastFrameToAnalyze = (size_t)-1;
 	}
 	
+	analysisOptionsStream << "FIRST FRAME ANALYZED:" << firstFrameToAnalyze << ';';
+	analysisOptionsStream << "LAST FRAME ANALYZED:" << lastFrameToAnalyze << ';';
+	
 	if (p->QFlagEncountered) {
 		quiet = 1;
 	} else {
