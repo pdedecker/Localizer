@@ -280,7 +280,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	double current_value[2];
 	int result;
 	
-	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
+	average_image->setConstant(0.0);
 	
 	
 	for (size_t i = 0; i < n_images; i++) {
@@ -347,8 +347,8 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd(xRange, yRange));
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
-	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
-	std::fill(stdDevImage->data().begin(), stdDevImage->data().end(), double(0.0));
+	average_image->setConstant(0.0);
+	stdDevImage->setConstant(0.0);
 	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {

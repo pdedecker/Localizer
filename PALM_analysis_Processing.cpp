@@ -44,7 +44,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	average_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
-	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
+	average_image->setConstant(0.0);
 	
 	for (size_t n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->readImage(n);
@@ -60,7 +60,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	for (size_t n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->readImage(n);
 		
-		ublas::noalias(*subtracted_image) = (*loaded_image) - (*average_image);
+		(*subtracted_image) = (*loaded_image) - (*average_image);
 		
 		output_writer->write_image(subtracted_image);
 		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0);
@@ -89,7 +89,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	
 	std::deque<boost::shared_ptr<Eigen::MatrixXd> > frameBuffer;
 	
-	std::fill(summedImages->data().begin(), summedImages->data().end(), double(0.0));
+	summedImages->setConstant(0.0);
 	
 	// start by loading a full set of images
 	for (size_t i = 0; i < nFramesInAverage; ++i) {
@@ -110,7 +110,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 			
 			// do not take the current frame into account when calculating the average
 			*summedImages -= *activeImage;
-			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
 			*summedImages += *activeImage;
 			
 			*activeImage -= *averageImage;
@@ -123,7 +123,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 			
 			// subtract the contribution of the current frame
 			*summedImages -= *activeImage;
-			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
 			*summedImages += *activeImage;
 			
 			*activeImage -= *averageImage;
@@ -143,7 +143,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 			
 			*activeImage = *frameBuffer.at(nFramesInAverage / 2);
 			*summedImages -= *activeImage;
-			ublas::noalias(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
+			(*averageImage) = *summedImages / (double)(nFramesInAverage - 1);
 			*summedImages += *activeImage;
 			
 			*activeImage -= *averageImage;
@@ -218,8 +218,8 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	this->croppedXSize = endX - startX + 1;
 	this->croppedYSize = endY - startY + 1;
 	
-	boost::shared_ptr<ublas::matrix <double> > croppedImage;
-	boost::shared_ptr<ublas::matrix <double> > loadedImage;
+	boost::shared_ptr<Eigen::MatrixXd > croppedImage;
+	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
 	
 	this->progressReporter->CalculationStarted();
 	
@@ -247,8 +247,8 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<ublas::matrix <double> > loadedImage;
-	boost::shared_ptr<ublas::matrix <double> > convertedImage (new Eigen::MatrixXd(x_size, y_size));;
+	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
+	boost::shared_ptr<Eigen::MatrixXd > convertedImage (new Eigen::MatrixXd(x_size, y_size));;
 	
 	this->progressReporter->CalculationStarted();
 	

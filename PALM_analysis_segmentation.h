@@ -32,7 +32,7 @@ public:
 	ThresholdImage() {;}
 	virtual ~ThresholdImage() {;}
 	
-	virtual boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) = 0;
+	virtual boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) = 0;
 };
 
 class ThresholdImage_Direct : public ThresholdImage {
@@ -41,7 +41,7 @@ public:
 	ThresholdImage_Direct(double thresh_parameter) {threshold = thresh_parameter;}
 	~ThresholdImage_Direct() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	double threshold;
@@ -54,7 +54,7 @@ public:
 	ThresholdImage_Igor_Iterative() {;}
 	~ThresholdImage_Igor_Iterative() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -66,7 +66,7 @@ public:
 	ThresholdImage_Igor_Bimodal() {;}
 	~ThresholdImage_Igor_Bimodal() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -78,7 +78,7 @@ public:
 	ThresholdImage_Igor_Adaptive() {;}
 	~ThresholdImage_Igor_Adaptive() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -90,7 +90,7 @@ public:
 	ThresholdImage_Igor_Fuzzy1() {;}
 	~ThresholdImage_Igor_Fuzzy1() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -102,7 +102,7 @@ public:
 	ThresholdImage_Igor_Fuzzy2() {;}
 	~ThresholdImage_Igor_Fuzzy2() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	boost::mutex threadMutex;
@@ -114,14 +114,14 @@ public:
 	ThresholdImage_Isodata() {;}
 	~ThresholdImage_Isodata() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 };
 
 class ThresholdImage_Triangle : public ThresholdImage {
 public:
 	ThresholdImage_Triangle() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 };
 
 class ConvolveMatricesWithFFTClass {
@@ -166,8 +166,8 @@ public:
 	ThresholdImage_GLRT_FFT(double PFA_param, double width_param);
 	~ThresholdImage_GLRT_FFT() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding();
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding();
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
 	
 protected:
 	void MakeKernels(size_t xSize, size_t ySize);
@@ -246,7 +246,7 @@ public:
 	ThresholdImage_Postprocessor() {;}
 	virtual ~ThresholdImage_Postprocessor() {;}
 	
-	virtual boost::shared_ptr<ublas::matrix <unsigned char> > do_postprocessing(boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) = 0;
+	virtual boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) = 0;
 };
 
 class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
@@ -255,7 +255,7 @@ public:
 	ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	~ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > do_postprocessing(boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image);
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image);
 };
 
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> image, size_t number_of_bins);

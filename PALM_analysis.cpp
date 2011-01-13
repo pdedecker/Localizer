@@ -1,13 +1,13 @@
 #include "PALM_analysis.h"
 
 
-boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
 	boost::shared_ptr<Eigen::MatrixXd> preprocessed_image;
-	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image;
-	boost::shared_ptr<ublas::matrix <unsigned char> > postprocessed_image;
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > postprocessed_image;
 	
 	if (preprocessor.get() != NULL) {
 		preprocessed_image = preprocessor->do_preprocessing(image);
@@ -171,7 +171,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
 	boost::shared_ptr<Eigen::MatrixXd> currentImage;
-	boost::shared_ptr<ublas::matrix <unsigned char> > thresholdedImage;
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage;
 	boost::shared_ptr<std::list<position> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
@@ -278,7 +278,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_position
 	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
 	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
 	boost::shared_ptr<Eigen::MatrixXd> subtractedImage;
-	boost::shared_ptr<ublas::matrix <unsigned char> > segmentedImage;
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > segmentedImage;
 	boost::shared_ptr<std::list<position> > locatedParticles;
 	
 	// get an initial set of positions to start from
