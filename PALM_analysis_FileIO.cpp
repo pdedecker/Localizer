@@ -692,36 +692,44 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_UINT16:
 		{
 			uint16_t *currentUint16t = (uint16_t *)buffer.get();
-			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = *currentUint16t;
-				++currentUint16t;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					(*image)(i, j) = *currentUint16t;
+					++currentUint16t;
+				}
 			}
 			break;
 		}
 		case STORAGE_TYPE_UINT32:
 		{
 			uint32_t *currentUint32t = (uint32_t *)buffer.get();
-			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = *currentUint32t;
-				++currentUint32t;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					(*image)(i, j) = *currentUint32t;
+					++currentUint32t;
+				}
 			}
 			break;
 		}
 		case STORAGE_TYPE_FP32:
 		{
 			float *currentFloat = (float *)buffer.get();
-			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = *currentFloat;
-				++currentFloat;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					(*image)(i, j) = *currentFloat;
+					++currentFloat;
+				}
 			}
 			break;
 		}
 		case STORAGE_TYPE_FP64:
 		{
 			double *currentDouble = (double *)buffer.get();
-			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
-				*it = *currentDouble;
-				++currentDouble;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					(*image)(i, j) = *currentDouble;
+					++currentDouble;
+				}
 			}
 			break;
 		}
@@ -1244,9 +1252,11 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT16:
 		{
 			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
-				buffer[offset] = (uint16_t)(*it);
-				++offset;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					buffer[offset] = (uint16_t)(*imageToWrite)(i, j);
+					++offset;
+				}
 			}
 			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint16_t));
 			break;
@@ -1254,9 +1264,11 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT32:
 		{
 			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
-				buffer[offset] = (uint32_t)(*it);
-				++offset;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					buffer[offset] = (uint32_t)(*imageToWrite)(i, j);
+					++offset;
+				}
 			}
 			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint32_t));
 			break;
@@ -1264,9 +1276,11 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP32:
 		{
 			boost::scoped_array<float> buffer(new float[n_pixels]);
-			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
-				buffer[offset] = (float)(*it);
-				++offset;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					buffer[offset] = (float)(*imageToWrite)(i, j);
+					++offset;
+				}
 			}
 			this->file.write((char *)buffer.get(), n_pixels * sizeof(float));
 			break;
@@ -1274,9 +1288,11 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP64:
 		{
 			boost::scoped_array<double> buffer(new double[n_pixels]);
-			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
-				buffer[offset] = (double)(*it);
-				++offset;
+			for (size_t i = 0; i < this->x_size; ++i) {
+				for (size_t j = 0; j < this->y_size; ++j) {
+					buffer[offset] = (double)(*imageToWrite)(i, j);
+					++offset;
+				}
 			}
 			this->file.write((char *)buffer.get(), n_pixels * sizeof(double));
 			break;

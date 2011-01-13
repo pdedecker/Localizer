@@ -822,7 +822,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	ublas::noalias(*image_squared) = element_prod((*image), (*image));
+	*image_squared) = element_prod((*image), (*image));
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
