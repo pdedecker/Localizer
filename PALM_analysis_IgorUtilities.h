@@ -19,8 +19,6 @@
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
 
-namespace ublas = boost::numeric::ublas;
-
 class ImageLoader;
 
 // Routines that return information on CCD files and image frames to Igor

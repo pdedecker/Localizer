@@ -23,8 +23,6 @@
 #undef min
 #undef max
 
-namespace ublas = boost::numeric::ublas;
-
 /**
  * Given a set of input positions, calculate the L-function to analyze clustering
  *

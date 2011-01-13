@@ -17,8 +17,6 @@
 #include <Eigen/Eigen>
 #include <list>
 
-namespace ublas = boost::numeric::ublas;
-
 /**
  * @brief An abstract base class from which all other 'particle finder' classes must derive
  * 

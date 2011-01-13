@@ -1413,7 +1413,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double value[2];
 	
 	
-	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image;
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
 	
 	
 	boost::shared_ptr<ThresholdImage> thresholder;
@@ -1808,7 +1808,7 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-	boost::shared_ptr<ublas::matrix <double> > image;
+	boost::shared_ptr<Eigen::MatrixXd> image;
 	
 	// Flag parameters.
 	

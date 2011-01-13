@@ -731,7 +731,7 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	double distance_x, distance_y;
 	
 	// calculate the Gaussian kernel
-	boost::shared_ptr<Eigen::MatrixXd> Gaussian_kernel(new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> Gaussian_kernel(new Eigen::MatrixXd(xSize, ySize));
 	
 	sum = 0;
 	std::fill(Gaussian_kernel->data().begin(), Gaussian_kernel->data().end(), double(0.0));
@@ -792,7 +792,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	}
 	
 	if (imageNeedsResizing == 1) {
-		boost::shared_ptr<Eigen::MatrixXd> reducedImage(new ublas::matrix<double>(xSize, ySize));
+		boost::shared_ptr<Eigen::MatrixXd> reducedImage(new Eigen::MatrixXd(xSize, ySize));
 		for (size_t i = 0; i < xSize; ++i) {
 			for (size_t j = 0; j < ySize; ++j) {
 				(*reducedImage)(i,j) = (*image)(i,j);
@@ -801,7 +801,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		image = reducedImage;	// modify the smart_ptr
 	}
 	
-	image_squared = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(xSize, ySize));
+	image_squared = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(xSize, ySize));
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -889,7 +889,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
-	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -932,9 +932,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
-	boost::shared_ptr<Eigen::MatrixXd> Gaussian_window(new ublas::matrix<double>(window_size, window_size));
+	boost::shared_ptr<Eigen::MatrixXd> Gaussian_window(new Eigen::MatrixXd(window_size, window_size));
 	
-	Gaussian_kernel = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	Gaussian_kernel = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
@@ -1004,7 +1004,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 	// make a copy of the image
 	// this copy will be mean-filtered
 	// close to the edges, where the kernel doesn't fit we will not modify the image
-	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -1239,7 +1239,7 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> image(new Eigen::MatrixXd(xSize, ySize));
 	
 	double normalization_factor = (double)(xSize * ySize);
 	

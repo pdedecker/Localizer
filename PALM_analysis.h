@@ -21,8 +21,6 @@
 
 #define GSL_RANGE_CHECK_OFF	// this is not required since Eigen::MatrixXddoes range checks
 
-namespace ublas = boost::numeric::ublas;
-
 class ImageLoader;
 class ThresholdImage;
 class ThresholdImage_Preprocessor;

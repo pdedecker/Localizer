@@ -27,8 +27,6 @@
 #include "XOPStandardHeaders.h"
 #endif
 
-namespace ublas = boost::numeric::ublas;
-
 class ThresholdImage {
 public:
 	ThresholdImage() {;}

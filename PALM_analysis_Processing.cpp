@@ -41,8 +41,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	if (this->n_frames_averaging == 0)
 		this->n_frames_averaging = total_number_of_images;
 	
-	average_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
-	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	average_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
+	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
@@ -83,9 +83,9 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> averageImage (new ublas::matrix<double>(xSize, ySize));
-	boost::shared_ptr<Eigen::MatrixXd> summedImages (new ublas::matrix<double>(xSize, ySize));
-	boost::shared_ptr<Eigen::MatrixXd> activeImage (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> averageImage (new Eigen::MatrixXd(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> summedImages (new Eigen::MatrixXd(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> activeImage (new Eigen::MatrixXd(xSize, ySize));
 	
 	std::deque<boost::shared_ptr<Eigen::MatrixXd> > frameBuffer;
 	
@@ -248,7 +248,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	size_t y_size = image_loader->getYSize();
 	
 	boost::shared_ptr<ublas::matrix <double> > loadedImage;
-	boost::shared_ptr<ublas::matrix <double> > convertedImage (new ublas::matrix<double>(x_size, y_size));;
+	boost::shared_ptr<ublas::matrix <double> > convertedImage (new Eigen::MatrixXd(x_size, y_size));;
 	
 	this->progressReporter->CalculationStarted();
 	

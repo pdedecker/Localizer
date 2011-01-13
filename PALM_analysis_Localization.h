@@ -26,8 +26,6 @@
 #include <gsl/gsl_blas.h>
 #include <stdexcept>
 
-namespace ublas = boost::numeric::ublas;
-
 class LocalizedPosition;
 class LocalizedPositionsContainer;
 

@@ -267,7 +267,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -456,7 +456,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t inde
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd(x_size, y_size));
 	
 	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
 	
@@ -563,7 +563,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t 
 	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd(x_size, y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -651,7 +651,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 	size_t n_pixels = this->x_size * this->y_size;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(this->x_size, this->y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(this->x_size, this->y_size));
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -692,7 +692,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_UINT16:
 		{
 			uint16_t *currentUint16t = (uint16_t *)buffer.get();
-			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 				*it = *currentUint16t;
 				++currentUint16t;
 			}
@@ -701,7 +701,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_UINT32:
 		{
 			uint32_t *currentUint32t = (uint32_t *)buffer.get();
-			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 				*it = *currentUint32t;
 				++currentUint32t;
 			}
@@ -710,7 +710,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_FP32:
 		{
 			float *currentFloat = (float *)buffer.get();
-			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 				*it = *currentFloat;
 				++currentFloat;
 			}
@@ -719,7 +719,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_FP64:
 		{
 			double *currentDouble = (double *)buffer.get();
-			for (ublas::matrix<double>::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::iterator it = image->data().begin(); it != image->data().end(); ++it) {
 				*it = *currentDouble;
 				++currentDouble;
 			}
@@ -950,7 +950,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		throw std::bad_alloc();
 	}
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
 	
 	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
 	if (result != 1) {
@@ -1116,7 +1116,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	// no mutex locking is required since these calls are all threadsafe
 	
 	indices[2] = index;
-	image = boost::shared_ptr<Eigen::MatrixXd> (new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j  = 0; j < y_size; j++) {
@@ -1244,7 +1244,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT16:
 		{
 			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (uint16_t)(*it);
 				++offset;
 			}
@@ -1254,7 +1254,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT32:
 		{
 			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (uint32_t)(*it);
 				++offset;
 			}
@@ -1264,7 +1264,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP32:
 		{
 			boost::scoped_array<float> buffer(new float[n_pixels]);
-			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (float)(*it);
 				++offset;
 			}
@@ -1274,7 +1274,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP64:
 		{
 			boost::scoped_array<double> buffer(new double[n_pixels]);
-			for (ublas::matrix<double>::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
+			for (Eigen::MatrixXd::array_type::const_iterator it = imageToWrite->data().begin(); it != imageToWrite->data().end(); ++it) {
 				buffer[offset] = (double)(*it);
 				++offset;
 			}

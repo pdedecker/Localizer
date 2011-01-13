@@ -269,7 +269,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	yRange = endY - startY + 1;
 	
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	boost::shared_ptr<Eigen::MatrixXd> average_image(new ublas::matrix<double>(xRange, yRange));
+	boost::shared_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd(xRange, yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -343,8 +343,8 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new ublas::matrix<double>(xRange, yRange));
-	boost::scoped_ptr<Eigen::MatrixXd> average_image(new ublas::matrix<double>(xRange, yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new Eigen::MatrixXd(xRange, yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd(xRange, yRange));
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
@@ -596,7 +596,7 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<Eigen::MatrixXd> matrix(new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {

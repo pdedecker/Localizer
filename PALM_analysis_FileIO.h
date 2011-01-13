@@ -34,8 +34,6 @@
 #include "PALM_analysis_IgorUtilities.h"
 #endif
 
-namespace ublas = boost::numeric::ublas;
-
 /**
  * Provide an ifstream-like class for Windows that handles large file offset
  */

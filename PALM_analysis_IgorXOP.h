@@ -30,8 +30,6 @@
 #include "PALM_analysis_IgorUtilities.h"
 #include "PALM_analysis_PositionsProcessing.h"
 
-namespace ublas = boost::numeric::ublas;
-
 
 HOST_IMPORT int main(IORecHandle ioRecHandle);
 
