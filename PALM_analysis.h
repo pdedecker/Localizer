@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_defines.h"
@@ -19,7 +19,7 @@
 #include "XOPStandardHeaders.h"
 #endif
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since Eigen::MatrixXddoes range checks
 
 namespace ublas = boost::numeric::ublas;
 
@@ -32,7 +32,7 @@ class FitPositions;
 class PALMAnalysisProgressReporter;
 
 
-boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 
@@ -172,10 +172,10 @@ public:
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<Eigen::MatrixXd image, boost::shared_ptr<std::list<position> > positions);
 	
 protected:
-	boost::shared_ptr<ublas::matrix<double> > subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions);
+	boost::shared_ptr<Eigen::MatrixXd> subtractLocalizedPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<LocalizedPositionsContainer> positions);
 	
 	boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor;

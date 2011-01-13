@@ -14,7 +14,7 @@
 #include <algorithm>
 
 #include "XOPStandardHeaders.h"
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
@@ -48,8 +48,8 @@ int ConvertHandleToFilepathString(Handle handle, std::string &output_string);
 // routines to convert data from and to Igor format
 waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
 
-boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave);
+boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave);
 
-waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName);
+waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::string waveName);
 
 #endif

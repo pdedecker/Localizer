@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_segmentation.h"
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	size_t x_size, y_size;
 	double current_value;
@@ -35,7 +35,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Direct::do_thre
 }
 
 #ifdef WITH_IGOR
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -120,7 +120,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Iterative:
 	return thresholded_image;
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -204,7 +204,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Bimodal::d
 	return thresholded_image;
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -357,7 +357,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Adaptive::
 	return original_thresholded;
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -441,7 +441,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy1::do
 	return thresholded_image;	
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -526,7 +526,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Igor_Fuzzy2::do
 }
 #endif // WITH_IGOR
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	gsl_histogram *hist;
 	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
 	
@@ -612,7 +612,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Isodata::do_thr
 	return threshold_image;
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	gsl_histogram *hist;
 	size_t number_of_bins = 256;
 	size_t maximum_bin;
@@ -731,7 +731,7 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	double distance_x, distance_y;
 	
 	// calculate the Gaussian kernel
-	boost::shared_ptr<ublas::matrix<double> > Gaussian_kernel(new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> Gaussian_kernel(new ublas::matrix<double>(xSize, ySize));
 	
 	sum = 0;
 	std::fill(Gaussian_kernel->data().begin(), Gaussian_kernel->data().end(), double(0.0));
@@ -760,17 +760,17 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	
 	boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image;
-	boost::shared_ptr<ublas::matrix<double> > averages;
-	boost::shared_ptr<ublas::matrix<double> > image_squared;
-	boost::shared_ptr<ublas::matrix<double> > summed_squares;
-	boost::shared_ptr<ublas::matrix<double> > null_hypothesis;
-	boost::shared_ptr<ublas::matrix<double> > image_Gaussian_convolved;
+	boost::shared_ptr<Eigen::MatrixXd> averages;
+	boost::shared_ptr<Eigen::MatrixXd> image_squared;
+	boost::shared_ptr<Eigen::MatrixXd> summed_squares;
+	boost::shared_ptr<Eigen::MatrixXd> null_hypothesis;
+	boost::shared_ptr<Eigen::MatrixXd> image_Gaussian_convolved;
 	
 	double current_value;
 	int imageNeedsResizing = 0;
@@ -792,7 +792,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 	}
 	
 	if (imageNeedsResizing == 1) {
-		boost::shared_ptr<ublas::matrix<double> > reducedImage(new ublas::matrix<double>(xSize, ySize));
+		boost::shared_ptr<Eigen::MatrixXd> reducedImage(new ublas::matrix<double>(xSize, ySize));
 		for (size_t i = 0; i < xSize; ++i) {
 			for (size_t j = 0; j < ySize; ++j) {
 				(*reducedImage)(i,j) = (*image)(i,j);
@@ -801,7 +801,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 		image = reducedImage;	// modify the smart_ptr
 	}
 	
-	image_squared = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(xSize, ySize));
+	image_squared = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(xSize, ySize));
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -869,7 +869,7 @@ boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_GLRT_FFT::do_th
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
@@ -880,7 +880,7 @@ boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MedianFilt
 	double value, median;
 	
 	gsl_vector *median_environment;
-	boost::shared_ptr<ublas::matrix<double> > filtered_image;
+	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
 	
 	// allocate a gsl_vector with the correct size
 	median_environment = gsl_vector_alloc(kernel_size);
@@ -889,7 +889,7 @@ boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MedianFilt
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
-	filtered_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -932,9 +932,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
-	boost::shared_ptr<ublas::matrix<double> > Gaussian_window(new ublas::matrix<double>(window_size, window_size));
+	boost::shared_ptr<Eigen::MatrixXd> Gaussian_window(new ublas::matrix<double>(window_size, window_size));
 	
-	Gaussian_kernel = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	Gaussian_kernel = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
@@ -963,9 +963,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 
 
 
-boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
-	boost::shared_ptr<ublas::matrix<double> > filtered_image;
+	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
 	size_t x_size = image->size1();
 	size_t y_size = image->size2();
 	
@@ -989,7 +989,7 @@ boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_GaussianSm
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	double double_kernel_pixels = (double)kernel_size;
@@ -999,12 +999,12 @@ boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MeanFilter
 	size_t y_size = image->size2();
 	double mean;
 	
-	boost::shared_ptr<ublas::matrix<double> > filtered_image;
+	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
 	
 	// make a copy of the image
 	// this copy will be mean-filtered
 	// close to the edges, where the kernel doesn't fit we will not modify the image
-	filtered_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -1032,7 +1032,7 @@ boost::shared_ptr<ublas::matrix<double> > ThresholdImage_Preprocessor_MeanFilter
 	return filtered_image;
 }
 
-boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image, boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<ublas::matrix <unsigned char> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
 	size_t x_size = thresholded_image->size1();
 	size_t y_size = thresholded_image->size2();
@@ -1087,7 +1087,7 @@ boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 }
 
-boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<ublas::matrix<double> > image1, boost::shared_ptr<ublas::matrix<double> > image2) {
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<Eigen::MatrixXd> image1, boost::shared_ptr<Eigen::MatrixXd> image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	
 	x_size1 = image1->size1();
@@ -1126,13 +1126,13 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
+	boost::shared_ptr<Eigen::MatrixXd> convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 	
 }
 
-boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
 	size_t x_size1, y_size1;
 	
 	x_size1 = image->size1();
@@ -1167,12 +1167,12 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<ublas::matrix<double> > convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
+	boost::shared_ptr<Eigen::MatrixXd> convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 }
 
-boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(boost::shared_ptr<ublas::matrix<double> > image, size_t kernelXSize, size_t kernelYSize) {
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(boost::shared_ptr<Eigen::MatrixXd> image, size_t kernelXSize, size_t kernelYSize) {
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
 	
@@ -1181,8 +1181,8 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	}
 	
 	// calculate an accumulated image
-	boost::shared_ptr<ublas::matrix<double> > accumulatedImage(new ublas::matrix<double> (xSize, ySize));
-	boost::shared_ptr<ublas::matrix<double> > convolvedImage(new ublas::matrix<double> (xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(new Eigen::MatrixXd(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd(xSize, ySize));
 	
 	// populate the upper row of the matrix
 	memcpy(&(accumulatedImage->data()[0]), &(image->data()[0]), ySize * sizeof(double));
@@ -1213,7 +1213,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::Convolve
 	return convolvedImage;
 }
 
-boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<ublas::matrix<double> > image) {
+boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
@@ -1237,9 +1237,9 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	return array_FFT;
 }
 
-boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
-	boost::shared_ptr<ublas::matrix<double> > image(new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> image(new ublas::matrix<double>(xSize, ySize));
 	
 	double normalization_factor = (double)(xSize * ySize);
 	
@@ -1261,7 +1261,7 @@ boost::shared_ptr<ublas::matrix<double> > ConvolveMatricesWithFFTClass::DoRevers
 }
 
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<ublas::matrix<double> > image, size_t number_of_bins) {
+gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> image, size_t number_of_bins) {
 	size_t x_size, y_size;
 	gsl_histogram *hist;
 	double min = 1e100;

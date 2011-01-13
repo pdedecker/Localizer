@@ -14,7 +14,7 @@
 #include "PALM_analysis_defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include <gsl/gsl_cdf.h>
 
@@ -75,7 +75,7 @@ public:
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	boost::shared_ptr<ublas::matrix<double> > CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+	boost::shared_ptr<Eigen::MatrixXd> CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	

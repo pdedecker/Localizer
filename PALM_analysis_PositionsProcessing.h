@@ -12,7 +12,7 @@
 #include <vector>
 #include <cmath>
 #include "boost/smart_ptr.hpp"
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"

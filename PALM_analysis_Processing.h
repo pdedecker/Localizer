@@ -9,7 +9,7 @@
 #ifndef PALM_ANALYSIS_PROCESSING_H
 #define PALM_ANALYSIS_PROCESSING_H
 
-#define GSL_RANGE_CHECK_OFF	// this is not required since ublas::matrix<double> does range checks
+#define GSL_RANGE_CHECK_OFF	// this is not required since Eigen::MatrixXddoes range checks
 
 #include <vector>
 #include <queue>
@@ -18,7 +18,7 @@
 #include <string>
 #include <algorithm>
 #include <boost/smart_ptr.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"

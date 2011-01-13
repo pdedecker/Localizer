@@ -234,7 +234,7 @@ void ImageLoaderSPE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -243,7 +243,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	float *currentFloat = 0;
 	int16_t *currentInt16t = 0;
 	uint16_t *currentUint16t = 0;
-	boost::shared_ptr<ublas::matrix<double> > image;
+	boost::shared_ptr<Eigen::MatrixXd> image;
 	
 	uint64_t n_bytes_in_single_image;
 	
@@ -267,7 +267,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderSPE::readImage(const size_t
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -447,7 +447,7 @@ void ImageLoaderAndor::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -456,7 +456,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderAndor::readImage(const size
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	boost::shared_ptr<ublas::matrix<double> > image (new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new ublas::matrix<double>(x_size, y_size));
 	
 	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
 	
@@ -554,7 +554,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -563,7 +563,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderHamamatsu::readImage(const 
 	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	boost::shared_ptr<ublas::matrix<double> > image (new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new ublas::matrix<double>(x_size, y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -643,15 +643,15 @@ void ImageLoaderPDE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderPDE::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	boost::shared_ptr<ublas::matrix<double> > image;
+	boost::shared_ptr<Eigen::MatrixXd> image;
 	size_t n_pixels = this->x_size * this->y_size;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(this->x_size, this->y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(this->x_size, this->y_size));
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -936,11 +936,11 @@ void ImageLoaderTIFF::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	boost::shared_ptr<ublas::matrix<double> > image;
+	boost::shared_ptr<Eigen::MatrixXd> image;
 	int result;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
@@ -950,7 +950,7 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderTIFF::readImage(const size_
 		throw std::bad_alloc();
 	}
 	
-	image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
 	if (result != 1) {
@@ -1103,7 +1103,7 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<ublas::matrix<double> > ImageLoaderIgor::readImage(const size_t index) {
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index) {
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
@@ -1111,12 +1111,12 @@ boost::shared_ptr<ublas::matrix<double> > ImageLoaderIgor::readImage(const size_
 	long indices[3];
 	int result;
 	
-	boost::shared_ptr<ublas::matrix<double> > image;
+	boost::shared_ptr<Eigen::MatrixXd> image;
 		
 	// no mutex locking is required since these calls are all threadsafe
 	
 	indices[2] = index;
-	image = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double>(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd> (new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j  = 0; j < y_size; j++) {
@@ -1222,7 +1222,7 @@ void PDEImageOutputWriter::WriteHeader() {
 	}
 }
 
-void PDEImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
+void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
 	// determine the size of the frames
 	size_t currentXSize = imageToWrite->size1();
@@ -1328,7 +1328,7 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 
 
 
-void TIFFImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
+void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
 	size_t x_size = imageToWrite->size1();
 	size_t y_size = imageToWrite->size2();
@@ -1599,7 +1599,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	}
 }
 
-void IgorImageOutputWriter::write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) {
+void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	long indices[MAX_DIMENSIONS + 1];
 	int result;
 	double value[2];

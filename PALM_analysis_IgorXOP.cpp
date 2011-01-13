@@ -1402,7 +1402,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double radiusBetweenParticles;
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
-	boost::shared_ptr<ublas::matrix<double> > CCD_Frame;
+	boost::shared_ptr<Eigen::MatrixXd> CCD_Frame;
 	boost::shared_ptr<std::list<position> > located_particles;
 	std::vector<size_t> particleVerifierMethods;
 	
@@ -1734,9 +1734,9 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	boost::shared_ptr<ublas::matrix<double> > firstImage;
-	boost::shared_ptr<ublas::matrix<double> > secondImage;
-	boost::shared_ptr<ublas::matrix<double> > outputImage;
+	boost::shared_ptr<Eigen::MatrixXd> firstImage;
+	boost::shared_ptr<Eigen::MatrixXd> secondImage;
+	boost::shared_ptr<Eigen::MatrixXd> outputImage;
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;

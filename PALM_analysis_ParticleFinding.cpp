@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_ParticleFinding.h"
 
-boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
 	boost::shared_ptr<std::list<position> > positions (new std::list<position>());
 	position currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
@@ -19,7 +19,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boo
 	double distance_squared;
 	double radius_squared = (double)(radius * radius);
 	double x, y;
-	boost::shared_ptr<ublas::matrix<double> > output_positions;
+	boost::shared_ptr<Eigen::MatrixXd> output_positions;
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
@@ -80,7 +80,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boo
 }
 
 
-boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
 	
 	boost::shared_ptr<std::list<position> > particles (new std::list<position>());
 	std::list<position> positionsInCurrentParticleList;
@@ -179,7 +179,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	
 }
 
-void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
+void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -260,7 +260,7 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<p
 }
 
 
-boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
+boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image) {
 	
 	std::list<position> positionsInCurrentParticleList;
 	std::vector<position> positionsInCurrentParticle;
@@ -360,7 +360,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	
 }
 
-void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
+void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ublas::matrix <unsigned char> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -406,7 +406,7 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<p
 	}
 }
 
-void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {
 	double distance;
 	double minDistance = 4.0 * this->psfWidth;
 	

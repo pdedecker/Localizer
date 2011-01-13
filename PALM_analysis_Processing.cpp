@@ -30,9 +30,9 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	size_t total_number_of_images = image_loader->GetNImages();
-	boost::shared_ptr<ublas::matrix<double> > average_image;
-	boost::shared_ptr<ublas::matrix<double> > loaded_image;
-	boost::shared_ptr<ublas::matrix<double> > subtracted_image;
+	boost::shared_ptr<Eigen::MatrixXd> average_image;
+	boost::shared_ptr<Eigen::MatrixXd> loaded_image;
+	boost::shared_ptr<Eigen::MatrixXd> subtracted_image;
 	
 	// we pass through the images two times:
 	// the first pass calculates the average,
@@ -41,8 +41,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	if (this->n_frames_averaging == 0)
 		this->n_frames_averaging = total_number_of_images;
 	
-	average_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
-	subtracted_image = boost::shared_ptr<ublas::matrix<double> >(new ublas::matrix<double>(x_size, y_size));
+	average_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
+	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new ublas::matrix<double>(x_size, y_size));
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	
@@ -70,7 +70,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 
 void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
 	
-	boost::shared_ptr<ublas::matrix<double> > currentImage;
+	boost::shared_ptr<Eigen::MatrixXd> currentImage;
 	size_t xSize = image_loader->getXSize();
 	size_t ySize = image_loader->getYSize();
 	size_t nFramesInMovie = image_loader->GetNImages();
@@ -83,11 +83,11 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
 	}
 	
-	boost::shared_ptr<ublas::matrix<double> > averageImage (new ublas::matrix<double>(xSize, ySize));
-	boost::shared_ptr<ublas::matrix<double> > summedImages (new ublas::matrix<double>(xSize, ySize));
-	boost::shared_ptr<ublas::matrix<double> > activeImage (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> averageImage (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> summedImages (new ublas::matrix<double>(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> activeImage (new ublas::matrix<double>(xSize, ySize));
 	
-	std::deque<boost::shared_ptr<ublas::matrix<double> > > frameBuffer;
+	std::deque<boost::shared_ptr<Eigen::MatrixXd> > frameBuffer;
 	
 	std::fill(summedImages->data().begin(), summedImages->data().end(), double(0.0));
 	
@@ -156,8 +156,8 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 }
 
 void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	boost::shared_ptr<ublas::matrix<double> > current_image;
-	boost::shared_ptr<ublas::matrix<double> > next_image;
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	boost::shared_ptr<Eigen::MatrixXd> next_image;
 	size_t total_number_of_images = image_loader->GetNImages();
 	
 	if (total_number_of_images <= 1) {
@@ -191,7 +191,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 }
 
 void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	size_t total_number_of_images = image_loader->GetNImages();
 	
 	this->progressReporter->CalculationStarted();
@@ -225,7 +225,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->readImage(n);
-		croppedImage = boost::shared_ptr<ublas::matrix<double> > (new ublas::matrix<double> (croppedXSize, croppedYSize));
+		croppedImage = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(croppedXSize, croppedYSize));
 		
 		for (size_t x = startX; x <= endX; ++x) {
 			for (size_t y = startY; y <= endY; ++y) {

@@ -20,7 +20,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	long indices[MAX_DIMENSIONS];
 	
 	int result;
-	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	double current_value;
 	double current_value_array[2];
 	
@@ -160,7 +160,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	double summed_intensity;
 	
 	waveHndl output_wave;
@@ -268,8 +268,8 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::shared_ptr<ublas::matrix<double> > current_image;
-	boost::shared_ptr<ublas::matrix<double> > average_image(new ublas::matrix<double>(xRange, yRange));
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	boost::shared_ptr<Eigen::MatrixXd> average_image(new ublas::matrix<double>(xRange, yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -343,9 +343,9 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<ublas::matrix<double> > stdDevImage(new ublas::matrix<double>(xRange, yRange));
-	boost::scoped_ptr<ublas::matrix<double> > average_image(new ublas::matrix<double>(xRange, yRange));
-	boost::shared_ptr<ublas::matrix<double> > current_image;
+	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new ublas::matrix<double>(xRange, yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> average_image(new ublas::matrix<double>(xRange, yRange));
+	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
 	std::fill(average_image->data().begin(), average_image->data().end(), double(0.0));
 	std::fill(stdDevImage->data().begin(), stdDevImage->data().end(), double(0.0));
@@ -574,7 +574,7 @@ waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave) {
+boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
@@ -596,7 +596,7 @@ boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave) 
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<ublas::matrix<double> > matrix(new ublas::matrix<double>(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> matrix(new ublas::matrix<double>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
@@ -615,7 +615,7 @@ boost::shared_ptr<ublas::matrix<double> > CopyIgorDPWaveToMatrix(waveHndl wave) 
 	return matrix;
 }
 
-waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<ublas::matrix<double> > matrix, std::string waveName) {
+waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	

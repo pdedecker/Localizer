@@ -1,11 +1,11 @@
 #include "PALM_analysis.h"
 
 
-boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<ublas::matrix <unsigned char> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
-	boost::shared_ptr<ublas::matrix<double> > preprocessed_image;
+	boost::shared_ptr<Eigen::MatrixXd> preprocessed_image;
 	boost::shared_ptr<ublas::matrix <unsigned char> > thresholded_image;
 	boost::shared_ptr<ublas::matrix <unsigned char> > postprocessed_image;
 	
@@ -170,7 +170,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 
 void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
-	boost::shared_ptr<ublas::matrix<double> > currentImage;
+	boost::shared_ptr<Eigen::MatrixXd> currentImage;
 	boost::shared_ptr<ublas::matrix <unsigned char> > thresholdedImage;
 	boost::shared_ptr<std::list<position> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
@@ -272,12 +272,12 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 }
 #endif // WITH_IGOR
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<std::list<position> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
 	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
 	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
-	boost::shared_ptr<ublas::matrix<double> > subtractedImage;
+	boost::shared_ptr<Eigen::MatrixXd> subtractedImage;
 	boost::shared_ptr<ublas::matrix <unsigned char> > segmentedImage;
 	boost::shared_ptr<std::list<position> > locatedParticles;
 	
@@ -317,7 +317,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_position
 }
 
 
-boost::shared_ptr<ublas::matrix<double> > FitPositionsDeflate::subtractLocalizedPositions(boost::shared_ptr<ublas::matrix<double> > image, boost::shared_ptr<LocalizedPositionsContainer> positions) {
+boost::shared_ptr<Eigen::MatrixXd> FitPositionsDeflate::subtractLocalizedPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<LocalizedPositionsContainer> positions) {
 	double fittedXPos, fittedYPos, fittedIntegral, fittedXWidth, fittedYWidth;
 	double centerX, centerY, calculatedAmplitude;
 	long startX, endX, startY, endY;
@@ -326,7 +326,7 @@ boost::shared_ptr<ublas::matrix<double> > FitPositionsDeflate::subtractLocalized
 	size_t nPositions = positions->getNPositions();
 	size_t xSize = image->size1();
 	size_t ySize = image->size2();
-	boost::shared_ptr<ublas::matrix<double> > outputImage(new ublas::matrix<double> (xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> outputImage(new Eigen::MatrixXd(xSize, ySize));
 	outputImage = image;
 	
 	for (size_t n = 0; n < nPositions; ++n) {

@@ -23,7 +23,7 @@
 #include "tiffio.h"
 #include "stdint.h"
 #include "boost/thread.hpp"
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Eigen>
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -79,7 +79,7 @@ public:
 	size_t getXSize() const {return x_size;}
 	size_t getYSize() const {return y_size;}
 	int getStorageType() const {return storage_type;}
-	virtual boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index) = 0;	// images are numbered from 0 to N - 1
+	virtual boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index) = 0;	// images are numbered from 0 to N - 1
 	
 protected:
 	virtual void parse_header_information() = 0;
@@ -110,7 +110,7 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information();
@@ -121,7 +121,7 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information();
@@ -149,7 +149,7 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information();
@@ -160,7 +160,7 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information();
@@ -171,7 +171,7 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information();
@@ -186,7 +186,7 @@ public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<ublas::matrix<double> > readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
 	
 protected:
 	void parse_header_information() {;}
@@ -206,7 +206,7 @@ public:
 	std::string get_file_path() const {return file_path;}
 	size_t get_n_images_written() const {return n_images_written;}
 	
-	virtual void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite) = 0;
+	virtual void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) = 0;
 	
 protected:
 	
@@ -215,7 +215,7 @@ protected:
 	
 	size_t n_images_written;
 	
-	std::queue <boost::shared_ptr<ublas::matrix<double> > > image_buffer;
+	std::queue <boost::shared_ptr<Eigen::MatrixXd> > image_buffer;
 };
 
 
@@ -224,7 +224,7 @@ public:
 	PDEImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
 	~PDEImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
+	void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite);
 	
 protected:
 	void WriteHeader();
@@ -249,7 +249,7 @@ public:
 	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
 	~TIFFImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<ublas::matrix<double> > imageToWrite);
+	void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite);
 protected:
 	int compression;	// if 1 then don't compress the data, otherwise compress
 	int storageType;
@@ -263,7 +263,7 @@ public:
 	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite, int storageType);
 	~IgorImageOutputWriter() {;}
 	
-	void write_image(boost::shared_ptr<ublas::matrix<double> > new_image);
+	void write_image(boost::shared_ptr<Eigen::MatrixXd> new_image);
 	
 protected:
 	size_t nImagesTotal;
