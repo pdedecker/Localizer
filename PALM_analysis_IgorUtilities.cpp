@@ -596,7 +596,7 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {

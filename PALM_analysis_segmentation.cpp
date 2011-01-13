@@ -17,7 +17,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	x_size = image->rows();
 	y_size = image->cols();
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image(new ublas::matrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
@@ -68,7 +68,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -152,7 +152,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -227,8 +227,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	y_size = image->cols();
 	
 	// we make two images for the original and the transposed threshold
-	original_thresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
-	transposed_tresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	original_thresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
+	transposed_tresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -389,7 +389,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -473,7 +473,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -587,7 +587,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
 		// to indicate this we set everything to 'off' (0)
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 		threshold_image->setConstant(0.0);
 		return threshold_image;
 	}
@@ -643,7 +643,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	// catch an unlikely case where the maximum corresponds to the last bin
 	if (maximum_bin == (number_of_bins - 1)) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 		threshold_image->setConstant(0);
 		return threshold_image;
 	}
@@ -655,7 +655,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	// catch an unlikely case where the connecting line is flat (the histogram is apparently uniform)
 	if (slope == 0) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 		threshold_image->setConstant(0);
 		return threshold_image;
 	}
@@ -775,7 +775,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	double current_value;
 	int imageNeedsResizing = 0;
 	
-	threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(xSize, ySize));
+	threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(xSize, ySize));
 	threshold_image->setConstant(0);
 	
 	// if the image has odd dimensions then the convolution will be throw an error
@@ -822,7 +822,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	*image_squared) = element_prod((*image), (*image));
+	*image_squared = element_prod((*image), (*image));
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -842,7 +842,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	// recycle image_squared since it's already allocated and we won't use it again
 	null_hypothesis = image_squared;
-	ublas::noalias(*null_hypothesis) = (*summed_squares) - (element_prod((*averages), (*averages)) * this->double_window_pixels);
+	*null_hypothesis = (*summed_squares) - (element_prod((*averages), (*averages)) * this->double_window_pixels);
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -1042,7 +1042,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > processed_thresholded_image;
 	
-	processed_thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
+	processed_thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {
