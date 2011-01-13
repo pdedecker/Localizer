@@ -14,8 +14,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	size_t x_size, y_size;
 	double current_value;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image(new ublas::matrix<unsigned char>(x_size, y_size));
 	
@@ -51,8 +51,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -136,8 +136,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -223,8 +223,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	waveHndl tmp_storage_wave;
 	waveHndl thresholded_wave;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	// we make two images for the original and the transposed threshold
 	original_thresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new ublas::matrix<unsigned char>(x_size, y_size));
@@ -373,8 +373,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -457,8 +457,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	waveHndl tmp_storage_wave;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -530,8 +530,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	gsl_histogram *hist;
 	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	
 	size_t number_of_bins = 256;
 	size_t current_threshold_bin = 127;
@@ -627,8 +627,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
 	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	
 	// since this is a histogram-based approach we start by constructing the histogram
 	
@@ -762,8 +762,8 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 
 boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	boost::shared_ptr<Eigen::MatrixXd> averages;
@@ -875,8 +875,8 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	size_t offset;
 	double value, median;
 	
@@ -967,8 +967,8 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	generateKernelMutex.lock();
@@ -978,7 +978,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing
 		
 	} else {	// we already have a kernel stored, is it the correct size?
 		// if not we will calculate a new one
-		if ((x_size != Gaussian_kernel->size1()) || (y_size != Gaussian_kernel->size2())) {
+		if ((x_size != Gaussian_kernel->rows()) || (y_size != Gaussian_kernel->cols())) {
 			generate_Gaussian_kernel(x_size, y_size);
 		}
 	}
@@ -996,8 +996,8 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 	double double_kernel_pixels = (double)kernel_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
 	size_t half_kernel_size_y = kernel_y_size / 2;
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	double mean;
 	
 	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
@@ -1035,8 +1035,8 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 
 boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
-	size_t x_size = thresholded_image->size1();
-	size_t y_size = thresholded_image->size2();
+	size_t x_size = thresholded_image->rows();
+	size_t y_size = thresholded_image->cols();
 	unsigned char value;
 	bool neighbour_found;
 	
@@ -1091,10 +1091,10 @@ ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<Eigen::MatrixXd> image1, boost::shared_ptr<Eigen::MatrixXd> image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	
-	x_size1 = image1->size1();
-	y_size1 = image1->size2();
-	x_size2 = image2->size1();
-	y_size2 = image2->size2();
+	x_size1 = image1->rows();
+	y_size1 = image1->cols();
+	x_size2 = image2->rows();
+	y_size2 = image2->cols();
 	
 	size_t n_FFT_values, nColumns;
 	
@@ -1136,8 +1136,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrice
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
 	size_t x_size1, y_size1;
 	
-	x_size1 = image->size1();
-	y_size1 = image->size2();
+	x_size1 = image->rows();
+	y_size1 = image->cols();
 	
 	size_t n_FFT_values, nColumns;
 	
@@ -1174,8 +1174,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(boost::shared_ptr<Eigen::MatrixXd> image, size_t kernelXSize, size_t kernelYSize) {
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	if ((kernelXSize % 2 != 1) || (kernelYSize % 2 != 1)) {
 		throw std::runtime_error("A kernel with even dimensions was passed to ConvolveMatrixWithFlatKernel");
@@ -1216,8 +1216,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 
 boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	size_t nPixels = xSize * ySize;
 	
 	boost::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nPixels), fftw_free);
@@ -1269,8 +1269,8 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> im
 	double max = -1e100;
 	double current_value;
 	
-	x_size = image->size1();
-	y_size = image->size2();
+	x_size = image->rows();
+	y_size = image->cols();
 	
 	std::string error;
 	error = "Unable to allocate a gsl_histogram in make_histogram_from_matrix()";

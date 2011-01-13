@@ -639,8 +639,8 @@ waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::
 	}
 	
 	
-	size_t x_size = (size_t)matrix->size1();
-	size_t y_size = (size_t)matrix->size2();
+	size_t x_size = (size_t)matrix->rows();
+	size_t y_size = (size_t)matrix->cols();
 	
 	dimensionSizes[0] = x_size;
 	dimensionSizes[1] = y_size;

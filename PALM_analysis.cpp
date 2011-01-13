@@ -324,8 +324,8 @@ boost::shared_ptr<Eigen::MatrixXd> FitPositionsDeflate::subtractLocalizedPositio
 	double distanceXSquared, distanceYSquared, currentIntensity;
 	
 	size_t nPositions = positions->getNPositions();
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	boost::shared_ptr<Eigen::MatrixXd> outputImage(new Eigen::MatrixXd(xSize, ySize));
 	outputImage = image;
 	

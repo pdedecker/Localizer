@@ -23,8 +23,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	double x0_initial, y0_initial, amplitude, background;
 	double chi, degreesOfFreedom, c;
@@ -208,8 +208,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	double x0_initial, y0_initial, amplitude, background;
 	double chi, degreesOfFreedom, c;
@@ -386,8 +386,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	double x_offset, y_offset, x_max, y_max;
 	size_t number_of_intensities = size_of_subset * size_of_subset;
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	double x0_initial, y0_initial, amplitude, background, correlation_initial;
 	double chi, degreesOfFreedom, c;
@@ -585,8 +585,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
 	double x_offset, y_offset, x_max, y_max;
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	
 	double x0_initial, y0_initial, integral, background;
 	long iterations = 0;
@@ -745,8 +745,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	}
 	
 	size_t size_of_subset = 2 * cutoff_radius + 1;
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	double x_offset, y_offset, x_max, y_max;
 	
 	double x0_initial, y0_initial, amplitude, background;
@@ -838,12 +838,12 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<Eigen::
 													   double std_dev, double background, double amplitude) {
 	// we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 	
-	size_t x_size = masked_image->size1();
-	size_t y_size = masked_image->size2();
+	size_t x_size = masked_image->rows();
+	size_t y_size = masked_image->cols();
 	
 	double gaussian_value, distance_squared;
 	
-	if ((original_image->size1() != x_size) || (original_image->size2() != y_size)) {
+	if ((original_image->rows() != x_size) || (original_image->cols() != y_size)) {
 		throw DIMENSIONS_SHOULD_BE_EQUAL(std::string("Matrix dimensions are not equal in FitPositionsMultiplication::multiply_with_gaussian"));
 	}
 	
@@ -864,8 +864,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<Eigen::
 int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<Eigen::MatrixXd> masked_image, double &x, double &y) {
 	// based on eq (3) in Thompson Biophys J 2002
 	
-	size_t x_size = (size_t)masked_image->size1();
-	size_t y_size = (size_t)masked_image->size2();
+	size_t x_size = (size_t)masked_image->rows();
+	size_t y_size = (size_t)masked_image->cols();
 	
 	double numerator_x = 0, denominator = 0;
 	double numerator_y = 0;
@@ -898,8 +898,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 		return boost::shared_ptr<LocalizedPositionsContainer_Centroid> (new LocalizedPositionsContainer_Centroid());
 	}
 	
-	size_t xSize = image->size1();
-	size_t ySize = image->size2();
+	size_t xSize = image->rows();
+	size_t ySize = image->cols();
 	double x_offset, y_offset, x_max, y_max;
 	
 	size_t x0_initial, y0_initial;
@@ -956,8 +956,8 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -996,8 +996,8 @@ int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, 
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1036,8 +1036,8 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1076,8 +1076,8 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1126,8 +1126,8 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1173,8 +1173,8 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1233,8 +1233,8 @@ int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fit
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	size_t arrayOffset = 0;
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
@@ -1311,8 +1311,8 @@ double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
 	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
 	
-	size_t xSize = imageSubset->size1();
-	size_t ySize = imageSubset->size2();
+	size_t xSize = imageSubset->rows();
+	size_t ySize = imageSubset->cols();
 	double xOffset = fitDataLocal->xOffset;
 	double yOffset = fitDataLocal->yOffset;
 	

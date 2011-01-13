@@ -13,7 +13,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_radius::findPositions(boo
 	boost::shared_ptr<std::list<position> > positions (new std::list<position>());
 	position currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
-	size_t x_size = image->size1(), y_size = image->size2();
+	size_t x_size = image->rows(), y_size = image->cols();
 	size_t number_of_positions;
 	double current_intensity, previous_intensity, current_x, current_y;
 	double distance_squared;
@@ -86,9 +86,9 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	std::list<position> positionsInCurrentParticleList;
 	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
-	boost::shared_ptr<ublas::matrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
@@ -96,7 +96,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
-	mapped_image = boost::shared_ptr<ublas::matrix<long> >(new ublas::matrix<long>(x_size, y_size));
+	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	mapped_image->setConstant(-1);
 	
 	for (size_t i = 0; i < x_size; i++) {
@@ -179,7 +179,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	
 }
 
-void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
+void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -188,8 +188,8 @@ void ParticleFinder_adjacent4::growParticle(position centerPosition, std::list<p
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	position currentPosition;
 	
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);
@@ -266,9 +266,9 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	std::vector<position> positionsInCurrentParticle;
 	position currentPosition;
 	boost::shared_ptr<std::list<position> > particles(new std::list<position>);
-	boost::shared_ptr<ublas::matrix<long> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image;	// keeps track of which pixels have already been mapped to a particle
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	size_t x, y;
 	long particleIndex = 0;
 	double average_x, average_y;
@@ -276,7 +276,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
-	mapped_image = boost::shared_ptr<ublas::matrix<long> >(new ublas::matrix<long>(x_size, y_size));
+	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
 	mapped_image->setConstant(-1);
 	
 	for (size_t i = 0; i < x_size; i++) {
@@ -360,7 +360,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	
 }
 
-void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<ublas::matrix<long> > mapped_image) {
+void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<position> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -369,8 +369,8 @@ void ParticleFinder_adjacent8::growParticle(position centerPosition, std::list<p
 	// if they are not known then they are added to to the list with positions of the current particle
 	// and also added to mapped_image
 	
-	size_t x_size = image->size1();
-	size_t y_size = image->size2();
+	size_t x_size = image->rows();
+	size_t y_size = image->cols();
 	position currentPosition;
 	
 	size_t x = (size_t)(centerPosition.get_x() + 0.5);

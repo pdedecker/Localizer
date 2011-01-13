@@ -1225,8 +1225,8 @@ void PDEImageOutputWriter::WriteHeader() {
 void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
 	// determine the size of the frames
-	size_t currentXSize = imageToWrite->size1();
-	size_t currentYSize = imageToWrite->size2();
+	size_t currentXSize = imageToWrite->rows();
+	size_t currentYSize = imageToWrite->cols();
 	size_t n_pixels = currentXSize * currentYSize;
 	
 	size_t offset = 0;
@@ -1330,8 +1330,8 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 
 void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
-	size_t x_size = imageToWrite->size1();
-	size_t y_size = imageToWrite->size2();
+	size_t x_size = imageToWrite->rows();
+	size_t y_size = imageToWrite->cols();
 	
 	int result, sampleFormat, bitsPerSample;
 	uint16_t current_uint16;
@@ -1604,8 +1604,8 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	int result;
 	double value[2];
 	
-	size_t x_size = imageToWrite->size1();
-	size_t y_size = imageToWrite->size2();
+	size_t x_size = imageToWrite->rows();
+	size_t y_size = imageToWrite->cols();
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now

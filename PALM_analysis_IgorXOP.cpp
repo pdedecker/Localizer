@@ -1526,8 +1526,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// copy the Igor wave with the CCD Frame into a new gsl_matrix
 		CCD_Frame = CopyIgorDPWaveToMatrix(CCD_Frame_wave);
 		
-		x_size = CCD_Frame->size1();
-		y_size = CCD_Frame->size2();
+		x_size = CCD_Frame->rows();
+		y_size = CCD_Frame->cols();
 		
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
