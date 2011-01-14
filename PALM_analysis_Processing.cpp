@@ -41,8 +41,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	if (this->n_frames_averaging == 0)
 		this->n_frames_averaging = total_number_of_images;
 	
-	average_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
-	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
+	average_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	average_image->setConstant(0.0);
 	
@@ -83,9 +83,9 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> averageImage (new Eigen::MatrixXd(xSize, ySize));
-	boost::shared_ptr<Eigen::MatrixXd> summedImages (new Eigen::MatrixXd(xSize, ySize));
-	boost::shared_ptr<Eigen::MatrixXd> activeImage (new Eigen::MatrixXd(xSize, ySize));
+	boost::shared_ptr<Eigen::MatrixXd> averageImage (new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> summedImages (new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> activeImage (new Eigen::MatrixXd((int)xSize, (int)ySize));
 	
 	std::deque<boost::shared_ptr<Eigen::MatrixXd> > frameBuffer;
 	
@@ -225,7 +225,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->readImage(n);
-		croppedImage = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(croppedXSize, croppedYSize));
+		croppedImage = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)croppedXSize, (int)croppedYSize));
 		
 		for (size_t x = startX; x <= endX; ++x) {
 			for (size_t y = startY; y <= endY; ++y) {
@@ -248,7 +248,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	size_t y_size = image_loader->getYSize();
 	
 	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
-	boost::shared_ptr<Eigen::MatrixXd > convertedImage (new Eigen::MatrixXd(x_size, y_size));;
+	boost::shared_ptr<Eigen::MatrixXd > convertedImage (new Eigen::MatrixXd((int)x_size, (int)y_size));;
 	
 	this->progressReporter->CalculationStarted();
 	

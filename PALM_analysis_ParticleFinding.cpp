@@ -96,7 +96,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent4::findPositions(
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
-	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
+	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	mapped_image->setConstant(-1);
 	
 	for (size_t i = 0; i < x_size; i++) {
@@ -276,7 +276,7 @@ boost::shared_ptr<std::list<position> > ParticleFinder_adjacent8::findPositions(
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
-	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>(x_size, y_size));
+	mapped_image = boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	mapped_image->setConstant(-1);
 	
 	for (size_t i = 0; i < x_size; i++) {

@@ -27,7 +27,7 @@ boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boo
 	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
 	
 	size_t nPositions = positions->getNPositions();
-	boost::shared_ptr<Eigen::MatrixXd> outputImage(new Eigen::MatrixXd(imageWidth, imageHeight));
+	boost::shared_ptr<Eigen::MatrixXd> outputImage(new Eigen::MatrixXd((int)imageWidth, (int)imageHeight));
 	outputImage->setConstant(0.0);
 	
 	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;

@@ -267,7 +267,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -456,7 +456,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t inde
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
 	
@@ -563,7 +563,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t 
 	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd(x_size, y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -651,7 +651,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 	size_t n_pixels = this->x_size * this->y_size;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(this->x_size, this->y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)this->x_size, (int)this->y_size));
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -958,7 +958,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		throw std::bad_alloc();
 	}
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
 	if (result != 1) {
@@ -1124,7 +1124,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	// no mutex locking is required since these calls are all threadsafe
 	
 	indices[2] = index;
-	image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(x_size, y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j  = 0; j < y_size; j++) {

@@ -269,7 +269,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	yRange = endY - startY + 1;
 	
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	boost::shared_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd(xRange, yRange));
+	boost::shared_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd((int)xRange, (int)yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -343,8 +343,8 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new Eigen::MatrixXd(xRange, yRange));
-	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd(xRange, yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new Eigen::MatrixXd((int)xRange, (int)yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd((int)xRange, (int)yRange));
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
 	average_image->setConstant(0.0);
@@ -366,13 +366,16 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
-		(*stdDevImage) = (*stdDevImage) + element_prod((*current_image) - (*average_image), (*current_image) - (*average_image));
+		(*stdDevImage) = (*stdDevImage) + ((*current_image) - (*average_image)).cwise() * (*current_image) - (*average_image);
 	}
 	
 	// divide by the number of images to get the average deviation, and take the square root
 	*stdDevImage /= (double)n_images;
-	std::transform(stdDevImage->data().begin(), stdDevImage->data().end(), stdDevImage->data().begin(), static_cast<double(*)(double)>(sqrt));
-	//(*stdDevImage) = (*stdDevImage).RaiseToPower(0.5);
+	for (size_t i = 0; i < stdDevImage->rows(); ++i) {
+		for (size_t j = 0; j < stdDevImage->cols(); ++j) {
+			(*stdDevImage)(i, j) = sqrt((*stdDevImage)(i, j));
+		}
+	}
 	
 	// try to create the output wave
 	dimension_sizes[0] = xRange;

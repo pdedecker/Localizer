@@ -37,7 +37,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
 	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(size_of_subset, size_of_subset));
+	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -222,7 +222,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
 	boost::shared_ptr<LocalizedPosition_2DGaussFixedWidth> localizationResult (new LocalizedPosition_2DGaussFixedWidth());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(size_of_subset, size_of_subset));
+	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -398,7 +398,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
 	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(size_of_subset, size_of_subset));
+	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -598,7 +598,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
 	boost::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(size_of_subset, size_of_subset));
+	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
 	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
 	gsl_multimin_fminimizer *fit_iterator = NULL;
@@ -765,8 +765,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	boost::shared_ptr<LocalizedPositionsContainer_Multiplication> fitted_positions (new LocalizedPositionsContainer_Multiplication());
 	boost::shared_ptr<LocalizedPosition_Multiplication> localizationResult (new LocalizedPosition_Multiplication());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd(size_of_subset, size_of_subset));
-	image_subset_mask = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd(size_of_subset, size_of_subset));
+	image_subset = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset_mask = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
 	std::list<position>::iterator it = positions->begin();
 	while (it != positions->end()) {
