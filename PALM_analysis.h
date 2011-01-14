@@ -30,7 +30,7 @@ class FitPositions;
 class PALMAnalysisProgressReporter;
 
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 

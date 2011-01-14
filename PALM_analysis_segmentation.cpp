@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_segmentation.h"
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	
 	size_t x_size, y_size;
 	double current_value;
@@ -17,7 +17,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	x_size = image->rows();
 	y_size = image->cols();
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	for (size_t i = 0; i < x_size; i++) {
 		for (size_t j = 0; j < y_size; j++) {
@@ -35,7 +35,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 }
 
 #ifdef WITH_IGOR
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Iterative::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -68,7 +68,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -120,7 +120,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	return thresholded_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Bimodal::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -152,7 +152,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -204,7 +204,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	return thresholded_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Adaptive::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -217,8 +217,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	double value[2];
 	int result;
 	unsigned char threshold_result;
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > original_thresholded;
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > transposed_tresholded;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > original_thresholded;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > transposed_tresholded;
 	
 	waveHndl tmp_storage_wave;
 	waveHndl thresholded_wave;
@@ -227,8 +227,8 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	y_size = image->cols();
 	
 	// we make two images for the original and the transposed threshold
-	original_thresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
-	transposed_tresholded = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	original_thresholded = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	transposed_tresholded = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	dimensionSizes[0] = (long)x_size;
 	dimensionSizes[1] = (long)y_size;
@@ -357,7 +357,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	return original_thresholded;
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Fuzzy1::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -389,7 +389,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -441,7 +441,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	return thresholded_image;	
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Igor_Fuzzy2::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we use a built-in Igor operation to handle this case
 	// the approach is quite clumsy: we create a temporary wave in Igor that has the same values as the frame we are interested in
 	// the igor routine then runs on that frame
@@ -473,7 +473,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 		throw result;
 	}
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image (new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	// now copy the data
 	for (size_t i = 0; i < x_size; i++) {
@@ -526,9 +526,9 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 }
 #endif // WITH_IGOR
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	gsl_histogram *hist;
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	
 	size_t x_size = image->rows();
 	size_t y_size = image->cols();
@@ -587,7 +587,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	
 	if (converged == 0) {	// the iterations did not converge, there is no clear threshold
 		// to indicate this we set everything to 'off' (0)
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 		threshold_image->setConstant(0.0);
 		return threshold_image;
 	}
@@ -612,7 +612,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	return threshold_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	gsl_histogram *hist;
 	size_t number_of_bins = 256;
 	size_t maximum_bin;
@@ -626,7 +626,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	size_t max_index;
 	double lower_bin_limit, upper_bin_limit, intensity_threshold;
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	size_t x_size = image->rows();
 	size_t y_size = image->cols();
 	
@@ -643,7 +643,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	// catch an unlikely case where the maximum corresponds to the last bin
 	if (maximum_bin == (number_of_bins - 1)) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 		threshold_image->setConstant(0);
 		return threshold_image;
 	}
@@ -655,7 +655,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	// catch an unlikely case where the connecting line is flat (the histogram is apparently uniform)
 	if (slope == 0) {
 		gsl_histogram_free(hist);
-		threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+		threshold_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 		threshold_image->setConstant(0);
 		return threshold_image;
 	}
@@ -760,12 +760,12 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	boost::shared_ptr<Eigen::MatrixXd> averages;
 	boost::shared_ptr<Eigen::MatrixXd> image_squared;
 	boost::shared_ptr<Eigen::MatrixXd> summed_squares;
@@ -775,7 +775,7 @@ boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >
 	double current_value;
 	int imageNeedsResizing = 0;
 	
-	threshold_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)xSize, (int)ySize));
+	threshold_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)xSize, (int)ySize));
 	threshold_image->setConstant(0);
 	
 	// if the image has odd dimensions then the convolution will be throw an error
@@ -1033,16 +1033,16 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 	return filtered_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
 	size_t x_size = thresholded_image->rows();
 	size_t y_size = thresholded_image->cols();
 	unsigned char value;
 	bool neighbour_found;
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > processed_thresholded_image;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > processed_thresholded_image;
 	
-	processed_thresholded_image = boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<unsigned char , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
+	processed_thresholded_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)x_size, (int)y_size));
 	
 	for (size_t i = 0; i < x_size; ++i) {
 		for (size_t j = 0; j < y_size; ++j) {

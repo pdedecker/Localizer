@@ -1413,7 +1413,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 	double value[2];
 	
 	
-	boost::shared_ptr<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
 	
 	
 	boost::shared_ptr<ThresholdImage> thresholder;
