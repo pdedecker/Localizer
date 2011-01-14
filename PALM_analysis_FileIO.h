@@ -23,6 +23,7 @@
 #include "tiffio.h"
 #include "stdint.h"
 #include "boost/thread.hpp"
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 
 #ifdef _WIN32

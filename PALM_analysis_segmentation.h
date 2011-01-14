@@ -14,6 +14,7 @@
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include <fftw3.h>

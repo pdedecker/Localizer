@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_FileIO.h"

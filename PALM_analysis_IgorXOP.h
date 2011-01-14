@@ -16,6 +16,7 @@
 #include <cmath>
 #include <sstream>
 #include "boost/smart_ptr.hpp"
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis.h"

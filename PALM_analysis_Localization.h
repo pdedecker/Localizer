@@ -16,6 +16,7 @@
 #include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_storage.h"
 #include "boost/smart_ptr.hpp"
+#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
