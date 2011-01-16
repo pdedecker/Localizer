@@ -855,10 +855,12 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
 	
+	(*averages) = ((*image_Gaussian_convolved).cwise() * (*image_Gaussian_convolved)).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
+	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t k = this->half_window_size + 1; k < xSize - this->half_window_size; k++) {
 		for (size_t l = this->half_window_size + 1; l < ySize - this->half_window_size; l++) {
-			current_value = 1 - (this->sum_squared_Gaussian * (*image_Gaussian_convolved)(k, l) * (*image_Gaussian_convolved)(k, l)) / (*null_hypothesis)(k , l);
+			current_value = 1 - (*averages)(k, l);
 			if (current_value > 0.0) {
 				if (- this->double_window_pixels * log(current_value) > PFA)
 					(*threshold_image)(k, l) = (unsigned char)255;
