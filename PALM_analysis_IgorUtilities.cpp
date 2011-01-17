@@ -371,11 +371,7 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	
 	// divide by the number of images to get the average deviation, and take the square root
 	*stdDevImage /= (double)n_images;
-	for (size_t i = 0; i < stdDevImage->rows(); ++i) {
-		for (size_t j = 0; j < stdDevImage->cols(); ++j) {
-			(*stdDevImage)(i, j) = sqrt((*stdDevImage)(i, j));
-		}
-	}
+	*stdDevImage = (*stdDevImage).cwise().sqrt();
 	
 	// try to create the output wave
 	dimension_sizes[0] = xRange;

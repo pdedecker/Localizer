@@ -822,7 +822,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	*image_squared = (*image).cwise() * (*image);
+	*image_squared = (*image).cwise().square();
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -842,7 +842,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	// recycle image_squared since it's already allocated and we won't use it again
 	null_hypothesis = image_squared;
-	*null_hypothesis = (*summed_squares) - ((*averages).cwise() * (*averages)) * this->double_window_pixels;
+	*null_hypothesis = (*summed_squares) - (*averages).cwise().square() * this->double_window_pixels;
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -855,7 +855,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
 	
-	(*averages) = ((*image_Gaussian_convolved).cwise() * (*image_Gaussian_convolved)).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
+	(*averages) = ((*image_Gaussian_convolved).cwise().square()).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t k = this->half_window_size + 1; k < xSize - this->half_window_size; k++) {
