@@ -148,15 +148,6 @@ public:
 	boost::shared_ptr<Eigen::MatrixXd> DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize);
 protected:
 	static boost::mutex FFTWPlannerMutex;
-	
-	/** the reason for the many mutexes is for thread safety: because the creation of fftw plans is not thread safe, only a single thread can create a plan
-	 at any given time. This is assured by exclusively locking the planMutexes. 
-	 But it's possible that one thread wants to create a plan, while another thread is already running a calculation with the previous one (for example images with different
-	 sizes are being passed). In that case we need to make sure that the calculations with the previous plan are finished before we make a new one. We could do this with a 
-	 standard mutex, but at the same time we need to allow different calculations with the same plan to proceed in parallel. So we use a shared mutex: every thread that enters
-	 a calculation does a shared_lock() on the mutex, which is unlocked when the calculation is finished. But to create a plan we require exclusive ownership. This means that
-	 when we get the lock all the calculation threads have finished, and it is safe to create a different plan
-	 ***/
 };
 
 class ThresholdImage_GLRT_FFT : public ThresholdImage {

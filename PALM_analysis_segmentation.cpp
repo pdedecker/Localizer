@@ -958,18 +958,19 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing
 	size_t y_size = image->cols();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
-	generateKernelMutex.lock();
-	if (Gaussian_kernel.get() == NULL) {	// we don't have a kernel, we need to generate it
-		
-		generate_Gaussian_kernel((int)x_size, (int)y_size);
-		
-	} else {	// we already have a kernel stored, is it the correct size?
-		// if not we will calculate a new one
-		if ((x_size != Gaussian_kernel->rows()) || (y_size != Gaussian_kernel->cols())) {
+	{
+		boost::lock_guard<boost::mutex> locker(generateKernelMutex);
+		if (Gaussian_kernel.get() == NULL) {	// we don't have a kernel, we need to generate it
+			
 			generate_Gaussian_kernel((int)x_size, (int)y_size);
+			
+		} else {	// we already have a kernel stored, is it the correct size?
+			// if not we will calculate a new one
+			if ((x_size != Gaussian_kernel->rows()) || (y_size != Gaussian_kernel->cols())) {
+				generate_Gaussian_kernel((int)x_size, (int)y_size);
+			}
 		}
 	}
-	generateKernelMutex.unlock();
 	
 	filtered_image = matrixConvolver.ConvolveMatricesWithFFT(image, Gaussian_kernel);
 	
@@ -1206,21 +1207,24 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
 	size_t nPixels = xSize * ySize;
+	fftw_plan forwardPlan;
 	
 	boost::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nPixels), fftw_free);
 	if (array_FFT.get() == NULL) {
 		throw std::bad_alloc();
 	}
 	
-	FFTWPlannerMutex.lock();
-	fftw_plan forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
-	FFTWPlannerMutex.unlock();
+	{
+		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
+	}
 	
 	fftw_execute(forwardPlan);
 	
-	FFTWPlannerMutex.lock();
-	fftw_destroy_plan(forwardPlan);
-	FFTWPlannerMutex.unlock();
+	{
+		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		fftw_destroy_plan(forwardPlan);
+	}
 	
 	return array_FFT;
 }
@@ -1230,16 +1234,19 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(bo
 	boost::shared_ptr<Eigen::MatrixXd> image(new Eigen::MatrixXd((int)xSize, (int)ySize));
 	
 	double normalization_factor = (double)(xSize * ySize);
+	fftw_plan reversePlan;
 	
-	FFTWPlannerMutex.lock();
-	fftw_plan reversePlan = reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
-	FFTWPlannerMutex.unlock();
+	{
+		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
+	}
 	
 	fftw_execute(reversePlan);
 	
-	FFTWPlannerMutex.lock();
-	fftw_destroy_plan(reversePlan);
-	FFTWPlannerMutex.unlock();
+	{
+		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		fftw_destroy_plan(reversePlan);
+	}
 	
 	*image /= normalization_factor;
 	

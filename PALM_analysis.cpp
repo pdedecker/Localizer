@@ -231,9 +231,8 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		// since there seems to be no easy way to communicate the exception to the
 		// main thread, set an error message in the analysis controller.
 		// The controller will periodically check this message and handle the error
-		controller->errorReportingMutex.lock();
+		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign(e.what());
-		controller->errorReportingMutex.unlock();
 		
 		// no point in continuing this thread
 		return;
@@ -243,17 +242,15 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		return;
 	}
 	catch (std::exception &e) {
-		controller->errorReportingMutex.lock();
+		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign(e.what());
-		controller->errorReportingMutex.unlock();
 		
 		return;
 	}
 	catch (...) {
 		// catch any other exception not handled by the above block
-		controller->errorReportingMutex.lock();
+		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign("Encountered an unspecified exception while doing the PALM analysis");
-		controller->errorReportingMutex.unlock();
 		
 		// no point in continuing this thread
 		return;
