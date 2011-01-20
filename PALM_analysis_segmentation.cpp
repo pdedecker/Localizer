@@ -1256,8 +1256,6 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(bo
 	fftw_destroy_plan(reversePlan);
 	FFTWPlannerMutex.unlock();
 	
-	reverseCalculationMutex.unlock_shared();
-	
 	*image /= normalization_factor;
 	
 	return image;

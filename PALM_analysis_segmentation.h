@@ -149,9 +149,6 @@ public:
 protected:
 	static boost::mutex FFTWPlannerMutex;
 	
-	boost::shared_mutex forwardCalculationMutex;
-	boost::shared_mutex reverseCalculationMutex;
-	
 	/** the reason for the many mutexes is for thread safety: because the creation of fftw plans is not thread safe, only a single thread can create a plan
 	 at any given time. This is assured by exclusively locking the planMutexes. 
 	 But it's possible that one thread wants to create a plan, while another thread is already running a calculation with the previous one (for example images with different
