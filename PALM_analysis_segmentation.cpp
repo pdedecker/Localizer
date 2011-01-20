@@ -59,7 +59,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	dimensionSizes[2] = 0;
 	
 	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
-	threadMutex.lock();
+	boost::lock_guard<boost::mutex> locker(threadMutex);
 	
 	
 	// try to make the wave for the temporary storage
@@ -114,9 +114,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		throw result;
 	}
 	
-	/****** release the mutex ******/
-	threadMutex.unlock();
-	
 	return thresholded_image;
 }
 
@@ -144,7 +141,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	dimensionSizes[2] = 0;
 	
 	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
-	threadMutex.lock();
+	boost::lock_guard<boost::mutex> locker(threadMutex);
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -198,9 +195,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		throw result;
 	}
 	
-	/****** release the mutex ******/
-	threadMutex.unlock();
-	
 	return thresholded_image;
 }
 
@@ -235,7 +229,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	dimensionSizes[2] = 0;
 	
 	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
-	threadMutex.lock();
+	boost::lock_guard<boost::mutex> locker(threadMutex);
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -351,9 +345,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		throw result;
 	}
 	
-	/****** release the mutex ******/
-	threadMutex.unlock();
-	
 	return original_thresholded;
 }
 
@@ -381,7 +372,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	dimensionSizes[2] = 0;
 	
 	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
-	threadMutex.lock();
+	boost::lock_guard<boost::mutex> locker(threadMutex);
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -435,9 +426,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		throw result;
 	}
 	
-	/****** release the mutex ******/
-	threadMutex.unlock();
-	
 	return thresholded_image;	
 }
 
@@ -465,7 +453,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	dimensionSizes[2] = 0;
 	
 	/****** this function is not reentrant, only one thread can be past this stage. Make sure that this is so by locking the mutex ******/
-	threadMutex.lock();
+	boost::lock_guard<boost::mutex> locker(threadMutex);
 	
 	// try to make the wave for the temporary storage
 	result = MDMakeWave(&tmp_storage_wave, "tmp_thresh_storage", NULL, dimensionSizes, NT_FP64, 1);
@@ -518,9 +506,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	if (result != 0) {
 		throw result;
 	}
-	
-	/****** release the mutex ******/
-	threadMutex.unlock();
 	
 	return thresholded_image;
 }
