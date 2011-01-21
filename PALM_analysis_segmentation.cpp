@@ -696,19 +696,19 @@ ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_
 	this->gaussianWidth = width_param;
 	this->kernelXSize = 0;
 	this->kernelYSize = 0;
+	
+	// calculate the window size that will be used
+	this->windowSize = ceil(4 * this->gaussianWidth);
+	if ((this->windowSize % 2) == 0)	// window_size must be odd
+		this->windowSize += 1;
 }
 
 void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	
-	// calculate all kernels that will be needed for images of the requested size
-	size_t window_size = ceil(4 * this->gaussianWidth);
-	if ((window_size % 2) == 0)	// window_size must be odd
-		window_size += 1;
-	
 	this->kernelXSize = xSize;
 	this->kernelYSize = ySize;
-	this->double_window_pixels = (double)window_size * (double)window_size;
-	this->half_window_size = window_size / 2;	// integer division takes care of the floor() aspect
+	double double_window_pixels = (double)this->windowSize * (double)this->windowSize;
+	size_t half_window_size = this->windowSize / 2;	// integer division takes care of the floor() aspect
 	
 	size_t center_x = xSize / 2;
 	size_t center_y = ySize / 2;
@@ -759,6 +759,8 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	boost::shared_ptr<Eigen::MatrixXd> hypothesis_test;
 	
 	double current_value;
+	double double_window_pixels = (double)this->windowSize * (double)this->windowSize;
+	size_t half_window_size = this->windowSize / 2;
 	int imageNeedsResizing = 0;
 	
 	threshold_image = boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> >(new Eigen::Matrix<int , Eigen::Dynamic, Eigen::Dynamic>((int)xSize, (int)ySize));
@@ -817,18 +819,18 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 	
 	// convolve the image with a "box function", that will get us the average
-	averages = matrixConvolver.ConvolveMatrixWithFlatKernel(image, 2 * this->half_window_size + 1, 2 * this->half_window_size + 1);
+	averages = matrixConvolver.ConvolveMatrixWithFlatKernel(image, 2 * half_window_size + 1, 2 * half_window_size + 1);
 	
 	// do the same for the squared image
-	summed_squares = matrixConvolver.ConvolveMatrixWithFlatKernel(image_squared, 2 * this->half_window_size + 1, 2 * this->half_window_size + 1);
+	summed_squares = matrixConvolver.ConvolveMatrixWithFlatKernel(image_squared, 2 * half_window_size + 1, 2 * half_window_size + 1);
 	
 	// normalize the result, so that we get averages
-	(*averages) /= this->double_window_pixels;
+	(*averages) /= double_window_pixels;
 	
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	// recycle image_squared since it's already allocated and we won't use it again
 	null_hypothesis = image_squared;
-	*null_hypothesis = (*summed_squares) - (*averages).cwise().square() * this->double_window_pixels;
+	*null_hypothesis = (*summed_squares) - (*averages).cwise().square() * double_window_pixels;
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -846,12 +848,12 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	(*hypothesis_test) = ((*image_Gaussian_convolved).cwise().square()).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
 	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
-	for (size_t k = this->half_window_size + 1; k < xSize - this->half_window_size; k++) {
-		for (size_t l = this->half_window_size + 1; l < ySize - this->half_window_size; l++) {
+	for (size_t k = half_window_size + 1; k < xSize - half_window_size; k++) {
+		for (size_t l = half_window_size + 1; l < ySize - half_window_size; l++) {
 			current_value = 1 - (*hypothesis_test)(k, l);
 			if (current_value > 0.0) {
-				if (- this->double_window_pixels * log(current_value) > PFA)
-					(*threshold_image)(k, l) = (unsigned char)255;
+				if (- double_window_pixels * log(current_value) > PFA)
+					(*threshold_image)(k, l) = 255;
 			}
 		}
 	}

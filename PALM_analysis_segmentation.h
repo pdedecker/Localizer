@@ -173,8 +173,7 @@ protected:
 	boost::shared_ptr<fftw_complex> GaussianKernelFFT;
 	
 	double sum_squared_Gaussian;
-	double double_window_pixels;
-	size_t half_window_size;
+	size_t windowSize;
 };
 
 class ThresholdImage_Preprocessor {
