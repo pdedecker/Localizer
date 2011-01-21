@@ -1081,6 +1081,40 @@ boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 }
 
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatrixWithSmallKernel(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::MatrixXd> kernel) {
+	// implement a direct convolution with sufficiently small kernel
+	size_t kernelXSize = kernel->rows();
+	size_t kernelYSize = kernel->cols();
+	size_t imageXSize = image->rows();
+	size_t imageYSize = image->rows();
+	
+	if ((kernelXSize % 2 != 1) || (kernelYSize % 2 != 1))
+		throw std::runtime_error("Tried to use a kernel with even dimensions in ConvolveMatrixWithSmallKernel");
+	
+	if ((kernelXSize > 20) || (kernelYSize > 20))
+		throw std::runtime_error("Tried to use a large kernel in ConvolveMatrixWithSmallKernel");
+	
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)imageXSize, (int)imageYSize));
+	
+	size_t halfKernelXSize = kernelXSize / 2;
+	size_t halfKernelYSize = kernelYSize / 2;
+	double sum;
+	
+	for (size_t i = halfKernelXSize; i < imageXSize - halfKernelXSize; ++i) {
+		for (size_t j = halfKernelYSize; j < imageYSize - halfKernelYSize; ++j) {
+			sum = 0.0;
+			for (size_t k = 0; k < halfKernelXSize; ++k) {
+				for (size_t l = 0; l < halfKernelYSize; ++l) {
+					sum += (*image)(i - halfKernelXSize + k, j - halfKernelYSize + l) * (*kernel)(k, l);
+				}
+			}
+			(*convolvedImage)(i, j) = sum;
+		}
+	}
+	
+	return convolvedImage;
+}
+
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<Eigen::MatrixXd> image1, boost::shared_ptr<Eigen::MatrixXd> image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	

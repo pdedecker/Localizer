@@ -130,6 +130,7 @@ public:
 	ConvolveMatricesWithFFTClass() {;}
 	~ConvolveMatricesWithFFTClass();
 	
+	boost::shared_ptr<Eigen::MatrixXd> ConvolveMatrixWithSmallKernel(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::MatrixXd> kernel);
 	boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFT(boost::shared_ptr<Eigen::MatrixXd> image1, boost::shared_ptr<Eigen::MatrixXd> image2);
 	boost::shared_ptr<Eigen::MatrixXd> ConvolveMatrixWithGivenFFT(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2);
 	
