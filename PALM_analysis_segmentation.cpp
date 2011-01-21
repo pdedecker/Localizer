@@ -708,7 +708,7 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	this->kernelXSize = xSize;
 	this->kernelYSize = ySize;
 	double double_window_pixels = (double)this->windowSize * (double)this->windowSize;
-	size_t half_window_size = this->windowSize / 2;	// integer division takes care of the floor() aspect
+	int half_window_size = this->windowSize / 2;	// integer division takes care of the floor() aspect
 	
 	size_t center_x = xSize / 2;
 	size_t center_y = ySize / 2;
@@ -716,17 +716,21 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	double distance_x, distance_y;
 	
 	// calculate the Gaussian kernel
+	// make both a small kernel suitable for direct convolution
+	// and a large kernel (same size as the image) suitable for FFT-based convolution
+	this->smallGaussianKernel = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)this->windowSize, (int)this->windowSize));
 	boost::shared_ptr<Eigen::MatrixXd> Gaussian_kernel(new Eigen::MatrixXd((int)xSize, (int)ySize));
 	
 	sum = 0;
 	Gaussian_kernel->setConstant(0.0);
 	
-	for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-			distance_x = (double)center_x - (double)i;
-			distance_y = (double)center_y - (double)j;
-			(*Gaussian_kernel)(i, j) = 1.0 / (1.77245385 * this->gaussianWidth) * exp(- 1.0 / (2.0 * this->gaussianWidth * this->gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
-			sum += (*Gaussian_kernel)(i, j);
+	// start out by calculating the small kernel, then introduce it into the larger one
+	for (int i = -1.0 * half_window_size; i <= half_window_size; ++i) {
+		for (int j = - 1.0 * half_window_size; j <= half_window_size; ++j) {
+			distance_x = (double)i;
+			distance_y = (double)j;
+			(*this->smallGaussianKernel)(i + half_window_size, j + half_window_size) = 1.0 / (1.77245385 * this->gaussianWidth) * exp(- 1.0 / (2.0 * this->gaussianWidth * this->gaussianWidth) * (distance_x * distance_x + distance_y * distance_y));
+			sum += (*this->smallGaussianKernel)(i + half_window_size, j + half_window_size);
 		}
 	}
 	
@@ -734,14 +738,21 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	// at this point Gaussian_window becomes equal to 'gc' in the original matlab code
 	sum /= double_window_pixels;
 	this->sum_squared_Gaussian = 0;
-	for (size_t i = center_x - half_window_size; i <= center_x + half_window_size; i++) {
-		for (size_t j = center_y - half_window_size; j <= center_y + half_window_size; j++) {
-			(*Gaussian_kernel)(i, j) = (*Gaussian_kernel)(i, j) - sum;
-			this->sum_squared_Gaussian += (*Gaussian_kernel)(i, j) * (*Gaussian_kernel)(i, j);	// this is 'Sgc2' in the original code
+	for (size_t i = 0; i < this->windowSize; ++i) {
+		for (size_t j = 0; j < this->windowSize; ++j) {
+			(*this->smallGaussianKernel)(i, j) = (*this->smallGaussianKernel)(i, j) - sum;
+			this->sum_squared_Gaussian += (*this->smallGaussianKernel)(i, j) * (*this->smallGaussianKernel)(i, j);
 		}
 	}
 	
-	// now calculate the FFTs of the kernel
+	// introduce the small kernel into the big one
+	for (size_t i = 0; i < this->windowSize; i++) {
+		for (size_t j = 0; j < this->windowSize; j++) {
+			(*Gaussian_kernel)(i + center_x - half_window_size, j + center_y - half_window_size) = (*this->smallGaussianKernel)(i, j);
+		}
+	}
+	
+	// now calculate the FFT of the big kernel
 	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
