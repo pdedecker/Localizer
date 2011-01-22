@@ -170,6 +170,8 @@ protected:
 	boost::mutex kernelCalculationMutex;
 	boost::shared_mutex segmentationCalculationMutex;
 	
+	int useFFT;
+	
 	size_t kernelXSize, kernelYSize;
 	boost::shared_ptr<Eigen::MatrixXd> smallGaussianKernel;
 	boost::shared_ptr<fftw_complex> GaussianKernelFFT;

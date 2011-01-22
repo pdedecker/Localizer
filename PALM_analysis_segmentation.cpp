@@ -696,6 +696,7 @@ ThresholdImage_GLRT_FFT::ThresholdImage_GLRT_FFT(double PFA_param, double width_
 	this->gaussianWidth = width_param;
 	this->kernelXSize = 0;
 	this->kernelYSize = 0;
+	this->useFFT = 1;
 	
 	// calculate the window size that will be used
 	this->windowSize = ceil(4 * this->gaussianWidth);
@@ -714,6 +715,15 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	size_t center_y = ySize / 2;
 	double sum;
 	double distance_x, distance_y;
+	
+	// decide whether to use the direct convolution or one based on the FFT
+	int sizeIsPowerOfTwo = (((xSize & (xSize - 1)) == 0) && ((ySize & (ySize - 1)) == 0));
+	if (sizeIsPowerOfTwo)
+		this->useFFT = 1;
+	else if (this->windowSize <= 10)
+		this->useFFT = 0;
+	else
+		this->useFFT = 1;
 	
 	// calculate the Gaussian kernel
 	// make both a small kernel suitable for direct convolution
@@ -846,8 +856,11 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// calculate the hypothesis H1 that there is an emitter
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
-	// we now do this using the FFT
-	image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->kernelXSize, this->kernelYSize);
+	// dependingo on the image or kernel size choose either direct or FFT-based convolution
+	if (this->useFFT == 1)
+		image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->kernelXSize, this->kernelYSize);
+	else
+		image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithSmallKernel(image, this->smallGaussianKernel);
 	
 	this->segmentationCalculationMutex.unlock_shared();
 	
@@ -1092,7 +1105,7 @@ boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatrixWithSmallKernel(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::MatrixXd> kernel) {
+boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithSmallKernel(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::MatrixXd> kernel) {
 	// implement a direct convolution with sufficiently small kernel
 	size_t kernelXSize = kernel->rows();
 	size_t kernelYSize = kernel->cols();
@@ -1114,8 +1127,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatrixWithSmallKernel(boost::shared_p
 	for (size_t i = halfKernelXSize; i < imageXSize - halfKernelXSize; ++i) {
 		for (size_t j = halfKernelYSize; j < imageYSize - halfKernelYSize; ++j) {
 			sum = 0.0;
-			for (size_t k = 0; k < halfKernelXSize; ++k) {
-				for (size_t l = 0; l < halfKernelYSize; ++l) {
+			for (size_t k = 0; k < kernelXSize; ++k) {
+				for (size_t l = 0; l < kernelYSize; ++l) {
 					sum += (*image)(i - halfKernelXSize + k, j - halfKernelYSize + l) * (*kernel)(k, l);
 				}
 			}
