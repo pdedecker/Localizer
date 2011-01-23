@@ -12,7 +12,6 @@
 #include <vector>
 #include <cmath>
 #include "boost/smart_ptr.hpp"
-#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis.h"

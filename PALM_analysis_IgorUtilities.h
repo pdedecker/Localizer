@@ -14,7 +14,6 @@
 #include <algorithm>
 
 #include "XOPStandardHeaders.h"
-#define EIGEN_DEFAULT_TO_ROW_MAJOR
 #include <Eigen/Eigen>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_storage.h"
