@@ -1115,29 +1115,113 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	if (index >= total_number_of_images)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	double value[2];
-	long indices[3];
-	int result;
+	int err;
+	int waveType = WaveType(this->igor_data_wave);
+	size_t waveDataOffset;
+	char* startOfWaveData;
+	size_t nPixels = this->x_size * this->y_size;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image;
+	// allocate a new image
+	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
-	// no mutex locking is required since these calls are all threadsafe
+	// get a pointer to the data in the wave
+	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
+	if (err != 0) {
+		throw err;
+	}
+	startOfWaveData = ((char*)(*this->igor_data_wave) + waveDataOffset);
 	
-	indices[2] = index;
-	image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)x_size, (int)y_size));
+	// get a pointer to the image
+	double* imagePtr = image->data();
 	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j  = 0; j < y_size; j++) {
-			indices[0] = (long)i;
-			indices[1] = (long)j;
-			
-			result = MDGetNumericWavePointValue(igor_data_wave, indices, value);
-			if (result != 0) {
-				throw result;
+	switch (waveType) {
+		case NT_FP32:
+		{
+			float* floatPtr = (float*)startOfWaveData;
+			floatPtr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *floatPtr;
+				++imagePtr;
+				++floatPtr;
 			}
-			
-			(*image)(i, j) = value[0];
+			break;
 		}
+		case NT_FP64:
+		{
+			double* doublePtr = (double*)startOfWaveData;
+			doublePtr += nPixels * index;
+			memcpy(imagePtr, doublePtr, nPixels * sizeof(double));
+			break;
+		}
+		case NT_I8:
+		{
+			int8_t* int8Ptr = (int8_t*)startOfWaveData;
+			int8Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *int8Ptr;
+				++imagePtr;
+				++int8Ptr;
+			}
+			break;
+		}
+		case NT_I16:
+		{
+			int16_t* int16Ptr = (int16_t*)startOfWaveData;
+			int16Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *int16Ptr;
+				++imagePtr;
+				++int16Ptr;
+			}
+			break;
+		}
+		case NT_I32:
+		{
+			int32_t* int32Ptr = (int32_t*)startOfWaveData;
+			int32Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *int32Ptr;
+				++imagePtr;
+				++int32Ptr;
+			}
+			break;
+		}
+		case NT_I8 | NT_UNSIGNED:
+		{
+			uint8_t* uint8Ptr = (uint8_t*)startOfWaveData;
+			uint8Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *uint8Ptr;
+				++imagePtr;
+				++uint8Ptr;
+			}
+			break;
+		}
+		case NT_I16 | NT_UNSIGNED:
+		{
+			uint16_t* uint16Ptr = (uint16_t*)startOfWaveData;
+			uint16Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *uint16Ptr;
+				++imagePtr;
+				++uint16Ptr;
+			}
+			break;
+		}
+		case NT_I32 | NT_UNSIGNED:
+		{
+			uint32_t* uint32Ptr = (uint32_t*)startOfWaveData;
+			uint32Ptr += nPixels * index;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*imagePtr = *uint32Ptr;
+				++imagePtr;
+				++uint32Ptr;
+			}
+			break;
+		}
+		default:
+			throw std::runtime_error("Unknown or unsupported wavetype");
+			break;
 	}
 	
 	return image;
