@@ -1165,7 +1165,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrice
 	boost::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2);
 	
 	n_FFT_values = x_size1 * y_size1;
-	nColumns = y_size1 / 2 + 1;
+	nColumns = x_size1 / 2 + 1;	// the order of the dimensions will be swapped because of column-major ordering
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
@@ -1206,7 +1206,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image);
 	
 	n_FFT_values = x_size1 * y_size1;
-	nColumns = y_size1 / 2 + 1;
+	nColumns = x_size1 / 2 + 1;	// the order of the dimensions will be swapped because of column-major ordering
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
