@@ -1279,7 +1279,8 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	
 	{
 		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
-		forwardPlan = fftw_plan_dft_r2c_2d((int)(xSize), (int)(ySize), &(image->data()[0]), array_FFT.get(), FFTW_ESTIMATE);
+		// pass the image dimensions in opposite order to account for column-major ordering
+		forwardPlan = fftw_plan_dft_r2c_2d((int)(ySize), (int)(xSize), image->data(), array_FFT.get(), FFTW_ESTIMATE);
 	}
 	
 	fftw_execute(forwardPlan);
@@ -1301,7 +1302,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(bo
 	
 	{
 		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
-		reversePlan = fftw_plan_dft_c2r_2d((int)(xSize), (int)(ySize), array_FFT.get(), &(image->data()[0]), FFTW_ESTIMATE);
+		// pass the image dimensions in opposite order to account for column-major ordering
+		reversePlan = fftw_plan_dft_c2r_2d((int)(ySize), (int)(xSize), array_FFT.get(), image->data(), FFTW_ESTIMATE);
 	}
 	
 	fftw_execute(reversePlan);
