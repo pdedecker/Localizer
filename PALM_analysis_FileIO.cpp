@@ -1736,42 +1736,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		dimensionSizes[2] = this->nImagesTotal;
 		dimensionSizes[3] = 0;
 		
-		switch (this->storageType) {
-			case STORAGE_TYPE_INT4:
-			case STORAGE_TYPE_UINT4:
-			case STORAGE_TYPE_INT8:
-				storage = NT_I8;
-				break;
-			case STORAGE_TYPE_UINT8:
-				storage = NT_I8 | NT_UNSIGNED;
-				break;
-			case STORAGE_TYPE_INT16:
-				storage = NT_I16;
-				break;
-			case STORAGE_TYPE_UINT16:
-				storage = NT_I16 | NT_UNSIGNED;
-				break;
-			case STORAGE_TYPE_INT32:
-				storage = NT_I32;
-				break;
-			case STORAGE_TYPE_UINT32:
-				storage = NT_I32 | NT_UNSIGNED;
-				break;
-			case STORAGE_TYPE_INT64:
-				storage = NT_I32;	// todo: not yet supported in Igor
-				break;
-			case STORAGE_TYPE_UINT64:
-				storage = NT_I32 | NT_UNSIGNED;
-				break;
-			case STORAGE_TYPE_FP32:
-				storage = NT_FP32;
-				break;
-			case STORAGE_TYPE_FP64:
-				storage = NT_FP64;
-				break;
-			default:
-				throw std::runtime_error("Unsupported output format in IgorImageOutputWriter");
-		}
+		storage = this->GetIgorStorageType();
 		
 		// the way to make the wave depends on whether this object was constructed with a full path
 		// or with a DataFolderAndName argument
@@ -1799,4 +1764,46 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	
 	++n_images_written;
 }
+
+int IgorImageOutputWriter::GetIgorStorageType() {
+	int storage;
+	
+	switch (this->storageType) {
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_INT8:
+			storage = NT_I8;
+			break;
+		case STORAGE_TYPE_UINT8:
+			storage = NT_I8 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT16:
+			storage = NT_I16;
+			break;
+		case STORAGE_TYPE_UINT16:
+			storage = NT_I16 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT32:
+			storage = NT_I32;
+			break;
+		case STORAGE_TYPE_UINT32:
+			storage = NT_I32 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT64:
+			storage = NT_I32;	// todo: not yet supported in Igor
+			break;
+		case STORAGE_TYPE_UINT64:
+			storage = NT_I32 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_FP32:
+			storage = NT_FP32;
+			break;
+		case STORAGE_TYPE_FP64:
+			storage = NT_FP64;
+			break;
+	}
+	
+	return storage;
+}
+
 #endif // WITH_IGOR

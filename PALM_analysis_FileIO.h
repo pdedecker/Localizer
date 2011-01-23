@@ -268,6 +268,8 @@ public:
 	void write_image(boost::shared_ptr<Eigen::MatrixXd> new_image);
 	
 protected:
+	int GetIgorStorageType();
+	
 	size_t nImagesTotal;
 	std::string fullPathToWave;
 	DataFolderAndName waveDataFolderAndName;
