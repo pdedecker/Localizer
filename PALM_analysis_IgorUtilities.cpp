@@ -14,15 +14,10 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	size_t total_n_images = image_loader->GetNImages();
 	size_t n_images_to_load;
 	size_t x_size, y_size;
-	int storage_type, waveType;
-	waveHndl output_wave;
-	long dimension_sizes[MAX_DIMENSIONS + 1];
-	long indices[MAX_DIMENSIONS];
+	int storage_type;
 	
 	int result;
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	double current_value;
-	double current_value_array[2];
 	
 	if (n_start > n_end)
 		throw END_SHOULD_BE_LARGER_THAN_START(std::string("When loading part of a CCD file a the starting index was larger than the ending index"));
@@ -55,75 +50,14 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	if (result != 0)
 		throw result;
 	
+	// allocate the object that will write the data to Igor
+	IgorImageOutputWriter waveWriter(destination, n_images_to_load, 1, storage_type);
 	
-	// make the output wave that will store the data
-	dimension_sizes[0] = (long)x_size;
-	dimension_sizes[1] = (long)y_size;
-	dimension_sizes[2] = (long)n_images_to_load;
-	dimension_sizes[3] = 0;
-	
-	// decide on the storage type to use
-	// we use the storage type that matches that of the original frames
-	switch (storage_type) {
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_INT8:
-			waveType = NT_I8;
-			break;
-		case STORAGE_TYPE_UINT8:
-			waveType = NT_I8 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_INT16:
-			waveType = NT_I16;
-			break;
-		case STORAGE_TYPE_UINT16:
-			waveType = NT_I16 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_INT32:
-			waveType = NT_I32;
-			break;
-		case STORAGE_TYPE_UINT32:
-			waveType = NT_I32 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_FP32:
-			waveType = NT_FP32;
-			break;
-		case STORAGE_TYPE_FP64:
-			waveType = NT_FP64;
-			break;
-		default:
-			waveType = NT_FP64;
-	}
-	
-	result = MDMakeWave(&output_wave, destination.name, destination.dfH, dimension_sizes, waveType, 1);
-	if (result != 0)
-		throw result;
-	
-	// load the data
+	// load the data and write it to Igor
 	for (size_t i = n_start; i <= n_end; i++) {
 		current_image = image_loader->readImage(i);
-		
-		indices[2] = i - n_start;
-		
-		// store the data in the output wave
-		for (size_t k = 0; k < y_size; k++) {
-			for (size_t j = 0; j < x_size; j++) {
-				current_value = (*current_image)(j, k);
-				
-				indices[0] = j;
-				indices[1] = k;
-				
-				current_value_array[0] = current_value;
-				
-				result = MDSetNumericWavePointValue(output_wave, indices, current_value_array);
-				if (result != 0) {
-					throw result;
-				}
-			}
-		}
-		
+		waveWriter.write_image(current_image);
 	}
-	
 	
 	return 0;
 }
