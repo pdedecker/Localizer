@@ -459,10 +459,10 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 	int returnErrors = 1;
 	
 	std::ostringstream analysisOptionsStream;	// a stringstream that is built up during the options parsing
-												// and contains the settings that are used
-												// it can be used to add metadata to the fitted positions
-												// such as wave notes or file headers
-												// the information is added in semicolon-separated key:value pairs
+	// and contains the settings that are used
+	// it can be used to add metadata to the fitted positions
+	// such as wave notes or file headers
+	// the information is added in semicolon-separated key:value pairs
 	
 	size_t preprocessing_method;
 	size_t thresholding_method;
@@ -560,7 +560,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		if (thresholding_method == THRESHOLD_METHOD_DIRECT)
 			analysisOptionsStream << "ABSOLUTE THRESHOLD:" << directThreshold << ';';	
 	} else if (thresholding_method == THRESHOLD_METHOD_DIRECT)
-			return TOO_FEW_PARAMETERS;
+		return TOO_FEW_PARAMETERS;
 	
 	if (p->PFAFlagEncountered) {
 		// Parameter: p->PFA
@@ -910,7 +910,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->start_image < 0) {
 			start_image = 0;
 		} else {
-		start_image = (size_t)(p->start_image + 0.5);
+			start_image = (size_t)(p->start_image + 0.5);
 		}
 	} else {
 		return TOO_FEW_PARAMETERS;
@@ -1268,7 +1268,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
-		
+	
 	
 	if (p->MFlagEncountered) {
 		// Parameter: p->method
@@ -1310,7 +1310,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 			endY = startY;
 			startY = swap;
 		}
-			
+		
 		
 		
 	} else {
@@ -1349,7 +1349,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	
 	try {
 		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
-	
+		
 		switch (method) {
 			case ANALYZING_SUMMEDTRACE:
 				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
@@ -1385,7 +1385,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	catch (...) {
 		return WM_UNKNOWN_ERROR;
 	}
-
+	
 	return 0;
 }
 
@@ -1656,8 +1656,8 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		
 		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_ImageThresh"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
 		
-		for (long i = 0; i < x_size; i++) {
-			for (long j = 0; j < y_size; j++) {
+		for (long j = 0; j < y_size; j++) {
+			for (long i = 0; i < x_size; i++) {
 				indices[0] = i;
 				indices[1] = j;
 				
@@ -1917,8 +1917,8 @@ static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
 			default:
 				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
 		}
-	
-	// do the actual calculation
+		
+		// do the actual calculation
 		progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));

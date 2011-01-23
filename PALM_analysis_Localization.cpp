@@ -11,7 +11,7 @@
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
 																							 boost::shared_ptr<std::list<position> > positions) {
-																			
+	
 	// some safety checks
 	if (positions->size() == 0) {
 		// if no positions were found then there is no reason to run the analysis
@@ -94,8 +94,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; j++) {
-			for (size_t k = y_offset; k <= y_max; k++) {
+		for (size_t k = y_offset; k <= y_max; k++) {
+			for (size_t j = x_offset; j <= x_max; j++) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -279,8 +279,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; j++) {
-			for (size_t k = y_offset; k <= y_max; k++) {
+		for (size_t k = y_offset; k <= y_max; k++) {
+			for (size_t j = x_offset; j <= x_max; j++) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -456,8 +456,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; j++) {
-			for (size_t k = y_offset; k <= y_max; k++) {
+		for (size_t k = y_offset; k <= y_max; k++) {
+			for (size_t j = x_offset; j <= x_max; j++) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -550,16 +550,16 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
 		
 		localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation 
-										* localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
+																						  * localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
 		localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation * localizationResult->correlation)
-												* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
-												* c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
-												+ localizationResult->correlation * localizationResult->correlation * localizationResult->correlationDeviation
-												* localizationResult->correlationDeviation / (1 - localizationResult->correlation * localizationResult->correlation)
-												/ (1 - localizationResult->correlation * localizationResult->correlation) + localizationResult->xWidthDeviation
-												* localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
-												+ localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
-												/ localizationResult->yWidth);
+		* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
+																		 * c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
+																		 + localizationResult->correlation * localizationResult->correlation * localizationResult->correlationDeviation
+																		 * localizationResult->correlationDeviation / (1 - localizationResult->correlation * localizationResult->correlation)
+																		 / (1 - localizationResult->correlation * localizationResult->correlation) + localizationResult->xWidthDeviation
+																		 * localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
+																		 + localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
+																		 / localizationResult->yWidth);
 		
 		fitted_positions->addPosition(localizationResult);
 		++it;
@@ -593,7 +593,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	int status;
 	double size;
 	double dummy;
-		
+	
 	boost::shared_ptr<Eigen::MatrixXd> image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
 	boost::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
@@ -648,8 +648,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; j++) {
-			for (size_t k = y_offset; k <= y_max; k++) {
+		for (size_t k = y_offset; k <= y_max; k++) {
+			for (size_t j = x_offset; j <= x_max; j++) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -785,8 +785,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; ++j) {
-			for (size_t k = y_offset; k <= y_max; ++k) {
+		for (size_t k = y_offset; k <= y_max; ++k) {
+			for (size_t j = x_offset; j <= x_max; ++j) {
 				(*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
 			}
 		}
@@ -847,8 +847,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<Eigen::
 		throw DIMENSIONS_SHOULD_BE_EQUAL(std::string("Matrix dimensions are not equal in FitPositionsMultiplication::multiply_with_gaussian"));
 	}
 	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			distance_squared = (x - (double)i) * (x - (double)i) + (y - (double)j) * (y - (double)j);
 			
 			gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev)) + background;
@@ -871,8 +871,8 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<Eigen::
 	double numerator_y = 0;
 	
 	// start with determining the x-position
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j = 0; j < y_size; j++) {
+	for (size_t j = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			numerator_x += (double)i * (*masked_image)(i, j);
 			numerator_y += (double)j * (*masked_image)(i, j);
 			denominator += (*masked_image)(i, j);
@@ -927,8 +927,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 			continue;
 		}
 		
-		for (size_t j = x_offset; j <= x_max; ++j) {
-			for (size_t k = y_offset; k <= y_max; ++k) {
+		for (size_t k = y_offset; k <= y_max; ++k) {
+			for (size_t j = x_offset; j <= x_max; ++j) {
 				current_x += (double)j * (*image)(j, k);
 				current_y += (double)k * (*image)(j, k);
 				denominator += (*image)(j, k);
@@ -975,8 +975,8 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 		return GSL_FAILURE;
 	}
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
@@ -1015,8 +1015,8 @@ int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, 
 		return GSL_FAILURE;
 	}
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
@@ -1057,8 +1057,8 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
 	
 	double x,y, function_value, square_deviation;
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			function_value = amplitude * exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX 
@@ -1096,8 +1096,8 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
 		return GSL_FAILURE;
 	}
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
@@ -1145,8 +1145,8 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 		return GSL_FAILURE;
 	}
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
@@ -1196,8 +1196,8 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 	
 	denominator = 2 * (1 - corr * corr) * sigma;
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
@@ -1253,8 +1253,8 @@ int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fit
 		return GSL_FAILURE;
 	}
 	
-	for (int i = 0; i < xSize; ++i) {
-		for (int j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			
@@ -1325,8 +1325,8 @@ double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_
 	double expectationValue, recordedSignal, summedLikelihood, x, y;
 	
 	summedLikelihood = 0.0;
-	for (size_t i = 0; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
+	for (size_t j = 0; j < ySize; ++j) {
+		for (size_t i = 0; i < xSize; ++i) {
 			x = xOffset + (double)i;
 			y = yOffset + (double)j;
 			recordedSignal = (*imageSubset)(i, j);

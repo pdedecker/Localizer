@@ -2,7 +2,7 @@
 
 
 boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
-																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
+																									  boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
 	boost::shared_ptr<Eigen::MatrixXd> preprocessed_image;
@@ -106,7 +106,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	for (;;) {
 		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(500));
 		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
-											// while we wait we check for various things and give the interface the chance to update
+			// while we wait we check for various things and give the interface the chance to update
 			
 			// did one of the threads run into an error?
 			this->errorReportingMutex.lock();
@@ -118,7 +118,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 				}
 				// wait until the threads have completed
 				for (size_t j = 0; j < numberOfThreads; ++j) {
-				threads.at(j)->join();
+					threads.at(j)->join();
 				}
 				
 				throw ERROR_RUNNING_THREADED_ANALYSIS(this->errorMessage);
@@ -352,8 +352,8 @@ boost::shared_ptr<Eigen::MatrixXd> FitPositionsDeflate::subtractLocalizedPositio
 		if (endY >= ySize)
 			endY = ySize - 1;
 		
-		for (size_t i = startX; i <= endX; ++i) {
-			for (size_t j = startY; j < endY; ++j) {
+		for (size_t j = startY; j < endY; ++j) {
+			for (size_t i = startX; i <= endX; ++i) {
 				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
 				currentIntensity = calculatedAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * fittedXWidth * fittedYWidth));

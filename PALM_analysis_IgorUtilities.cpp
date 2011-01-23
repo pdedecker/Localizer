@@ -106,8 +106,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 		indices[2] = i - n_start;
 		
 		// store the data in the output wave
-		for (size_t j = 0; j < x_size; j++) {
-			for (size_t k = 0; k < y_size; k++) {
+		for (size_t k = 0; k < y_size; k++) {
+			for (size_t j = 0; j < x_size; j++) {
 				current_value = (*current_image)(j, k);
 				
 				indices[0] = j;
@@ -191,8 +191,8 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 		current_image = image_loader->readImage(i);
 		
 		// calculate the total sum of the image
-		for (size_t j = startX; j <= endX; j++) {
-			for (size_t k = startY; k <= endY; k++) {
+		for (size_t k = startY; k <= endY; k++) {
+			for (size_t j = startX; j <= endX; j++) {
 				summed_intensity += (*current_image)(j, k);
 			}
 		}
@@ -299,8 +299,8 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 		throw result;
 	
 	// write the output data to the wave
-	for (size_t i = startX; i <= endX; ++i) {
-		for (size_t j = startY; j <= endY; ++j) {
+	for (size_t j = startY; j <= endY; ++j) {
+		for (size_t i = startX; i <= endX; ++i) {
 			current_value[0] = (*average_image)(i, j);
 			indices[0] = i;
 			indices[1] = j;
@@ -382,8 +382,8 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		throw result;
 	
 	// write the output data to the wave
-	for (size_t i = startX; i <= endX; ++i) {
-		for (size_t j = startY; j <= endX; ++j) {
+	for (size_t j = startY; j <= endX; ++j) {
+		for (size_t i = startX; i <= endX; ++i) {
 			current_value[0] = (*stdDevImage)(i, j);
 			indices[0] = i;
 			indices[1] = j;
@@ -597,8 +597,8 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	
 	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
-	for (size_t i = 0; i < x_size; ++i) {
-		for (size_t j = 0; j < y_size; ++j) {
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
 			indices[0] = i;
 			indices[1] = j;
 			
@@ -647,8 +647,8 @@ waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::
 	
 	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
-	for (size_t i = 0; i < x_size; ++i) {
-		for (size_t j = 0; j < y_size; ++j) {
+	for (size_t j = 0; j < y_size; ++j) {
+		for (size_t i = 0; i < x_size; ++i) {
 			indices[0] = i;
 			indices[1] = j;
 			

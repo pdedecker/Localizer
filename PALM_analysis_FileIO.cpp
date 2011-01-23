@@ -1120,7 +1120,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	int result;
 	
 	boost::shared_ptr<Eigen::MatrixXd> image;
-		
+	
 	// no mutex locking is required since these calls are all threadsafe
 	
 	indices[2] = index;
@@ -1173,7 +1173,7 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 	}
-		
+	
 	file.open(file_path.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
 	if (file.fail() != 0) {
 		std::string error("Cannot create an output file at ");
@@ -1675,8 +1675,8 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	
 	indices[2] = n_images_written;
 	
-	for (size_t i = 0; i < x_size; i++) {
-		for (size_t j  = 0; j < y_size; j++) {
+	for (size_t j  = 0; j < y_size; j++) {
+		for (size_t i = 0; i < x_size; i++) {
 			indices[0] = i;
 			indices[1] = j;
 			

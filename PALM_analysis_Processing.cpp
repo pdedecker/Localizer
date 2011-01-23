@@ -227,8 +227,8 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 		loadedImage = image_loader->readImage(n);
 		croppedImage = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)croppedXSize, (int)croppedYSize));
 		
-		for (size_t x = startX; x <= endX; ++x) {
-			for (size_t y = startY; y <= endY; ++y) {
+		for (size_t y = startY; y <= endY; ++y) {
+			for (size_t x = startX; x <= endX; ++x) {
 				(*croppedImage)(x - startX, y - startY) = (*loadedImage)(x, y);
 			}
 		}
@@ -254,8 +254,8 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->readImage(n);
-		for (size_t i = 0; i < x_size; ++i) {
-			for (size_t j = 0; j < y_size; ++j) {
+		for (size_t j = 0; j < y_size; ++j) {
+			for (size_t i = 0; i < x_size; ++i) {
 				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;
 			}
 		}

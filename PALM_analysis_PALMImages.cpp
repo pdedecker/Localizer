@@ -91,8 +91,8 @@ boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boo
 		if (endY >= imageHeight)
 			endY = imageHeight - 1;
 		
-		for (size_t i = startX; i <= endX; ++i) {
-			for (size_t j = startY; j < endY; ++j) {
+		for (size_t j = startY; j < endY; ++j) {
+			for (size_t i = startX; i <= endX; ++i) {
 				// take into account that each pixel really should contain the integral of the Gaussian
 				// for that calculate the distance of the edge of every pixel to the emitter (in 1D)
 				lowerXEdgeDistance = centerX - (double)i - 0.5;
