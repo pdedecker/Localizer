@@ -1719,24 +1719,21 @@ IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderA
 }
 
 void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
-	long indices[MAX_DIMENSIONS + 1];
-	int result;
-	double value[2];
 	
+	int result;
 	size_t x_size = imageToWrite->rows();
 	size_t y_size = imageToWrite->cols();
+	size_t nPixels = x_size * y_size;
+	int storage = this->GetIgorStorageType();
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
 		long dimensionSizes[MAX_DIMENSIONS + 1];
-		int storage;
 		
 		dimensionSizes[0] = x_size;
 		dimensionSizes[1] = y_size;
 		dimensionSizes[2] = this->nImagesTotal;
 		dimensionSizes[3] = 0;
-		
-		storage = this->GetIgorStorageType();
 		
 		// the way to make the wave depends on whether this object was constructed with a full path
 		// or with a DataFolderAndName argument
@@ -1747,18 +1744,101 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		}
 	}
 	
-	indices[2] = n_images_written;
+	// the strategy for writing the data depends on the storage type
+	size_t waveDataOffset;
+	char *waveDataPtr;
 	
-	for (size_t j  = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
-			indices[0] = i;
-			indices[1] = j;
-			
-			value[0] = (*imageToWrite)(i,j);
-			result = MDSetNumericWavePointValue(outputWave, indices, value);
-			if (result != 0) {
-				throw result;
+	result = MDAccessNumericWaveData(this->outputWave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
+	if (result != 0)
+		throw result;
+	
+	waveDataPtr = (char *)((char*)(*this->outputWave) + waveDataOffset);
+	double* imagePtr = imageToWrite->data();
+	
+	switch (storage) {
+		case NT_I8:
+		{
+			int8_t* int8Ptr = (int8_t*)waveDataPtr;
+			int8Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*int8Ptr = *imagePtr;
+				++int8Ptr;
+				++imagePtr;
 			}
+			break;
+		}
+		case NT_I16:
+		{
+			int16_t* int16Ptr = (int16_t*)waveDataPtr;
+			int16Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*int16Ptr = *imagePtr;
+				++int16Ptr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_I32:
+		{
+			int32_t* int32Ptr = (int32_t*)waveDataPtr;
+			int32Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*int32Ptr = *imagePtr;
+				++int32Ptr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_I8 | NT_UNSIGNED:
+		{
+			uint8_t* uint8Ptr = (uint8_t*)waveDataPtr;
+			uint8Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*uint8Ptr = *imagePtr;
+				++uint8Ptr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_I16 | NT_UNSIGNED:
+		{
+			uint16_t* uint16Ptr = (uint16_t*)waveDataPtr;
+			uint16Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*uint16Ptr = *imagePtr;
+				++uint16Ptr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_I32 | NT_UNSIGNED:
+		{
+			uint32_t* uint32Ptr = (uint32_t*)waveDataPtr;
+			uint32Ptr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*uint32Ptr = *imagePtr;
+				++uint32Ptr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_FP32:
+		{
+			float* floatPtr = (float*)waveDataPtr;
+			floatPtr += nPixels * this->n_images_written;
+			for (size_t i = 0; i < nPixels; ++i) {
+				*floatPtr = *imagePtr;
+				++floatPtr;
+				++imagePtr;
+			}
+			break;
+		}
+		case NT_FP64:
+		{
+			double* doublePtr = (double*)waveDataPtr;
+			doublePtr += nPixels * this->n_images_written;
+			memcpy(doublePtr, imagePtr, nPixels * sizeof(double));
+			break;
 		}
 	}
 	
