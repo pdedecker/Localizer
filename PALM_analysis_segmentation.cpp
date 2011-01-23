@@ -1110,7 +1110,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	size_t kernelXSize = kernel->rows();
 	size_t kernelYSize = kernel->cols();
 	size_t imageXSize = image->rows();
-	size_t imageYSize = image->rows();
+	size_t imageYSize = image->cols();
 	
 	if ((kernelXSize % 2 != 1) || (kernelYSize % 2 != 1))
 		throw std::runtime_error("Tried to use a kernel with even dimensions in ConvolveMatrixWithSmallKernel");
