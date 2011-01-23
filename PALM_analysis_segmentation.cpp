@@ -1236,20 +1236,20 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
 	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
 	
-	// populate the upper row of the matrix
-	memcpy(&(accumulatedImage->data()[0]), &(image->data()[0]), ySize * sizeof(double));
+	// populate the first column of the matrix
+	memcpy(accumulatedImage->data(), image->data(), xSize * sizeof(double));
 	
-	// first loop: calculate the sum along the columns
-	for (size_t i = 1; i < xSize; ++i) {
-		for (size_t j = 0; j < ySize; ++j) {
-			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*image)(i, j);
-		}
-	}
-	
-	// second loop: calculate the sum of every pixel along the rows
+	// first loop: calculate the sum of every pixel along the rows
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 1; j < ySize; ++j) {
 			(*accumulatedImage)(i, j) = (*accumulatedImage)(i, j) + (*accumulatedImage)(i, j - 1);
+		}
+	}
+	
+	// second loop: calculate the sum along the columns
+	for (size_t i = 1; i < xSize; ++i) {
+		for (size_t j = 0; j < ySize; ++j) {
+			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*image)(i, j);
 		}
 	}
 	
