@@ -258,14 +258,19 @@ protected:
 #ifdef WITH_IGOR
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
+	// constructor when the wave is specified using a fully qualified path or just a single name
 	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite, int storageType);
+	// constructor when using the DataFolderAndName type provided by the XOP toolkit
+	IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName, size_t nImagesTotal, int overwrite, int storageType);
+	
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(boost::shared_ptr<Eigen::MatrixXd> new_image);
 	
 protected:
 	size_t nImagesTotal;
-	std::string waveName;
+	std::string fullPathToWave;
+	DataFolderAndName waveDataFolderAndName;
 	waveHndl outputWave;
 	int overwrite;
 	int storageType;

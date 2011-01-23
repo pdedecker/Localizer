@@ -1683,7 +1683,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	
 	this->overwrite = overwrite_rhs;
 	this->outputWave = NULL;
-	this->waveName = waveName_rhs;
+	this->fullPathToWave = waveName_rhs;
 	this->nImagesTotal = nImages_rhs;
 	this->n_images_written = 0;
 	this->storageType = storageType_rhs;
@@ -1694,7 +1694,26 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 		if (wave != NULL) {
 			std::string error ("the output wave ");
 			error += waveName_rhs;
-			error += " already exists and was not overwritten (/O flag)";
+			error += " already exists (and the /O flag was not specified)";
+		}
+	}
+}
+
+IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName_rhs, size_t nImages_rhs, int overwrite_rhs, int storageType_rhs) {
+	
+	this->overwrite = overwrite_rhs;
+	this->outputWave = NULL;
+	this->fullPathToWave.assign("");
+	this->nImagesTotal = nImages_rhs;
+	this->n_images_written = 0;
+	this->storageType = storageType_rhs;
+	this->waveDataFolderAndName = outputDataFolderAndName_rhs;
+	
+	// check if the output wave already exists
+	if (this->overwrite != 1) {
+		waveHndl wave = FetchWaveFromDataFolder(this->waveDataFolderAndName.dfH, this->waveDataFolderAndName.name);
+		if (wave != NULL) {
+			throw std::runtime_error("the requested output wave already exists (and the /O flag was not specified)");
 		}
 	}
 }
@@ -1754,7 +1773,13 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 				throw std::runtime_error("Unsupported output format in IgorImageOutputWriter");
 		}
 		
-		this->outputWave = MakeWaveUsingFullPath(this->waveName, dimensionSizes, storage, this->overwrite);
+		// the way to make the wave depends on whether this object was constructed with a full path
+		// or with a DataFolderAndName argument
+		if (this->fullPathToWave.length() != 0) {
+			this->outputWave = MakeWaveUsingFullPath(this->fullPathToWave, dimensionSizes, storage, this->overwrite);
+		} else {
+			result = MDMakeWave(&(this->outputWave), this->waveDataFolderAndName.name, this->waveDataFolderAndName.dfH, dimensionSizes, storage, this->overwrite);
+		}
 	}
 	
 	indices[2] = n_images_written;
