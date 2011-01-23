@@ -720,7 +720,7 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	int sizeIsPowerOfTwo = (((xSize & (xSize - 1)) == 0) && ((ySize & (ySize - 1)) == 0));
 	if (sizeIsPowerOfTwo)
 		this->useFFT = 1;
-	else if (this->windowSize <= 10)
+	else if (this->windowSize <= 7)
 		this->useFFT = 0;
 	else
 		this->useFFT = 1;
