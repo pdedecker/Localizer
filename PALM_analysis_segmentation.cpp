@@ -1242,14 +1242,14 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	// first loop: calculate the sum of every pixel along the rows
 	for (size_t i = 0; i < xSize; ++i) {
 		for (size_t j = 1; j < ySize; ++j) {
-			(*accumulatedImage)(i, j) = (*accumulatedImage)(i, j) + (*accumulatedImage)(i, j - 1);
+			(*accumulatedImage)(i, j) = (*image)(i, j) + (*accumulatedImage)(i, j - 1);
 		}
 	}
 	
 	// second loop: calculate the sum along the columns
 	for (size_t i = 1; i < xSize; ++i) {
 		for (size_t j = 0; j < ySize; ++j) {
-			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*image)(i, j);
+			(*accumulatedImage)(i, j) = (*accumulatedImage)(i - 1, j) + (*accumulatedImage)(i, j);
 		}
 	}
 	
