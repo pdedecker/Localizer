@@ -127,8 +127,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			
 			// does the user want to abort?
 #ifdef WITH_IGOR
-			status = CheckAbort(0);
-			if (status == -1) {
+			status = SpinProcess();
+			if (status != 0) {
 				for (size_t j = 0; j < numberOfThreads; ++j) {
 					threads.at(j)->interrupt();
 				}
