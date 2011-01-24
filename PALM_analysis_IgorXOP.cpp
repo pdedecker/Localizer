@@ -2170,7 +2170,7 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 	
 	XOPInit(ioRecHandle);							// Do standard XOP initialization.
 	SetXOPEntry(XOPEntry);							// Set entry point for future calls.
-	if (igorVersion < 600) {
+	if (igorVersion < 620) {
 		SetXOPResult(IGOR_OBSOLETE);
 		return EXIT_FAILURE;
 	}
