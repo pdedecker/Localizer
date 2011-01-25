@@ -210,8 +210,6 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	dimension_sizes[0] = xRange;
 	dimension_sizes[1] = yRange;
 	dimension_sizes[2] = 0;
-	long indices[MAX_DIMENSIONS];
-	double current_value[2];
 	int result;
 	
 	average_image->setConstant(0.0);
@@ -233,17 +231,9 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 		throw result;
 	
 	// write the output data to the wave
-	for (size_t j = startY; j <= endY; ++j) {
-		for (size_t i = startX; i <= endX; ++i) {
-			current_value[0] = (*average_image)(i, j);
-			indices[0] = i;
-			indices[1] = j;
-			result = MDSetNumericWavePointValue(output_wave, indices, current_value);
-			if (result != 0) {
-				throw result;
-			}
-		}
-	}
+	result = MDStoreDPDataInNumericWave(output_wave, average_image->data());
+	if (result != 0)
+		throw result;
 	
 	return output_wave;
 }
@@ -256,9 +246,6 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	int result;
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
-	long indices[MAX_DIMENSIONS];
-	
-	double current_value[2];
 	
 	long xRange, yRange;
 	
@@ -316,17 +303,9 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		throw result;
 	
 	// write the output data to the wave
-	for (size_t j = startY; j <= endX; ++j) {
-		for (size_t i = startX; i <= endX; ++i) {
-			current_value[0] = (*stdDevImage)(i, j);
-			indices[0] = i;
-			indices[1] = j;
-			result = MDSetNumericWavePointValue(output_wave, indices, current_value);
-			if (result != 0) {
-				throw result;
-			}
-		}
-	}
+	result = MDStoreDPDataInNumericWave(output_wave, stdDevImage->data());
+	if (result != 0)
+		throw result;
 	
 	return output_wave;
 }
@@ -514,8 +493,6 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	int numDimensions; 
 	CountInt dimensionSizes[MAX_DIMENSIONS+1];
 	size_t x_size, y_size;
-	long indices[MAX_DIMENSIONS];
-	double value[2];
 	
 	
 	err = MDGetWaveDimensions(wave, &numDimensions, dimensionSizes);
@@ -531,19 +508,9 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	
 	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd((int)x_size, (int)y_size));
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
-			indices[0] = i;
-			indices[1] = j;
-			
-			err = MDGetNumericWavePointValue(wave, indices, value);
-			if (err != 0) {
-				throw err;
-			}
-			
-			(*matrix)(i, j) = value[0];
-		}
-	}
+	err = MDGetDPDataFromNumericWave(wave, matrix->data());
+	if (err != 0)
+		throw err;
 	
 	return matrix;
 }
@@ -553,9 +520,7 @@ waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::
 	waveHndl DPWave;
 	
 	int err;
-	long indices[MAX_DIMENSIONS];
 	long dimensionSizes[MAX_DIMENSIONS+1];
-	double value[2];
 	
 	// special case:
 	// if the matrix is NULL (such as when there are no positions found)
@@ -581,19 +546,9 @@ waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::
 	
 	DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
 	
-	for (size_t j = 0; j < y_size; ++j) {
-		for (size_t i = 0; i < x_size; ++i) {
-			indices[0] = i;
-			indices[1] = j;
-			
-			value[0] = (*matrix)(i, j);
-			
-			err = MDSetNumericWavePointValue(DPWave, indices, value);
-			if (err != 0) {
-				throw err;
-			}
-		}
-	}
+	err = MDStoreDPDataInNumericWave(DPWave, matrix->data());
+	if (err != 0)
+		throw err;
 	
 	return DPWave;
 }
