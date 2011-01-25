@@ -287,7 +287,7 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
-		(*stdDevImage) = (*stdDevImage) + ((*current_image) - (*average_image)).cwise() * (*current_image) - (*average_image);
+		(*stdDevImage) += ((*current_image) - (*average_image)).cwise().square();
 	}
 	
 	// divide by the number of images to get the average deviation, and take the square root
