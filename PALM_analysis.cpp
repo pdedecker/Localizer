@@ -9,20 +9,11 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_proces
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > postprocessed_image;
 	
-	if (preprocessor.get() != NULL) {
-		preprocessed_image = preprocessor->do_preprocessing(image);
-		thresholded_image = thresholder->do_thresholding(preprocessed_image);
-		
-	} else {
-		thresholded_image = thresholder->do_thresholding(image);
-	}
+	preprocessed_image = preprocessor->do_preprocessing(image);
+	thresholded_image = thresholder->do_thresholding(preprocessed_image);
+	postprocessed_image = postprocessor->do_postprocessing(thresholded_image, image);
 	
-	if (postprocessor.get() != NULL) {
-		postprocessed_image = postprocessor->do_postprocessing(thresholded_image, image);
-		thresholded_image = postprocessed_image;
-	}
-	
-	return thresholded_image;
+	return postprocessed_image;
 }
 
 
