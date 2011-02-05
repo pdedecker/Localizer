@@ -187,6 +187,14 @@ public:
 	virtual boost::shared_ptr<Eigen::MatrixXd> do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) = 0;
 };
 
+class ThresholdImage_Preprocessor_DoNothing : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
+public:
+	ThresholdImage_Preprocessor_DoNothing() {;}
+	~ThresholdImage_Preprocessor_DoNothing() {;}
+	
+	boost::shared_ptr<Eigen::MatrixXd> do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {return image;}
+};
+
 class ThresholdImage_Preprocessor_MedianFilter : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
 public:
 	ThresholdImage_Preprocessor_MedianFilter(unsigned x, size_t y) {kernel_x_size = x; kernel_y_size = y;}
@@ -238,6 +246,15 @@ public:
 	virtual ~ThresholdImage_Postprocessor() {;}
 	
 	virtual boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) = 0;
+};
+
+class ThresholdImage_Postprocessor_DoNothing : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
+	// but do not have any active neighbours
+public:
+	ThresholdImage_Postprocessor_DoNothing() {;}
+	~ThresholdImage_Postprocessor_DoNothing() {;}
+	
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {return thresholded_image;}
 };
 
 class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
