@@ -676,7 +676,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
 			case PREPROCESSOR_NONE:	// no preprocessing
-				//preprocessor = NULL;	// this is the default for a shared_ptr
+				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
 				break;
 			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
@@ -739,7 +739,7 @@ static int ExecuteAnalyzePALMImages(AnalyzePALMImagesRuntimeParamsPtr p) {
 		// which postprocessing do we wish to do?
 		switch(postprocessing_method) {
 			case POSTPROCESSOR_NONE:	// no postprocessing
-				//postprocessor = NULL;	// this is the default for a shared_ptr
+				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
 				break;
 			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
@@ -1532,7 +1532,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// which preprocessing do we wish to do?
 		switch(preprocessing_method) {
 			case PREPROCESSOR_NONE:	// no preprocessing
-				// preprocessor = NULL;	// this is the default for a smart pointer
+				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
 				break;
 			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
 				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
@@ -1593,7 +1593,7 @@ static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
 		// which postprocessing do we wish to do?
 		switch(postprocessing_method) {
 			case POSTPROCESSOR_NONE:	// no postprocessing
-				//postprocessor = NULL;	// this is the default for a shared_ptr
+				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
 				break;
 			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
 				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());

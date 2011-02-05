@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
 boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name) {
 	
 	if (name == std::string("none"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>();	// equivalent to returning a NULL pointer
+		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
 	
 	if (name == std::string("3x3median"))
 		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
@@ -196,7 +196,7 @@ boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string n
 
 boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name) {
 	if (name == std::string("none"))
-		return boost::shared_ptr<ThresholdImage_Postprocessor>();	// equivalent to returning a NULL pointer
+		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
 	
 	if (name == std::string("removeisolated"))
 		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
