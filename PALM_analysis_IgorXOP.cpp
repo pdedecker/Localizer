@@ -352,9 +352,9 @@ typedef struct ConvolveImagesRuntimeParams ConvolveImagesRuntimeParams;
 typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
-// Runtime param structure for MakeBitmapPALMImage operation.
+// Runtime param structure for LocalizationBitmap operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
-struct MakeBitmapPALMImageRuntimeParams {
+struct LocalizationBitmapRuntimeParams {
 	// Flag parameters.
 	
 	// Parameters for /M flag group.
@@ -406,8 +406,8 @@ struct MakeBitmapPALMImageRuntimeParams {
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
-typedef struct MakeBitmapPALMImageRuntimeParams MakeBitmapPALMImageRuntimeParams;
-typedef struct MakeBitmapPALMImageRuntimeParams* MakeBitmapPALMImageRuntimeParamsPtr;
+typedef struct LocalizationBitmapRuntimeParams LocalizationBitmapRuntimeParams;
+typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for RipleyLFunctionClustering operation.
@@ -1796,7 +1796,7 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 }
 
 
-static int ExecuteMakeBitmapPALMImage(MakeBitmapPALMImageRuntimeParamsPtr p) {
+static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int method, emitterWeighing;
@@ -2091,16 +2091,16 @@ static int RegisterConvolveImages(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);
 }
 
-static int RegisterMakeBitmapPALMImage(void) {
+static int RegisterLocalizationBitmap(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
 	const char* runtimeStrVarList;
 	
-	// NOTE: If you change this template, you must change the MakeBitmapPALMImageRuntimeParams structure as well.
-	cmdTemplate = "MakeBitmapPALMImage /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
+	// NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
+	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(MakeBitmapPALMImageRuntimeParams), (void*)ExecuteMakeBitmapPALMImage, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, 0);
 }
 
 
@@ -2146,7 +2146,7 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 		return result;
 	if (result = RegisterConvolveImages())
 		return result;
-	if (result = RegisterMakeBitmapPALMImage())
+	if (result = RegisterLocalizationBitmap())
 		return result;
 	if (result = RegisterRipleyLFunctionClustering())
 		return result;

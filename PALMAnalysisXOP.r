@@ -49,7 +49,7 @@ resource 'XOPC' (1100) {
 		"ConvolveImages",
 		XOPOp+utilOp+compilableOp,
 		
-		"MakeBitmapPALMImage",
+		"LocalizationBitmap",
 		XOPOp+utilOp+compilableOp,
 		
 		"RipleyLFunctionClustering",
