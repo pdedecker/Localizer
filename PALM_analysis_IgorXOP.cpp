@@ -906,9 +906,10 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	if (p->end_imageEncountered) {
 		// Parameter: p->end_image
 		if (p->end_image < 0) {
-			return EXPECT_POS_NUM;
+			end_image = (size_t)-1;
+		} else {
+			end_image = (size_t)(p->end_image + 0.5);
 		}
-		end_image = (size_t)(p->end_image + 0.5);
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
