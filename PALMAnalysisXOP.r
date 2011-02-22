@@ -44,7 +44,7 @@ resource 'XOPC' (1100) {
 		XOPOp+utilOp+compilableOp,
 		
 		"EmitterSegmentation",
-		XOPOp+utilOp+compilableOp,
+		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"ConvolveImages",
 		XOPOp+utilOp+compilableOp,

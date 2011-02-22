@@ -322,6 +322,7 @@ struct EmitterSegmentationRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct EmitterSegmentationRuntimeParams EmitterSegmentationRuntimeParams;
 typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParamsPtr;
@@ -2047,7 +2048,7 @@ static int RegisterEmitterSegmentation(void) {
 	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
 }
 
 static int RegisterConvolveImages(void) {
