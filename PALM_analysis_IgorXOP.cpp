@@ -708,21 +708,6 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
 				break;
-			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
-				break;
-			case THRESHOLD_METHOD_IGOR_BIMODAL:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
-				break;
-			case THRESHOLD_METHOD_IGOR_ADAPTIVE:	// Igor's adaptive approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
-				break;
-			case THRESHOLD_METHOD_IGOR_FUZZY_1:	// Igor's first fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
-				break;
-			case THRESHOLD_METHOD_IGOR_FUZZY_2:	// Igor's second fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
-				break;
 			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 				break;
@@ -1560,21 +1545,6 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 		switch(method) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
-				break;
-			case THRESHOLD_METHOD_IGOR_ITERATIVE:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Iterative());
-				break;
-			case THRESHOLD_METHOD_IGOR_BIMODAL:	// Igor's iterative approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Bimodal());
-				break;
-			case THRESHOLD_METHOD_IGOR_ADAPTIVE:	// Igor's adaptive approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Adaptive());
-				break;
-			case THRESHOLD_METHOD_IGOR_FUZZY_1:	// Igor's first fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy1());
-				break;
-			case THRESHOLD_METHOD_IGOR_FUZZY_2:	// Igor's second fuzzy approach
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Igor_Fuzzy2());
 				break;
 			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
 				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());

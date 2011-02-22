@@ -47,68 +47,6 @@ protected:
 	double threshold;
 };
 
-#ifdef WITH_IGOR
-class ThresholdImage_Igor_Iterative : public ThresholdImage {
-	// making use of a built-in Igor operation
-public:
-	ThresholdImage_Igor_Iterative() {;}
-	~ThresholdImage_Igor_Iterative() {;}
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
-	
-protected:
-	boost::mutex threadMutex;
-};
-
-class ThresholdImage_Igor_Bimodal : public ThresholdImage {
-	// making use of a built-in Igor operation
-public:
-	ThresholdImage_Igor_Bimodal() {;}
-	~ThresholdImage_Igor_Bimodal() {;}
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
-	
-protected:
-	boost::mutex threadMutex;
-};
-
-class ThresholdImage_Igor_Adaptive : public ThresholdImage {
-	// making use of a built-in Igor operation
-public:
-	ThresholdImage_Igor_Adaptive() {;}
-	~ThresholdImage_Igor_Adaptive() {;}
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
-	
-protected:
-	boost::mutex threadMutex;
-};
-
-class ThresholdImage_Igor_Fuzzy1 : public ThresholdImage {
-	// making use of a built-in Igor operation
-public:
-	ThresholdImage_Igor_Fuzzy1() {;}
-	~ThresholdImage_Igor_Fuzzy1() {;}
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
-	
-protected:
-	boost::mutex threadMutex;
-};
-
-class ThresholdImage_Igor_Fuzzy2 : public ThresholdImage {
-	// making use of a built-in Igor operation
-public:
-	ThresholdImage_Igor_Fuzzy2() {;}
-	~ThresholdImage_Igor_Fuzzy2() {;}
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image);
-	
-protected:
-	boost::mutex threadMutex;
-};
-#endif // WITH_IGOR
-
 class ThresholdImage_Isodata : public ThresholdImage {
 public:
 	ThresholdImage_Isodata() {;}
