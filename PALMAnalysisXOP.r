@@ -31,7 +31,7 @@ resource 'XOPI' (1100) {
 
 resource 'XOPC' (1100) {
 	{
-		"AnalyzePALMImages",
+		"LocalizationAnalysis",
 		XOPOp+utilOp+compilableOp,
 		
 		"ReadCCDImages",
