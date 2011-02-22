@@ -405,6 +405,7 @@ struct LocalizationBitmapRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationBitmapRuntimeParams LocalizationBitmapRuntimeParams;
 typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsPtr;
@@ -2100,7 +2101,7 @@ static int RegisterLocalizationBitmap(void) {
 	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
 }
 
 

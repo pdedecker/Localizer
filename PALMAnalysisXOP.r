@@ -50,7 +50,7 @@ resource 'XOPC' (1100) {
 		XOPOp+utilOp+compilableOp,
 		
 		"LocalizationBitmap",
-		XOPOp+utilOp+compilableOp,
+		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"RipleyLFunctionClustering",
 		XOPOp+utilOp+compilableOp,
