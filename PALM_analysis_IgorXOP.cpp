@@ -261,9 +261,9 @@ typedef struct AnalyzeCCDImagesRuntimeParams AnalyzeCCDImagesRuntimeParams;
 typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
-// Runtime param structure for TestThreshold operation.
+// Runtime param structure for EmitterSegmentation operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
-struct TestThresholdRuntimeParams {
+struct EmitterSegmentationRuntimeParams {
 	// Flag parameters.
 	
 	// Parameters for /M flag group.
@@ -323,8 +323,8 @@ struct TestThresholdRuntimeParams {
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
-typedef struct TestThresholdRuntimeParams TestThresholdRuntimeParams;
-typedef struct TestThresholdRuntimeParams* TestThresholdRuntimeParamsPtr;
+typedef struct EmitterSegmentationRuntimeParams EmitterSegmentationRuntimeParams;
+typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ConvolveImages operation.
@@ -1390,7 +1390,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 }
 
 
-static int ExecuteTestThreshold(TestThresholdRuntimeParamsPtr p) {
+static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	size_t method;
@@ -2067,16 +2067,16 @@ static int RegisterAnalyzeCCDImages(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, 0);
 }
 
-static int RegisterTestThreshold(void) {
+static int RegisterEmitterSegmentation(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
 	const char* runtimeStrVarList;
 	
-	// NOTE: If you change this template, you must change the TestThresholdRuntimeParams structure as well.
-	cmdTemplate = "TestThreshold /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	// NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
+	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(TestThresholdRuntimeParams), (void*)ExecuteTestThreshold, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, 0);
 }
 
 static int RegisterConvolveImages(void) {
@@ -2142,7 +2142,7 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 		return result;
 	if (result = RegisterAnalyzeCCDImages())
 		return result;
-	if (result = RegisterTestThreshold())
+	if (result = RegisterEmitterSegmentation())
 		return result;
 	if (result = RegisterConvolveImages())
 		return result;

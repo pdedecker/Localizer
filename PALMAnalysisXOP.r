@@ -43,7 +43,7 @@ resource 'XOPC' (1100) {
 		"AnalyzeCCDImages",
 		XOPOp+utilOp+compilableOp,
 		
-		"TestThreshold",
+		"EmitterSegmentation",
 		XOPOp+utilOp+compilableOp,
 		
 		"ConvolveImages",
