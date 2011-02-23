@@ -9,6 +9,36 @@
 
 #include "PALM_analysis_IgorUtilities.h"
 
+int GetFileStorageType(std::string &filePath) {
+	size_t startOfExtension = filePath.rfind('.');
+	if (startOfExtension == size_t(-1)) {
+		// the filepath does not appear to contain an extension
+		throw std::runtime_error("Unable to deduce the file type");
+	}
+	
+	std::string extension = filePath.substr(startOfExtension);
+	if ((extension.length() < 3) || (extension.length() > 4)) {
+		throw std::runtime_error("Unable to deduce the file type");
+	}
+	
+	if (boost::algorithm::iequals(extension, "spe"))
+		return CAMERA_TYPE_WINSPEC;
+	if (boost::algorithm::iequals(extension, "sif"))
+		return CAMERA_TYPE_ANDOR;
+	if (boost::algorithm::iequals(extension, "his"))
+		return CAMERA_TYPE_HAMAMATSU;
+	if (boost::algorithm::iequals(extension, "pde"))
+		return CAMERA_TYPE_PDE;
+	if (boost::algorithm::iequals(extension, "tif"))
+		return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "tiff"))
+		return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "lsm"))
+		return CAMERA_TYPE_TIFF;
+	
+	// if we're still here then the extension was not recognized
+	throw std::runtime_error("Unable to deduce the file type");
+}
 
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination) {
 	size_t total_n_images = image_loader->GetNImages();

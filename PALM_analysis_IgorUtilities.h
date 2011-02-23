@@ -12,6 +12,7 @@
 
 #include <string>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 #include "XOPStandardHeaders.h"
 #include <Eigen/Eigen>
@@ -20,6 +21,12 @@
 #include "PALM_analysis_FileIO.h"
 
 class ImageLoader;
+
+/**
+ * Try to determine what the file type is given its filepath.
+ * This will work by looking at the extension.
+ */
+int GetFileStorageType(std::string &filePath);
 
 // Routines that return information on CCD files and image frames to Igor
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination);
