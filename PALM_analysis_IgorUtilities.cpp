@@ -10,15 +10,10 @@
 #include "PALM_analysis_IgorUtilities.h"
 
 void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t &cameraType) {
-	int err;
-	char cString[1024];
 	int isWavePath = 1;
 	
-	err = GetCStringFromHandle(stringHandle, cString, 1023);
-	if (err != 0)
-		throw err;
+	std::string path = ConvertHandleToString(stringHandle);
 	
-	std::string path(cString);
 	try {
 		FetchWaveUsingFullPath(path);
 	}
@@ -38,31 +33,10 @@ void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t
 	// if we're still here then it's a path to a file
 	// first we need to try to convert the path to the
 	// appropriate format, if required
-	
-	#ifdef MACIGOR
-	err = WinToMacPath(cString);
-	if (err != 0) {
-		throw err;
-	}
-	
-	char posixPATH[MAX_PATH_LEN+1];
-	
-	err = HFSToPosixPath(cString, posixPATH, 0);
-	if (err != 0) {
-		throw err;
-	}
-	path.assign(posixPATH);
-	#endif
-	#ifdef WINIGOR
-	err = MacToWinPath(cString);
-	if (err != 0) {
-		throw err;
-	}
-	path.assign(cString);
-	#endif
+	std::string convertedPath = ConvertPathToNativePath(path);
 	
 	filePath = path;
-	cameraType = GetFileStorageType(filePath);
+	cameraType = GetFileStorageType(path);
 	return;
 }
 
@@ -522,55 +496,54 @@ waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int t
 }
 
 
-int ConvertHandleToString(Handle handle, std::string& convertedString) {
+std::string ConvertHandleToString(Handle handle) {
 	int err;
+	std::string convertedString;
 	
-	// determine the type of positions being passed
 	size_t stringLength = GetHandleSize(handle);
-	boost::scoped_array<char> CStringWaveNote(new char[stringLength + 1]);
+	boost::scoped_array<char> cString(new char[stringLength + 1]);
 	
-	err = GetCStringFromHandle(handle, CStringWaveNote.get(), stringLength);
+	err = GetCStringFromHandle(handle, cString.get(), stringLength);
 	if (err != 0)
-		return err;
+		throw err;
 	
 	// save the wavenote as a std::string
-	convertedString.assign(CStringWaveNote.get());
+	convertedString.assign(cString.get());
 	
-	return 0;
+	return convertedString;
 }
 
-int ConvertHandleToFilepathString(Handle handle, std::string &output_path) {
+std::string ConvertPathToNativePath(std::string& filePath) {
 	int err;
-	char handle_char[1024];
+	std::string convertedPath;
 	
-	err = GetCStringFromHandle(handle, handle_char, 1023);
-	if (err != 0) {
-		return err;
-	}
+	boost::scoped_array<char> cString(new char[filePath.size() + 1]);
+	strncpy(cString.get(), filePath.c_str(), filePath.size());
 	
-#ifdef MACIGOR
-	err = WinToMacPath(handle_char);
+	
+	#ifdef MACIGOR
+	err = WinToMacPath(cString.get());
 	if (err != 0) {
-		return err;
+		throw err;
 	}
 	
 	char posixPATH[MAX_PATH_LEN+1];
 	
-	err = HFSToPosixPath(handle_char, posixPATH, 0);
+	err = HFSToPosixPath(cString.get(), posixPATH, 0);
 	if (err != 0) {
-		return err;
+		throw err;
 	}
-	output_path.assign(posixPATH);
-#endif
-#ifdef WINIGOR
-	err = MacToWinPath(handle_char);
+	convertedPath.assign(posixPATH);
+	#endif
+	#ifdef WINIGOR
+	err = MacToWinPath(cString.get());
 	if (err != 0) {
-		return err;
+		throw err;
 	}
-	output_path.assign(handle_char);
-#endif
+	convertedPath.assign(cString.get());
+	#endif
 	
-	return 0;
+	return convertedPath;
 	
 }
 

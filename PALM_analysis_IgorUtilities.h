@@ -54,9 +54,9 @@ waveHndl FetchWaveUsingFullPath(std::string wavePath);
 waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int type, int overwrite);
 
 // Routines to convert between handles and C strings
-int ConvertHandleToString(Handle handle, std::string& convertedString);
+std::string ConvertHandleToString(Handle handle);
 
-int ConvertHandleToFilepathString(Handle handle, std::string &output_string);
+std::string ConvertPathToNativePath(std::string& filePath);
 
 // routines to convert data from and to Igor format
 waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
