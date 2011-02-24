@@ -245,14 +245,14 @@ struct AnalyzeCCDImagesRuntimeParams {
 	double endY;
 	int RFlagParamsSet[4];
 	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int outputWaveParamsEncountered;
-	DataFolderAndName outputWaveParams;
-	int outputWaveParamsParamsSet[1];
-	
-	// Parameters for simple main group #1.
 	int input_fileEncountered;
 	Handle input_file;
 	int input_fileParamsSet[1];
@@ -1295,14 +1295,15 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		startX = endX = startY = endY = -1;	// by convention '-1' means that we take the whole image
 	}
 	
-	// Main parameters.
-	
-	if (p->outputWaveParamsEncountered) {
-		// Parameter: p->outputWaveParams
-		outputWaveParams = p->outputWaveParams;
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		outputWaveParams = p->dest;
 	} else {
-		return EXPECTED_NAME;
+		outputWaveParams.dfH = NULL;
+		strcpy(outputWaveParams.name, "AnalysisResult");
 	}
+	
+	// Main parameters.
 	
 	if (p->input_fileEncountered) {
 		// Parameter: p->input_file (test for NULL handle before using)
@@ -2013,7 +2014,7 @@ static int RegisterAnalyzeCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /R={number:startX, number:endX, number:startY, number:endY} DataFolderAndName:{outputWaveParams, real}, string:input_file";
+	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /R={number:startX, number:endX, number:startY, number:endY} /DEST=DataFolderAndName:{dest,real} string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, 0);
