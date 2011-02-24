@@ -1606,7 +1606,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 		dimensionSizes[1] = y_size;
 		dimensionSizes[2] = 0;
 		
-		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_ImageThresh"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
+		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_SegmentedImage"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
 		
 		for (long j = 0; j < y_size; j++) {
 			for (long i = 0; i < x_size; i++) {
@@ -1637,7 +1637,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 			dimensionSizes[1] = 4;	// warning: magic number
 			dimensionSizes[2] = 0;
 			
-			outputWave = MakeWaveUsingFullPath(std::string("M_locatedParticles"), dimensionSizes, NT_FP64, 1);
+			outputWave = MakeWaveUsingFullPath(std::string("M_LocatedParticles"), dimensionSizes, NT_FP64, 1);
 			
 			offset = 0;
 			for (std::list<position>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
