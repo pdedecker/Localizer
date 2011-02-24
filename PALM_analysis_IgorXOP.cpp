@@ -180,13 +180,13 @@ struct ProcessCCDImagesRuntimeParams {
 	double multiplicationFactor;
 	int CALFlagParamsSet[2];
 	
-	// Parameters for /R flag group.
-	int RFlagEncountered;
+	// Parameters for /ROI flag group.
+	int ROIFlagEncountered;
 	double startX;
 	double endX;
 	double startY;
 	double endY;
-	int RFlagParamsSet[4];
+	int ROIFlagParamsSet[4];
 	
 	// Parameters for /AVG flag group.
 	int AVGFlagEncountered;
@@ -237,13 +237,13 @@ struct AnalyzeCCDImagesRuntimeParams {
 	double method;
 	int MFlagParamsSet[1];
 	
-	// Parameters for /R flag group.
-	int RFlagEncountered;
+	// Parameters for /ROI flag group.
+	int ROIFlagEncountered;
 	double startX;
 	double endX;
 	double startY;
 	double endY;
-	int RFlagParamsSet[4];
+	int ROIFlagParamsSet[4];
 	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
@@ -1051,7 +1051,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		overwrite = 1;
 	}
 	
-	if (p->RFlagEncountered) {
+	if (p->ROIFlagEncountered) {
 		// Parameter: p->startX
 		// Parameter: p->endX
 		// Parameter: p->startY
@@ -1255,7 +1255,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->RFlagEncountered) {
+	if (p->ROIFlagEncountered) {
 		// Parameter: p->startX
 		// Parameter: p->endX
 		// Parameter: p->startY
@@ -2002,7 +2002,7 @@ static int RegisterProcessCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /R={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
@@ -2014,7 +2014,7 @@ static int RegisterAnalyzeCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /R={number:startX, number:endX, number:startY, number:endY} /DEST=DataFolderAndName:{dest,real} string:input_file";
+	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /DEST=DataFolderAndName:{dest,real} string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, 0);
