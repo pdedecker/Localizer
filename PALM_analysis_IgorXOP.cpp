@@ -664,7 +664,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 				}
 			}
 			
-			image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
+			image_loader = GetImageLoader(camera_type, data_file_path);
 			
 			analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
 			analysisOptionsStream << "CAMERA TYPE:" << camera_type << ';';
@@ -940,7 +940,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	try {
 		
 		// if we are here then everything should be okay
-		image_loader = get_image_loader_for_camera_type(camera_type, data_file_path);
+		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
 			err = load_partial_ccd_image(image_loader.get(), start_image, end_image, dataFolderAndName);
@@ -1116,7 +1116,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	
 	
 	try {
-		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
+		image_loader = GetImageLoader(camera_type, input_file_path);
 		
 		// set up compression for those files that use it
 		switch (outputType) {
@@ -1336,7 +1336,7 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	}
 	
 	try {
-		image_loader = get_image_loader_for_camera_type(camera_type, input_file_path);
+		image_loader = GetImageLoader(camera_type, input_file_path);
 		
 		switch (method) {
 			case ANALYZING_SUMMEDTRACE:
@@ -2158,40 +2158,4 @@ HOST_IMPORT int main(IORecHandle ioRecHandle) {
 }
 
 class INCOMPATIBLE_WAVE_FORMAT {};
-
-
-boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, std::string data_file_path) {
-	
-	boost::shared_ptr<ImageLoader> image_loader;
-	
-	switch (camera_type) {
-		case CAMERA_TYPE_WINSPEC:	// spe files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
-			break;
-		case CAMERA_TYPE_ANDOR:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
-			break;
-		case CAMERA_TYPE_HAMAMATSU:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
-			break;
-		case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
-			break;
-		case CAMERA_TYPE_PDE:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(data_file_path));
-			break;
-		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
-			break;
-		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
-			break;
-		default:
-			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
-			break;
-	}
-	
-	return image_loader;
-	
-}
 
