@@ -132,14 +132,14 @@ struct ReadCCDImagesRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int start_imageEncountered;
-	double start_image;
-	int start_imageParamsSet[1];
+	int firstImageEncountered;
+	double firstImage;
+	int firstImageParamsSet[1];
 	
 	// Parameters for simple main group #1.
-	int end_imageEncountered;
-	double end_image;
-	int end_imageParamsSet[1];
+	int nImagesToReadEncountered;
+	double nImagesToRead;
+	int nImagesToReadParamsSet[1];
 	
 	// Parameters for simple main group #2.
 	int experiment_fileEncountered;
@@ -845,7 +845,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	int err = 0;
 	int returnErrors = 1;
 	size_t camera_type;
-	size_t start_image, end_image;
+	size_t firstImage, nImagesToRead;
 	std::string data_file_path;
 	int header_only = 0;
 	DataFolderAndName dataFolderAndName;
@@ -888,23 +888,25 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	
 	// Main parameters.
 	
-	if (p->start_imageEncountered) {
-		// Parameter: p->start_image
-		if (p->start_image < 0) {
-			start_image = 0;
+	if (p->firstImageEncountered) {
+		// Parameter: p->firstImage
+		if (p->firstImage < 0) {
+			return kBadValueForFirstImage;
 		} else {
-			start_image = (size_t)(p->start_image + 0.5);
+			firstImage = (size_t)(p->start_image + 0.5);
 		}
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
 	
-	if (p->end_imageEncountered) {
-		// Parameter: p->end_image
-		if (p->end_image < 0) {
-			end_image = (size_t)-1;
+	if (p->nImagesToReadEncountered) {
+		// Parameter: p->nImagesToRead
+		if (p->nImagesToRead < 0) {
+			nImagesToRead = (size_t)-1;
 		} else {
-			end_image = (size_t)(p->end_image + 0.5);
+			nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
+			if (nImagesToRead == 0)
+				return kBadMultipleImageCount;
 		}
 	} else {
 		return TOO_FEW_PARAMETERS;
@@ -1976,7 +1978,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z /DEST=DataFolderAndName:{dest,real} number:start_image, number:end_image, string:experiment_file";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z /DEST=DataFolderAndName:{dest,real} number:firstImage, number:nImagesToRead, string:experiment_file";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);

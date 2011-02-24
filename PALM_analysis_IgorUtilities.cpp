@@ -45,7 +45,7 @@ int GetFileStorageType(std::string &filePath) {
 		throw std::runtime_error("Unable to deduce the file type");
 	}
 	
-	std::string extension = filePath.substr(startOfExtension);
+	std::string extension = filePath.substr(startOfExtension + 1);
 	if ((extension.length() < 3) || (extension.length() > 4)) {
 		throw std::runtime_error("Unable to deduce the file type");
 	}
@@ -117,31 +117,36 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 	
 }
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination) {
-	size_t total_n_images = image_loader->GetNImages();
-	size_t n_images_to_load;
+int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, DataFolderAndName destination) {
+	size_t nImages = image_loader->GetNImages();
+	size_t maxNImagesToLoad, nImagesToLoad;
 	size_t x_size, y_size;
 	int storage_type;
 	
 	int result;
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
-	if (n_start > n_end)
-		throw END_SHOULD_BE_LARGER_THAN_START(std::string("When loading part of a CCD file the start index was larger than the end index"));
+	if (firstImage >= nImages) {
+		throw std::runtime_error("the requested starting image is larger than the number of images available in the file");
+	}
 	
 	// how many images should we load?
-	if (n_end <= total_n_images) {
-		n_images_to_load = n_end - n_start + 1;
+	maxNImagesToLoad = nImages - firstImage;
+	if (nImagesRequested == (size_t)-1) {
+		nImagesToLoad = maxNImagesToLoad;
 	} else {
-		n_images_to_load = total_n_images - n_start;
-		n_end = total_n_images - 1;
+		if (nImagesRequested > maxNImagesToLoad) {
+			nImages = maxNImagesToLoad;
+		} else {
+			nImages = nImagesRequested
+		}
 	}
 	
 	x_size = image_loader->getXSize();
 	y_size = image_loader->getYSize();
 	storage_type = image_loader->getStorageType();
 	
-	result = SetOperationNumVar("V_numberOfImages", total_n_images);
+	result = SetOperationNumVar("V_numberOfImages", nImages);
 	if (result != 0)
 		throw result;
 	result = SetOperationNumVar("V_xSize", x_size);
@@ -150,10 +155,10 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	result = SetOperationNumVar("V_ySize", y_size);
 	if (result != 0)
 		throw result;
-	result = SetOperationNumVar("V_firstImageLoaded", n_start);
+	result = SetOperationNumVar("V_firstImageLoaded", firstImage);
 	if (result != 0)
 		throw result;
-	result = SetOperationNumVar("V_lastImageLoaded", n_end);
+	result = SetOperationNumVar("V_lastImageLoaded", firstImage + nImagesToLoad - 1);
 	if (result != 0)
 		throw result;
 	
