@@ -268,14 +268,24 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 	double value[2];
 	int result;
 	
+	int imageXSize = image_loader->getXSize();
+	int imageYSize = image_loader->getYSize();
+	int xSize, ySize;
+	
 	// start by calculating the summed intensity
 	waveHndl outputWave = construct_summed_intensity_trace(image_loader, outputWaveParams, startX, startY, endX, endY);
 	
 	MDGetWaveDimensions(outputWave, &numDimensions, dimensionSizes);
 	
+	if ((startX < 0) || (startY < 0) || (endX < 0) || (endY < 0)) {
+		xSize = imageXSize;
+		ySize = imageYSize;
+	} else {
+		xSize = endX - startX + 1;
+		ySize = endY - startY + 1;
+	}
+	
 	size_t nFrames = dimensionSizes[0];
-	int xSize = endX - startX + 1;
-	int ySize = endY - startY + 1;
 	double nPixels = xSize * ySize;
 	
 	for (size_t i = 0; i < nFrames; ++i) {
