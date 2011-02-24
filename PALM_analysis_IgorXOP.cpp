@@ -505,10 +505,13 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		camera_type = (size_t)(p->camera_type + 0.5);
-		analysisOptionsStream << "THRESHOLD METHOD:" << camera_type << ';';
+		if (p->camera_type < 0) {
+			camera_type = (size_t)-1;
+		} else {
+			camera_type = (size_t)(p->camera_type + 0.5);
+		}
 	} else {
-		return TOO_FEW_PARAMETERS;
+		camera_type = (size_t)-1;
 	}
 	
 	if (p->GFlagEncountered) {
@@ -652,17 +655,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 				return EXPECTED_STRING_EXPR;
 			}
 			
-			if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
-				err = ConvertHandleToFilepathString(p->experiment_file, data_file_path);
-				if (err != 0) {
-					return err;
-				}
-			} else {	// if we are loading data from an Igor wave then there is no need to convert
-				err = ConvertHandleToString(p->experiment_file, data_file_path);
-				if (err != 0) {
-					return err;
-				}
-			}
+			data_file_path = ConvertHandleToString(p->experiment_file);
 			
 			image_loader = GetImageLoader(camera_type, data_file_path);
 			
@@ -851,7 +844,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int returnErrors = 1;
-	int camera_type;
+	size_t camera_type;
 	size_t start_image, end_image;
 	std::string data_file_path;
 	int header_only = 0;
@@ -863,10 +856,13 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		camera_type = (int)(p->camera_type + 0.5);
-		
+		if (p->camera_type < 0) {
+			camera_type = (size_t)-1;
+		} else {
+			camera_type = (size_t)(p->camera_type + 0.5);
+		}
 	} else {
-		return TOO_FEW_PARAMETERS;
+		camera_type = (size_t)-1;
 	}
 	
 	if (p->HFlagEncountered) {
@@ -919,20 +915,6 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		if (p->experiment_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		
-		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
-			err = ConvertHandleToFilepathString(p->experiment_file, data_file_path);
-			if (err != 0) {
-				return err;
-			}
-		} else {	// if we are loading data from an Igor wave then there is no need to convert
-			err = ConvertHandleToString(p->experiment_file, data_file_path);
-			if (err != 0) {
-				return err;
-			}
-		}
-		
-		
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -940,6 +922,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	try {
 		
 		// if we are here then everything should be okay
+		data_file_path = ConvertHandleToString(p->experiment_file);
 		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
@@ -981,7 +964,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	int camera_type;
+	size_t camera_type;
 	int method;
 	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
 	int nFramesAveraging;
@@ -1001,9 +984,13 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		camera_type = (int)(p->camera_type + 0.5);
+		if (p->camera_type < 0) {
+			camera_type = (size_t)-1;
+		} else {
+			camera_type = (size_t)(p->camera_type + 0.5);
+		}
 	} else {
-		return TOO_FEW_PARAMETERS;
+		camera_type = (size_t)-1;
 	}
 	
 	if (p->MFlagEncountered) {
@@ -1082,17 +1069,6 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->input_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
-			err = ConvertHandleToFilepathString(p->input_file, input_file_path);
-			if (err != 0) {
-				return err;
-			}
-		} else {	// if we are loading data from an Igor wave then there is no need to convert
-			err = ConvertHandleToString(p->input_file, input_file_path);
-			if (err != 0) {
-				return err;
-			}
-		}
 	} else {
 		return EXPECTED_STRING_EXPR;
 	}
@@ -1102,21 +1078,18 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (p->output_file == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
-		if (outputType == IMAGE_OUTPUT_TYPE_IGOR) {
-			err = ConvertHandleToString(p->output_file, output_file_path);
-		} else {
-			err = ConvertHandleToFilepathString(p->output_file, output_file_path);
-		}
-		if (err != 0) {
-			return err;
-		}
 	} else {
 		return EXPECTED_STRING_EXPR;
 	}
 	
 	
 	try {
+		input_file_path = ConvertHandleToString(p->input_file);
 		image_loader = GetImageLoader(camera_type, input_file_path);
+		
+		output_file_path = ConvertHandleToString(p->output_file);
+		if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
+			output_file_path = ConvertPathToNativePath(output_file_path);
 		
 		// set up compression for those files that use it
 		switch (outputType) {
@@ -1238,7 +1211,7 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	int camera_type;
+	size_t camera_type;
 	int method;
 	
 	DataFolderAndName outputWaveParams;
@@ -1252,9 +1225,13 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	
 	if (p->YFlagEncountered) {
 		// Parameter: p->camera_type
-		camera_type = (int)(p->camera_type + 0.5);
+		if (p->camera_type < 0) {
+			camera_type = (size_t)-1;
+		} else {
+			camera_type = (size_t)(p->camera_type + 0.5);
+		}
 	} else {
-		return TOO_FEW_PARAMETERS;
+		camera_type = (size_t)-1;
 	}
 	
 	
@@ -1319,23 +1296,12 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		if (p->input_fileEncountered == 0) {
 			return EXPECTED_STRING_EXPR;
 		}
-		if (camera_type != CAMERA_TYPE_IGOR_WAVE) {
-			err = ConvertHandleToFilepathString(p->input_file, input_file_path);
-			if (err != 0) {
-				return err;
-			}
-		} else {	// if we are loading data from an Igor wave then there is no need to convert
-			err = ConvertHandleToString(p->input_file, input_file_path);
-			if (err != 0) {
-				return err;
-			}
-		}
-		
 	} else {
 		return EXPECTED_STRING_EXPR;
 	}
 	
 	try {
+		input_file_path = ConvertHandleToString(p->input_file);
 		image_loader = GetImageLoader(camera_type, input_file_path);
 		
 		switch (method) {

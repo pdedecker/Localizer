@@ -79,7 +79,11 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 		GetFilePathAndCameraType(data_file_path, convertedFilePath, estimatedCameraType);
 	} else {
 		estimatedCameraType = camera_type;
-		convertedFilePath = data_file_path;
+		if (estimatedCameraType != CAMERA_TYPE_IGOR_WAVE) {
+			convertedFilePath = ConvertPathToNativePath(data_file_path);
+		} else {
+			convertedFilePath = data_file_path;
+		}
 	}
 	
 	switch (estimatedCameraType) {
@@ -123,7 +127,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_e
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
 	if (n_start > n_end)
-		throw END_SHOULD_BE_LARGER_THAN_START(std::string("When loading part of a CCD file a the starting index was larger than the ending index"));
+		throw END_SHOULD_BE_LARGER_THAN_START(std::string("When loading part of a CCD file the start index was larger than the end index"));
 	
 	// how many images should we load?
 	if (n_end <= total_n_images) {
@@ -521,12 +525,14 @@ std::string ConvertHandleToString(Handle handle) {
 	return convertedString;
 }
 
-std::string ConvertPathToNativePath(std::string& filePath) {
+std::string ConvertPathToNativePath(std::string filePath) {
 	int err;
 	std::string convertedPath;
 	
 	boost::scoped_array<char> cString(new char[filePath.size() + 1]);
-	strncpy(cString.get(), filePath.c_str(), filePath.size());
+	memcpy(cString.get(), filePath.c_str(), filePath.size() * sizeof(char));
+	cString[filePath.size()] = '\0';
+	
 	
 	
 	#ifdef MACIGOR
