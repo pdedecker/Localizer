@@ -136,9 +136,9 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 		nImagesToLoad = maxNImagesToLoad;
 	} else {
 		if (nImagesRequested > maxNImagesToLoad) {
-			nImages = maxNImagesToLoad;
+			nImagesToLoad = maxNImagesToLoad;
 		} else {
-			nImages = nImagesRequested
+			nImagesToLoad = nImagesRequested;
 		}
 	}
 	
@@ -163,10 +163,10 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 		throw result;
 	
 	// allocate the object that will write the data to Igor
-	IgorImageOutputWriter waveWriter(destination, n_images_to_load, 1, storage_type);
+	IgorImageOutputWriter waveWriter(destination, nImagesToLoad, 1, storage_type);
 	
 	// load the data and write it to Igor
-	for (size_t i = n_start; i <= n_end; i++) {
+	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
 		current_image = image_loader->readImage(i);
 		waveWriter.write_image(current_image);
 	}

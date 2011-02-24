@@ -120,6 +120,16 @@ struct ReadCCDImagesRuntimeParams {
 	int HFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double firstImage;
+	int SFlagParamsSet[1];
+	
+	// Parameters for /C flag group.
+	int CFlagEncountered;
+	double nImagesToRead;
+	int CFlagParamsSet[1];
+	
 	// Parameters for /Z flag group.
 	int ZFlagEncountered;
 	// There are no fields for this group because it has no parameters.
@@ -132,19 +142,9 @@ struct ReadCCDImagesRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int firstImageEncountered;
-	double firstImage;
-	int firstImageParamsSet[1];
-	
-	// Parameters for simple main group #1.
-	int nImagesToReadEncountered;
-	double nImagesToRead;
-	int nImagesToReadParamsSet[1];
-	
-	// Parameters for simple main group #2.
-	int experiment_fileEncountered;
-	Handle experiment_file;
-	int experiment_fileParamsSet[1];
+	int filePathEncountered;
+	Handle filePath;
+	int filePathParamsSet[1];
 	
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
@@ -871,6 +871,30 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		header_only = 0;
 	}
 	
+	if (p->SFlagEncountered) {
+		// Parameter: p->firstImage
+		if (p->firstImage < 0) {
+			return kBadValueForFirstImage;
+		} else {
+			firstImage = (size_t)(p->firstImage + 0.5);
+		}
+	} else {
+		firstImage = 0;
+	}
+	
+	if (p->CFlagEncountered) {
+		// Parameter: p->nImagesToRead
+		if (p->nImagesToRead < 0) {
+			nImagesToRead = (size_t)-1;
+		} else {
+			nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
+			if (nImagesToRead == 0)
+				return kBadMultipleImageCount;
+		}
+	} else {
+		nImagesToRead = (size_t)-1;
+	}
+	
 	if (p->ZFlagEncountered) {
 		returnErrors = 0;
 	} else {
@@ -888,33 +912,9 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	
 	// Main parameters.
 	
-	if (p->firstImageEncountered) {
-		// Parameter: p->firstImage
-		if (p->firstImage < 0) {
-			return kBadValueForFirstImage;
-		} else {
-			firstImage = (size_t)(p->start_image + 0.5);
-		}
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->nImagesToReadEncountered) {
-		// Parameter: p->nImagesToRead
-		if (p->nImagesToRead < 0) {
-			nImagesToRead = (size_t)-1;
-		} else {
-			nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
-			if (nImagesToRead == 0)
-				return kBadMultipleImageCount;
-		}
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->experiment_fileEncountered) {
-		// Parameter: p->experiment_file (test for NULL handle before using)
-		if (p->experiment_file == NULL) {
+	if (p->filePathEncountered) {
+		// Parameter: p->filePath (test for NULL handle before using)
+		if (p->filePath == NULL) {
 			return EXPECTED_STRING_EXPR;
 		}
 	} else {
@@ -924,11 +924,11 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	try {
 		
 		// if we are here then everything should be okay
-		data_file_path = ConvertHandleToString(p->experiment_file);
+		data_file_path = ConvertHandleToString(p->filePath);
 		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
-			err = load_partial_ccd_image(image_loader.get(), start_image, end_image, dataFolderAndName);
+			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, dataFolderAndName);
 		} else {
 			err = parse_ccd_headers(image_loader.get());
 		}
@@ -1978,7 +1978,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /Z /DEST=DataFolderAndName:{dest,real} number:firstImage, number:nImagesToRead, string:experiment_file";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /DEST=DataFolderAndName:{dest,real} string:filePath";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
