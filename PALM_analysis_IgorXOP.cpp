@@ -134,6 +134,10 @@ struct ReadCCDImagesRuntimeParams {
 	int ZFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
@@ -153,7 +157,7 @@ struct ReadCCDImagesRuntimeParams {
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()	// All structures passed to Igor are two-byte aligned..
 
 // Runtime param structure for ProcessCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -844,6 +848,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
 	int returnErrors = 1;
+	int overwrite = 0;
 	size_t camera_type;
 	size_t firstImage, nImagesToRead;
 	std::string data_file_path;
@@ -901,6 +906,12 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		returnErrors = 1;
 	}
 	
+	if (p->OFlagEncountered) {
+		overwrite = 1;
+	} else {
+		overwrite = 0;
+	}
+	
 	if (p->DESTFlagEncountered) {
 		// Parameter: p->dest
 		dataFolderAndName = p->dest;
@@ -928,7 +939,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
-			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, dataFolderAndName);
+			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName);
 		} else {
 			err = parse_ccd_headers(image_loader.get());
 		}
@@ -1978,7 +1989,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /DEST=DataFolderAndName:{dest,real} string:filePath";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /DEST=DataFolderAndName:{dest,real} string:filePath";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);

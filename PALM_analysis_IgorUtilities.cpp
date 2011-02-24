@@ -117,7 +117,7 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 	
 }
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, DataFolderAndName destination) {
+int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination) {
 	size_t nImages = image_loader->GetNImages();
 	size_t maxNImagesToLoad, nImagesToLoad;
 	size_t x_size, y_size;
@@ -163,7 +163,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 		throw result;
 	
 	// allocate the object that will write the data to Igor
-	IgorImageOutputWriter waveWriter(destination, nImagesToLoad, 1, storage_type);
+	IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storage_type);
 	
 	// load the data and write it to Igor
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
