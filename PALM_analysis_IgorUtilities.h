@@ -30,11 +30,11 @@ class ImageLoader;
  * the string as a path to a wave. If that wave doesn't exist then assume it's a
  * file path.
  */
-void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t &cameraType);
+void GetFilePathAndCameraType(std::string& inputFilePath, std::string &filePath, size_t &cameraType);
 
 int GetFileStorageType(std::string &filePath);
 
-boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string data_file_path);
+boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path);
 
 // Routines that return information on CCD files and image frames to Igor
 int load_partial_ccd_image(ImageLoader *image_loader, size_t n_start, size_t n_end, DataFolderAndName destination);

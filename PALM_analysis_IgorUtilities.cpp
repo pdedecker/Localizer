@@ -9,13 +9,11 @@
 
 #include "PALM_analysis_IgorUtilities.h"
 
-void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t &cameraType) {
+void GetFilePathAndCameraType(std::string &inputFilePath, std::string &filePath, size_t &cameraType) {
 	int isWavePath = 1;
 	
-	std::string path = ConvertHandleToString(stringHandle);
-	
 	try {
-		FetchWaveUsingFullPath(path);
+		FetchWaveUsingFullPath(inputFilePath);
 	}
 	// if the wave pointed to by the path does not the exist
 	// (as would be the case if it was a file path)
@@ -25,7 +23,7 @@ void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t
 	}
 	
 	if (isWavePath == 1) {
-		filePath = path;
+		filePath = inputFilePath;
 		cameraType = CAMERA_TYPE_IGOR_WAVE;
 		return;
 	}
@@ -33,10 +31,10 @@ void GetFilePathAndCameraType(Handle stringHandle, std::string &filePath, size_t
 	// if we're still here then it's a path to a file
 	// first we need to try to convert the path to the
 	// appropriate format, if required
-	std::string convertedPath = ConvertPathToNativePath(path);
+	std::string convertedPath = ConvertPathToNativePath(inputFilePath);
 	
-	filePath = path;
-	cameraType = GetFileStorageType(path);
+	filePath = convertedPath;
+	cameraType = GetFileStorageType(filePath);
 	return;
 }
 
@@ -71,30 +69,40 @@ int GetFileStorageType(std::string &filePath) {
 	throw std::runtime_error("Unable to deduce the file type");
 }
 
-boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string data_file_path) {
+boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path) {
 	boost::shared_ptr<ImageLoader> image_loader;
+	size_t estimatedCameraType;
+	std::string convertedFilePath;
 	
-	switch (camera_type) {
+	// the camera type might be unknown
+	if (camera_type == (size_t)-1) {
+		GetFilePathAndCameraType(data_file_path, convertedFilePath, estimatedCameraType);
+	} else {
+		estimatedCameraType = camera_type;
+		convertedFilePath = data_file_path;
+	}
+	
+	switch (estimatedCameraType) {
 		case CAMERA_TYPE_WINSPEC:	// spe files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
 			break;
 		case CAMERA_TYPE_ANDOR:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
 			break;
 		case CAMERA_TYPE_HAMAMATSU:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
 			break;
 		case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
 			break;
 		case CAMERA_TYPE_PDE:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
 			break;
 		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
 			break;
 		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(data_file_path));
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
 			break;
 		default:
 			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
