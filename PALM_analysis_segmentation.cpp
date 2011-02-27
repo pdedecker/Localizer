@@ -302,7 +302,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	boost::shared_ptr<Eigen::MatrixXd> image_Gaussian_convolved;
 	boost::shared_ptr<Eigen::MatrixXd> hypothesis_test;
 	
-	double current_value;
 	double double_window_pixels = (double)this->windowSize * (double)this->windowSize;
 	size_t half_window_size = this->windowSize / 2;
 	int imageNeedsResizing = 0;
@@ -394,12 +393,14 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	hypothesis_test = averages;
 	(*hypothesis_test) = ((*image_Gaussian_convolved).cwise().square()).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
 	
+	// calculate the threshold value that will serve to accept or reject the presence of an emitter
+	// details are in the GLRTSpeedup.tex file in the project folder
+	double GLRTThreshold = 1.0 - exp(- PFA / double_window_pixels);
+	
 	// calculate the image that will determine whether to accept or reject the null hypothesis
 	for (size_t l = half_window_size + 1; l < ySize - half_window_size; l++) {
 		for (size_t k = half_window_size + 1; k < xSize - half_window_size; k++) {
-			current_value = 1 - (*hypothesis_test)(k, l);
-			if (current_value > 0.0) {
-				if (- double_window_pixels * log(current_value) > PFA)
+			if (((*hypothesis_test)(k, l) < 1.0) && ((*hypothesis_test)(k, l) > GLRTThreshold)) {
 					(*threshold_image)(k, l) = 255;
 			}
 		}
