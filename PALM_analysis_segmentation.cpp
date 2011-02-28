@@ -886,3 +886,25 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> im
 	
 	return hist;
 }
+
+/**
+ * A global instance of MatrixRecycler to be used in the
+ * segmentation
+ */
+boost::shared_ptr<MatrixRecycler> segmentationMatrixRecycler(new MatrixRecycler);
+
+/**
+ * A function that will handle allocation of memory from segmentationMatrixRecycler
+ */
+Eigen::MatrixXd* GetSegmentationMatrix(size_t nRows, size_t nCols) {
+	return segmentationMatrixRecycler->getMatrix(nRows, nCols);
+}
+
+/**
+ * A function that will handle freeing of memory from segmentationMatrixRecycler
+ */
+void FreeSegmentationMatrix(Eigen::MatrixXd* matrixToFree) {
+	segmentationMatrixRecycler->freeMatrix(matrixToFree);
+}
+
+

@@ -16,6 +16,7 @@
 #include "boost/thread/shared_mutex.hpp"
 #include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
+#include "PALM_analysis_MatrixRecycler.h"
 #include <fftw3.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>
@@ -205,6 +206,16 @@ public:
 };
 
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> image, size_t number_of_bins);
+
+/**
+ * A function that will handle allocation of memory from segmentationMatrixRecycler
+ */
+Eigen::MatrixXd* GetSegmentationMatrix(size_t nRows, size_t nCols);
+
+/**
+ * A function that will handle freeing of memory from segmentationMatrixRecycler
+ */
+void FreeSegmentationMatrix(Eigen::MatrixXd* matrixToFree);
 
 #endif
 

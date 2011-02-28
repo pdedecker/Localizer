@@ -12,6 +12,7 @@
 #include <Eigen/Eigen>
 
 class MatrixRecycler {
+public:
 	MatrixRecycler() {;}
 	~MatrixRecycler();
 	
