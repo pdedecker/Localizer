@@ -324,7 +324,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	}
 	
 	if (imageNeedsResizing == 1) {
-		boost::shared_ptr<Eigen::MatrixXd> reducedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
+		boost::shared_ptr<Eigen::MatrixXd> reducedImage(GetSegmentationMatrix((int)xSize, (int)ySize), FreeSegmentationMatrix);
 		for (size_t j = 0; j < ySize; ++j) {
 			for (size_t i = 0; i < xSize; ++i) {
 				(*reducedImage)(i,j) = (*image)(i,j);
@@ -333,7 +333,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		image = reducedImage;	// modify the smart_ptr
 	}
 	
-	image_squared = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	image_squared = boost::shared_ptr<Eigen::MatrixXd>(GetSegmentationMatrix((int)xSize, (int)ySize), FreeSegmentationMatrix);
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -642,7 +642,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	if ((kernelXSize > 20) || (kernelYSize > 20))
 		throw std::runtime_error("Tried to use a large kernel in ConvolveMatrixWithSmallKernel");
 	
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)imageXSize, (int)imageYSize));
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetSegmentationMatrix((int)imageXSize, (int)imageYSize), FreeSegmentationMatrix);
 	
 	size_t halfKernelXSize = kernelXSize / 2;
 	size_t halfKernelYSize = kernelYSize / 2;
@@ -757,8 +757,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	}
 	
 	// calculate an accumulated image
-	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(GetSegmentationMatrix((int)xSize, (int)ySize), FreeSegmentationMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetSegmentationMatrix((int)xSize, (int)ySize), FreeSegmentationMatrix);
 	
 	// populate the first column of the matrix
 	memcpy(accumulatedImage->data(), image->data(), xSize * sizeof(double));
@@ -819,7 +819,7 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> image(GetSegmentationMatrix((int)xSize, (int)ySize), FreeSegmentationMatrix);
 	
 	double normalization_factor = (double)(xSize * ySize);
 	fftw_plan reversePlan;
