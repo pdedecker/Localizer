@@ -52,6 +52,14 @@ void MatrixRecycler::freeMatrix(Eigen::MatrixXd *matrixToFree) {
 	// remove it from the used list
 	// and copy it to the unused one
 	// but only if it can be found in the list!
+	
+	// first check to see how many unused matrices are available
+	// if there are too many then delete the last one
+	if (this->unusedMatrixList.size() >= kMaxUnusedMatrices) {
+		delete this->unusedMatrixList.back();
+		this->unusedMatrixList.pop_back();
+	}
+	
 	for (std::list<Eigen::MatrixXd*>::iterator it = this->usedMatrixList.begin(); it != this->usedMatrixList.end(); ++it) {
 		if ((*it) == matrixToFree) {
 			this->unusedMatrixList.push_front(*it);

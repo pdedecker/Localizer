@@ -11,6 +11,8 @@
 #include "boost/thread.hpp"
 #include <Eigen/Eigen>
 
+const size_t kMaxUnusedMatrices = 20;
+
 class MatrixRecycler {
 public:
 	MatrixRecycler() {;}
