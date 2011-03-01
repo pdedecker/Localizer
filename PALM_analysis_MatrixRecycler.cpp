@@ -64,3 +64,23 @@ void MatrixRecycler::freeMatrix(Eigen::MatrixXd *matrixToFree) {
 	// this is an error
 	throw std::runtime_error("no matrix found in freeMatrix()");
 }
+
+/**
+ * A global instance of MatrixRecycler to be used in the
+ * segmentation
+ */
+boost::shared_ptr<MatrixRecycler> globalMatrixRecycler(new MatrixRecycler);
+
+/**
+ * A function that will handle allocation of memory from globalMatrixRecycler
+ */
+Eigen::MatrixXd* GetRecycledMatrix(size_t nRows, size_t nCols) {
+	return globalMatrixRecycler->getMatrix(nRows, nCols);
+}
+
+/**
+ * A function that will handle freeing of memory from globalMatrixRecycler
+ */
+void FreeRecycledMatrix(Eigen::MatrixXd* matrixToFree) {
+	globalMatrixRecycler->freeMatrix(matrixToFree);
+}

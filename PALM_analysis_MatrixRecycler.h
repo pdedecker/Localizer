@@ -25,3 +25,13 @@ protected:
 	
 	boost::mutex recyclingMutex;
 };
+
+/**
+ * A function that will handle allocation of memory from globalMatrixRecycler
+ */
+Eigen::MatrixXd* GetRecycledMatrix(size_t nRows, size_t nCols);
+
+/**
+ * A function that will handle freeing of memory from globalMatrixRecycler
+ */
+void FreeRecycledMatrix(Eigen::MatrixXd* matrixToFree);

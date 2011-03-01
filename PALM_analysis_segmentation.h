@@ -207,15 +207,5 @@ public:
 
 gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> image, size_t number_of_bins);
 
-/**
- * A function that will handle allocation of memory from segmentationMatrixRecycler
- */
-Eigen::MatrixXd* GetSegmentationMatrix(size_t nRows, size_t nCols);
-
-/**
- * A function that will handle freeing of memory from segmentationMatrixRecycler
- */
-void FreeSegmentationMatrix(Eigen::MatrixXd* matrixToFree);
-
 #endif
 
