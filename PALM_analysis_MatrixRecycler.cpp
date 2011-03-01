@@ -17,7 +17,7 @@ MatrixRecycler::~MatrixRecycler() {
 		throw std::runtime_error("MatrixRecycler still has memory reported in use");
 	
 	// delete all entries in the unusedMatrixList
-	for (std::list<Eigen::MatrixXd*>::iterator it = this->usedMatrixList.begin(); it != this->usedMatrixList.end(); ++it) {
+	for (std::list<Eigen::MatrixXd*>::iterator it = this->unusedMatrixList.begin(); it != this->unusedMatrixList.end(); ++it) {
 		delete (*it);
 	}
 }
@@ -50,7 +50,7 @@ void MatrixRecycler::freeMatrix(Eigen::MatrixXd *matrixToFree) {
 	
 	// matrixToFree is not required anymore for now
 	// remove it from the used list
-	// and copy it to the unused one
+	// and move it to the unused one
 	// but only if it can be found in the list!
 	
 	// first check to see how many unused matrices are available
