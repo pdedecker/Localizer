@@ -1140,9 +1140,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			float* floatPtr = (float*)startOfWaveData;
 			floatPtr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *floatPtr;
-				++imagePtr;
-				++floatPtr;
+				imagePtr[i] = floatPtr[i];
 			}
 			break;
 		}
@@ -1158,9 +1156,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			int8_t* int8Ptr = (int8_t*)startOfWaveData;
 			int8Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *int8Ptr;
-				++imagePtr;
-				++int8Ptr;
+				imagePtr[i] = int8Ptr[i];
 			}
 			break;
 		}
@@ -1169,9 +1165,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			int16_t* int16Ptr = (int16_t*)startOfWaveData;
 			int16Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *int16Ptr;
-				++imagePtr;
-				++int16Ptr;
+				imagePtr[i] = int16Ptr[i];
 			}
 			break;
 		}
@@ -1180,9 +1174,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			int32_t* int32Ptr = (int32_t*)startOfWaveData;
 			int32Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *int32Ptr;
-				++imagePtr;
-				++int32Ptr;
+				imagePtr[i] = int32Ptr[i];
 			}
 			break;
 		}
@@ -1191,9 +1183,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			uint8_t* uint8Ptr = (uint8_t*)startOfWaveData;
 			uint8Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *uint8Ptr;
-				++imagePtr;
-				++uint8Ptr;
+				imagePtr[i] = uint8Ptr[i];
 			}
 			break;
 		}
@@ -1202,9 +1192,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			uint16_t* uint16Ptr = (uint16_t*)startOfWaveData;
 			uint16Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *uint16Ptr;
-				++imagePtr;
-				++uint16Ptr;
+				imagePtr[i] = uint16Ptr[i];
 			}
 			break;
 		}
@@ -1213,9 +1201,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 			uint32_t* uint32Ptr = (uint32_t*)startOfWaveData;
 			uint32Ptr += nPixels * index;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*imagePtr = *uint32Ptr;
-				++imagePtr;
-				++uint32Ptr;
+				imagePtr[i] = uint32Ptr[i];
 			}
 			break;
 		}
@@ -1761,9 +1747,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			int8_t* int8Ptr = (int8_t*)waveDataPtr;
 			int8Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*int8Ptr = *imagePtr;
-				++int8Ptr;
-				++imagePtr;
+				int8Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1772,9 +1756,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			int16_t* int16Ptr = (int16_t*)waveDataPtr;
 			int16Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*int16Ptr = *imagePtr;
-				++int16Ptr;
-				++imagePtr;
+				int16Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1783,9 +1765,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			int32_t* int32Ptr = (int32_t*)waveDataPtr;
 			int32Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*int32Ptr = *imagePtr;
-				++int32Ptr;
-				++imagePtr;
+				int32Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1794,9 +1774,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			uint8_t* uint8Ptr = (uint8_t*)waveDataPtr;
 			uint8Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*uint8Ptr = *imagePtr;
-				++uint8Ptr;
-				++imagePtr;
+				uint8Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1805,9 +1783,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			uint16_t* uint16Ptr = (uint16_t*)waveDataPtr;
 			uint16Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*uint16Ptr = *imagePtr;
-				++uint16Ptr;
-				++imagePtr;
+				uint16Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1816,9 +1792,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			uint32_t* uint32Ptr = (uint32_t*)waveDataPtr;
 			uint32Ptr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*uint32Ptr = *imagePtr;
-				++uint32Ptr;
-				++imagePtr;
+				uint32Ptr[i] = imagePtr[i];
 			}
 			break;
 		}
@@ -1827,9 +1801,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			float* floatPtr = (float*)waveDataPtr;
 			floatPtr += nPixels * this->n_images_written;
 			for (size_t i = 0; i < nPixels; ++i) {
-				*floatPtr = *imagePtr;
-				++floatPtr;
-				++imagePtr;
+				floatPtr[i] = imagePtr[i];
 			}
 			break;
 		}
