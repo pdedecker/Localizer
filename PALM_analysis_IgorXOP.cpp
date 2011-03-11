@@ -337,6 +337,15 @@ typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParam
 struct ConvolveImagesRuntimeParams {
 	// Flag parameters.
 	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -1690,9 +1699,25 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<Eigen::MatrixXd> firstImage;
 	boost::shared_ptr<Eigen::MatrixXd> secondImage;
 	boost::shared_ptr<Eigen::MatrixXd> outputImage;
+	DataFolderAndName dfAndName;
+	int overwrite;
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;
+	
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		dfAndName = p->dest;
+	} else {
+		dfAndName.dfH = NULL;
+		strcpy(dfAndName.name, "M_Convolved");
+	}
+	
+	if (p->OFlagEncountered) {
+		overwrite = 1;
+	} else {
+		overwrite = 0;
+	}
 	
 	// Main parameters.
 	
@@ -2038,7 +2063,7 @@ static int RegisterConvolveImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ConvolveImagesRuntimeParams structure as well.
-	cmdTemplate = "ConvolveImages wave:firstImage, wave:secondImage";
+	cmdTemplate = "ConvolveImages /DEST=DataFolderAndName:{dest,real} /O wave:firstImage, wave:secondImage";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);
