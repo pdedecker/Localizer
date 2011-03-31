@@ -78,6 +78,11 @@ struct LocalizationAnalysisRuntimeParams {
 	double lastFrame;
 	int RNGFlagParamsSet[2];
 	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
 	// Parameters for /Q flag group.
 	int QFlagEncountered;
 	// There are no fields for this group because it has no parameters.
@@ -89,11 +94,6 @@ struct LocalizationAnalysisRuntimeParams {
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
-	int outputWaveParamsEncountered;
-	DataFolderAndName outputWaveParams;
-	int outputWaveParamsParamsSet[1];
-	
-	// Parameters for simple main group #1.
 	int experiment_fileEncountered;
 	Handle experiment_file;
 	int experiment_fileParamsSet[1];
@@ -336,6 +336,15 @@ typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParam
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ConvolveImagesRuntimeParams {
 	// Flag parameters.
+	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	// There are no fields for this group because it has no parameters.
 	
 	// Main parameters.
 	
@@ -630,6 +639,14 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	analysisOptionsStream << "FIRST FRAME ANALYZED:" << firstFrameToAnalyze << ';';
 	analysisOptionsStream << "LAST FRAME ANALYZED:" << lastFrameToAnalyze << ';';
 	
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		outputWaveParams = p->dest;
+	} else {
+		outputWaveParams.dfH = NULL;
+		strcpy(outputWaveParams.name, "POS_out");
+	}
+	
 	if (p->QFlagEncountered) {
 		quiet = 1;
 	} else {
@@ -643,13 +660,6 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	}
 	
 	// Main parameters.
-	
-	if (p->outputWaveParamsEncountered) {
-		// Parameter: p->outputWaveParams
-		outputWaveParams = p->outputWaveParams;
-	} else {
-		return EXPECTED_NAME;
-	}
 	
 	try {
 		
@@ -1690,9 +1700,25 @@ static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	boost::shared_ptr<Eigen::MatrixXd> firstImage;
 	boost::shared_ptr<Eigen::MatrixXd> secondImage;
 	boost::shared_ptr<Eigen::MatrixXd> outputImage;
+	DataFolderAndName dfAndName;
+	int overwrite;
 	waveHndl firstWave;
 	waveHndl secondWave;
 	waveHndl outputWave;
+	
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		dfAndName = p->dest;
+	} else {
+		dfAndName.dfH = NULL;
+		strcpy(dfAndName.name, "M_Convolved");
+	}
+	
+	if (p->OFlagEncountered) {
+		overwrite = 1;
+	} else {
+		overwrite = 0;
+	}
 	
 	// Main parameters.
 	
@@ -1978,7 +2004,7 @@ static int RegisterLocalizationAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the LocalizationAnalysisRuntimeParams structure as well.
-	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /Q /Z DataFolderAndName:{outputWaveParams, real}, string:experiment_file";
+	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, 0);
@@ -2038,7 +2064,7 @@ static int RegisterConvolveImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ConvolveImagesRuntimeParams structure as well.
-	cmdTemplate = "ConvolveImages wave:firstImage, wave:secondImage";
+	cmdTemplate = "ConvolveImages /DEST=DataFolderAndName:{dest,real} /O wave:firstImage, wave:secondImage";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);

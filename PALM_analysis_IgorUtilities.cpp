@@ -169,6 +169,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
 		current_image = image_loader->readImage(i);
 		waveWriter.write_image(current_image);
+		if (CheckAbort(0))
+			return 0;
 	}
 	
 	return 0;

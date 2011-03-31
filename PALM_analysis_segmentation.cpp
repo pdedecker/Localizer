@@ -324,7 +324,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	}
 	
 	if (imageNeedsResizing == 1) {
-		boost::shared_ptr<Eigen::MatrixXd> reducedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
+		boost::shared_ptr<Eigen::MatrixXd> reducedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 		for (size_t j = 0; j < ySize; ++j) {
 			for (size_t i = 0; i < xSize; ++i) {
 				(*reducedImage)(i,j) = (*image)(i,j);
@@ -333,7 +333,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		image = reducedImage;	// modify the smart_ptr
 	}
 	
-	image_squared = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	image_squared = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -642,7 +642,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	if ((kernelXSize > 20) || (kernelYSize > 20))
 		throw std::runtime_error("Tried to use a large kernel in ConvolveMatrixWithSmallKernel");
 	
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)imageXSize, (int)imageYSize));
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetRecycledMatrix((int)imageXSize, (int)imageYSize), FreeRecycledMatrix);
 	
 	size_t halfKernelXSize = kernelXSize / 2;
 	size_t halfKernelYSize = kernelYSize / 2;
@@ -757,8 +757,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	}
 	
 	// calculate an accumulated image
-	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// populate the first column of the matrix
 	memcpy(accumulatedImage->data(), image->data(), xSize * sizeof(double));
@@ -819,7 +819,7 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 
 boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	double normalization_factor = (double)(xSize * ySize);
 	fftw_plan reversePlan;
@@ -886,3 +886,6 @@ gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> im
 	
 	return hist;
 }
+
+
+

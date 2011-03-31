@@ -16,6 +16,7 @@
 #include "boost/thread/shared_mutex.hpp"
 #include <Eigen/Eigen>
 #include "PALM_analysis_storage.h"
+#include "PALM_analysis_MatrixRecycler.h"
 #include <fftw3.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>

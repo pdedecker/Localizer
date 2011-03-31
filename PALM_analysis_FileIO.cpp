@@ -153,53 +153,20 @@ ImageLoaderSPE::~ImageLoaderSPE() {
 }
 
 void ImageLoaderSPE::parse_header_information() {
-	long current_bytes = 0;	// assume that this is a four-byte variable
-	char header_buffer[1500];
-	char byte_reader1, byte_reader2, byte_reader3, byte_reader4;	// we want to only read 1 byte at a time
+	// warning: only safe as long as both the writing
+	// and reading systems are little-endian
+	file.seekg(42);
+	file.read((char *)&(this->x_size), 2);
 	
-	// read the entire header into a buffer
-	file.read(header_buffer, 1500);
+	file.seekg(656);
+	file.read((char *)&(this->y_size), 2);
 	
-	byte_reader1 = header_buffer[42];
-	byte_reader2 = header_buffer[43];
-	current_bytes = 0x000000FF & byte_reader2;
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader1);
+	file.seekg(1446);
+	file.read((char *)&(this->total_number_of_images), 4);
 	
-	x_size = current_bytes;
-	current_bytes = 0;
+	file.seekg(108);
+	file.read((char *)&(this->storage_type), 2);
 	
-	byte_reader1 = header_buffer[656];
-	byte_reader2 = header_buffer[657];
-	current_bytes = 0x000000FF & byte_reader2;
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader1);
-	
-	y_size = current_bytes;
-	current_bytes = 0;
-	
-	byte_reader1 = header_buffer[1446];
-	byte_reader2 = header_buffer[1447];
-	byte_reader3 = header_buffer[1448];
-	byte_reader4 = header_buffer[1449];
-	current_bytes = 0x000000FF  & byte_reader4;
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader3);
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader2);
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader1);
-	
-	total_number_of_images = current_bytes;
-	current_bytes = 0;
-	
-	byte_reader1 = header_buffer[108];
-	byte_reader2 = header_buffer[109];
-	current_bytes = 0x000000FF & byte_reader2;
-	current_bytes *= 256;
-	current_bytes = current_bytes | (0x000000FF & byte_reader1);
-	
-	storage_type = (int)current_bytes;
 	switch (storage_type) {
 		case 0:
 			storage_type = STORAGE_TYPE_FP32;
@@ -219,7 +186,6 @@ void ImageLoaderSPE::parse_header_information() {
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
-	current_bytes = 0;
 	
 	// was there an error sometime during this procedure that would have caused the reading to fail?
 	if (file.fail() != 0) {
@@ -267,7 +233,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -456,7 +422,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t inde
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
 	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
 	
@@ -563,7 +529,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t 
 	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	boost::shared_ptr<Eigen::MatrixXd> image (new Eigen::MatrixXd((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -651,7 +617,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 	size_t n_pixels = this->x_size * this->y_size;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)this->x_size, (int)this->y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)this->x_size, (int)this->y_size), FreeRecycledMatrix);
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -958,7 +924,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		throw std::bad_alloc();
 	}
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
 	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
 	if (result != 1) {
@@ -1122,7 +1088,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	size_t nPixels = this->x_size * this->y_size;
 	
 	// allocate a new image
-	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)x_size, (int)y_size));
+	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
 	// get a pointer to the data in the wave
 	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
