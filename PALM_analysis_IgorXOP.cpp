@@ -2031,7 +2031,7 @@ static int RegisterProcessCCDImages(void) {
 	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
 }
 
 static int RegisterAnalyzeCCDImages(void) {

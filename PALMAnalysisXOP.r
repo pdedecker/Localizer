@@ -38,7 +38,7 @@ resource 'XOPC' (1100) {
 		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"ProcessCCDImages",
-		XOPOp+utilOp+compilableOp,
+		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"AnalyzeCCDImages",
 		XOPOp+utilOp+compilableOp,
