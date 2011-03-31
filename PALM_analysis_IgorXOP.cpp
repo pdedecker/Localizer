@@ -218,6 +218,7 @@ struct ProcessCCDImagesRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct ProcessCCDImagesRuntimeParams ProcessCCDImagesRuntimeParams;
 typedef struct ProcessCCDImagesRuntimeParams* ProcessCCDImagesRuntimeParamsPtr;
@@ -261,6 +262,7 @@ struct AnalyzeCCDImagesRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct AnalyzeCCDImagesRuntimeParams AnalyzeCCDImagesRuntimeParams;
 typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
