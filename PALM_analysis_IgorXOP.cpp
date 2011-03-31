@@ -1455,8 +1455,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 		// Parameter: p->particle_finder
 		particle_finding_method = (size_t)(p->particle_finder + 0.5);
 	} else {
-		if (output_located_particles == 1)
-			return TOO_FEW_PARAMETERS;
+		particle_finding_method = PARTICLEFINDER_ADJACENT8;
 	}
 	
 	if (p->PVERFlagEncountered) {
