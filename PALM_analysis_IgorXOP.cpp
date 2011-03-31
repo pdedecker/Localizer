@@ -101,6 +101,7 @@ struct LocalizationAnalysisRuntimeParams {
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationAnalysisRuntimeParams LocalizationAnalysisRuntimeParams;
 typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimeParamsPtr;
@@ -2007,7 +2008,7 @@ static int RegisterLocalizationAnalysis(void) {
 	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
 	runtimeNumVarList = "V_flag;";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, kOperationIsThreadSafe);
 }
 
 static int RegisterReadCCDImages(void) {

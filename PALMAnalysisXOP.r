@@ -32,7 +32,7 @@ resource 'XOPI' (1100) {
 resource 'XOPC' (1100) {
 	{
 		"LocalizationAnalysis",
-		XOPOp+utilOp+compilableOp,
+		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"ReadCCDImages",
 		XOPOp+utilOp+compilableOp+threadSafeOp,
