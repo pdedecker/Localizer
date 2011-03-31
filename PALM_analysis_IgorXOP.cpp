@@ -513,7 +513,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		thresholding_method = (int)(p->thresholding_method + 0.5);
 		analysisOptionsStream << "THRESHOLD METHOD:" << thresholding_method << ';';
 	} else {
-		return TOO_FEW_PARAMETERS;
+		return THRESHOLD_METHOD_GLRT;
 	}
 	
 	if (p->YFlagEncountered) {
@@ -586,7 +586,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		if (thresholding_method == THRESHOLD_METHOD_GLRT)
 			analysisOptionsStream << "PFA:" << PFA << ';';
 	} else if (thresholding_method == THRESHOLD_METHOD_GLRT)
-		return TOO_FEW_PARAMETERS;
+		PFA = 30;
 	
 	
 	if (p->RFlagEncountered) {
