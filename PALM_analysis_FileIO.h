@@ -21,7 +21,7 @@
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis.h"
 #include "tiffio.h"
-#include "stdint.h"
+#include "boost/cstdint.hpp"
 #include "boost/thread.hpp"
 #include <Eigen/Eigen>
 
@@ -33,6 +33,15 @@
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis_IgorUtilities.h"
 #endif
+
+using boost::uint64_t;
+using boost::int64_t;
+using boost::uint32_t;
+using boost::int32_t;
+using boost::uint16_t;
+using boost::int16_t;
+using boost::uint8_t;
+using boost::int8_t;
 
 /**
  * Provide an ifstream-like class for Windows that handles large file offset
