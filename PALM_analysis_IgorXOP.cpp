@@ -505,7 +505,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		method = (int)(p->method + 0.5);
 		analysisOptionsStream << "LOCALIZATION METHOD:" << method << ';';
 	} else {
-		return TOO_FEW_PARAMETERS;
+		method = LOCALIZATION_METHOD_2DGAUSS;
 	}
 	
 	if (p->DFlagEncountered) {
@@ -546,7 +546,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		particle_finding_method = (int)(p->particle_finder + 0.5);
 		analysisOptionsStream << "PARTICLE FINDING METHOD:" << particle_finding_method << ';';
 	} else {
-		return TOO_FEW_PARAMETERS;
+		particle_finding_method = PARTICLEFINDER_ADJACENT8;
 	}
 	
 	if (p->PVERFlagEncountered) {
