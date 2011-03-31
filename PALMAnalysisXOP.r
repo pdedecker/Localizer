@@ -41,7 +41,7 @@ resource 'XOPC' (1100) {
 		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"AnalyzeCCDImages",
-		XOPOp+utilOp+compilableOp,
+		XOPOp+utilOp+compilableOp+threadSafeOp,
 		
 		"EmitterSegmentation",
 		XOPOp+utilOp+compilableOp+threadSafeOp,

@@ -2043,7 +2043,7 @@ static int RegisterAnalyzeCCDImages(void) {
 	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /DEST=DataFolderAndName:{dest,real} string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, 0);
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, kOperationIsThreadSafe);
 }
 
 static int RegisterEmitterSegmentation(void) {
