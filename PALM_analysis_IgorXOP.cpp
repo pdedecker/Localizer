@@ -393,9 +393,8 @@ struct LocalizationBitmapRuntimeParams {
 	int WFlagEncountered;
 	double CCDXSize;
 	double CCDYSize;
-	double ImageWidth;
-	double ImageHeight;
-	int WFlagParamsSet[4];
+	double outputImageScaleFactor;
+	int WFlagParamsSet[3];
 	
 	// Parameters for /WGHT flag group.
 	int WGHTFlagEncountered;
@@ -1827,14 +1826,13 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	if (p->WFlagEncountered) {
 		// Parameter: p->CCDXSize
 		// Parameter: p->CCDYSize
-		// Parameter: p->ImageWidth
-		// Parameter: p->ImageHeight
-		if ((p->CCDXSize <= 0) || (p->CCDYSize <= 0) || (p->ImageWidth <= 0) || (p->ImageHeight <= 0))
+		// Parameter: p->outputImageScaleFactor
+		if ((p->CCDXSize <= 0) || (p->CCDYSize <= 0) || (p->outputImageScaleFactor <= 0))
 			return EXPECT_POS_NUM;
 		xSize = (size_t)(p->CCDXSize + 0.5);
 		ySize = (size_t)(p->CCDYSize + 0.5);
-		imageWidth = (size_t)(p->ImageWidth + 0.5);
-		imageHeight = (size_t)(p->ImageHeight + 0.5);
+		imageWidth = (size_t)(p->outputImageScaleFactor * p->CCDXSize + 0.5);
+		imageHeight = (size_t)(p->outputImageScaleFactor * p->CCDYSize + 0.5);
 	} else {
 		return TOO_FEW_PARAMETERS;
 	}
@@ -2078,7 +2076,7 @@ static int RegisterLocalizationBitmap(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
-	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:ImageWidth, number:ImageHeight} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
+	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
