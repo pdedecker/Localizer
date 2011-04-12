@@ -1899,7 +1899,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
-		CopyMatrixToIgorDPWave(image, std::string("M_PALM"));
+		CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
 	}
 	catch (std::bad_alloc) {
 		return NOMEM;
