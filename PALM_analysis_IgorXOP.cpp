@@ -1800,7 +1800,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		
 		method = (int)(p->deviationMethod + 0.5);
 	} else {
-		return TOO_FEW_PARAMETERS;
+		method = PALMBITMAP_DEVIATION_SAME;
 	}
 	
 	if (p->SFlagEncountered) {
@@ -1808,8 +1808,8 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		if (p->scaleFactor <= 0)
 			return EXPECT_POS_NUM;
 		scaleFactor = p->scaleFactor;
-	} else if ((method == PALMBITMAP_DEVIATION_SAME) || (method == PALMBITMAP_DEVIATION_FITUNCERTAINTY)) {
-		return TOO_FEW_PARAMETERS;
+	} else {
+		scaleFactor = 1.0;
 	}
 	
 	if (p->LFlagEncountered) {
@@ -1818,9 +1818,8 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 			return EXPECT_POS_NUM;
 		upperLimit = p->upperLimit;
 	} else {
-		if (method == PALMBITMAP_DEVIATION_FITUNCERTAINTY) {	// calculate the width using the uncertainty from the fits
-			return TOO_FEW_PARAMETERS;
-		}
+		upperLimit = 1.0e100;	// provide an unpractically large value, so that
+								// the net result is no limitation
 	}
 	
 	if (p->WFlagEncountered) {
@@ -1844,7 +1843,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 			return EXPECT_POS_NUM;
 		}
 	} else {
-		return TOO_FEW_PARAMETERS;
+		emitterWeighing = PALMBITMAP_EMITTERWEIGHING_SAME;
 	}
 	
 	if (p->WDTHFlagEncountered) {
@@ -1856,9 +1855,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		PSFWidth = p->PSFWidth;
 		
 	} else {
-		if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
-			return TOO_FEW_PARAMETERS;
-		}
+		PSFWidth = 1.5;
 	}
 	
 	if (p->MULTFlagEncountered) {
