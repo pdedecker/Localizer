@@ -155,6 +155,11 @@ ImageLoaderSPE::~ImageLoaderSPE() {
 void ImageLoaderSPE::parse_header_information() {
 	// warning: only safe as long as both the writing
 	// and reading systems are little-endian
+	this->x_size = 0;
+	this->y_size = 0;
+	this->total_number_of_images = 0;
+	this->storage_type = 0;
+	
 	file.seekg(42);
 	file.read((char *)&(this->x_size), 2);
 	
