@@ -73,22 +73,34 @@ void MatrixRecycler::freeMatrix(Eigen::MatrixXd *matrixToFree) {
 	throw std::runtime_error("no matrix found in freeMatrix()");
 }
 
+void MatrixRecycler::freeAllMatrices() {
+	boost::lock_guard<boost::mutex> locker(this->recyclingMutex);
+	
+	if (this->usedMatrixList.size() != 0) {
+		throw std::runtime_error("tried to free all matrices while some were still in use.");
+	}
+	
+	for (std::list<Eigen::MatrixXd*>::iterator it = this->unusedMatrixList.begin(); it != this->unusedMatrixList.end(); ++it) {
+		delete (*it);
+	}
+	
+	unusedMatrixList.clear();
+}
+
 /**
  * A global instance of MatrixRecycler to be used in the
  * segmentation
  */
 boost::shared_ptr<MatrixRecycler> globalMatrixRecycler(new MatrixRecycler);
 
-/**
- * A function that will handle allocation of memory from globalMatrixRecycler
- */
 Eigen::MatrixXd* GetRecycledMatrix(size_t nRows, size_t nCols) {
 	return globalMatrixRecycler->getMatrix(nRows, nCols);
 }
 
-/**
- * A function that will handle freeing of memory from globalMatrixRecycler
- */
 void FreeRecycledMatrix(Eigen::MatrixXd* matrixToFree) {
 	globalMatrixRecycler->freeMatrix(matrixToFree);
+}
+
+void FreeAllRecycledMatrices() {
+	globalMatrixRecycler->freeAllMatrices();
 }

@@ -21,6 +21,12 @@ public:
 	Eigen::MatrixXd *getMatrix(size_t nRows, size_t nCols);
 	void freeMatrix(Eigen::MatrixXd *matrixToFree);
 	
+	// free all matrices allocated by this matrix
+	// if this function is called while some memory
+	// allocated by this class is still in use then
+	// an error will be thrown
+	void freeAllMatrices();
+	
 protected:
 	std::list<Eigen::MatrixXd *> unusedMatrixList;
 	std::list<Eigen::MatrixXd *> usedMatrixList;
@@ -28,12 +34,20 @@ protected:
 	boost::mutex recyclingMutex;
 };
 
+// the functions below act as proxies for the functions in the MatrixRecycler class,
+// except that they act on a single, global instance
+
 /**
- * A function that will handle allocation of memory from globalMatrixRecycler
+ * Obtain a matrix of the requested dimensions from the globalMatrixRecycler
  */
 Eigen::MatrixXd* GetRecycledMatrix(size_t nRows, size_t nCols);
 
 /**
- * A function that will handle freeing of memory from globalMatrixRecycler
+ * Mark a matrix from the globalMatrixRecycler as no longer in use
  */
 void FreeRecycledMatrix(Eigen::MatrixXd* matrixToFree);
+
+/**
+ * Request that all reserved memory held in the recycler be freed
+ */
+void FreeAllRecycledMatrices();
