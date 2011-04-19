@@ -546,32 +546,35 @@ std::string ConvertPathToNativePath(std::string filePath) {
 	int err;
 	std::string convertedPath;
 	
-	boost::scoped_array<char> cString(new char[filePath.size() + 1]);
-	memcpy(cString.get(), filePath.c_str(), filePath.size() * sizeof(char));
+	if (filePath.size() > MAX_PATH_LEN)
+		throw PATH_TOO_LONG;
+	
+	char cString[MAX_PATH_LEN+1];
+	memcpy(cString, filePath.c_str(), filePath.size() * sizeof(char));
 	cString[filePath.size()] = '\0';
 	
 	
 	
 	#ifdef MACIGOR
-	err = WinToMacPath(cString.get());
+	err = WinToMacPath(cString);
 	if (err != 0) {
 		throw err;
 	}
 	
 	char posixPATH[MAX_PATH_LEN+1];
 	
-	err = HFSToPosixPath(cString.get(), posixPATH, 0);
+	err = HFSToPosixPath(cString, posixPATH, 0);
 	if (err != 0) {
 		throw err;
 	}
 	convertedPath.assign(posixPATH);
 	#endif
 	#ifdef WINIGOR
-	err = MacToWinPath(cString.get());
+	err = MacToWinPath(cString);
 	if (err != 0) {
 		throw err;
 	}
-	convertedPath.assign(cString.get());
+	convertedPath.assign(cString);
 	#endif
 	
 	return convertedPath;
