@@ -363,7 +363,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 }
 
 
-waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -388,12 +388,12 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<Eigen::MatrixXd> stdDevImage(new Eigen::MatrixXd((int)xRange, (int)yRange));
+	boost::scoped_ptr<Eigen::MatrixXd> varianceImage(new Eigen::MatrixXd((int)xRange, (int)yRange));
 	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd((int)xRange, (int)yRange));
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	
 	average_image->setConstant(0.0);
-	stdDevImage->setConstant(0.0);
+	varianceImage->setConstant(0.0);
 	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
@@ -411,12 +411,11 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
-		(*stdDevImage) += ((*current_image) - (*average_image)).cwise().square();
+		(*varianceImage) += ((*current_image) - (*average_image)).cwise().square();
 	}
 	
-	// divide by the number of images to get the average deviation, and take the square root
-	*stdDevImage /= (double)n_images;
-	*stdDevImage = (*stdDevImage).cwise().sqrt();
+	// divide by the number of images to get the average deviation
+	*varianceImage /= (double)n_images;
 	
 	// try to create the output wave
 	dimension_sizes[0] = xRange;
@@ -427,7 +426,7 @@ waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAn
 		throw result;
 	
 	// write the output data to the wave
-	result = MDStoreDPDataInNumericWave(output_wave, stdDevImage->data());
+	result = MDStoreDPDataInNumericWave(output_wave, varianceImage->data());
 	if (result != 0)
 		throw result;
 	

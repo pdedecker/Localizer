@@ -1337,8 +1337,8 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 			case ANALYZING_AVERAGEIMAGE:
 				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
-			case ANALYZING_STDDEVIATIONIMAGE:
-				calculateStandardDeviationImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+			case ANALYZING_VARIANCEIMAGE:
+				calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
 				break;
 			case ANALYZING_AVERAGETRACE:
 				construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);

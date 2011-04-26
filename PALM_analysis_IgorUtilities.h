@@ -47,7 +47,7 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
 
-waveHndl calculateStandardDeviationImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
+waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);
