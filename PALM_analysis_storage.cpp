@@ -25,8 +25,13 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 	boost::scoped_array<char> CStringWaveNote(new char[waveNoteSize + 1]);
 	
 	err = GetCStringFromHandle(waveNoteHandle, CStringWaveNote.get(), waveNoteSize);
-	if (err != 0)
-		throw std::runtime_error("GetCStringFromHandle() returned a nonzero code");
+	if (err != 0) {
+		if (err == USING_NULL_STRVAR) {
+			throw std::runtime_error("No wavenote found. Did you make or load these positions with this software?");
+		} else {
+			throw std::runtime_error("GetCStringFromHandle() returned a nonzero code");
+		}
+	}
 	
 	// save the wavenote as a std::string
 	std::string waveNote(CStringWaveNote.get());
