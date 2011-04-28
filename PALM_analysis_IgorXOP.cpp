@@ -1043,9 +1043,9 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		// Parameter: p->framesAveraging
 		nFramesAveraging = (int)(p->framesAveraging + 0.5);
 		if (nFramesAveraging < 0)
-			return EXPECT_POS_NUM;
+			nFramesAveraging = 0;
 		
-		if ((method == PROCESSING_AVERAGESUBTRACTION) && (nFramesAveraging % 2 == 0)) {
+		if ((method == PROCESSING_AVERAGESUBTRACTION) && (nFramesAveraging != 0) && (nFramesAveraging % 2 == 0)) {
 			return ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES;
 		}
 	} else {
