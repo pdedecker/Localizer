@@ -836,7 +836,11 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		if (quiet == 1) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
 		} else {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			if (igorProgressReporterFunction != NULL) {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			}
 		}
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
 																								   postprocessor, particle_finder, particleVerifiers,

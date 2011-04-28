@@ -260,13 +260,11 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 	}
 }
 
-PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction_rhs) {
+PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction) {
 	int err;
 	FunctionInfo fi;
-	int requiredParameterTypes[3];
+	int requiredParameterTypes[2];
 	int badParameterNumber;
-	
-	this->igorProgressFunction = igorProgressFunction_rhs;
 	
 	// Make sure the function exists and get information about it
 	err = GetFunctionInfoFromFuncRef(igorProgressFunction, &fi);
@@ -274,16 +272,28 @@ PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_Igor
 		throw err;
 	
 	// Make sure the function has the right form
-	requiredParameterTypes[0] = HSTRING_TYPE;
+	requiredParameterTypes[0] = NT_FP64;
 	requiredParameterTypes[1] = NT_FP64;
-	requiredParameterTypes[2] = NT_FP64;
 	
-	err = CheckFunctionForm(&fi, 3, requiredParameterTypes, &badParameterNumber, NT_FP64);
+	err = CheckFunctionForm(&fi, 2, requiredParameterTypes, &badParameterNumber, NT_FP64);
 	if (err != 0)
 		throw err;
 	
 	// the function is valid, we're all set
+	this->igorProgressFunction = fi;
 }
+
+void PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
+	// call the progress function
+	double result;
+	int err;
+	IgorUserFunctionParams params;
+	params.progress = progress;
+	params.maxProgress = maxProgress;
+	
+	err = CallFunction(&(this->igorProgressFunction), (void *)&params, &result);
+}
+
 #endif // WITH_IGOR
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {

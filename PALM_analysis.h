@@ -140,18 +140,26 @@ protected:
 	double previousPercentage;
 };
 
+#pragma pack(2) 
+struct IgorUserFunctionParams {
+	double progress;
+	double maxProgress;
+};
+typedef struct IgorUserFunctionParams IgorUserFunctionParams;
+#pragma pack()
+
 class PALMAnalysisProgressReporter_IgorUserFunction : public PALMAnalysisProgressReporter {
 public:
 	PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction);
 	~PALMAnalysisProgressReporter_IgorUserFunction() {;}
 	
 	void CalculationStarted() {;}
-	void UpdateCalculationProgress(double progress, double maxProgress) {;}
+	void UpdateCalculationProgress(double progress, double maxProgress);
 	void CalculationDone() {;}
 	void CalculationAborted() {;}
 	
 protected:
-	FUNCREF igorProgressFunction;
+	FunctionInfo igorProgressFunction;
 };
 #endif // WITH_IGOR
 
