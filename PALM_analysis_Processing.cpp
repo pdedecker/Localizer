@@ -50,7 +50,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 		loaded_image = image_loader->readImage(n);
 		
 		(*average_image) += (*loaded_image);
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0, 100.0);
 	}
 	
 	// now divide each point so that we get the average
@@ -63,7 +63,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 		(*subtracted_image) = (*loaded_image) - (*average_image);
 		
 		output_writer->write_image(subtracted_image);
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0, 100.0);
 	}
 	
 }
@@ -151,7 +151,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 			output_writer->write_image(activeImage);
 		}
 		
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)nFramesInMovie * 100.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)nFramesInMovie * 100.0, 100.0);
 	}
 }
 
@@ -185,7 +185,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 		// current_image now contains the subtracted image, we should write it to disk
 		output_writer->write_image(current_image);
 		
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
 	}
 	this->progressReporter->CalculationDone();
 }
@@ -199,7 +199,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		current_image = image_loader->readImage(n);
 		output_writer->write_image(current_image);
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
 	}
 	this->progressReporter->CalculationDone();
 }
@@ -235,7 +235,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 		
 		output_writer->write_image(croppedImage);
 		
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
 	}
 	this->progressReporter->CalculationDone();
 }
@@ -261,7 +261,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 		}
 		output_writer->write_image(convertedImage);
 		
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0);
+		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
 	}
 	this->progressReporter->CalculationDone();
 }

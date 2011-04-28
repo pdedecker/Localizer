@@ -47,7 +47,7 @@ boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boo
 		
 		if (n%100 == 0) {
 			// every 100 iterations provide a progress update
-			this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0);
+			this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0, 100.0);
 			
 			#ifdef WITH_IGOR
 			status = CheckAbort(0);

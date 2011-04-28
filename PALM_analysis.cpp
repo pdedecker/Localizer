@@ -137,7 +137,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			{
 				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
 				percentDone = (double)(nFramesToBeAnalyzed - framesToBeProcessed.size()) / (double)(nFramesToBeAnalyzed) * 100.0;
-				progressReporter->UpdateCalculationProgress(percentDone);
+				progressReporter->UpdateCalculationProgress(percentDone, 100.0);
 			}
 			continue;
 		} else {
@@ -250,7 +250,8 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 }
 
 #ifdef WITH_IGOR
-void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double percentDone) {
+void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
+	double percentDone = progress / maxProgress * 100.0;
 	char XOPOut[10];
 	if (percentDone - previousPercentage > 10.0) {
 		previousPercentage = floor(percentDone / 10.0) * 10.0;
