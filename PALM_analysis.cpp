@@ -258,6 +258,31 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 		XOPNotice(XOPOut);
 	}
 }
+
+PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction_rhs) {
+	int err;
+	FunctionInfo fi;
+	int requiredParameterTypes[3];
+	int badParameterNumber;
+	
+	this->igorProgressFunction = igorProgressFunction_rhs;
+	
+	// Make sure the function exists and get information about it
+	err = GetFunctionInfoFromFuncRef(igorProgressFunction, &fi);
+	if (err != 0)
+		throw err;
+	
+	// Make sure the function has the right form
+	requiredParameterTypes[0] = HSTRING_TYPE;
+	requiredParameterTypes[1] = NT_FP64;
+	requiredParameterTypes[2] = NT_FP64;
+	
+	err = CheckFunctionForm(&fi, 3, requiredParameterTypes, &badParameterNumber, NT_FP64);
+	if (err != 0)
+		throw err;
+	
+	// the function is valid, we're all set
+}
 #endif // WITH_IGOR
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {

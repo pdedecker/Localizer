@@ -139,6 +139,20 @@ public:
 protected:
 	double previousPercentage;
 };
+
+class PALMAnalysisProgressReporter_IgorUserFunction : public PALMAnalysisProgressReporter {
+public:
+	PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction);
+	~PALMAnalysisProgressReporter_IgorUserFunction() {;}
+	
+	void CalculationStarted() {;}
+	void UpdateCalculationProgress(double percentDone) {;}
+	void CalculationDone() {;}
+	void CalculationAborted() {;}
+	
+protected:
+	FUNCREF igorProgressFunction;
+};
 #endif // WITH_IGOR
 
 class PALMAnalysisProgressReporter_stdout : public PALMAnalysisProgressReporter {
