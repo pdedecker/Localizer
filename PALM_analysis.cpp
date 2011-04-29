@@ -48,7 +48,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	size_t nFramesToBeAnalyzed;
 	std::vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
-	int firstThreadHasFinished, status;
+	int firstThreadHasFinished, spinProcessStatus, progressStatus;
 	size_t nFramesAnalyzed;
 	
 	this->localizedPositions = boost::shared_ptr<LocalizedPositionsContainer>();
@@ -116,10 +116,19 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			}
 			this->errorReportingMutex.unlock();
 			
-			// does the user want to abort?
+			// allow the reporter to update with new progress
+			{
+				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
+				nFramesAnalyzed = nFramesToBeAnalyzed - framesToBeProcessed.size();
+				progressStatus = progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
+			}
 #ifdef WITH_IGOR
-			status = SpinProcess();
-			if (status != 0) {
+			// does the user want to abort?
+			spinProcessStatus = SpinProcess();
+#else
+			spinProcessStatus = 0;
+#endif	// WITH_IGOR
+			if ((spinProcessStatus != 0) || (progressStatus != 0)) {
 				for (size_t j = 0; j < numberOfThreads; ++j) {
 					threads.at(j)->interrupt();
 				}
@@ -130,14 +139,6 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 				progressReporter->CalculationAborted();
 				this->localizedPositions->sortPositionsByFrameNumber();
 				return this->localizedPositions;
-			}
-#endif // WITH_IGOR
-			
-			// allow the reporter to update with new progress
-			{
-				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
-				nFramesAnalyzed = nFramesToBeAnalyzed - framesToBeProcessed.size();
-				progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
 			}
 			continue;
 		} else {
