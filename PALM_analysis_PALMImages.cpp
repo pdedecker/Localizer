@@ -19,7 +19,7 @@ NormalCDFLookupTable::NormalCDFLookupTable() {
 
 boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
-	int spinProcessStatus, progressStatus;
+	int progressStatus;
 	double fittedXPos, fittedYPos, fittedIntegral;
 	double centerX, centerY, calculatedIntegral, calculatedDeviation;
 	long startX, endX, startY, endY;
@@ -48,16 +48,12 @@ boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boo
 		if (n%100 == 0) {
 			// every 100 iterations provide a progress update
 			progressStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0, 100.0);
-			
-			#ifdef WITH_IGOR
-			spinProcessStatus = CheckAbort(0);
-			if ((progressStatus != 0) || (spinProcessStatus != 0)) {
+			if (progressStatus != 0) {
 				// abort the calculation
 				// just return the image that has been calculated now
 				this->progressReporter->CalculationAborted();
 				return outputImage;
 			}
-			#endif
 		}
 		
 		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);

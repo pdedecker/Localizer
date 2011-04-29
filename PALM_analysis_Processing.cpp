@@ -34,7 +34,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	boost::shared_ptr<Eigen::MatrixXd> loaded_image;
 	boost::shared_ptr<Eigen::MatrixXd> subtracted_image;
 	
-	int spinProcessStatus, progressUpdateStatus;
+	int abortStatus;
 	
 	// we pass through the images two times:
 	// the first pass calculates the average,
@@ -55,14 +55,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 		
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-		
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0, 100.0);
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0, 100.0);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
@@ -83,14 +77,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 		
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-			
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0, 100.0);
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)total_number_of_images * 50.0 + 50.0, 100.0);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
@@ -107,7 +95,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	size_t ySize = image_loader->getYSize();
 	size_t nFramesInMovie = image_loader->GetNImages();
 	int nFramesSurroundingFrame = nFramesInAverage / 2;
-	int spinProcessStatus, progressUpdateStatus;
+	int abortStatus;
 	
 	if (nFramesInAverage > nFramesInMovie) {
 		throw std::runtime_error("The number of frames requested in the rolling average is larger than the total number of frames in the movie");
@@ -136,14 +124,8 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-			
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)nFramesInMovie);
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)nFramesInMovie);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
@@ -208,7 +190,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 	boost::shared_ptr<Eigen::MatrixXd> next_image;
 	size_t total_number_of_images = image_loader->GetNImages();
 	
-	int spinProcessStatus, progressUpdateStatus;
+	int abortStatus;
 	
 	if (total_number_of_images <= 1) {
 		throw std::runtime_error("Impossible to calculate a difference image on a sequence that has less than two frames");
@@ -224,14 +206,8 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 	for (size_t n = 0; n < (total_number_of_images - 1); n++) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-			
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)(n + 1), (double)(total_number_of_images));
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)(n + 1), (double)total_number_of_images);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
@@ -256,21 +232,15 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	size_t total_number_of_images = image_loader->GetNImages();
-	int spinProcessStatus, progressUpdateStatus;
+	int abortStatus;
 	
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-			
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)total_number_of_images);
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)total_number_of_images);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
@@ -285,7 +255,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 
 void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	size_t total_number_of_images = image_loader->GetNImages();
-	int progressUpdateStatus, spinProcessStatus;
+	int abortStatus;
 	
 	if ((startX >= endX) || (startY >= endY)) {
 		throw std::runtime_error("Bad limit values specified for cropping");
@@ -306,14 +276,8 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
-			#ifdef WITH_IGOR
-			spinProcessStatus = SpinProcess();
-			#else
-			spinProcessStatus = 0;
-			#endif
-			
-			progressUpdateStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)total_number_of_images);
-			if ((spinProcessStatus != 0) || (progressUpdateStatus != 0)) {
+			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)total_number_of_images);
+			if (abortStatus != 0) {
 				// user abort
 				this->progressReporter->CalculationAborted();
 				throw USER_ABORTED("aborted by user request");
