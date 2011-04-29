@@ -217,6 +217,11 @@ struct ProcessCCDImagesRuntimeParams {
 	int OFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -486,7 +491,8 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	int err = 0;
 	double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
 	DataFolderAndName outputWaveParams;
-	FUNCREF igorProgressReporterFunction = NULL;
+	int useIgorFunctionForProgress = 0;
+	FUNCREF igorProgressReporterFunction;
 	std::string data_file_path;
 	size_t camera_type;
 	int method;
@@ -663,7 +669,10 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	
 	if (p->PROGFlagEncountered) {
 		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
 		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
 	}
 	
 	if (p->DESTFlagEncountered) {
@@ -841,7 +850,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		if (quiet == 1) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
 		} else {
-			if (igorProgressReporterFunction != NULL) {
+			if (useIgorFunctionForProgress != 0) {
 				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
 			} else {
 				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
@@ -1025,6 +1034,8 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 	int outputType, compression;
 	size_t startX, endX, startY, endY;
 	double cameraOffset, cameraMultiplicationFactor;
+	int useIgorFunctionForProgress;
+	FUNCREF igorProgressReporterFunction;
 	
 	std::string input_file_path;
 	std::string output_file_path;
@@ -1114,6 +1125,14 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		if (method == PROCESSING_CROP) {	// export a cropped version
 			return TOO_FEW_PARAMETERS;
 		}
+	}
+	
+	if (p->PROGFlagEncountered) {
+		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
+		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
 	}
 	
 	// Main parameters.
@@ -1209,7 +1228,12 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		}
 		
 		// get a progress reporter
-		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_IgorCommandLine);
+		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+		if (useIgorFunctionForProgress != 0) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		} else {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+		}
 		
 		// do the actual procedure
 		switch (method) {
@@ -1813,7 +1837,8 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
 	waveHndl positionsWave;
-	FUNCREF igorProgressReporterFunction = NULL;
+	int useIgorFunctionForProgress = 0;
+	FUNCREF igorProgressReporterFunction;
 	
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
@@ -1899,7 +1924,10 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	
 	if (p->PROGFlagEncountered) {
 		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
 		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
 	}
 	
 	// Main parameters.	
@@ -1929,10 +1957,10 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
 		}
 		
-		if (igorProgressReporterFunction == NULL) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
-		} else {
+		if (useIgorFunctionForProgress != 0) {
 			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		} else {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		}
 		
 		// do the actual calculation
@@ -2065,7 +2093,7 @@ static int RegisterProcessCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
