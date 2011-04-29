@@ -95,7 +95,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	
 	// test if the threads have finished
 	for (;;) {
-		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(500));
+		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(250));
 		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
 			// while we wait we check for various things and give the interface the chance to update
 			
