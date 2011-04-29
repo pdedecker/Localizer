@@ -120,8 +120,9 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			{
 				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
 				nFramesAnalyzed = nFramesToBeAnalyzed - framesToBeProcessed.size();
-				progressStatus = progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
 			}
+			progressStatus = progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
+			
 #ifdef WITH_IGOR
 			// does the user want to abort?
 			spinProcessStatus = SpinProcess();
