@@ -51,7 +51,7 @@ boost::shared_ptr<Eigen::MatrixXd> PALMBitmapImageCalculator::CalculateImage(boo
 			
 			#ifdef WITH_IGOR
 			spinProcessStatus = CheckAbort(0);
-			if ((progressStatus != 0) || (spinProcessStatus == -1)) {
+			if ((progressStatus != 0) || (spinProcessStatus != 0)) {
 				// abort the calculation
 				// just return the image that has been calculated now
 				this->progressReporter->CalculationAborted();
