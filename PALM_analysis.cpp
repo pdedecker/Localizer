@@ -250,7 +250,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 }
 
 #ifdef WITH_IGOR
-void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
+int PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
 	double percentDone = progress / maxProgress * 100.0;
 	char XOPOut[10];
 	if (percentDone - previousPercentage > 10.0) {
@@ -258,6 +258,7 @@ void PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(dou
 		sprintf(XOPOut, "%.0lf%% ", previousPercentage);
 		XOPNotice(XOPOut);
 	}
+	return 0;
 }
 
 PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction) {
@@ -283,7 +284,7 @@ PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_Igor
 	this->igorProgressFunction = fi;
 }
 
-void PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
+int PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
 	// call the progress function
 	double result;
 	int err;
@@ -292,6 +293,10 @@ void PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(do
 	params.maxProgress = maxProgress;
 	
 	err = CallFunction(&(this->igorProgressFunction), (void *)&params, &result);
+	if (err != 0)
+		throw err;
+	
+	return (int)(result + 0.5);
 }
 
 #endif // WITH_IGOR
