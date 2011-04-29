@@ -255,6 +255,12 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 int PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
 	double percentDone = progress / maxProgress * 100.0;
 	char XOPOut[10];
+	
+	// check if the user wants to abort
+	int abortStatus = CheckAbort(0);
+	if (abortStatus != 0)
+		return abortStatus;
+	
 	if (percentDone - previousPercentage > 10.0) {
 		previousPercentage = floor(percentDone / 10.0) * 10.0;
 		sprintf(XOPOut, "%.0lf%% ", previousPercentage);
@@ -287,6 +293,11 @@ PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_Igor
 }
 
 int PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
+	// check if the user wants to abort
+	int abortStatus = CheckAbort(0);
+	if (abortStatus != 0)
+		return abortStatus;
+	
 	// call the progress function
 	double result;
 	int err;
