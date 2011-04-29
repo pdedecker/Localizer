@@ -425,6 +425,11 @@ struct LocalizationBitmapRuntimeParams {
 	double PSFWidth;
 	int WDTHFlagParamsSet[1];
 	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -1808,6 +1813,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	size_t imageWidth, imageHeight, xSize, ySize;
 	
 	waveHndl positionsWave;
+	FUNCREF igorProgressReporterFunction = NULL;
 	
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
@@ -1891,6 +1897,11 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		return TOO_FEW_PARAMETERS;
 	}
 	
+	if (p->PROGFlagEncountered) {
+		// Parameter: p->progStruct
+		igorProgressReporterFunction = p->progStruct->funcRef;
+	}
+	
 	// Main parameters.	
 	if (p->positionsWaveEncountered) {
 		// Parameter: p->positionsWave (test for NULL handle before using)
@@ -1918,8 +1929,13 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
 		}
 		
+		if (igorProgressReporterFunction == NULL) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+		} else {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		}
+		
 		// do the actual calculation
-		progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
 		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
 		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
@@ -2097,7 +2113,7 @@ static int RegisterLocalizationBitmap(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
-	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth wave:positionsWave";
+	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
