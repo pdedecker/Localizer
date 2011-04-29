@@ -49,7 +49,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	std::vector<boost::shared_ptr<boost::thread> > threads;
 	boost::shared_ptr<boost::thread> singleThreadPtr;
 	int firstThreadHasFinished, status;
-	double percentDone;
+	size_t nFramesAnalyzed;
 	
 	this->localizedPositions = boost::shared_ptr<LocalizedPositionsContainer>();
 	
@@ -136,8 +136,8 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			// allow the reporter to update with new progress
 			{
 				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
-				percentDone = (double)(nFramesToBeAnalyzed - framesToBeProcessed.size()) / (double)(nFramesToBeAnalyzed) * 100.0;
-				progressReporter->UpdateCalculationProgress(percentDone, 100.0);
+				nFramesAnalyzed = nFramesToBeAnalyzed - framesToBeProcessed.size();
+				progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
 			}
 			continue;
 		} else {
