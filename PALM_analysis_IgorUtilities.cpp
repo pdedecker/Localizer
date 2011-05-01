@@ -203,7 +203,8 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	return 0;
 }
 
-waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY, 
+										  boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -231,10 +232,18 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 			throw kBadROIDimensions;
 	}
 	
+	progressReporter->CalculationStarted();
+	int progressStatus;
 	// try to allocate a buffer that will hold the intensity trace
 	boost::scoped_array<double> intensity_trace_buffer(new double[n_images]);
 	
 	for (size_t i = 0; i < n_images; i++) {
+		if (i % 20 == 0) {
+			progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
+			if (progressStatus != 0)
+				throw USER_ABORTED("");
+		}
+		
 		summed_intensity = 0;
 		current_image = image_loader->readImage(i);
 		
@@ -258,6 +267,8 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	if (result != 0) {
 		throw result;
 	}
+	
+	progressReporter->CalculationDone();
 	
 	return output_wave;
 }

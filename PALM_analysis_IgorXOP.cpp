@@ -266,6 +266,11 @@ struct AnalyzeCCDImagesRuntimeParams {
 	double endY;
 	int ROIFlagParamsSet[4];
 	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
@@ -1293,6 +1298,8 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 	int method;
 	
 	DataFolderAndName outputWaveParams;
+	int useIgorFunctionForProgress = 0;
+	FUNCREF igorProgressReporterFunction;
 	long startX, startY, endX, endY, swap;
 	
 	std::string input_file_path;
@@ -1360,6 +1367,14 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		startX = endX = startY = endY = -1;	// by convention '-1' means that we take the whole image
 	}
 	
+	if (p->PROGFlagEncountered) {
+		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
+		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
+	}
+	
 	if (p->DESTFlagEncountered) {
 		// Parameter: p->dest
 		outputWaveParams = p->dest;
@@ -1383,9 +1398,16 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		input_file_path = ConvertHandleToString(p->input_file);
 		image_loader = GetImageLoader(camera_type, input_file_path);
 		
+		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+		if (useIgorFunctionForProgress != 0) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		} else {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+		}
+		
 		switch (method) {
 			case ANALYZING_SUMMEDTRACE:
-				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
 				break;
 			case ANALYZING_AVERAGEIMAGE:
 				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
@@ -2105,7 +2127,7 @@ static int RegisterAnalyzeCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /DEST=DataFolderAndName:{dest,real} string:input_file";
+	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, kOperationIsThreadSafe);
