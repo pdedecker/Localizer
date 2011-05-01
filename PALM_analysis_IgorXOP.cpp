@@ -1410,13 +1410,13 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
 				break;
 			case ANALYZING_AVERAGEIMAGE:
-				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
 				break;
 			case ANALYZING_VARIANCEIMAGE:
-				calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+				calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
 				break;
 			case ANALYZING_AVERAGETRACE:
-				construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY);
+				construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
 				break;
 			default:
 				throw std::runtime_error("Unknown analysis method");

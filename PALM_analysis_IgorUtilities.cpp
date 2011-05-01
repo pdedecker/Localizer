@@ -203,7 +203,8 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 	return 0;
 }
 
-waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY, 
+waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
+										  long startX, long startY, long endX, long endY, 
 										  boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
@@ -273,7 +274,9 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	return output_wave;
 }
 
-waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
+										   long startX, long startY, long endX, long endY,
+										   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
 	
 	int numDimensions;
 	CountInt dimensionSizes[MAX_DIMENSIONS+1];
@@ -286,7 +289,8 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 	int xSize, ySize;
 	
 	// start by calculating the summed intensity
-	waveHndl outputWave = construct_summed_intensity_trace(image_loader, outputWaveParams, startX, startY, endX, endY);
+	waveHndl outputWave = construct_summed_intensity_trace(image_loader, outputWaveParams, startX, startY, endX, endY,
+														   progressReporter);
 	
 	MDGetWaveDimensions(outputWave, &numDimensions, dimensionSizes);
 	
@@ -315,7 +319,9 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 	
 }
 
-waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
+								 long startX, long startY, long endX, long endY,
+								 boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -349,8 +355,16 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	
 	average_image->setConstant(0.0);
 	
+	int progressStatus;
+	progressReporter->CalculationStarted();
 	
 	for (size_t i = 0; i < n_images; i++) {
+		if (i % 20 == 0) {
+			progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
+			if (progressStatus != 0)
+				throw USER_ABORTED("");
+		}
+		
 		current_image = image_loader->readImage(i);
 		
 		// add the values of the newly loaded image to the average image
@@ -370,11 +384,15 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	if (result != 0)
 		throw result;
 	
+	progressReporter->CalculationDone();
+	
 	return output_wave;
 }
 
 
-waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, long startX, long startY, long endX, long endY) {
+waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
+								long startX, long startY, long endX, long endY,
+								boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -406,8 +424,19 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 	average_image->setConstant(0.0);
 	varianceImage->setConstant(0.0);
 	
+	progressReporter->CalculationStarted();
+	int progressStatus;
+	
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
+		if (i % 10 == 0) {
+			progressStatus = progressReporter->UpdateCalculationProgress(i / 2, n_images);
+			if (progressStatus != 0) {
+				progressReporter->CalculationAborted();
+				throw USER_ABORTED("");
+			}
+		}
+		
 		current_image = image_loader->readImage(i);
 		
 		// add the values of the newly loaded image to the average image
@@ -419,6 +448,14 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 	
 	// now loop over the images again, calculating the standard deviation of each pixel
 	for (size_t i = 0; i < n_images; i++) {
+		if (i % 10 == 0) {
+			progressStatus = progressReporter->UpdateCalculationProgress((i + n_images) / 2, n_images);
+			if (progressStatus != 0) {
+				progressReporter->CalculationAborted();
+				throw USER_ABORTED("");
+			}
+		}
+		
 		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
@@ -440,6 +477,8 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 	result = MDStoreDPDataInNumericWave(output_wave, varianceImage->data());
 	if (result != 0)
 		throw result;
+	
+	progressReporter->CalculationDone();
 	
 	return output_wave;
 }
