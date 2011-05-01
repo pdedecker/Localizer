@@ -222,6 +222,10 @@ struct ProcessCCDImagesRuntimeParams {
 	LocalizerProgStruct* progStruct;
 	int PROGFlagParamsSet[1];
 	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -270,6 +274,10 @@ struct AnalyzeCCDImagesRuntimeParams {
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
 	int PROGFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
 	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
@@ -440,6 +448,10 @@ struct LocalizationBitmapRuntimeParams {
 	LocalizerProgStruct* progStruct;
 	int PROGFlagParamsSet[1];
 	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Main parameters.
 	
 	// Parameters for simple main group #0.
@@ -503,7 +515,6 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	int method;
 	int particle_finding_method;
 	size_t firstFrameToAnalyze, lastFrameToAnalyze;
-	int quiet = 0;
 	int returnErrors = 1;
 	
 	std::ostringstream analysisOptionsStream;	// a stringstream that is built up during the options parsing
@@ -688,10 +699,12 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		strcpy(outputWaveParams.name, "POS_out");
 	}
 	
+	int quiet = 0;
 	if (p->QFlagEncountered) {
 		quiet = 1;
 	} else {
-		quiet = 0;
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
 	}
 	
 	if (p->ZFlagEncountered) {
@@ -861,6 +874,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
 			}
 		}
+		
 		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
 																								   postprocessor, particle_finder, particleVerifiers,
 																								   positions_fitter,
@@ -1140,6 +1154,14 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		useIgorFunctionForProgress = 0;
 	}
 	
+	int quiet = 0;
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+	}
+	
 	// Main parameters.
 	
 	if (p->input_fileEncountered) {
@@ -1234,10 +1256,14 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		
 		// get a progress reporter
 		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-		if (useIgorFunctionForProgress != 0) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		if (quiet == 1) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent());
 		} else {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			if (useIgorFunctionForProgress != 0) {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			}
 		}
 		
 		// do the actual procedure
@@ -1375,6 +1401,14 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		useIgorFunctionForProgress = 0;
 	}
 	
+	int quiet = 0;
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+	}
+	
 	if (p->DESTFlagEncountered) {
 		// Parameter: p->dest
 		outputWaveParams = p->dest;
@@ -1399,10 +1433,14 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		image_loader = GetImageLoader(camera_type, input_file_path);
 		
 		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
-		if (useIgorFunctionForProgress != 0) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		if (quiet == 1) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent());
 		} else {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			if (useIgorFunctionForProgress != 0) {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			}
 		}
 		
 		switch (method) {
@@ -1952,6 +1990,14 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		useIgorFunctionForProgress = 0;
 	}
 	
+	int quiet = 0;
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+	}
+	
 	// Main parameters.	
 	if (p->positionsWaveEncountered) {
 		// Parameter: p->positionsWave (test for NULL handle before using)
@@ -1979,10 +2025,14 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
 		}
 		
-		if (useIgorFunctionForProgress != 0) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+		if (quiet == 1) {
+			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
 		} else {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			if (useIgorFunctionForProgress != 0) {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+			}
 		}
 		
 		// do the actual calculation
@@ -2115,7 +2165,7 @@ static int RegisterProcessCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} string:input_file, string:output_file";
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q string:input_file, string:output_file";
 	runtimeNumVarList = "V_flag";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
@@ -2127,7 +2177,7 @@ static int RegisterAnalyzeCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} string:input_file";
+	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:input_file";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, kOperationIsThreadSafe);
@@ -2163,7 +2213,7 @@ static int RegisterLocalizationBitmap(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
-	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} wave:positionsWave";
+	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} /Q wave:positionsWave";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
