@@ -241,8 +241,10 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	for (size_t i = 0; i < n_images; i++) {
 		if (i % 20 == 0) {
 			progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
-			if (progressStatus != 0)
+			if (progressStatus != 0) {
+				progressReporter->CalculationAborted();
 				throw USER_ABORTED("");
+			}
 		}
 		
 		summed_intensity = 0;
@@ -361,8 +363,10 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	for (size_t i = 0; i < n_images; i++) {
 		if (i % 20 == 0) {
 			progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
-			if (progressStatus != 0)
+			if (progressStatus != 0) {
+				progressReporter->CalculationAborted();
 				throw USER_ABORTED("");
+			}
 		}
 		
 		current_image = image_loader->readImage(i);

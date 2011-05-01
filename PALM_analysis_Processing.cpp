@@ -308,6 +308,7 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
 	boost::shared_ptr<Eigen::MatrixXd > convertedImage (new Eigen::MatrixXd((int)x_size, (int)y_size));;
 	
+	int abortStatus;
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < total_number_of_images; ++n) {
@@ -319,7 +320,11 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 		}
 		output_writer->write_image(convertedImage);
 		
-		this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
+		abortStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)(total_number_of_images) * 100.0, 100.0);
+		if (abortStatus != 0) {
+			progressReporter->CalculationAborted();
+			throw USER_ABORTED("");
+		}
 	}
 	this->progressReporter->CalculationDone();
 }
