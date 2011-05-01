@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
 	
 	// get a progress reporter
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout());
+	boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_stdout());
 	
 	// get an analysis controller
 	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 

@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_ProgressReporting.h"
 
-int PALMAnalysisProgressReporter_Silent::UpdateCalculationProgress(double progress, double maxProgress) {
+int ProgressReporter_Silent::UpdateCalculationProgress(double progress, double maxProgress) {
 #ifdef WITH_IGOR
 	int abortStatus = CheckAbort(0);
 	if (abortStatus != 0)
@@ -19,7 +19,7 @@ int PALMAnalysisProgressReporter_Silent::UpdateCalculationProgress(double progre
 }
 
 #ifdef WITH_IGOR
-int PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
+int ProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
 	double percentDone = progress / maxProgress * 100.0;
 	char XOPOut[10];
 	
@@ -36,7 +36,7 @@ int PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(doub
 	return 0;
 }
 
-PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction) {
+ProgressReporter_IgorUserFunction::ProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction) {
 	int err;
 	FunctionInfo fi;
 	int requiredParameterTypes[2];
@@ -59,7 +59,7 @@ PALMAnalysisProgressReporter_IgorUserFunction::PALMAnalysisProgressReporter_Igor
 	this->igorProgressFunction = fi;
 }
 
-int PALMAnalysisProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
+int ProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress, double maxProgress) {
 	// check if the user wants to abort
 	int abortStatus = CheckAbort(0);
 	if (abortStatus != 0)

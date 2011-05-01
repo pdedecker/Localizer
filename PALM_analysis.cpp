@@ -23,7 +23,7 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 												boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
 												std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
 												boost::shared_ptr<FitPositions> fitPositions_rhs,
-												boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs,
+												boost::shared_ptr<ProgressReporter> progressReporter_rhs,
 												size_t firstFrame, size_t lastFrame) {
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;

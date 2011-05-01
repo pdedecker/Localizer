@@ -47,19 +47,19 @@ int parse_ccd_headers(ImageLoader *image_loader);
 // Routines that process CCD files and return data to Igor
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 										  long startX, long startY, long endX, long endY, 
-										  boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter);
+										  boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 										   long startX, long startY, long endX, long endY, 
-										   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter);
+										   boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								 long startX, long startY, long endX, long endY,
-								 boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter);
+								 boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								long startX, long startY, long endX, long endY,
-								boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter);
+								boost::shared_ptr<ProgressReporter> progressReporter);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);

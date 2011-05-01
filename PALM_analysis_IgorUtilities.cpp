@@ -205,7 +205,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 										  long startX, long startY, long endX, long endY, 
-										  boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
+										  boost::shared_ptr<ProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -278,7 +278,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 
 waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 										   long startX, long startY, long endX, long endY,
-										   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
+										   boost::shared_ptr<ProgressReporter> progressReporter) {
 	
 	int numDimensions;
 	CountInt dimensionSizes[MAX_DIMENSIONS+1];
@@ -323,7 +323,7 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								 long startX, long startY, long endX, long endY,
-								 boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
+								 boost::shared_ptr<ProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
@@ -396,7 +396,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 
 waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								long startX, long startY, long endX, long endY,
-								boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter) {
+								boost::shared_ptr<ProgressReporter> progressReporter) {
 	size_t n_images = image_loader->GetNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();

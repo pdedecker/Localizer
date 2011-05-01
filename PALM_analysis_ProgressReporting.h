@@ -20,10 +20,10 @@
 /**
  * @brief An abstract base class that provides progress updates and allows user aborts
  */
-class PALMAnalysisProgressReporter {
+class ProgressReporter {
 public:
-	PALMAnalysisProgressReporter() {;}
-	virtual ~PALMAnalysisProgressReporter() {;}
+	ProgressReporter() {;}
+	virtual ~ProgressReporter() {;}
 	
 	virtual void CalculationStarted() = 0;
 	virtual int UpdateCalculationProgress(double progress, double maxProgress) = 0;
@@ -31,10 +31,10 @@ public:
 	virtual void CalculationAborted() = 0;
 };
 
-class PALMAnalysisProgressReporter_Silent : public PALMAnalysisProgressReporter {
+class ProgressReporter_Silent : public ProgressReporter {
 public:
-	PALMAnalysisProgressReporter_Silent() {;}
-	~PALMAnalysisProgressReporter_Silent() {;}
+	ProgressReporter_Silent() {;}
+	~ProgressReporter_Silent() {;}
 	
 	void CalculationStarted() {;}
 	int UpdateCalculationProgress(double progress, double maxProgress);
@@ -49,10 +49,10 @@ protected:
 /**
  * @brief Print updates on the calculation progress to the Igor command line
  */
-class PALMAnalysisProgressReporter_IgorCommandLine : public PALMAnalysisProgressReporter {
+class ProgressReporter_IgorCommandLine : public ProgressReporter {
 public:
-	PALMAnalysisProgressReporter_IgorCommandLine() {;}
-	~PALMAnalysisProgressReporter_IgorCommandLine() {;}
+	ProgressReporter_IgorCommandLine() {;}
+	~ProgressReporter_IgorCommandLine() {;}
 	
 	void CalculationStarted() {previousPercentage = 0; XOPNotice("Running calculation... ");}
 	int UpdateCalculationProgress(double progress, double maxProgress);
@@ -71,10 +71,10 @@ struct IgorUserFunctionParams {
 typedef struct IgorUserFunctionParams IgorUserFunctionParams;
 #pragma pack()
 
-class PALMAnalysisProgressReporter_IgorUserFunction : public PALMAnalysisProgressReporter {
+class ProgressReporter_IgorUserFunction : public ProgressReporter {
 public:
-	PALMAnalysisProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction);
-	~PALMAnalysisProgressReporter_IgorUserFunction() {;}
+	ProgressReporter_IgorUserFunction(FUNCREF igorProgressFunction);
+	~ProgressReporter_IgorUserFunction() {;}
 	
 	void CalculationStarted() {;}
 	int UpdateCalculationProgress(double progress, double maxProgress);
@@ -86,10 +86,10 @@ protected:
 };
 #endif // WITH_IGOR
 
-class PALMAnalysisProgressReporter_stdout : public PALMAnalysisProgressReporter {
+class ProgressReporter_stdout : public ProgressReporter {
 public:
-	PALMAnalysisProgressReporter_stdout() {;}
-	~PALMAnalysisProgressReporter_stdout() {;}
+	ProgressReporter_stdout() {;}
+	~ProgressReporter_stdout() {;}
 	
 	void CalculationStarted() {std::cout << "Running calculation... "; std::cout.flush();}
 	int UpdateCalculationProgress(double progress, double maxProgress) {printf("\rRunning calculation... %4.1f%%", progress / maxProgress * 100.0); std::cout.flush(); return 0;}

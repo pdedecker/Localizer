@@ -20,7 +20,7 @@ int main(int argc, char *argv[]);
 
 // function that will parse the string command line arguments
 // and convert them to the appropriate objects
-boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset);
+boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<ProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset);
 
 // function that will guess the CCD file type and return an image loader
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);

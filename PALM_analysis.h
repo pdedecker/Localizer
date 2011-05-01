@@ -50,7 +50,7 @@ public:
 						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
 						   std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
 						   boost::shared_ptr<FitPositions> fitPositions_rhs,
-						   boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter_rhs,
+						   boost::shared_ptr<ProgressReporter> progressReporter_rhs,
 						   size_t firstFrame = (size_t)-1, size_t lastFrame = (size_t)-1);
 	~PALMAnalysisController() {;}
 	
@@ -76,7 +76,7 @@ protected:
 	boost::shared_ptr<ParticleFinder> particleFinder;
 	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
 	boost::shared_ptr<FitPositions> fitPositions;
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+	boost::shared_ptr<ProgressReporter> progressReporter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addLocalizedPositionsMutex;

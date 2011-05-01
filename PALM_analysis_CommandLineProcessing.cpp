@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// get a progress reporter
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter(new PALMAnalysisProgressReporter_stdout);
+	boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_stdout);
 	
 	ccdImagesProcessor = GetCCDImagesProcessor(processorName, progressReporter, nFramesAveraging, cameraMultiplicationFactor, cameraOffset);
 	
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset) {
+boost::shared_ptr<CCDImagesProcessor> GetCCDImagesProcessor(std::string name, boost::shared_ptr<ProgressReporter> progressReporter, size_t nFramesAveraging, double cameraMultiplier, double cameraOffset) {
 	if (name == std::string("subtractaverage"))
 		return boost::shared_ptr<CCDImagesProcessor> (new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
 	

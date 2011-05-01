@@ -537,7 +537,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
 	boost::shared_ptr<PALMAnalysisController> analysisController;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+	boost::shared_ptr<ProgressReporter> progressReporter;
 	
 	// Flag parameters.
 	
@@ -866,12 +866,12 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		}
 		
 		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
 		} else {
 			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
 			} else {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
 			}
 		}
 		
@@ -1255,14 +1255,14 @@ static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 		}
 		
 		// get a progress reporter
-		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+		boost::shared_ptr<ProgressReporter> progressReporter;
 		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent());
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
 		} else {
 			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
 			} else {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
 			}
 		}
 		
@@ -1432,14 +1432,14 @@ static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 		input_file_path = ConvertHandleToString(p->input_file);
 		image_loader = GetImageLoader(camera_type, input_file_path);
 		
-		boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+		boost::shared_ptr<ProgressReporter> progressReporter;
 		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent());
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
 		} else {
 			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
 			} else {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
 			}
 		}
 		
@@ -1902,7 +1902,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	boost::shared_ptr<PALMAnalysisProgressReporter> progressReporter;
+	boost::shared_ptr<ProgressReporter> progressReporter;
 	boost::shared_ptr<Eigen::MatrixXd> image;
 	
 	// Flag parameters.
@@ -2026,12 +2026,12 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		}
 		
 		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_Silent);
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
 		} else {
 			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
 			} else {
-				progressReporter = boost::shared_ptr<PALMAnalysisProgressReporter> (new PALMAnalysisProgressReporter_IgorCommandLine);
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
 			}
 		}
 		
