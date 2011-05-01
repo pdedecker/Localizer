@@ -9,6 +9,15 @@
 
 #include "PALM_analysis_ProgressReporting.h"
 
+int PALMAnalysisProgressReporter_Silent::UpdateCalculationProgress(double progress, double maxProgress) {
+#ifdef WITH_IGOR
+	int abortStatus = CheckAbort(0);
+	if (abortStatus != 0)
+		return abortStatus;
+#endif
+	return 0;
+}
+
 #ifdef WITH_IGOR
 int PALMAnalysisProgressReporter_IgorCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
 	double percentDone = progress / maxProgress * 100.0;

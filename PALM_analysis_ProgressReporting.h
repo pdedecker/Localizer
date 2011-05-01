@@ -37,7 +37,7 @@ public:
 	~PALMAnalysisProgressReporter_Silent() {;}
 	
 	void CalculationStarted() {;}
-	int UpdateCalculationProgress(double progress, double maxProgress) {return 0;}
+	int UpdateCalculationProgress(double progress, double maxProgress);
 	void CalculationDone() {;}
 	void CalculationAborted() {;}
 	
