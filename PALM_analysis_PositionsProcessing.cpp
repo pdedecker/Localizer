@@ -48,8 +48,8 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	}
 	
 	// run the actual calculation
-	VR_sp_pp2(xPositions.get(), yPositions.get(), &nPositions, &nBins,
-			  &((*lFunction)[0]), &calculationRange, upperX, lowerX,
+	VR_sp_pp2(xPositions.get(), yPositions.get(), nPositions, &nBins,
+			  &((*lFunction)[0]), calculationRange, upperX, lowerX,
 			  upperY, lowerY);
 	
     // return the calculated function
@@ -57,25 +57,25 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	
 }
 
-void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t *npt, size_t *nBins,
-			   double *outputArray, double *calculationRange, double upperX, double lowerX,
+void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_t *nBins,
+			   double *outputArray, double calculationRange, double upperX, double lowerX,
 			   double upperY, double lowerY) {
-    int   nPoints = *npt, kk = *nBins, k1, i, j, ib;
-    double ax, ay, xi, yi, sarea, g, dm, alm;
-    double a, x1, y1, rr, fss = *calculationRange, fs1, s1;
+    int   nIncludedBins, i, j, ib;
+    double xSize, ySize, xi, yi, sqrtArea, g, dm, alm;
+    double sqDistance, x1, y1, sqMaxDistance, effectiveCalculationRange, binsPerDistance;
 	
     // testinit();
-    ax = upperX - lowerX;
-    ay = upperY - lowerY;
-    sarea = sqrt(ax * ay);
-    dm = fss;
+    xSize = upperX - lowerX;
+    ySize = upperY - lowerY;
+    sqrtArea = sqrt(xSize * ySize);
+    dm = calculationRange;
     g = 2.0 / (nPoints * nPoints);
-    fs1 = std::min(fss, 0.5 * sqrt(ax * ax + ay * ay));
-    s1 = kk / fss;
-    k1 = floor(s1 * fs1 + 1e-3);
-    *nBins = k1;
-    rr = fs1 * fs1;
-    for (i = 0; i < kk; i++)
+    effectiveCalculationRange = std::min(calculationRange, 0.5 * sqrt(xSize * xSize + ySize * ySize));
+    binsPerDistance = *nBins / calculationRange;
+    nIncludedBins = floor(binsPerDistance * effectiveCalculationRange + 1e-3);
+    *nBins = nIncludedBins;
+    sqMaxDistance = effectiveCalculationRange * effectiveCalculationRange;
+    for (i = 0; i < *nBins; i++)
 		outputArray[i] = 0.0;
 	
     for (i = 1; i < nPoints; i++) {
@@ -84,21 +84,21 @@ void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t *npt, size_t *
 		for (j = 0; j < i; j++) {
 			x1 = xCoordinates[j] - xi;
 			y1 = yCoordinates[j] - yi;
-			a = x1 * x1 + y1 * y1;
-			if (a < rr) {
-				a = sqrt(a);
-				dm = std::min(a, dm);
-				ib = floor(s1 * a);
-				if (ib < k1)
-					outputArray[ib] += g * (VR_edge(xi, yi, a, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates[j], yCoordinates[j], a, upperX, lowerX, upperY, lowerY));
+			sqDistance = x1 * x1 + y1 * y1;
+			if (sqDistance < sqMaxDistance) {
+				sqDistance = sqrt(sqDistance);
+				dm = std::min(sqDistance, dm);
+				ib = floor(binsPerDistance * sqDistance);
+				if (ib < nIncludedBins)
+					outputArray[ib] += g * (VR_edge(xi, yi, sqDistance, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates[j], yCoordinates[j], sqDistance, upperX, lowerX, upperY, lowerY));
 			}
 		}
     }
-    a = 0.0;
+    sqDistance = 0.0;
     alm = 0.0;
-    for (i = 0; i < k1; i++) {
-		a += outputArray[i];
-		outputArray[i] = sqrt(a / M_PI) * sarea;
+    for (i = 0; i < nIncludedBins; i++) {
+		sqDistance += outputArray[i];
+		outputArray[i] = sqrt(sqDistance / M_PI) * sqrtArea;
     }
 }
 

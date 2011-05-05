@@ -46,9 +46,9 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
  *	fs	the scale of the plot, that is, the range of the x coordinates of the l function
  *	xu0	the coordinates of the rectangle bounding the points
  */
-void VR_sp_pp2(double *x, double *y, size_t *npt, size_t *k,
-			   double *h, double *fs, double xu0, double xl0,
-			   double yu0, double yl0);
+void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_t *nBins,
+			   double *outputArray, double calculationRange, double upperX, double lowerX,
+			   double upperY, double lowerY);
 
 /**
  * Function that corrects for edge effects in the calculated L function, verbatim from Ripley et al
