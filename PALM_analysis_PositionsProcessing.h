@@ -32,7 +32,7 @@
  */
 
 boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
-																	 double plotFullScale, size_t nBins, double lowerX, double upperX,
+																	 double calculationRange, size_t nBins, double lowerX, double upperX,
 																	 double lowerY, double upperY);
 
 /**

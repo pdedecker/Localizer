@@ -10,7 +10,7 @@
 #include "PALM_analysis_PositionsProcessing.h"
 
 boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
-																	 double plotFullScale, size_t nBins, double lowerX, double upperX,
+																	 double calculationRange, size_t nBins, double lowerX, double upperX,
 																	 double lowerY, double upperY) {
 	size_t nPositions = positions->getNPositions();
 	double currentX, currentY;
@@ -49,7 +49,7 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	
 	// run the actual calculation
 	VR_sp_pp2(xPositions.get(), yPositions.get(), &nPositions, &nBins,
-			  &((*lFunction)[0]), &plotFullScale, upperX, lowerX,
+			  &((*lFunction)[0]), &calculationRange, upperX, lowerX,
 			  upperY, lowerY);
 	
     // return the calculated function
@@ -57,48 +57,48 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	
 }
 
-void VR_sp_pp2(double *x, double *y, size_t *npt, size_t *k,
-			   double *h, double *fs, double xu0, double xl0,
-			   double yu0, double yl0) {
-    int   n = *npt, kk = *k, k1, i, j, ib;
+void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t *npt, size_t *nBins,
+			   double *outputArray, double *calculationRange, double upperX, double lowerX,
+			   double upperY, double lowerY) {
+    int   nPoints = *npt, kk = *nBins, k1, i, j, ib;
     double ax, ay, xi, yi, sarea, g, dm, alm;
-    double a, x1, y1, rr, fss = *fs, fs1, s1;
+    double a, x1, y1, rr, fss = *calculationRange, fs1, s1;
 	
     // testinit();
-    ax = xu0 - xl0;
-    ay = yu0 - yl0;
+    ax = upperX - lowerX;
+    ay = upperY - lowerY;
     sarea = sqrt(ax * ay);
     dm = fss;
-    g = 2.0 / (n * n);
+    g = 2.0 / (nPoints * nPoints);
     fs1 = std::min(fss, 0.5 * sqrt(ax * ax + ay * ay));
     s1 = kk / fss;
     k1 = floor(s1 * fs1 + 1e-3);
-    *k = k1;
+    *nBins = k1;
     rr = fs1 * fs1;
     for (i = 0; i < kk; i++)
-		h[i] = 0.0;
+		outputArray[i] = 0.0;
 	
-    for (i = 1; i < n; i++) {
-		xi = x[i];
-		yi = y[i];
+    for (i = 1; i < nPoints; i++) {
+		xi = xCoordinates[i];
+		yi = yCoordinates[i];
 		for (j = 0; j < i; j++) {
-			x1 = x[j] - xi;
-			y1 = y[j] - yi;
+			x1 = xCoordinates[j] - xi;
+			y1 = yCoordinates[j] - yi;
 			a = x1 * x1 + y1 * y1;
 			if (a < rr) {
 				a = sqrt(a);
 				dm = std::min(a, dm);
 				ib = floor(s1 * a);
 				if (ib < k1)
-					h[ib] += g * (VR_edge(xi, yi, a, xu0, xl0, yu0, yl0) + VR_edge(x[j], y[j], a, xu0, xl0, yu0, yl0));
+					outputArray[ib] += g * (VR_edge(xi, yi, a, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates[j], yCoordinates[j], a, upperX, lowerX, upperY, lowerY));
 			}
 		}
     }
     a = 0.0;
     alm = 0.0;
     for (i = 0; i < k1; i++) {
-		a += h[i];
-		h[i] = sqrt(a / M_PI) * sarea;
+		a += outputArray[i];
+		outputArray[i] = sqrt(a / M_PI) * sarea;
     }
 }
 
