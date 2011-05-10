@@ -131,8 +131,6 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 		throw std::runtime_error("the requested starting image is larger than the number of images available in the file");
 	}
 	
-	progressReporter->CalculationStarted();
-	
 	// how many images should we load?
 	maxNImagesToLoad = nImages - firstImage;
 	if (nImagesRequested == (size_t)-1) {
@@ -144,6 +142,14 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 			nImagesToLoad = nImagesRequested;
 		}
 	}
+	
+	// only report progress if more than 50 frames are requested
+	int doProgress = 0, progressStatus = 0;
+	if (nImagesToLoad >= 50)
+		progressStatus = 1;
+	
+	if (doProgress)
+		progressReporter->CalculationStarted();
 	
 	x_size = image_loader->getXSize();
 	y_size = image_loader->getYSize();
@@ -170,14 +176,22 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	
 	// load the data and write it to Igor
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
-		progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
+		if (doProgress && (i % 30 == 0)) {
+			progressStatus =  progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
+			if (progressStatus != 0) {
+				progressReporter->CalculationAborted();
+				throw USER_ABORTED("");
+			}
+		}
+		
 		current_image = image_loader->readImage(i);
 		waveWriter.write_image(current_image);
 		if (CheckAbort(0))
 			return 0;
 	}
 	
-	progressReporter->CalculationDone();
+	if (doProgress)
+		progressReporter->CalculationDone();
 	
 	return 0;
 }
