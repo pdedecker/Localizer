@@ -146,7 +146,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	// only report progress if more than 50 frames are requested
 	int doProgress = 0, progressStatus = 0;
 	if (nImagesToLoad >= 50)
-		progressStatus = 1;
+		doProgress = 1;
 	
 	if (doProgress)
 		progressReporter->CalculationStarted();
@@ -176,7 +176,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	
 	// load the data and write it to Igor
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
-		if (doProgress && (i % 30 == 0)) {
+		if (doProgress && (i % 10 == 0)) {
 			progressStatus =  progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
 			if (progressStatus != 0) {
 				progressReporter->CalculationAborted();
