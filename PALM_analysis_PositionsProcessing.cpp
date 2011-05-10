@@ -107,18 +107,28 @@ double VR_edge(double x, double y, double a, double xu0, double xl0,
     double b, c, c1, c2, r[6], w;
     int   i;
 	
+	// set w to the distance from the point to
+	// the closest edge
     w = x - xl0;
     if (w > y - yl0) w = y - yl0;
     if (w > xu0 - x) w = xu0 - x;
     if (w > yu0 - y) w = yu0 - y;
+	
+	// if the distance between the points
+	// is less than the distance to the closest edge
+	// then the entire circle is within the sample region
     if (a <= w) return (0.5);
+	
+	
     r[4] = r[0] = x - xl0;
     r[5] = r[1] = yu0 - y;
     r[2] = xu0 - x;
     r[3] = y - yl0;
     b = 0.0;
     for (i = 1; i <= 4; i++)
-		if (r[i] < a) {
+		if (r[i] < a) {	// the distance from this point to the edge
+						// is closer than the radius of the circle
+						// so some part of it is outside the region
 			if (r[i] == 0.0)
 				b += M_PI;
 			else {
