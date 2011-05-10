@@ -117,7 +117,8 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 	
 }
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination) {
+int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
+						   boost::shared_ptr<ProgressReporter> progressReporter) {
 	size_t nImages = image_loader->GetNImages();
 	size_t maxNImagesToLoad, nImagesToLoad;
 	size_t x_size, y_size;
@@ -129,6 +130,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	if (firstImage >= nImages) {
 		throw std::runtime_error("the requested starting image is larger than the number of images available in the file");
 	}
+	
+	progressReporter->CalculationStarted();
 	
 	// how many images should we load?
 	maxNImagesToLoad = nImages - firstImage;
@@ -167,11 +170,14 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	
 	// load the data and write it to Igor
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
+		progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
 		current_image = image_loader->readImage(i);
 		waveWriter.write_image(current_image);
 		if (CheckAbort(0))
 			return 0;
 	}
+	
+	progressReporter->CalculationDone();
 	
 	return 0;
 }

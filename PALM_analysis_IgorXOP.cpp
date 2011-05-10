@@ -153,6 +153,15 @@ struct ReadCCDImagesRuntimeParams {
 	int OFlagEncountered;
 	// There are no fields for this group because it has no parameters.
 	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
@@ -172,7 +181,7 @@ struct ReadCCDImagesRuntimeParams {
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned..
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ProcessCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -981,6 +990,24 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 		overwrite = 0;
 	}
 	
+	int useIgorFunctionForProgress;
+	FUNCREF igorProgressReporterFunction;
+	if (p->PROGFlagEncountered) {
+		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
+		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
+	}
+	
+	int quiet = 0;
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+	}
+	
 	if (p->DESTFlagEncountered) {
 		// Parameter: p->dest
 		dataFolderAndName = p->dest;
@@ -1002,13 +1029,22 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	}
 	
 	try {
+		boost::shared_ptr<ProgressReporter> progressReporter;
+		if (quiet == 1) {
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+		} else {
+			if (useIgorFunctionForProgress != 0) {
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+			}
+		}
 		
-		// if we are here then everything should be okay
 		data_file_path = ConvertHandleToString(p->filePath);
 		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
-			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName);
+			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
 		} else {
 			err = parse_ccd_headers(image_loader.get());
 		}
@@ -2153,7 +2189,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /DEST=DataFolderAndName:{dest,real} string:filePath";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:filePath";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);

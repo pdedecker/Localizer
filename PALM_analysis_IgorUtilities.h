@@ -40,7 +40,8 @@ int GetFileStorageType(std::string &filePath);
 boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path);
 
 // Routines that return information on CCD files and image frames to Igor
-int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination);
+int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination, 
+						   boost::shared_ptr<ProgressReporter> progressReporter);
 
 int parse_ccd_headers(ImageLoader *image_loader);
 
