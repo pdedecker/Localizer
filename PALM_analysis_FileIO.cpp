@@ -609,7 +609,7 @@ void ImageLoaderPDE::parse_header_information() {
 	this->x_size = header.xSize;
 	this->y_size = header.ySize;
 	this->storage_type = header.storageFormat;
-	this->header_length = sizeof(header);
+	this->header_length = 24;
 	
 	this->checkForReasonableValues();
 }
