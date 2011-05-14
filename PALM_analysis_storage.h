@@ -231,24 +231,24 @@ public:
 	// accessor methods
 	virtual size_t getNPositions() const = 0;
 	virtual size_t getFrameNumber(size_t index) const = 0;
-	virtual double getIntegral(size_t index) const = 0;
-	virtual double getXWidth(size_t index) const = 0;
-	virtual double getYWidth(size_t index) const = 0;
-	virtual double getCorrelation(size_t index) const = 0;
-	virtual double getXPosition(size_t index) const = 0;
-	virtual double getYPosition(size_t index) const = 0;
-	virtual double getZPosition(size_t index) const = 0;
-	virtual double getBackground(size_t index) const = 0;
+	virtual double getIntegral(size_t index) const {return 0;}
+	virtual double getXWidth(size_t index) const {return 0;}
+	virtual double getYWidth(size_t index) const {return 0;}
+	virtual double getCorrelation(size_t index) const {return 0;}
+	virtual double getXPosition(size_t index) const {return 0;}
+	virtual double getYPosition(size_t index) const {return 0;}
+	virtual double getZPosition(size_t index) const {return 0;}
+	virtual double getBackground(size_t index) const {return 0;}
 	
 	
-	virtual double getIntegralDeviation(size_t index) const = 0;
-	virtual double getXWidthDeviation(size_t index) const = 0;
-	virtual double getYWidthDeviation(size_t index) const = 0;
-	virtual double getCorrelationDeviation(size_t index) const = 0;
-	virtual double getXPositionDeviation(size_t index) const = 0;
-	virtual double getYPositionDeviation(size_t index) const = 0;
-	virtual double getZPositionDeviation(size_t index) const = 0;
-	virtual double getBackgroundDeviation(size_t index) const = 0;
+	virtual double getIntegralDeviation(size_t index) const {return 0;}
+	virtual double getXWidthDeviation(size_t index) const {return 0;}
+	virtual double getYWidthDeviation(size_t index) const {return 0;}
+	virtual double getCorrelationDeviation(size_t index) const {return 0;}
+	virtual double getXPositionDeviation(size_t index) const {return 0;}
+	virtual double getYPositionDeviation(size_t index) const {return 0;}
+	virtual double getZPositionDeviation(size_t index) const {return 0;}
+	virtual double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// add positions
 	virtual void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) = 0;
@@ -289,7 +289,6 @@ public:
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getZPosition(size_t index) const {return 0;}
@@ -298,10 +297,8 @@ public:
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
 	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
 	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).widthDeviation;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
-	double getZPositionDeviation(size_t index) const {return 0;}
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
@@ -344,21 +341,12 @@ public:
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
-	double getXWidth(size_t index) const {return 0;}
-	double getYWidth(size_t index) const {return 0;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
-	
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
-	double getXWidthDeviation(size_t index) const {return 0;}
-	double getYWidthDeviation(size_t index) const {return 0;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
-	double getZPositionDeviation(size_t index) const {return 0;}
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
@@ -409,7 +397,6 @@ public:
 	double getCorrelation(size_t index) const {return positionsVector.at(index).correlation;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
 	
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
@@ -418,7 +405,6 @@ public:
 	double getCorrelationDeviation(size_t index) const {return positionsVector.at(index).correlationDeviation;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
-	double getZPositionDeviation(size_t index) const {return 0;}
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
@@ -460,23 +446,8 @@ public:
 	// accessor methods
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
-	double getIntegral(size_t index) const {return 0;}
-	double getXWidth(size_t index) const {return 0;}
-	double getYWidth(size_t index) const {return 0;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
-	double getBackground(size_t index) const {return 0;}
-	
-	double getIntegralDeviation(size_t index) const {return 0;}
-	double getXWidthDeviation(size_t index) const {return 0;}
-	double getYWidthDeviation(size_t index) const {return 0;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
-	double getXPositionDeviation(size_t index) const {return 0;}
-	double getYPositionDeviation(size_t index) const {return 0;}
-	double getZPositionDeviation(size_t index) const {return 0;}
-	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
@@ -517,23 +488,10 @@ public:
 	// accessor methods
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
-	double getIntegral(size_t index) const {return 0;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
-	double getBackground(size_t index) const {return 0;}
-	
-	double getIntegralDeviation(size_t index) const {return 0;}
-	double getXWidthDeviation(size_t index) const {return 0;}
-	double getYWidthDeviation(size_t index) const {return 0;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
-	double getXPositionDeviation(size_t index) const {return 0;}
-	double getYPositionDeviation(size_t index) const {return 0;}
-	double getZPositionDeviation(size_t index) const {return 0;}
-	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
@@ -575,22 +533,10 @@ public:
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
-	double getXWidth(size_t index) const {return 0;}
-	double getYWidth(size_t index) const {return 0;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
-	double getBackground(size_t index) const {return 0;}
-	
-	double getIntegralDeviation(size_t index) const {return 0;}
-	double getXWidthDeviation(size_t index) const {return 0;}
-	double getYWidthDeviation(size_t index) const {return 0;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
-	double getZPositionDeviation(size_t index) const {return 0;}
-	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
@@ -634,20 +580,12 @@ public:
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
 	double getXWidth(size_t index) const {return positionsVector.at(index).width;}
 	double getYWidth(size_t index) const {return positionsVector.at(index).width;}
-	double getCorrelation(size_t index) const {return 0;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
-	double getZPosition(size_t index) const {return 0;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
 	
-	double getIntegralDeviation(size_t index) const {return 0;}
-	double getXWidthDeviation(size_t index) const {return 0;}
-	double getYWidthDeviation(size_t index) const {return 0;}
-	double getCorrelationDeviation(size_t index) const {return 0;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
-	double getZPositionDeviation(size_t index) const {return 0;}
-	double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// adding new positions
 	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
