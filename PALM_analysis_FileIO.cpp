@@ -716,8 +716,9 @@ ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 	TIFFSetWarningHandler(NULL);
 	this->filePath = rhs;
 	
-	tiff_file = NULL;
+	this->previousDirectoryIndex = (size_t)-2;
 	
+	tiff_file = NULL;
 	tiff_file = TIFFOpen(this->filePath.c_str(), "rm");
 	if (tiff_file == NULL) {
 		std::string error ("Unable to open the file at ");
@@ -931,7 +932,11 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 	
 	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
 	
-	result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
+	if (directoryIndices[index] == previousDirectoryIndex + 1) {
+		result = TIFFReadDirectory(tiff_file);
+	} else {
+		result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
+	}
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the directory for the image at\"";
@@ -1015,6 +1020,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 				break;
 		}
 	}
+	
+	this->previousDirectoryIndex = directoryIndices[index];
 	
 	return image;
 }

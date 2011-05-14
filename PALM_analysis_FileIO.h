@@ -185,6 +185,8 @@ protected:
 	
 	TIFF* tiff_file;
 	std::vector<size_t> directoryIndices;
+	
+	size_t previousDirectoryIndex;
 };
 
 #ifdef WITH_IGOR
