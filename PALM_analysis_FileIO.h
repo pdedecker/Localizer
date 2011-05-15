@@ -79,14 +79,26 @@ private:
 class ImageLoader {
 public:
 	ImageLoader();
-	ImageLoader(const std::string rhs);
 	virtual ~ImageLoader();
 	
 	size_t getNImages() const {return nImages;}
 	size_t getXSize() const {return xSize;}
 	size_t getYSize() const {return ySize;}
 	int getStorageType() const {return storage_type;}
-	virtual boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index) = 0;	// images are numbered from 0 to N - 1
+	
+	/**
+	 * readImage explicitly asks for the image at a certain index, but is not reentrant.
+	 */
+	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);	// images are numbered from 0 to N - 1
+	
+	/*
+	 * readNext asks for the next image in the sequence, and is
+	 * reentrant, but throws a std::runtime exception if there are no more images
+	 * in the sequence. Also, due to its reentrant nature there must be some way
+	 * for the caller to know which image was returned. This is returned by reference
+	 * in the argument.
+	 */
+	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index) = 0;
 	
 protected:
 	virtual void parse_header_information() = 0;
@@ -108,6 +120,7 @@ protected:
 	uint64_t xSize;
 	uint64_t ySize;
 	int storage_type;
+	size_t nextImageToRead;
 	
 	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
 };
@@ -117,7 +130,7 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -128,7 +141,7 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();

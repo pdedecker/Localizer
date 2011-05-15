@@ -111,10 +111,11 @@ void WindowsFileStream::seekg(uint64_t pos) {
 
 
 ImageLoader::ImageLoader() {
-	nImages = 0;
-	xSize = 0;
-	ySize = 0;
-	header_length = 0;
+	this->nImages = 0;
+	this->xSize = 0;
+	this->ySize = 0;
+	this->header_length = 0;
+	this->nextImageToRead = 0;
 }
 
 ImageLoader::~ImageLoader() {
@@ -130,6 +131,14 @@ void ImageLoader::checkForReasonableValues() {
 	if (this->nImages > kMaxNFrames) {
 		throw std::runtime_error("the reported number of frames is unreasonably large");
 	}
+}
+
+boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readImage(size_t index) {
+	if (index >= nImages)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
+	this->nextImageToRead = index;
+	return this->readNextImage(index);
 }
 
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
@@ -205,30 +214,24 @@ void ImageLoaderSPE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index) {
-	if (index >= nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readNextImage(size_t &index) {
 	uint64_t offset;
 	uint32_t *currentUint32t = 0;
 	float *currentFloat = 0;
 	int16_t *currentInt16t = 0;
 	uint16_t *currentUint16t = 0;
-	boost::shared_ptr<Eigen::MatrixXd> image;
 	
-	uint64_t n_bytes_in_single_image;
+	uint64_t imageSize, pixelSize;
 	
 	// determine how big we have to make the single image buffer and the offset
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4 byte float
 		case STORAGE_TYPE_UINT32:	// 4-byte long
-			n_bytes_in_single_image = xSize * ySize * 4;
-			offset = header_length + index * (xSize) * (ySize) * 4;
+			pixelSize = 4;
 			break;
 		case STORAGE_TYPE_INT16:	// 2 byte signed short
 		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
-			n_bytes_in_single_image = xSize * ySize * 2;
-			offset = header_length + index * (xSize) * (ySize) * 2;
+			pixelSize = 2;
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
@@ -237,13 +240,20 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 			break;
 	}
 	
-	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	imageSize = pixelSize * xSize * ySize;
+	
+	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
+	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		
+		offset = this->header_length + this->nextImageToRead * imageSize;
+		if (this->nextImageToRead >= this->nImages)
+			throw std::runtime_error("requested more images than there are in the file");
+		
 		file.seekg(offset);
-		file.read((char *)single_image_buffer.get(), n_bytes_in_single_image);
+		file.read((char *)single_image_buffer.get(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
@@ -251,6 +261,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 			error += "\" assuming the SPE format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
 	}
 	
 	switch(storage_type) {
@@ -293,7 +305,6 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 				}
 			}
 			break;
-			
 		default:
 			std::string error("Unable to determine the storage type used in ");
 			error += this->filePath;
@@ -418,21 +429,21 @@ void ImageLoaderAndor::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t index) {
-	if (index >= nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
-	uint64_t offset;	// off_t is the size of the file pointer used by the OS
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readNextImage(size_t &index) {
+	uint64_t offset;
 	float current_float = 0;
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[xSize * ySize]);
 	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
-	offset = header_length + index * (xSize) * (ySize) * sizeof(float);
-	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		if (this->nextImageToRead >= nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		offset = this->header_length + this->nextImageToRead * (xSize) * (ySize) * sizeof(float);
+		
 		file.seekg(offset);
 		file.read((char *)single_image_buffer.get(), (xSize * ySize * sizeof(float)));
 		if (file.fail() != 0) {
@@ -442,10 +453,10 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t inde
 			error += "\" assuming the Andor format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
 	}
 	
-	
-	// this is currently only safe on little-endian systems!
 	for (size_t j  = 0; j < ySize; j++) {
 		for (size_t i = 0; i < xSize; i++) {
 			current_float = single_image_buffer[cache_offset];
