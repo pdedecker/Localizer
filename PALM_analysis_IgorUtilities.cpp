@@ -258,6 +258,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	
 	progressReporter->CalculationStarted();
 	int progressStatus;
+	size_t nextFrameRead;
 	// try to allocate a buffer that will hold the intensity trace
 	boost::scoped_array<double> intensity_trace_buffer(new double[n_images]);
 	
@@ -271,7 +272,8 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 		}
 		
 		summed_intensity = 0;
-		current_image = image_loader->readImage(i);
+		current_image = image_loader->readNextImage(nextFrameRead);
+		assert(i == nextFrameRead);
 		
 		// calculate the total sum of the image
 		for (size_t k = startY; k <= endY; k++) {
@@ -382,7 +384,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	
 	int progressStatus;
 	progressReporter->CalculationStarted();
-	
+	size_t nextFrameRead;
 	for (size_t i = 0; i < n_images; i++) {
 		if (i % 20 == 0) {
 			progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
@@ -392,7 +394,8 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 			}
 		}
 		
-		current_image = image_loader->readImage(i);
+		current_image = image_loader->readNextImage(nextFrameRead);
+		assert(i == nextFrameRead);
 		
 		// add the values of the newly loaded image to the average image
 		(*average_image) += (*current_image);
@@ -453,7 +456,7 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 	
 	progressReporter->CalculationStarted();
 	int progressStatus;
-	
+	size_t nextFrameRead;
 	// construct an average image
 	for (size_t i = 0; i < n_images; i++) {
 		if (i % 10 == 0) {
@@ -464,7 +467,8 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 			}
 		}
 		
-		current_image = image_loader->readImage(i);
+		current_image = image_loader->readNextImage(nextFrameRead);
+		assert(nextFrameRead == i);
 		
 		// add the values of the newly loaded image to the average image
 		(*average_image) += (*current_image);
