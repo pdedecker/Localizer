@@ -101,9 +101,14 @@ public:
 	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index) = 0;
 	
 	/*
+	 * Spool the file so the specified frame will be the one read by readNextImage
+	 */
+	void spoolTo(size_t index);
+	
+	/*
 	 * 'Rewind' the file to the beginning so that readNextImage will return the first frame.
 	 */
-	void rewind() {this->nextImageToRead = 0;}
+	void rewind() {this->spoolTo(0);}
 	
 protected:
 	virtual void parse_header_information() = 0;
@@ -199,15 +204,10 @@ public:
 	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 	/*
-	 * The implementation of readImage in the base ImageLoader class
+	 * The implementation of spoolTo in the base ImageLoader class
 	 * is overridden due to the linked list nature of TIFF files
 	 */
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
-	
-	/*
-	 * rewind must also be reimplemented.
-	 */
-	void rewind();
+	void spoolTo(size_t index);
 	
 protected:
 	void parse_header_information();

@@ -134,11 +134,15 @@ void ImageLoader::checkForReasonableValues() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readImage(size_t index) {
+	this->spoolTo(index);
+	return this->readNextImage(index);
+}
+
+void ImageLoader::spoolTo(size_t index) {
 	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	this->nextImageToRead = index;
-	return this->readNextImage(index);
 }
 
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
@@ -930,28 +934,6 @@ void ImageLoaderTIFF::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index) {
-	if (index >= this->nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
-	int result;
-	
-	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the directory for the image at\"";
-		error += this->filePath;
-		error += "\"";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	this->currentDirectoryIndex = this->directoryIndices.at(index);
-	this->nextImageToRead = index;
-	
-	size_t dummyIndex;
-	return this->readNextImage(dummyIndex);
-}
-
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index) {
 	int result;
 	
@@ -1062,10 +1044,10 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index)
 	return image;
 }
 
-void ImageLoaderTIFF::rewind() {
+void ImageLoaderTIFF::spoolTo(size_t index) {
 	int result;
 	
-	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(0));
+	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the directory for the image at\"";
@@ -1074,8 +1056,8 @@ void ImageLoaderTIFF::rewind() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	this->nextImageToRead = 0;
-	this->currentDirectoryIndex = this->directoryIndices.at(0);
+	this->nextImageToRead = index;
+	this->currentDirectoryIndex = this->directoryIndices.at(index);
 }
 
 #ifdef WITH_IGOR
