@@ -99,12 +99,15 @@ public:
 	 * in the argument.
 	 */
 	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index) = 0;
-	
+	/*
+	 * Get the next image in the file and loop to the begin after the last image.
+	 * Not reentrant.
+	 */
+	boost::shared_ptr<Eigen::MatrixXd> readNextImageAndLoop(size_t &index);
 	/*
 	 * Spool the file so the specified frame will be the one read by readNextImage
 	 */
 	void spoolTo(size_t index);
-	
 	/*
 	 * 'Rewind' the file to the beginning so that readNextImage will return the first frame.
 	 */

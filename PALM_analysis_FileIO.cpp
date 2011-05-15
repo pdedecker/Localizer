@@ -138,6 +138,11 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readImage(size_t index) {
 	return this->readNextImage(index);
 }
 
+boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readNextImageAndLoop(size_t &index) {
+	this->spoolTo(index % this->nImages);
+	return this->readNextImage(index);
+}
+
 void ImageLoader::spoolTo(size_t index) {
 	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
