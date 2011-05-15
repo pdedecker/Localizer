@@ -135,7 +135,7 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -146,7 +146,7 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -174,7 +174,7 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -185,7 +185,7 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -196,7 +196,18 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	
+	/*
+	 * The implementation of readImage in the base ImageLoader class
+	 * is overridden due to the linked list nature of TIFF files
+	 */
 	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	
+	/*
+	 * rewind must also be reimplemented.
+	 */
+	void rewind();
 	
 protected:
 	void parse_header_information();
@@ -204,7 +215,7 @@ protected:
 	TIFF* tiff_file;
 	std::vector<size_t> directoryIndices;
 	
-	size_t previousDirectoryIndex;
+	size_t currentDirectoryIndex;
 };
 
 #ifdef WITH_IGOR

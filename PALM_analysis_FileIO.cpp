@@ -540,7 +540,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readNextImage(size_t &i
 	uint64_t offset;
 	size_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
-	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
+	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
 	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -730,7 +730,7 @@ ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 	TIFFSetWarningHandler(NULL);
 	this->filePath = rhs;
 	
-	this->previousDirectoryIndex = (size_t)-2;
+	this->currentDirectoryIndex = 0;
 	
 	tiff_file = NULL;
 	tiff_file = TIFFOpen(this->filePath.c_str(), "rm");
@@ -931,26 +931,12 @@ void ImageLoaderTIFF::parse_header_information() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index) {
-	if (index >= nImages)
+	if (index >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	boost::shared_ptr<Eigen::MatrixXd> image;
 	int result;
 	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
-	
-	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
-	if (single_scanline_buffer.get() == NULL) {
-		throw std::bad_alloc();
-	}
-	
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
-	if (directoryIndices[index] == previousDirectoryIndex + 1) {
-		result = TIFFReadDirectory(tiff_file);
-	} else {
-		result = TIFFSetDirectory(tiff_file, directoryIndices[index]);
-	}
+	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the directory for the image at\"";
@@ -958,6 +944,41 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		error += "\"";
 		throw ERROR_READING_FILE_DATA(error);
 	}
+	
+	this->currentDirectoryIndex = this->directoryIndices.at(index);
+	this->nextImageToRead = index;
+	
+	size_t dummyIndex;
+	return this->readNextImage(dummyIndex);
+}
+
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index) {
+	int result;
+	
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	
+	if (this->nextImageToRead >= this->nImages)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
+	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
+	if (single_scanline_buffer.get() == NULL) {
+		throw std::bad_alloc();
+	}
+	
+	// advance the active TIFF directory to that needed to read the next image
+	while (this->currentDirectoryIndex != directoryIndices.at(this->nextImageToRead)) {
+		result = TIFFReadDirectory(this->tiff_file);
+		this->currentDirectoryIndex += 1;
+		if (result != 1) {
+			std::string error;
+			error = "Unable to set the directory for the image at\"";
+			error += this->filePath;
+			error += "\"";
+			throw ERROR_READING_FILE_DATA(error);
+		}
+	}
+	
+	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	for (size_t j = 0; j < ySize; ++j) {
 		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
@@ -1035,9 +1056,26 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		}
 	}
 	
-	this->previousDirectoryIndex = directoryIndices[index];
+	index = this->nextImageToRead;
+	this->nextImageToRead += 1;
 	
 	return image;
+}
+
+void ImageLoaderTIFF::rewind() {
+	int result;
+	
+	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(0));
+	if (result != 1) {
+		std::string error;
+		error = "Unable to set the directory for the image at\"";
+		error += this->filePath;
+		error += "\"";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	this->nextImageToRead = 0;
+	this->currentDirectoryIndex = this->directoryIndices.at(0);
 }
 
 #ifdef WITH_IGOR
