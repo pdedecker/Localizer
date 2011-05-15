@@ -247,10 +247,10 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readNextImage(size_t &index) 
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
-		
-		offset = this->header_length + this->nextImageToRead * imageSize;
 		if (this->nextImageToRead >= this->nImages)
 			throw std::runtime_error("requested more images than there are in the file");
+		
+		offset = this->header_length + this->nextImageToRead * imageSize;
 		
 		file.seekg(offset);
 		file.read((char *)single_image_buffer.get(), imageSize);
@@ -536,21 +536,22 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t index) {
-	if (index >= nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
-	uint64_t offset;	// off_t is the size of the file pointer used by the OS
-	size_t n_bytes_per_image = xSize * ySize * 2;
-	offset = (index + 1) * header_length + index * (xSize) * (ySize) * 2;	// assume a 16-bit format
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readNextImage(size_t &index) {
+	uint64_t offset;
+	size_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
 	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		if (this->nextImageToRead >= nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		offset = (this->nextImageToRead + 1) * header_length + this->nextImageToRead * imageSize;
+		
 		file.seekg(offset);
-		file.read(single_image_buffer.get(), n_bytes_per_image);
+		file.read(single_image_buffer.get(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
@@ -558,6 +559,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t 
 			error += "\" assuming the Hamamatsu format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
 	}
 	
 	uint16_t *uint16tPtr = (uint16_t *)single_image_buffer.get();
@@ -625,29 +628,22 @@ void ImageLoaderPDE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index) {
-	if (index >= nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
-	boost::shared_ptr<Eigen::MatrixXd> image;
-	size_t n_pixels = this->xSize * this->ySize;
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readNextImage(size_t &index) {
+	size_t nPixels = this->xSize * this->ySize;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
-			imageSize = n_pixels * 2;
-			offset = header_length + index * n_pixels * sizeof(uint16_t);
+			imageSize = nPixels * 2;
 			break;
 		case STORAGE_TYPE_UINT32:
 		case STORAGE_TYPE_FP32:
-			imageSize = n_pixels * 4;
-			offset = header_length + index * n_pixels * sizeof(uint32_t);
+			imageSize = nPixels * 4;
 			break;
 		case STORAGE_TYPE_FP64:
-			imageSize = n_pixels * 8;
-			offset = header_length + index * n_pixels * sizeof(double);
+			imageSize = nPixels * 8;
 			break;
 		default:
 			throw std::runtime_error("The data file does not appear to contain a recognized storage type");
@@ -658,6 +654,11 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		if (this->nextImageToRead >= this->nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		offset = this->header_length + this->nextImageToRead * imageSize;
+		
 		file.seekg(offset);
 		file.read(buffer.get(), imageSize);
 		if (file.fail() != 0) {
@@ -667,6 +668,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 			error += "\" assuming the simple image format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
 	}
 	
 	
