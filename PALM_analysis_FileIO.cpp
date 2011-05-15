@@ -111,9 +111,9 @@ void WindowsFileStream::seekg(uint64_t pos) {
 
 
 ImageLoader::ImageLoader() {
-	total_number_of_images = 0;
-	x_size = 0;
-	y_size = 0;
+	nImages = 0;
+	xSize = 0;
+	ySize = 0;
 	header_length = 0;
 }
 
@@ -123,11 +123,11 @@ ImageLoader::~ImageLoader() {
 }
 
 void ImageLoader::checkForReasonableValues() {
-	if ((this->x_size > kMaxImageDimension) || (this->y_size > kMaxImageDimension)) {
+	if ((this->xSize > kMaxImageDimension) || (this->ySize > kMaxImageDimension)) {
 		throw std::runtime_error("the reported frame size is unreasonably large");
 	}
 	
-	if (this->total_number_of_images > kMaxNFrames) {
+	if (this->nImages > kMaxNFrames) {
 		throw std::runtime_error("the reported number of frames is unreasonably large");
 	}
 }
@@ -155,19 +155,19 @@ ImageLoaderSPE::~ImageLoaderSPE() {
 void ImageLoaderSPE::parse_header_information() {
 	// warning: only safe as long as both the writing
 	// and reading systems are little-endian
-	this->x_size = 0;
-	this->y_size = 0;
-	this->total_number_of_images = 0;
+	this->xSize = 0;
+	this->ySize = 0;
+	this->nImages = 0;
 	this->storage_type = 0;
 	
 	file.seekg(42);
-	file.read((char *)&(this->x_size), 2);
+	file.read((char *)&(this->xSize), 2);
 	
 	file.seekg(656);
-	file.read((char *)&(this->y_size), 2);
+	file.read((char *)&(this->ySize), 2);
 	
 	file.seekg(1446);
-	file.read((char *)&(this->total_number_of_images), 4);
+	file.read((char *)&(this->nImages), 4);
 	
 	file.seekg(108);
 	file.read((char *)&(this->storage_type), 2);
@@ -206,7 +206,7 @@ void ImageLoaderSPE::parse_header_information() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	uint64_t offset;
@@ -222,13 +222,13 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4 byte float
 		case STORAGE_TYPE_UINT32:	// 4-byte long
-			n_bytes_in_single_image = x_size * y_size * 4;
-			offset = header_length + index * (x_size) * (y_size) * 4;
+			n_bytes_in_single_image = xSize * ySize * 4;
+			offset = header_length + index * (xSize) * (ySize) * 4;
 			break;
 		case STORAGE_TYPE_INT16:	// 2 byte signed short
 		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
-			n_bytes_in_single_image = x_size * y_size * 2;
-			offset = header_length + index * (x_size) * (y_size) * 2;
+			n_bytes_in_single_image = xSize * ySize * 2;
+			offset = header_length + index * (xSize) * (ySize) * 2;
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
@@ -238,7 +238,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	}
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_in_single_image]);
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -256,8 +256,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4-byte float
 			currentFloat = (float *)single_image_buffer.get();
-			for (size_t j  = 0; j < y_size; j++) {
-				for (size_t i = 0; i < x_size; i++) {
+			for (size_t j  = 0; j < ySize; j++) {
+				for (size_t i = 0; i < xSize; i++) {
 					(*image)(i, j) = *currentFloat;
 					++currentFloat;
 				}
@@ -266,8 +266,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 			
 		case STORAGE_TYPE_UINT32:	// 4-byte long
 			currentUint32t = (uint32_t *)single_image_buffer.get();
-			for (size_t j  = 0; j < y_size; j++) {
-				for (size_t i = 0; i < x_size; i++) {
+			for (size_t j  = 0; j < ySize; j++) {
+				for (size_t i = 0; i < xSize; i++) {
 					(*image)(i, j) = *currentUint32t;
 					++currentUint32t;
 				}
@@ -276,8 +276,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 			
 		case STORAGE_TYPE_INT16:	// 2-byte signed short
 			currentInt16t = (int16_t *) single_image_buffer.get();
-			for (size_t j  = 0; j < y_size; j++) {
-				for (size_t i = 0; i < x_size; i++) {
+			for (size_t j  = 0; j < ySize; j++) {
+				for (size_t i = 0; i < xSize; i++) {
 					(*image)(i, j) = *currentInt16t;
 					++currentInt16t;				
 				}
@@ -286,8 +286,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readImage(const size_t index)
 			
 		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
 			currentUint16t = (uint16_t *)single_image_buffer.get();
-			for (size_t j  = 0; j < y_size; j++) {
-				for (size_t i = 0; i < x_size; i++) {
+			for (size_t j  = 0; j < ySize; j++) {
+				for (size_t i = 0; i < xSize; i++) {
 					(*image)(i, j) = *currentUint16t;
 					++currentUint16t;
 				}
@@ -372,9 +372,9 @@ void ImageLoaderAndor::parse_header_information() {
 #ifdef WIN32
 	int wTemp, wFrameYSize, wFrameXSize, WNImages;
 	result = sscanf(singleLine.c_str(), "Pixel number%d 1 %d %d 1 %d", &wTemp, &wFrameYSize, &wFrameXSize, &WNImages);
-	frameYSize = wFrameYSize; frameXSize = wFrameXSize; this->total_number_of_images = WNImages;
+	frameYSize = wFrameYSize; frameXSize = wFrameXSize; this->nImages = WNImages;
 #else
-	result = sscanf(singleLine.c_str(), "Pixel number%zu 1 %zu %zu 1 %zu", &temp, &frameYSize, &frameXSize, &this->total_number_of_images);
+	result = sscanf(singleLine.c_str(), "Pixel number%zu 1 %zu %zu 1 %zu", &temp, &frameYSize, &frameXSize, &this->nImages);
 #endif
 	if (result != 4)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
@@ -392,11 +392,11 @@ void ImageLoaderAndor::parse_header_information() {
 	if (result != 7)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
-	this->x_size = (xEnd - xStart + 1) / xBinning;
-	this->y_size = (yEnd - yStart + 1) / yBinning;	// integer division
+	this->xSize = (xEnd - xStart + 1) / xBinning;
+	this->ySize = (yEnd - yStart + 1) / yBinning;	// integer division
 	
 	// now there are some lines that may contain timestamps. There are as many lines as there are images
-	for (size_t i = 0;  i < total_number_of_images; i++) {
+	for (size_t i = 0;  i < nImages; i++) {
 		ss.getline(singleLineBuffer.get(), 4096);
 	}
 	
@@ -419,22 +419,22 @@ void ImageLoaderAndor::parse_header_information() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
 	float current_float = 0;
 	uint64_t cache_offset = 0;
 	
-	boost::scoped_array<float> single_image_buffer(new float[x_size * y_size]);
-	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
+	boost::scoped_array<float> single_image_buffer(new float[xSize * ySize]);
+	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
-	offset = header_length + index * (x_size) * (y_size) * sizeof(float);
+	offset = header_length + index * (xSize) * (ySize) * sizeof(float);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
 		file.seekg(offset);
-		file.read((char *)single_image_buffer.get(), (x_size * y_size * sizeof(float)));
+		file.read((char *)single_image_buffer.get(), (xSize * ySize * sizeof(float)));
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
@@ -446,8 +446,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readImage(const size_t inde
 	
 	
 	// this is currently only safe on little-endian systems!
-	for (size_t j  = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
+	for (size_t j  = 0; j < ySize; j++) {
+		for (size_t i = 0; i < xSize; i++) {
 			current_float = single_image_buffer[cache_offset];
 			(*image)(i, j) = (double)current_float;
 			cache_offset++;
@@ -507,9 +507,9 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	}
 	
 	this->header_length = header.commentLength + 64;
-	this->x_size = header.xSize;
-	this->y_size = header.ySize;
-	this->total_number_of_images = header.nImages;
+	this->xSize = header.xSize;
+	this->ySize = header.ySize;
+	this->nImages = header.nImages;
 	
 	// was there an error reading the file?
 	if (file.fail() != 0) {
@@ -526,15 +526,15 @@ void ImageLoaderHamamatsu::parse_header_information() {
 
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	uint64_t offset;	// off_t is the size of the file pointer used by the OS
-	size_t n_bytes_per_image = x_size * y_size * 2;
-	offset = (index + 1) * header_length + index * (x_size) * (y_size) * 2;	// assume a 16-bit format
+	size_t n_bytes_per_image = xSize * ySize * 2;
+	offset = (index + 1) * header_length + index * (xSize) * (ySize) * 2;	// assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[n_bytes_per_image]);
-	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -551,8 +551,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readImage(const size_t 
 	
 	uint16_t *uint16tPtr = (uint16_t *)single_image_buffer.get();
 	
-	for (size_t j  = 0; j < y_size; j++) {
-		for (size_t i = 0; i < x_size; i++) {
+	for (size_t j  = 0; j < ySize; j++) {
+		for (size_t i = 0; i < xSize; i++) {
 			(*image)(i, j) = (double)(*uint16tPtr);
 			++uint16tPtr;
 		}
@@ -605,9 +605,9 @@ void ImageLoaderPDE::parse_header_information() {
 	if (header.version != 1)
 		throw std::runtime_error("Unsupported version of the PDE format.");
 	
-	this->total_number_of_images = header.nImages;
-	this->x_size = header.xSize;
-	this->y_size = header.ySize;
+	this->nImages = header.nImages;
+	this->xSize = header.xSize;
+	this->ySize = header.ySize;
 	this->storage_type = header.storageFormat;
 	this->header_length = 24;
 	
@@ -615,14 +615,14 @@ void ImageLoaderPDE::parse_header_information() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	boost::shared_ptr<Eigen::MatrixXd> image;
-	size_t n_pixels = this->x_size * this->y_size;
+	size_t n_pixels = this->xSize * this->ySize;
 	size_t offset, imageSize;
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)this->x_size, (int)this->y_size), FreeRecycledMatrix);
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -663,8 +663,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_UINT16:
 		{
 			uint16_t *currentUint16t = (uint16_t *)buffer.get();
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					(*image)(i, j) = *currentUint16t;
 					++currentUint16t;
 				}
@@ -674,8 +674,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_UINT32:
 		{
 			uint32_t *currentUint32t = (uint32_t *)buffer.get();
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					(*image)(i, j) = *currentUint32t;
 					++currentUint32t;
 				}
@@ -685,8 +685,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_FP32:
 		{
 			float *currentFloat = (float *)buffer.get();
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					(*image)(i, j) = *currentFloat;
 					++currentFloat;
 				}
@@ -696,8 +696,8 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readImage(const size_t index)
 		case STORAGE_TYPE_FP64:
 		{
 			double *currentDouble = (double *)buffer.get();
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					(*image)(i, j) = *currentDouble;
 					++currentDouble;
 				}
@@ -772,7 +772,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	}
 	
 	
-	this->total_number_of_images = directoryIndices.size();
+	this->nImages = directoryIndices.size();
 	
 	// obtain some properties from the first image in the file
 	// we assume that these properties are the for all other valid subfiles
@@ -890,7 +890,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	x_size = (size_t)(result_uint32);
+	xSize = (size_t)(result_uint32);
 	
 	// what is the y size?
 	result = TIFFGetField(tiff_file, TIFFTAG_IMAGELENGTH, &result_uint32);
@@ -902,7 +902,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	y_size = (size_t)(result_uint32);
+	ySize = (size_t)(result_uint32);
 	
 	result = TIFFSetDirectory(tiff_file, directoryIndices[0]);
 	if (result != 1) {
@@ -917,7 +917,7 @@ void ImageLoaderTIFF::parse_header_information() {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	boost::shared_ptr<Eigen::MatrixXd> image;
@@ -930,7 +930,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		throw std::bad_alloc();
 	}
 	
-	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
+	image = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	if (directoryIndices[index] == previousDirectoryIndex + 1) {
 		result = TIFFReadDirectory(tiff_file);
@@ -945,7 +945,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	for (size_t j = 0; j < y_size; ++j) {
+	for (size_t j = 0; j < ySize; ++j) {
 		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
 		if (result != 1) {
 			std::string error;
@@ -959,7 +959,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_UINT4:
 			{
 				char *charPtr = (char *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; k+=2) {
+				for (size_t k = 0; k < xSize; k+=2) {
 					(*image)(k, j) = (double)(0x0000000F & (*charPtr));
 					(*image)(k + 1, j) = (double)((0x000000F0 & (*charPtr)) / 16);			  
 					++charPtr;
@@ -969,7 +969,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_UINT8:
 			{
 				char *charPtr = (char *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; ++k) {
+				for (size_t k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*charPtr);
 					++charPtr;
 				}
@@ -978,7 +978,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_UINT16:
 			{
 				uint16_t *uint16tPtr = (uint16_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; ++k) {
+				for (size_t k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*uint16tPtr);
 					++uint16tPtr;
 				}
@@ -987,7 +987,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_UINT32:
 			{
 				uint32_t *uint32tPtr = (uint32_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; ++k) {
+				for (size_t k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*uint32tPtr);
 					++uint32tPtr;
 				}
@@ -996,7 +996,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_FP32:
 			{
 				float *floatPtr = (float *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; ++k) {
+				for (size_t k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*floatPtr);
 					++floatPtr;
 				}
@@ -1005,7 +1005,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readImage(const size_t index
 			case STORAGE_TYPE_FP64:
 			{
 				double *doublePtr = (double *)single_scanline_buffer.get();
-				for (size_t k = 0; k < x_size; ++k) {
+				for (size_t k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*doublePtr);
 					++doublePtr;
 				}
@@ -1046,14 +1046,14 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 		throw INCOMPATIBLE_DIMENSIONING;
 	}
 	
-	x_size = (size_t)DimensionSizes[0];
-	y_size = (size_t)DimensionSizes[1];
-	total_number_of_images = (size_t)DimensionSizes[2];
+	xSize = (size_t)DimensionSizes[0];
+	ySize = (size_t)DimensionSizes[1];
+	nImages = (size_t)DimensionSizes[2];
 	
 	// special case: if the wave contains only a single image then it is usually two-dimensional, that is, DimensionSizes[2] == 0
-	// in that case total_number_of_images is still one
+	// in that case nImages is still one
 	if (DimensionSizes[2] == 0) {
-		total_number_of_images = 1;
+		nImages = 1;
 	}
 	
 	waveType = WaveType(igor_data_wave);
@@ -1090,17 +1090,17 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 }
 
 boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index) {
-	if (index >= total_number_of_images)
+	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	int err;
 	int waveType = WaveType(this->igor_data_wave);
 	size_t waveDataOffset;
 	char* startOfWaveData;
-	size_t nPixels = this->x_size * this->y_size;
+	size_t nPixels = this->xSize * this->ySize;
 	
 	// allocate a new image
-	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (GetRecycledMatrix((int)x_size, (int)y_size), FreeRecycledMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// get a pointer to the data in the wave
 	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
@@ -1237,13 +1237,13 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 	header.ySize = 0;
 	header.storageFormat = 0;
 	
-	this->x_size = 0;
-	this->y_size = 0;
+	this->xSize = 0;
+	this->ySize = 0;
 	this->n_images_written = 0;
 	this->storageType = storageType_rhs;
 	
 	// the first 3 * 4 bytes of the file should be written in advance, we will fill them in later
-	// by convention they are x_size, y_size, and n_images
+	// by convention they are xSize, ySize, and n_images
 	file.write((char *)&header, sizeof(header));
 }
 
@@ -1261,8 +1261,8 @@ void PDEImageOutputWriter::WriteHeader() {
 	header.magic = 27;
 	header.version = 1;
 	header.nImages = this->n_images_written;
-	header.xSize = this->x_size;
-	header.ySize = this->y_size;
+	header.xSize = this->xSize;
+	header.ySize = this->ySize;
 	header.storageFormat = this->storageType;
 	
 	if (file.is_open()) {
@@ -1288,10 +1288,10 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 	size_t offset = 0;
 	
 	if (this->n_images_written == 0) {
-		this->x_size = currentXSize;
-		this->y_size = currentYSize;
+		this->xSize = currentXSize;
+		this->ySize = currentYSize;
 	} else {
-		if ((currentXSize != this->x_size) || (currentYSize != this->y_size)) {
+		if ((currentXSize != this->xSize) || (currentYSize != this->ySize)) {
 			throw std::runtime_error("Tried to write an image with different dimensions to an SPE file");
 		}
 	}
@@ -1300,8 +1300,8 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT16:
 		{
 			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					buffer[offset] = (uint16_t)(*imageToWrite)(i, j);
 					++offset;
 				}
@@ -1312,8 +1312,8 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_UINT32:
 		{
 			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					buffer[offset] = (uint32_t)(*imageToWrite)(i, j);
 					++offset;
 				}
@@ -1324,8 +1324,8 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP32:
 		{
 			boost::scoped_array<float> buffer(new float[n_pixels]);
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					buffer[offset] = (float)(*imageToWrite)(i, j);
 					++offset;
 				}
@@ -1336,8 +1336,8 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		case STORAGE_TYPE_FP64:
 		{
 			boost::scoped_array<double> buffer(new double[n_pixels]);
-			for (size_t i = 0; i < this->x_size; ++i) {
-				for (size_t j = 0; j < this->y_size; ++j) {
+			for (size_t i = 0; i < this->xSize; ++i) {
+				for (size_t j = 0; j < this->ySize; ++j) {
 					buffer[offset] = (double)(*imageToWrite)(i, j);
 					++offset;
 				}
@@ -1394,8 +1394,8 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 
 void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
-	size_t x_size = imageToWrite->rows();
-	size_t y_size = imageToWrite->cols();
+	size_t xSize = imageToWrite->rows();
+	size_t ySize = imageToWrite->cols();
 	
 	int result, sampleFormat, bitsPerSample;
 	uint16_t current_uint16;
@@ -1452,7 +1452,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	
 	// make a scoped_array that will act as a single scanline buffer
 	// make it a buffer of chars equal to the total number of bytes required
-	boost::scoped_array<char> scanLine(new char[x_size * bitsPerSample / 8]);
+	boost::scoped_array<char> scanLine(new char[xSize * bitsPerSample / 8]);
 	
 	// make sure that all the image tags have the correct values
 	result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
@@ -1464,7 +1464,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-	current_uint32 = x_size;
+	current_uint32 = xSize;
 	result = TIFFSetField(tiff_file, TIFFTAG_IMAGEWIDTH, current_uint32);
 	if (result != 1) {
 		std::string error;
@@ -1474,7 +1474,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-	current_uint32 = y_size;
+	current_uint32 = ySize;
 	result = TIFFSetField(tiff_file, TIFFTAG_IMAGELENGTH, current_uint32);
 	if (result != 1) {
 		std::string error;
@@ -1531,7 +1531,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	}
 	
 	size_t offset = 0;
-	for (size_t j = 0; j < y_size; j++) {
+	for (size_t j = 0; j < ySize; j++) {
 		offset = 0;
 		
 		switch (this->storageType) {
@@ -1540,7 +1540,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_INT8:
 			{
 				int8_t* charPtr = (int8_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					charPtr[i] = (int8_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1548,7 +1548,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_UINT8:
 			{
 				uint8_t* uCharPtr = (uint8_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					uCharPtr[i] = (uint8_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1556,7 +1556,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_INT16:
 			{
 				int16_t* int16Ptr = (int16_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					int16Ptr[i] = (int16_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1564,7 +1564,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_UINT16:
 			{
 				uint16_t* uInt16Ptr = (uint16_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					uInt16Ptr[i] = (uint16_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1572,7 +1572,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_INT32:
 			{
 				int32_t* int32Ptr = (int32_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					int32Ptr[i] = (int32_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1580,7 +1580,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_UINT32:
 			{
 				uint32_t* uInt32Ptr = (uint32_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					uInt32Ptr[i] = (uint32_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1588,7 +1588,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_INT64:
 			{
 				int64_t* int64Ptr = (int64_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					int64Ptr[i] = (int64_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1596,7 +1596,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_UINT64:
 			{
 				uint64_t* uInt64Ptr = (uint64_t *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					uInt64Ptr[i] = (uint64_t)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1604,7 +1604,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_FP32:
 			{
 				float* floatPtr = (float *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					floatPtr[i] = (float)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1612,7 +1612,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 			case STORAGE_TYPE_FP64:
 			{
 				double* doublePtr = (double *)scanLine.get();
-				for (size_t i = 0; i < x_size; i++) {
+				for (size_t i = 0; i < xSize; i++) {
 					doublePtr[i] = (double)(*imageToWrite)(i, j);
 				}
 				break;
@@ -1685,17 +1685,17 @@ IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderA
 void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
 	
 	int result;
-	size_t x_size = imageToWrite->rows();
-	size_t y_size = imageToWrite->cols();
-	size_t nPixels = x_size * y_size;
+	size_t xSize = imageToWrite->rows();
+	size_t ySize = imageToWrite->cols();
+	size_t nPixels = xSize * ySize;
 	int storage = this->GetIgorStorageType();
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
 		long dimensionSizes[MAX_DIMENSIONS + 1];
 		
-		dimensionSizes[0] = x_size;
-		dimensionSizes[1] = y_size;
+		dimensionSizes[0] = xSize;
+		dimensionSizes[1] = ySize;
 		dimensionSizes[2] = this->nImagesTotal;
 		dimensionSizes[3] = 0;
 		

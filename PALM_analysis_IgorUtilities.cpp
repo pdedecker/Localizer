@@ -119,7 +119,7 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 
 int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
 						   boost::shared_ptr<ProgressReporter> progressReporter) {
-	size_t nImages = image_loader->GetNImages();
+	size_t nImages = image_loader->getNImages();
 	size_t maxNImagesToLoad, nImagesToLoad;
 	size_t x_size, y_size;
 	int storage_type;
@@ -198,7 +198,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 
 
 int parse_ccd_headers(ImageLoader *image_loader) {
-	size_t total_n_images = image_loader->GetNImages();
+	size_t total_n_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -226,7 +226,7 @@ int parse_ccd_headers(ImageLoader *image_loader) {
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 										  long startX, long startY, long endX, long endY, 
 										  boost::shared_ptr<ProgressReporter> progressReporter) {
-	size_t n_images = image_loader->GetNImages();
+	size_t n_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -344,7 +344,7 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								 long startX, long startY, long endX, long endY,
 								 boost::shared_ptr<ProgressReporter> progressReporter) {
-	size_t n_images = image_loader->GetNImages();
+	size_t n_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
@@ -417,7 +417,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
 								long startX, long startY, long endX, long endY,
 								boost::shared_ptr<ProgressReporter> progressReporter) {
-	size_t n_images = image_loader->GetNImages();
+	size_t n_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	int result;

@@ -29,7 +29,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
-	size_t total_number_of_images = image_loader->GetNImages();
+	size_t total_number_of_images = image_loader->getNImages();
 	boost::shared_ptr<Eigen::MatrixXd> average_image;
 	boost::shared_ptr<Eigen::MatrixXd> loaded_image;
 	boost::shared_ptr<Eigen::MatrixXd> subtracted_image;
@@ -93,7 +93,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	boost::shared_ptr<Eigen::MatrixXd> currentImage;
 	size_t xSize = image_loader->getXSize();
 	size_t ySize = image_loader->getYSize();
-	size_t nFramesInMovie = image_loader->GetNImages();
+	size_t nFramesInMovie = image_loader->getNImages();
 	int nFramesSurroundingFrame = nFramesInAverage / 2;
 	int abortStatus;
 	
@@ -188,7 +188,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
 	boost::shared_ptr<Eigen::MatrixXd> next_image;
-	size_t total_number_of_images = image_loader->GetNImages();
+	size_t total_number_of_images = image_loader->getNImages();
 	
 	int abortStatus;
 	
@@ -231,7 +231,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 
 void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	size_t total_number_of_images = image_loader->GetNImages();
+	size_t total_number_of_images = image_loader->getNImages();
 	int abortStatus;
 	
 	this->progressReporter->CalculationStarted();
@@ -254,7 +254,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 }
 
 void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	size_t total_number_of_images = image_loader->GetNImages();
+	size_t total_number_of_images = image_loader->getNImages();
 	int abortStatus;
 	
 	if ((startX >= endX) || (startY >= endY)) {
@@ -301,7 +301,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
 	assert(this->multiplicationFactor > 0.0);
 	
-	size_t total_number_of_images = image_loader->GetNImages();
+	size_t total_number_of_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	

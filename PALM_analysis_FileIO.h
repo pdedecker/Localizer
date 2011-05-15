@@ -82,9 +82,9 @@ public:
 	ImageLoader(const std::string rhs);
 	virtual ~ImageLoader();
 	
-	size_t GetNImages() const {return total_number_of_images;}
-	size_t getXSize() const {return x_size;}
-	size_t getYSize() const {return y_size;}
+	size_t getNImages() const {return nImages;}
+	size_t getXSize() const {return xSize;}
+	size_t getYSize() const {return ySize;}
 	int getStorageType() const {return storage_type;}
 	virtual boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index) = 0;	// images are numbered from 0 to N - 1
 	
@@ -104,9 +104,9 @@ protected:
 	std::ifstream file;
 #endif
 	uint64_t header_length;
-	size_t total_number_of_images;
-	uint64_t x_size;
-	uint64_t y_size;
+	size_t nImages;
+	uint64_t xSize;
+	uint64_t ySize;
 	int storage_type;
 	
 	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
@@ -238,7 +238,7 @@ public:
 protected:
 	void WriteHeader();
 	
-	uint32_t x_size, y_size;
+	uint32_t xSize, ySize;
 	uint32_t storageType;
 };
 

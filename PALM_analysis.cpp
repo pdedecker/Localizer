@@ -41,7 +41,7 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 
 boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs) {
 	this->imageLoader = imageLoader_rhs;
-	this->nImages = imageLoader->GetNImages();
+	this->nImages = imageLoader->getNImages();
 	
 	size_t numberOfThreads;
 	size_t firstFrame, lastFrame;
