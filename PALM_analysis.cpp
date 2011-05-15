@@ -65,7 +65,6 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 		numberOfThreads = nImages;
 	}
 	
-	// fill the queue holding the frames to be processed with the frames in the sequence
 	firstFrame = this->firstFrameToAnalyze;
 	lastFrame = this->lastFrameToAnalyze;
 	if (firstFrame == (size_t)-1) {
@@ -78,11 +77,13 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	} else if ((lastFrame >= this->nImages) || (lastFrame < firstFrame)) {
 		throw std::runtime_error("Invalid last frame to analyze specified");
 	}
+	
 	nFramesToBeAnalyzed = lastFrame - firstFrame + 1;
 	
-	for (size_t i = firstFrame; i <= lastFrame; ++i) {
-		this->framesToBeProcessed.push(i);
-	}
+	this->nFramesRemainingToBeProcessed = lastFrame - firstFrame + 1;
+	
+	// spool the image loader so that the correct first frame will be returned
+	this->imageLoader->spoolTo(firstFrame);
 	
 	progressReporter->CalculationStarted();
 	
@@ -119,7 +120,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 			// allow the reporter to update with new progress
 			{
 				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
-				nFramesAnalyzed = nFramesToBeAnalyzed - framesToBeProcessed.size();
+				nFramesAnalyzed = nFramesToBeAnalyzed - this->nFramesRemainingToBeProcessed;
 			}
 			progressStatus = progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
 			
@@ -176,18 +177,18 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			}
 			
 			// start by a acquiring an image to process
+			// see if there are still frames to be processed
 			{
 				boost::lock_guard<boost::mutex> locker(controller->acquireFrameForProcessingMutex);
-				if (controller->framesToBeProcessed.size() == 0) {
+				if (controller->nFramesRemainingToBeProcessed == 0) {
 					// no more frames to be processed
 					return;
 				}
-				currentImageToProcess = controller->framesToBeProcessed.front();
-				controller->framesToBeProcessed.pop();
+				controller->nFramesRemainingToBeProcessed -= 1;
 			}
 			
 			// we need to process the image with index currentImageToProcess
-			currentImage = controller->imageLoader->readImage(currentImageToProcess);
+			currentImage = controller->imageLoader->readNextImage(currentImageToProcess);
 			
 			thresholdedImage = do_processing_and_thresholding(currentImage, controller->thresholdImagePreprocessor, controller->thresholder,
 															  controller->thresholdImagePostprocessor);

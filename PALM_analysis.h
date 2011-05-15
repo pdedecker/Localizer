@@ -64,7 +64,7 @@ protected:
 	size_t firstFrameToAnalyze;
 	size_t lastFrameToAnalyze;
 	
-	std::queue<size_t> framesToBeProcessed;
+	size_t nFramesRemainingToBeProcessed;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	friend void ThreadPoolWorker(PALMAnalysisController* controller);
