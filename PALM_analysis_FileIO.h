@@ -100,6 +100,11 @@ public:
 	 */
 	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index) = 0;
 	
+	/*
+	 * 'Rewind' the file to the beginning so that readNextImage will return the first frame.
+	 */
+	void rewind() {this->nextImageToRead = 0;}
+	
 protected:
 	virtual void parse_header_information() = 0;
 	
