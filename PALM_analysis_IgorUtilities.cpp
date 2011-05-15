@@ -175,6 +175,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storage_type);
 	
 	// load the data and write it to Igor
+	size_t nextFrameRead;
+	image_loader->spoolTo(firstImage);
 	for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
 		if (doProgress && (i % 10 == 0)) {
 			progressStatus =  progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
@@ -184,7 +186,8 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 			}
 		}
 		
-		current_image = image_loader->readImage(i);
+		current_image = image_loader->readNextImage(nextFrameRead);
+		assert(nextFrameRead == i);
 		waveWriter.write_image(current_image);
 		if (CheckAbort(0))
 			return 0;
