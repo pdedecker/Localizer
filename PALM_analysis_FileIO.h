@@ -224,7 +224,7 @@ public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);
+	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information() {;}

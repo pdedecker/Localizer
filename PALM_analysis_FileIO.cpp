@@ -1141,10 +1141,7 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index) {
-	if (index >= nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
+boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readNextImage(size_t &index) {
 	int err;
 	int waveType = WaveType(this->igor_data_wave);
 	size_t waveDataOffset;
@@ -1152,7 +1149,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 	size_t nPixels = this->xSize * this->ySize;
 	
 	// allocate a new image
-	boost::shared_ptr<Eigen::MatrixXd> image = boost::shared_ptr<Eigen::MatrixXd> (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// get a pointer to the data in the wave
 	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
@@ -1160,6 +1157,15 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readImage(const size_t index
 		throw err;
 	}
 	startOfWaveData = ((char*)(*this->igor_data_wave) + waveDataOffset);
+	
+	{
+		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		if (this->nextImageToRead >= nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
+	}
 	
 	// get a pointer to the image
 	double* imagePtr = image->data();
