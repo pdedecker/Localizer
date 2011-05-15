@@ -142,7 +142,9 @@ void ImageLoader::spoolTo(size_t index) {
 	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	this->nextImageToRead = index;
+	// don't do any work if its not required
+	if (this->nextImageToRead != index)
+		this->nextImageToRead = index;
 }
 
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
@@ -1047,17 +1049,20 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index)
 void ImageLoaderTIFF::spoolTo(size_t index) {
 	int result;
 	
-	result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the directory for the image at\"";
-		error += this->filePath;
-		error += "\"";
-		throw ERROR_READING_FILE_DATA(error);
+	// don't do any work unless it is required
+	if (this->nextImageToRead != index) {
+		result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
+		if (result != 1) {
+			std::string error;
+			error = "Unable to set the directory for the image at\"";
+			error += this->filePath;
+			error += "\"";
+			throw ERROR_READING_FILE_DATA(error);
+		}
+		
+		this->nextImageToRead = index;
+		this->currentDirectoryIndex = this->directoryIndices.at(index);
 	}
-	
-	this->nextImageToRead = index;
-	this->currentDirectoryIndex = this->directoryIndices.at(index);
 }
 
 #ifdef WITH_IGOR
