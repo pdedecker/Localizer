@@ -52,8 +52,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 					previous_intensity = (*it).get_intensity();
 					if (current_intensity > previous_intensity) {
 						(*it).set_intensity(current_intensity);
-						(*it).set_x(current_x);
-						(*it).set_y(current_y);
+						(*it).x = current_x;
+						(*it).y = current_y;
 					}
 					continue;
 				}
@@ -61,8 +61,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 			
 			// this position is a new emitter
 			currentPosition.set_intensity(current_intensity);
-			currentPosition.set_x(current_x);
-			currentPosition.set_y(current_y);
+			currentPosition.x = current_x;
+			currentPosition.y = current_y;
 			positions->push_back(currentPosition);
 		}
 	}
@@ -120,8 +120,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			(*mapped_image)(i, j) = particleIndex;
 			
 			// store this position
-			currentPosition.set_x((double)i);
-			currentPosition.set_y((double)j);
+			currentPosition.x = (double)i;
+			currentPosition.y = (double)j;
 			currentPosition.set_intensity((*image)(i, j));
 			
 			positionsInCurrentParticleList.push_back(currentPosition);
@@ -160,8 +160,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			average_x /= positionsInCurrentParticle.size();
 			average_y /= positionsInCurrentParticle.size();
 			currentPosition.set_intensity(maxIntensity);
-			currentPosition.set_x(average_x);
-			currentPosition.set_y(average_y);
+			currentPosition.x = average_x;
+			currentPosition.y = average_y;
 			
 			particles->push_back(currentPosition);
 		}
@@ -205,8 +205,8 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 			if ((*mapped_image)(x - 1, y) == -1) {
 				(*mapped_image)(x - 1, y) = particleIndex;
 				// add the point to the vector
-				currentPosition.set_x((double)x - 1);
-				currentPosition.set_y((double)y);
+				currentPosition.x = (double)x - 1;
+				currentPosition.y = (double)y;
 				currentPosition.set_intensity((*image)(x - 1, y));
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
@@ -220,8 +220,8 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 			if ((*mapped_image)(x + 1, y) == -1) {
 				(*mapped_image)(x + 1, y) = particleIndex;
 				// add the point to the vector
-				currentPosition.set_x((double)x + 1);
-				currentPosition.set_y((double)y);
+				currentPosition.x = (double)x + 1;
+				currentPosition.y = (double)y;
 				currentPosition.set_intensity((*image)(x + 1, y));
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
@@ -235,8 +235,8 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 			if ((*mapped_image)(x, y - 1) == -1) {
 				(*mapped_image)(x, y - 1) = particleIndex;
 				// add the point to the vector
-				currentPosition.set_x((double)x);
-				currentPosition.set_y((double)y - 1);
+				currentPosition.x = (double)x;
+				currentPosition.y = (double)y - 1;
 				currentPosition.set_intensity((*image)(x, y - 1));
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
@@ -250,8 +250,8 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 			if ((*mapped_image)(x, y + 1) == -1) {
 				(*mapped_image)(x, y + 1) = particleIndex;
 				// add the point to the vector
-				currentPosition.set_x((double)x);
-				currentPosition.set_y((double)y + 1);
+				currentPosition.x = (double)x;
+				currentPosition.y = (double)y + 1;
 				currentPosition.set_intensity((*image)(x, y + 1));
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
@@ -300,8 +300,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			(*mapped_image)(i, j) = particleIndex;
 			
 			// store this position
-			currentPosition.set_x((double)i);
-			currentPosition.set_y((double)j);
+			currentPosition.x = (double)i;
+			currentPosition.y = (double)j;
 			currentPosition.set_intensity((*image)(i, j));
 			
 			positionsInCurrentParticleList.push_back(currentPosition);
@@ -341,8 +341,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			average_x /= positionsInCurrentParticle.size();
 			average_y /= positionsInCurrentParticle.size();
 			currentPosition.set_intensity(maxIntensity);
-			currentPosition.set_x(average_x);
-			currentPosition.set_y(average_y);
+			currentPosition.x = average_x;
+			currentPosition.y = average_y;
 			
 			particles->push_back(currentPosition);
 		}
@@ -398,8 +398,8 @@ void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<P
 			
 			// add the current position
 			(*mapped_image)(i, j) = particleIndex;
-			currentPosition.set_x((double)i);
-			currentPosition.set_y((double)j);
+			currentPosition.x = (double)i;
+			currentPosition.y = (double)j;
 			currentPosition.set_intensity((*image)(i, j));
 			positionsInCurrentParticle.push_back(currentPosition);
 		}

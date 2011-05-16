@@ -54,7 +54,6 @@ public:
 	double get_intensity() const {return intensity;}
 	double get_background() const {return background;}
 	
-protected:
 	double x;
 	double y;
 	double intensity;
