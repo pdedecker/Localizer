@@ -44,11 +44,6 @@ public:
 	Particle(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
 	~Particle() {;}
 	
-	double get_x() const {return x;}
-	double get_y() const {return y;}
-	double get_intensity() const {return intensity;}
-	double get_background() const {return background;}
-	
 	double x;
 	double y;
 	double intensity;

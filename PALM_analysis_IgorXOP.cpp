@@ -1804,16 +1804,16 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 			for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
 				indices[0] = offset;
 				indices[1] = 0;
-				value[0] = (*it).get_intensity();
+				value[0] = (*it).intensity;
 				MDSetNumericWavePointValue(outputWave, indices, value);
 				indices[1] = 1;
-				value[0] = (*it).get_x();
+				value[0] = (*it).x;
 				MDSetNumericWavePointValue(outputWave, indices, value);
 				indices[1] = 2;
-				value[0] = (*it).get_y();
+				value[0] = (*it).y;
 				MDSetNumericWavePointValue(outputWave, indices, value);
 				indices[1] = 3;
-				value[0] = (*it).get_background();
+				value[0] = (*it).background;
 				MDSetNumericWavePointValue(outputWave, indices, value);
 				++offset;
 			}

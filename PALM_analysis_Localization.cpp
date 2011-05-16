@@ -78,10 +78,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	while (it != positions->end()) {
 		iterations = 0;
 		
-		amplitude = (*it).get_intensity();
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
-		background = (*it).get_background();
+		amplitude = (*it).intensity;
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
+		background = (*it).background;
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -263,10 +263,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	while (it != positions->end()) {
 		iterations = 0;
 		
-		amplitude = (*it).get_intensity();
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
-		background = (*it).get_background();
+		amplitude = (*it).intensity;
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
+		background = (*it).background;
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -439,11 +439,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	while (it != positions->end()) {
 		iterations = 0;
 		
-		amplitude = (*it).get_intensity();
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
+		amplitude = (*it).intensity;
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
 		correlation_initial = 0.0;
-		background = (*it).get_background();
+		background = (*it).background;
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -632,10 +632,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	while (it != positions->end()) {
 		iterations = 0;
 		
-		integral = (*it).get_intensity() * 2.0 * M_PI * this->initialPSFWidth * this->initialPSFWidth;;
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
-		background = (*it).get_background();
+		integral = (*it).intensity * 2.0 * M_PI * this->initialPSFWidth * this->initialPSFWidth;;
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
+		background = (*it).background;
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -770,10 +770,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	
 	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
-		amplitude = (*it).get_intensity();
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
-		background = (*it).get_background();
+		amplitude = (*it).intensity;
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
+		background = (*it).background;
 		
 		x_offset = floor(x0_initial - (double)cutoff_radius);
 		y_offset = floor(y0_initial - (double)cutoff_radius);
@@ -911,8 +911,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	
 	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
-		x0_initial = (*it).get_x();
-		y0_initial = (*it).get_y();
+		x0_initial = (*it).x;
+		y0_initial = (*it).y;
 		current_x = 0;
 		current_y = 0;
 		denominator = 0;
