@@ -51,7 +51,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 					// we will keep the pixel with the largest intensity
 					previous_intensity = (*it).get_intensity();
 					if (current_intensity > previous_intensity) {
-						(*it).set_intensity(current_intensity);
+						(*it).intensity = current_intensity;
 						(*it).x = current_x;
 						(*it).y = current_y;
 					}
@@ -60,7 +60,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 			}
 			
 			// this position is a new emitter
-			currentPosition.set_intensity(current_intensity);
+			currentPosition.intensity = current_intensity;
 			currentPosition.x = current_x;
 			currentPosition.y = current_y;
 			positions->push_back(currentPosition);
@@ -71,8 +71,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = positions->begin(); it != positions->end(); ++it) {
-		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
-		(*it).set_background(backgroundIntensity);
+		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).background = backgroundIntensity;
 	}
 	
 	
@@ -122,7 +122,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			// store this position
 			currentPosition.x = (double)i;
 			currentPosition.y = (double)j;
-			currentPosition.set_intensity((*image)(i, j));
+			currentPosition.intensity = (*image)(i, j);
 			
 			positionsInCurrentParticleList.push_back(currentPosition);
 			
@@ -159,7 +159,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			}
 			average_x /= positionsInCurrentParticle.size();
 			average_y /= positionsInCurrentParticle.size();
-			currentPosition.set_intensity(maxIntensity);
+			currentPosition.intensity = maxIntensity;
 			currentPosition.x = average_x;
 			currentPosition.y = average_y;
 			
@@ -171,8 +171,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = particles->begin(); it != particles->end(); ++it) {
-		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
-		(*it).set_background(backgroundIntensity);
+		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).background = backgroundIntensity;
 	}
 	
 	return particles;
@@ -207,7 +207,7 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 				// add the point to the vector
 				currentPosition.x = (double)x - 1;
 				currentPosition.y = (double)y;
-				currentPosition.set_intensity((*image)(x - 1, y));
+				currentPosition.intensity = (*image)(x - 1, y);
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
 		}
@@ -222,7 +222,7 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 				// add the point to the vector
 				currentPosition.x = (double)x + 1;
 				currentPosition.y = (double)y;
-				currentPosition.set_intensity((*image)(x + 1, y));
+				currentPosition.intensity = (*image)(x + 1, y);
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
 		}
@@ -237,7 +237,7 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 				// add the point to the vector
 				currentPosition.x = (double)x;
 				currentPosition.y = (double)y - 1;
-				currentPosition.set_intensity((*image)(x, y - 1));
+				currentPosition.intensity = (*image)(x, y - 1);
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
 		}
@@ -252,7 +252,7 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 				// add the point to the vector
 				currentPosition.x = (double)x;
 				currentPosition.y = (double)y + 1;
-				currentPosition.set_intensity((*image)(x, y + 1));
+				currentPosition.intensity = (*image)(x, y + 1);
 				positionsInCurrentParticle.push_back(currentPosition);
 			}
 		}
@@ -302,7 +302,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			// store this position
 			currentPosition.x = (double)i;
 			currentPosition.y = (double)j;
-			currentPosition.set_intensity((*image)(i, j));
+			currentPosition.intensity = (*image)(i, j);
 			
 			positionsInCurrentParticleList.push_back(currentPosition);
 			
@@ -340,7 +340,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			}
 			average_x /= positionsInCurrentParticle.size();
 			average_y /= positionsInCurrentParticle.size();
-			currentPosition.set_intensity(maxIntensity);
+			currentPosition.intensity = maxIntensity;
 			currentPosition.x = average_x;
 			currentPosition.y = average_y;
 			
@@ -352,8 +352,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = particles->begin(); it != particles->end(); ++it) {
-		(*it).set_intensity((*it).get_intensity() - backgroundIntensity);
-		(*it).set_background(backgroundIntensity);
+		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).background = backgroundIntensity;
 	}
 	
 	return particles;
@@ -400,7 +400,7 @@ void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<P
 			(*mapped_image)(i, j) = particleIndex;
 			currentPosition.x = (double)i;
 			currentPosition.y = (double)j;
-			currentPosition.set_intensity((*image)(i, j));
+			currentPosition.intensity = (*image)(i, j);
 			positionsInCurrentParticle.push_back(currentPosition);
 		}
 	}
@@ -419,8 +419,8 @@ void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_
 				// don't delete them now since there might be a third point overlapping with one of them
 				// instead just mark them as needing deletion by changing their amplitude to some
 				// unlikely value
-				(*it1).set_intensity(-1.0e200);
-				(*it2).set_intensity(-1.0e200);
+				(*it1).intensity = -1.0e200;
+				(*it2).intensity = -1.0e200;
 			}
 		}
 	}
