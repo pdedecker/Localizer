@@ -42,14 +42,14 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 			// check if the current point overlaps with a previous point
 			number_of_positions = positions->size();
 			for (std::list<Particle>::iterator it = positions->begin(); it != positions->end(); ++it) {
-				x = (*it).get_x();
-				y = (*it).get_y();
+				x = (*it).x;
+				y = (*it).y;
 				distance_squared = (current_x - x) * (current_x - x) + (current_y - y) * (current_y - y);
 				
 				if (distance_squared < radius_squared) {
 					// we need to skip one of the two pixels that we are comparing
 					// we will keep the pixel with the largest intensity
-					previous_intensity = (*it).get_intensity();
+					previous_intensity = (*it).intensity;
 					if (current_intensity > previous_intensity) {
 						(*it).intensity = current_intensity;
 						(*it).x = current_x;
@@ -71,7 +71,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = positions->begin(); it != positions->end(); ++it) {
-		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).intensity = (*it).intensity - backgroundIntensity;
 		(*it).background = backgroundIntensity;
 	}
 	
@@ -131,8 +131,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			
 			while (positionsInCurrentParticleList.size() > 0) {
 				currentPosition = positionsInCurrentParticleList.front();
-				x = (size_t)(currentPosition.get_x() + 0.5);
-				y = (size_t)(currentPosition.get_y() + 0.5);
+				x = (size_t)(currentPosition.x + 0.5);
+				y = (size_t)(currentPosition.y + 0.5);
 				
 				growParticle(currentPosition, positionsInCurrentParticleList, image, threshold_image, mapped_image);
 				// growParticle will update the list with new positions
@@ -151,10 +151,10 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 			average_x = 0;
 			average_y = 0;
 			for (size_t k = 0; k < positionsInCurrentParticle.size(); ++k) {
-				average_x += positionsInCurrentParticle[k].get_x();
-				average_y += positionsInCurrentParticle[k].get_y();
-				if (positionsInCurrentParticle[k].get_intensity() > maxIntensity) {
-					maxIntensity = positionsInCurrentParticle[k].get_intensity();
+				average_x += positionsInCurrentParticle[k].x;
+				average_y += positionsInCurrentParticle[k].y;
+				if (positionsInCurrentParticle[k].intensity > maxIntensity) {
+					maxIntensity = positionsInCurrentParticle[k].intensity;
 				}
 			}
 			average_x /= positionsInCurrentParticle.size();
@@ -171,7 +171,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = particles->begin(); it != particles->end(); ++it) {
-		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).intensity = (*it).intensity - backgroundIntensity;
 		(*it).background = backgroundIntensity;
 	}
 	
@@ -192,8 +192,8 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 	size_t y_size = image->cols();
 	Particle currentPosition;
 	
-	size_t x = (size_t)(centerPosition.get_x() + 0.5);
-	size_t y = (size_t)(centerPosition.get_y() + 0.5);
+	size_t x = (size_t)(centerPosition.x + 0.5);
+	size_t y = (size_t)(centerPosition.y + 0.5);
 	
 	long particleIndex = (*mapped_image)(x, y);
 	
@@ -311,8 +311,8 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			
 			while (positionsInCurrentParticleList.size() > 0) {
 				currentPosition = positionsInCurrentParticleList.front();
-				x = (size_t)(currentPosition.get_x() + 0.5);
-				y = (size_t)(currentPosition.get_y() + 0.5);
+				x = (size_t)(currentPosition.x + 0.5);
+				y = (size_t)(currentPosition.y + 0.5);
 				
 				growParticle(currentPosition, positionsInCurrentParticleList, image, threshold_image, mapped_image);
 				// growParticle will update the list with new positions
@@ -332,10 +332,10 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 			average_x = 0;
 			average_y = 0;
 			for (size_t k = 0; k < positionsInCurrentParticle.size(); ++k) {
-				average_x += positionsInCurrentParticle[k].get_x();
-				average_y += positionsInCurrentParticle[k].get_y();
-				if (positionsInCurrentParticle[k].get_intensity() > maxIntensity) {
-					maxIntensity = positionsInCurrentParticle[k].get_intensity();
+				average_x += positionsInCurrentParticle[k].x;
+				average_y += positionsInCurrentParticle[k].y;
+				if (positionsInCurrentParticle[k].intensity > maxIntensity) {
+					maxIntensity = positionsInCurrentParticle[k].intensity;
 				}
 			}
 			average_x /= positionsInCurrentParticle.size();
@@ -352,7 +352,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 	
 	// update the amplitudes/intensities on all of the positions
 	for (std::list<Particle>::iterator it = particles->begin(); it != particles->end(); ++it) {
-		(*it).intensity = (*it).get_intensity() - backgroundIntensity;
+		(*it).intensity = (*it).intensity - backgroundIntensity;
 		(*it).background = backgroundIntensity;
 	}
 	
@@ -373,8 +373,8 @@ void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<P
 	size_t y_size = image->cols();
 	Particle currentPosition;
 	
-	size_t x = (size_t)(centerPosition.get_x() + 0.5);
-	size_t y = (size_t)(centerPosition.get_y() + 0.5);
+	size_t x = (size_t)(centerPosition.x + 0.5);
+	size_t y = (size_t)(centerPosition.y + 0.5);
 	
 	// make sure that we don't cross the boundaries of the image
 	size_t lowerXBound = (x - 1) == (size_t)-1 ? 0 : x - 1;
@@ -413,7 +413,7 @@ void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_
 	for (std::list<Particle>::iterator it1 = positions->begin(); it1 != positions->end(); ++it1) {
 		// since the list::iterator does not support operator+() we have to be kludgy
 		for (std::list<Particle>::iterator it2 = (++it1)--; it2 != positions->end(); ++it2) {
-			distance = sqrt(((*it1).get_x() - (*it2).get_x()) * ((*it1).get_x() - (*it2).get_x()) + ((*it1).get_y() - (*it2).get_y()) * ((*it1).get_y() - (*it2).get_y()));
+			distance = sqrt(((*it1).x - (*it2).x) * ((*it1).x - (*it2).x) + ((*it1).y - (*it2).y) * ((*it1).y - (*it2).y));
 			if (distance < minDistance) {
 				// these two points should be deleted
 				// don't delete them now since there might be a third point overlapping with one of them
@@ -427,7 +427,7 @@ void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_
 	
 	// now delete the positions that failed the test
 	for (std::list<Particle>::iterator it = positions->begin(); it != positions->end(); ++it) {
-		if ((*it).get_intensity() == -1.0e200) {
+		if ((*it).intensity == -1.0e200) {
 			it = positions->erase(it);
 			if (it != positions->begin())
 				--it;
