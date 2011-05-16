@@ -1532,7 +1532,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
 	boost::shared_ptr<Eigen::MatrixXd> CCD_Frame;
-	boost::shared_ptr<std::list<position> > located_particles;
+	boost::shared_ptr<std::list<Particle> > located_particles;
 	std::vector<size_t> particleVerifierMethods;
 	
 	// long numDimensions; 
@@ -1801,7 +1801,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 			outputWave = MakeWaveUsingFullPath(std::string("M_LocatedParticles"), dimensionSizes, NT_FP64, 1);
 			
 			offset = 0;
-			for (std::list<position>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
+			for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
 				indices[0] = offset;
 				indices[1] = 0;
 				value[0] = (*it).get_intensity();

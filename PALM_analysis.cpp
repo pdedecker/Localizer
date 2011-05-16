@@ -166,7 +166,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
 	boost::shared_ptr<Eigen::MatrixXd> currentImage;
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage;
-	boost::shared_ptr<std::list<position> > locatedParticles;
+	boost::shared_ptr<std::list<Particle> > locatedParticles;
 	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	try {
@@ -252,14 +252,14 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
 	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
 	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
 	boost::shared_ptr<Eigen::MatrixXd> subtractedImage;
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > segmentedImage;
-	boost::shared_ptr<std::list<position> > locatedParticles;
+	boost::shared_ptr<std::list<Particle> > locatedParticles;
 	
 	// get an initial set of positions to start from
 	positionsFittedThusFar = this->positionsFitter->fit_positions(image, positions);

@@ -10,7 +10,7 @@
 #include "PALM_analysis_Localization.h"
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
-																							 boost::shared_ptr<std::list<position> > positions) {
+																							 boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -74,7 +74,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	
 	
 	// iterate over all the determined positions
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		iterations = 0;
 		
@@ -195,7 +195,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
-																							  boost::shared_ptr<std::list<position> > positions) {
+																							  boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -259,7 +259,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	
 	
 	// iterate over all the determined positions
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		iterations = 0;
 		
@@ -373,7 +373,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
-																							   boost::shared_ptr<std::list<position> > positions) {
+																							   boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -435,7 +435,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	
 	
 	// iterate over all the determined positions
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		iterations = 0;
 		
@@ -573,7 +573,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -628,7 +628,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	}
 	
 	// iterate over all the determined positions
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		iterations = 0;
 		
@@ -734,7 +734,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
-																						 boost::shared_ptr<std::list<position> > positions) {
+																						 boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -768,7 +768,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	image_subset = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	image_subset_mask = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
 	
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		amplitude = (*it).get_intensity();
 		x0_initial = (*it).get_x();
@@ -888,7 +888,7 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<Eigen::
 
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
-																				   boost::shared_ptr<std::list<position> > positions) {
+																				   boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -909,7 +909,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 	boost::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
 	boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
 	
-	std::list<position>::iterator it = positions->begin();
+	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
 		x0_initial = (*it).get_x();
 		y0_initial = (*it).get_y();

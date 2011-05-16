@@ -112,7 +112,7 @@ public:
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<position> > positions);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions);
 	
 protected:
 	boost::shared_ptr<Eigen::MatrixXd> subtractLocalizedPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<LocalizedPositionsContainer> positions);

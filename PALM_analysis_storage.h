@@ -37,12 +37,12 @@ public:
  * @brief A more complex container containing the coordinates of a single point in 2D space
  * with its estimated intensity and background
  */
-class position {
+class Particle {
 public:
-	position() {x = 0; y = 0; intensity = 0;}
-	position(double xLoc, double yLoc) {x = xLoc; y = yLoc;}
-	position(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
-	~position() {;}
+	Particle() {x = 0; y = 0; intensity = 0;}
+	Particle(double xLoc, double yLoc) {x = xLoc; y = yLoc;}
+	Particle(double xLoc, double yLoc, double intensity_rhs) {x = xLoc; y = yLoc; intensity = intensity_rhs;}
+	~Particle() {;}
 	
 	void set_x(const double xLoc) {x = xLoc;}
 	void set_y(const double yLoc) {y = yLoc;}
