@@ -58,7 +58,7 @@ protected:
 
 /**
  * @brief A class responsible for calculating a bitmap PALM output image by adding an individual Gaussian for every position to the image.
- * The output image is returned as a Eigen::MatrixXd.
+ * The output image is returned as a Image.
  * 
  * PALMBitmapImageCalculator takes a set of positions in a LocalizedPositionsContainer and creates an output image (2D) with sizes (xSize, ySize).
  * For every position it adds a Gaussian to the output image with an integrated contribution that is either equal to to integrated intensity
@@ -73,7 +73,7 @@ public:
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	boost::shared_ptr<Eigen::MatrixXd> CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+	ImagePtr CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	

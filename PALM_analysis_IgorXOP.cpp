@@ -1531,7 +1531,7 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 	double radiusBetweenParticles;
 	waveHndl CCD_Frame_wave;
 	waveHndl threshold_image_wave;
-	boost::shared_ptr<Eigen::MatrixXd> CCD_Frame;
+	ImagePtr CCD_Frame;
 	boost::shared_ptr<std::list<Particle> > located_particles;
 	std::vector<size_t> particleVerifierMethods;
 	
@@ -1847,9 +1847,9 @@ static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
 	int err = 0;
-	boost::shared_ptr<Eigen::MatrixXd> firstImage;
-	boost::shared_ptr<Eigen::MatrixXd> secondImage;
-	boost::shared_ptr<Eigen::MatrixXd> outputImage;
+	ImagePtr firstImage;
+	ImagePtr secondImage;
+	ImagePtr outputImage;
 	DataFolderAndName dfAndName;
 	int overwrite;
 	waveHndl firstWave;
@@ -1939,7 +1939,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
 	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
 	boost::shared_ptr<ProgressReporter> progressReporter;
-	boost::shared_ptr<Eigen::MatrixXd> image;
+	ImagePtr image;
 	
 	// Flag parameters.
 	
@@ -1970,7 +1970,7 @@ static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
 		upperLimit = p->upperLimit;
 	} else {
 		upperLimit = 1.0e100;	// provide an unpractically large value, so that
-								// the net result is no limitation
+		// the net result is no limitation
 	}
 	
 	if (p->WFlagEncountered) {

@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_segmentation.h"
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Direct::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Direct::do_thresholding(ImagePtr image) {
 	
 	size_t x_size, y_size;
 	double current_value;
@@ -34,7 +34,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 }
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Isodata::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Isodata::do_thresholding(ImagePtr image) {
 	gsl_histogram *hist;
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
 	
@@ -120,7 +120,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	return threshold_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Triangle::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Triangle::do_thresholding(ImagePtr image) {
 	gsl_histogram *hist;
 	size_t number_of_bins = 256;
 	size_t maximum_bin;
@@ -251,8 +251,8 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	// calculate the Gaussian kernel
 	// make both a small kernel suitable for direct convolution
 	// and a large kernel (same size as the image) suitable for FFT-based convolution
-	this->smallGaussianKernel = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)this->windowSize, (int)this->windowSize));
-	boost::shared_ptr<Eigen::MatrixXd> Gaussian_kernel(new Eigen::MatrixXd((int)xSize, (int)ySize));
+	this->smallGaussianKernel = ImagePtr (new Image((int)this->windowSize, (int)this->windowSize));
+	ImagePtr Gaussian_kernel(new Image((int)xSize, (int)ySize));
 	
 	sum = 0;
 	Gaussian_kernel->setConstant(0.0);
@@ -289,18 +289,18 @@ void ThresholdImage_GLRT_FFT::MakeKernels(size_t xSize, size_t ySize) {
 	this->GaussianKernelFFT = this->matrixConvolver.DoForwardFFT(Gaussian_kernel);
 }
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_GLRT_FFT::do_thresholding(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_GLRT_FFT::do_thresholding(ImagePtr image) {
 	// the code is based on a series of matlab files sent by Didier Marguet, corresponding author of the original paper
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
 	
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image;
-	boost::shared_ptr<Eigen::MatrixXd> averages;
-	boost::shared_ptr<Eigen::MatrixXd> image_squared;
-	boost::shared_ptr<Eigen::MatrixXd> summed_squares;
-	boost::shared_ptr<Eigen::MatrixXd> null_hypothesis;
-	boost::shared_ptr<Eigen::MatrixXd> image_Gaussian_convolved;
-	boost::shared_ptr<Eigen::MatrixXd> hypothesis_test;
+	ImagePtr averages;
+	ImagePtr image_squared;
+	ImagePtr summed_squares;
+	ImagePtr null_hypothesis;
+	ImagePtr image_Gaussian_convolved;
+	ImagePtr hypothesis_test;
 	
 	double double_window_pixels = (double)this->windowSize * (double)this->windowSize;
 	size_t half_window_size = this->windowSize / 2;
@@ -324,7 +324,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	}
 	
 	if (imageNeedsResizing == 1) {
-		boost::shared_ptr<Eigen::MatrixXd> reducedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+		ImagePtr reducedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 		for (size_t j = 0; j < ySize; ++j) {
 			for (size_t i = 0; i < xSize; ++i) {
 				(*reducedImage)(i,j) = (*image)(i,j);
@@ -333,7 +333,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 		image = reducedImage;	// modify the smart_ptr
 	}
 	
-	image_squared = boost::shared_ptr<Eigen::MatrixXd>(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	image_squared = ImagePtr(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// do we have kernels of the appropriate size?
 	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
@@ -410,7 +410,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 }
 
 
-boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
+ImagePtr ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(ImagePtr image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	size_t half_kernel_size_x = kernel_x_size / 2;
@@ -421,7 +421,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_
 	double value, median;
 	
 	gsl_vector *median_environment;
-	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
+	ImagePtr filtered_image;
 	
 	// allocate a gsl_vector with the correct size
 	median_environment = gsl_vector_alloc(kernel_size);
@@ -430,7 +430,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MedianFilter::do_
 	// make a copy of the image
 	// this copy will be median-filtered
 	// close to the edges (where the kernel doesn't fit we will not modify the image)
-	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	filtered_image = ImagePtr(new Image((int)x_size, (int)y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -473,9 +473,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 	size_t center_y = y_size / 2;
 	double current_value, distance_x, distance_y;
 	
-	boost::shared_ptr<Eigen::MatrixXd> Gaussian_window(new Eigen::MatrixXd((int)window_size, (int)window_size));
+	ImagePtr Gaussian_window(new Image((int)window_size, (int)window_size));
 	
-	Gaussian_kernel = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	Gaussian_kernel = ImagePtr(new Image((int)x_size, (int)y_size));
 	
 	
 	// calculate the values of a Gaussian with the correct width in a smaller window
@@ -504,9 +504,9 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 
 
 
-boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
+ImagePtr ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(ImagePtr image) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
+	ImagePtr filtered_image;
 	size_t x_size = image->rows();
 	size_t y_size = image->cols();
 	
@@ -531,7 +531,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_GaussianSmoothing
 }
 
 
-boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(boost::shared_ptr<Eigen::MatrixXd> image) {
+ImagePtr ThresholdImage_Preprocessor_MeanFilter::do_preprocessing(ImagePtr image) {
 	
 	size_t kernel_size = kernel_x_size * kernel_y_size;
 	double double_kernel_pixels = (double)kernel_size;
@@ -541,12 +541,12 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 	size_t y_size = image->cols();
 	double mean;
 	
-	boost::shared_ptr<Eigen::MatrixXd> filtered_image;
+	ImagePtr filtered_image;
 	
 	// make a copy of the image
 	// this copy will be mean-filtered
 	// close to the edges, where the kernel doesn't fit we will not modify the image
-	filtered_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	filtered_image = ImagePtr(new Image((int)x_size, (int)y_size));
 	
 	for (size_t j = 0; j < y_size; ++j) {
 		for (size_t i = 0; i < x_size; ++i) {
@@ -574,7 +574,7 @@ boost::shared_ptr<Eigen::MatrixXd> ThresholdImage_Preprocessor_MeanFilter::do_pr
 	return filtered_image;
 }
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Postprocessor_RemoveIsolatedPixels::do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) {
 	// we don't care about the edges, they are ignored anyway in the fitting
 	size_t x_size = thresholded_image->rows();
 	size_t y_size = thresholded_image->cols();
@@ -629,7 +629,7 @@ boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithSmallKernel(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::MatrixXd> kernel) {
+ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithSmallKernel(ImagePtr image, ImagePtr kernel) {
 	// implement a direct convolution with sufficiently small kernel
 	size_t kernelXSize = kernel->rows();
 	size_t kernelYSize = kernel->cols();
@@ -642,7 +642,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	if ((kernelXSize > 20) || (kernelYSize > 20))
 		throw std::runtime_error("Tried to use a large kernel in ConvolveMatrixWithSmallKernel");
 	
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetRecycledMatrix((int)imageXSize, (int)imageYSize), FreeRecycledMatrix);
+	ImagePtr convolvedImage(GetRecycledMatrix((int)imageXSize, (int)imageYSize), FreeRecycledMatrix);
 	
 	size_t halfKernelXSize = kernelXSize / 2;
 	size_t halfKernelYSize = kernelYSize / 2;
@@ -663,7 +663,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	return convolvedImage;
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(boost::shared_ptr<Eigen::MatrixXd> image1, boost::shared_ptr<Eigen::MatrixXd> image2) {
+ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(ImagePtr image1, ImagePtr image2) {
 	size_t x_size1, y_size1, x_size2, y_size2;
 	
 	x_size1 = image1->rows();
@@ -702,13 +702,13 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrice
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
+	ImagePtr convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 	
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
+ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(ImagePtr image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
 	size_t x_size1, y_size1;
 	
 	x_size1 = image->rows();
@@ -743,12 +743,12 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
+	ImagePtr convolved_image = DoReverseFFT(array1_FFT, x_size1, y_size1);
 	
 	return convolved_image;
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(boost::shared_ptr<Eigen::MatrixXd> image, size_t kernelXSize, size_t kernelYSize) {
+ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(ImagePtr image, size_t kernelXSize, size_t kernelYSize) {
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
 	
@@ -757,8 +757,8 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	}
 	
 	// calculate an accumulated image
-	boost::shared_ptr<Eigen::MatrixXd> accumulatedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	boost::shared_ptr<Eigen::MatrixXd> convolvedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr accumulatedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr convolvedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// populate the first column of the matrix
 	memcpy(accumulatedImage->data(), image->data(), xSize * sizeof(double));
@@ -789,7 +789,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::ConvolveMatrixW
 	return convolvedImage;
 }
 
-boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost::shared_ptr<Eigen::MatrixXd> image) {
+boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(ImagePtr image) {
 	
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
@@ -817,9 +817,9 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(boost
 	return array_FFT;
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
+ImagePtr ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	double normalization_factor = (double)(xSize * ySize);
 	fftw_plan reversePlan;
@@ -843,7 +843,7 @@ boost::shared_ptr<Eigen::MatrixXd> ConvolveMatricesWithFFTClass::DoReverseFFT(bo
 }
 
 
-gsl_histogram * make_histogram_from_matrix(boost::shared_ptr<Eigen::MatrixXd> image, size_t number_of_bins) {
+gsl_histogram * make_histogram_from_matrix(ImagePtr image, size_t number_of_bins) {
 	size_t x_size, y_size;
 	gsl_histogram *hist;
 	double min = 1e100;

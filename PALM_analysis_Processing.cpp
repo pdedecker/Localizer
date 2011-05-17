@@ -30,9 +30,9 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	size_t total_number_of_images = image_loader->getNImages();
-	boost::shared_ptr<Eigen::MatrixXd> average_image;
-	boost::shared_ptr<Eigen::MatrixXd> loaded_image;
-	boost::shared_ptr<Eigen::MatrixXd> subtracted_image;
+	ImagePtr average_image;
+	ImagePtr loaded_image;
+	ImagePtr subtracted_image;
 	
 	int abortStatus;
 	
@@ -43,8 +43,8 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	if (this->n_frames_averaging == 0)
 		this->n_frames_averaging = total_number_of_images;
 	
-	average_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
-	subtracted_image = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	average_image = ImagePtr(new Image((int)x_size, (int)y_size));
+	subtracted_image = ImagePtr(new Image((int)x_size, (int)y_size));
 	
 	average_image->setConstant(0.0);
 	
@@ -90,7 +90,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 
 void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
 	
-	boost::shared_ptr<Eigen::MatrixXd> currentImage;
+	ImagePtr currentImage;
 	size_t xSize = image_loader->getXSize();
 	size_t ySize = image_loader->getYSize();
 	size_t nFramesInMovie = image_loader->getNImages();
@@ -104,11 +104,11 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> averageImage (new Eigen::MatrixXd((int)xSize, (int)ySize));
-	boost::shared_ptr<Eigen::MatrixXd> summedImages (new Eigen::MatrixXd((int)xSize, (int)ySize));
-	boost::shared_ptr<Eigen::MatrixXd> activeImage (new Eigen::MatrixXd((int)xSize, (int)ySize));
+	ImagePtr averageImage (new Image((int)xSize, (int)ySize));
+	ImagePtr summedImages (new Image((int)xSize, (int)ySize));
+	ImagePtr activeImage (new Image((int)xSize, (int)ySize));
 	
-	std::deque<boost::shared_ptr<Eigen::MatrixXd> > frameBuffer;
+	std::deque<ImagePtr > frameBuffer;
 	
 	summedImages->setConstant(0.0);
 	
@@ -186,8 +186,8 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 }
 
 void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	boost::shared_ptr<Eigen::MatrixXd> next_image;
+	ImagePtr current_image;
+	ImagePtr next_image;
 	size_t total_number_of_images = image_loader->getNImages();
 	
 	int abortStatus;
@@ -230,7 +230,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 }
 
 void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	ImagePtr current_image;
 	size_t total_number_of_images = image_loader->getNImages();
 	int abortStatus;
 	
@@ -268,8 +268,8 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	this->croppedXSize = endX - startX + 1;
 	this->croppedYSize = endY - startY + 1;
 	
-	boost::shared_ptr<Eigen::MatrixXd > croppedImage;
-	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
+	boost::shared_ptr<Image > croppedImage;
+	boost::shared_ptr<Image > loadedImage;
 	
 	this->progressReporter->CalculationStarted();
 	
@@ -285,7 +285,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 		}
 		
 		loadedImage = image_loader->readImage(n);
-		croppedImage = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)croppedXSize, (int)croppedYSize));
+		croppedImage = ImagePtr (new Image((int)croppedXSize, (int)croppedYSize));
 		
 		for (size_t y = startY; y <= endY; ++y) {
 			for (size_t x = startX; x <= endX; ++x) {
@@ -305,8 +305,8 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<Eigen::MatrixXd > loadedImage;
-	boost::shared_ptr<Eigen::MatrixXd > convertedImage (new Eigen::MatrixXd((int)x_size, (int)y_size));;
+	boost::shared_ptr<Image > loadedImage;
+	boost::shared_ptr<Image > convertedImage (new Image((int)x_size, (int)y_size));;
 	
 	int abortStatus;
 	this->progressReporter->CalculationStarted();

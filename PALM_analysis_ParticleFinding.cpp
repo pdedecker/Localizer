@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_ParticleFinding.h"
 
-boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
+boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(ImagePtr image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
 	boost::shared_ptr<std::list<Particle> > positions (new std::list<Particle>());
 	Particle currentPosition;
 	// we store the pixels above the treshold as a vector containing x,y,intensity
@@ -19,7 +19,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 	double distance_squared;
 	double radius_squared = (double)(radius * radius);
 	double x, y;
-	boost::shared_ptr<Eigen::MatrixXd> output_positions;
+	ImagePtr output_positions;
 	double backgroundIntensity = 0;
 	size_t nBackgroundPixels = 0;
 	
@@ -80,7 +80,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(boo
 }
 
 
-boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
+boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(ImagePtr image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
 	
 	boost::shared_ptr<std::list<Particle> > particles (new std::list<Particle>());
 	std::list<Particle> positionsInCurrentParticleList;
@@ -179,7 +179,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent4::findPositions(
 	
 }
 
-void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<Particle> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
+void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<Particle> &positionsInCurrentParticle, ImagePtr image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -260,7 +260,7 @@ void ParticleFinder_adjacent4::growParticle(Particle centerPosition, std::list<P
 }
 
 
-boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
+boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(ImagePtr image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
 	
 	std::list<Particle> positionsInCurrentParticleList;
 	std::vector<Particle> positionsInCurrentParticle;
@@ -360,7 +360,7 @@ boost::shared_ptr<std::list<Particle> > ParticleFinder_adjacent8::findPositions(
 	
 }
 
-void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<Particle> &positionsInCurrentParticle, boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
+void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<Particle> &positionsInCurrentParticle, ImagePtr image, boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image, boost::shared_ptr<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> > mapped_image) {
 	// the pixel at position (x,y) belongs to a particle
 	// do the surrounding pixels belong to the same particle?
 	
@@ -406,7 +406,7 @@ void ParticleFinder_adjacent8::growParticle(Particle centerPosition, std::list<P
 	}
 }
 
-void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions) {
+void ParticleVerifier_RemoveOverlappingParticles::VerifyParticles(ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
 	double distance;
 	double minDistance = 4.0 * this->psfWidth;
 	

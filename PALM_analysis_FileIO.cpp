@@ -133,12 +133,12 @@ void ImageLoader::checkForReasonableValues() {
 	}
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readImage(size_t index) {
+ImagePtr ImageLoader::readImage(size_t index) {
 	this->spoolTo(index);
 	return this->readNextImage(index);
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoader::readNextImageAndLoop(size_t &index) {
+ImagePtr ImageLoader::readNextImageAndLoop(size_t &index) {
 	this->spoolTo(index % this->nImages);
 	return this->readNextImage(index);
 }
@@ -225,7 +225,7 @@ void ImageLoaderSPE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readNextImage(size_t &index) {
+ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
 	uint64_t offset;
 	uint32_t *currentUint32t = 0;
 	float *currentFloat = 0;
@@ -254,7 +254,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderSPE::readNextImage(size_t &index) 
 	imageSize = pixelSize * xSize * ySize;
 	
 	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
-	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -440,13 +440,13 @@ void ImageLoaderAndor::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderAndor::readNextImage(size_t &index) {
+ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 	uint64_t offset;
 	float current_float = 0;
 	uint64_t cache_offset = 0;
 	
 	boost::scoped_array<float> single_image_buffer(new float[xSize * ySize]);
-	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -547,12 +547,12 @@ void ImageLoaderHamamatsu::parse_header_information() {
 }
 
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderHamamatsu::readNextImage(size_t &index) {
+ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 	uint64_t offset;
 	size_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
-	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -639,11 +639,11 @@ void ImageLoaderPDE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderPDE::readNextImage(size_t &index) {
+ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 	size_t nPixels = this->xSize * this->ySize;
 	size_t offset, imageSize;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
+	ImagePtr image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
 	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_UINT16:
@@ -941,7 +941,7 @@ void ImageLoaderTIFF::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index) {
+ImagePtr ImageLoaderTIFF::readNextImage(size_t &index) {
 	int result;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
@@ -967,7 +967,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderTIFF::readNextImage(size_t &index)
 		}
 	}
 	
-	boost::shared_ptr<Eigen::MatrixXd> image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	for (size_t j = 0; j < ySize; ++j) {
 		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
@@ -1133,7 +1133,7 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	this->checkForReasonableValues();
 }
 
-boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readNextImage(size_t &index) {
+ImagePtr ImageLoaderIgor::readNextImage(size_t &index) {
 	int err;
 	int waveType = WaveType(this->igor_data_wave);
 	size_t waveDataOffset;
@@ -1141,7 +1141,7 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readNextImage(size_t &index)
 	size_t nPixels = this->xSize * this->ySize;
 	
 	// allocate a new image
-	boost::shared_ptr<Eigen::MatrixXd> image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// get a pointer to the data in the wave
 	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
@@ -1315,7 +1315,7 @@ void PDEImageOutputWriter::WriteHeader() {
 	}
 }
 
-void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
+void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	// determine the size of the frames
 	size_t currentXSize = imageToWrite->rows();
@@ -1429,7 +1429,7 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 
 
 
-void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
+void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	size_t xSize = imageToWrite->rows();
 	size_t ySize = imageToWrite->cols();
@@ -1719,7 +1719,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderA
 	}
 }
 
-void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) {
+void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	int result;
 	size_t xSize = imageToWrite->rows();

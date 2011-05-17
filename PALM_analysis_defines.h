@@ -21,6 +21,13 @@
 #define ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES 2 + FIRST_XOP_ERR
 #endif // WITH_IGOR
 
+#include <boost/smart_ptr.hpp>
+#include <eigen2/Eigen/Eigen>
+
+// the typedef for an image
+typedef Eigen::MatrixXd Image;
+typedef boost::shared_ptr<Image> ImagePtr;
+
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors
 const int kMaxImageDimension = 10000;

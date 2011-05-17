@@ -30,7 +30,7 @@ class ParticleFinder;
 class FitPositions;
 
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 
@@ -112,10 +112,10 @@ public:
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions);
+	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
 	
 protected:
-	boost::shared_ptr<Eigen::MatrixXd> subtractLocalizedPositions(boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<LocalizedPositionsContainer> positions);
+	ImagePtr subtractLocalizedPositions(ImagePtr image, boost::shared_ptr<LocalizedPositionsContainer> positions);
 	
 	boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
 	boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor;

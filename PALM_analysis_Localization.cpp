@@ -9,7 +9,7 @@
 
 #include "PALM_analysis_Localization.h"
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
 																							 boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
@@ -33,11 +33,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	
 	double relativeAmplitudeError, relativeWidthError;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image_subset;
+	ImagePtr image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
 	boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -194,7 +194,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const ImagePtr image,
 																							  boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
@@ -218,11 +218,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 	
 	double relativeAmplitudeError;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image_subset;
+	ImagePtr image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
 	boost::shared_ptr<LocalizedPosition_2DGaussFixedWidth> localizationResult (new LocalizedPosition_2DGaussFixedWidth());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -372,7 +372,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const ImagePtr image,
 																							   boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
@@ -394,11 +394,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	long iterations = 0;
 	int status;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image_subset;
+	ImagePtr image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
 	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 	
 	// initialize the solver
 	const gsl_multifit_fdfsolver_type *solver;
@@ -573,7 +573,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image, boost::shared_ptr<std::list<Particle> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
 	if (positions->size() == 0) {
@@ -594,11 +594,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	double size;
 	double dummy;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image_subset;
+	ImagePtr image_subset;
 	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
 	boost::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 	
 	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
 	gsl_multimin_fminimizer *fit_iterator = NULL;
@@ -733,7 +733,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const ImagePtr image,
 																						 boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
@@ -760,13 +760,13 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 	double previous_position_x, previous_position_y;
 	double current_x, current_y;
 	
-	boost::shared_ptr<Eigen::MatrixXd> image_subset;
-	boost::shared_ptr<Eigen::MatrixXd> image_subset_mask;
+	ImagePtr image_subset;
+	ImagePtr image_subset_mask;
 	boost::shared_ptr<LocalizedPositionsContainer_Multiplication> fitted_positions (new LocalizedPositionsContainer_Multiplication());
 	boost::shared_ptr<LocalizedPosition_Multiplication> localizationResult (new LocalizedPosition_Multiplication());
 	
-	image_subset = boost::shared_ptr<Eigen::MatrixXd>(new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
-	image_subset_mask = boost::shared_ptr<Eigen::MatrixXd> (new Eigen::MatrixXd((int)size_of_subset, (int)size_of_subset));
+	image_subset = ImagePtr(new Image((int)size_of_subset, (int)size_of_subset));
+	image_subset_mask = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 	
 	std::list<Particle>::iterator it = positions->begin();
 	while (it != positions->end()) {
@@ -834,7 +834,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 }
 
 
-int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<Eigen::MatrixXd> original_image, boost::shared_ptr<Eigen::MatrixXd> masked_image, double x, double y, 
+int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, ImagePtr masked_image, double x, double y, 
 													   double std_dev, double background, double amplitude) {
 	// we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 	
@@ -861,7 +861,7 @@ int FitPositionsMultiplication::multiply_with_gaussian(boost::shared_ptr<Eigen::
 }
 
 
-int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<Eigen::MatrixXd> masked_image, double &x, double &y) {
+int FitPositionsMultiplication::determine_x_y_position(ImagePtr masked_image, double &x, double &y) {
 	// based on eq (3) in Thompson Biophys J 2002
 	
 	size_t x_size = (size_t)masked_image->rows();
@@ -887,7 +887,7 @@ int FitPositionsMultiplication::determine_x_y_position(boost::shared_ptr<Eigen::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const boost::shared_ptr<Eigen::MatrixXd> image,
+boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const ImagePtr image,
 																				   boost::shared_ptr<std::list<Particle> > positions) {
 	
 	// some safety checks
@@ -954,7 +954,7 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 	
 	
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -994,7 +994,7 @@ int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, 
 	
 	
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1034,7 +1034,7 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
 	
 	
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1074,7 +1074,7 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
 
 int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1124,7 +1124,7 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
 
 int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1171,7 +1171,7 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 
 int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1231,7 +1231,7 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 
 int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *model_values, gsl_matrix *jacobian) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();
@@ -1309,7 +1309,7 @@ int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *m
 
 double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_rhs) {
 	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-	boost::shared_ptr<Eigen::MatrixXd> imageSubset = fitDataLocal->imageSubset;
+	ImagePtr imageSubset = fitDataLocal->imageSubset;
 	
 	size_t xSize = imageSubset->rows();
 	size_t ySize = imageSubset->cols();

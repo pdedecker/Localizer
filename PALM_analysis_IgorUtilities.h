@@ -74,8 +74,8 @@ std::string ConvertPathToNativePath(std::string filePath);
 // routines to convert data from and to Igor format
 waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName);
 
-boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave);
+ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave);
 
-waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::string waveName);
+waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName);
 
 #endif

@@ -89,7 +89,7 @@ public:
 	/**
 	 * readImage explicitly asks for the image at a certain index, but is not reentrant.
 	 */
-	boost::shared_ptr<Eigen::MatrixXd> readImage(const size_t index);	// images are numbered from 0 to N - 1
+	ImagePtr readImage(const size_t index);	// images are numbered from 0 to N - 1
 	
 	/*
 	 * readNext asks for the next image in the sequence, and is
@@ -98,12 +98,12 @@ public:
 	 * for the caller to know which image was returned. This is returned by reference
 	 * in the argument.
 	 */
-	virtual boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index) = 0;
+	virtual ImagePtr readNextImage(size_t &index) = 0;
 	/*
 	 * Get the next image in the file and loop to the begin after the last image.
 	 * Not reentrant.
 	 */
-	boost::shared_ptr<Eigen::MatrixXd> readNextImageAndLoop(size_t &index);
+	ImagePtr readNextImageAndLoop(size_t &index);
 	/*
 	 * Spool the file so the specified frame will be the one read by readNextImage
 	 */
@@ -143,7 +143,7 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -154,7 +154,7 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -182,7 +182,7 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -193,7 +193,7 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information();
@@ -204,7 +204,7 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 	/*
 	 * The implementation of spoolTo in the base ImageLoader class
@@ -227,7 +227,7 @@ public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
-	boost::shared_ptr<Eigen::MatrixXd> readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &index);
 	
 protected:
 	void parse_header_information() {;}
@@ -246,7 +246,7 @@ public:
 	std::string getOutputFilePath() const {return outputFilePath;}
 	size_t getNImagesWritten() const {return nImagesWritten;}
 	
-	virtual void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) = 0;
+	virtual void write_image(ImagePtr imageToWrite) = 0;
 	
 protected:
 	
@@ -262,7 +262,7 @@ public:
 	PDEImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
 	~PDEImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite);
+	void write_image(ImagePtr imageToWrite);
 	
 protected:
 	void WriteHeader();
@@ -287,7 +287,7 @@ public:
 	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
 	~TIFFImageOutputWriter();
 	
-	void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite);
+	void write_image(ImagePtr imageToWrite);
 protected:
 	int compression;	// if 1 then don't compress the data, otherwise compress
 	int storageType;
@@ -305,7 +305,7 @@ public:
 	
 	~IgorImageOutputWriter() {;}
 	
-	void write_image(boost::shared_ptr<Eigen::MatrixXd> new_image);
+	void write_image(ImagePtr new_image);
 	
 protected:
 	int GetIgorStorageType();

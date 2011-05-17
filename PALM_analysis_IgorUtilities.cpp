@@ -125,7 +125,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 	int storage_type;
 	
 	int result;
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	ImagePtr current_image;
 	
 	if (firstImage >= nImages) {
 		throw std::runtime_error("the requested starting image is larger than the number of images available in the file");
@@ -233,7 +233,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	ImagePtr current_image;
 	double summed_intensity;
 	
 	waveHndl output_wave;
@@ -370,8 +370,8 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
-	boost::shared_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd((int)xRange, (int)yRange));
+	ImagePtr current_image;
+	ImagePtr average_image(new Image((int)xRange, (int)yRange));
 	
 	waveHndl output_wave;
 	long dimension_sizes[MAX_DIMENSIONS + 1];
@@ -447,9 +447,9 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 	xRange = endX - startX + 1;
 	yRange = endY - startY + 1;
 	
-	boost::scoped_ptr<Eigen::MatrixXd> varianceImage(new Eigen::MatrixXd((int)xRange, (int)yRange));
-	boost::scoped_ptr<Eigen::MatrixXd> average_image(new Eigen::MatrixXd((int)xRange, (int)yRange));
-	boost::shared_ptr<Eigen::MatrixXd> current_image;
+	boost::scoped_ptr<Image> varianceImage(new Image((int)xRange, (int)yRange));
+	boost::scoped_ptr<Image> average_image(new Image((int)xRange, (int)yRange));
+	ImagePtr current_image;
 	
 	average_image->setConstant(0.0);
 	varianceImage->setConstant(0.0);
@@ -635,7 +635,7 @@ std::string ConvertPathToNativePath(std::string filePath) {
 	
 	
 	
-	#ifdef MACIGOR
+#ifdef MACIGOR
 	err = WinToMacPath(cString);
 	if (err != 0) {
 		throw err;
@@ -648,14 +648,14 @@ std::string ConvertPathToNativePath(std::string filePath) {
 		throw err;
 	}
 	convertedPath.assign(posixPATH);
-	#endif
-	#ifdef WINIGOR
+#endif
+#ifdef WINIGOR
 	err = MacToWinPath(cString);
 	if (err != 0) {
 		throw err;
 	}
 	convertedPath.assign(cString);
-	#endif
+#endif
 	
 	return convertedPath;
 	
@@ -694,7 +694,7 @@ waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std
 }
 
 
-boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
+ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave) {
 	// copy a Igor wave into a new gsl_matrix
 	
 	int err;
@@ -714,7 +714,7 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	x_size = dimensionSizes[0];
 	y_size = dimensionSizes[1];
 	
-	boost::shared_ptr<Eigen::MatrixXd> matrix(new Eigen::MatrixXd((int)x_size, (int)y_size));
+	ImagePtr matrix(new Image((int)x_size, (int)y_size));
 	
 	err = MDGetDPDataFromNumericWave(wave, matrix->data());
 	if (err != 0)
@@ -723,7 +723,7 @@ boost::shared_ptr<Eigen::MatrixXd> CopyIgorDPWaveToMatrix(waveHndl wave) {
 	return matrix;
 }
 
-waveHndl CopyMatrixToIgorDPWave(boost::shared_ptr<Eigen::MatrixXd> matrix, std::string waveName) {
+waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName) {
 	
 	waveHndl DPWave;
 	

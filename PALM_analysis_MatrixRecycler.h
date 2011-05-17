@@ -10,6 +10,7 @@
 #include <list>
 #include "boost/thread.hpp"
 #include <Eigen/Eigen>
+#include "PALM_analysis_storage.h"
 
 const size_t kMaxUnusedMatrices = 20;
 
@@ -18,8 +19,8 @@ public:
 	MatrixRecycler() {;}
 	~MatrixRecycler();
 	
-	Eigen::MatrixXd *getMatrix(size_t nRows, size_t nCols);
-	void freeMatrix(Eigen::MatrixXd *matrixToFree);
+	Image *getMatrix(size_t nRows, size_t nCols);
+	void freeMatrix(Image *matrixToFree);
 	
 	// free all matrices allocated by this matrix
 	// if this function is called while some memory
@@ -28,8 +29,8 @@ public:
 	void freeAllMatrices();
 	
 protected:
-	std::list<Eigen::MatrixXd *> unusedMatrixList;
-	std::list<Eigen::MatrixXd *> usedMatrixList;
+	std::list<Image *> unusedMatrixList;
+	std::list<Image *> usedMatrixList;
 	
 	boost::mutex recyclingMutex;
 };
@@ -40,12 +41,12 @@ protected:
 /**
  * Obtain a matrix of the requested dimensions from the globalMatrixRecycler
  */
-Eigen::MatrixXd* GetRecycledMatrix(size_t nRows, size_t nCols);
+Image* GetRecycledMatrix(size_t nRows, size_t nCols);
 
 /**
  * Mark a matrix from the globalMatrixRecycler as no longer in use
  */
-void FreeRecycledMatrix(Eigen::MatrixXd* matrixToFree);
+void FreeRecycledMatrix(Image* matrixToFree);
 
 /**
  * Request that all reserved memory held in the recycler be freed
