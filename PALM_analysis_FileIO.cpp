@@ -1272,22 +1272,16 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
-	PDEFormatHeader header;
-	header.magic = 0;
-	header.version = 0;
-	header.nImages = 0;
-	header.xSize = 0;
-	header.ySize = 0;
-	header.storageFormat = 0;
-	
 	this->xSize = 0;
 	this->ySize = 0;
 	this->nImagesWritten = 0;
 	this->storageType = storageType_rhs;
 	
-	// the first 3 * 4 bytes of the file should be written in advance, we will fill them in later
-	// by convention they are xSize, ySize, and n_images
-	file.write((char *)&header, sizeof(header));
+	// write the header out in advance
+	// before closing the file, after all images have been written,
+	// we will come back to this and overwrite it with the correct
+	// values
+	this->WriteHeader();
 }
 
 
