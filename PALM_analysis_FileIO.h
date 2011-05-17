@@ -243,19 +243,17 @@ public:
 	ImageOutputWriter();
 	virtual ~ImageOutputWriter() {;}
 	
-	std::string get_file_path() const {return file_path;}
-	size_t get_n_images_written() const {return n_images_written;}
+	std::string getOutputFilePath() const {return outputFilePath;}
+	size_t getNImagesWritten() const {return nImagesWritten;}
 	
 	virtual void write_image(boost::shared_ptr<Eigen::MatrixXd> imageToWrite) = 0;
 	
 protected:
 	
-	std::string file_path;
+	std::string outputFilePath;
 	std::ofstream file;
 	
-	size_t n_images_written;
-	
-	std::queue <boost::shared_ptr<Eigen::MatrixXd> > image_buffer;
+	size_t nImagesWritten;
 };
 
 

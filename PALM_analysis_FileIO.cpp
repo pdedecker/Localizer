@@ -1245,30 +1245,30 @@ boost::shared_ptr<Eigen::MatrixXd> ImageLoaderIgor::readNextImage(size_t &index)
 
 
 ImageOutputWriter::ImageOutputWriter() {
-	file_path.assign("");
-	n_images_written = 0;
+	outputFilePath.assign("");
+	nImagesWritten = 0;
 }
 
 PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
-	file_path = rhs;
+	outputFilePath = rhs;
 	
 	if (overwrite == 0) {
 		std::ifstream input_test;
-		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
+		input_test.open(outputFilePath.c_str(), std::ios::in | std::ios::binary);
 		if (input_test.good() == 1) {
 			std::string error("The output file at ");
-			error += this->file_path;
+			error += this->outputFilePath;
 			error += " already exists.";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 	}
 	
-	file.open(file_path.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
+	file.open(outputFilePath.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
 	if (file.fail() != 0) {
 		std::string error("Cannot create an output file at ");
-		error += this->file_path;
+		error += this->outputFilePath;
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
@@ -1282,7 +1282,7 @@ PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite,
 	
 	this->xSize = 0;
 	this->ySize = 0;
-	this->n_images_written = 0;
+	this->nImagesWritten = 0;
 	this->storageType = storageType_rhs;
 	
 	// the first 3 * 4 bytes of the file should be written in advance, we will fill them in later
@@ -1303,7 +1303,7 @@ void PDEImageOutputWriter::WriteHeader() {
 	
 	header.magic = 27;
 	header.version = 1;
-	header.nImages = this->n_images_written;
+	header.nImages = this->nImagesWritten;
 	header.xSize = this->xSize;
 	header.ySize = this->ySize;
 	header.storageFormat = this->storageType;
@@ -1330,7 +1330,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 	
 	size_t offset = 0;
 	
-	if (this->n_images_written == 0) {
+	if (this->nImagesWritten == 0) {
 		this->xSize = currentXSize;
 		this->ySize = currentYSize;
 	} else {
@@ -1391,7 +1391,7 @@ void PDEImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> imageT
 		default:
 			throw std::runtime_error("Unsupport file type requested in the simple output format");
 	}
-	++this->n_images_written;
+	++this->nImagesWritten;
 }
 
 TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {
@@ -1399,30 +1399,30 @@ TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrit
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
 	TIFFSetWarningHandler(NULL);
-	this->file_path = rhs;
+	this->outputFilePath = rhs;
 	this->compression = compression_rhs;
 	this->storageType = storageType_rhs;
 	
 	if (overwrite == 0) {
 		std::ifstream input_test;
-		input_test.open(file_path.c_str(), std::ios::in | std::ios::binary);
+		input_test.open(outputFilePath.c_str(), std::ios::in | std::ios::binary);
 		if (input_test.good() == 1) {
 			std::string error("The output file at ");
-			error += this->file_path;
+			error += this->outputFilePath;
 			error += " already exists.";
 			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
 		}
 		input_test.close();
 	}
 	
-	tiff_file = TIFFOpen(file_path.c_str(), "w");
+	tiff_file = TIFFOpen(outputFilePath.c_str(), "w");
 	if (tiff_file == NULL) {
 		std::string error("Cannot create an output file at ");
-		error += this->file_path;
+		error += this->outputFilePath;
 		throw CANNOT_OPEN_OUTPUT_FILE(error);
 	}
 	
-	n_images_written = 0;
+	nImagesWritten = 0;
 }
 
 
@@ -1502,7 +1502,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the photometric type for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1512,7 +1512,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the image width for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1522,7 +1522,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the image height for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1531,7 +1531,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the SampleFormat for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1540,7 +1540,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the BitsPerSample for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1549,17 +1549,17 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the SubFileType for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-	current_uint16 = (uint16_t)n_images_written;
+	current_uint16 = (uint16_t)nImagesWritten;
 	result = TIFFSetField(tiff_file, TIFFTAG_PAGENUMBER, current_uint16);
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the PageNumber for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1568,7 +1568,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to set the compression method for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
@@ -1666,7 +1666,7 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		if (result != 1) {
 			std::string error;
 			error = "There was an error writing a scanline for the image at\"";
-			error += file_path;
+			error += outputFilePath;
 			error += "\"";
 			throw ERROR_WRITING_FILE_DATA(error);
 		}
@@ -1677,12 +1677,12 @@ void TIFFImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 	if (result != 1) {
 		std::string error;
 		error = "Unable to write a directory for the image at\"";
-		error += file_path;
+		error += outputFilePath;
 		error += "\"";
 		throw ERROR_WRITING_FILE_DATA(error);
 	}
 	
-	++this->n_images_written;
+	++this->nImagesWritten;
 }
 
 #ifdef WITH_IGOR
@@ -1692,7 +1692,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	this->outputWave = NULL;
 	this->fullPathToWave = waveName_rhs;
 	this->nImagesTotal = nImages_rhs;
-	this->n_images_written = 0;
+	this->nImagesWritten = 0;
 	this->storageType = storageType_rhs;
 	
 	// check if the output wave already exists
@@ -1712,7 +1712,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderA
 	this->outputWave = NULL;
 	this->fullPathToWave.assign("");
 	this->nImagesTotal = nImages_rhs;
-	this->n_images_written = 0;
+	this->nImagesWritten = 0;
 	this->storageType = storageType_rhs;
 	this->waveDataFolderAndName = outputDataFolderAndName_rhs;
 	
@@ -1766,7 +1766,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I8:
 		{
 			int8_t* int8Ptr = (int8_t*)waveDataPtr;
-			int8Ptr += nPixels * this->n_images_written;
+			int8Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				int8Ptr[i] = imagePtr[i];
 			}
@@ -1775,7 +1775,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I16:
 		{
 			int16_t* int16Ptr = (int16_t*)waveDataPtr;
-			int16Ptr += nPixels * this->n_images_written;
+			int16Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				int16Ptr[i] = imagePtr[i];
 			}
@@ -1784,7 +1784,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I32:
 		{
 			int32_t* int32Ptr = (int32_t*)waveDataPtr;
-			int32Ptr += nPixels * this->n_images_written;
+			int32Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				int32Ptr[i] = imagePtr[i];
 			}
@@ -1793,7 +1793,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I8 | NT_UNSIGNED:
 		{
 			uint8_t* uint8Ptr = (uint8_t*)waveDataPtr;
-			uint8Ptr += nPixels * this->n_images_written;
+			uint8Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				uint8Ptr[i] = imagePtr[i];
 			}
@@ -1802,7 +1802,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I16 | NT_UNSIGNED:
 		{
 			uint16_t* uint16Ptr = (uint16_t*)waveDataPtr;
-			uint16Ptr += nPixels * this->n_images_written;
+			uint16Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				uint16Ptr[i] = imagePtr[i];
 			}
@@ -1811,7 +1811,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_I32 | NT_UNSIGNED:
 		{
 			uint32_t* uint32Ptr = (uint32_t*)waveDataPtr;
-			uint32Ptr += nPixels * this->n_images_written;
+			uint32Ptr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				uint32Ptr[i] = imagePtr[i];
 			}
@@ -1820,7 +1820,7 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_FP32:
 		{
 			float* floatPtr = (float*)waveDataPtr;
-			floatPtr += nPixels * this->n_images_written;
+			floatPtr += nPixels * this->nImagesWritten;
 			for (size_t i = 0; i < nPixels; ++i) {
 				floatPtr[i] = imagePtr[i];
 			}
@@ -1829,13 +1829,13 @@ void IgorImageOutputWriter::write_image(boost::shared_ptr<Eigen::MatrixXd> image
 		case NT_FP64:
 		{
 			double* doublePtr = (double*)waveDataPtr;
-			doublePtr += nPixels * this->n_images_written;
+			doublePtr += nPixels * this->nImagesWritten;
 			memcpy(doublePtr, imagePtr, nPixels * sizeof(double));
 			break;
 		}
 	}
 	
-	++n_images_written;
+	++nImagesWritten;
 }
 
 int IgorImageOutputWriter::GetIgorStorageType() {
