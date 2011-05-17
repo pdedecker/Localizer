@@ -1249,13 +1249,6 @@ ImageOutputWriter::ImageOutputWriter() {
 	n_images_written = 0;
 }
 
-ImageOutputWriter::ImageOutputWriter(const std::string &rhs, int overwrite) {
-	file_path.assign("");
-	n_images_written = 0;
-}
-
-
-
 PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting

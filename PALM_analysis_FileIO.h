@@ -241,7 +241,6 @@ protected:
 class ImageOutputWriter {
 public:
 	ImageOutputWriter();
-	ImageOutputWriter(const std::string &rhs, int overwrite);
 	virtual ~ImageOutputWriter() {;}
 	
 	std::string get_file_path() const {return file_path;}
