@@ -531,6 +531,11 @@ struct SOFIAnalysisRuntimeParams {
 	double order;
 	int ORDRFlagParamsSet[1];
 	
+	// Parameters for /LAG flag group.
+	int LAGFlagEncountered;
+	double lagTime;
+	int LAGFlagParamsSet[1];
+	
 	// Parameters for /XC flag group.
 	int XCFlagEncountered;
 	double doCrossCorrelation;
@@ -2238,8 +2243,12 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 	
 	// Flag parameters.
 	
+	int cameraType;
 	if (p->YFlagEncountered) {
 		// Parameter: p->cameraType
+		cameraType = (int)(p->cameraType + 0.5);
+	} else {
+		cameraType = -1;
 	}
 	
 	if (p->WDTHFlagEncountered) {
@@ -2248,6 +2257,16 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 	
 	if (p->ORDRFlagEncountered) {
 		// Parameter: p->order
+	}
+	
+	int lagTime;
+	if (p->LAGFlagEncountered) {
+		// Parameter: p->lagTime
+		if (p->lagTime < 0)
+			throw EXPECT_POS_NUM;
+		lagTime = (int)(p->lagTime + 0.5);
+	} else {
+		lagTime = 0;
 	}
 	
 	if (p->XCFlagEncountered) {
@@ -2262,18 +2281,55 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		// Parameter: p->maxBleaching
 	}
 	
+	int outputType;
 	if (p->OUTFlagEncountered) {
 		// Parameter: p->outputType
+		outputType = (int)(p->outputType + 0.5);
+	} else {
+		outputType = IMAGE_OUTPUT_TYPE_IGOR;
 	}
 	
 	// Main parameters.
 	
 	if (p->inputFilePathEncountered) {
 		// Parameter: p->inputFilePath (test for NULL handle before using)
+		if (p->inputFilePath == NULL)
+			return EXPECTED_STRING_EXPR;
+	} else {
+		return EXPECTED_STRING_EXPR;
 	}
 	
 	if (p->outputFilePathEncountered) {
 		// Parameter: p->outputFilePath (test for NULL handle before using)
+		if (p->outputFilePath == NULL)
+			return EXPECTED_STRING_EXPR;
+	} else {
+		return EXPECTED_STRING_EXPR;
+	}
+	
+	try {
+		std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
+		boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
+		
+		std::string outputFilePath = ConvertHandleToString(p->outputFilePath);
+		if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
+			outputFilePath = ConvertPathToNativePath(outputFilePath);
+		
+		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, 1, 1, STORAGE_TYPE_FP64));
+		
+		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, 0);
+	}
+	catch (int e) {
+		return e;
+	}
+	catch (std::runtime_error e) {
+		XOPNotice(e.what());
+		XOPNotice("\r");
+		return PALM_ANALYSIS_XOP_ERROR;
+	}
+	catch (...) {
+		XOPNotice("An unknown error occurred\r");
+		return WM_UNKNOWN_ERROR;
 	}
 	
 	return err;
@@ -2382,7 +2438,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /XC=number:doCrossCorrelation /FRMS=number:nFramesToGroup /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /FRMS=number:nFramesToGroup /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

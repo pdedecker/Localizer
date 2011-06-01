@@ -30,6 +30,7 @@
 #include "PALM_analysis_IgorUtilities.h"
 #include "PALM_analysis_PositionsProcessing.h"
 #include "PALM_analysis_ProgressReporting.h"
+#include "PALM_analysis_SOFI.h"
 
 
 HOST_IMPORT int main(IORecHandle ioRecHandle);

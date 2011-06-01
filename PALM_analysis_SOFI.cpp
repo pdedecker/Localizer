@@ -11,6 +11,7 @@
 
 SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) {
 	this->lagTime = lagTime_rhs;
+	this->nEvaluations = 0;
 }
 
 void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
