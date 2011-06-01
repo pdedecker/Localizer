@@ -54,5 +54,8 @@ resource 'XOPC' (1100) {
 		
 		"RipleyLFunctionClustering",
 		XOPOp+utilOp+compilableOp,
+		
+		"SOFIAnalysis",
+		XOPOp+utilOp+compilableOp,
 	}
 };

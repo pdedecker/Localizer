@@ -511,6 +511,66 @@ typedef struct RipleyLFunctionClusteringRuntimeParams RipleyLFunctionClusteringR
 typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClusteringRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
+// Runtime param structure for SOFIAnalysis operation.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+struct SOFIAnalysisRuntimeParams {
+	// Flag parameters.
+	
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double cameraType;
+	int YFlagParamsSet[1];
+	
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
+	double psfWidth;
+	int WDTHFlagParamsSet[1];
+	
+	// Parameters for /ORDR flag group.
+	int ORDRFlagEncountered;
+	double order;
+	int ORDRFlagParamsSet[1];
+	
+	// Parameters for /XC flag group.
+	int XCFlagEncountered;
+	double doCrossCorrelation;
+	int XCFlagParamsSet[1];
+	
+	// Parameters for /FRMS flag group.
+	int FRMSFlagEncountered;
+	double nFramesToGroup;
+	int FRMSFlagParamsSet[1];
+	
+	// Parameters for /MXBL flag group.
+	int MXBLFlagEncountered;
+	double maxBleaching;
+	int MXBLFlagParamsSet[1];
+	
+	// Parameters for /OUT flag group.
+	int OUTFlagEncountered;
+	double outputType;
+	int OUTFlagParamsSet[1];
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int inputFilePathEncountered;
+	Handle inputFilePath;
+	int inputFilePathParamsSet[1];
+	
+	// Parameters for simple main group #1.
+	int outputFilePathEncountered;
+	Handle outputFilePath;
+	int outputFilePathParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+};
+typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
+typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
+#pragma pack()	// All structures passed to Igor are two-byte aligned.
+
 
 static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 	gsl_set_error_handler_off();	// we will handle errors ourselves
@@ -2171,6 +2231,54 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 	return err;
 }
 
+static int
+ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
+{
+	int err = 0;
+	
+	// Flag parameters.
+	
+	if (p->YFlagEncountered) {
+		// Parameter: p->cameraType
+	}
+	
+	if (p->WDTHFlagEncountered) {
+		// Parameter: p->psfWidth
+	}
+	
+	if (p->ORDRFlagEncountered) {
+		// Parameter: p->order
+	}
+	
+	if (p->XCFlagEncountered) {
+		// Parameter: p->doCrossCorrelation
+	}
+	
+	if (p->FRMSFlagEncountered) {
+		// Parameter: p->nFramesToGroup
+	}
+	
+	if (p->MXBLFlagEncountered) {
+		// Parameter: p->maxBleaching
+	}
+	
+	if (p->OUTFlagEncountered) {
+		// Parameter: p->outputType
+	}
+	
+	// Main parameters.
+	
+	if (p->inputFilePathEncountered) {
+		// Parameter: p->inputFilePath (test for NULL handle before using)
+	}
+	
+	if (p->outputFilePathEncountered) {
+		// Parameter: p->outputFilePath (test for NULL handle before using)
+	}
+	
+	return err;
+}
+
 static int RegisterLocalizationAnalysis(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
@@ -2268,6 +2376,18 @@ static int RegisterRipleyLFunctionClustering(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);
 }
 
+static int RegisterSOFIAnalysis(void) {
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
+	
+	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /XC=number:doCrossCorrelation /FRMS=number:nFramesToGroup /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
+	runtimeNumVarList = "";
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
+}
+
 /*	XOPEntry()
  
  This is the entry point from the host application to the XOP for all
@@ -2301,6 +2421,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 	if (result = RegisterLocalizationBitmap())
 		return result;
 	if (result = RegisterRipleyLFunctionClustering())
+		return result;
+	if (result = RegisterSOFIAnalysis())
 		return result;
 	
 	// There are no more operations added by this XOP.
