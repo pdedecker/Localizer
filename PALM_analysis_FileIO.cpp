@@ -1742,6 +1742,8 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 			this->outputWave = MakeWaveUsingFullPath(this->fullPathToWave, dimensionSizes, storage, this->overwrite);
 		} else {
 			result = MDMakeWave(&(this->outputWave), this->waveDataFolderAndName.name, this->waveDataFolderAndName.dfH, dimensionSizes, storage, this->overwrite);
+			if (result != 0)
+				throw result;
 		}
 	}
 	

@@ -92,7 +92,7 @@ public:
 	ImagePtr readImage(const size_t index);	// images are numbered from 0 to N - 1
 	
 	/*
-	 * readNext asks for the next image in the sequence, and is
+	 * readNextImage asks for the next image in the sequence, and is
 	 * reentrant, but throws a std::runtime exception if there are no more images
 	 * in the sequence. Also, due to its reentrant nature there must be some way
 	 * for the caller to know which image was returned. This is returned by reference
