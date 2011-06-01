@@ -7,13 +7,20 @@
  *
  */
 
+#ifndef PALM_ANALYSIS_SOFI_H
+#define PALM_ANALYSIS_SOFI_H
+
 #include <queue>
 #include <vector>
 
 #include <Eigen/Eigen>
 #include "boost/smart_ptr.hpp"
+#include <gsl/gsl_min.h>
 
 #include "PALM_analysis_FileIO.h"
+
+void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+					int lagTime, int order, int crossCorrelate);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
  * In addition it's possible that the calculation will only operate on subranges
@@ -50,5 +57,24 @@ protected:
 	size_t nEvaluations;
 };
 
-void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					int lagTime, int order, int crossCorrelate);
+class SOFICalculator_Order2_cross : public SOFICalculator {
+public:
+	SOFICalculator_Order2_cross(int lagTime);
+	~SOFICalculator_Order2_cross() {;}
+	
+	void addNewImage(ImagePtr image);
+	ImagePtr getResult();
+	
+protected:
+	static double determinePSFStdDev(ImagePtr output);
+	static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
+	static double functionToMinimize(double psfStdDev, void *params);
+	
+	size_t lagTime;
+	std::queue<ImagePtr> imageQueue;
+	ImagePtr outputImage;
+	ImagePtr averageImage;
+	size_t nEvaluations;
+};
+
+#endif

@@ -19,7 +19,6 @@
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_defines.h"
-#include "PALM_analysis.h"
 #include "tiffio.h"
 #include "boost/cstdint.hpp"
 #include "boost/thread.hpp"
