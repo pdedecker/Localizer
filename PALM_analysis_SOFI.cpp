@@ -9,16 +9,20 @@
 
 #include "PALM_analysis_SOFI.h"
 
+SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) {
+	this->lagTime = lagTime_rhs;
+}
+
 void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	// a new image is available
 	// this can be the start of the calculation, or we can be
 	// somewhere in the middle of the calculation
 	
-	this->imageQueue.push_back(newImage);
+	this->imageQueue.push(newImage);
 	
 	// if the length of the queue is not equal to the lagTime + 1
 	// then it's impossible to produce output
-	if (this->imageQueue.length() < this->lagTime + 1)
+	if (this->imageQueue.size() < this->lagTime + 1)
 		return;
 	
 	// if we're here then the queue is long enough
@@ -27,9 +31,9 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	
 	// do the necessary images already exist?
 	if (this->nEvaluations == 0) {
-		this->outputImage = new Image((int)nRows, (int)nCols);
+		this->outputImage = ImagePtr(new Image((int)nRows, (int)nCols));
 		this->outputImage->setConstant(0.0);
-		this->averageImage = new Image((int)nRows, (int)nCols);
+		this->averageImage = ImagePtr(new Image((int)nRows, (int)nCols));
 		this->averageImage->setConstant(0.0);
 	}
 	
@@ -39,7 +43,7 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	*this->outputImage += (*previousImage).cwise() * (*currentImage);
 	*this->averageImage += *previousImage;
 	
-	this->imageQueue.pop_front();
+	this->imageQueue.pop();
 	this->nEvaluations += 1;
 }
 
@@ -61,7 +65,29 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	this->nEvaluations = 0;
 	this->averageImage.reset();
 	this->outputImage.reset();
-	this->imageQueue.clear();
+	
+	while (this->imageQueue.size() > 0)
+		this->imageQueue.pop();
 	
 	return imageToBeReturned;
+}
+
+void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+									 int lagTime, int order, int crossCorrelate) {
+	size_t nImages = imageLoader->getNImages();
+	if (nImages <= lagTime)
+		throw std::runtime_error("Not enough images for the requested lagtime");
+	
+	boost::scoped_ptr<SOFICalculator> sofiCalculator(new SOFICalculator_Order2_auto(lagTime));
+	
+	ImagePtr currentImage;
+	imageLoader->rewind();
+	size_t dummyIndex;
+	for (size_t i = 0; i < nImages; ++i) {
+		currentImage = imageLoader->readNextImage(dummyIndex);
+		sofiCalculator->addNewImage(currentImage);
+	}
+	
+	ImagePtr outputImage = sofiCalculator->getResult();
+	outputWriter->write_image(outputImage);
 }

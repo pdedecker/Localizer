@@ -8,6 +8,7 @@
  */
 
 #include <queue>
+#include <vector>
 
 #include <Eigen/Eigen>
 #include "boost/smart_ptr.hpp"
@@ -42,8 +43,12 @@ public:
 	ImagePtr getResult();
 	
 protected:
+	size_t lagTime;
 	std::queue<ImagePtr> imageQueue;
 	ImagePtr outputImage;
 	ImagePtr averageImage;
-	size_t nEvaluations = 0;
+	size_t nEvaluations;
 };
+
+void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+					int lagTime, int order, int crossCorrelate);
