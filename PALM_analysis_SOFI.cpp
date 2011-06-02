@@ -239,9 +239,27 @@ double SOFICalculator_Order2_cross::determinePSFStdDev(ImagePtr image) {
 	func.function = SOFICalculator_Order2_cross::functionToMinimize;
 	func.params = (void *)(&(*image));
 	
-	gsl_min_fminimizer_set(minimizer, &func, this->psfWidth, 0.1, 4);
-	
 	int status;
+	
+	// try to initialize the minimizer
+	// somewhat annoyingly, the solver refuses to do anything
+	// unless the boundaries and starting value indicate a minimum
+	// so if we don't get lucky right away then search some more
+	// for a starting guess
+	status = gsl_min_fminimizer_set(minimizer, &func, this->psfWidth, 0.1, 10.0);
+	if (status == GSL_EINVAL) {
+		double updatedInitialGuess = 0.1 + 0.5;
+		do {
+			status = gsl_min_fminimizer_set(minimizer, &func, updatedInitialGuess, 0.1, 10);
+			updatedInitialGuess += 0.5;
+		} while ((status == GSL_EINVAL) && (updatedInitialGuess < 10.0));
+	}
+	
+	if (status == GSL_EINVAL) {
+		// we didn't find any acceptable interval
+		throw std::runtime_error("Unable to find acceptable starting guess for the PSF correction in 2nd order XC");
+	}
+	
 	int maxIterations = 100, iterations = 0;
 	for (;;) {
 		status = gsl_min_fminimizer_iterate(minimizer);
