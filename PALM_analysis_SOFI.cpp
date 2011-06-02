@@ -188,23 +188,23 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 		for (size_t i = 0; i < nRowsOutputImage; ++i) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// this is an autocorrelation pixel
-				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2);
 				continue;
 			}
 			
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
-				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2 + 1);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2 + 1);
 				continue;
 			}
 			
-			if ((i % 2 == 0) && (i < nRowsOutputImage - 1)) {
-				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2);
+			if (i % 2 == 1) {
+				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2);
 				continue;
 			}
 			
-			if ((j % 2 == 0) && (j < nColsOutputImage - 1)) {
-				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2 + 1);
+			if (j % 2 == 1) {
+				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2 + 1);
 				continue;
 			}
 		}
