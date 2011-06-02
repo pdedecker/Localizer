@@ -211,8 +211,8 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	}
 	
 	// now we need to find the size of the psf and correct for that
-	//double psfStdDev = determinePSFStdDev(outputImage);
-	//ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
+	double psfStdDev = determinePSFStdDev(outputImage);
+	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
 	return outputImage;
 }
 
@@ -264,8 +264,12 @@ ImagePtr SOFICalculator_Order2_cross::performPSFCorrection(Image* image, double 
 	ImagePtr correctedImage(new Image(*image));
 	
 	// only loop over the crosscorrelation pixels
-	for (size_t j = 0; j < nCols; j+=2) {
-		for (size_t i = 0; i < nRows; i+=2) {
+	for (size_t j = 0; j < nCols; ++j) {
+		for (size_t i = 0; i < nRows; ++i) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
+				// autocorrelation pixel
+				continue;
+			}
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
 				(*correctedImage)(i, j) /= diagonalFactor;
@@ -292,11 +296,11 @@ double SOFICalculator_Order2_cross::functionToMinimize(double psfStdDev, void *p
 	for (size_t j = 0; j < nCols; ++j) {
 		for (size_t i = 0; i < nRows; ++i) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
-				sumOfAuto += (*image)(i, j);
+				sumOfAuto += (*correctedImage)(i, j);
 				nPixelsAuto += 1.0;
 				continue;
 			} else {
-				sumOfCross += (*image)(i, j);
+				sumOfCross += (*correctedImage)(i, j);
 				nPixelsCross += 1.0;
 			}
 		}
