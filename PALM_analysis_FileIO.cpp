@@ -138,6 +138,11 @@ ImagePtr ImageLoader::readImage(size_t index) {
 	return this->readNextImage(index);
 }
 
+ImagePtr ImageLoader::readNextImage() {
+	size_t dummy;
+	return this->readNextImage(dummy);
+}
+
 ImagePtr ImageLoader::readNextImageAndLoop(size_t &index) {
 	this->spoolTo(index % this->nImages);
 	return this->readNextImage(index);
@@ -1746,6 +1751,12 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				throw result;
 		}
 	}
+	
+	// check that we are not trying to write too many images
+	// which would otherwise trigger an out-of-bounds memory
+	// access
+	if (this->nImagesWritten >= this->nImagesTotal)
+		throw std::runtime_error("Writing too many images to the IgorImageOutputWriter");
 	
 	// the strategy for writing the data depends on the storage type
 	size_t waveDataOffset;
