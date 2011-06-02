@@ -15,7 +15,12 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
 	
-	boost::scoped_ptr<SOFICalculator> sofiCalculator(new SOFICalculator_Order2_auto(lagTime));
+	boost::shared_ptr<SOFICalculator> sofiCalculator;
+	if (crossCorrelate == 0) {
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_auto(lagTime));
+	} else {
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime));
+	}
 	
 	ImagePtr currentImage;
 	imageLoader->rewind();
@@ -129,8 +134,8 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	
 	// the cross correlation image has autocorrelation contributions and crosscorrelation contributions
 	// treat all of these separately
-	for (size_t j = 0; j < nColsOutputImage - 2; j+=2) {
-		for (size_t i = 0; i < nRowsOutputImage - 2; i+=2) {
+	for (size_t j = 0; j < nColsOutputImage - 1; j+=2) {
+		for (size_t i = 0; i < nRowsOutputImage - 1; i+=2) {
 			// first handle the autocorrelation pixel
 			// in the original image this pixel is at (i / 2, j / 2)
 			(*outputImage)(i, j) = (*previousImage)(i / 2, j / 2) * (*currentImage)(i / 2, j / 2);
@@ -147,15 +152,20 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	// the previous loops have handled all pixels except those at the edges of the image
 	// (the row and column with the highest indices), so handle those separately
 	size_t index = nColsOutputImage - 1;
-	for (size_t i = 0; i < nRowsOutputImage - 2; i += 2) {
+	for (size_t i = 0; i < nRowsOutputImage - 1; i += 2) {
+		// autocorrelation
 		(*outputImage)(i, index) = (*previousImage)(i / 2, index / 2) * (*currentImage)(i / 2, index / 2);
+		
+		// crosscorrelation
 		(*outputImage)(i + 1, index) = (*previousImage)(i / 2, index / 2) * (*currentImage)(i / 2 + 1, index / 2);
 	}
 	
 	index = nRowsOutputImage - 1;
-	for (size_t j = 0; j < nColsOutputImage - 2; j += 2) {
+	for (size_t j = 0; j < nColsOutputImage - 1; j += 2) {
+		// autocorrelation
 		(*outputImage)(index, j) = (*previousImage)(index / 2, j / 2) * (*currentImage)(index / 2, j / 2);
 		
+		// crosscorrelation
 		(*outputImage)(index, j + 1) = (*previousImage)(index / 2, j / 2) * (*currentImage)(index / 2, j / 2 + 1);
 	}
 	
@@ -180,7 +190,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	// normalize the correlated values to get fluctuations
 	for (size_t j = 0; j < nColsOutputImage; ++j) {
 		for (size_t i = 0; i < nRowsOutputImage; ++i) {
-			if ((i % 2 == 0) && (j & 2 == 0)) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// this is an autocorrelation pixel
 				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2);
 				continue;
@@ -192,18 +202,22 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 				continue;
 			}
 			
-			if (i % 2 == 0) {
+			if ((i % 2 == 0) && (i < nRowsOutputImage - 1)) {
 				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2);
-			} else {	// i is even, j is odd
+				continue;
+			}
+			
+			if ((j % 2 == 0) && (j < nColsOutputImage - 1)) {
 				(*outputImage)(i, j) /= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2 + 1);
+				continue;
 			}
 		}
 	}
 	
 	// now we need to find the size of the psf and correct for that
-	double psfStdDev = determinePSFStdDev(outputImage);
-	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
-	return correctedImage;
+	//double psfStdDev = determinePSFStdDev(outputImage);
+	//ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
+	return outputImage;
 }
 
 double SOFICalculator_Order2_cross::determinePSFStdDev(ImagePtr image) {
@@ -248,14 +262,14 @@ ImagePtr SOFICalculator_Order2_cross::performPSFCorrection(Image* image, double 
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
 	
-	double horizontalFactor = exp((1 / sqrt(2.0)) / (2 * psfStdDev * psfStdDev));
-	double diagonalFactor = exp(1.0 / (2 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
+	double horizontalFactor = exp(- (1 / 2) / (2 * psfStdDev * psfStdDev));
+	double diagonalFactor = exp(- 1.0 / (2 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
 	
 	ImagePtr correctedImage(new Image(*image));
 	
 	// only loop over the crosscorrelation pixels
-	for (size_t j = 1; j < nCols; j+=2) {
-		for (size_t i = 1; i < nRows; i+=2) {
+	for (size_t j = 0; j < nCols; j+=2) {
+		for (size_t i = 0; i < nRows; i+=2) {
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
 				(*correctedImage)(i, j) /= diagonalFactor;

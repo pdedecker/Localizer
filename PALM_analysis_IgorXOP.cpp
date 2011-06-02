@@ -2269,8 +2269,16 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		lagTime = 0;
 	}
 	
+	int crossCorrelate;
 	if (p->XCFlagEncountered) {
 		// Parameter: p->doCrossCorrelation
+		if ((int)(p->doCrossCorrelation + 0.5) == 0) {
+			crossCorrelate = 0;
+		} else {
+			crossCorrelate = 1;
+		}
+	} else {
+		crossCorrelate = 0;
 	}
 	
 	if (p->FRMSFlagEncountered) {
@@ -2317,7 +2325,7 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		
 		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, 1, 1, STORAGE_TYPE_FP64));
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, 0);
+		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate);
 	}
 	catch (int e) {
 		return e;
