@@ -2239,6 +2239,7 @@ static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimePara
 static int
 ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 {
+	gsl_set_error_handler_off();
 	int err = 0;
 	
 	// Flag parameters.
@@ -2251,8 +2252,14 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		cameraType = -1;
 	}
 	
+	double psfWidth;
 	if (p->WDTHFlagEncountered) {
 		// Parameter: p->psfWidth
+		if (p->psfWidth <= 0)
+			return EXPECT_POS_NUM;
+		psfWidth = p->psfWidth;
+	} else {
+		psfWidth = 1.6;
 	}
 	
 	if (p->ORDRFlagEncountered) {
@@ -2325,7 +2332,7 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		
 		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, 1, 1, STORAGE_TYPE_FP64));
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate);
+		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate, psfWidth);
 	}
 	catch (int e) {
 		return e;

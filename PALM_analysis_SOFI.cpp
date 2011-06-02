@@ -10,7 +10,7 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					int lagTime, int order, int crossCorrelate) {
+					int lagTime, int order, int crossCorrelate, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
@@ -19,7 +19,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	if (crossCorrelate == 0) {
 		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_auto(lagTime));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime, psfWidth));
 	}
 	
 	ImagePtr currentImage;
@@ -99,8 +99,9 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	return imageToBeReturned;
 }
 
-SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs) {
+SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs, double psfWidth_rhs) {
 	this->lagTime = lagTime_rhs;
+	this->psfWidth = psfWidth_rhs;
 	this->nEvaluations = 0;
 }
 
@@ -211,9 +212,19 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	}
 	
 	// now we need to find the size of the psf and correct for that
-	double psfStdDev = determinePSFStdDev(outputImage);
-	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
-	return outputImage;
+	//double psfStdDev = determinePSFStdDev(outputImage);
+	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), this->psfWidth);
+	
+	// now reset everything for the next calculation
+	// before returning
+	this->nEvaluations = 0;
+	this->averageImage.reset();
+	this->outputImage.reset();
+	
+	while (this->imageQueue.size() > 0)
+		this->imageQueue.pop();
+	
+	return correctedImage;
 }
 
 double SOFICalculator_Order2_cross::determinePSFStdDev(ImagePtr image) {
@@ -228,7 +239,7 @@ double SOFICalculator_Order2_cross::determinePSFStdDev(ImagePtr image) {
 	func.function = SOFICalculator_Order2_cross::functionToMinimize;
 	func.params = (void *)(&(*image));
 	
-	gsl_min_fminimizer_set(minimizer, &func, 1.6, 0.5, 10.0);
+	gsl_min_fminimizer_set(minimizer, &func, this->psfWidth, 0.1, 4);
 	
 	int status;
 	int maxIterations = 100, iterations = 0;
@@ -258,8 +269,8 @@ ImagePtr SOFICalculator_Order2_cross::performPSFCorrection(Image* image, double 
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
 	
-	double horizontalFactor = exp(- (1 / 2) / (2 * psfStdDev * psfStdDev));
-	double diagonalFactor = exp(- 1.0 / (2 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
+	double horizontalFactor = exp(- (1.0 / 2.0) / (2.0 * psfStdDev * psfStdDev));
+	double diagonalFactor = exp(- 1.0 / (2.0 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
 	
 	ImagePtr correctedImage(new Image(*image));
 	
@@ -288,7 +299,7 @@ double SOFICalculator_Order2_cross::functionToMinimize(double psfStdDev, void *p
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
 	
-	ImagePtr correctedImage = SOFICalculator_Order2_cross::performPSFCorrection(image, psfStdDev);
+	ImagePtr correctedImage = performPSFCorrection(image, psfStdDev);
 	
 	// calculate the mean of the cross and autocorrelation pixels
 	double nPixelsAuto = 0.0, nPixelsCross = 0.0;
