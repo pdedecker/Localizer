@@ -1747,6 +1747,12 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		}
 	}
 	
+	// check that we are not trying to write too many images
+	// which would otherwise trigger an out-of-bounds memory
+	// access
+	if (this->nImagesWritten >= this->nImagesTotal)
+		throw std::runtime_error("Writing too many images to the IgorImageOutputWriter");
+	
 	// the strategy for writing the data depends on the storage type
 	size_t waveDataOffset;
 	char *waveDataPtr;
