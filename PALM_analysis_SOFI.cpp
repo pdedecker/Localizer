@@ -212,8 +212,12 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	}
 	
 	// now we need to find the size of the psf and correct for that
-	//double psfStdDev = determinePSFStdDev(outputImage);
-	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), this->psfWidth);
+	double psfStdDev = determinePSFStdDev(outputImage);
+	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
+	
+	char XOPOut[256];
+	sprintf(XOPOut, "Found psf width of %g\r", psfStdDev);
+	XOPNotice(XOPOut);
 	
 	// now reset everything for the next calculation
 	// before returning
