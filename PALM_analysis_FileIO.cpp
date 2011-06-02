@@ -138,6 +138,11 @@ ImagePtr ImageLoader::readImage(size_t index) {
 	return this->readNextImage(index);
 }
 
+ImagePtr ImageLoader::readNextImage() {
+	size_t dummy;
+	return this->readNextImage(dummy);
+}
+
 ImagePtr ImageLoader::readNextImageAndLoop(size_t &index) {
 	this->spoolTo(index % this->nImages);
 	return this->readNextImage(index);

@@ -96,9 +96,10 @@ public:
 	 * reentrant, but throws a std::runtime exception if there are no more images
 	 * in the sequence. Also, due to its reentrant nature there must be some way
 	 * for the caller to know which image was returned. This is returned by reference
-	 * in the argument.
+	 * in the argument. The non-reentrant version below does not require this argument.
 	 */
 	virtual ImagePtr readNextImage(size_t &index) = 0;
+	ImagePtr readNextImage();
 	/*
 	 * Get the next image in the file and loop to the begin after the last image.
 	 * Not reentrant.
