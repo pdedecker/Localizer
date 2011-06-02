@@ -34,7 +34,6 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	
 	ImagePtr currentImage;
 	imageLoader->rewind();
-	size_t dummyIndex;
 	
 	size_t nFramesInThisGroup;
 	ImagePtr outputImage;
@@ -42,7 +41,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImages - (currentGroup * nFramesToGroup)));
 		
 		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
-			currentImage = imageLoader->readNextImage(dummyIndex);
+			currentImage = imageLoader->readNextImage();
 			sofiCalculator->addNewImage(currentImage);
 		}
 		
