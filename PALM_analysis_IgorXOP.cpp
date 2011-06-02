@@ -541,10 +541,15 @@ struct SOFIAnalysisRuntimeParams {
 	double doCrossCorrelation;
 	int XCFlagParamsSet[1];
 	
-	// Parameters for /FRMS flag group.
-	int FRMSFlagEncountered;
+	// Parameters for /GRP flag group.
+	int GRPFlagEncountered;
 	double nFramesToGroup;
-	int FRMSFlagParamsSet[1];
+	int GRPFlagParamsSet[1];
+	
+	// Parameters for /SKIP flag group.
+	int SKIPFlagEncountered;
+	double framesToSkip;
+	int SKIPFlagParamsSet[1];
 	
 	// Parameters for /MXBL flag group.
 	int MXBLFlagEncountered;
@@ -2288,12 +2293,22 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		crossCorrelate = 0;
 	}
 	
-	if (p->FRMSFlagEncountered) {
+	int nFramesToGroup;
+	if (p->GRPFlagEncountered) {
 		// Parameter: p->nFramesToGroup
+		if (p->nFramesToGroup < 0)
+			return EXPECT_POS_NUM;
+		nFramesToGroup = (int)(p->nFramesToGroup + 0.5);
+	} else {
+		nFramesToGroup = 0;
 	}
 	
 	if (p->MXBLFlagEncountered) {
 		// Parameter: p->maxBleaching
+	}
+	
+	if (p->SKIPFlagEncountered) {
+		// Parameter: p->framesToSkip
 	}
 	
 	int outputType;
@@ -2330,9 +2345,15 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
 			outputFilePath = ConvertPathToNativePath(outputFilePath);
 		
-		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, 1, 1, STORAGE_TYPE_FP64));
+		int nGroups;
+		if (nFramesToGroup != 0) {
+			nGroups = ceil((double)(imageLoader->getNImages()) / (double)(nFramesToGroup));
+		} else {
+			nGroups = 1;
+		}
+		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, nGroups, 1, STORAGE_TYPE_FP64));
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate, psfWidth);
+		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
 	}
 	catch (int e) {
 		return e;
@@ -2453,7 +2474,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /FRMS=number:nFramesToGroup /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

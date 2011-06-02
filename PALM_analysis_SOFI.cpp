@@ -10,10 +10,13 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					int lagTime, int order, int crossCorrelate, double psfWidth) {
+					int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
+	
+	if ((nFramesToGroup <= lagTime) && (nFramesToGroup != 0))
+		throw std::runtime_error("Cannot group less frames than the lag time");
 	
 	boost::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {
@@ -22,16 +25,30 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime, psfWidth));
 	}
 	
+	int nGroups;
+	if (nFramesToGroup != 0) {
+		nGroups = ceil((double)(nImages) / (double)(nFramesToGroup));
+	} else {
+		nGroups = 1;
+	}
+	
 	ImagePtr currentImage;
 	imageLoader->rewind();
 	size_t dummyIndex;
-	for (size_t i = 0; i < nImages; ++i) {
-		currentImage = imageLoader->readNextImage(dummyIndex);
-		sofiCalculator->addNewImage(currentImage);
-	}
 	
-	ImagePtr outputImage = sofiCalculator->getResult();
-	outputWriter->write_image(outputImage);
+	size_t nFramesInThisGroup;
+	ImagePtr outputImage;
+	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
+		nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImages - (currentGroup * nFramesToGroup)));
+		
+		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
+			currentImage = imageLoader->readNextImage(dummyIndex);
+			sofiCalculator->addNewImage(currentImage);
+		}
+		
+		outputImage = sofiCalculator->getResult();
+		outputWriter->write_image(outputImage);
+	}
 }
 
 SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) {

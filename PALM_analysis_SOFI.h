@@ -20,7 +20,7 @@
 #include "PALM_analysis_FileIO.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					int lagTime, int order, int crossCorrelate, double psfWidth);
+					int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
  * In addition it's possible that the calculation will only operate on subranges
