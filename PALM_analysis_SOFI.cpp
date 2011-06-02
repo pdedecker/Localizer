@@ -132,46 +132,42 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	
 	*this->averageImage += *previousImage;
 	
-	// the cross correlation image has autocorrelation contributions and crosscorrelation contributions
-	// treat all of these separately
-	for (size_t j = 0; j < nColsOutputImage - 1; j+=2) {
-		for (size_t i = 0; i < nRowsOutputImage - 1; i+=2) {
-			// first handle the autocorrelation pixel
-			// in the original image this pixel is at (i / 2, j / 2)
-			(*outputImage)(i, j) = (*previousImage)(i / 2, j / 2) * (*currentImage)(i / 2, j / 2);
+	for (size_t j = 0; j < nCols - 1; ++j) {
+		for (size_t i = 0; i < nRows - 1; ++i) {
+			// first handle the crosscorrelation
+			(*outputImage)(2*i, 2*j) += (*previousImage)(i, j) * (*currentImage)(i, j);
 			
-			// next handle the horizontal and vertical pixel
-			(*outputImage)(i + 1, j) = (*previousImage)(i / 2, j / 2) * (*currentImage)(i / 2 + 1, j / 2);
-			(*outputImage)(i, j + 1) = (*previousImage)(i / 2, j / 2) * (*currentImage)(i / 2, j / 2 + 1);
+			// handle the horizontal and vertical pixel
+			(*outputImage)(2*i + 1, 2*j) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
+			(*outputImage)(2*i, 2*j + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
 			
-			// and the diagonal pixel
-			(*outputImage)(i + 1, j + 1) = (*previousImage)(i / 2, j / 2) * (*currentImage)(i / 2 + 1, j / 2 + 1);
+			// handle the diagonal pixel
+			(*outputImage)(2*i + 1, 2*j + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
 		}
 	}
 	
 	// the previous loops have handled all pixels except those at the edges of the image
 	// (the row and column with the highest indices), so handle those separately
-	size_t index = nColsOutputImage - 1;
-	for (size_t i = 0; i < nRowsOutputImage - 1; i += 2) {
+	size_t index = nCols - 1;
+	for (size_t i = 0; i < nRows - 1; ++i) {
 		// autocorrelation
-		(*outputImage)(i, index) = (*previousImage)(i / 2, index / 2) * (*currentImage)(i / 2, index / 2);
+		(*outputImage)(2 * i, 2 * index) += (*previousImage)(i, index) * (*currentImage)(i, index);
 		
 		// crosscorrelation
-		(*outputImage)(i + 1, index) = (*previousImage)(i / 2, index / 2) * (*currentImage)(i / 2 + 1, index / 2);
+		(*outputImage)(2 * i + 1, 2 * index) += (*previousImage)(i, index) * (*currentImage)(i + 1, index);
 	}
 	
-	index = nRowsOutputImage - 1;
-	for (size_t j = 0; j < nColsOutputImage - 1; j += 2) {
+	index = nRows - 1;
+	for (size_t j = 0; j < nCols - 1; ++j) {
 		// autocorrelation
-		(*outputImage)(index, j) = (*previousImage)(index / 2, j / 2) * (*currentImage)(index / 2, j / 2);
+		(*outputImage)(2 * index, 2 * j) += (*previousImage)(index, j) * (*currentImage)(index, j);
 		
 		// crosscorrelation
-		(*outputImage)(index, j + 1) = (*previousImage)(index / 2, j / 2) * (*currentImage)(index / 2, j / 2 + 1);
+		(*outputImage)(2 * index, 2 * j + 1) += (*previousImage)(index, j) * (*currentImage)(index, j + 1);
 	}
 	
 	// now there's just a single autocorrelation pixel left in the farthest corner of the image
-	(*outputImage)(nRowsOutputImage - 1, nColsOutputImage - 1) = (*previousImage)((nRowsOutputImage - 1) / 2, (nColsOutputImage - 1) / 2) 
-																	* (*currentImage)((nRowsOutputImage - 1) / 2, (nColsOutputImage - 1) / 2);
+	(*outputImage)(2 * (nRows - 1), 2 * (nCols - 1)) += (*previousImage)(nRows - 1, nCols - 1) * (*currentImage)(nRows - 1, nCols - 1);
 	
 	// remove the last image from the queue
 	this->imageQueue.pop();
