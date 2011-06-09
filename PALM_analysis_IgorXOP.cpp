@@ -2302,8 +2302,14 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		// Parameter: p->maxBleaching
 	}
 	
+	size_t nFramesToSkip;
 	if (p->SKIPFlagEncountered) {
 		// Parameter: p->framesToSkip
+		if (p->framesToSkip < 0)
+			return EXPECT_POS_NUM;
+		nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
+	} else {
+		nFramesToSkip = 0;
 	}
 	
 	DataFolderAndName outputWaveParams;
@@ -2329,14 +2335,20 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
 		
 		int nGroups;
+		size_t nImagesToProcess;
+		if (nFramesToSkip >= imageLoader->getNImages())
+			return ORN_OFFSET_OUT_OT_RANGE;
+		
+		nImagesToProcess = imageLoader->getNImages() - nFramesToSkip;
+		
 		if (nFramesToGroup != 0) {
-			nGroups = ceil((double)(imageLoader->getNImages()) / (double)(nFramesToGroup));
+			nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
 		} else {
 			nGroups = 1;
 		}
 		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+		DoSOFIAnalysis(imageLoader, outputWriter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
 	}
 	catch (int e) {
 		return e;

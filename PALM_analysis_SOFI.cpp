@@ -10,10 +10,14 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
+					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
+	
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
+	
+	if (nFramesToSkip > nImages - lagTime)
+		throw std::runtime_error("Too many frames are being skipped (/SKIP flag)");
 	
 	if ((nFramesToGroup <= lagTime) && (nFramesToGroup != 0))
 		throw std::runtime_error("Cannot group less frames than the lag time");
@@ -25,23 +29,24 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime, psfWidth));
 	}
 	
+	size_t nImagesToProcess = nImages - nFramesToSkip;
 	int nGroups;
 	if (nFramesToGroup != 0) {
-		nGroups = ceil((double)(nImages) / (double)(nFramesToGroup));
+		nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
 	} else {
 		nGroups = 1;
 	}
 	
 	ImagePtr currentImage;
-	imageLoader->rewind();
+	imageLoader->spoolTo(nFramesToSkip);
 	
 	size_t nFramesInThisGroup;
 	ImagePtr outputImage;
 	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
 		if (nFramesToGroup > 0) {
-			nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImages - (currentGroup * nFramesToGroup)));
+			nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImagesToProcess - (currentGroup * nFramesToGroup)));
 		} else {
-			nFramesInThisGroup = nImages;
+			nFramesInThisGroup = nImagesToProcess;
 		}
 		
 		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
