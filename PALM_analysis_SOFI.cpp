@@ -38,7 +38,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	size_t nFramesInThisGroup;
 	ImagePtr outputImage;
 	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
-		nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImages - (currentGroup * nFramesToGroup)));
+		if (nFramesToGroup > 0) {
+			nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImages - (currentGroup * nFramesToGroup)));
+		} else {
+			nFramesInThisGroup = nImages;
+		}
 		
 		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
 			currentImage = imageLoader->readNextImage();
@@ -151,7 +155,7 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	
 	for (size_t j = 0; j < nCols - 1; ++j) {
 		for (size_t i = 0; i < nRows - 1; ++i) {
-			// first handle the crosscorrelation
+			// first handle the autocorrelation
 			(*outputImage)(2*i, 2*j) += (*previousImage)(i, j) * (*currentImage)(i, j);
 			
 			// handle the horizontal and vertical pixel
@@ -200,6 +204,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	
 	size_t nRowsOutputImage = this->outputImage->rows();
 	size_t nColsOutputImage = this->outputImage->cols();
+	
 	// normalize the correlated values to get fluctuations
 	for (size_t j = 0; j < nColsOutputImage; ++j) {
 		for (size_t i = 0; i < nRowsOutputImage; ++i) {
@@ -230,10 +235,6 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	// now we need to find the size of the psf and correct for that
 	double psfStdDev = determinePSFStdDev(outputImage);
 	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
-	
-	char XOPOut[256];
-	sprintf(XOPOut, "Found psf width of %g\r", psfStdDev);
-	XOPNotice(XOPOut);
 	
 	// now reset everything for the next calculation
 	// before returning
@@ -359,4 +360,71 @@ double SOFICalculator_Order2_cross::functionToMinimize(double psfStdDev, void *p
 	sumOfCross /= nPixelsCross;
 	
 	return (sumOfAuto - sumOfCross) * (sumOfAuto - sumOfCross);
+}
+
+ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(Image *image) {
+	
+	size_t nRows = image->rows();
+	size_t nCols = image->cols();
+	
+	ImagePtr correctedImage (new Image(*image));
+	
+	size_t nAutoPixels = (nRows / 2 + 1) * (nCols / 2 + 1);
+	size_t nHorizontalPixels = (nRows / 2 + 1) * (nCols / 2);
+	size_t nVerticalPixels = (nRows / 2) * (nCols / 2 + 1);
+	size_t nDiagonalPixels = (nRows / 2) * (nCols / 2);
+	
+	double sumAuto = 0.0;
+	double sumHorizontal = 0.0;
+	double sumVertical = 0.0;
+	double sumDiagonal = 0.0;
+	
+	for (size_t j = 0; j < nCols; j+=1) {
+		for (size_t i = 0; i < nRows; i+=1) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
+				sumAuto += (*image)(i, j);
+				continue;
+			}
+			
+			if ((i % 2 == 1) && (j % 2 == 1)) {
+				sumDiagonal += (*image)(i, j);
+				continue;
+			}
+			
+			if (i % 2 == 1) {
+				sumVertical += (*image)(i, j);
+			} else {
+				sumHorizontal += (*image)(i, j);
+			}
+		}
+	}
+	
+	sumAuto /= (double)nAutoPixels;
+	sumHorizontal /= (double)nHorizontalPixels;
+	sumVertical /= (double)nVerticalPixels;
+	sumDiagonal /= (double)nDiagonalPixels;
+	
+	double horizontalFactor = sumAuto / sumHorizontal;
+	double verticalFactor = sumAuto / sumVertical;
+	double diagonalFactor = sumAuto / sumDiagonal;
+	
+	for (size_t j = 0; j < nCols; j+=1) {
+		for (size_t i = 0; i < nRows; i+=1) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
+				continue;
+			}
+			
+			if ((i % 2 == 1) && (j % 2 == 1)) {
+				(*correctedImage)(i, j) *= diagonalFactor;
+			}
+			
+			if (i % 2 == 1) {
+				(*correctedImage)(i, j) *= verticalFactor;
+			} else {
+				(*correctedImage)(i, j) *= horizontalFactor;
+			}
+		}
+	}
+	
+	return correctedImage;
 }

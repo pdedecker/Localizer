@@ -70,6 +70,8 @@ protected:
 	static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
 	static double functionToMinimize(double psfStdDev, void *params);
 	
+	static ImagePtr performCorrection_Averages(Image *image);
+	
 	size_t lagTime;
 	double psfWidth;
 	std::queue<ImagePtr> imageQueue;
