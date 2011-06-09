@@ -556,10 +556,10 @@ struct SOFIAnalysisRuntimeParams {
 	double maxBleaching;
 	int MXBLFlagParamsSet[1];
 	
-	// Parameters for /OUT flag group.
-	int OUTFlagEncountered;
-	double outputType;
-	int OUTFlagParamsSet[1];
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
 	
 	// Main parameters.
 	
@@ -567,11 +567,6 @@ struct SOFIAnalysisRuntimeParams {
 	int inputFilePathEncountered;
 	Handle inputFilePath;
 	int inputFilePathParamsSet[1];
-	
-	// Parameters for simple main group #1.
-	int outputFilePathEncountered;
-	Handle outputFilePath;
-	int outputFilePathParamsSet[1];
 	
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
@@ -2311,27 +2306,19 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		// Parameter: p->framesToSkip
 	}
 	
-	int outputType;
-	if (p->OUTFlagEncountered) {
-		// Parameter: p->outputType
-		outputType = (int)(p->outputType + 0.5);
+	DataFolderAndName outputWaveParams;
+	if (p->DESTFlagEncountered) {
+		// Parameter: p->dest
+		outputWaveParams = p->dest;
 	} else {
-		outputType = IMAGE_OUTPUT_TYPE_IGOR;
+		outputWaveParams.dfH = NULL;
+		strcpy(outputWaveParams.name, "M_SOFI");
 	}
 	
 	// Main parameters.
-	
 	if (p->inputFilePathEncountered) {
 		// Parameter: p->inputFilePath (test for NULL handle before using)
 		if (p->inputFilePath == NULL)
-			return EXPECTED_STRING_EXPR;
-	} else {
-		return EXPECTED_STRING_EXPR;
-	}
-	
-	if (p->outputFilePathEncountered) {
-		// Parameter: p->outputFilePath (test for NULL handle before using)
-		if (p->outputFilePath == NULL)
 			return EXPECTED_STRING_EXPR;
 	} else {
 		return EXPECTED_STRING_EXPR;
@@ -2341,17 +2328,13 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
 		boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
 		
-		std::string outputFilePath = ConvertHandleToString(p->outputFilePath);
-		if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
-			outputFilePath = ConvertPathToNativePath(outputFilePath);
-		
 		int nGroups;
 		if (nFramesToGroup != 0) {
 			nGroups = ceil((double)(imageLoader->getNImages()) / (double)(nFramesToGroup));
 		} else {
 			nGroups = 1;
 		}
-		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputFilePath, nGroups, 1, STORAGE_TYPE_FP64));
+		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
 		
 		DoSOFIAnalysis(imageLoader, outputWriter, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
 	}
@@ -2474,7 +2457,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /OUT=number:outputType string:inputFilePath, string:outputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

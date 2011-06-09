@@ -232,9 +232,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 		}
 	}
 	
-	// now we need to find the size of the psf and correct for that
-	double psfStdDev = determinePSFStdDev(outputImage);
-	ImagePtr correctedImage = performPSFCorrection(outputImage.get(), psfStdDev);
+	ImagePtr correctedImage = performCorrection_Averages(outputImage);
 	
 	// now reset everything for the next calculation
 	// before returning
@@ -362,7 +360,7 @@ double SOFICalculator_Order2_cross::functionToMinimize(double psfStdDev, void *p
 	return (sumOfAuto - sumOfCross) * (sumOfAuto - sumOfCross);
 }
 
-ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(Image *image) {
+ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(ImagePtr image) {
 	
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
