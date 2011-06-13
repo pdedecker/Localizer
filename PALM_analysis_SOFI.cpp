@@ -29,6 +29,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime, psfWidth));
 	}
 	
+	SOFICorrector_Order2 sofiCorrector;	// will only be used when crosscorrelating
+	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
 	int nGroups;
 	if (nFramesToGroup != 0) {
@@ -55,6 +57,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		}
 		
 		outputImage = sofiCalculator->getResult();
+		
+		if (crossCorrelate == 1) {
+			outputImage = sofiCorrector.doImageCorrection(outputImage);
+		}
+		
 		outputWriter->write_image(outputImage);
 	}
 }
