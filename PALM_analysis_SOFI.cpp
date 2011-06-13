@@ -237,7 +237,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 		}
 	}
 	
-	ImagePtr correctedImage = performCorrection_Averages(outputImage);
+	ImagePtr imageToReturn (new Image(*outputImage));
 	
 	// now reset everything for the next calculation
 	// before returning
@@ -248,124 +248,10 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	while (this->imageQueue.size() > 0)
 		this->imageQueue.pop();
 	
-	return correctedImage;
+	return imageToReturn;
 }
 
-double SOFICalculator_Order2_cross::determinePSFStdDev(ImagePtr image) {
-	
-	const gsl_min_fminimizer_type * minizerType = gsl_min_fminimizer_brent;
-	gsl_min_fminimizer *minimizer = gsl_min_fminimizer_alloc(minizerType);
-	if (minimizer == NULL) {
-		throw std::bad_alloc();
-	}
-	
-	gsl_function func;
-	func.function = SOFICalculator_Order2_cross::functionToMinimize;
-	func.params = (void *)(&(*image));
-	
-	int status;
-	
-	// try to initialize the minimizer
-	// somewhat annoyingly, the solver refuses to do anything
-	// unless the boundaries and starting value indicate a minimum
-	// so if we don't get lucky right away then search some more
-	// for a starting guess
-	status = gsl_min_fminimizer_set(minimizer, &func, this->psfWidth, 0.1, 10.0);
-	if (status == GSL_EINVAL) {
-		double updatedInitialGuess = 0.1 + 0.5;
-		do {
-			status = gsl_min_fminimizer_set(minimizer, &func, updatedInitialGuess, 0.1, 10);
-			updatedInitialGuess += 0.5;
-		} while ((status == GSL_EINVAL) && (updatedInitialGuess < 10.0));
-	}
-	
-	if (status == GSL_EINVAL) {
-		// we didn't find any acceptable interval
-		throw std::runtime_error("Unable to find acceptable starting guess for the PSF correction in 2nd order XC");
-	}
-	
-	int maxIterations = 100, iterations = 0;
-	for (;;) {
-		status = gsl_min_fminimizer_iterate(minimizer);
-		if (status != GSL_SUCCESS) {
-			gsl_min_fminimizer_free(minimizer);
-			throw std::runtime_error("gsl_min_fminimizer_iterate reported an error");
-		}
-		
-		status = gsl_min_test_interval(gsl_min_fminimizer_x_lower(minimizer), gsl_min_fminimizer_x_upper(minimizer), 0.001, 0.0);
-		if (status == GSL_SUCCESS)
-			break;
-		
-		iterations += 1;
-		if (iterations > maxIterations)
-			break;
-	}
-	
-	double minimum = gsl_min_fminimizer_minimum(minimizer);
-	gsl_min_fminimizer_free(minimizer);
-	
-	return minimum;
-}
-
-ImagePtr SOFICalculator_Order2_cross::performPSFCorrection(Image* image, double psfStdDev) {
-	size_t nRows = image->rows();
-	size_t nCols = image->cols();
-	
-	double horizontalFactor = exp(- (1.0 / 2.0) / (2.0 * psfStdDev * psfStdDev));
-	double diagonalFactor = exp(- 1.0 / (2.0 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
-	
-	ImagePtr correctedImage(new Image(*image));
-	
-	// only loop over the crosscorrelation pixels
-	for (size_t j = 0; j < nCols; ++j) {
-		for (size_t i = 0; i < nRows; ++i) {
-			if ((i % 2 == 0) && (j % 2 == 0)) {
-				// autocorrelation pixel
-				continue;
-			}
-			if ((i % 2 == 1) && (j % 2 == 1)) {
-				// this is a diagonal crosscorrelation pixel
-				(*correctedImage)(i, j) /= diagonalFactor;
-			} else {
-				(*correctedImage)(i, j) /= horizontalFactor;
-			}
-		}
-	}
-	
-	return correctedImage;
-}
-
-double SOFICalculator_Order2_cross::functionToMinimize(double psfStdDev, void *params) {
-	Image* image = (Image *)params;
-	
-	size_t nRows = image->rows();
-	size_t nCols = image->cols();
-	
-	ImagePtr correctedImage = performPSFCorrection(image, psfStdDev);
-	
-	// calculate the mean of the cross and autocorrelation pixels
-	double nPixelsAuto = 0.0, nPixelsCross = 0.0;
-	double sumOfAuto = 0, sumOfCross = 0;
-	for (size_t j = 0; j < nCols; ++j) {
-		for (size_t i = 0; i < nRows; ++i) {
-			if ((i % 2 == 0) && (j % 2 == 0)) {
-				sumOfAuto += (*correctedImage)(i, j);
-				nPixelsAuto += 1.0;
-				continue;
-			} else {
-				sumOfCross += (*correctedImage)(i, j);
-				nPixelsCross += 1.0;
-			}
-		}
-	}
-	
-	sumOfAuto /= nPixelsAuto;
-	sumOfCross /= nPixelsCross;
-	
-	return (sumOfAuto - sumOfCross) * (sumOfAuto - sumOfCross);
-}
-
-ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(ImagePtr image) {
+/*ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(ImagePtr image) {
 	
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
@@ -430,4 +316,126 @@ ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(ImagePtr image)
 	}
 	
 	return correctedImage;
+}*/
+
+ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
+	// estimate the PSF standard deviation
+	double optimalPSFStdDev = determinePSFStdDev(imageToCorrect);
+	
+	ImagePtr correctedImage = performPSFCorrection(imageToCorrect.get(), optimalPSFStdDev);
+	return correctedImage;
+}
+
+double SOFICorrector_Order2::determinePSFStdDev(ImagePtr imageToCorrect) {
+	const gsl_min_fminimizer_type * minizerType = gsl_min_fminimizer_brent;
+	gsl_min_fminimizer *minimizer = gsl_min_fminimizer_alloc(minizerType);
+	if (minimizer == NULL) {
+		throw std::bad_alloc();
+	}
+	
+	gsl_function func;
+	func.function = SOFICorrector_Order2::functionToMinimize;
+	func.params = (void *)(&(*imageToCorrect));
+	
+	int status;
+	
+	// try to initialize the minimizer
+	// somewhat annoyingly, the solver refuses to do anything
+	// unless the boundaries and starting value indicate a minimum
+	// so if we don't get lucky right away then search some more
+	// for a starting guess
+	double initialPSFWidth = 2.0;	// TODO: provide this initial value in a more sensible way
+	status = gsl_min_fminimizer_set(minimizer, &func, initialPSFWidth, 0.1, 10.0);
+	if (status == GSL_EINVAL) {
+		double updatedInitialGuess = 0.1 + 0.5;
+		do {
+			status = gsl_min_fminimizer_set(minimizer, &func, updatedInitialGuess, 0.1, 10);
+			updatedInitialGuess += 0.5;
+		} while ((status == GSL_EINVAL) && (updatedInitialGuess < 10.0));
+	}
+	
+	if (status == GSL_EINVAL) {
+		// we didn't find any acceptable interval
+		throw std::runtime_error("Unable to find acceptable starting guess for the PSF correction in 2nd order XC");
+	}
+	
+	int maxIterations = 100, iterations = 0;
+	for (;;) {
+		status = gsl_min_fminimizer_iterate(minimizer);
+		if (status != GSL_SUCCESS) {
+			gsl_min_fminimizer_free(minimizer);
+			throw std::runtime_error("gsl_min_fminimizer_iterate reported an error");
+		}
+		
+		status = gsl_min_test_interval(gsl_min_fminimizer_x_lower(minimizer), gsl_min_fminimizer_x_upper(minimizer), 0.001, 0.0);
+		if (status == GSL_SUCCESS)
+			break;
+		
+		iterations += 1;
+		if (iterations > maxIterations)
+			break;
+	}
+	
+	double minimum = gsl_min_fminimizer_minimum(minimizer);
+	gsl_min_fminimizer_free(minimizer);
+	
+	return minimum;
+}
+
+ImagePtr SOFICorrector_Order2::performPSFCorrection(Image *image, double psfStdDev) {
+	size_t nRows = image->rows();
+	size_t nCols = image->cols();
+	
+	double horizontalFactor = exp(- (1.0 / 2.0) / (2.0 * psfStdDev * psfStdDev));
+	double diagonalFactor = exp(- 1.0 / (2.0 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
+	
+	ImagePtr correctedImage(new Image(*image));
+	
+	// only loop over the crosscorrelation pixels
+	for (size_t j = 0; j < nCols; ++j) {
+		for (size_t i = 0; i < nRows; ++i) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
+				// autocorrelation pixel
+				continue;
+			}
+			if ((i % 2 == 1) && (j % 2 == 1)) {
+				// this is a diagonal crosscorrelation pixel
+				(*correctedImage)(i, j) /= diagonalFactor;
+			} else {
+				(*correctedImage)(i, j) /= horizontalFactor;
+			}
+		}
+	}
+	
+	return correctedImage;
+}
+
+double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) {
+	Image* image = (Image *)params;
+	
+	size_t nRows = image->rows();
+	size_t nCols = image->cols();
+	
+	ImagePtr correctedImage = performPSFCorrection(image, psfStdDev);
+	
+	// calculate the mean of the cross and autocorrelation pixels
+	double nPixelsAuto = 0.0, nPixelsCross = 0.0;
+	double sumOfAuto = 0, sumOfCross = 0;
+	for (size_t j = 0; j < nCols; ++j) {
+		for (size_t i = 0; i < nRows; ++i) {
+			if ((i % 2 == 0) && (j % 2 == 0)) {
+				sumOfAuto += (*correctedImage)(i, j);
+				nPixelsAuto += 1.0;
+				continue;
+			} else {
+				sumOfCross += (*correctedImage)(i, j);
+				nPixelsCross += 1.0;
+			}
+		}
+	}
+	
+	sumOfAuto /= nPixelsAuto;
+	sumOfCross /= nPixelsCross;
+	
+	return (sumOfAuto - sumOfCross) * (sumOfAuto - sumOfCross);
 }

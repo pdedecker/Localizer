@@ -19,6 +19,7 @@
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis.h"
 #include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_ProgressReporting.h"
 
 
 // the main function

@@ -13,6 +13,7 @@
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_Processing.h"
+#include "PALM_analysis_ProgressReporting.h"
 
 
 // the main function

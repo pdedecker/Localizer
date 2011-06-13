@@ -22,7 +22,7 @@
 #endif // WITH_IGOR
 
 #include <boost/smart_ptr.hpp>
-#include <eigen2/Eigen/Eigen>
+#include "Eigen/Eigen"
 
 // the typedef for an image
 typedef Eigen::MatrixXd Image;

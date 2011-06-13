@@ -66,11 +66,7 @@ public:
 	ImagePtr getResult();
 	
 protected:
-	double determinePSFStdDev(ImagePtr output);
-	static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
-	static double functionToMinimize(double psfStdDev, void *params);
-	
-	static ImagePtr performCorrection_Averages(ImagePtr image);
+	//static ImagePtr performCorrection_Averages(ImagePtr image);
 	
 	size_t lagTime;
 	double psfWidth;
@@ -78,6 +74,19 @@ protected:
 	ImagePtr outputImage;
 	ImagePtr averageImage;
 	size_t nEvaluations;
+};
+
+class SOFICorrector_Order2 {
+public:
+	SOFICorrector_Order2() {;}
+	~SOFICorrector_Order2() {;}
+	
+	ImagePtr doImageCorrection(ImagePtr imageToCorrect);
+	
+protected:
+	double determinePSFStdDev(ImagePtr imageToCorrect);
+	static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
+	static double functionToMinimize(double psfStdDev, void *params);
 };
 
 #endif
