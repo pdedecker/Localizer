@@ -12,6 +12,7 @@
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
+	size_t blockSize = 50;
 	
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
@@ -43,7 +44,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	imageLoader->spoolTo(nFramesToSkip);
 	
 	size_t nFramesInThisGroup;
+	size_t nFramesProcessedInThisRun;
 	ImagePtr outputImage;
+	ImagePtr sofiImage;
+	size_t nImagesInBlock;
+	
 	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
 		if (nFramesToGroup > 0) {
 			nFramesInThisGroup = std::min(nFramesToGroup, (int)(nImagesToProcess - (currentGroup * nFramesToGroup)));
@@ -51,18 +56,35 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			nFramesInThisGroup = nImagesToProcess;
 		}
 		
-		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
-			currentImage = imageLoader->readNextImage();
-			sofiCalculator->addNewImage(currentImage);
+		nFramesProcessedInThisRun = 0;
+		nImagesInBlock = 0;
+		while (nFramesProcessedInThisRun < nFramesInThisGroup) {
+			nImagesInBlock = std::min(nFramesInThisGroup - nFramesProcessedInThisRun, blockSize);
+			if (nImagesInBlock < lagTime + 1)
+				break;
+			
+			for (size_t i = 0; i < nImagesInBlock; ++i) {
+				currentImage = imageLoader->readNextImage();
+				sofiCalculator->addNewImage(currentImage);
+				nFramesProcessedInThisRun += 1;
+			}
+			
+			outputImage = sofiCalculator->getResult();
+				
+			if (sofiImage.get() == NULL) {
+				sofiImage = outputImage;
+			} else {
+				*sofiImage += *outputImage;
+			}
 		}
 		
-		outputImage = sofiCalculator->getResult();
-		
-		if (crossCorrelate == 1) {
-			outputImage = sofiCorrector.doImageCorrection(outputImage);
+		if (nImagesInBlock > 0) {
+			*sofiImage /= (double)(nImagesInBlock);
+			
+			if (crossCorrelate != 0)
+				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
+			outputWriter->write_image(sofiImage);
 		}
-		
-		outputWriter->write_image(outputImage);
 	}
 }
 
@@ -78,7 +100,7 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	
 	this->imageQueue.push(newImage);
 	
-	// if the length of the queue is not equal to the lagTime + 1
+	// if the length of the queue is less than lagTime + 1
 	// then it's impossible to produce output
 	if (this->imageQueue.size() < this->lagTime + 1)
 		return;
@@ -141,7 +163,7 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	
 	this->imageQueue.push(newImage);
 	
-	// if the length of the queue is not equal to the lagTime + 1
+	// if the length of the queue is less than lagTime + 1
 	// then it's impossible to produce output
 	if (this->imageQueue.size() < this->lagTime + 1)
 		return;
