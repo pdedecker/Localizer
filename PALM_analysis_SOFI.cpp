@@ -81,8 +81,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		if (nImagesInBlock > 0) {
 			*sofiImage /= (double)(nImagesInBlock);
 			
-			if (crossCorrelate != 0)
-				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
+			//if (crossCorrelate != 0)
+			//	sofiImage = sofiCorrector.doImageCorrection(sofiImage);
 			outputWriter->write_image(sofiImage);
 		}
 	}
@@ -190,7 +190,10 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	for (size_t j = 0; j < nCols - 1; ++j) {
 		for (size_t i = 0; i < nRows - 1; ++i) {
 			// first handle the autocorrelation
-			(*outputImage)(2*i, 2*j) += (*previousImage)(i, j) * (*currentImage)(i, j);
+			if ((i != 0) && (j != 0)) {
+				// these autocorrelation pixels are now calculated using crosscorrelation
+				(*outputImage)(2*i, 2*j) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
+			}
 			
 			// handle the horizontal and vertical pixel
 			(*outputImage)(2*i + 1, 2*j) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
@@ -244,7 +247,12 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 		for (size_t i = 0; i < nRowsOutputImage; ++i) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// this is an autocorrelation pixel
-				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2);
+				if ((i == 0) || (i == nRowsOutputImage - 1) || (j == 0) || (j == nColsOutputImage - 1)) {
+					// these pixels are on the edge of the image, it's impossible to crosscorrelate them
+					continue;
+				}
+				
+				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2 - 1) * (*averageImage)(i / 2, j / 2 + 1);
 				continue;
 			}
 			
@@ -415,6 +423,7 @@ ImagePtr SOFICorrector_Order2::performPSFCorrection(Image *image, double psfStdD
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
 	
+	double autoPixelFactor = exp(- sqrt(2.0) / (2.0 * psfStdDev * psfStdDev));
 	double horizontalFactor = exp(- (1.0 / 2.0) / (2.0 * psfStdDev * psfStdDev));
 	double diagonalFactor = exp(- 1.0 / (2.0 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
 	
@@ -425,7 +434,7 @@ ImagePtr SOFICorrector_Order2::performPSFCorrection(Image *image, double psfStdD
 		for (size_t i = 0; i < nRows; ++i) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// autocorrelation pixel
-				continue;
+				(*correctedImage)(i, j) /= autoPixelFactor;
 			}
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
