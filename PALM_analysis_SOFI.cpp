@@ -81,8 +81,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		if (nImagesInBlock > 0) {
 			*sofiImage /= (double)(nImagesInBlock);
 			
-			//if (crossCorrelate != 0)
-			//	sofiImage = sofiCorrector.doImageCorrection(sofiImage);
+			if (crossCorrelate != 0)
+				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
 			outputWriter->write_image(sofiImage);
 		}
 	}
@@ -172,8 +172,8 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	size_t nRows = newImage->rows();
 	size_t nCols = newImage->cols();
 	
-	size_t nRowsOutputImage = 2 * nRows - 1;
-	size_t nColsOutputImage = 2 * nCols - 1;
+	size_t nRowsOutputImage = 2 * nRows - 4;
+	size_t nColsOutputImage = 2 * nCols - 4;
 	
 	if (this->nEvaluations == 0) {
 		this->outputImage = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
@@ -187,45 +187,20 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	
 	*this->averageImage += *previousImage;
 	
-	for (size_t j = 0; j < nCols - 1; ++j) {
-		for (size_t i = 0; i < nRows - 1; ++i) {
+	for (size_t j = 1; j < nCols - 1; ++j) {
+		for (size_t i = 1; i < nRows - 1; ++i) {
 			// first handle the autocorrelation
-			if ((i != 0) && (j != 0)) {
-				// these autocorrelation pixels are now calculated using crosscorrelation
-				(*outputImage)(2*i, 2*j) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
-			}
+			// these autocorrelation pixels are now calculated using crosscorrelation
+			(*outputImage)(2*i - 2, 2*j - 2) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
 			
 			// handle the horizontal and vertical pixel
-			(*outputImage)(2*i + 1, 2*j) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
-			(*outputImage)(2*i, 2*j + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
+			(*outputImage)(2*i - 2 + 1, 2*j - 2) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
+			(*outputImage)(2*i - 2, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
 			
 			// handle the diagonal pixel
-			(*outputImage)(2*i + 1, 2*j + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
+			(*outputImage)(2*i - 2 + 1, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
 		}
 	}
-	
-	// the previous loops have handled all pixels except those at the edges of the image
-	// (the row and column with the highest indices), so handle those separately
-	size_t index = nCols - 1;
-	for (size_t i = 0; i < nRows - 1; ++i) {
-		// autocorrelation
-		(*outputImage)(2 * i, 2 * index) += (*previousImage)(i, index) * (*currentImage)(i, index);
-		
-		// crosscorrelation
-		(*outputImage)(2 * i + 1, 2 * index) += (*previousImage)(i, index) * (*currentImage)(i + 1, index);
-	}
-	
-	index = nRows - 1;
-	for (size_t j = 0; j < nCols - 1; ++j) {
-		// autocorrelation
-		(*outputImage)(2 * index, 2 * j) += (*previousImage)(index, j) * (*currentImage)(index, j);
-		
-		// crosscorrelation
-		(*outputImage)(2 * index, 2 * j + 1) += (*previousImage)(index, j) * (*currentImage)(index, j + 1);
-	}
-	
-	// now there's just a single autocorrelation pixel left in the farthest corner of the image
-	(*outputImage)(2 * (nRows - 1), 2 * (nCols - 1)) += (*previousImage)(nRows - 1, nCols - 1) * (*currentImage)(nRows - 1, nCols - 1);
 	
 	// remove the last image from the queue
 	this->imageQueue.pop();
@@ -245,30 +220,26 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	// normalize the correlated values to get fluctuations
 	for (size_t j = 0; j < nColsOutputImage; ++j) {
 		for (size_t i = 0; i < nRowsOutputImage; ++i) {
+			
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// this is an autocorrelation pixel
-				if ((i == 0) || (i == nRowsOutputImage - 1) || (j == 0) || (j == nColsOutputImage - 1)) {
-					// these pixels are on the edge of the image, it's impossible to crosscorrelate them
-					continue;
-				}
-				
-				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2 - 1) * (*averageImage)(i / 2, j / 2 + 1);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 - 1 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 			
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
-				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2 + 1);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 			
 			if (i % 2 == 1) {
-				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2 + 1, j / 2);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1);
 				continue;
 			}
 			
 			if (j % 2 == 1) {
-				(*outputImage)(i, j) -= (*averageImage)(i / 2, j / 2) * (*averageImage)(i / 2, j / 2 + 1);
+				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 		}
