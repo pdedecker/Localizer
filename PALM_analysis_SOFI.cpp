@@ -259,80 +259,64 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	return imageToReturn;
 }
 
-/*ImagePtr SOFICalculator_Order2_cross::performCorrection_Averages(ImagePtr image) {
+ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
+	size_t nRows = imageToCorrect->rows();
+	size_t nCols = imageToCorrect->cols();
 	
-	size_t nRows = image->rows();
-	size_t nCols = image->cols();
+	double avgOfAuto = 0.0, avgOfHoriz = 0.0, avgOfDiag = 0.0;
+	double nAuto = 0.0, nHoriz = 0.0, nDiag = 0.0;
 	
-	ImagePtr correctedImage (new Image(*image));
-	
-	size_t nAutoPixels = (nRows / 2 + 1) * (nCols / 2 + 1);
-	size_t nHorizontalPixels = (nRows / 2 + 1) * (nCols / 2);
-	size_t nVerticalPixels = (nRows / 2) * (nCols / 2 + 1);
-	size_t nDiagonalPixels = (nRows / 2) * (nCols / 2);
-	
-	double sumAuto = 0.0;
-	double sumHorizontal = 0.0;
-	double sumVertical = 0.0;
-	double sumDiagonal = 0.0;
+	ImagePtr correctedImage(new Image(*imageToCorrect));
 	
 	for (size_t j = 0; j < nCols; j+=1) {
 		for (size_t i = 0; i < nRows; i+=1) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
-				sumAuto += (*image)(i, j);
+				avgOfAuto += (*imageToCorrect)(i, j);
+				nAuto += 1.0;
 				continue;
 			}
-			
 			if ((i % 2 == 1) && (j % 2 == 1)) {
-				sumDiagonal += (*image)(i, j);
+				avgOfDiag += (*imageToCorrect)(i, j);
+				nDiag += 1.0;
 				continue;
 			}
 			
-			if (i % 2 == 1) {
-				sumVertical += (*image)(i, j);
-			} else {
-				sumHorizontal += (*image)(i, j);
-			}
+			avgOfHoriz += (*imageToCorrect)(i, j);
+			nHoriz += 1.0;
 		}
 	}
 	
-	sumAuto /= (double)nAutoPixels;
-	sumHorizontal /= (double)nHorizontalPixels;
-	sumVertical /= (double)nVerticalPixels;
-	sumDiagonal /= (double)nDiagonalPixels;
+	avgOfAuto /= nAuto;
+	avgOfDiag /= nDiag;
+	avgOfHoriz /= nHoriz;
 	
-	double horizontalFactor = sumAuto / sumHorizontal;
-	double verticalFactor = sumAuto / sumVertical;
-	double diagonalFactor = sumAuto / sumDiagonal;
+	double horizFactor = avgOfHoriz / avgOfAuto;
+	double diagFactor = avgOfDiag / avgOfAuto;
 	
 	for (size_t j = 0; j < nCols; j+=1) {
 		for (size_t i = 0; i < nRows; i+=1) {
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				continue;
 			}
-			
 			if ((i % 2 == 1) && (j % 2 == 1)) {
-				(*correctedImage)(i, j) *= diagonalFactor;
+				(*correctedImage)(i, j) /= diagFactor;
+				continue;
 			}
 			
-			if (i % 2 == 1) {
-				(*correctedImage)(i, j) *= verticalFactor;
-			} else {
-				(*correctedImage)(i, j) *= horizontalFactor;
-			}
+			(*correctedImage)(i, j) /= horizFactor;
 		}
 	}
 	
 	return correctedImage;
-}*/
+}
 
-ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
+/*ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
 	// estimate the PSF standard deviation
 	double optimalPSFStdDev = determinePSFStdDev(imageToCorrect);
 	
 	ImagePtr correctedImage = performPSFCorrection(imageToCorrect.get(), optimalPSFStdDev);
 	return correctedImage;
-}
+}*/
 
 double SOFICorrector_Order2::determinePSFStdDev(ImagePtr imageToCorrect) {
 	const gsl_min_fminimizer_type * minizerType = gsl_min_fminimizer_brent;
@@ -406,6 +390,7 @@ ImagePtr SOFICorrector_Order2::performPSFCorrection(Image *image, double psfStdD
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// autocorrelation pixel
 				(*correctedImage)(i, j) /= autoPixelFactor;
+				continue;
 			}
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
@@ -427,24 +412,13 @@ double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) 
 	
 	ImagePtr correctedImage = performPSFCorrection(image, psfStdDev);
 	
-	// calculate the mean of the cross and autocorrelation pixels
-	double nPixelsAuto = 0.0, nPixelsCross = 0.0;
-	double sumOfAuto = 0, sumOfCross = 0;
-	for (size_t j = 0; j < nCols; ++j) {
-		for (size_t i = 0; i < nRows; ++i) {
-			if ((i % 2 == 0) && (j % 2 == 0)) {
-				sumOfAuto += (*correctedImage)(i, j);
-				nPixelsAuto += 1.0;
-				continue;
-			} else {
-				sumOfCross += (*correctedImage)(i, j);
-				nPixelsCross += 1.0;
-			}
-		}
-	}
+	// calculate the relative variance of the mean
+	double avg, avgOfSquares, variance;
 	
-	sumOfAuto /= nPixelsAuto;
-	sumOfCross /= nPixelsCross;
+	avg = (*image).sum() / (double)(nRows * nCols);
+	avgOfSquares = (*image).cwise().square().sum() / (double)(nRows * nCols);
+	variance = avgOfSquares - avg * avg;
 	
-	return (sumOfAuto - sumOfCross) * (sumOfAuto - sumOfCross);
+	return variance / (avg * avg);
 }
+
