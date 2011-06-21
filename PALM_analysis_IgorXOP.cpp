@@ -556,6 +556,15 @@ struct SOFIAnalysisRuntimeParams {
 	double maxBleaching;
 	int MXBLFlagParamsSet[1];
 	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
@@ -2312,6 +2321,24 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		nFramesToSkip = 0;
 	}
 	
+	int useIgorFunctionForProgress;
+	FUNCREF igorProgressReporterFunction;
+	if (p->PROGFlagEncountered) {
+		// Parameter: p->progStruct
+		useIgorFunctionForProgress = 1;
+		igorProgressReporterFunction = p->progStruct->funcRef;
+	} else {
+		useIgorFunctionForProgress = 0;
+	}
+	
+	int quiet = 0;
+	if (p->QFlagEncountered) {
+		quiet = 1;
+	} else {
+		if (RunningInMainThread() != 1)
+			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+	}
+	
 	DataFolderAndName outputWaveParams;
 	if (p->DESTFlagEncountered) {
 		// Parameter: p->dest
@@ -2348,7 +2375,19 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		}
 		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+		boost::shared_ptr<ProgressReporter> progressReporter;
+		
+		if (quiet == 1) {
+			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+		} else {
+			if (useIgorFunctionForProgress != 0) {
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+			} else {
+				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+			}
+		}
+		
+		DoSOFIAnalysis(imageLoader, outputWriter, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
 	}
 	catch (int e) {
 		return e;
@@ -2469,7 +2508,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

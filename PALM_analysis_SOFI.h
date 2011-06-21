@@ -18,8 +18,10 @@
 #include <gsl/gsl_min.h>
 
 #include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_ProgressReporting.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+					boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)

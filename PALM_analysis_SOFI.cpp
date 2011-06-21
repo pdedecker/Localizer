@@ -10,6 +10,7 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+					boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
@@ -45,9 +46,13 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	
 	size_t nFramesInThisGroup;
 	size_t nFramesProcessedInThisRun;
+	size_t nFramesProcessedTotal = 0;
 	ImagePtr outputImage;
 	ImagePtr sofiImage;
 	size_t nImagesInBlock;
+	int status;
+	
+	progressReporter->CalculationStarted();
 	
 	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
 		if (nFramesToGroup > 0) {
@@ -67,6 +72,13 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 				currentImage = imageLoader->readNextImage();
 				sofiCalculator->addNewImage(currentImage);
 				nFramesProcessedInThisRun += 1;
+				nFramesProcessedTotal += 1;
+			}
+			
+			status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
+			if (status != 0) {
+				progressReporter->CalculationAborted();
+				throw USER_ABORTED("Abort requested by user");
 			}
 			
 			outputImage = sofiCalculator->getResult();
@@ -86,6 +98,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			outputWriter->write_image(sofiImage);
 		}
 	}
+	progressReporter->CalculationDone();
 }
 
 SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) {
