@@ -100,6 +100,11 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	if (nFramesInAverage > nFramesInMovie) {
 		throw std::runtime_error("The number of frames requested in the rolling average is larger than the total number of frames in the movie");
 	}
+	
+	if (nFramesInAverage == 1) {
+		throw std::runtime_error("The rolling average must consist of more than 1 frame");
+	}
+	
 	if (nFramesInAverage % 2 == 0) {
 		throw std::runtime_error("Subtracting a rolling average requires an odd number of frames in the average");
 	}
