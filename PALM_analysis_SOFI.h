@@ -91,4 +91,23 @@ protected:
 	static double functionToMinimize(double psfStdDev, void *params);
 };
 
+class SOFIFrameVerifier {
+public:
+	SOFIFrameVerifier() {;}
+	virtual ~SOFIFrameVerifier() {;}
+	
+	virtual int isValidFrame(ImagePtr frame) = 0;
+};
+
+class SOFIFrameVerifier_NoSaturation {
+public:
+	SOFIFrameVerifier_NoSaturation(int storageType_rhs);
+	~SOFIFrameVerifier_NoSaturation() {;}
+	
+	int isValidFrame(ImagePtr frame);
+	
+protected:
+	double saturationValue;
+};
+
 #endif

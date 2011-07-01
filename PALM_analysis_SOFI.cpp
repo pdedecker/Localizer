@@ -440,3 +440,60 @@ double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) 
 	return variance / (avg * avg);
 }
 
+SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_rhs) {
+	switch (storageType_rhs) {
+		case STORAGE_TYPE_INT8:
+			this->saturationValue = 127.0;
+			break;
+		case STORAGE_TYPE_UINT8:
+			this->saturationValue = 255.0;
+			break;
+		case STORAGE_TYPE_INT16:
+			this->saturationValue = 32767.0;
+			break;
+		case STORAGE_TYPE_UINT16:
+			this->saturationValue = 65535.0;
+			break;
+		case STORAGE_TYPE_INT32:
+			this->saturationValue = 2147483647.0;
+			break;
+		case STORAGE_TYPE_UINT32:
+			this->saturationValue = 4294967295.0;
+			break;
+		case STORAGE_TYPE_INT64:
+			this->saturationValue = 9223372036854775807.0;
+			break;
+		case STORAGE_TYPE_UINT64:
+			this->saturationValue = 18446744073709551615.0;
+			break;
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_FP32:
+		case STORAGE_TYPE_FP64:
+			throw std::runtime_error("invalid storage type for saturation verification");
+			break;
+		default:
+			throw std::runtime_error("unknown storage type for saturation verification");
+			break;
+	}
+}
+
+int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
+	size_t nRows = frame->rows();
+	size_t nCols = frame->cols();
+	
+	size_t nPixels = nRows * nCols;
+	double localSaturationValue = this->saturationValue;
+	
+	double *dataPtr = frame->data();
+	for (size_t i = 0; i < nPixels; i+=1) {
+		if (dataPtr[i] == localSaturationValue) {
+			return 0;
+		} else {
+			continue;
+		}
+	}
+	
+	return 1;
+}
+
