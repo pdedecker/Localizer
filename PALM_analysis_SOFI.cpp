@@ -52,6 +52,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	size_t nImagesInBlock;
 	int status;
 	
+	double weightOfThisBlock, sumOfBlockWeights;
+	
 	progressReporter->CalculationStarted();
 	
 	for (size_t currentGroup = 0; currentGroup < nGroups; currentGroup += 1) {
@@ -63,6 +65,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		
 		nFramesProcessedInThisRun = 0;
 		nImagesInBlock = 0;
+		sumOfBlockWeights = 0.0;
 		while (nFramesProcessedInThisRun < nFramesInThisGroup) {
 			nImagesInBlock = std::min(nFramesInThisGroup - nFramesProcessedInThisRun, blockSize);
 			if (nImagesInBlock < lagTime + 1)
@@ -82,16 +85,18 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			}
 			
 			outputImage = sofiCalculator->getResult();
+			weightOfThisBlock = (double)(nImagesInBlock) / (double)(blockSize);
+			sumOfBlockWeights += weightOfThisBlock;
 				
 			if (sofiImage.get() == NULL) {
 				sofiImage = outputImage;
 			} else {
-				*sofiImage += *outputImage;
+				*sofiImage += *outputImage * weightOfThisBlock;
 			}
 		}
 		
 		if (nImagesInBlock > 0) {
-			*sofiImage /= (double)(nImagesInBlock);
+			*sofiImage /= sumOfBlockWeights;
 			
 			if (crossCorrelate != 0)
 				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
