@@ -556,6 +556,11 @@ struct SOFIAnalysisRuntimeParams {
 	double maxBleaching;
 	int MXBLFlagParamsSet[1];
 	
+	// Parameters for /NSAT flag group.
+	int NSATFlagEncountered;
+	double noSaturatedPixels;				// Optional parameter.
+	int NSATFlagParamsSet[1];
+	
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
@@ -2311,6 +2316,17 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		// Parameter: p->maxBleaching
 	}
 	
+	int noSaturatedPixels;
+	if (p->NSATFlagEncountered) {
+		noSaturatedPixels = 1;
+		if (p->NSATFlagParamsSet[0]) {
+			// Optional parameter: p->noSaturatedPixels
+			noSaturatedPixels = (int)(p->noSaturatedPixels + 0.5);
+		}
+	} else {
+		noSaturatedPixels = 0;
+	}
+	
 	size_t nFramesToSkip;
 	if (p->SKIPFlagEncountered) {
 		// Parameter: p->framesToSkip
@@ -2373,6 +2389,15 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		} else {
 			nGroups = 1;
 		}
+		
+		boost::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
+		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
+		
+		if (noSaturatedPixels != 0) {
+			sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
+			frameVerifiers.push_back(sofiFrameVerifier);
+		}
+		
 		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
 		
 		boost::shared_ptr<ProgressReporter> progressReporter;
@@ -2387,7 +2412,7 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 			}
 		}
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+		DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
 	}
 	catch (int e) {
 		return e;
@@ -2508,7 +2533,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

@@ -20,8 +20,10 @@
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_ProgressReporting.h"
 
+class SOFIFrameVerifier;
+
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					boost::shared_ptr<ProgressReporter> progressReporter,
+					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
@@ -99,7 +101,7 @@ public:
 	virtual int isValidFrame(ImagePtr frame) = 0;
 };
 
-class SOFIFrameVerifier_NoSaturation {
+class SOFIFrameVerifier_NoSaturation : public SOFIFrameVerifier {
 public:
 	SOFIFrameVerifier_NoSaturation(int storageType_rhs);
 	~SOFIFrameVerifier_NoSaturation() {;}

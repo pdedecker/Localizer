@@ -10,7 +10,7 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-					boost::shared_ptr<ProgressReporter> progressReporter,
+					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
@@ -51,6 +51,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	ImagePtr sofiImage;
 	size_t nImagesInBlock;
 	int status;
+	int isValidFrame;
 	
 	double weightOfThisBlock, sumOfBlockWeights;
 	
@@ -73,7 +74,18 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			
 			for (size_t i = 0; i < nImagesInBlock; ++i) {
 				currentImage = imageLoader->readNextImage();
-				sofiCalculator->addNewImage(currentImage);
+				
+				// verify if this is an acceptable image
+				isValidFrame = 1;
+				for (size_t j = 0; j < frameVerifiers.size(); j+=1) {
+					if (frameVerifiers[j]->isValidFrame(currentImage) != 1) {
+						isValidFrame = 0;
+						break;
+					}
+				}
+				if (isValidFrame == 1) {
+					sofiCalculator->addNewImage(currentImage);
+				}
 				nFramesProcessedInThisRun += 1;
 				nFramesProcessedTotal += 1;
 			}
@@ -489,8 +501,6 @@ int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
 	for (size_t i = 0; i < nPixels; i+=1) {
 		if (dataPtr[i] == localSaturationValue) {
 			return 0;
-		} else {
-			continue;
 		}
 	}
 	
