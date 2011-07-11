@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
-#include <Eigen/Eigen>
+#include <eigen2/Eigen/Eigen>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_defines.h"

@@ -13,7 +13,7 @@
 #include <queue>
 #include <vector>
 
-#include <Eigen/Eigen>
+#include <eigen2/Eigen/Eigen>
 #include "boost/smart_ptr.hpp"
 #include <gsl/gsl_min.h>
 

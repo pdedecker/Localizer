@@ -16,7 +16,7 @@
 #include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_storage.h"
 #include "boost/smart_ptr.hpp"
-#include <Eigen/Eigen>
+#include <eigen2/Eigen/Eigen>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_integration.h>

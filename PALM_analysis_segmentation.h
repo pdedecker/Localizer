@@ -14,7 +14,7 @@
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
-#include <Eigen/Eigen>
+#include <eigen2/Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_MatrixRecycler.h"
 #include <fftw3.h>

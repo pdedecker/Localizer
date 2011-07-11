@@ -18,7 +18,7 @@
 #include <string>
 #include <algorithm>
 #include <boost/smart_ptr.hpp>
-#include <Eigen/Eigen>
+#include <eigen2/Eigen/Eigen>
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
