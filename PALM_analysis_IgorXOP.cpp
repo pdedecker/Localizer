@@ -645,7 +645,7 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		thresholding_method = (int)(p->thresholding_method + 0.5);
 		analysisOptionsStream << "THRESHOLD METHOD:" << thresholding_method << ';';
 	} else {
-		return THRESHOLD_METHOD_GLRT;
+		thresholding_method = THRESHOLD_METHOD_GLRT;
 	}
 	
 	if (p->YFlagEncountered) {
