@@ -70,13 +70,15 @@ public:
 	ImagePtr getResult();
 	
 protected:
-	//static ImagePtr performCorrection_Averages(ImagePtr image);
-	
 	size_t lagTime;
 	double psfWidth;
 	std::queue<ImagePtr> imageQueue;
-	ImagePtr outputImage;
+	
+	ImagePtr outputImageCrossCorrelation;
+	ImagePtr outputImageHorizontalAutoCorrelation;
+	ImagePtr outputImageVerticalAutoCorrelation;
 	ImagePtr averageImage;
+	
 	size_t nEvaluations;
 };
 

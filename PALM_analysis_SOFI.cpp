@@ -206,8 +206,14 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 	size_t nColsOutputImage = 2 * nCols - 4;
 	
 	if (this->nEvaluations == 0) {
-		this->outputImage = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
-		this->outputImage->setConstant(0.0);
+		this->outputImageCrossCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
+		this->outputImageHorizontalAutoCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
+		this->outputImageVerticalAutoCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
+		
+		this->outputImageCrossCorrelation->setConstant(0.0);
+		this->outputImageHorizontalAutoCorrelation->setConstant(0.0);
+		this->outputImageVerticalAutoCorrelation->setConstant(0.0);
+		
 		this->averageImage = ImagePtr(new Image((int)nRows, (int)nCols));
 		this->averageImage->setConstant(0.0);
 	}
@@ -221,14 +227,18 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 		for (size_t i = 1; i < nRows - 1; ++i) {
 			// first handle the autocorrelation
 			// these autocorrelation pixels are now calculated using crosscorrelation
-			(*outputImage)(2*i - 2, 2*j - 2) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
+			// since these require the correlation of two pixels with an intermediate pixel
+			// in between, they might be more sensitive to noise. Therefore do two different
+			// correlations, and at the end average between them
+			(*outputImageHorizontalAutoCorrelation)(2*i - 2, 2*j - 2) += (*previousImage)(i - 1, j) * (*currentImage)(i + 1, j);
+			(*outputImageVerticalAutoCorrelation)(2*i - 2, 2*j - 2) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
 			
 			// handle the horizontal and vertical pixel
-			(*outputImage)(2*i - 2 + 1, 2*j - 2) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
-			(*outputImage)(2*i - 2, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
+			(*outputImageCrossCorrelation)(2*i - 2 + 1, 2*j - 2) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
+			(*outputImageCrossCorrelation)(2*i - 2, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
 			
 			// handle the diagonal pixel
-			(*outputImage)(2*i - 2 + 1, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
+			(*outputImageCrossCorrelation)(2*i - 2 + 1, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
 		}
 	}
 	
@@ -242,10 +252,12 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 		throw std::runtime_error("Requested a SOFI image even though there are no evaluations");
 	
 	*this->averageImage /= (double)(this->nEvaluations);
-	*this->outputImage /= (double)(this->nEvaluations);
+	*this->outputImageHorizontalAutoCorrelation /= (double)(this->nEvaluations);
+	*this->outputImageVerticalAutoCorrelation /= (double)(this->nEvaluations);
+	*this->outputImageCrossCorrelation /= (double)(this->nEvaluations);
 	
-	size_t nRowsOutputImage = this->outputImage->rows();
-	size_t nColsOutputImage = this->outputImage->cols();
+	size_t nRowsOutputImage = this->outputImageHorizontalAutoCorrelation->rows();
+	size_t nColsOutputImage = this->outputImageHorizontalAutoCorrelation->cols();
 	
 	// normalize the correlated values to get fluctuations
 	for (size_t j = 0; j < nColsOutputImage; ++j) {
@@ -253,35 +265,39 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 			
 			if ((i % 2 == 0) && (j % 2 == 0)) {
 				// this is an autocorrelation pixel
-				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 - 1 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
+				(*outputImageHorizontalAutoCorrelation)(i, j) -= (*averageImage)(i / 2 - 1 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1);
+				(*outputImageVerticalAutoCorrelation)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 - 1 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 			
 			if ((i % 2 == 1) && (j % 2 == 1)) {
 				// this is a diagonal crosscorrelation pixel
-				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1 + 1);
+				(*outputImageCrossCorrelation)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 			
 			if (i % 2 == 1) {
-				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1);
+				(*outputImageCrossCorrelation)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1 + 1, j / 2 + 1);
 				continue;
 			}
 			
 			if (j % 2 == 1) {
-				(*outputImage)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
+				(*outputImageCrossCorrelation)(i, j) -= (*averageImage)(i / 2 + 1, j / 2 + 1) * (*averageImage)(i / 2 + 1, j / 2 + 1 + 1);
 				continue;
 			}
 		}
 	}
 	
-	ImagePtr imageToReturn (new Image(*outputImage));
+	ImagePtr imageToReturn (new Image(*outputImageHorizontalAutoCorrelation));
+	*imageToReturn = ((*outputImageHorizontalAutoCorrelation) + (*outputImageVerticalAutoCorrelation) / 2.0) + (*outputImageCrossCorrelation);
 	
 	// now reset everything for the next calculation
 	// before returning
 	this->nEvaluations = 0;
 	this->averageImage.reset();
-	this->outputImage.reset();
+	this->outputImageHorizontalAutoCorrelation.reset();
+	this->outputImageVerticalAutoCorrelation.reset();
+	this->outputImageCrossCorrelation.reset();
 	
 	while (this->imageQueue.size() > 0)
 		this->imageQueue.pop();
