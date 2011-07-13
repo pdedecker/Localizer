@@ -174,8 +174,8 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	// now reset everything for the next calculation
 	// before returning
 	this->nEvaluations = 0;
-	this->averageImage.reset();
-	this->outputImage.reset();
+	this->averageImage->setConstant(0.0);
+	this->outputImage->setConstant(0.0);
 	
 	while (this->imageQueue.size() > 0)
 		this->imageQueue.pop();
@@ -294,10 +294,10 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	// now reset everything for the next calculation
 	// before returning
 	this->nEvaluations = 0;
-	this->averageImage.reset();
-	this->outputImageHorizontalAutoCorrelation.reset();
-	this->outputImageVerticalAutoCorrelation.reset();
-	this->outputImageCrossCorrelation.reset();
+	this->averageImage->setConstant(0.0);
+	this->outputImageHorizontalAutoCorrelation->setConstant(0.0);
+	this->outputImageVerticalAutoCorrelation->setConstant(0.0);
+	this->outputImageCrossCorrelation->setConstant(0.0);
 	
 	while (this->imageQueue.size() > 0)
 		this->imageQueue.pop();
