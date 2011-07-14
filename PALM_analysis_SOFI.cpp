@@ -140,7 +140,7 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	size_t nCols = newImage->cols();
 	
 	// do the necessary images already exist?
-	if (this->nEvaluations == 0) {
+	if (this->outputImage.get() == NULL) {
 		this->outputImage = ImagePtr(new Image((int)nRows, (int)nCols));
 		this->outputImage->setConstant(0.0);
 		this->averageImage = ImagePtr(new Image((int)nRows, (int)nCols));
@@ -169,7 +169,7 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	// instead of fluctuations
 	*this->outputImage -= (*this->averageImage).cwise().square();
 	
-	ImagePtr imageToBeReturned = this->outputImage;
+	ImagePtr imageToBeReturned(new Image(*this->outputImage));
 	
 	// now reset everything for the next calculation
 	// before returning
