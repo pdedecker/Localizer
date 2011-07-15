@@ -551,10 +551,10 @@ struct SOFIAnalysisRuntimeParams {
 	double framesToSkip;
 	int SKIPFlagParamsSet[1];
 	
-	// Parameters for /MXBL flag group.
-	int MXBLFlagEncountered;
-	double maxBleaching;
-	int MXBLFlagParamsSet[1];
+	// Parameters for /MAX flag group.
+	int MAXFlagEncountered;
+	double maxPixelVal;
+	int MAXFlagParamsSet[1];
 	
 	// Parameters for /NSAT flag group.
 	int NSATFlagEncountered;
@@ -2312,8 +2312,8 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		nFramesToGroup = 0;
 	}
 	
-	if (p->MXBLFlagEncountered) {
-		// Parameter: p->maxBleaching
+	if (p->MAXFlagEncountered) {
+		// Parameter: p->maxPixelVal
 	}
 	
 	int noSaturatedPixels;
@@ -2533,7 +2533,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MXBL=number:maxBleaching /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
