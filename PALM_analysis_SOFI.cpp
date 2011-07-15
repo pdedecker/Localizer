@@ -523,3 +523,20 @@ int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
 	return 1;
 }
 
+int SOFIFrameVerifier_MaxPixelValue::isValidFrame(ImagePtr image) {
+	size_t nRows = image->rows();
+	size_t nCols = image->cols();
+	
+	size_t nPixels = nRows * nCols;
+	double localMaxPixelValue = this->maxPixelValue;
+	
+	double *dataPtr = image->data();
+	for (size_t i = 0; i < nPixels; i+=1) {
+		if (dataPtr[i] > localMaxPixelValue) {
+			return 0;
+		}
+	}
+	
+	return 1;
+}
+

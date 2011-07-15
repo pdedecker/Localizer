@@ -114,4 +114,15 @@ protected:
 	double saturationValue;
 };
 
+class SOFIFrameVerifier_MaxPixelValue : public SOFIFrameVerifier {
+public:
+	SOFIFrameVerifier_MaxPixelValue(int maxPixelValue_rhs) {maxPixelValue = maxPixelValue_rhs;}
+	~SOFIFrameVerifier_MaxPixelValue() {;}
+	
+	int isValidFrame(ImagePtr frame);
+	
+protected:
+	double maxPixelValue;
+};
+
 #endif
