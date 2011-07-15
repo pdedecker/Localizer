@@ -2312,19 +2312,21 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 		nFramesToGroup = 0;
 	}
 	
+	double maxPixelVal = 0.0;
+	int limitMaxPixelVal = 0;
 	if (p->MAXFlagEncountered) {
 		// Parameter: p->maxPixelVal
+		maxPixelVal = p->maxPixelVal;
+		limitMaxPixelVal = 1;
 	}
 	
-	int noSaturatedPixels;
+	int noSaturatedPixels = 0;
 	if (p->NSATFlagEncountered) {
 		noSaturatedPixels = 1;
 		if (p->NSATFlagParamsSet[0]) {
 			// Optional parameter: p->noSaturatedPixels
 			noSaturatedPixels = (int)(p->noSaturatedPixels + 0.5);
 		}
-	} else {
-		noSaturatedPixels = 0;
 	}
 	
 	size_t nFramesToSkip;
@@ -2390,11 +2392,16 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 			nGroups = 1;
 		}
 		
+		// check if any frame verifiers need to be used
 		boost::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		
 		if (noSaturatedPixels != 0) {
 			sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
+			frameVerifiers.push_back(sofiFrameVerifier);
+		}
+		if (limitMaxPixelVal != 0) {
+			sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_MaxPixelValue(maxPixelVal));
 			frameVerifiers.push_back(sofiFrameVerifier);
 		}
 		
