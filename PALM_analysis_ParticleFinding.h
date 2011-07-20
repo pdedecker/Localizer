@@ -14,7 +14,7 @@
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_Localization.h"
 #include "boost/smart_ptr.hpp"
-#include <eigen2/Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 #include <list>
 
 /**

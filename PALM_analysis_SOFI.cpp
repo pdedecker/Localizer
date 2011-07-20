@@ -150,7 +150,7 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 	ImagePtr previousImage = this->imageQueue.front();
 	ImagePtr currentImage = this->imageQueue.back();
 	
-	*this->outputImage += (*previousImage).cwise() * (*currentImage);
+	*this->outputImage += ((*previousImage).array() * (*currentImage).array()).matrix();
 	*this->averageImage += *previousImage;
 	
 	// remove the last image from the queue
@@ -167,7 +167,7 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	
 	// correct for the fact that we have been multiplying intensities
 	// instead of fluctuations
-	*this->outputImage -= (*this->averageImage).cwise().square();
+	*this->outputImage -= (*this->averageImage).array().square().matrix();
 	
 	ImagePtr imageToBeReturned(new Image(*this->outputImage));
 	
@@ -462,7 +462,7 @@ double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) 
 	double avg, avgOfSquares, variance;
 	
 	avg = (*image).sum() / (double)(nRows * nCols);
-	avgOfSquares = (*image).cwise().square().sum() / (double)(nRows * nCols);
+	avgOfSquares = (*image).array().square().sum() / (double)(nRows * nCols);
 	variance = avgOfSquares - avg * avg;
 	
 	return variance / (avg * avg);

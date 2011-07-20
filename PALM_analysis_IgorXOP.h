@@ -16,7 +16,7 @@
 #include <cmath>
 #include <sstream>
 #include "boost/smart_ptr.hpp"
-#include <eigen2/Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 #include "XOPStandardHeaders.h"
 #include "PALM_analysis.h"
 #include "PALM_analysis_defines.h"

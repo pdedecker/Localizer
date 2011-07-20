@@ -490,7 +490,7 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 		current_image = image_loader->readImage(i);
 		
 		// add the deviation of the newly loaded image from the mean to the stddev image
-		(*varianceImage) += ((*current_image) - (*average_image)).cwise().square();
+		(*varianceImage) += ((*current_image) - (*average_image)).array().square().matrix();
 	}
 	
 	// divide by the number of images to get the average deviation

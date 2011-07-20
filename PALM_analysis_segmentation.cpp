@@ -353,7 +353,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 	// calculate the square of the pixel values
 	// we'll use this later
-	*image_squared = (*image).cwise().square();
+	*image_squared = (*image).array().square();
 	
 	// NULL HYPOTHESIS: there is no emitter at a certain position
 	
@@ -373,7 +373,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// now calculate the null hypothesis image. This is T_sig0_2 in the original matlab source
 	// recycle image_squared since it's already allocated and we won't use it again
 	null_hypothesis = image_squared;
-	*null_hypothesis = (*summed_squares) - (*averages).cwise().square() * double_window_pixels;
+	*null_hypothesis = (*summed_squares) - (*averages).array().square().matrix() * double_window_pixels;
 	
 	// calculate the hypothesis H1 that there is an emitter
 	
@@ -391,7 +391,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 	// recycle the memory that has been allocated for average
 	hypothesis_test = averages;
-	(*hypothesis_test) = ((*image_Gaussian_convolved).cwise().square()).cwise() / (*null_hypothesis) * this->sum_squared_Gaussian;
+	(*hypothesis_test) = ((*image_Gaussian_convolved).array().square()) / (*null_hypothesis).array() * this->sum_squared_Gaussian;
 	
 	// calculate the threshold value that will serve to accept or reject the presence of an emitter
 	// details are in the GLRTSpeedup.tex file in the project folder

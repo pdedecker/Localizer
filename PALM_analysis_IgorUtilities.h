@@ -16,7 +16,7 @@
 #include "boost/smart_ptr.hpp"
 
 #include "XOPStandardHeaders.h"
-#include <eigen2/Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 #include "PALM_analysis.h"
 #include "PALM_analysis_ProgressReporting.h"
 #include "PALM_analysis_defines.h"

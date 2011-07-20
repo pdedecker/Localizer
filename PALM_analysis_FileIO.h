@@ -22,7 +22,7 @@
 #include "tiffio.h"
 #include "boost/cstdint.hpp"
 #include "boost/thread.hpp"
-#include <eigen2/Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 
 #ifdef _WIN32
 #include <stdio.h>

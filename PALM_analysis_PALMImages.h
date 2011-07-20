@@ -14,7 +14,7 @@
 #include "PALM_analysis_defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
-#include <eigen2/Eigen/Eigen>
+#include <eigen3/Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include <gsl/gsl_cdf.h>
 
