@@ -51,6 +51,17 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	VR_sp_pp2(xPositions.get(), yPositions.get(), nPositions, &nBins,
 			  &((*lFunction)[0]), calculationRange, upperX, lowerX,
 			  upperY, lowerY);
+    
+    // if the requested calculation range is too high then VR_sp_pp2 will
+    // have automatically reduced it. It reports the correct number of points
+    // in nBins
+    if (nBins != lFunction->size()) {
+        boost::shared_ptr<std::vector<double> > resizedLFunction(new std::vector<double>(nBins));
+        for (size_t i = 0; i < nBins; i+=1) {
+            (*resizedLFunction)[i] = (*lFunction)[i];
+        }
+        lFunction = resizedLFunction;
+    }
 	
     // return the calculated function
 	return lFunction;
