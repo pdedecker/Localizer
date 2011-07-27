@@ -975,8 +975,8 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
         return GSL_FAILURE;
     }
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
             function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
@@ -1015,8 +1015,8 @@ int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, 
         return GSL_FAILURE;
     }
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
             function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
@@ -1057,8 +1057,8 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
 
     double x,y, function_value, square_deviation;
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
             function_value = amplitude * exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX
@@ -1096,8 +1096,8 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
         return GSL_FAILURE;
     }
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
 
@@ -1145,8 +1145,8 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
         return GSL_FAILURE;
     }
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
 
@@ -1196,8 +1196,8 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 
     denominator = 2 * (1 - corr * corr) * sigma;
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
 
@@ -1253,8 +1253,8 @@ int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fit
         return GSL_FAILURE;
     }
 
-    for (int j = 0; j < ySize; ++j) {
-        for (int i = 0; i < xSize; ++i) {
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
 
