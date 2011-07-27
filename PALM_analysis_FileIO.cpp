@@ -1692,7 +1692,23 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	this->fullPathToWave = waveName_rhs;
 	this->nImagesTotal = nImages_rhs;
 	this->nImagesWritten = 0;
-	this->storageType = storageType_rhs;
+    
+    // not all storage types are supported in Igor
+    // silently replace these with supported types
+    switch (storageType_rhs) {
+        case STORAGE_TYPE_INT4:
+        case STORAGE_TYPE_UINT4:
+            this->storageType = STORAGE_TYPE_INT8;
+            break;
+        case STORAGE_TYPE_INT64:
+            this->storageType = STORAGE_TYPE_INT32;
+            break;
+        case STORAGE_TYPE_UINT64:
+            this->storageType = STORAGE_TYPE_UINT32;
+            break;
+        default:
+            this->storageType = storageType_rhs;
+    }
 	
 	// check if the output wave already exists
 	if (this->overwrite != 1) {
@@ -1755,7 +1771,7 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	// check that we are not trying to write too many images
 	// which would otherwise trigger an out-of-bounds memory
 	// access
-	if (this->nImagesWritten >= this->nImagesTotal)
+    if (this->nImagesWritten >= this->nImagesTotal)
 		throw std::runtime_error("Writing too many images to the IgorImageOutputWriter");
 	
 	// the strategy for writing the data depends on the storage type
@@ -1869,8 +1885,8 @@ int IgorImageOutputWriter::GetIgorStorageType() {
 		case STORAGE_TYPE_UINT32:
 			storage = NT_I32 | NT_UNSIGNED;
 			break;
-		case STORAGE_TYPE_INT64:
-			storage = NT_I32;	// todo: not yet supported in Igor
+        case STORAGE_TYPE_INT64:
+            storage = NT_I32;
 			break;
 		case STORAGE_TYPE_UINT64:
 			storage = NT_I32 | NT_UNSIGNED;
