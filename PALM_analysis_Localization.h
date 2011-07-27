@@ -39,10 +39,10 @@ class LocalizedPositionsContainer;
  */
 class FitPositions {
 public:
-	FitPositions() {;}
-	virtual ~FitPositions() {;}
-	
-	virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) = 0;
+    FitPositions() {;}
+    virtual ~FitPositions() {;}
+
+    virtual boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) = 0;
 };
 
 /**
@@ -50,15 +50,15 @@ public:
  */
 class FitPositions_SymmetricGaussian : public FitPositions {
 public:
-	FitPositions_SymmetricGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositions_SymmetricGaussian() {;}
-	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositions_SymmetricGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositions_SymmetricGaussian() {;}
+
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	double sigma;
-	size_t cutoff_radius;
-	double initialPSFWidth;
+    double sigma;
+    size_t cutoff_radius;
+    double initialPSFWidth;
 };
 
 /**
@@ -66,28 +66,28 @@ protected:
  */
 class FitPositions_FixedWidthGaussian : public FitPositions {
 public:
-	FitPositions_FixedWidthGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositions_FixedWidthGaussian() {;}
-	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositions_FixedWidthGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositions_FixedWidthGaussian() {;}
+
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	double sigma;
-	size_t cutoff_radius;
-	double initialPSFWidth;
+    double sigma;
+    size_t cutoff_radius;
+    double initialPSFWidth;
 };
 
 class FitPositions_EllipsoidalGaussian : public FitPositions {
 public:
-	FitPositions_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositions_EllipsoidalGaussian() {;}
-	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositions_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositions_EllipsoidalGaussian() {;}
+
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	double sigma;
-	size_t cutoff_radius;
-	double initialPSFWidth;
+    double sigma;
+    size_t cutoff_radius;
+    double initialPSFWidth;
 };
 
 /**
@@ -95,14 +95,14 @@ protected:
  */
 class FitPositions_MLEwG : public FitPositions {
 public:
-	FitPositions_MLEwG(double initialPSFWidth_rhs) : initialPSFWidth(initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositions_MLEwG() {;}
-	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositions_MLEwG(double initialPSFWidth_rhs) : initialPSFWidth(initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositions_MLEwG() {;}
+
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	size_t cutoff_radius;
-	double initialPSFWidth;
+    size_t cutoff_radius;
+    double initialPSFWidth;
 };
 
 /**
@@ -111,38 +111,38 @@ protected:
  */
 class FitPositionsMultiplication : public FitPositions {
 public:
-	FitPositionsMultiplication(double initialPSFWidth_rhs, double convergence_rhs) {initialPSFWidth = initialPSFWidth_rhs; convergence_threshold = convergence_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositionsMultiplication() {;}
-	
-	// initialPSFWidth should be the standard deviation of the Gaussian
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositionsMultiplication(double initialPSFWidth_rhs, double convergence_rhs) {initialPSFWidth = initialPSFWidth_rhs; convergence_threshold = convergence_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositionsMultiplication() {;}
+
+    // initialPSFWidth should be the standard deviation of the Gaussian
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	int multiply_with_gaussian(ImagePtr original_image, ImagePtr masked_image, double x, double y,
-							   double std_dev, double background, double amplitude);
-	// masked_image should be provided with the same dimensions as original_image. It will be overwritten with the contents of the multiplication
-	int determine_x_y_position(ImagePtr masked_image, double &x, double &y);
-	
-	double convergence_threshold;
-	size_t cutoff_radius;
-	double initialPSFWidth;
+    int multiply_with_gaussian(ImagePtr original_image, ImagePtr masked_image, double x, double y,
+                               double std_dev, double background, double amplitude);
+    // masked_image should be provided with the same dimensions as original_image. It will be overwritten with the contents of the multiplication
+    int determine_x_y_position(ImagePtr masked_image, double &x, double &y);
+
+    double convergence_threshold;
+    size_t cutoff_radius;
+    double initialPSFWidth;
 };
 
 /**
  * @brief fits the positions by calculating weighted averages for x and y using the intensity of the emission at each point as the weight.
  */
 class FitPositionsCentroid : public FitPositions {
-	// fits the positions by calculating a centroid for the pixel values
-	
+    // fits the positions by calculating a centroid for the pixel values
+
 public:
-	FitPositionsCentroid(double initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
-	~FitPositionsCentroid() {;}
-	
-	// initialPSFWidth should be the standard deviation of the Gaussian
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
-	
+    FitPositionsCentroid(double initialPSFWidth_rhs) {cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositionsCentroid() {;}
+
+    // initialPSFWidth should be the standard deviation of the Gaussian
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+
 protected:
-	size_t cutoff_radius;
+    size_t cutoff_radius;
 };
 
 // the routines below are used in the least-squares fitting of a Gaussian to the spots
@@ -166,14 +166,14 @@ double MLEwGIntegrand(double t, void *params_rhs);
 
 class measured_data_Gauss_fits {
 public:	
-	measured_data_Gauss_fits() {;}
-	~measured_data_Gauss_fits() {;}
-	
-	double xOffset;
-	double yOffset;
-	double sigma;
-	double width;
-	ImagePtr imageSubset;
+    measured_data_Gauss_fits() {;}
+    ~measured_data_Gauss_fits() {;}
+
+    double xOffset;
+    double yOffset;
+    double sigma;
+    double width;
+    ImagePtr imageSubset;
 };
 
 

@@ -16,7 +16,6 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_proces
 	return postprocessed_image;
 }
 
-
 PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage> thresholder_rhs,
 												boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
 												boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
