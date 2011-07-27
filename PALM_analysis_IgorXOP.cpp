@@ -1119,9 +1119,9 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         // if the user did not provide a filepath
         // then show a dialog asking for one
 #ifdef MACIGOR
-        char *fileFilterStr = "Data Files::.spe,.sif,.his,.tif,.tiff,.lsm,.pde;";
+        const char *fileFilterStr = "Data Files::.spe,.sif,.his,.tif,.tiff,.lsm,.pde;";
 #else
-        char *fileFilterStr = "Data Files\0.spe;.sif;.his;.tif;.tiff;.lsm;.pde\0\0";
+        const char *fileFilterStr = "Data Files\0.spe;.sif;.his;.tif;.tiff;.lsm;.pde\0\0";
 #endif
         err = XOPOpenFileDialog("Open images", fileFilterStr, NULL, "", filePathFromDialog);
         if ((err == -1) || (strlen(filePathFromDialog) == 0)) {
