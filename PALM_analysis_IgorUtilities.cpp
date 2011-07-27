@@ -117,7 +117,7 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 	
 }
 
-int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
+int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
 						   boost::shared_ptr<ProgressReporter> progressReporter) {
 	size_t nImages = image_loader->getNImages();
 	size_t maxNImagesToLoad, nImagesToLoad;
@@ -200,7 +200,7 @@ int load_partial_ccd_image(ImageLoader *image_loader, size_t firstImage, size_t 
 }
 
 
-int parse_ccd_headers(ImageLoader *image_loader) {
+int ParseCCDHeaders(ImageLoader *image_loader) {
 	size_t total_n_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();

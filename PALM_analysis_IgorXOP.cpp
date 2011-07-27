@@ -1008,7 +1008,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     int overwrite = 0;
     size_t camera_type;
     size_t firstImage, nImagesToRead;
-    std::string data_file_path;
+    std::string dataFilePath;
     int header_only = 0;
     DataFolderAndName dataFolderAndName;
 
@@ -1147,22 +1147,22 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         // get the filepath string in different ways depending on how
         // the user provided it
         if (p->filePath == NULL) {
-            data_file_path = std::string(filePathFromDialog);
+            dataFilePath = std::string(filePathFromDialog);
         } else {
-            data_file_path = ConvertHandleToString(p->filePath);
+            dataFilePath = ConvertHandleToString(p->filePath);
         }
         
         // also return the chosen filepath to Igor
-        err = SetOperationStrVar("S_filePath", data_file_path.c_str());
+        err = SetOperationStrVar("S_filePath", dataFilePath.c_str());
         if (err != 0)
             return err;
         
-        image_loader = GetImageLoader(camera_type, data_file_path);
+        image_loader = GetImageLoader(camera_type, dataFilePath);
 
         if (header_only == 0) {
-            err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
+            err = LoadPartialCCDImage(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
         } else {
-            err = parse_ccd_headers(image_loader.get());
+            err = ParseCCDHeaders(image_loader.get());
         }
 
     }
