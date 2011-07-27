@@ -125,55 +125,55 @@ typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimePar
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ReadCCDImagesRuntimeParams {
 	// Flag parameters.
-	
+    
 	// Parameters for /Y flag group.
 	int YFlagEncountered;
 	double camera_type;
 	int YFlagParamsSet[1];
-	
+    
 	// Parameters for /H flag group.
 	int HFlagEncountered;
 	// There are no fields for this group because it has no parameters.
-	
+    
 	// Parameters for /S flag group.
 	int SFlagEncountered;
 	double firstImage;
 	int SFlagParamsSet[1];
-	
+    
 	// Parameters for /C flag group.
 	int CFlagEncountered;
 	double nImagesToRead;
 	int CFlagParamsSet[1];
-	
+    
 	// Parameters for /Z flag group.
 	int ZFlagEncountered;
 	// There are no fields for this group because it has no parameters.
-	
+    
 	// Parameters for /O flag group.
 	int OFlagEncountered;
 	// There are no fields for this group because it has no parameters.
-	
+    
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
 	int PROGFlagParamsSet[1];
-	
+    
 	// Parameters for /Q flag group.
 	int QFlagEncountered;
 	// There are no fields for this group because it has no parameters.
-	
+    
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
 	int DESTFlagParamsSet[1];
-	
+    
 	// Main parameters.
-	
+    
 	// Parameters for simple main group #0.
 	int filePathEncountered;
-	Handle filePath;
+	Handle filePath;						// Optional parameter.
 	int filePathParamsSet[1];
-	
+    
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
@@ -1097,15 +1097,38 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 	}
 	
 	// Main parameters.
-	
+    int useDialog = 0;
+	char filePathFromDialog[MAX_PATH_LEN + 1];
+    strcpy(filePathFromDialog, "");
 	if (p->filePathEncountered) {
-		// Parameter: p->filePath (test for NULL handle before using)
-		if (p->filePath == NULL) {
-			return EXPECTED_STRING_EXPR;
-		}
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
+		if (p->filePathParamsSet[0]) {
+            // Parameter: p->filePath (test for NULL handle before using)
+            if (p->filePath == NULL) {
+                useDialog = 1;
+            } else {
+                useDialog = 0;
+            }
+        } else {
+            useDialog = 1;
+        }
+    } else {
+        useDialog = 1;
+    }
+        
+    if (useDialog != 0) {
+        // if the user did not provide a filepath
+        // then show a dialog asking for one
+#ifdef MACIGOR
+        char *fileFilterStr = "Data Files::.spe,.sif,.his,.tif,.tiff,.lsm,.pde;";
+#else
+        char *fileFilterStr = "Data Files\0.spe;.sif;.his;.tif;.tiff;.lsm;.pde\0\0";
+#endif
+        err = XOPOpenFileDialog("Open images", fileFilterStr, NULL, "", filePathFromDialog);
+        if ((err == -1) || (strlen(filePathFromDialog) == 0)) {
+            // user canceled the dialog
+            return 0;
+        }
+    }
 	
 	try {
 		boost::shared_ptr<ProgressReporter> progressReporter;
@@ -1119,7 +1142,13 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 			}
 		}
 		
-		data_file_path = ConvertHandleToString(p->filePath);
+        // get the filepath string in different ways depending on how
+        // the user provided it
+        if (p->filePath == NULL) {
+            data_file_path = std::string(filePathFromDialog);
+        } else {
+            data_file_path = ConvertHandleToString(p->filePath);
+        }
 		image_loader = GetImageLoader(camera_type, data_file_path);
 		
 		if (header_only == 0) {
@@ -2455,7 +2484,7 @@ static int RegisterReadCCDImages(void) {
 	const char* runtimeStrVarList;
 	
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:filePath";
+	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
