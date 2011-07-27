@@ -1002,106 +1002,106 @@ static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 
 
 static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	int returnErrors = 1;
-	int overwrite = 0;
-	size_t camera_type;
-	size_t firstImage, nImagesToRead;
-	std::string data_file_path;
-	int header_only = 0;
-	DataFolderAndName dataFolderAndName;
-	
-	boost::shared_ptr<ImageLoader> image_loader;
-	
-	// Flag parameters.
-	
-	if (p->YFlagEncountered) {
-		// Parameter: p->camera_type
-		if (p->camera_type < 0) {
-			camera_type = (size_t)-1;
-		} else {
-			camera_type = (size_t)(p->camera_type + 0.5);
-		}
-	} else {
-		camera_type = (size_t)-1;
-	}
-	
-	if (p->HFlagEncountered) {
-		header_only = 1;
-	} else {
-		header_only = 0;
-	}
-	
-	if (p->SFlagEncountered) {
-		// Parameter: p->firstImage
-		if (p->firstImage < 0) {
-			return kBadValueForFirstImage;
-		} else {
-			firstImage = (size_t)(p->firstImage + 0.5);
-		}
-	} else {
-		firstImage = 0;
-	}
-	
-	if (p->CFlagEncountered) {
-		// Parameter: p->nImagesToRead
-		if (p->nImagesToRead < 0) {
-			nImagesToRead = (size_t)-1;
-		} else {
-			nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
-			if (nImagesToRead == 0)
-				return kBadMultipleImageCount;
-		}
-	} else {
-		nImagesToRead = (size_t)-1;
-	}
-	
-	if (p->ZFlagEncountered) {
-		returnErrors = 0;
-	} else {
-		returnErrors = 1;
-	}
-	
-	if (p->OFlagEncountered) {
-		overwrite = 1;
-	} else {
-		overwrite = 0;
-	}
-	
-	int useIgorFunctionForProgress;
-	FUNCREF igorProgressReporterFunction;
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	if (p->DESTFlagEncountered) {
-		// Parameter: p->dest
-		dataFolderAndName = p->dest;
-	} else {
-		// not default destination was provided, use a default instead
-		dataFolderAndName.dfH = NULL;
-		strcpy(dataFolderAndName.name, "M_CCDFrames");
-	}
-	
-	// Main parameters.
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    int returnErrors = 1;
+    int overwrite = 0;
+    size_t camera_type;
+    size_t firstImage, nImagesToRead;
+    std::string data_file_path;
+    int header_only = 0;
+    DataFolderAndName dataFolderAndName;
+
+    boost::shared_ptr<ImageLoader> image_loader;
+
+    // Flag parameters.
+
+    if (p->YFlagEncountered) {
+        // Parameter: p->camera_type
+        if (p->camera_type < 0) {
+            camera_type = (size_t)-1;
+        } else {
+            camera_type = (size_t)(p->camera_type + 0.5);
+        }
+    } else {
+        camera_type = (size_t)-1;
+    }
+
+    if (p->HFlagEncountered) {
+        header_only = 1;
+    } else {
+        header_only = 0;
+    }
+
+    if (p->SFlagEncountered) {
+        // Parameter: p->firstImage
+        if (p->firstImage < 0) {
+            return kBadValueForFirstImage;
+        } else {
+            firstImage = (size_t)(p->firstImage + 0.5);
+        }
+    } else {
+        firstImage = 0;
+    }
+
+    if (p->CFlagEncountered) {
+        // Parameter: p->nImagesToRead
+        if (p->nImagesToRead < 0) {
+            nImagesToRead = (size_t)-1;
+        } else {
+            nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
+            if (nImagesToRead == 0)
+                return kBadMultipleImageCount;
+        }
+    } else {
+        nImagesToRead = (size_t)-1;
+    }
+
+    if (p->ZFlagEncountered) {
+        returnErrors = 0;
+    } else {
+        returnErrors = 1;
+    }
+
+    if (p->OFlagEncountered) {
+        overwrite = 1;
+    } else {
+        overwrite = 0;
+    }
+
+    int useIgorFunctionForProgress;
+    FUNCREF igorProgressReporterFunction;
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        dataFolderAndName = p->dest;
+    } else {
+        // not default destination was provided, use a default instead
+        dataFolderAndName.dfH = NULL;
+        strcpy(dataFolderAndName.name, "M_CCDFrames");
+    }
+
+    // Main parameters.
     int useDialog = 0;
-	char filePathFromDialog[MAX_PATH_LEN + 1];
+    char filePathFromDialog[MAX_PATH_LEN + 1];
     strcpy(filePathFromDialog, "");
-	if (p->filePathEncountered) {
-		if (p->filePathParamsSet[0]) {
+    if (p->filePathEncountered) {
+        if (p->filePathParamsSet[0]) {
             // Parameter: p->filePath (test for NULL handle before using)
             if (p->filePath == NULL) {
                 useDialog = 1;
@@ -1114,7 +1114,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     } else {
         useDialog = 1;
     }
-        
+
     if (useDialog != 0) {
         // if the user did not provide a filepath
         // then show a dialog asking for one
@@ -1128,20 +1128,22 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
             // user canceled the dialog
             return 0;
         }
+        if (err != 0)
+            return err;
     }
-	
-	try {
-		boost::shared_ptr<ProgressReporter> progressReporter;
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
+
+    try {
+        boost::shared_ptr<ProgressReporter> progressReporter;
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
         // get the filepath string in different ways depending on how
         // the user provided it
         if (p->filePath == NULL) {
@@ -1149,41 +1151,47 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         } else {
             data_file_path = ConvertHandleToString(p->filePath);
         }
-		image_loader = GetImageLoader(camera_type, data_file_path);
-		
-		if (header_only == 0) {
-			err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
-		} else {
-			err = parse_ccd_headers(image_loader.get());
-		}
-		
-	}
-	catch (std::bad_alloc) {
-		err = NOMEM;
-	}
-	catch (int e) {
-		err = e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		err = PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		err = WM_UNKNOWN_ERROR;
-	}
-	
-	SetOperationNumVar("V_flag", err);
-	
-	if ((err != 0) && (returnErrors != 0)) {
-		return err;
-	} else {
-		return 0;
-	}
+        
+        // also return the chosen filepath to Igor
+        err = SetOperationStrVar("S_filePath", data_file_path.c_str());
+        if (err != 0)
+            return err;
+        
+        image_loader = GetImageLoader(camera_type, data_file_path);
+
+        if (header_only == 0) {
+            err = load_partial_ccd_image(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
+        } else {
+            err = parse_ccd_headers(image_loader.get());
+        }
+
+    }
+    catch (std::bad_alloc) {
+        err = NOMEM;
+    }
+    catch (int e) {
+        err = e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        err = PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        err = WM_UNKNOWN_ERROR;
+    }
+
+    SetOperationNumVar("V_flag", err);
+
+    if ((err != 0) && (returnErrors != 0)) {
+        return err;
+    } else {
+        return 0;
+    }
 }
 
 
@@ -2486,7 +2494,7 @@ static int RegisterReadCCDImages(void) {
 	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
 	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
 	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
-	runtimeStrVarList = "";
+	runtimeStrVarList = "S_filePath;";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
 }
 
