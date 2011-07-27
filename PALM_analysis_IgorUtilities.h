@@ -41,26 +41,26 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 
 // Routines that return information on CCD files and image frames to Igor
 int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination, 
-						   boost::shared_ptr<ProgressReporter> progressReporter);
+                        boost::shared_ptr<ProgressReporter> progressReporter);
 
 int ParseCCDHeaders(ImageLoader *image_loader);
 
 // Routines that process CCD files and return data to Igor
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-										  long startX, long startY, long endX, long endY, 
-										  boost::shared_ptr<ProgressReporter> progressReporter);
+                                          long startX, long startY, long endX, long endY,
+                                          boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-										   long startX, long startY, long endX, long endY, 
-										   boost::shared_ptr<ProgressReporter> progressReporter);
+                                           long startX, long startY, long endX, long endY,
+                                           boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-								 long startX, long startY, long endX, long endY,
-								 boost::shared_ptr<ProgressReporter> progressReporter);
+                                 long startX, long startY, long endX, long endY,
+                                 boost::shared_ptr<ProgressReporter> progressReporter);
 
 waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-								long startX, long startY, long endX, long endY,
-								boost::shared_ptr<ProgressReporter> progressReporter);
+                                long startX, long startY, long endX, long endY,
+                                boost::shared_ptr<ProgressReporter> progressReporter);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);

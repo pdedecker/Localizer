@@ -11,8 +11,8 @@
 
 #pragma pack(2)
 struct LocalizerProgStruct {
-	uint32_t version;
-	FUNCREF funcRef;
+    uint32_t version;
+    FUNCREF funcRef;
 };
 typedef struct LocalizerProgStruct LocalizerProgStruct;
 typedef struct LocalizerProgStruct* LocalizerProgStructPtr;
@@ -23,99 +23,99 @@ typedef struct LocalizerProgStruct* LocalizerProgStructPtr;
 // Runtime param structure for LocalizationAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct LocalizationAnalysisRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double method;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /D flag group.
-	int DFlagEncountered;
-	double thresholding_method;
-	int DFlagParamsSet[1];
-	
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double camera_type;
-	int YFlagParamsSet[1];
-	
-	// Parameters for /G flag group.
-	int GFlagEncountered;
-	double preprocessing;
-	double postprocessing;
-	int GFlagParamsSet[2];
-	
-	// Parameters for /F flag group.
-	int FFlagEncountered;
-	double particle_finder;
-	int FFlagParamsSet[1];
-	
-	// Parameters for /PVER flag group.
-	int PVERFlagEncountered;
-	double particleVerifiers[100];			// Optional parameter.
-	int PVERFlagParamsSet[100];
-	
-	// Parameters for /T flag group.
-	int TFlagEncountered;
-	double treshold_parameter;
-	int TFlagParamsSet[1];
-	
-	// Parameters for /PFA flag group.
-	int PFAFlagEncountered;
-	double PFA;
-	int PFAFlagParamsSet[1];
-	
-	// Parameters for /R flag group.
-	int RFlagEncountered;
-	double radius;
-	int RFlagParamsSet[1];
-	
-	// Parameters for /W flag group.
-	int WFlagEncountered;
-	double initial_width;
-	int WFlagParamsSet[1];
-	
-	// Parameters for /S flag group.
-	int SFlagEncountered;
-	double sigma;
-	int SFlagParamsSet[1];
-	
-	// Parameters for /RNG flag group.
-	int RNGFlagEncountered;
-	double firstFrame;
-	double lastFrame;
-	int RNGFlagParamsSet[2];
-	
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
-	
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
-	
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Parameters for /Z flag group.
-	int ZFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int experiment_fileEncountered;
-	Handle experiment_file;
-	int experiment_fileParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double method;
+    int MFlagParamsSet[1];
+
+    // Parameters for /D flag group.
+    int DFlagEncountered;
+    double thresholding_method;
+    int DFlagParamsSet[1];
+
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double camera_type;
+    int YFlagParamsSet[1];
+
+    // Parameters for /G flag group.
+    int GFlagEncountered;
+    double preprocessing;
+    double postprocessing;
+    int GFlagParamsSet[2];
+
+    // Parameters for /F flag group.
+    int FFlagEncountered;
+    double particle_finder;
+    int FFlagParamsSet[1];
+
+    // Parameters for /PVER flag group.
+    int PVERFlagEncountered;
+    double particleVerifiers[100];			// Optional parameter.
+    int PVERFlagParamsSet[100];
+
+    // Parameters for /T flag group.
+    int TFlagEncountered;
+    double treshold_parameter;
+    int TFlagParamsSet[1];
+
+    // Parameters for /PFA flag group.
+    int PFAFlagEncountered;
+    double PFA;
+    int PFAFlagParamsSet[1];
+
+    // Parameters for /R flag group.
+    int RFlagEncountered;
+    double radius;
+    int RFlagParamsSet[1];
+
+    // Parameters for /W flag group.
+    int WFlagEncountered;
+    double initial_width;
+    int WFlagParamsSet[1];
+
+    // Parameters for /S flag group.
+    int SFlagEncountered;
+    double sigma;
+    int SFlagParamsSet[1];
+
+    // Parameters for /RNG flag group.
+    int RNGFlagEncountered;
+    double firstFrame;
+    double lastFrame;
+    int RNGFlagParamsSet[2];
+
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
+
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
+
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Parameters for /Z flag group.
+    int ZFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int experiment_fileEncountered;
+    Handle experiment_file;
+    int experiment_fileParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationAnalysisRuntimeParams LocalizationAnalysisRuntimeParams;
 typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimeParamsPtr;
@@ -124,60 +124,60 @@ typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimePar
 // Runtime param structure for ReadCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ReadCCDImagesRuntimeParams {
-	// Flag parameters.
+    // Flag parameters.
     
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double camera_type;
-	int YFlagParamsSet[1];
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double camera_type;
+    int YFlagParamsSet[1];
     
-	// Parameters for /H flag group.
-	int HFlagEncountered;
-	// There are no fields for this group because it has no parameters.
+    // Parameters for /H flag group.
+    int HFlagEncountered;
+    // There are no fields for this group because it has no parameters.
     
-	// Parameters for /S flag group.
-	int SFlagEncountered;
-	double firstImage;
-	int SFlagParamsSet[1];
+    // Parameters for /S flag group.
+    int SFlagEncountered;
+    double firstImage;
+    int SFlagParamsSet[1];
     
-	// Parameters for /C flag group.
-	int CFlagEncountered;
-	double nImagesToRead;
-	int CFlagParamsSet[1];
+    // Parameters for /C flag group.
+    int CFlagEncountered;
+    double nImagesToRead;
+    int CFlagParamsSet[1];
     
-	// Parameters for /Z flag group.
-	int ZFlagEncountered;
-	// There are no fields for this group because it has no parameters.
+    // Parameters for /Z flag group.
+    int ZFlagEncountered;
+    // There are no fields for this group because it has no parameters.
     
-	// Parameters for /O flag group.
-	int OFlagEncountered;
-	// There are no fields for this group because it has no parameters.
+    // Parameters for /O flag group.
+    int OFlagEncountered;
+    // There are no fields for this group because it has no parameters.
     
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
     
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
     
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
     
-	// Main parameters.
+    // Main parameters.
     
-	// Parameters for simple main group #0.
-	int filePathEncountered;
-	Handle filePath;						// Optional parameter.
-	int filePathParamsSet[1];
+    // Parameters for simple main group #0.
+    int filePathEncountered;
+    Handle filePath;						// Optional parameter.
+    int filePathParamsSet[1];
     
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
@@ -186,71 +186,71 @@ typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
 // Runtime param structure for ProcessCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ProcessCCDImagesRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double camera_type;
-	int YFlagParamsSet[1];
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double method;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /CAL flag group.
-	int CALFlagEncountered;
-	double offset;
-	double multiplicationFactor;
-	int CALFlagParamsSet[2];
-	
-	// Parameters for /ROI flag group.
-	int ROIFlagEncountered;
-	double startX;
-	double endX;
-	double startY;
-	double endY;
-	int ROIFlagParamsSet[4];
-	
-	// Parameters for /AVG flag group.
-	int AVGFlagEncountered;
-	double framesAveraging;
-	int AVGFlagParamsSet[1];
-	
-	// Parameters for /OUT flag group.
-	int OUTFlagEncountered;
-	double outputType;
-	int OUTFlagParamsSet[1];
-	
-	// Parameters for /O flag group.
-	int OFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
-	
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int input_fileEncountered;
-	Handle input_file;
-	int input_fileParamsSet[1];
-	
-	// Parameters for simple main group #1.
-	int output_fileEncountered;
-	Handle output_file;
-	int output_fileParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double camera_type;
+    int YFlagParamsSet[1];
+
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double method;
+    int MFlagParamsSet[1];
+
+    // Parameters for /CAL flag group.
+    int CALFlagEncountered;
+    double offset;
+    double multiplicationFactor;
+    int CALFlagParamsSet[2];
+
+    // Parameters for /ROI flag group.
+    int ROIFlagEncountered;
+    double startX;
+    double endX;
+    double startY;
+    double endY;
+    int ROIFlagParamsSet[4];
+
+    // Parameters for /AVG flag group.
+    int AVGFlagEncountered;
+    double framesAveraging;
+    int AVGFlagParamsSet[1];
+
+    // Parameters for /OUT flag group.
+    int OUTFlagEncountered;
+    double outputType;
+    int OUTFlagParamsSet[1];
+
+    // Parameters for /O flag group.
+    int OFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
+
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int input_fileEncountered;
+    Handle input_file;
+    int input_fileParamsSet[1];
+
+    // Parameters for simple main group #1.
+    int output_fileEncountered;
+    Handle output_file;
+    int output_fileParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct ProcessCCDImagesRuntimeParams ProcessCCDImagesRuntimeParams;
 typedef struct ProcessCCDImagesRuntimeParams* ProcessCCDImagesRuntimeParamsPtr;
@@ -259,51 +259,51 @@ typedef struct ProcessCCDImagesRuntimeParams* ProcessCCDImagesRuntimeParamsPtr;
 // Runtime param structure for AnalyzeCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct AnalyzeCCDImagesRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double camera_type;
-	int YFlagParamsSet[1];
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double method;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /ROI flag group.
-	int ROIFlagEncountered;
-	double startX;
-	double endX;
-	double startY;
-	double endY;
-	int ROIFlagParamsSet[4];
-	
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
-	
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int input_fileEncountered;
-	Handle input_file;
-	int input_fileParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double camera_type;
+    int YFlagParamsSet[1];
+
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double method;
+    int MFlagParamsSet[1];
+
+    // Parameters for /ROI flag group.
+    int ROIFlagEncountered;
+    double startX;
+    double endX;
+    double startY;
+    double endY;
+    int ROIFlagParamsSet[4];
+
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
+
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int input_fileEncountered;
+    Handle input_file;
+    int input_fileParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct AnalyzeCCDImagesRuntimeParams AnalyzeCCDImagesRuntimeParams;
 typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
@@ -312,65 +312,65 @@ typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
 // Runtime param structure for EmitterSegmentation operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct EmitterSegmentationRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double method;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /ABS flag group.
-	int ABSFlagEncountered;
-	double absoluteThreshold;
-	int ABSFlagParamsSet[1];
-	
-	// Parameters for /PFA flag group.
-	int PFAFlagEncountered;
-	double PFA;
-	int PFAFlagParamsSet[1];
-	
-	// Parameters for /WDTH flag group.
-	int WDTHFlagEncountered;
-	double PSFWidth;
-	int WDTHFlagParamsSet[1];
-	
-	// Parameters for /G flag group.
-	int GFlagEncountered;
-	double preprocessing;
-	double postprocessing;
-	int GFlagParamsSet[2];
-	
-	// Parameters for /F flag group.
-	int FFlagEncountered;
-	double particle_finder;
-	int FFlagParamsSet[1];
-	
-	// Parameters for /PVER flag group.
-	int PVERFlagEncountered;
-	double particleVerifiers[100];			// Optional parameter.
-	int PVERFlagParamsSet[100];
-	
-	// Parameters for /R flag group.
-	int RFlagEncountered;
-	double radiusBetweenParticles;
-	int RFlagParamsSet[1];
-	
-	// Parameters for /S flag group.
-	int SFlagEncountered;
-	double output_located_particles;
-	int SFlagParamsSet[1];
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int CCD_FrameEncountered;
-	waveHndl CCD_Frame;
-	int CCD_FrameParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double method;
+    int MFlagParamsSet[1];
+
+    // Parameters for /ABS flag group.
+    int ABSFlagEncountered;
+    double absoluteThreshold;
+    int ABSFlagParamsSet[1];
+
+    // Parameters for /PFA flag group.
+    int PFAFlagEncountered;
+    double PFA;
+    int PFAFlagParamsSet[1];
+
+    // Parameters for /WDTH flag group.
+    int WDTHFlagEncountered;
+    double PSFWidth;
+    int WDTHFlagParamsSet[1];
+
+    // Parameters for /G flag group.
+    int GFlagEncountered;
+    double preprocessing;
+    double postprocessing;
+    int GFlagParamsSet[2];
+
+    // Parameters for /F flag group.
+    int FFlagEncountered;
+    double particle_finder;
+    int FFlagParamsSet[1];
+
+    // Parameters for /PVER flag group.
+    int PVERFlagEncountered;
+    double particleVerifiers[100];			// Optional parameter.
+    int PVERFlagParamsSet[100];
+
+    // Parameters for /R flag group.
+    int RFlagEncountered;
+    double radiusBetweenParticles;
+    int RFlagParamsSet[1];
+
+    // Parameters for /S flag group.
+    int SFlagEncountered;
+    double output_located_particles;
+    int SFlagParamsSet[1];
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int CCD_FrameEncountered;
+    waveHndl CCD_Frame;
+    int CCD_FrameParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct EmitterSegmentationRuntimeParams EmitterSegmentationRuntimeParams;
 typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParamsPtr;
@@ -379,32 +379,32 @@ typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParam
 // Runtime param structure for ConvolveImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ConvolveImagesRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
-	
-	// Parameters for /O flag group.
-	int OFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int firstImageEncountered;
-	waveHndl firstImage;
-	int firstImageParamsSet[1];
-	
-	// Parameters for simple main group #1.
-	int secondImageEncountered;
-	waveHndl secondImage;
-	int secondImageParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    // Flag parameters.
+
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
+
+    // Parameters for /O flag group.
+    int OFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int firstImageEncountered;
+    waveHndl firstImage;
+    int firstImageParamsSet[1];
+
+    // Parameters for simple main group #1.
+    int secondImageEncountered;
+    waveHndl secondImage;
+    int secondImageParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct ConvolveImagesRuntimeParams ConvolveImagesRuntimeParams;
 typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
@@ -413,65 +413,65 @@ typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
 // Runtime param structure for LocalizationBitmap operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct LocalizationBitmapRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double deviationMethod;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /S flag group.
-	int SFlagEncountered;
-	double scaleFactor;
-	int SFlagParamsSet[1];
-	
-	// Parameters for /L flag group.
-	int LFlagEncountered;
-	double upperLimit;
-	int LFlagParamsSet[1];
-	
-	// Parameters for /W flag group.
-	int WFlagEncountered;
-	double CCDXSize;
-	double CCDYSize;
-	double outputImageScaleFactor;
-	int WFlagParamsSet[3];
-	
-	// Parameters for /WGHT flag group.
-	int WGHTFlagEncountered;
-	double emitterWeighing;
-	int WGHTFlagParamsSet[1];
-	
-	// Parameters for /MULT flag group.
-	int MULTFlagEncountered;
-	double cameraMultiplicationFactor;
-	int MULTFlagParamsSet[1];
-	
-	// Parameters for /WDTH flag group.
-	int WDTHFlagEncountered;
-	double PSFWidth;
-	int WDTHFlagParamsSet[1];
-	
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
-	
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int positionsWaveEncountered;
-	waveHndl positionsWave;
-	int positionsWaveParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double deviationMethod;
+    int MFlagParamsSet[1];
+
+    // Parameters for /S flag group.
+    int SFlagEncountered;
+    double scaleFactor;
+    int SFlagParamsSet[1];
+
+    // Parameters for /L flag group.
+    int LFlagEncountered;
+    double upperLimit;
+    int LFlagParamsSet[1];
+
+    // Parameters for /W flag group.
+    int WFlagEncountered;
+    double CCDXSize;
+    double CCDYSize;
+    double outputImageScaleFactor;
+    int WFlagParamsSet[3];
+
+    // Parameters for /WGHT flag group.
+    int WGHTFlagEncountered;
+    double emitterWeighing;
+    int WGHTFlagParamsSet[1];
+
+    // Parameters for /MULT flag group.
+    int MULTFlagEncountered;
+    double cameraMultiplicationFactor;
+    int MULTFlagParamsSet[1];
+
+    // Parameters for /WDTH flag group.
+    int WDTHFlagEncountered;
+    double PSFWidth;
+    int WDTHFlagParamsSet[1];
+
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
+
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int positionsWaveEncountered;
+    waveHndl positionsWave;
+    int positionsWaveParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationBitmapRuntimeParams LocalizationBitmapRuntimeParams;
 typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsPtr;
@@ -480,32 +480,32 @@ typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsP
 // Runtime param structure for RipleyLFunctionClustering operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct RipleyLFunctionClusteringRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /RNGE flag group.
-	int RNGEFlagEncountered;
-	double calculationRange;
-	double nBins;
-	int RNGEFlagParamsSet[2];
-	
-	// Parameters for /REGN flag group.
-	int REGNFlagEncountered;
-	double lowerX;
-	double upperX;
-	double lowerY;
-	double upperY;
-	int REGNFlagParamsSet[4];
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int positionsWaveEncountered;
-	waveHndl positionsWave;
-	int positionsWaveParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    // Flag parameters.
+
+    // Parameters for /RNGE flag group.
+    int RNGEFlagEncountered;
+    double calculationRange;
+    double nBins;
+    int RNGEFlagParamsSet[2];
+
+    // Parameters for /REGN flag group.
+    int REGNFlagEncountered;
+    double lowerX;
+    double upperX;
+    double lowerY;
+    double upperY;
+    int REGNFlagParamsSet[4];
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int positionsWaveEncountered;
+    waveHndl positionsWave;
+    int positionsWaveParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct RipleyLFunctionClusteringRuntimeParams RipleyLFunctionClusteringRuntimeParams;
 typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClusteringRuntimeParamsPtr;
@@ -514,77 +514,77 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 // Runtime param structure for SOFIAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct SOFIAnalysisRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double cameraType;
-	int YFlagParamsSet[1];
-	
-	// Parameters for /WDTH flag group.
-	int WDTHFlagEncountered;
-	double psfWidth;
-	int WDTHFlagParamsSet[1];
-	
-	// Parameters for /ORDR flag group.
-	int ORDRFlagEncountered;
-	double order;
-	int ORDRFlagParamsSet[1];
-	
-	// Parameters for /LAG flag group.
-	int LAGFlagEncountered;
-	double lagTime;
-	int LAGFlagParamsSet[1];
-	
-	// Parameters for /XC flag group.
-	int XCFlagEncountered;
-	double doCrossCorrelation;
-	int XCFlagParamsSet[1];
-	
-	// Parameters for /GRP flag group.
-	int GRPFlagEncountered;
-	double nFramesToGroup;
-	int GRPFlagParamsSet[1];
-	
-	// Parameters for /SKIP flag group.
-	int SKIPFlagEncountered;
-	double framesToSkip;
-	int SKIPFlagParamsSet[1];
-	
-	// Parameters for /MAX flag group.
-	int MAXFlagEncountered;
-	double maxPixelVal;
-	int MAXFlagParamsSet[1];
-	
-	// Parameters for /NSAT flag group.
-	int NSATFlagEncountered;
-	double noSaturatedPixels;				// Optional parameter.
-	int NSATFlagParamsSet[1];
-	
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
-	
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
-	
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int inputFilePathEncountered;
-	Handle inputFilePath;
-	int inputFilePathParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    // Flag parameters.
+
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double cameraType;
+    int YFlagParamsSet[1];
+
+    // Parameters for /WDTH flag group.
+    int WDTHFlagEncountered;
+    double psfWidth;
+    int WDTHFlagParamsSet[1];
+
+    // Parameters for /ORDR flag group.
+    int ORDRFlagEncountered;
+    double order;
+    int ORDRFlagParamsSet[1];
+
+    // Parameters for /LAG flag group.
+    int LAGFlagEncountered;
+    double lagTime;
+    int LAGFlagParamsSet[1];
+
+    // Parameters for /XC flag group.
+    int XCFlagEncountered;
+    double doCrossCorrelation;
+    int XCFlagParamsSet[1];
+
+    // Parameters for /GRP flag group.
+    int GRPFlagEncountered;
+    double nFramesToGroup;
+    int GRPFlagParamsSet[1];
+
+    // Parameters for /SKIP flag group.
+    int SKIPFlagEncountered;
+    double framesToSkip;
+    int SKIPFlagParamsSet[1];
+
+    // Parameters for /MAX flag group.
+    int MAXFlagEncountered;
+    double maxPixelVal;
+    int MAXFlagParamsSet[1];
+
+    // Parameters for /NSAT flag group.
+    int NSATFlagEncountered;
+    double noSaturatedPixels;				// Optional parameter.
+    int NSATFlagParamsSet[1];
+
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
+
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
+
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
+
+    // Main parameters.
+
+    // Parameters for simple main group #0.
+    int inputFilePathEncountered;
+    Handle inputFilePath;
+    int inputFilePathParamsSet[1];
+
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
 typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
@@ -592,412 +592,412 @@ typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
 
 
 static int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
-	DataFolderAndName outputWaveParams;
-	int useIgorFunctionForProgress = 0;
-	FUNCREF igorProgressReporterFunction;
-	std::string data_file_path;
-	size_t camera_type;
-	int method;
-	int particle_finding_method;
-	size_t firstFrameToAnalyze, lastFrameToAnalyze;
-	int returnErrors = 1;
-	
-	std::ostringstream analysisOptionsStream;	// a stringstream that is built up during the options parsing
-	// and contains the settings that are used
-	// it can be used to add metadata to the fitted positions
-	// such as wave notes or file headers
-	// the information is added in semicolon-separated key:value pairs
-	
-	size_t preprocessing_method;
-	size_t thresholding_method;
-	size_t postprocessing_method;
-	std::vector<size_t> particleVerifierMethods;
-	
-	boost::shared_ptr<ImageLoader> image_loader;
-	boost::shared_ptr<FitPositions> positions_fitter;
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
-	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
-	boost::shared_ptr<ParticleFinder> particle_finder;
-	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-	boost::shared_ptr<PALMAnalysisController> analysisController;
-	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
-	boost::shared_ptr<ProgressReporter> progressReporter;
-	
-	// Flag parameters.
-	
-	if (p->MFlagEncountered) {
-		// Parameter: p->method
-		
-		// 0 means Gaussian fitting
-		// 1 means multiplication method (Thompson, Biophys J 2002)
-		method = (int)(p->method + 0.5);
-		analysisOptionsStream << "LOCALIZATION METHOD:" << method << ';';
-	} else {
-		method = LOCALIZATION_METHOD_2DGAUSS;
-	}
-	
-	if (p->DFlagEncountered) {
-		// Parameter: p->thresholding_method
-		thresholding_method = (int)(p->thresholding_method + 0.5);
-		analysisOptionsStream << "THRESHOLD METHOD:" << thresholding_method << ';';
-	} else {
-		thresholding_method = THRESHOLD_METHOD_GLRT;
-	}
-	
-	if (p->YFlagEncountered) {
-		// Parameter: p->camera_type
-		if (p->camera_type < 0) {
-			camera_type = (size_t)-1;
-		} else {
-			camera_type = (size_t)(p->camera_type + 0.5);
-		}
-	} else {
-		camera_type = (size_t)-1;
-	}
-	
-	if (p->GFlagEncountered) {
-		// Parameter: p->preprocessing
-		// Parameter: p->postprocessing
-		preprocessing_method = (size_t)(p->preprocessing + 0.5);
-		postprocessing_method = (size_t)(p->postprocessing + 0.5);
-	} else {
-		// if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
-		preprocessing_method = 0;
-		postprocessing_method = 0;
-	}
-	
-	analysisOptionsStream << "PREPROCESSING:" << preprocessing_method << ';';
-	analysisOptionsStream << "POSTPROCESSING:" << postprocessing_method << ';';
-	
-	if (p->FFlagEncountered) {
-		// Parameter: p->particle_finder
-		particle_finding_method = (int)(p->particle_finder + 0.5);
-		analysisOptionsStream << "PARTICLE FINDING METHOD:" << particle_finding_method << ';';
-	} else {
-		particle_finding_method = PARTICLEFINDER_ADJACENT8;
-	}
-	
-	if (p->PVERFlagEncountered) {
-		int* paramsSet = &p->PVERFlagParamsSet[0];
-		size_t particleVerifierMethod;
-		
-		for (int i=0; i<100; i++) {
-			if (paramsSet[i] == 0)
-				break;		// No more parameters.
-			
-			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
-			
-			if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
-				// there's no need to fit the same positions with the same algorithm twice, drop this verification
-				continue;
-			} else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
-				continue;
-			}
-			
-			particleVerifierMethods.push_back(particleVerifierMethod);
-		}
-	} else {
-		particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
-	}
-	
-	if (p->TFlagEncountered) {
-		// Parameter: p->treshold_parameter
-		directThreshold = p->treshold_parameter;
-		if (thresholding_method == THRESHOLD_METHOD_DIRECT)
-			analysisOptionsStream << "ABSOLUTE THRESHOLD:" << directThreshold << ';';	
-	} else if (thresholding_method == THRESHOLD_METHOD_DIRECT)
-		return TOO_FEW_PARAMETERS;
-	
-	if (p->PFAFlagEncountered) {
-		// Parameter: p->PFA
-		PFA = p->PFA;
-		if (thresholding_method == THRESHOLD_METHOD_GLRT)
-			analysisOptionsStream << "PFA:" << PFA << ';';
-	} else if (thresholding_method == THRESHOLD_METHOD_GLRT)
-		PFA = 30;
-	
-	
-	if (p->RFlagEncountered) {
-		// Parameter: p->radius
-		radiusBetweenParticles = p->radius;
-		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
-			analysisOptionsStream << "MINIMUM DISTANCE BETWEEN PARTICLES:" << particle_finding_method << ';';
-		}
-	} else {
-		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
-			return TOO_FEW_PARAMETERS;
-		}
-	}
-	
-	if (p->WFlagEncountered) {
-		// Parameter: p->initial_width
-		initial_width = p->initial_width;
-	} else {
-		initial_width = 2;
-	}
-	
-	if (method != LOCALIZATION_METHOD_CENTROID)
-		analysisOptionsStream << "PSF WIDTH:" << initial_width << ';';
-	
-	if (p->SFlagEncountered) {
-		// Parameter: p->sigma
-		sigma = p->sigma;
-	} else {
-		sigma = 1;
-	}
-	
-	if (p->RNGFlagEncountered) {
-		// Parameter: p->firstFrame
-		// Parameter: p->lastFrame
-		if (p->firstFrame < 0) {
-			firstFrameToAnalyze = (size_t)-1;
-		} else {
-			firstFrameToAnalyze = (size_t)(p->firstFrame + 0.5);
-		}
-		if (p->lastFrame < 0) {
-			lastFrameToAnalyze = (size_t)-1;
-		} else {
-			lastFrameToAnalyze = (size_t)(p->lastFrame + 0.5);
-		}
-	} else {
-		firstFrameToAnalyze = (size_t)-1;
-		lastFrameToAnalyze = (size_t)-1;
-	}
-	
-	analysisOptionsStream << "FIRST FRAME ANALYZED:" << firstFrameToAnalyze << ';';
-	analysisOptionsStream << "LAST FRAME ANALYZED:" << lastFrameToAnalyze << ';';
-	
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	if (p->DESTFlagEncountered) {
-		// Parameter: p->dest
-		outputWaveParams = p->dest;
-	} else {
-		outputWaveParams.dfH = NULL;
-		strcpy(outputWaveParams.name, "POS_out");
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	if (p->ZFlagEncountered) {
-		returnErrors = 0;
-	} else {
-		returnErrors = 1;
-	}
-	
-	// Main parameters.
-	
-	try {
-		
-		if (p->experiment_fileEncountered) {
-			// Parameter: p->experiment_file (test for NULL handle before using)
-			if (p->experiment_file == NULL) {
-				return EXPECTED_STRING_EXPR;
-			}
-			
-			data_file_path = ConvertHandleToString(p->experiment_file);
-			
-			image_loader = GetImageLoader(camera_type, data_file_path);
-			
-			analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
-			analysisOptionsStream << "CAMERA TYPE:" << camera_type << ';';
-			analysisOptionsStream << "X SIZE:" << image_loader->getXSize() << ';';
-			analysisOptionsStream << "Y SIZE:" << image_loader->getYSize() << ';';
-			
-		} else {	// file path parameter was not supplied from igor
-			return EXPECTED_STRING_EXPR;
-		}
-		
-		// which preprocessing do we wish to do?
-		switch(preprocessing_method) {
-			case PREPROCESSOR_NONE:	// no preprocessing
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
-				break;
-			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
-				break;
-			case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
-				break;
-			case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
-				break;
-			case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
-				break;
-			case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
-				break;
-			case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation preprocessing method");
-				break;
-		}
-		
-		
-		// choose which thresholding we want to do
-		switch(thresholding_method) {
-			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
-				break;
-			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
-				break;
-			case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
-				break;
-			case THRESHOLD_METHOD_DIRECT:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation method");
-				break;
-		}
-		
-		// which postprocessing do we wish to do?
-		switch(postprocessing_method) {
-			case POSTPROCESSOR_NONE:	// no postprocessing
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
-				break;
-			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation postprocessing method");
-				break;
-		}
-		
-		// which particle finding method do we wish to use?
-		switch (particle_finding_method) {
-			case PARTICLEFINDER_ADJACENT4:
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
-				break;
-			case PARTICLEFINDER_ADJACENT8:
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
-				break;
-			case PARTICLEFINDER_RADIUS:	// traditional radius approach
-				particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
-				break;
-			default:
-				throw std::runtime_error("Unknown particle finding method");
-				break;
-		}
-		
-		// what particle verification do we wish to use?
-		// several particle verifiers can be used
-		for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
-			switch (*it) {
-				case PARTICLEVERIFIER_NONE:
-					// no particle verification requested for this entry, do nothing
-					break;
-				case PARTICLEVERIFIER_SYMMETRICGAUSS:
-					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
-					break;
-				case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
-					break;
-				case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
-					particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
-					break;
-				default:
-					throw std::runtime_error("Unknown particle verifying method");
-					break;
-			}
-		}
-		
-		// which localization method do we wish to use?
-		if (p->MFlagEncountered) {
-			switch (method) {
-				case LOCALIZATION_METHOD_2DGAUSS:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
-					break;
-				case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
-					break;
-				case LOCALIZATION_METHOD_MULTIPLICATION:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
-					break;
-				case LOCALIZATION_METHOD_CENTROID:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
-					break;
-				case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
-					break;
-				case LOCALIZATION_METHOD_MLEwG:
-					positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
-					break;
-				default:
-					throw std::runtime_error("Unknown localization method");
-					break;
-			}
-			
-		} else {
-			positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
-		}
-		
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
-		analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor, 
-																								   postprocessor, particle_finder, particleVerifiers,
-																								   positions_fitter,
-																								   progressReporter, firstFrameToAnalyze,
-																								   lastFrameToAnalyze));
-		
-		localizedPositions = analysisController->DoPALMAnalysis(image_loader);
-		localizedPositions->writePositionsToWave(outputWaveParams, analysisOptionsStream.str());
-	}
-	catch (std::bad_alloc) {
-		err = NOMEM;
-	}
-	catch (int e) {
-		err = e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		err = PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		err = WM_UNKNOWN_ERROR;
-	}
-	
-	SetOperationNumVar("V_flag", err);
-	
-	if ((err != 0) && (returnErrors != 0)) {
-		return err;
-	} else {
-		return 0;
-	}
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
+    DataFolderAndName outputWaveParams;
+    int useIgorFunctionForProgress = 0;
+    FUNCREF igorProgressReporterFunction;
+    std::string data_file_path;
+    size_t camera_type;
+    int method;
+    int particle_finding_method;
+    size_t firstFrameToAnalyze, lastFrameToAnalyze;
+    int returnErrors = 1;
+
+    std::ostringstream analysisOptionsStream;	// a stringstream that is built up during the options parsing
+    // and contains the settings that are used
+    // it can be used to add metadata to the fitted positions
+    // such as wave notes or file headers
+    // the information is added in semicolon-separated key:value pairs
+
+    size_t preprocessing_method;
+    size_t thresholding_method;
+    size_t postprocessing_method;
+    std::vector<size_t> particleVerifierMethods;
+
+    boost::shared_ptr<ImageLoader> image_loader;
+    boost::shared_ptr<FitPositions> positions_fitter;
+    boost::shared_ptr<ThresholdImage> thresholder;
+    boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
+    boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
+    boost::shared_ptr<ParticleFinder> particle_finder;
+    std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+    boost::shared_ptr<PALMAnalysisController> analysisController;
+    boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
+    boost::shared_ptr<ProgressReporter> progressReporter;
+
+    // Flag parameters.
+
+    if (p->MFlagEncountered) {
+        // Parameter: p->method
+
+        // 0 means Gaussian fitting
+        // 1 means multiplication method (Thompson, Biophys J 2002)
+        method = (int)(p->method + 0.5);
+        analysisOptionsStream << "LOCALIZATION METHOD:" << method << ';';
+    } else {
+        method = LOCALIZATION_METHOD_2DGAUSS;
+    }
+
+    if (p->DFlagEncountered) {
+        // Parameter: p->thresholding_method
+        thresholding_method = (int)(p->thresholding_method + 0.5);
+        analysisOptionsStream << "THRESHOLD METHOD:" << thresholding_method << ';';
+    } else {
+        thresholding_method = THRESHOLD_METHOD_GLRT;
+    }
+
+    if (p->YFlagEncountered) {
+        // Parameter: p->camera_type
+        if (p->camera_type < 0) {
+            camera_type = (size_t)-1;
+        } else {
+            camera_type = (size_t)(p->camera_type + 0.5);
+        }
+    } else {
+        camera_type = (size_t)-1;
+    }
+
+    if (p->GFlagEncountered) {
+        // Parameter: p->preprocessing
+        // Parameter: p->postprocessing
+        preprocessing_method = (size_t)(p->preprocessing + 0.5);
+        postprocessing_method = (size_t)(p->postprocessing + 0.5);
+    } else {
+        // if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
+        preprocessing_method = 0;
+        postprocessing_method = 0;
+    }
+
+    analysisOptionsStream << "PREPROCESSING:" << preprocessing_method << ';';
+    analysisOptionsStream << "POSTPROCESSING:" << postprocessing_method << ';';
+
+    if (p->FFlagEncountered) {
+        // Parameter: p->particle_finder
+        particle_finding_method = (int)(p->particle_finder + 0.5);
+        analysisOptionsStream << "PARTICLE FINDING METHOD:" << particle_finding_method << ';';
+    } else {
+        particle_finding_method = PARTICLEFINDER_ADJACENT8;
+    }
+
+    if (p->PVERFlagEncountered) {
+        int* paramsSet = &p->PVERFlagParamsSet[0];
+        size_t particleVerifierMethod;
+
+        for (int i=0; i<100; i++) {
+            if (paramsSet[i] == 0)
+                break;		// No more parameters.
+
+            particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+
+            if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
+                // there's no need to fit the same positions with the same algorithm twice, drop this verification
+                continue;
+            } else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
+                continue;
+            }
+
+            particleVerifierMethods.push_back(particleVerifierMethod);
+        }
+    } else {
+        particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
+    }
+
+    if (p->TFlagEncountered) {
+        // Parameter: p->treshold_parameter
+        directThreshold = p->treshold_parameter;
+        if (thresholding_method == THRESHOLD_METHOD_DIRECT)
+            analysisOptionsStream << "ABSOLUTE THRESHOLD:" << directThreshold << ';';
+    } else if (thresholding_method == THRESHOLD_METHOD_DIRECT)
+        return TOO_FEW_PARAMETERS;
+
+    if (p->PFAFlagEncountered) {
+        // Parameter: p->PFA
+        PFA = p->PFA;
+        if (thresholding_method == THRESHOLD_METHOD_GLRT)
+            analysisOptionsStream << "PFA:" << PFA << ';';
+    } else if (thresholding_method == THRESHOLD_METHOD_GLRT)
+        PFA = 30;
+
+
+    if (p->RFlagEncountered) {
+        // Parameter: p->radius
+        radiusBetweenParticles = p->radius;
+        if (particle_finding_method == PARTICLEFINDER_RADIUS) {
+            analysisOptionsStream << "MINIMUM DISTANCE BETWEEN PARTICLES:" << particle_finding_method << ';';
+        }
+    } else {
+        if (particle_finding_method == PARTICLEFINDER_RADIUS) {
+            return TOO_FEW_PARAMETERS;
+        }
+    }
+
+    if (p->WFlagEncountered) {
+        // Parameter: p->initial_width
+        initial_width = p->initial_width;
+    } else {
+        initial_width = 2;
+    }
+
+    if (method != LOCALIZATION_METHOD_CENTROID)
+        analysisOptionsStream << "PSF WIDTH:" << initial_width << ';';
+
+    if (p->SFlagEncountered) {
+        // Parameter: p->sigma
+        sigma = p->sigma;
+    } else {
+        sigma = 1;
+    }
+
+    if (p->RNGFlagEncountered) {
+        // Parameter: p->firstFrame
+        // Parameter: p->lastFrame
+        if (p->firstFrame < 0) {
+            firstFrameToAnalyze = (size_t)-1;
+        } else {
+            firstFrameToAnalyze = (size_t)(p->firstFrame + 0.5);
+        }
+        if (p->lastFrame < 0) {
+            lastFrameToAnalyze = (size_t)-1;
+        } else {
+            lastFrameToAnalyze = (size_t)(p->lastFrame + 0.5);
+        }
+    } else {
+        firstFrameToAnalyze = (size_t)-1;
+        lastFrameToAnalyze = (size_t)-1;
+    }
+
+    analysisOptionsStream << "FIRST FRAME ANALYZED:" << firstFrameToAnalyze << ';';
+    analysisOptionsStream << "LAST FRAME ANALYZED:" << lastFrameToAnalyze << ';';
+
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        outputWaveParams = p->dest;
+    } else {
+        outputWaveParams.dfH = NULL;
+        strcpy(outputWaveParams.name, "POS_out");
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    if (p->ZFlagEncountered) {
+        returnErrors = 0;
+    } else {
+        returnErrors = 1;
+    }
+
+    // Main parameters.
+
+    try {
+
+        if (p->experiment_fileEncountered) {
+            // Parameter: p->experiment_file (test for NULL handle before using)
+            if (p->experiment_file == NULL) {
+                return EXPECTED_STRING_EXPR;
+            }
+
+            data_file_path = ConvertHandleToString(p->experiment_file);
+
+            image_loader = GetImageLoader(camera_type, data_file_path);
+
+            analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
+            analysisOptionsStream << "CAMERA TYPE:" << camera_type << ';';
+            analysisOptionsStream << "X SIZE:" << image_loader->getXSize() << ';';
+            analysisOptionsStream << "Y SIZE:" << image_loader->getYSize() << ';';
+
+        } else {	// file path parameter was not supplied from igor
+            return EXPECTED_STRING_EXPR;
+        }
+
+        // which preprocessing do we wish to do?
+        switch(preprocessing_method) {
+        case PREPROCESSOR_NONE:	// no preprocessing
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
+            break;
+        case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
+            break;
+        case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
+            break;
+        case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
+            break;
+        case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
+            break;
+        case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
+            break;
+        case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation preprocessing method");
+            break;
+        }
+
+
+        // choose which thresholding we want to do
+        switch(thresholding_method) {
+        case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
+            break;
+        case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
+            break;
+        case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
+            break;
+        case THRESHOLD_METHOD_DIRECT:	// direct threshold
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation method");
+            break;
+        }
+
+        // which postprocessing do we wish to do?
+        switch(postprocessing_method) {
+        case POSTPROCESSOR_NONE:	// no postprocessing
+            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
+            break;
+        case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
+            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation postprocessing method");
+            break;
+        }
+
+        // which particle finding method do we wish to use?
+        switch (particle_finding_method) {
+        case PARTICLEFINDER_ADJACENT4:
+            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
+            break;
+        case PARTICLEFINDER_ADJACENT8:
+            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
+            break;
+        case PARTICLEFINDER_RADIUS:	// traditional radius approach
+            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
+            break;
+        default:
+            throw std::runtime_error("Unknown particle finding method");
+            break;
+        }
+
+        // what particle verification do we wish to use?
+        // several particle verifiers can be used
+        for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
+            switch (*it) {
+            case PARTICLEVERIFIER_NONE:
+                // no particle verification requested for this entry, do nothing
+                break;
+            case PARTICLEVERIFIER_SYMMETRICGAUSS:
+                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
+                break;
+            case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
+                break;
+            case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
+                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
+                break;
+            default:
+                throw std::runtime_error("Unknown particle verifying method");
+                break;
+            }
+        }
+
+        // which localization method do we wish to use?
+        if (p->MFlagEncountered) {
+            switch (method) {
+            case LOCALIZATION_METHOD_2DGAUSS:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_MULTIPLICATION:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_CENTROID:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
+                break;
+            case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_MLEwG:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
+                break;
+            default:
+                throw std::runtime_error("Unknown localization method");
+                break;
+            }
+
+        } else {
+            positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+        }
+
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
+        analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor,
+                                                                                                   postprocessor, particle_finder, particleVerifiers,
+                                                                                                   positions_fitter,
+                                                                                                   progressReporter, firstFrameToAnalyze,
+                                                                                                   lastFrameToAnalyze));
+
+        localizedPositions = analysisController->DoPALMAnalysis(image_loader);
+        localizedPositions->writePositionsToWave(outputWaveParams, analysisOptionsStream.str());
+    }
+    catch (std::bad_alloc) {
+        err = NOMEM;
+    }
+    catch (int e) {
+        err = e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        err = PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        err = WM_UNKNOWN_ERROR;
+    }
+
+    SetOperationNumVar("V_flag", err);
+
+    if ((err != 0) && (returnErrors != 0)) {
+        return err;
+    } else {
+        return 0;
+    }
 }
 
 
@@ -1196,1438 +1196,1438 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 
 
 static int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	size_t camera_type;
-	int method;
-	int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
-	int nFramesAveraging;
-	int outputType, compression;
-	size_t startX, endX, startY, endY;
-	double cameraOffset, cameraMultiplicationFactor;
-	int useIgorFunctionForProgress;
-	FUNCREF igorProgressReporterFunction;
-	
-	std::string input_file_path;
-	std::string output_file_path;
-	
-	boost::shared_ptr<ImageLoader> image_loader;
-	boost::shared_ptr<ImageOutputWriter> output_writer;
-	boost::shared_ptr<CCDImagesProcessor> ccd_image_processor;
-	
-	
-	// Flag parameters.
-	
-	if (p->YFlagEncountered) {
-		// Parameter: p->camera_type
-		if (p->camera_type < 0) {
-			camera_type = (size_t)-1;
-		} else {
-			camera_type = (size_t)(p->camera_type + 0.5);
-		}
-	} else {
-		camera_type = (size_t)-1;
-	}
-	
-	if (p->MFlagEncountered) {
-		// Parameter: p->method
-		if (p-> method < 0) {
-			return EXPECT_POS_NUM;
-		}
-		method = (int)(p->method + 0.5);
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->CALFlagEncountered) {
-		// Parameter: p->offset
-		// Parameter: p->multiplicationFactor
-		cameraOffset = p->offset;
-		cameraMultiplicationFactor = p->multiplicationFactor;
-		if (cameraMultiplicationFactor <= 0.0)
-			return EXPECT_POS_NUM;
-	} else if (method == PROCESSING_CONVERTTOPHOTONS) {
-		return EXPECT_POS_NUM;
-	}
-	
-	if (p->AVGFlagEncountered) {
-		// Parameter: p->framesAveraging
-		nFramesAveraging = (int)(p->framesAveraging + 0.5);
-		if (nFramesAveraging < 0)
-			nFramesAveraging = 0;
-		
-		if ((method == PROCESSING_AVERAGESUBTRACTION) && (nFramesAveraging != 0) && (nFramesAveraging % 2 == 0)) {
-			return ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES;
-		}
-	} else {
-		nFramesAveraging = 0;
-	}
-	
-	if (p->OUTFlagEncountered) {
-		// Parameter: p->outputType
-		outputType = (int)(p->outputType + 0.5);
-	} else {
-		outputType = IMAGE_OUTPUT_TYPE_TIFF;
-	}
-	
-	if (p->OFlagEncountered) {
-		overwrite = 1;
-	}
-	
-	if (p->ROIFlagEncountered) {
-		// Parameter: p->startX
-		// Parameter: p->endX
-		// Parameter: p->startY
-		// Parameter: p->endY
-		
-		// check that they are all positive
-		if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
-			return EXPECT_POS_NUM;
-		}
-		if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
-			return EXPECT_POS_NUM;	// update this with the proper error message
-		}
-		
-		startX = (size_t)(p->startX + 0.5);
-		endX = (size_t)(p->endX + 0.5);
-		startY = (size_t)(p->startY + 0.5);
-		endY = (size_t)(p->endY + 0.5);
-	} else {
-		if (method == PROCESSING_CROP) {	// export a cropped version
-			return TOO_FEW_PARAMETERS;
-		}
-	}
-	
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	// Main parameters.
-	
-	if (p->input_fileEncountered) {
-		// Parameter: p->input_file (test for NULL handle before using)
-		if (p->input_file == NULL) {
-			return EXPECTED_STRING_EXPR;
-		}
-	} else {
-		return EXPECTED_STRING_EXPR;
-	}
-	
-	if (p->output_fileEncountered) {
-		// Parameter: p->output_file (test for NULL handle before using)
-		if (p->output_file == NULL) {
-			return EXPECTED_STRING_EXPR;
-		}
-	} else {
-		return EXPECTED_STRING_EXPR;
-	}
-	
-	
-	try {
-		input_file_path = ConvertHandleToString(p->input_file);
-		image_loader = GetImageLoader(camera_type, input_file_path);
-		
-		output_file_path = ConvertHandleToString(p->output_file);
-		if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
-			output_file_path = ConvertPathToNativePath(output_file_path);
-		
-		// set up compression for those files that use it
-		switch (outputType) {
-			case IMAGE_OUTPUT_TYPE_TIFF:
-				compression = COMPRESSION_NONE;
-				break;
-			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-				compression = COMPRESSION_DEFLATE;
-				break;
-		}
-		
-		// the output number type depends on the requested information
-		switch (outputType) {
-			case IMAGE_OUTPUT_TYPE_TIFF:
-			case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-				// the storage type depends on the method
-				switch (method) {
-					case PROCESSING_AVERAGESUBTRACTION:
-					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_FP32));
-						break;
-					case PROCESSING_CONVERTTOPHOTONS:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_UINT32));
-						break;
-					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, image_loader->getStorageType()));
-						break;
-				}
-				break;
-			case IMAGE_OUTPUT_TYPE_IGOR:
-				switch (method) {
-					case PROCESSING_AVERAGESUBTRACTION:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_FP32));
-						break;
-					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, STORAGE_TYPE_FP32));
-						break;
-					case PROCESSING_CONVERTTOPHOTONS:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_UINT16));
-						break;
-					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, image_loader->getStorageType()));
-						break;
-				}
-				break;
-			case IMAGE_OUTPUT_TYPE_PDE:
-				switch (method) {
-					case PROCESSING_AVERAGESUBTRACTION:
-					case PROCESSING_DIFFERENCEIMAGE:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
-						break;
-					case PROCESSING_CONVERTTOPHOTONS:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
-						break;
-					default:
-						output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
-						break;
-				}
-				break;
-			default:
-				throw std::runtime_error("Unsupported output format (/OUT flag)");
-				break;
-		}
-		
-		// get a progress reporter
-		boost::shared_ptr<ProgressReporter> progressReporter;
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
-		// do the actual procedure
-		switch (method) {
-			case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
-				break;
-			case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
-				break;
-			case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(progressReporter));
-				break;
-			case PROCESSING_CROP:		// output a cropped version of the image
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(progressReporter, startX, endX, startY, endY));
-				break;
-			case PROCESSING_CONVERTTOPHOTONS:
-				ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplicationFactor, cameraOffset));
-				break;
-			default:
-				throw std::runtime_error("Unknown CCD postprocessing method");
-				break;
-		}
-		
-		ccd_image_processor->convert_images(image_loader, output_writer);
-	}
-	
-	catch (std::bad_alloc) {
-		SetOperationNumVar("V_flag", NOMEM);
-		return NOMEM;
-	}
-	catch (int e) {
-		SetOperationNumVar("V_flag", e);
-		return e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return SYNERR;
-	}
-	catch (...) {
-		err = WM_UNKNOWN_ERROR;
-	}
-	
-	SetOperationNumVar("V_flag", 0.0);
-	return err;
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    size_t camera_type;
+    int method;
+    int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
+    int nFramesAveraging;
+    int outputType, compression;
+    size_t startX, endX, startY, endY;
+    double cameraOffset, cameraMultiplicationFactor;
+    int useIgorFunctionForProgress;
+    FUNCREF igorProgressReporterFunction;
+
+    std::string input_file_path;
+    std::string output_file_path;
+
+    boost::shared_ptr<ImageLoader> image_loader;
+    boost::shared_ptr<ImageOutputWriter> output_writer;
+    boost::shared_ptr<CCDImagesProcessor> ccd_image_processor;
+
+
+    // Flag parameters.
+
+    if (p->YFlagEncountered) {
+        // Parameter: p->camera_type
+        if (p->camera_type < 0) {
+            camera_type = (size_t)-1;
+        } else {
+            camera_type = (size_t)(p->camera_type + 0.5);
+        }
+    } else {
+        camera_type = (size_t)-1;
+    }
+
+    if (p->MFlagEncountered) {
+        // Parameter: p->method
+        if (p-> method < 0) {
+            return EXPECT_POS_NUM;
+        }
+        method = (int)(p->method + 0.5);
+    } else {
+        return TOO_FEW_PARAMETERS;
+    }
+
+    if (p->CALFlagEncountered) {
+        // Parameter: p->offset
+        // Parameter: p->multiplicationFactor
+        cameraOffset = p->offset;
+        cameraMultiplicationFactor = p->multiplicationFactor;
+        if (cameraMultiplicationFactor <= 0.0)
+            return EXPECT_POS_NUM;
+    } else if (method == PROCESSING_CONVERTTOPHOTONS) {
+        return EXPECT_POS_NUM;
+    }
+
+    if (p->AVGFlagEncountered) {
+        // Parameter: p->framesAveraging
+        nFramesAveraging = (int)(p->framesAveraging + 0.5);
+        if (nFramesAveraging < 0)
+            nFramesAveraging = 0;
+
+        if ((method == PROCESSING_AVERAGESUBTRACTION) && (nFramesAveraging != 0) && (nFramesAveraging % 2 == 0)) {
+            return ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES;
+        }
+    } else {
+        nFramesAveraging = 0;
+    }
+
+    if (p->OUTFlagEncountered) {
+        // Parameter: p->outputType
+        outputType = (int)(p->outputType + 0.5);
+    } else {
+        outputType = IMAGE_OUTPUT_TYPE_TIFF;
+    }
+
+    if (p->OFlagEncountered) {
+        overwrite = 1;
+    }
+
+    if (p->ROIFlagEncountered) {
+        // Parameter: p->startX
+        // Parameter: p->endX
+        // Parameter: p->startY
+        // Parameter: p->endY
+
+        // check that they are all positive
+        if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
+            return EXPECT_POS_NUM;
+        }
+        if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
+            return EXPECT_POS_NUM;	// update this with the proper error message
+        }
+
+        startX = (size_t)(p->startX + 0.5);
+        endX = (size_t)(p->endX + 0.5);
+        startY = (size_t)(p->startY + 0.5);
+        endY = (size_t)(p->endY + 0.5);
+    } else {
+        if (method == PROCESSING_CROP) {	// export a cropped version
+            return TOO_FEW_PARAMETERS;
+        }
+    }
+
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    // Main parameters.
+
+    if (p->input_fileEncountered) {
+        // Parameter: p->input_file (test for NULL handle before using)
+        if (p->input_file == NULL) {
+            return EXPECTED_STRING_EXPR;
+        }
+    } else {
+        return EXPECTED_STRING_EXPR;
+    }
+
+    if (p->output_fileEncountered) {
+        // Parameter: p->output_file (test for NULL handle before using)
+        if (p->output_file == NULL) {
+            return EXPECTED_STRING_EXPR;
+        }
+    } else {
+        return EXPECTED_STRING_EXPR;
+    }
+
+
+    try {
+        input_file_path = ConvertHandleToString(p->input_file);
+        image_loader = GetImageLoader(camera_type, input_file_path);
+
+        output_file_path = ConvertHandleToString(p->output_file);
+        if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
+            output_file_path = ConvertPathToNativePath(output_file_path);
+
+        // set up compression for those files that use it
+        switch (outputType) {
+        case IMAGE_OUTPUT_TYPE_TIFF:
+            compression = COMPRESSION_NONE;
+            break;
+        case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
+            compression = COMPRESSION_DEFLATE;
+            break;
+        }
+
+        // the output number type depends on the requested information
+        switch (outputType) {
+        case IMAGE_OUTPUT_TYPE_TIFF:
+        case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
+            // the storage type depends on the method
+            switch (method) {
+            case PROCESSING_AVERAGESUBTRACTION:
+            case PROCESSING_DIFFERENCEIMAGE:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_FP32));
+                break;
+            case PROCESSING_CONVERTTOPHOTONS:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_UINT32));
+                break;
+            default:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, image_loader->getStorageType()));
+                break;
+            }
+            break;
+        case IMAGE_OUTPUT_TYPE_IGOR:
+            switch (method) {
+            case PROCESSING_AVERAGESUBTRACTION:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_FP32));
+                break;
+            case PROCESSING_DIFFERENCEIMAGE:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, STORAGE_TYPE_FP32));
+                break;
+            case PROCESSING_CONVERTTOPHOTONS:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_UINT16));
+                break;
+            default:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, image_loader->getStorageType()));
+                break;
+            }
+            break;
+        case IMAGE_OUTPUT_TYPE_PDE:
+            switch (method) {
+            case PROCESSING_AVERAGESUBTRACTION:
+            case PROCESSING_DIFFERENCEIMAGE:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
+                break;
+            case PROCESSING_CONVERTTOPHOTONS:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
+                break;
+            default:
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
+                break;
+            }
+            break;
+        default:
+            throw std::runtime_error("Unsupported output format (/OUT flag)");
+            break;
+        }
+
+        // get a progress reporter
+        boost::shared_ptr<ProgressReporter> progressReporter;
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
+        // do the actual procedure
+        switch (method) {
+        case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
+            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
+            break;
+        case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
+            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
+            break;
+        case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
+            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(progressReporter));
+            break;
+        case PROCESSING_CROP:		// output a cropped version of the image
+            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(progressReporter, startX, endX, startY, endY));
+            break;
+        case PROCESSING_CONVERTTOPHOTONS:
+            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplicationFactor, cameraOffset));
+            break;
+        default:
+            throw std::runtime_error("Unknown CCD postprocessing method");
+            break;
+        }
+
+        ccd_image_processor->convert_images(image_loader, output_writer);
+    }
+
+    catch (std::bad_alloc) {
+        SetOperationNumVar("V_flag", NOMEM);
+        return NOMEM;
+    }
+    catch (int e) {
+        SetOperationNumVar("V_flag", e);
+        return e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return SYNERR;
+    }
+    catch (...) {
+        err = WM_UNKNOWN_ERROR;
+    }
+
+    SetOperationNumVar("V_flag", 0.0);
+    return err;
 }
 
 
 static int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	size_t camera_type;
-	int method;
-	
-	DataFolderAndName outputWaveParams;
-	int useIgorFunctionForProgress = 0;
-	FUNCREF igorProgressReporterFunction;
-	long startX, startY, endX, endY, swap;
-	
-	std::string input_file_path;
-	
-	boost::shared_ptr<ImageLoader> image_loader;
-	
-	// Flag parameters.
-	
-	if (p->YFlagEncountered) {
-		// Parameter: p->camera_type
-		if (p->camera_type < 0) {
-			camera_type = (size_t)-1;
-		} else {
-			camera_type = (size_t)(p->camera_type + 0.5);
-		}
-	} else {
-		camera_type = (size_t)-1;
-	}
-	
-	
-	if (p->MFlagEncountered) {
-		// Parameter: p->method
-		method = (int)(p->method + 0.5);
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->ROIFlagEncountered) {
-		// Parameter: p->startX
-		// Parameter: p->endX
-		// Parameter: p->startY
-		// Parameter: p->endY
-		
-		// check that they are all positive
-		if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
-			return EXPECT_POS_NUM;
-		}
-		if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
-			return EXPECT_POS_NUM;	// update this with the proper error message
-		}
-		
-		startX = (long)(p->startX + 0.5);
-		endX = (long)(p->endX + 0.5);
-		startY = (long)(p->startY + 0.5);
-		endY = (long)(p->endY + 0.5);
-		
-		if (startX < 0)
-			startX = 0;
-		if (startY < 0)
-			startY = 0;
-		if (startX > endX) {
-			swap = endX;
-			endX = startX;
-			startX = swap;
-		}
-		if (startY > endY) {
-			swap = endY;
-			endY = startY;
-			startY = swap;
-		}
-		
-		
-		
-	} else {
-		startX = endX = startY = endY = -1;	// by convention '-1' means that we take the whole image
-	}
-	
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	if (p->DESTFlagEncountered) {
-		// Parameter: p->dest
-		outputWaveParams = p->dest;
-	} else {
-		outputWaveParams.dfH = NULL;
-		strcpy(outputWaveParams.name, "AnalysisResult");
-	}
-	
-	// Main parameters.
-	
-	if (p->input_fileEncountered) {
-		// Parameter: p->input_file (test for NULL handle before using)
-		if (p->input_fileEncountered == 0) {
-			return EXPECTED_STRING_EXPR;
-		}
-	} else {
-		return EXPECTED_STRING_EXPR;
-	}
-	
-	try {
-		input_file_path = ConvertHandleToString(p->input_file);
-		image_loader = GetImageLoader(camera_type, input_file_path);
-		
-		boost::shared_ptr<ProgressReporter> progressReporter;
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
-		switch (method) {
-			case ANALYZING_SUMMEDTRACE:
-				construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-				break;
-			case ANALYZING_AVERAGEIMAGE:
-				construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-				break;
-			case ANALYZING_VARIANCEIMAGE:
-				calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-				break;
-			case ANALYZING_AVERAGETRACE:
-				construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-				break;
-			default:
-				throw std::runtime_error("Unknown analysis method");
-		}
-	}
-	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return SYNERR;
-	}
-	catch (...) {
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return 0;
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    size_t camera_type;
+    int method;
+
+    DataFolderAndName outputWaveParams;
+    int useIgorFunctionForProgress = 0;
+    FUNCREF igorProgressReporterFunction;
+    long startX, startY, endX, endY, swap;
+
+    std::string input_file_path;
+
+    boost::shared_ptr<ImageLoader> image_loader;
+
+    // Flag parameters.
+
+    if (p->YFlagEncountered) {
+        // Parameter: p->camera_type
+        if (p->camera_type < 0) {
+            camera_type = (size_t)-1;
+        } else {
+            camera_type = (size_t)(p->camera_type + 0.5);
+        }
+    } else {
+        camera_type = (size_t)-1;
+    }
+
+
+    if (p->MFlagEncountered) {
+        // Parameter: p->method
+        method = (int)(p->method + 0.5);
+    } else {
+        return TOO_FEW_PARAMETERS;
+    }
+
+    if (p->ROIFlagEncountered) {
+        // Parameter: p->startX
+        // Parameter: p->endX
+        // Parameter: p->startY
+        // Parameter: p->endY
+
+        // check that they are all positive
+        if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
+            return EXPECT_POS_NUM;
+        }
+        if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
+            return EXPECT_POS_NUM;	// update this with the proper error message
+        }
+
+        startX = (long)(p->startX + 0.5);
+        endX = (long)(p->endX + 0.5);
+        startY = (long)(p->startY + 0.5);
+        endY = (long)(p->endY + 0.5);
+
+        if (startX < 0)
+            startX = 0;
+        if (startY < 0)
+            startY = 0;
+        if (startX > endX) {
+            swap = endX;
+            endX = startX;
+            startX = swap;
+        }
+        if (startY > endY) {
+            swap = endY;
+            endY = startY;
+            startY = swap;
+        }
+
+
+
+    } else {
+        startX = endX = startY = endY = -1;	// by convention '-1' means that we take the whole image
+    }
+
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        outputWaveParams = p->dest;
+    } else {
+        outputWaveParams.dfH = NULL;
+        strcpy(outputWaveParams.name, "AnalysisResult");
+    }
+
+    // Main parameters.
+
+    if (p->input_fileEncountered) {
+        // Parameter: p->input_file (test for NULL handle before using)
+        if (p->input_fileEncountered == 0) {
+            return EXPECTED_STRING_EXPR;
+        }
+    } else {
+        return EXPECTED_STRING_EXPR;
+    }
+
+    try {
+        input_file_path = ConvertHandleToString(p->input_file);
+        image_loader = GetImageLoader(camera_type, input_file_path);
+
+        boost::shared_ptr<ProgressReporter> progressReporter;
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
+        switch (method) {
+        case ANALYZING_SUMMEDTRACE:
+            construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
+            break;
+        case ANALYZING_AVERAGEIMAGE:
+            construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
+            break;
+        case ANALYZING_VARIANCEIMAGE:
+            calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
+            break;
+        case ANALYZING_AVERAGETRACE:
+            construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
+            break;
+        default:
+            throw std::runtime_error("Unknown analysis method");
+        }
+    }
+    catch (std::bad_alloc) {
+        return NOMEM;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return SYNERR;
+    }
+    catch (...) {
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return 0;
 }
 
 
 static int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	size_t method;
-	size_t preprocessing_method, postprocessing_method;
-	size_t particle_finding_method;
-	size_t offset;
-	int output_located_particles;
-	double absoluteThreshold, PFA, PSFWidth;
-	double radiusBetweenParticles;
-	waveHndl CCD_Frame_wave;
-	waveHndl threshold_image_wave;
-	ImagePtr CCD_Frame;
-	boost::shared_ptr<std::list<Particle> > located_particles;
-	std::vector<size_t> particleVerifierMethods;
-	
-	// long numDimensions; 
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	long x_size, y_size;
-	long indices[MAX_DIMENSIONS];
-	double value[2];
-	
-	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
-	
-	
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
-	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
-	boost::shared_ptr<ParticleFinder> particlefinder;
-	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-	boost::shared_ptr<ParticleVerifier> particleVerifier;
-	
-	
-	// Flag parameters.
-	
-	if (p->MFlagEncountered) {
-		// Parameter: p->method
-		method = (size_t)(p->method + 0.5);
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->ABSFlagEncountered) {
-		// Parameter: p->absoluteThreshold
-		absoluteThreshold = p->absoluteThreshold;
-	} else if (method == THRESHOLD_METHOD_DIRECT)
-		return TOO_FEW_PARAMETERS;
-	
-	
-	if (p->PFAFlagEncountered) {
-		// Parameter: p->PFA
-		PFA = p->PFA;
-	} else if (method == THRESHOLD_METHOD_GLRT)
-		return TOO_FEW_PARAMETERS;
-	
-	if (p->WDTHFlagEncountered) {
-		// Parameter: p->PSFWidth
-		PSFWidth = p->PSFWidth;
-		if (PSFWidth <= 0)
-			return EXPECT_POS_NUM;
-	} else
-		PSFWidth = 2.0;
-	
-	if (p->GFlagEncountered) {
-		// Parameter: p->preprocessing
-		// Parameter: p->postprocessing
-		preprocessing_method = (size_t)(p->preprocessing + 0.5);
-		postprocessing_method = (size_t)(p->postprocessing + 0.5);
-	} else {
-		// if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
-		preprocessing_method = 0;
-		postprocessing_method = 0;
-	}
-	
-	if (p->SFlagEncountered) {
-		// Parameter: p->output_located_particles
-		output_located_particles = (int)(p->output_located_particles + 0.5);
-	} else {
-		output_located_particles = 0;
-	}
-	
-	if (p->FFlagEncountered) {	// choose which particle finder we want to use
-		// Parameter: p->particle_finder
-		particle_finding_method = (size_t)(p->particle_finder + 0.5);
-	} else {
-		particle_finding_method = PARTICLEFINDER_ADJACENT8;
-	}
-	
-	if (p->PVERFlagEncountered) {
-		int* paramsSet = &p->PVERFlagParamsSet[0];
-		size_t particleVerifierMethod;
-		
-		for (int i=0; i<100; i++) {
-			if (paramsSet[i] == 0)
-				break;		// No more parameters.
-			
-			particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
-			
-			particleVerifierMethods.push_back(particleVerifierMethod);
-		}
-	} else {
-		particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
-	}
-	
-	if (p->RFlagEncountered) {
-		// Parameter: p->radiusBetweenParticles
-		radiusBetweenParticles = p->radiusBetweenParticles;
-		if ((radiusBetweenParticles <= 0) && (particle_finding_method == PARTICLEFINDER_RADIUS)) {
-			return EXPECT_POS_NUM;
-		}
-	} else {
-		if (particle_finding_method == PARTICLEFINDER_RADIUS) {
-			return TOO_FEW_PARAMETERS;
-		}
-	}
-	
-	// Main parameters.
-	
-	if (p->CCD_FrameEncountered) {
-		// Parameter: p->CCD_Frame (test for NULL handle before using)
-		if (p->CCD_Frame == NULL) {
-			return NOWAV;
-		} else {
-			CCD_Frame_wave = p->CCD_Frame;
-		}
-	} else {
-		return NOWAV;
-	}
-	
-	try {
-		
-		// copy the Igor wave with the CCD Frame into a new gsl_matrix
-		CCD_Frame = CopyIgorDPWaveToMatrix(CCD_Frame_wave);
-		
-		x_size = CCD_Frame->rows();
-		y_size = CCD_Frame->cols();
-		
-		// which preprocessing do we wish to do?
-		switch(preprocessing_method) {
-			case PREPROCESSOR_NONE:	// no preprocessing
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
-				break;
-			case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
-				break;
-			case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
-				break;
-			case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
-				break;
-			case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
-				break;
-			case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
-				break;
-			case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
-				preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation preprocessing method");
-				break;
-		}
-		switch(method) {
-			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
-				break;
-			case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
-				break;
-			case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
-				break;
-			case THRESHOLD_METHOD_DIRECT:	// direct threshold
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation method");
-				break;
-		}
-		
-		
-		// which postprocessing do we wish to do?
-		switch(postprocessing_method) {
-			case POSTPROCESSOR_NONE:	// no postprocessing
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
-				break;
-			case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
-				postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
-				break;
-			default:
-				throw std::runtime_error("Unknown segmentation postprocessing method");
-				break;
-		}
-		
-		// do we wish to show the located particle positions?
-		// which method do we want to use?
-		if (output_located_particles == 1) {
-			switch (particle_finding_method) {
-				case PARTICLEFINDER_ADJACENT4:
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
-					break;
-				case PARTICLEFINDER_ADJACENT8:
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
-					break;
-				case PARTICLEFINDER_RADIUS:	// traditional radius approach
-					particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
-					break;
-				default:
-					throw std::runtime_error("Unknown particle finding method");
-					break;
-			}
-			
-			// what particle verification do we wish to use?
-			// several particle verifiers can be used
-			for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
-				switch (*it) {
-					case PARTICLEVERIFIER_NONE:
-						// no particle verification requested for this entry, do nothing
-						break;
-					case PARTICLEVERIFIER_SYMMETRICGAUSS:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1)));
-						break;
-					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1)));
-						break;
-					case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
-						break;
-					default:
-						throw std::runtime_error("Unknown particle verifying method");
-						break;
-				}
-			}
-		}
-		
-		
-		
-		// calculate the threshold
-		thresholded_image = do_processing_and_thresholding(CCD_Frame, preprocessor, thresholder, postprocessor);
-		
-		// now create the output wave
-		dimensionSizes[0] = x_size;
-		dimensionSizes[1] = y_size;
-		dimensionSizes[2] = 0;
-		
-		threshold_image_wave = MakeWaveUsingFullPath(std::string("M_SegmentedImage"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
-		
-		for (long j = 0; j < y_size; j++) {
-			for (long i = 0; i < x_size; i++) {
-				indices[0] = i;
-				indices[1] = j;
-				
-				value[0] = (double)((*thresholded_image)(i, j));
-				
-				err = MDSetNumericWavePointValue(threshold_image_wave, indices, value);
-				if (err != 0) {
-					return err;
-				}
-			}
-		}
-		
-		// if it is requested then output the positions
-		if (output_located_particles == 1) {
-			located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
-			
-			// if the located particles are to be verified before fitting then do so
-			for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
-				(*it)->VerifyParticles(CCD_Frame, located_particles);
-			}
-			
-			waveHndl outputWave;
-			size_t nParticles = (*located_particles).size();
-			dimensionSizes[0] = nParticles;
-			dimensionSizes[1] = 4;	// warning: magic number
-			dimensionSizes[2] = 0;
-			
-			outputWave = MakeWaveUsingFullPath(std::string("M_LocatedParticles"), dimensionSizes, NT_FP64, 1);
-			
-			offset = 0;
-			for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
-				indices[0] = offset;
-				indices[1] = 0;
-				value[0] = (*it).intensity;
-				MDSetNumericWavePointValue(outputWave, indices, value);
-				indices[1] = 1;
-				value[0] = (*it).x;
-				MDSetNumericWavePointValue(outputWave, indices, value);
-				indices[1] = 2;
-				value[0] = (*it).y;
-				MDSetNumericWavePointValue(outputWave, indices, value);
-				indices[1] = 3;
-				value[0] = (*it).background;
-				MDSetNumericWavePointValue(outputWave, indices, value);
-				++offset;
-			}
-		}
-		
-	}
-	
-	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return err;
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    size_t method;
+    size_t preprocessing_method, postprocessing_method;
+    size_t particle_finding_method;
+    size_t offset;
+    int output_located_particles;
+    double absoluteThreshold, PFA, PSFWidth;
+    double radiusBetweenParticles;
+    waveHndl CCD_Frame_wave;
+    waveHndl threshold_image_wave;
+    ImagePtr CCD_Frame;
+    boost::shared_ptr<std::list<Particle> > located_particles;
+    std::vector<size_t> particleVerifierMethods;
+
+    // long numDimensions;
+    long dimensionSizes[MAX_DIMENSIONS+1];
+    long x_size, y_size;
+    long indices[MAX_DIMENSIONS];
+    double value[2];
+
+
+    boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
+
+
+    boost::shared_ptr<ThresholdImage> thresholder;
+    boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
+    boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
+    boost::shared_ptr<ParticleFinder> particlefinder;
+    std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+    boost::shared_ptr<ParticleVerifier> particleVerifier;
+
+
+    // Flag parameters.
+
+    if (p->MFlagEncountered) {
+        // Parameter: p->method
+        method = (size_t)(p->method + 0.5);
+    } else {
+        return TOO_FEW_PARAMETERS;
+    }
+
+    if (p->ABSFlagEncountered) {
+        // Parameter: p->absoluteThreshold
+        absoluteThreshold = p->absoluteThreshold;
+    } else if (method == THRESHOLD_METHOD_DIRECT)
+        return TOO_FEW_PARAMETERS;
+
+
+    if (p->PFAFlagEncountered) {
+        // Parameter: p->PFA
+        PFA = p->PFA;
+    } else if (method == THRESHOLD_METHOD_GLRT)
+        return TOO_FEW_PARAMETERS;
+
+    if (p->WDTHFlagEncountered) {
+        // Parameter: p->PSFWidth
+        PSFWidth = p->PSFWidth;
+        if (PSFWidth <= 0)
+            return EXPECT_POS_NUM;
+    } else
+        PSFWidth = 2.0;
+
+    if (p->GFlagEncountered) {
+        // Parameter: p->preprocessing
+        // Parameter: p->postprocessing
+        preprocessing_method = (size_t)(p->preprocessing + 0.5);
+        postprocessing_method = (size_t)(p->postprocessing + 0.5);
+    } else {
+        // if this flag doesn't appear then we assume that we don't want any pre- or postprocessing
+        preprocessing_method = 0;
+        postprocessing_method = 0;
+    }
+
+    if (p->SFlagEncountered) {
+        // Parameter: p->output_located_particles
+        output_located_particles = (int)(p->output_located_particles + 0.5);
+    } else {
+        output_located_particles = 0;
+    }
+
+    if (p->FFlagEncountered) {	// choose which particle finder we want to use
+        // Parameter: p->particle_finder
+        particle_finding_method = (size_t)(p->particle_finder + 0.5);
+    } else {
+        particle_finding_method = PARTICLEFINDER_ADJACENT8;
+    }
+
+    if (p->PVERFlagEncountered) {
+        int* paramsSet = &p->PVERFlagParamsSet[0];
+        size_t particleVerifierMethod;
+
+        for (int i=0; i<100; i++) {
+            if (paramsSet[i] == 0)
+                break;		// No more parameters.
+
+            particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+
+            particleVerifierMethods.push_back(particleVerifierMethod);
+        }
+    } else {
+        particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
+    }
+
+    if (p->RFlagEncountered) {
+        // Parameter: p->radiusBetweenParticles
+        radiusBetweenParticles = p->radiusBetweenParticles;
+        if ((radiusBetweenParticles <= 0) && (particle_finding_method == PARTICLEFINDER_RADIUS)) {
+            return EXPECT_POS_NUM;
+        }
+    } else {
+        if (particle_finding_method == PARTICLEFINDER_RADIUS) {
+            return TOO_FEW_PARAMETERS;
+        }
+    }
+
+    // Main parameters.
+
+    if (p->CCD_FrameEncountered) {
+        // Parameter: p->CCD_Frame (test for NULL handle before using)
+        if (p->CCD_Frame == NULL) {
+            return NOWAV;
+        } else {
+            CCD_Frame_wave = p->CCD_Frame;
+        }
+    } else {
+        return NOWAV;
+    }
+
+    try {
+
+        // copy the Igor wave with the CCD Frame into a new gsl_matrix
+        CCD_Frame = CopyIgorDPWaveToMatrix(CCD_Frame_wave);
+
+        x_size = CCD_Frame->rows();
+        y_size = CCD_Frame->cols();
+
+        // which preprocessing do we wish to do?
+        switch(preprocessing_method) {
+        case PREPROCESSOR_NONE:	// no preprocessing
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
+            break;
+        case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
+            break;
+        case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
+            break;
+        case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
+            break;
+        case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
+            break;
+        case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
+            break;
+        case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
+            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation preprocessing method");
+            break;
+        }
+        switch(method) {
+        case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
+            break;
+        case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
+            break;
+        case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
+            break;
+        case THRESHOLD_METHOD_DIRECT:	// direct threshold
+            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation method");
+            break;
+        }
+
+
+        // which postprocessing do we wish to do?
+        switch(postprocessing_method) {
+        case POSTPROCESSOR_NONE:	// no postprocessing
+            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
+            break;
+        case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
+            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+            break;
+        default:
+            throw std::runtime_error("Unknown segmentation postprocessing method");
+            break;
+        }
+
+        // do we wish to show the located particle positions?
+        // which method do we want to use?
+        if (output_located_particles == 1) {
+            switch (particle_finding_method) {
+            case PARTICLEFINDER_ADJACENT4:
+                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
+                break;
+            case PARTICLEFINDER_ADJACENT8:
+                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
+                break;
+            case PARTICLEFINDER_RADIUS:	// traditional radius approach
+                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
+                break;
+            default:
+                throw std::runtime_error("Unknown particle finding method");
+                break;
+            }
+
+            // what particle verification do we wish to use?
+            // several particle verifiers can be used
+            for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
+                switch (*it) {
+                case PARTICLEVERIFIER_NONE:
+                    // no particle verification requested for this entry, do nothing
+                    break;
+                case PARTICLEVERIFIER_SYMMETRICGAUSS:
+                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1)));
+                    break;
+                case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1)));
+                    break;
+                case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
+                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
+                    break;
+                default:
+                    throw std::runtime_error("Unknown particle verifying method");
+                    break;
+                }
+            }
+        }
+
+
+
+        // calculate the threshold
+        thresholded_image = do_processing_and_thresholding(CCD_Frame, preprocessor, thresholder, postprocessor);
+
+        // now create the output wave
+        dimensionSizes[0] = x_size;
+        dimensionSizes[1] = y_size;
+        dimensionSizes[2] = 0;
+
+        threshold_image_wave = MakeWaveUsingFullPath(std::string("M_SegmentedImage"), dimensionSizes, NT_I8 | NT_UNSIGNED, 1);
+
+        for (long j = 0; j < y_size; j++) {
+            for (long i = 0; i < x_size; i++) {
+                indices[0] = i;
+                indices[1] = j;
+
+                value[0] = (double)((*thresholded_image)(i, j));
+
+                err = MDSetNumericWavePointValue(threshold_image_wave, indices, value);
+                if (err != 0) {
+                    return err;
+                }
+            }
+        }
+
+        // if it is requested then output the positions
+        if (output_located_particles == 1) {
+            located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
+
+            // if the located particles are to be verified before fitting then do so
+            for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
+                (*it)->VerifyParticles(CCD_Frame, located_particles);
+            }
+
+            waveHndl outputWave;
+            size_t nParticles = (*located_particles).size();
+            dimensionSizes[0] = nParticles;
+            dimensionSizes[1] = 4;	// warning: magic number
+            dimensionSizes[2] = 0;
+
+            outputWave = MakeWaveUsingFullPath(std::string("M_LocatedParticles"), dimensionSizes, NT_FP64, 1);
+
+            offset = 0;
+            for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
+                indices[0] = offset;
+                indices[1] = 0;
+                value[0] = (*it).intensity;
+                MDSetNumericWavePointValue(outputWave, indices, value);
+                indices[1] = 1;
+                value[0] = (*it).x;
+                MDSetNumericWavePointValue(outputWave, indices, value);
+                indices[1] = 2;
+                value[0] = (*it).y;
+                MDSetNumericWavePointValue(outputWave, indices, value);
+                indices[1] = 3;
+                value[0] = (*it).background;
+                MDSetNumericWavePointValue(outputWave, indices, value);
+                ++offset;
+            }
+        }
+
+    }
+
+    catch (std::bad_alloc) {
+        return NOMEM;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return err;
 }
 
 
 static int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	ImagePtr firstImage;
-	ImagePtr secondImage;
-	ImagePtr outputImage;
-	DataFolderAndName dfAndName;
-	int overwrite;
-	waveHndl firstWave;
-	waveHndl secondWave;
-	waveHndl outputWave;
-	
-	if (p->DESTFlagEncountered) {
-		// Parameter: p->dest
-		dfAndName = p->dest;
-	} else {
-		dfAndName.dfH = NULL;
-		strcpy(dfAndName.name, "M_Convolved");
-	}
-	
-	if (p->OFlagEncountered) {
-		overwrite = 1;
-	} else {
-		overwrite = 0;
-	}
-	
-	// Main parameters.
-	
-	if (p->firstImageEncountered) {
-		// Parameter: p->firstImage (test for NULL handle before using)
-		if (p->firstImage == NULL) {
-			return NOWAV;
-		}
-		firstWave = p->firstImage;
-	} else {
-		return NOWAV;
-	}
-	
-	if (p->secondImageEncountered) {
-		// Parameter: p->secondImage (test for NULL handle before using)
-		if (p->firstImage == NULL) {
-			return NOWAV;
-		}
-		secondWave = p->secondImage;
-	} else {
-		return NOWAV;
-	}
-	
-	try {
-		firstImage = CopyIgorDPWaveToMatrix(firstWave);
-		secondImage = CopyIgorDPWaveToMatrix(secondWave);
-		ConvolveMatricesWithFFTClass matrixConvolver;
-		
-		outputImage = matrixConvolver.ConvolveMatricesWithFFT(firstImage,secondImage);
-		
-		outputWave = CopyMatrixToIgorDPWave(outputImage, "M_Convolved");
-		
-	}
-	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return err;
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    ImagePtr firstImage;
+    ImagePtr secondImage;
+    ImagePtr outputImage;
+    DataFolderAndName dfAndName;
+    int overwrite;
+    waveHndl firstWave;
+    waveHndl secondWave;
+    waveHndl outputWave;
+
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        dfAndName = p->dest;
+    } else {
+        dfAndName.dfH = NULL;
+        strcpy(dfAndName.name, "M_Convolved");
+    }
+
+    if (p->OFlagEncountered) {
+        overwrite = 1;
+    } else {
+        overwrite = 0;
+    }
+
+    // Main parameters.
+
+    if (p->firstImageEncountered) {
+        // Parameter: p->firstImage (test for NULL handle before using)
+        if (p->firstImage == NULL) {
+            return NOWAV;
+        }
+        firstWave = p->firstImage;
+    } else {
+        return NOWAV;
+    }
+
+    if (p->secondImageEncountered) {
+        // Parameter: p->secondImage (test for NULL handle before using)
+        if (p->firstImage == NULL) {
+            return NOWAV;
+        }
+        secondWave = p->secondImage;
+    } else {
+        return NOWAV;
+    }
+
+    try {
+        firstImage = CopyIgorDPWaveToMatrix(firstWave);
+        secondImage = CopyIgorDPWaveToMatrix(secondWave);
+        ConvolveMatricesWithFFTClass matrixConvolver;
+
+        outputImage = matrixConvolver.ConvolveMatricesWithFFT(firstImage,secondImage);
+
+        outputWave = CopyMatrixToIgorDPWave(outputImage, "M_Convolved");
+
+    }
+    catch (std::bad_alloc) {
+        return NOMEM;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return err;
 }
 
 
 static int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
-	gsl_set_error_handler_off();	// we will handle errors ourselves
-	int err = 0;
-	int method, emitterWeighing;
-	double scaleFactor, upperLimit, PSFWidth, cameraMultiplicationFactor;
-	size_t imageWidth, imageHeight, xSize, ySize;
-	
-	waveHndl positionsWave;
-	int useIgorFunctionForProgress = 0;
-	FUNCREF igorProgressReporterFunction;
-	
-	boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
-	boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-	boost::shared_ptr<ProgressReporter> progressReporter;
-	ImagePtr image;
-	
-	// Flag parameters.
-	
-	if (p->MFlagEncountered) {
-		// Parameter: p->deviationMethod
-		if (p->deviationMethod < 0) {
-			return EXPECT_POS_NUM;
-		}
-		
-		method = (int)(p->deviationMethod + 0.5);
-	} else {
-		method = PALMBITMAP_DEVIATION_SAME;
-	}
-	
-	if (p->SFlagEncountered) {
-		// Parameter: p->scaleFactor
-		if (p->scaleFactor <= 0)
-			return EXPECT_POS_NUM;
-		scaleFactor = p->scaleFactor;
-	} else {
-		scaleFactor = 1.0;
-	}
-	
-	if (p->LFlagEncountered) {
-		// Parameter: p->upperLimit
-		if (p->upperLimit <= 0)
-			return EXPECT_POS_NUM;
-		upperLimit = p->upperLimit;
-	} else {
-		upperLimit = 1.0e100;	// provide an unpractically large value, so that
-		// the net result is no limitation
-	}
-	
-	if (p->WFlagEncountered) {
-		// Parameter: p->CCDXSize
-		// Parameter: p->CCDYSize
-		// Parameter: p->outputImageScaleFactor
-		if ((p->CCDXSize <= 0) || (p->CCDYSize <= 0) || (p->outputImageScaleFactor <= 0))
-			return EXPECT_POS_NUM;
-		xSize = (size_t)(p->CCDXSize + 0.5);
-		ySize = (size_t)(p->CCDYSize + 0.5);
-		imageWidth = (size_t)(p->outputImageScaleFactor * p->CCDXSize + 0.5);
-		imageHeight = (size_t)(p->outputImageScaleFactor * p->CCDYSize + 0.5);
-	} else {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->WGHTFlagEncountered) {
-		// Parameter: p->emitterWeighing
-		emitterWeighing = int(p->emitterWeighing + 0.5);
-		if ((emitterWeighing != 0) && (emitterWeighing != 1)) {
-			return EXPECT_POS_NUM;
-		}
-	} else {
-		emitterWeighing = PALMBITMAP_EMITTERWEIGHING_SAME;
-	}
-	
-	if (p->WDTHFlagEncountered) {
-		// Parameter: p->PSFWidth
-		if (p->PSFWidth <= 0) {
-			return EXPECT_POS_NUM;
-		}
-		
-		PSFWidth = p->PSFWidth;
-		
-	} else {
-		PSFWidth = 1.5;
-	}
-	
-	if (p->MULTFlagEncountered) {
-		// Parameter: p->cameraMultiplicationFactor
-		cameraMultiplicationFactor = p->cameraMultiplicationFactor;
-		if (cameraMultiplicationFactor <= 0)
-			return EXPECT_POS_NUM;
-	} else if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
-		return TOO_FEW_PARAMETERS;
-	}
-	
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	// Main parameters.	
-	if (p->positionsWaveEncountered) {
-		// Parameter: p->positionsWave (test for NULL handle before using)
-		if (p->positionsWave == NULL) {
-			return NOWAV;
-		}
-		positionsWave = p->positionsWave;
-	} else {
-		return NOWAV;
-	}
-	
-	try {
-		// get the object that will calculate the standard deviation
-		switch (method) {
-			case PALMBITMAP_DEVIATION_SAME:
-				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
-				break;
-			case PALMBITMAP_DEVIATION_FITUNCERTAINTY:
-				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
-				break;
-			case PALMBITMAP_DEVIATION_GAUSSIANMASK:
-				deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraMultiplicationFactor));
-				break;
-			default:
-				throw std::runtime_error("Unknown deviation calculation method (/M flag)");
-		}
-		
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
-		// do the actual calculation
-		imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
-		boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
-		image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
-		CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
-	}
-	catch (std::bad_alloc) {
-		return NOMEM;
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return err;
+    gsl_set_error_handler_off();	// we will handle errors ourselves
+    int err = 0;
+    int method, emitterWeighing;
+    double scaleFactor, upperLimit, PSFWidth, cameraMultiplicationFactor;
+    size_t imageWidth, imageHeight, xSize, ySize;
+
+    waveHndl positionsWave;
+    int useIgorFunctionForProgress = 0;
+    FUNCREF igorProgressReporterFunction;
+
+    boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
+    boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
+    boost::shared_ptr<ProgressReporter> progressReporter;
+    ImagePtr image;
+
+    // Flag parameters.
+
+    if (p->MFlagEncountered) {
+        // Parameter: p->deviationMethod
+        if (p->deviationMethod < 0) {
+            return EXPECT_POS_NUM;
+        }
+
+        method = (int)(p->deviationMethod + 0.5);
+    } else {
+        method = PALMBITMAP_DEVIATION_SAME;
+    }
+
+    if (p->SFlagEncountered) {
+        // Parameter: p->scaleFactor
+        if (p->scaleFactor <= 0)
+            return EXPECT_POS_NUM;
+        scaleFactor = p->scaleFactor;
+    } else {
+        scaleFactor = 1.0;
+    }
+
+    if (p->LFlagEncountered) {
+        // Parameter: p->upperLimit
+        if (p->upperLimit <= 0)
+            return EXPECT_POS_NUM;
+        upperLimit = p->upperLimit;
+    } else {
+        upperLimit = 1.0e100;	// provide an unpractically large value, so that
+        // the net result is no limitation
+    }
+
+    if (p->WFlagEncountered) {
+        // Parameter: p->CCDXSize
+        // Parameter: p->CCDYSize
+        // Parameter: p->outputImageScaleFactor
+        if ((p->CCDXSize <= 0) || (p->CCDYSize <= 0) || (p->outputImageScaleFactor <= 0))
+            return EXPECT_POS_NUM;
+        xSize = (size_t)(p->CCDXSize + 0.5);
+        ySize = (size_t)(p->CCDYSize + 0.5);
+        imageWidth = (size_t)(p->outputImageScaleFactor * p->CCDXSize + 0.5);
+        imageHeight = (size_t)(p->outputImageScaleFactor * p->CCDYSize + 0.5);
+    } else {
+        return TOO_FEW_PARAMETERS;
+    }
+
+    if (p->WGHTFlagEncountered) {
+        // Parameter: p->emitterWeighing
+        emitterWeighing = int(p->emitterWeighing + 0.5);
+        if ((emitterWeighing != 0) && (emitterWeighing != 1)) {
+            return EXPECT_POS_NUM;
+        }
+    } else {
+        emitterWeighing = PALMBITMAP_EMITTERWEIGHING_SAME;
+    }
+
+    if (p->WDTHFlagEncountered) {
+        // Parameter: p->PSFWidth
+        if (p->PSFWidth <= 0) {
+            return EXPECT_POS_NUM;
+        }
+
+        PSFWidth = p->PSFWidth;
+
+    } else {
+        PSFWidth = 1.5;
+    }
+
+    if (p->MULTFlagEncountered) {
+        // Parameter: p->cameraMultiplicationFactor
+        cameraMultiplicationFactor = p->cameraMultiplicationFactor;
+        if (cameraMultiplicationFactor <= 0)
+            return EXPECT_POS_NUM;
+    } else if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
+        return TOO_FEW_PARAMETERS;
+    }
+
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    // Main parameters.
+    if (p->positionsWaveEncountered) {
+        // Parameter: p->positionsWave (test for NULL handle before using)
+        if (p->positionsWave == NULL) {
+            return NOWAV;
+        }
+        positionsWave = p->positionsWave;
+    } else {
+        return NOWAV;
+    }
+
+    try {
+        // get the object that will calculate the standard deviation
+        switch (method) {
+        case PALMBITMAP_DEVIATION_SAME:
+            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
+            break;
+        case PALMBITMAP_DEVIATION_FITUNCERTAINTY:
+            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
+            break;
+        case PALMBITMAP_DEVIATION_GAUSSIANMASK:
+            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraMultiplicationFactor));
+            break;
+        default:
+            throw std::runtime_error("Unknown deviation calculation method (/M flag)");
+        }
+
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
+        // do the actual calculation
+        imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
+        boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
+        image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
+        CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
+    }
+    catch (std::bad_alloc) {
+        return NOMEM;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return err;
 }
 
 static int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p) {
-	int err = 0;
-	size_t nBins;
-	double binWidth, calculationRange;
-	
-	// Flag parameters.
-	
-	if (p->RNGEFlagEncountered) {
-		// Parameter: p->calculationRange
-		// Parameter: p->nBins
-		if ((p->calculationRange <= 0) || (p->nBins <= 0))
-			return EXPECT_POS_NUM;
-		
-		calculationRange = p->calculationRange;
-		nBins = (size_t)(p->nBins + 0.5);
-		
-	} else {
-		return EXPECT_POS_NUM;
-	}
-	
-	double lowerX = 0, upperX = 0, lowerY = 0, upperY = 0;
-	if (p->REGNFlagEncountered) {
-		// Parameter: p->lowerX
-		// Parameter: p->upperX
-		// Parameter: p->lowerY
-		// Parameter: p->upperY
-		lowerX = p->lowerX;
-		upperX = p->upperX;
-		lowerY = p->lowerY;
-		upperY = p->upperY;
-	}
-	
-	// Main parameters.
-	
-	if (p->positionsWaveEncountered) {
-		// Parameter: p->positionsWave (test for NULL handle before using)
-		if (p->positionsWave == NULL)
-			return NOWAV;
-	}
-	
-	
-	
-	try {
-		boost::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
-		boost::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
-		
-		binWidth = calculationRange / (double)nBins;
-		double dimOffset = binWidth;
-		double dimDelta = binWidth;
-		waveHndl outputWave = CopyVectorToIgorDPWave(kFunction, std::string("W_LFunction"));
-		err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
-	}
-	catch (USER_ABORTED e) {
-		XOPNotice(e.what());
-		err = USER_ABORT;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (...) {
-		XOPNotice("An unknown error occurred\r");
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return err;
+    int err = 0;
+    size_t nBins;
+    double binWidth, calculationRange;
+
+    // Flag parameters.
+
+    if (p->RNGEFlagEncountered) {
+        // Parameter: p->calculationRange
+        // Parameter: p->nBins
+        if ((p->calculationRange <= 0) || (p->nBins <= 0))
+            return EXPECT_POS_NUM;
+
+        calculationRange = p->calculationRange;
+        nBins = (size_t)(p->nBins + 0.5);
+
+    } else {
+        return EXPECT_POS_NUM;
+    }
+
+    double lowerX = 0, upperX = 0, lowerY = 0, upperY = 0;
+    if (p->REGNFlagEncountered) {
+        // Parameter: p->lowerX
+        // Parameter: p->upperX
+        // Parameter: p->lowerY
+        // Parameter: p->upperY
+        lowerX = p->lowerX;
+        upperX = p->upperX;
+        lowerY = p->lowerY;
+        upperY = p->upperY;
+    }
+
+    // Main parameters.
+
+    if (p->positionsWaveEncountered) {
+        // Parameter: p->positionsWave (test for NULL handle before using)
+        if (p->positionsWave == NULL)
+            return NOWAV;
+    }
+
+
+
+    try {
+        boost::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
+        boost::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
+
+        binWidth = calculationRange / (double)nBins;
+        double dimOffset = binWidth;
+        double dimDelta = binWidth;
+        waveHndl outputWave = CopyVectorToIgorDPWave(kFunction, std::string("W_LFunction"));
+        err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (...) {
+        XOPNotice("An unknown error occurred\r");
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return err;
 }
 
 static int
 ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
 {
-	gsl_set_error_handler_off();
-	int err = 0;
-	
-	// Flag parameters.
-	
-	int cameraType;
-	if (p->YFlagEncountered) {
-		// Parameter: p->cameraType
-		cameraType = (int)(p->cameraType + 0.5);
-	} else {
-		cameraType = -1;
-	}
-	
-	double psfWidth;
-	if (p->WDTHFlagEncountered) {
-		// Parameter: p->psfWidth
-		if (p->psfWidth <= 0)
-			return EXPECT_POS_NUM;
-		psfWidth = p->psfWidth;
-	} else {
-		psfWidth = 1.6;
-	}
-	
-	if (p->ORDRFlagEncountered) {
-		// Parameter: p->order
-	}
-	
-	int lagTime;
-	if (p->LAGFlagEncountered) {
-		// Parameter: p->lagTime
-		if (p->lagTime < 0)
-			throw EXPECT_POS_NUM;
-		lagTime = (int)(p->lagTime + 0.5);
-	} else {
-		lagTime = 0;
-	}
-	
-	int crossCorrelate;
-	if (p->XCFlagEncountered) {
-		// Parameter: p->doCrossCorrelation
-		if ((int)(p->doCrossCorrelation + 0.5) == 0) {
-			crossCorrelate = 0;
-		} else {
-			crossCorrelate = 1;
-		}
-	} else {
-		crossCorrelate = 0;
-	}
-	
-	int nFramesToGroup;
-	if (p->GRPFlagEncountered) {
-		// Parameter: p->nFramesToGroup
-		if (p->nFramesToGroup < 0)
-			return EXPECT_POS_NUM;
-		nFramesToGroup = (int)(p->nFramesToGroup + 0.5);
-	} else {
-		nFramesToGroup = 0;
-	}
-	
-	double maxPixelVal = 0.0;
-	int limitMaxPixelVal = 0;
-	if (p->MAXFlagEncountered) {
-		// Parameter: p->maxPixelVal
-		maxPixelVal = p->maxPixelVal;
-		limitMaxPixelVal = 1;
-	}
-	
-	int noSaturatedPixels = 0;
-	if (p->NSATFlagEncountered) {
-		noSaturatedPixels = 1;
-		if (p->NSATFlagParamsSet[0]) {
-			// Optional parameter: p->noSaturatedPixels
-			noSaturatedPixels = (int)(p->noSaturatedPixels + 0.5);
-		}
-	}
-	
-	size_t nFramesToSkip;
-	if (p->SKIPFlagEncountered) {
-		// Parameter: p->framesToSkip
-		if (p->framesToSkip < 0)
-			return EXPECT_POS_NUM;
-		nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
-	} else {
-		nFramesToSkip = 0;
-	}
-	
-	int useIgorFunctionForProgress;
-	FUNCREF igorProgressReporterFunction;
-	if (p->PROGFlagEncountered) {
-		// Parameter: p->progStruct
-		useIgorFunctionForProgress = 1;
-		igorProgressReporterFunction = p->progStruct->funcRef;
-	} else {
-		useIgorFunctionForProgress = 0;
-	}
-	
-	int quiet = 0;
-	if (p->QFlagEncountered) {
-		quiet = 1;
-	} else {
-		if (RunningInMainThread() != 1)
-			quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
-	}
-	
-	DataFolderAndName outputWaveParams;
-	if (p->DESTFlagEncountered) {
-		// Parameter: p->dest
-		outputWaveParams = p->dest;
-	} else {
-		outputWaveParams.dfH = NULL;
-		strcpy(outputWaveParams.name, "M_SOFI");
-	}
-	
-	// Main parameters.
-	if (p->inputFilePathEncountered) {
-		// Parameter: p->inputFilePath (test for NULL handle before using)
-		if (p->inputFilePath == NULL)
-			return EXPECTED_STRING_EXPR;
-	} else {
-		return EXPECTED_STRING_EXPR;
-	}
-	
-	try {
-		std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
-		boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
-		
-		int nGroups;
-		size_t nImagesToProcess;
-		if (nFramesToSkip >= imageLoader->getNImages())
-			return ORN_OFFSET_OUT_OT_RANGE;
-		
-		nImagesToProcess = imageLoader->getNImages() - nFramesToSkip;
-		
-		if (nFramesToGroup != 0) {
-			nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
-		} else {
-			nGroups = 1;
-		}
-		
-		// check if any frame verifiers need to be used
-		boost::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
-		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-		
-		if (noSaturatedPixels != 0) {
-			sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
-			frameVerifiers.push_back(sofiFrameVerifier);
-		}
-		if (limitMaxPixelVal != 0) {
-			sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_MaxPixelValue(maxPixelVal));
-			frameVerifiers.push_back(sofiFrameVerifier);
-		}
-		
-		boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
-		
-		boost::shared_ptr<ProgressReporter> progressReporter;
-		
-		if (quiet == 1) {
-			progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
-		} else {
-			if (useIgorFunctionForProgress != 0) {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
-			} else {
-				progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-			}
-		}
-		
-		DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
-	}
-	catch (int e) {
-		return e;
-	}
-	catch (std::runtime_error e) {
-		XOPNotice(e.what());
-		XOPNotice("\r");
-		return PALM_ANALYSIS_XOP_ERROR;
-	}
-	catch (...) {
-		XOPNotice("An unknown error occurred\r");
-		return WM_UNKNOWN_ERROR;
-	}
-	
-	return err;
+    gsl_set_error_handler_off();
+    int err = 0;
+
+    // Flag parameters.
+
+    int cameraType;
+    if (p->YFlagEncountered) {
+        // Parameter: p->cameraType
+        cameraType = (int)(p->cameraType + 0.5);
+    } else {
+        cameraType = -1;
+    }
+
+    double psfWidth;
+    if (p->WDTHFlagEncountered) {
+        // Parameter: p->psfWidth
+        if (p->psfWidth <= 0)
+            return EXPECT_POS_NUM;
+        psfWidth = p->psfWidth;
+    } else {
+        psfWidth = 1.6;
+    }
+
+    if (p->ORDRFlagEncountered) {
+        // Parameter: p->order
+    }
+
+    int lagTime;
+    if (p->LAGFlagEncountered) {
+        // Parameter: p->lagTime
+        if (p->lagTime < 0)
+            throw EXPECT_POS_NUM;
+        lagTime = (int)(p->lagTime + 0.5);
+    } else {
+        lagTime = 0;
+    }
+
+    int crossCorrelate;
+    if (p->XCFlagEncountered) {
+        // Parameter: p->doCrossCorrelation
+        if ((int)(p->doCrossCorrelation + 0.5) == 0) {
+            crossCorrelate = 0;
+        } else {
+            crossCorrelate = 1;
+        }
+    } else {
+        crossCorrelate = 0;
+    }
+
+    int nFramesToGroup;
+    if (p->GRPFlagEncountered) {
+        // Parameter: p->nFramesToGroup
+        if (p->nFramesToGroup < 0)
+            return EXPECT_POS_NUM;
+        nFramesToGroup = (int)(p->nFramesToGroup + 0.5);
+    } else {
+        nFramesToGroup = 0;
+    }
+
+    double maxPixelVal = 0.0;
+    int limitMaxPixelVal = 0;
+    if (p->MAXFlagEncountered) {
+        // Parameter: p->maxPixelVal
+        maxPixelVal = p->maxPixelVal;
+        limitMaxPixelVal = 1;
+    }
+
+    int noSaturatedPixels = 0;
+    if (p->NSATFlagEncountered) {
+        noSaturatedPixels = 1;
+        if (p->NSATFlagParamsSet[0]) {
+            // Optional parameter: p->noSaturatedPixels
+            noSaturatedPixels = (int)(p->noSaturatedPixels + 0.5);
+        }
+    }
+
+    size_t nFramesToSkip;
+    if (p->SKIPFlagEncountered) {
+        // Parameter: p->framesToSkip
+        if (p->framesToSkip < 0)
+            return EXPECT_POS_NUM;
+        nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
+    } else {
+        nFramesToSkip = 0;
+    }
+
+    int useIgorFunctionForProgress;
+    FUNCREF igorProgressReporterFunction;
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = 1;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = 0;
+    }
+
+    int quiet = 0;
+    if (p->QFlagEncountered) {
+        quiet = 1;
+    } else {
+        if (RunningInMainThread() != 1)
+            quiet = 1;	// no progress reporting if running in an Igor-preemptive thread
+    }
+
+    DataFolderAndName outputWaveParams;
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        outputWaveParams = p->dest;
+    } else {
+        outputWaveParams.dfH = NULL;
+        strcpy(outputWaveParams.name, "M_SOFI");
+    }
+
+    // Main parameters.
+    if (p->inputFilePathEncountered) {
+        // Parameter: p->inputFilePath (test for NULL handle before using)
+        if (p->inputFilePath == NULL)
+            return EXPECTED_STRING_EXPR;
+    } else {
+        return EXPECTED_STRING_EXPR;
+    }
+
+    try {
+        std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
+        boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
+
+        int nGroups;
+        size_t nImagesToProcess;
+        if (nFramesToSkip >= imageLoader->getNImages())
+            return ORN_OFFSET_OUT_OT_RANGE;
+
+        nImagesToProcess = imageLoader->getNImages() - nFramesToSkip;
+
+        if (nFramesToGroup != 0) {
+            nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
+        } else {
+            nGroups = 1;
+        }
+
+        // check if any frame verifiers need to be used
+        boost::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
+        std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
+
+        if (noSaturatedPixels != 0) {
+            sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
+            frameVerifiers.push_back(sofiFrameVerifier);
+        }
+        if (limitMaxPixelVal != 0) {
+            sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_MaxPixelValue(maxPixelVal));
+            frameVerifiers.push_back(sofiFrameVerifier);
+        }
+
+        boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+
+        boost::shared_ptr<ProgressReporter> progressReporter;
+
+        if (quiet == 1) {
+            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+
+        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        XOPNotice("An unknown error occurred\r");
+        return WM_UNKNOWN_ERROR;
+    }
+
+    return err;
 }
 
 static int RegisterLocalizationAnalysis(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the LocalizationAnalysisRuntimeParams structure as well.
-	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
-	runtimeNumVarList = "V_flag;";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the LocalizationAnalysisRuntimeParams structure as well.
+    cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
+    runtimeNumVarList = "V_flag;";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, kOperationIsThreadSafe);
 }
 
 static int RegisterReadCCDImages(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
-	runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
-	runtimeStrVarList = "S_filePath;";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
+    cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
+    runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
+    runtimeStrVarList = "S_filePath;";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
 }
 
 static int RegisterProcessCCDImages(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q string:input_file, string:output_file";
-	runtimeNumVarList = "V_flag";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
+    cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q string:input_file, string:output_file";
+    runtimeNumVarList = "V_flag";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
 }
 
 static int RegisterAnalyzeCCDImages(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
-	cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:input_file";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the AnalyzeCCDImagesRuntimeParams structure as well.
+    cmdTemplate = "AnalyzeCCDImages /Y=number:camera_type /M=number:method /ROI={number:startX, number:endX, number:startY, number:endY} /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:input_file";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(AnalyzeCCDImagesRuntimeParams), (void*)ExecuteAnalyzeCCDImages, kOperationIsThreadSafe);
 }
 
 static int RegisterEmitterSegmentation(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
-	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
+    cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
 }
 
 static int RegisterConvolveImages(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the ConvolveImagesRuntimeParams structure as well.
-	cmdTemplate = "ConvolveImages /DEST=DataFolderAndName:{dest,real} /O wave:firstImage, wave:secondImage";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the ConvolveImagesRuntimeParams structure as well.
+    cmdTemplate = "ConvolveImages /DEST=DataFolderAndName:{dest,real} /O wave:firstImage, wave:secondImage";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ConvolveImagesRuntimeParams), (void*)ExecuteConvolveImages, 0);
 }
 
 static int RegisterLocalizationBitmap(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
-	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} /Q wave:positionsWave";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
+    cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} /Q wave:positionsWave";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
 }
 
 
 static int RegisterRipleyLFunctionClustering(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the RipleyLFunctionClusteringRuntimeParams structure as well.
-	cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the RipleyLFunctionClusteringRuntimeParams structure as well.
+    cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);
 }
 
 static int RegisterSOFIAnalysis(void) {
-	const char* cmdTemplate;
-	const char* runtimeNumVarList;
-	const char* runtimeStrVarList;
-	
-	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
-	runtimeNumVarList = "";
-	runtimeStrVarList = "";
-	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+
+    // NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
+    cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
 }
 
 /*	XOPEntry()
- 
+
  This is the entry point from the host application to the XOP for all
  messages after the INIT message.
  */
 static void XOPEntry(void) {	
-	long result = 0;
-	
-	switch (GetXOPMessage()) {
-			// We don't need to handle any messages for this XOP.
-	}
-	SetXOPResult(result);
+    long result = 0;
+
+    switch (GetXOPMessage()) {
+    // We don't need to handle any messages for this XOP.
+    }
+    SetXOPResult(result);
 }
 
 static int RegisterOperations(void)		// Register any operations with Igor.
 {
-	int result;
-	
-	if (result = RegisterLocalizationAnalysis())
-		return result;
-	if (result = RegisterReadCCDImages())
-		return result;
-	if (result = RegisterProcessCCDImages())
-		return result;
-	if (result = RegisterAnalyzeCCDImages())
-		return result;
-	if (result = RegisterEmitterSegmentation())
-		return result;
-	if (result = RegisterConvolveImages())
-		return result;
-	if (result = RegisterLocalizationBitmap())
-		return result;
-	if (result = RegisterRipleyLFunctionClustering())
-		return result;
-	if (result = RegisterSOFIAnalysis())
-		return result;
-	
-	// There are no more operations added by this XOP.
-	
-	return 0;
+    int result;
+
+    if (result = RegisterLocalizationAnalysis())
+        return result;
+    if (result = RegisterReadCCDImages())
+        return result;
+    if (result = RegisterProcessCCDImages())
+        return result;
+    if (result = RegisterAnalyzeCCDImages())
+        return result;
+    if (result = RegisterEmitterSegmentation())
+        return result;
+    if (result = RegisterConvolveImages())
+        return result;
+    if (result = RegisterLocalizationBitmap())
+        return result;
+    if (result = RegisterRipleyLFunctionClustering())
+        return result;
+    if (result = RegisterSOFIAnalysis())
+        return result;
+
+    // There are no more operations added by this XOP.
+
+    return 0;
 }
 
 
 /*	main(ioRecHandle)
- 
+
  This is the initial entry point at which the host application calls XOP.
  The message sent by the host must be INIT.
  
@@ -2635,22 +2635,22 @@ static int RegisterOperations(void)		// Register any operations with Igor.
  ioRecHandle to the address to be called for future messages.
  */
 HOST_IMPORT int main(IORecHandle ioRecHandle) {
-	int result;
-	
-	XOPInit(ioRecHandle);							// Do standard XOP initialization.
-	SetXOPEntry(XOPEntry);							// Set entry point for future calls.
-	if (igorVersion < 620) {
-		SetXOPResult(IGOR_OBSOLETE);
-		return EXIT_FAILURE;
-	}
-	
-	if (result = RegisterOperations()) {
-		SetXOPResult(result);
-	}
-	else {
-		SetXOPResult(0);
-	}
-	return EXIT_SUCCESS;
+    int result;
+
+    XOPInit(ioRecHandle);							// Do standard XOP initialization.
+    SetXOPEntry(XOPEntry);							// Set entry point for future calls.
+    if (igorVersion < 620) {
+        SetXOPResult(IGOR_OBSOLETE);
+        return EXIT_FAILURE;
+    }
+
+    if (result = RegisterOperations()) {
+        SetXOPResult(result);
+    }
+    else {
+        SetXOPResult(0);
+    }
+    return EXIT_SUCCESS;
 }
 
 class INCOMPATIBLE_WAVE_FORMAT {};
