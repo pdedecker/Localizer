@@ -7,6 +7,7 @@
  *
  */
 
+#include "PALM_analysis_MatrixRecycler.h"
 #include "PALM_analysis_FileIO.h"
 
 #ifdef WIN32

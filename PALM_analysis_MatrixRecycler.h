@@ -7,6 +7,9 @@
  *
  */
 
+#ifndef PALM_ANALYSIS_MATRIXRECYCLER
+#define PALM_ANALYSIS_MATRIXRECYCLER
+
 #include <list>
 #include "boost/thread.hpp"
 #include <eigen3/Eigen/Eigen>
@@ -52,3 +55,5 @@ void FreeRecycledMatrix(Image* matrixToFree);
  * Request that all reserved memory held in the recycler be freed
  */
 void FreeAllRecycledMatrices();
+
+#endif

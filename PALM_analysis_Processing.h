@@ -19,10 +19,12 @@
 #include <algorithm>
 #include <boost/smart_ptr.hpp>
 #include <eigen3/Eigen/Eigen>
+
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_ProgressReporting.h"
 
 class ImageLoader;
 class ImageOutputWriter;
