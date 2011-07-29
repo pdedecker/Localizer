@@ -33,7 +33,7 @@
 #include "PALM_analysis_SOFI.h"
 
 
-HOST_IMPORT int main(IORecHandle ioRecHandle);
+HOST_IMPORT int XOPMain(IORecHandle ioRecHandle);
 
 boost::shared_ptr<ImageLoader> get_image_loader_for_camera_type(size_t camera_type, std::string data_file_path);
 

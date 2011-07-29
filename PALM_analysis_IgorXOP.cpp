@@ -2634,7 +2634,7 @@ static int RegisterOperations(void)		// Register any operations with Igor.
  main does any necessary initialization and then sets the XOPEntry field of the
  ioRecHandle to the address to be called for future messages.
  */
-HOST_IMPORT int main(IORecHandle ioRecHandle) {
+HOST_IMPORT int XOPMain(IORecHandle ioRecHandle) {
     int result;
 
     XOPInit(ioRecHandle);							// Do standard XOP initialization.
