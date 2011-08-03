@@ -1124,8 +1124,15 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         const char *fileFilterStr = "Data Files\0.spe;.sif;.his;.tif;.tiff;.lsm;.pde\0\0";
 #endif
         err = XOPOpenFileDialog("Open images", fileFilterStr, NULL, "", filePathFromDialog);
-        if (err != 0)
-            return err;
+        if (err != 0) {
+            if (returnErrors != 0) {
+                SetOperationNumVar("V_flag", err);
+                return 0;
+            } else {
+                return err;
+            }
+        }
+        
         if ((err == -1) || (strlen(filePathFromDialog) == 0)) {
             // user canceled the dialog
             err = SetOperationStrVar("S_filePath", "");
@@ -1149,7 +1156,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 
         // get the filepath string in different ways depending on how
         // the user provided it
-        if (p->filePath == NULL) {
+        if (useDialog != 0) {
             dataFilePath = std::string(filePathFromDialog);
         } else {
             dataFilePath = ConvertHandleToString(p->filePath);
@@ -1190,7 +1197,7 @@ static int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 
     SetOperationNumVar("V_flag", err);
 
-    if ((err != 0) && (returnErrors != 0)) {
+    if (returnErrors != 0) {
         return err;
     } else {
         return 0;
