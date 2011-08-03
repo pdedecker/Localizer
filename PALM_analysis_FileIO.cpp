@@ -1100,13 +1100,18 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	ySize = (size_t)DimensionSizes[1];
 	nImages = (size_t)DimensionSizes[2];
 	
-	// special case: if the wave contains only a single image then it is usually two-dimensional, that is, DimensionSizes[2] == 0
+	// special case: if the wave contains only a single image
+    // then it is usually two-dimensional, that is, DimensionSizes[2] == 0
 	// in that case nImages is still one
 	if (DimensionSizes[2] == 0) {
 		nImages = 1;
 	}
 	
 	waveType = WaveType(igor_data_wave);
+    // do not handle complex waves
+    if (waveType & NT_CMPLX)
+        throw NO_COMPLEX_WAVE;
+    
 	switch (waveType) {
 		case NT_I8:
 			storage_type = STORAGE_TYPE_INT8;
