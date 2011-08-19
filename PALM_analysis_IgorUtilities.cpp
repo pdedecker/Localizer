@@ -164,6 +164,9 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
     result = SetOperationNumVar("V_ySize", y_size);
     if (result != 0)
         throw result;
+    result = SetOperationNumVar("V_storageType", storage_type);
+    if (result != 0)
+        throw result;
     result = SetOperationNumVar("V_firstImageLoaded", firstImage);
     if (result != 0)
         throw result;
@@ -204,6 +207,7 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
     size_t total_n_images = image_loader->getNImages();
     size_t x_size = image_loader->getXSize();
     size_t y_size = image_loader->getYSize();
+    int storageType = image_loader->getStorageType();
 
     int result;
 
@@ -214,6 +218,9 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
     if (result != 0)
         throw result;
     result = SetOperationNumVar("V_ySize", y_size);
+    if (result != 0)
+        throw result;
+    result = SetOperationNumVar("V_storageType", storageType);
     if (result != 0)
         throw result;
     result = SetOperationNumVar("V_firstImageLoaded", -1);

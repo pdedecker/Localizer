@@ -2503,7 +2503,7 @@ static int RegisterReadCCDImages(void) {
 
     // NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
     cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
-    runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_firstImageLoaded;V_lastImageLoaded;";
+    runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_storageType;V_firstImageLoaded;V_lastImageLoaded;";
     runtimeStrVarList = "S_filePath;";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
 }
