@@ -11,9 +11,15 @@
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
+    
+    if (nFramesToInclude == (size_t)-1)
+        nFramesToInclude = nImages - nFramesToSkip;
+    
+    if (nFramesToSkip + nFramesToInclude > nImages)
+        throw std::runtime_error("Too many images requested");
 	
 	if (nImages <= lagTime)
 		throw std::runtime_error("Not enough images for the requested lagtime");
@@ -23,6 +29,9 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	
 	if ((nFramesToGroup <= lagTime) && (nFramesToGroup != 0))
 		throw std::runtime_error("Cannot group less frames than the lag time");
+    
+    // adjust to the range requested by the user
+    nImages = nFramesToSkip + nFramesToInclude;
 	
 	boost::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {

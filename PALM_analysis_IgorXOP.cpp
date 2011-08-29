@@ -514,77 +514,78 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 // Runtime param structure for SOFIAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct SOFIAnalysisRuntimeParams {
-    // Flag parameters.
-
-    // Parameters for /Y flag group.
-    int YFlagEncountered;
-    double cameraType;
-    int YFlagParamsSet[1];
-
-    // Parameters for /WDTH flag group.
-    int WDTHFlagEncountered;
-    double psfWidth;
-    int WDTHFlagParamsSet[1];
-
-    // Parameters for /ORDR flag group.
-    int ORDRFlagEncountered;
-    double order;
-    int ORDRFlagParamsSet[1];
-
-    // Parameters for /LAG flag group.
-    int LAGFlagEncountered;
-    double lagTime;
-    int LAGFlagParamsSet[1];
-
-    // Parameters for /XC flag group.
-    int XCFlagEncountered;
-    double doCrossCorrelation;
-    int XCFlagParamsSet[1];
-
-    // Parameters for /GRP flag group.
-    int GRPFlagEncountered;
-    double nFramesToGroup;
-    int GRPFlagParamsSet[1];
-
-    // Parameters for /SKIP flag group.
-    int SKIPFlagEncountered;
-    double framesToSkip;
-    int SKIPFlagParamsSet[1];
-
-    // Parameters for /MAX flag group.
-    int MAXFlagEncountered;
-    double maxPixelVal;
-    int MAXFlagParamsSet[1];
-
-    // Parameters for /NSAT flag group.
-    int NSATFlagEncountered;
-    double noSaturatedPixels;				// Optional parameter.
-    int NSATFlagParamsSet[1];
-
-    // Parameters for /PROG flag group.
-    int PROGFlagEncountered;
-    LocalizerProgStruct* progStruct;
-    int PROGFlagParamsSet[1];
-
-    // Parameters for /Q flag group.
-    int QFlagEncountered;
-    // There are no fields for this group because it has no parameters.
-
-    // Parameters for /DEST flag group.
-    int DESTFlagEncountered;
-    DataFolderAndName dest;
-    int DESTFlagParamsSet[1];
-
-    // Main parameters.
-
-    // Parameters for simple main group #0.
-    int inputFilePathEncountered;
-    Handle inputFilePath;
-    int inputFilePathParamsSet[1];
-
-    // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	// Flag parameters.
+    
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double cameraType;
+	int YFlagParamsSet[1];
+    
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
+	double psfWidth;
+	int WDTHFlagParamsSet[1];
+    
+	// Parameters for /ORDR flag group.
+	int ORDRFlagEncountered;
+	double order;
+	int ORDRFlagParamsSet[1];
+    
+	// Parameters for /LAG flag group.
+	int LAGFlagEncountered;
+	double lagTime;
+	int LAGFlagParamsSet[1];
+    
+	// Parameters for /XC flag group.
+	int XCFlagEncountered;
+	double doCrossCorrelation;
+	int XCFlagParamsSet[1];
+    
+	// Parameters for /GRP flag group.
+	int GRPFlagEncountered;
+	double nFramesToGroup;
+	int GRPFlagParamsSet[1];
+    
+	// Parameters for /SUB flag group.
+	int SUBFlagEncountered;
+	double framesToSkip;
+	double nFramesToInclude;
+	int SUBFlagParamsSet[2];
+    
+	// Parameters for /MAX flag group.
+	int MAXFlagEncountered;
+	double maxPixelVal;
+	int MAXFlagParamsSet[1];
+    
+	// Parameters for /NSAT flag group.
+	int NSATFlagEncountered;
+	double noSaturatedPixels;				// Optional parameter.
+	int NSATFlagParamsSet[1];
+    
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+    
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+    
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+    
+	// Main parameters.
+    
+	// Parameters for simple main group #0.
+	int inputFilePathEncountered;
+	Handle inputFilePath;
+	int inputFilePathParamsSet[1];
+    
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
 typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
@@ -2376,15 +2377,16 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
         }
     }
 
-    size_t nFramesToSkip;
-    if (p->SKIPFlagEncountered) {
-        // Parameter: p->framesToSkip
-        if (p->framesToSkip < 0)
-            return EXPECT_POS_NUM;
-        nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
-    } else {
-        nFramesToSkip = 0;
-    }
+    size_t nFramesToSkip = 0;
+    size_t nFramesToInclude = (size_t)-1;
+    if (p->SUBFlagEncountered) {
+		// Parameter: p->framesToSkip
+        if (p->framesToSkip > 0)
+            nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
+		// Parameter: p->nFramesToInclude
+        if (p->nFramesToInclude > 0)
+            nFramesToInclude = (size_t)(p->nFramesToInclude + 0.5);
+	}
 
     int useIgorFunctionForProgress;
     FUNCREF igorProgressReporterFunction;
@@ -2466,7 +2468,7 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
             }
         }
 
-        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
     }
     catch (int e) {
         return e;
@@ -2587,8 +2589,8 @@ static int RegisterSOFIAnalysis(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-    cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SKIP=number:framesToSkip /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
-    runtimeNumVarList = "";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
 }

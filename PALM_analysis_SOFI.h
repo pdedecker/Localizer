@@ -24,7 +24,7 @@ class SOFIFrameVerifier;
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
  * In addition it's possible that the calculation will only operate on subranges
