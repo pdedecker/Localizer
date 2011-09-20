@@ -11,7 +11,7 @@
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth) {
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
     
@@ -37,7 +37,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	if (crossCorrelate == 0) {
 		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_auto(lagTime));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime, psfWidth));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime));
 	}
 	
 	SOFICorrector_Order2 sofiCorrector;	// will only be used when crosscorrelating
@@ -127,9 +127,9 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	progressReporter->CalculationDone();
 }
 
-SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) {
-	this->lagTime = lagTime_rhs;
-	this->nEvaluations = 0;
+SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) :
+    lagTime(lagTime_rhs), nEvaluations(0)
+{
 }
 
 void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
@@ -192,10 +192,9 @@ ImagePtr SOFICalculator_Order2_auto::getResult() {
 	return imageToBeReturned;
 }
 
-SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs, double psfWidth_rhs) {
-	this->lagTime = lagTime_rhs;
-	this->psfWidth = psfWidth_rhs;
-	this->nEvaluations = 0;
+SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs) :
+    lagTime(lagTime_rhs), nEvaluations(0)
+{
 }
 
 void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
@@ -371,7 +370,7 @@ ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
 	
 	ImagePtr correctedImage = performPSFCorrection(imageToCorrect.get(), optimalPSFStdDev);
 	return correctedImage;
-}*/
+}
 
 double SOFICorrector_Order2::determinePSFStdDev(ImagePtr imageToCorrect) {
 	const gsl_min_fminimizer_type * minizerType = gsl_min_fminimizer_brent;
@@ -475,7 +474,7 @@ double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) 
 	variance = avgOfSquares - avg * avg;
 	
 	return variance / (avg * avg);
-}
+}*/
 
 SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_rhs) {
 	switch (storageType_rhs) {

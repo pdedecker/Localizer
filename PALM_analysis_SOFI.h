@@ -24,7 +24,7 @@ class SOFIFrameVerifier;
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, double psfWidth);
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
  * In addition it's possible that the calculation will only operate on subranges
@@ -63,7 +63,7 @@ protected:
 
 class SOFICalculator_Order2_cross : public SOFICalculator {
 public:
-	SOFICalculator_Order2_cross(int lagTime, double psfWidth);
+	SOFICalculator_Order2_cross(int lagTime);
 	~SOFICalculator_Order2_cross() {;}
 	
 	void addNewImage(ImagePtr image);
@@ -71,7 +71,6 @@ public:
 	
 protected:
 	size_t lagTime;
-	double psfWidth;
 	std::queue<ImagePtr> imageQueue;
 	
 	ImagePtr outputImageCrossCorrelation;
@@ -90,9 +89,9 @@ public:
 	ImagePtr doImageCorrection(ImagePtr imageToCorrect);
 	
 protected:
-	double determinePSFStdDev(ImagePtr imageToCorrect);
-	static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
-	static double functionToMinimize(double psfStdDev, void *params);
+	//double determinePSFStdDev(ImagePtr imageToCorrect);
+	//static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
+	//static double functionToMinimize(double psfStdDev, void *params);
 };
 
 class SOFIFrameVerifier {

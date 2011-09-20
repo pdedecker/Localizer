@@ -2468,7 +2468,7 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
             }
         }
 
-        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup, psfWidth);
+        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup);
     }
     catch (int e) {
         return e;
