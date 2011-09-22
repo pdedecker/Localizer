@@ -65,6 +65,8 @@ public:
     void read(char *buffer, size_t nBytes);
     void getline(char *buffer, size_t nMax);
     
+    void write(char *buffer, size_t nBytes);
+    
     uint64_t tellg();
     void seekg(uint64_t pos);
     
@@ -188,7 +190,7 @@ protected:
 	void parse_header_information();
 };
 
-class ImageLoaderPDE : public ImageLoader {	// loads data from a binary file from a square array consisting of size_ts in row-major order
+class ImageLoaderPDE : public ImageLoader {
 public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
@@ -251,7 +253,11 @@ public:
 protected:
 	
 	std::string outputFilePath;
+#ifdef _WIN32
+	WindowsFileStream file;
+#else
 	std::ofstream file;
+#endif
 	
 	size_t nImagesWritten;
 };

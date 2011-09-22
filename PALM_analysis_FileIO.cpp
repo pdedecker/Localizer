@@ -54,7 +54,6 @@ void WindowsFileStream::close() {
 
 void WindowsFileStream::get(char& c) {
 	assert (this->fileRef != NULL);
-    int err;
 	if (this->fileRef == NULL) {
 		throw ERROR_READING_FILE_DATA(std::string("\"get\" was called on a NULL FILE*"));
 	}
@@ -76,11 +75,23 @@ void WindowsFileStream::read(char *buffer, size_t nBytes) {
 
 void WindowsFileStream::getline(char *buffer, size_t nMax) {
 	assert (this->fileRef != NULL);
-    int err;
     fgets(buffer, nMax, this->fileRef);
     if (ferror(fileRef) != 0) {
 		std::string error;
 		error = "Error returned using getline() on the image file at \"";
+		error += path;
+		error += "\"";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+}
+
+void WindowsFileStream::write(char *buffer, size_t nBytes) {
+    assert (this->fileRef != NULL);
+    
+    int err = fwrite(buffer, nBytes, 1, this->fileRef);
+    if (ferror(fileRef) != 0) {
+		std::string error;
+		error = "Error returned using write() on the image file at \"";
 		error += path;
 		error += "\"";
         throw ERROR_READING_FILE_DATA(error);
