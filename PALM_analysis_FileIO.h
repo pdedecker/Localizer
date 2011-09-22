@@ -80,7 +80,7 @@ private:
     FILE *fileRef;
 	std::string path;
 };
-#endif
+#endif // _WIN32
 
 class ImageLoader {
 public:

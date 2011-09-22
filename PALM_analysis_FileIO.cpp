@@ -10,7 +10,7 @@
 #include "PALM_analysis_MatrixRecycler.h"
 #include "PALM_analysis_FileIO.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 WindowsFileStream::~WindowsFileStream() {
     if (this->fileRef != NULL) {
         fclose(this->fileRef);
@@ -133,7 +133,7 @@ void WindowsFileStream::seekp(uint64_t pos, std::ios_base::seekdir dir) {
         throw ERROR_READING_FILE_DATA(error);
     }
 }
-#endif
+#endif // _WIN32
 
 
 ImageLoader::ImageLoader() {
