@@ -119,6 +119,20 @@ void WindowsFileStream::seekg(uint64_t pos) {
         throw ERROR_READING_FILE_DATA(error);
     }
 }
+
+void WindowsFileStream::seekp(uint64_t pos, std::ios_base::seekdir dir) {
+    assert (this->fileRef != NULL);
+    int err;
+    
+    err = _fseeki64(this->fileRef, pos, SEEK_SET);
+    if (err != 0) {
+		std::string error;
+       	error = "Error returned using seekg() on the image file at \"";
+		error += path;
+		error += "\"";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+}
 #endif
 
 

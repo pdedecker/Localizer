@@ -43,7 +43,11 @@ using boost::uint8_t;
 using boost::int8_t;
 
 /**
- * Provide an ifstream-like class for Windows that handles large file offset
+ Provides a replacement for an fstream class, since the standard fstream classes
+ in win32 do not handle file offsets larger than 2 GB.
+ The replacement is not complete; in particular the arguments to open, seekg, and seekp
+ are ignored. Also, there is no separate concept of a seek and put pointer, instead
+ there is only a single one.
  */
 #ifdef _WIN32
 class WindowsFileStream {
@@ -69,6 +73,7 @@ public:
     
     uint64_t tellg();
     void seekg(uint64_t pos);
+    void seekp(uint64_t pos, std::ios_base::seekdir dir);
     
     
 private:
