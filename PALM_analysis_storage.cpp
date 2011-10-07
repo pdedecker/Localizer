@@ -102,7 +102,7 @@ void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<Localiz
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != this->getPositionsType()) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_2DGauss");
 	}
 	
 	// cast the pointer to the more specific type
@@ -492,7 +492,7 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_p
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != this->getPositionsType()) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_2DGauss");
 	}
 	
 	// cast the pointer to the more specific type
@@ -522,7 +522,7 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPositions(boost::shar
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != this->getPositionsType()) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_2DGauss");
 	}
 	
 	// cast the pointer to the more specific type
@@ -897,7 +897,7 @@ void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<Locali
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_CENTROID) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Centroid");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_Centroid");
 	}
 	
 	// cast the pointer to the more specific type
@@ -1059,7 +1059,7 @@ void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_MULTIPLICATION) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_Multiplication");
 	}
 	
 	// cast the pointer to the more specific type
@@ -1186,7 +1186,7 @@ void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<Local
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_ZEISSPALM) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_ZeissPALM");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_ZeissPALM");
 	}
 	
 	// cast the pointer to the more specific type
@@ -1372,7 +1372,7 @@ void LocalizedPositionsContainer_MLEwG::addPositions(boost::shared_ptr<Localized
 	
 	// check if the positions container is of the right type
 	if (newPositionsContainer->getPositionsType() != this->getPositionsType()) {
-		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_MLEwG");
 	}
 	
 	// cast the pointer to the more specific type
