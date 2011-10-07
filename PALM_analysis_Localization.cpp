@@ -580,7 +580,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
+        return boost::shared_ptr<LocalizedPositionsContainer_MLEwG> (new LocalizedPositionsContainer_MLEwG());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
