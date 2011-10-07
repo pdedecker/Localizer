@@ -562,6 +562,11 @@ struct SOFIAnalysisRuntimeParams {
 	double noSaturatedPixels;				// Optional parameter.
 	int NSATFlagParamsSet[1];
     
+	// Parameters for /AVG flag group.
+	int AVGFlagEncountered;
+	double doAverage;						// Optional parameter.
+	int AVGFlagParamsSet[1];
+    
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
@@ -2376,6 +2381,15 @@ ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p)
             noSaturatedPixels = (int)(p->noSaturatedPixels + 0.5);
         }
     }
+    
+    int doAverage = 0;
+    if (p->AVGFlagEncountered) {
+        doAverage = 1;
+		if (p->AVGFlagParamsSet[0]) {
+			// Optional parameter: p->doAverage
+            doAverage = static_cast<int>(p->doAverage + 1);
+		}
+	}
 
     size_t nFramesToSkip = 0;
     size_t nFramesToInclude = (size_t)-1;
@@ -2584,15 +2598,15 @@ static int RegisterRipleyLFunctionClustering(void) {
 }
 
 static int RegisterSOFIAnalysis(void) {
-    const char* cmdTemplate;
-    const char* runtimeNumVarList;
-    const char* runtimeStrVarList;
-
-    // NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
+    
+	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
-    runtimeStrVarList = "";
-    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
 }
 
 /*	XOPEntry()
