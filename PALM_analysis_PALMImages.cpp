@@ -15,7 +15,7 @@ NormalCDFLookupTable::NormalCDFLookupTable() {
     this->upperLimit = 10.0;
     this->stride = 0.01;
     
-    size_t nValues = upperLimit - lowerLimit + 1;
+    size_t nValues = (upperLimit - lowerLimit) / stride + 1;
     
 	this->cdfTable = boost::shared_array<double> (new double[nValues]);
 	for (size_t i = 0; i < nValues; ++i) {
@@ -35,7 +35,7 @@ double NormalCDFLookupTable::getNormalCDF(double x, double sigma) {
         return 1.0;
     
     // perform linear interpolation using a weighted average
-    double fractionalIndex = (x - this->lowerLimit) / stride;
+    double fractionalIndex = (rescaledX - this->lowerLimit) / stride;
     size_t lowerIndex = std::floor(fractionalIndex);
     return cdfTable[lowerIndex] * (fractionalIndex - static_cast<double>(lowerIndex)) + cdfTable[lowerIndex + 1] * (static_cast<double>(lowerIndex + 1) - fractionalIndex);
 }
@@ -117,10 +117,10 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
                 shiftOfThisPixelX = static_cast<double>(i) - centerX;
                 shiftOfThisPixelY = static_cast<double>(j) - centerY;
                 
-                //integralX = this->cdfTable.getNormalCDF(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
-                //integralY = this->cdfTable.getNormalCDF(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
-                integralX = gsl_cdf_gaussian_P(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
-                integralY = gsl_cdf_gaussian_P(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
+                integralX = this->cdfTable.getNormalCDF(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
+                integralY = this->cdfTable.getNormalCDF(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
+                //integralX = gsl_cdf_gaussian_P(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
+                //integralY = gsl_cdf_gaussian_P(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
 				
 				(*outputImage)(i, j) += integralX * integralY * calculatedIntegral;
 			}
