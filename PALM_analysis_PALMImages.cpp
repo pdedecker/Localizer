@@ -10,11 +10,34 @@
 #include "PALM_analysis_PALMImages.h"
 
 NormalCDFLookupTable::NormalCDFLookupTable() {
-	// allocate an array of 1001 doubles containing the CDF of a normal distribution with stddev 5 between -5 and 5 (inclusive)
-	this->cdfTable = boost::shared_array<double> (new double[1001]);
-	for (size_t i = 0; i < 1001; ++i) {
-		this->cdfTable[i] = gsl_cdf_gaussian_P(-5.0 + 0.01 * (double)i, 1.0);
+	// allocate an array of 1001 doubles containing the CDF of a normal distribution
+    this->lowerLimit = -10.0;
+    this->upperLimit = 10.0;
+    this->stride = 0.01;
+    
+    size_t nValues = upperLimit - lowerLimit + 1;
+    
+	this->cdfTable = boost::shared_array<double> (new double[nValues]);
+	for (size_t i = 0; i < nValues; ++i) {
+		this->cdfTable[i] = gsl_cdf_gaussian_P(this->lowerLimit + static_cast<double>(i) * stride, 1.0);
 	}
+}
+
+double NormalCDFLookupTable::getNormalCDF(double x, double sigma) {
+    double rescaledX;
+    
+    // rescale the requested x to a distribution with stddev 1
+    rescaledX = x / sigma;
+    
+    if (rescaledX < this->lowerLimit)
+        return 0.0;
+    if (rescaledX > this->upperLimit)
+        return 1.0;
+    
+    // perform linear interpolation using a weighted average
+    double fractionalIndex = (x - this->lowerLimit) / stride;
+    size_t lowerIndex = std::floor(fractionalIndex);
+    return cdfTable[lowerIndex] * (fractionalIndex - static_cast<double>(lowerIndex)) + cdfTable[lowerIndex + 1] * (static_cast<double>(lowerIndex + 1) - fractionalIndex);
 }
 
 ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 

@@ -31,28 +31,11 @@ public:
 	NormalCDFLookupTable();
 	~NormalCDFLookupTable() {;}
 	
-	double getNormalCDF(double x, double sigma) {	// this function is defined here to make it inline
-		double rescaledX, lowerBracketX;
-		size_t lowerBracket, upperBracket;
-		
-		// rescale the requested x to a distribution with stddev 1
-		rescaledX = x / sigma;
-		
-		if (rescaledX < -5.0)
-			return 0;
-		if (rescaledX > 5.0)
-			return 1;
-		
-		lowerBracket = (size_t)((rescaledX + 5.0) / 0.01);
-		upperBracket = lowerBracket + 1;
-		lowerBracketX = -5.0 + lowerBracket * 0.01;
-		
-		
-		// obtain the output value by linear interpolation
-		return cdfTable[lowerBracket] + (rescaledX - lowerBracketX) / 0.01 * (cdfTable[upperBracket] - cdfTable[lowerBracket]);
-	}
+	double getNormalCDF(double x, double sigma);
 	
 protected:
+    double lowerLimit, upperLimit;
+    double stride;
 	boost::shared_array<double> cdfTable;
 };
 
