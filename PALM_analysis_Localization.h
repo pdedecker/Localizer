@@ -119,9 +119,8 @@ public:
 
 protected:
     int multiply_with_gaussian(ImagePtr original_image, ImagePtr masked_image, double x, double y,
-                               double std_dev, double background, double amplitude);
+                               double std_dev, double amplitude);
     // masked_image should be provided with the same dimensions as original_image. It will be overwritten with the contents of the multiplication
-    int determine_x_y_position(ImagePtr masked_image, double &x, double &y);
 
     double convergence_threshold;
     size_t cutoff_radius;

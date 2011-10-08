@@ -749,7 +749,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
     size_t ySize = image->cols();
     double x_offset, y_offset, x_max, y_max;
 
-    double x0_initial, y0_initial, amplitude, background;
+    double x0_initial, y0_initial, amplitude, background, threshold;
     size_t iterations = 0;
     int converged;
 
@@ -759,6 +759,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
     // we initialize it to a value well over the treshold so that we will run at least two iterations
     double previous_position_x, previous_position_y;
     double current_x, current_y;
+    double numerator_x, numerator_y, denominator;
 
     ImagePtr image_subset;
     ImagePtr image_subset_mask;
@@ -776,7 +777,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
         background = (*it).background;
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
-        y_offset = floor(y0_initial - (double)cutoff_radius);
+        y_offset = floor(y0_initial - (double)
+                         cutoff_radius);
         x_max = floor(x0_initial + (double)cutoff_radius);
         y_max = floor(y0_initial + (double)cutoff_radius);
 
@@ -785,11 +787,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
             continue;
         }
 
+        threshold = 0.0;
         for (size_t k = y_offset; k <= y_max; ++k) {
             for (size_t j = x_offset; j <= x_max; ++j) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
+                threshold += (*image)(j, k);
             }
         }
+        threshold /= static_cast<double>(size_of_subset * size_of_subset);
 
         iterations = 0;
 
@@ -808,8 +813,23 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
                 break;
             }
 
-            multiply_with_gaussian(image_subset, image_subset_mask, current_x, current_y, initialPSFWidth, background, amplitude);
-            determine_x_y_position(image_subset_mask, current_x, current_y);
+            multiply_with_gaussian(image_subset, image_subset_mask, current_x, current_y, initialPSFWidth, amplitude);
+            
+            numerator_x = 0.0;
+            numerator_y = 0.0;
+            denominator = 0.0;
+            for (size_t j = 0; j < size_of_subset; j++) {
+                for (size_t i = 0; i < size_of_subset; i++) {
+                    if ((*image_subset)(i, j) < threshold)
+                        continue;
+                    numerator_x += (double)i * (*image_subset_mask)(i, j);
+                    numerator_y += (double)j * (*image_subset_mask)(i, j);
+                    denominator += (*image_subset_mask)(i, j);
+                }
+            }
+            
+            current_x = numerator_x / denominator;
+            current_y = numerator_y / denominator;
 
             if (iterations == 1)	// this is the first iteration, we should not check for termination
                 continue;
@@ -835,7 +855,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 
 
 int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, ImagePtr masked_image, double x, double y, 
-                                                       double std_dev, double background, double amplitude) {
+                                                       double std_dev, double amplitude) {
     // we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 
     size_t x_size = masked_image->rows();
@@ -851,37 +871,11 @@ int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, 
         for (size_t i = 0; i < x_size; i++) {
             distance_squared = (x - (double)i) * (x - (double)i) + (y - (double)j) * (y - (double)j);
 
-            gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev)) + background;
+            gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev));
 
             (*masked_image)(i, j) = gaussian_value * (*original_image)(i, j);
         }
     }
-
-    return 0;
-}
-
-
-int FitPositionsMultiplication::determine_x_y_position(ImagePtr masked_image, double &x, double &y) {
-    // based on eq (3) in Thompson Biophys J 2002
-
-    size_t x_size = (size_t)masked_image->rows();
-    size_t y_size = (size_t)masked_image->cols();
-
-    double numerator_x = 0, denominator = 0;
-    double numerator_y = 0;
-
-    // start with determining the x-position
-    for (size_t j = 0; j < y_size; j++) {
-        for (size_t i = 0; i < x_size; i++) {
-            numerator_x += (double)i * (*masked_image)(i, j);
-            numerator_y += (double)j * (*masked_image)(i, j);
-            denominator += (*masked_image)(i, j);
-        }
-    }
-
-    x = numerator_x / denominator;
-
-    y = numerator_y / denominator;
 
     return 0;
 }
