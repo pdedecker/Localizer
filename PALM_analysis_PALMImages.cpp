@@ -24,14 +24,14 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 	double centerX, centerY, calculatedIntegral, calculatedDeviation;
 	long startX, endX, startY, endY;
 	double integralX, integralY;
-	double lowerXEdgeDistance, higherXEdgeDistance, lowerYEdgeDistance, higherYEdgeDistance;
+    double halfPixelSizeX = 0.5, halfPixelSizeY = 0.5, shiftOfThisPixelX, shiftOfThisPixelY;
 	
 	size_t nPositions = positions->getNPositions();
 	ImagePtr outputImage(new Image((int)imageWidth, (int)imageHeight));
 	outputImage->setConstant(0.0);
 	
-	double imageWidthScaleFactor = (double)(imageWidth - 1) / (double)xSize;
-	double imageHeightScaleFactor = (double)(imageHeight - 1) / (double)ySize;
+	double imageWidthScaleFactor = static_cast<double>(imageWidth) / static_cast<double>(xSize);
+	double imageHeightScaleFactor = static_cast<double>(imageHeight) / static_cast<double>(ySize);
 	
 	// update the progress reporter
 	this->progressReporter->CalculationStarted();
@@ -70,8 +70,8 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 				throw (std::runtime_error("Unrecognized emitter weighing method while calculating a PALM bitmap"));
 		}
 		
-		centerX = (size_t)(fittedXPos * imageWidthScaleFactor + 0.5);
-		centerY = (size_t)(fittedYPos * imageHeightScaleFactor + 0.5);
+		centerX = fittedXPos * imageWidthScaleFactor;
+		centerY = fittedYPos * imageHeightScaleFactor;
 		
 		startX = floor((double)centerX - 4.0 * calculatedDeviation);	// only run the calculation over a subset of the image surrounding the position
 		startY = floor((double)centerY - 4.0 * calculatedDeviation);
@@ -90,17 +90,16 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 		for (size_t j = startY; j < endY; ++j) {
 			for (size_t i = startX; i <= endX; ++i) {
 				// take into account that each pixel really should contain the integral of the Gaussian
-				// for that calculate the distance of the edge of every pixel to the emitter (in 1D)
-				lowerXEdgeDistance = centerX - (double)i - 0.5;
-				higherXEdgeDistance = centerX - (double)i + 0.5;
+				// how much is this pixel shifted with respect to the center of the emitter?
+                shiftOfThisPixelX = static_cast<double>(i) - centerX;
+                shiftOfThisPixelY = static_cast<double>(j) - centerY;
+                
+                //integralX = this->cdfTable.getNormalCDF(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
+                //integralY = this->cdfTable.getNormalCDF(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
+                integralX = gsl_cdf_gaussian_P(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
+                integralY = gsl_cdf_gaussian_P(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
 				
-				lowerYEdgeDistance = centerY - (double)j - 0.5;
-				higherYEdgeDistance = centerY - (double)j + 0.5;
-				
-				integralX = this->cdfTable.getNormalCDF(higherXEdgeDistance, calculatedDeviation) - this->cdfTable.getNormalCDF(lowerXEdgeDistance, calculatedDeviation);
-				integralY = this->cdfTable.getNormalCDF(higherYEdgeDistance, calculatedDeviation) - this->cdfTable.getNormalCDF(lowerYEdgeDistance, calculatedDeviation);
-				
-				(*outputImage)(i, j) = (*outputImage)(i, j) + integralX * integralY * calculatedIntegral;
+				(*outputImage)(i, j) += integralX * integralY * calculatedIntegral;
 			}
 		}
 	}
