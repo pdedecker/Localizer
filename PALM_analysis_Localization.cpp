@@ -904,7 +904,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
 
     size_t x0_initial, y0_initial;
     double current_x, current_y;
-    double denominator;
+    double denominator, threshold;
 
     boost::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
     boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
@@ -926,11 +926,22 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
             it = positions->erase(it);
             continue;
         }
+        
+        // estimate the threshold as the mean of the pixels in the subset
+        threshold = 0;
+        for (size_t k = y_offset; k <= y_max; ++k) {
+            for (size_t j = x_offset; j <= x_max; ++j) {
+                threshold += (*image)(j, k);
+            }
+        }
+        threshold /= static_cast<double>((x_max - x_offset + 1) * (y_max - y_offset + 1));
 
         for (size_t k = y_offset; k <= y_max; ++k) {
             for (size_t j = x_offset; j <= x_max; ++j) {
-                current_x += (double)j * (*image)(j, k);
-                current_y += (double)k * (*image)(j, k);
+                if ((*image)(j, k) < threshold)
+                    continue;
+                current_x += static_cast<double>(j) * (*image)(j, k);
+                current_y += static_cast<double>(k) * (*image)(j, k);
                 denominator += (*image)(j, k);
             }
         }
