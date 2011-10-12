@@ -42,6 +42,9 @@
 
 class SOFIFrameVerifier;
 
+// exception classes
+class SOFINoImageInCalculation;
+
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup);
@@ -142,6 +145,12 @@ public:
 	
 protected:
 	double maxPixelValue;
+};
+
+class SOFINoImageInCalculation : public std::runtime_error {
+public:
+	SOFINoImageInCalculation(const std::string& error_message) :
+	std::runtime_error(error_message) {}
 };
 
 #endif

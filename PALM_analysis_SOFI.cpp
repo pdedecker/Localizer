@@ -125,7 +125,15 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 				throw USER_ABORTED("Abort requested by user");
 			}
 			
-			outputImage = sofiCalculator->getResult();
+            try {
+                outputImage = sofiCalculator->getResult();
+            }
+            catch (SOFINoImageInCalculation e) {
+                // insufficient images were included in this calculation to get a result
+                // this probably means that the verifier rejected (nearly) all of them
+                // continue with the other images and hope that they make up for it
+                continue;
+            }
 			weightOfThisBlock = (double)(nImagesInBlock) / (double)(blockSize);
 			sumOfBlockWeights += weightOfThisBlock;
 				
@@ -188,8 +196,16 @@ void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
 }
 
 ImagePtr SOFICalculator_Order2_auto::getResult() {
-	if (this->nEvaluations == 0)
-		throw std::runtime_error("Requested a SOFI image even though there are no evaluations");
+	if (this->nEvaluations == 0) {
+        // cleanup for the next calculation
+        this->nEvaluations = 0;
+        this->averageImage->setConstant(0.0);
+        this->outputImage->setConstant(0.0);
+        
+        while (this->imageQueue.size() > 0)
+            this->imageQueue.pop();
+		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
+    }
 	
 	*this->averageImage /= (double)(this->nEvaluations);
 	*this->outputImage /= (double)(this->nEvaluations);
@@ -276,8 +292,19 @@ void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
 }
 
 ImagePtr SOFICalculator_Order2_cross::getResult() {
-	if (this->nEvaluations == 0)
-		throw std::runtime_error("Requested a SOFI image even though there are no evaluations");
+	if (this->nEvaluations == 0) {
+        // cleanup for the next set of images
+        this->nEvaluations = 0;
+        this->averageImage->setConstant(0.0);
+        this->outputImageHorizontalAutoCorrelation->setConstant(0.0);
+        this->outputImageVerticalAutoCorrelation->setConstant(0.0);
+        this->outputImageCrossCorrelation->setConstant(0.0);
+        
+        while (this->imageQueue.size() > 0)
+            this->imageQueue.pop();
+        
+        throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
+    }
 	
 	*this->averageImage /= (double)(this->nEvaluations);
 	*this->outputImageHorizontalAutoCorrelation /= (double)(this->nEvaluations);
