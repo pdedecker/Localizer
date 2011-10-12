@@ -670,9 +670,15 @@ ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 	ImagePtr image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
 	
 	switch (this->storage_type) {
+		case STORAGE_TYPE_INT8:
+		case STORAGE_TYPE_UINT8:
+			imageSize = nPixels;
+			break;
+		case STORAGE_TYPE_INT16:
 		case STORAGE_TYPE_UINT16:
 			imageSize = nPixels * 2;
 			break;
+		case STORAGE_TYPE_INT32:
 		case STORAGE_TYPE_UINT32:
 		case STORAGE_TYPE_FP32:
 			imageSize = nPixels * 4;
@@ -1333,9 +1339,7 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	// determine the size of the frames
 	size_t currentXSize = imageToWrite->rows();
 	size_t currentYSize = imageToWrite->cols();
-	size_t n_pixels = currentXSize * currentYSize;
-	
-	size_t offset = 0;
+	size_t nPixels = currentXSize * currentYSize;
 	
 	if (this->nImagesWritten == 0) {
 		this->xSize = currentXSize;
@@ -1346,58 +1350,59 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		}
 	}
 	
+	int bytesPerPixel;
 	switch (this->storageType) {
+		case STORAGE_TYPE_INT8:
+		case STORAGE_TYPE_UINT8:
+			bytesPerPixel = 1;
+			break;
+		case STORAGE_TYPE_INT16:
 		case STORAGE_TYPE_UINT16:
-		{
-			boost::scoped_array<uint16_t> buffer(new uint16_t[n_pixels]);
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					buffer[offset] = (uint16_t)(*imageToWrite)(i, j);
-					++offset;
-				}
-			}
-			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint16_t));
+			bytesPerPixel = 2;
 			break;
-		}
+		case STORAGE_TYPE_INT32:
 		case STORAGE_TYPE_UINT32:
-		{
-			boost::scoped_array<uint32_t> buffer(new uint32_t[n_pixels]);
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					buffer[offset] = (uint32_t)(*imageToWrite)(i, j);
-					++offset;
-				}
-			}
-			this->file.write((char *)buffer.get(), n_pixels * sizeof(uint32_t));
-			break;
-		}
 		case STORAGE_TYPE_FP32:
-		{
-			boost::scoped_array<float> buffer(new float[n_pixels]);
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					buffer[offset] = (float)(*imageToWrite)(i, j);
-					++offset;
-				}
-			}
-			this->file.write((char *)buffer.get(), n_pixels * sizeof(float));
+			bytesPerPixel = 4;
 			break;
-		}
 		case STORAGE_TYPE_FP64:
-		{
-			boost::scoped_array<double> buffer(new double[n_pixels]);
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					buffer[offset] = (double)(*imageToWrite)(i, j);
-					++offset;
-				}
-			}
-			this->file.write((char *)buffer.get(), n_pixels * sizeof(double));
+			bytesPerPixel = 8;
 			break;
-		}
 		default:
-			throw std::runtime_error("Unsupport file type requested in the simple output format");
+			throw std::runtime_error("Unsupport file type requested in the PDE output format");
 	}
+	
+	int nBytesToWrite = nPixels * bytesPerPixel;
+	boost::scoped_array<char> buffer(new char[nBytesToWrite]);
+	
+	switch (this->storageType) {
+		case STORAGE_TYPE_INT8:
+			WriteImageToBuffer<int8_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_UINT8:
+			WriteImageToBuffer<uint8_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_INT16:
+			WriteImageToBuffer<int16_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_UINT16:
+			WriteImageToBuffer<uint16_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_INT32:
+			WriteImageToBuffer<int32_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_UINT32:
+			WriteImageToBuffer<uint32_t>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_FP32:
+			WriteImageToBuffer<float>(imageToWrite, buffer.get());
+			break;
+		case STORAGE_TYPE_FP64:
+			WriteImageToBuffer<double>(imageToWrite, buffer.get());
+			break;
+	}
+	
+	this->file.write(buffer.get(), nBytesToWrite);
 	++this->nImagesWritten;
 }
 
