@@ -61,6 +61,41 @@ using boost::int16_t;
 using boost::uint8_t;
 using boost::int8_t;
 
+
+/**
+ Function that writes the contents of a char* buffer containing a single image
+ (i.e. as read from a file) to an Image.
+ */
+template <typename T>
+void WriteBufferToImage(char *buffer, ImagePtr imagePtr) {
+    T *bufferPtr = reinterpret_cast<T *>(buffer);
+    size_t nRows = imagePtr->rows();
+    size_t nCols = imagePtr->cols();
+    for (size_t j  = 0; j < nCols; j++) {
+        for (size_t i = 0; i < nRows; i++) {
+            (*imagePtr)(i, j) = static_cast<double>(*bufferPtr);
+            ++bufferPtr;
+        }
+    }
+}
+
+/**
+ Function that writes the contents of a single image to a char * buffer,
+ while converting to the requested number type
+ */
+template <typename T>
+void WriteImageToBuffer(ImagePtr imagePtr, char *buffer) {
+	T* bufferPtr = reinterpret_cast<T *>(buffer);
+	size_t nRows = imagePtr->rows();
+    size_t nCols = imagePtr->cols();
+    for (size_t j  = 0; j < nCols; j++) {
+        for (size_t i = 0; i < nRows; i++) {
+            *bufferPtr = static_cast<T>((*imagePtr)(i, j));
+            ++bufferPtr;
+        }
+    }
+}
+
 /**
  Provides a replacement for an fstream class, since the standard fstream classes
  in win32 do not handle file offsets larger than 2 GB.

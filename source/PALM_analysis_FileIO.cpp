@@ -278,10 +278,6 @@ void ImageLoaderSPE::parse_header_information() {
 
 ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
 	uint64_t offset;
-	uint32_t *currentUint32t = 0;
-	float *currentFloat = 0;
-	int16_t *currentInt16t = 0;
-	uint16_t *currentUint16t = 0;
 	
 	uint64_t imageSize, pixelSize;
 	
@@ -329,44 +325,21 @@ ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
 	
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4-byte float
-			currentFloat = (float *)single_image_buffer.get();
-			for (size_t j  = 0; j < ySize; j++) {
-				for (size_t i = 0; i < xSize; i++) {
-					(*image)(i, j) = *currentFloat;
-					++currentFloat;
-				}
-			}
+            WriteBufferToImage<float>(single_image_buffer.get(), image);
 			break;
-			
+            
 		case STORAGE_TYPE_UINT32:	// 4-byte long
-			currentUint32t = (uint32_t *)single_image_buffer.get();
-			for (size_t j  = 0; j < ySize; j++) {
-				for (size_t i = 0; i < xSize; i++) {
-					(*image)(i, j) = *currentUint32t;
-					++currentUint32t;
-				}
-			}
+			WriteBufferToImage<uint32_t>(single_image_buffer.get(), image);
 			break;
-			
+            
 		case STORAGE_TYPE_INT16:	// 2-byte signed short
-			currentInt16t = (int16_t *) single_image_buffer.get();
-			for (size_t j  = 0; j < ySize; j++) {
-				for (size_t i = 0; i < xSize; i++) {
-					(*image)(i, j) = *currentInt16t;
-					++currentInt16t;				
-				}
-			}
+			WriteBufferToImage<int16_t>(single_image_buffer.get(), image);
 			break;
 			
 		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
-			currentUint16t = (uint16_t *)single_image_buffer.get();
-			for (size_t j  = 0; j < ySize; j++) {
-				for (size_t i = 0; i < xSize; i++) {
-					(*image)(i, j) = *currentUint16t;
-					++currentUint16t;
-				}
-			}
+			WriteBufferToImage<uint16_t>(single_image_buffer.get(), image);
 			break;
+            
 		default:
 			std::string error("Unable to determine the storage type used in ");
 			error += this->filePath;
@@ -736,52 +709,36 @@ ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 	
 	
 	switch (this->storage_type) {
-		case STORAGE_TYPE_UINT16:
-		{
-			uint16_t *currentUint16t = (uint16_t *)buffer.get();
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					(*image)(i, j) = *currentUint16t;
-					++currentUint16t;
-				}
-			}
-			break;
-		}
+        case STORAGE_TYPE_INT8:
+            WriteBufferToImage<int8_t>(buffer.get(), image);
+            break;
+            
+        case STORAGE_TYPE_UINT8:
+            WriteBufferToImage<uint8_t>(buffer.get(), image);
+            break;
+            
+        case STORAGE_TYPE_INT16:
+            WriteBufferToImage<int16_t>(buffer.get(), image);
+            break;
+            
+        case STORAGE_TYPE_UINT16:
+            WriteBufferToImage<uint16_t>(buffer.get(), image);
+            break;
+            
 		case STORAGE_TYPE_UINT32:
-		{
-			uint32_t *currentUint32t = (uint32_t *)buffer.get();
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					(*image)(i, j) = *currentUint32t;
-					++currentUint32t;
-				}
-			}
-			break;
-		}
+            WriteBufferToImage<uint32_t>(buffer.get(), image);
+            break;
+            
 		case STORAGE_TYPE_FP32:
-		{
-			float *currentFloat = (float *)buffer.get();
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					(*image)(i, j) = *currentFloat;
-					++currentFloat;
-				}
-			}
-			break;
-		}
+            WriteBufferToImage<float>(buffer.get(), image);
+            break;
+            
 		case STORAGE_TYPE_FP64:
-		{
-			double *currentDouble = (double *)buffer.get();
-			for (size_t i = 0; i < this->xSize; ++i) {
-				for (size_t j = 0; j < this->ySize; ++j) {
-					(*image)(i, j) = *currentDouble;
-					++currentDouble;
-				}
-			}
-			break;
-		}
+            WriteBufferToImage<double>(buffer.get(), image);
+            break;
+            
 		default:
-			throw std::runtime_error("The data file does appear to contain a recognized storage type");
+			throw std::runtime_error("The data file does not appear to contain a recognized storage type");
 			break;
 	}
 	
