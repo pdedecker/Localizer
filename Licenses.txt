@@ -1,6 +1,7 @@
 Localizer itself is licensed under the GPLv3 license.
 
 It also includes code from the following projects:
+- Eigen (http://eigen.tuxfamily.org/index.php?title=Main_Page)
 - Libtiff (http://www.remotesensing.org/libtiff/).
 - GNU Scientific Library (https://www.gnu.org/s/gsl/).
 - FFTW (http://www.fftw.org/).
@@ -13,6 +14,9 @@ Where available, the relevant copyright and licenses are included below.
 
 LOCALIZER, GNU SCIENTIFIC LIBRARY, FFTW:
 http://www.gnu.org/licenses/gpl.html
+
+EIGEN:
+https://www.gnu.org/licenses/lgpl.html
 
 LIBTIFF:
 Copyright (c) 1988-1997 Sam Leffler
