@@ -27,4 +27,4 @@ I'm not much for source code. Do you have something that I can start using right
 
 I have written a graphical user interface for Igor Pro that provides a fully-featured and capable program to use for analyzing your PALM/STORM or SOFI data, including visualization, clustering analysis, drift correction, etc. Igor Pro is commercial software, but [a free 30-day trial version is available for direct download](http://www.wavemetrics.com/support/demos.htm). Localizer will function without restrictions during the trial period. After the trial period Localizer will continue to function normally, but you will be unable to save the data or figures it generates.
 
-You can download the necessary files [here](https://sushi.chem.kuleuven.be/SVN/Localizer).
+You can download the necessary files [here](https://sushi.chem.kuleuven.be/svn/Localizer). This location also includes a getting started guide as well as a complete reference for including Localizer in your own Igor programs.
