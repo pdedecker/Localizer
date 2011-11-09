@@ -1,0 +1,61 @@
+/*	XOP-specific resources for XOP1 on Windows
+
+	This file is compiled by the resource compiler and creates XOP-specific
+	resources that IGOR looks for in an XOP module.
+*/
+
+#include "XOPResources.h"			// Defines XOP-specific symbols.
+
+/* no custom error messages */
+
+/* no menu item */
+
+1100 XOPI							// XOPI - Describes general XOP properties to IGOR. 
+BEGIN
+	XOP_VERSION,					// Version number of host XOP system.
+	DEV_SYS_CODE,					// Code for development system used to make XOP.
+	0,								// Obsolete - set to zero.
+	0,								// Obsolete - set to zero.
+	XOP_TOOLKIT_VERSION				// XOP Toolkit version.
+END
+
+1100 XOPC							// Describes operations that the XOP adds to IGOR.
+BEGIN
+	"LocalizationAnalysis\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+		
+	"ReadCCDImages\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+		
+	"ProcessCCDImages\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+		
+	"AnalyzeCCDImages\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+		
+	"EmitterSegmentation\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+		
+	"ConvolveImages\0",
+	XOPOp | utilOp | compilableOp,
+
+	"LocalizationBitmap\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
+
+	"RipleyLFunctionClustering\0",
+	XOPOp | utilOp | compilableOp,
+
+	"SOFIAnalysis\0",
+	XOPOp | utilOp | compilableOp,
+
+	"\0"							// NOTE: NULL required to terminate the resource.
+END
+
+1100 STR#
+BEGIN
+		"An error occurred while performing the requested operation. See the command window (command-J or control-J) for more information.\0",
+		"A rolling average requires an odd number of frames to be specified (/AVG flag)\0",
+		"\0"	
+END
+
+
