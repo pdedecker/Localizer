@@ -12,6 +12,7 @@
 		D0069ECF117B8EB700112C90 /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
 		D01D290C136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
+		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D090E533139685610099D837 /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
 		D09EF8AC10ECC7EA0017DF46 /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
 		D09EF8AD10ECC7EA0017DF46 /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
@@ -36,6 +37,20 @@
 		D0A9C2FA135F4EED00D076AE /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
 		D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
 		D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
+		D0CCD31F1473C6B6005CD75A /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
+		D0CCD3211473C6B6005CD75A /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
+		D0CCD3231473C6B6005CD75A /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
+		D0CCD3251473C6B6005CD75A /* PALM_analysis_FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */; };
+		D0CCD3271473C6B6005CD75A /* PALM_analysis_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */; };
+		D0CCD3291473C6B6005CD75A /* PALM_analysis_ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */; };
+		D0CCD32B1473C6B6005CD75A /* PALM_analysis_Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */; };
+		D0CCD32D1473C6B6005CD75A /* PALM_analysis_PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */; };
+		D0CCD32F1473C6B6005CD75A /* PALM_analysis_PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */; };
+		D0CCD3311473C6B6005CD75A /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
+		D0CCD3331473C6B6005CD75A /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
+		D0CCD3351473C6B6005CD75A /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
+		D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CCD3381473C700005CD75A /* LocalizerDLL.h */; };
+		D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */; };
 		D0E6FD11131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
 		D0E6FD12131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
 		D0F4245211B5A6B1001BCE24 /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
@@ -99,6 +114,9 @@
 		D0A9C2CD135F449F00D076AE /* Include dylib.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Include dylib.txt"; sourceTree = "<group>"; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0B8585710E941A80045036F /* LocalizationAnalysis */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LocalizationAnalysis; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
+		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
 		D0D1B10B10E8EFA9009336E7 /* Wave note metadata.txt */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; path = "Wave note metadata.txt"; sourceTree = "<group>"; wrapsLines = 1; };
 		D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_MatrixRecycler.h; path = ../source/PALM_analysis_MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
 		D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_MatrixRecycler.cpp; path = ../source/PALM_analysis_MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
@@ -128,6 +146,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0006D2D12CFD34D00539A8F /* Accelerate.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0CCD3171473C5DD005CD75A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,6 +202,7 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				D0CCD33A1473C704005CD75A /* LocalizerDLL */,
 				D0F0E35110EBEC2900F9A855 /* Igor */,
 				D0F0E35210EBEC3500F9A855 /* Commandline */,
 				D08B48E30D52381800C99DE3 /* PALM_analysis.h */,
@@ -214,6 +241,7 @@
 				D0B8585710E941A80045036F /* LocalizationAnalysis */,
 				D0F4244D11B5A692001BCE24 /* PALM Analysis commandline processing */,
 				D0A9C305135F4EED00D076AE /* Localizer.xop */,
+				D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -228,6 +256,15 @@
 				D0A9C2CD135F449F00D076AE /* Include dylib.txt */,
 			);
 			name = "Design documents";
+			sourceTree = "<group>";
+		};
+		D0CCD33A1473C704005CD75A /* LocalizerDLL */ = {
+			isa = PBXGroup;
+			children = (
+				D0CCD3381473C700005CD75A /* LocalizerDLL.h */,
+				D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */,
+			);
+			name = LocalizerDLL;
 			sourceTree = "<group>";
 		};
 		D0F0E35110EBEC2900F9A855 /* Igor */ = {
@@ -253,6 +290,17 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D0CCD3181473C5DD005CD75A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		D0A9C2EB135F4EED00D076AE /* Localizer */ = {
@@ -290,6 +338,23 @@
 			productName = "PALM analysis commandline";
 			productReference = D0B8585710E941A80045036F /* LocalizationAnalysis */;
 			productType = "com.apple.product-type.tool";
+		};
+		D0CCD3191473C5DD005CD75A /* LocalizerDLL */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D0CCD31D1473C5DD005CD75A /* Build configuration list for PBXNativeTarget "LocalizerDLL" */;
+			buildPhases = (
+				D0CCD3161473C5DD005CD75A /* Sources */,
+				D0CCD3171473C5DD005CD75A /* Frameworks */,
+				D0CCD3181473C5DD005CD75A /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LocalizerDLL;
+			productName = LocalizerDLL;
+			productReference = D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
 		};
 		D0F4244C11B5A692001BCE24 /* PALM Analysis commandline processing */ = {
 			isa = PBXNativeTarget;
@@ -332,6 +397,7 @@
 				D0B8585610E941A80045036F /* PALM analysis commandline */,
 				D0F4244C11B5A692001BCE24 /* PALM Analysis commandline processing */,
 				D0A9C2EB135F4EED00D076AE /* Localizer */,
+				D0CCD3191473C5DD005CD75A /* LocalizerDLL */,
 			);
 		};
 /* End PBXProject section */
@@ -398,6 +464,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D0CCD3161473C5DD005CD75A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */,
+				D0CCD31F1473C6B6005CD75A /* PALM_analysis.cpp in Sources */,
+				D0CCD3211473C6B6005CD75A /* PALM_analysis_ProgressReporting.cpp in Sources */,
+				D0CCD3231473C6B6005CD75A /* PALM_analysis_Processing.cpp in Sources */,
+				D0CCD3251473C6B6005CD75A /* PALM_analysis_FileIO.cpp in Sources */,
+				D0CCD3271473C6B6005CD75A /* PALM_analysis_segmentation.cpp in Sources */,
+				D0CCD3291473C6B6005CD75A /* PALM_analysis_ParticleFinding.cpp in Sources */,
+				D0CCD32B1473C6B6005CD75A /* PALM_analysis_Localization.cpp in Sources */,
+				D0CCD32D1473C6B6005CD75A /* PALM_analysis_PALMImages.cpp in Sources */,
+				D0CCD32F1473C6B6005CD75A /* PALM_analysis_PositionsProcessing.cpp in Sources */,
+				D0CCD3311473C6B6005CD75A /* PALM_analysis_SOFI.cpp in Sources */,
+				D0CCD3331473C6B6005CD75A /* PALM_analysis_storage.cpp in Sources */,
+				D0CCD3351473C6B6005CD75A /* PALM_analysis_MatrixRecycler.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0F4244A11B5A692001BCE24 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -437,7 +523,7 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				EXPORTED_SYMBOLS_FILE = ../resources/Exports.exp;
+				EXPORTED_SYMBOLS_FILE = "";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = NO;
 				GCC_MODEL_PPC64 = YES;
@@ -446,7 +532,7 @@
 					"\"HAVE_INLINE\"",
 					"\"_DEBUG_\"",
 				);
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = NO;
 				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
@@ -472,7 +558,7 @@
 				);
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.6;
-				WRAPPER_EXTENSION = xop;
+				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
 		};
@@ -482,7 +568,7 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				EXPORTED_SYMBOLS_FILE = ../resources/Exports.exp;
+				EXPORTED_SYMBOLS_FILE = "";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
@@ -496,7 +582,7 @@
 					"\"HAVE_INLINE\"",
 				);
 				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -528,7 +614,7 @@
 				);
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.6;
-				WRAPPER_EXTENSION = xop;
+				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
 		};
@@ -662,6 +748,57 @@
 			};
 			name = Release;
 		};
+		D0CCD31B1473C5DD005CD75A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_EXTENSION = dylib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = localizer;
+				SDKROOT = macosx10.6;
+				WRAPPER_EXTENSION = "";
+			};
+			name = Debug;
+		};
+		D0CCD31C1473C5DD005CD75A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = dylib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = localizer;
+				SDKROOT = macosx10.6;
+				WRAPPER_EXTENSION = "";
+			};
+			name = Release;
+		};
 		D0F4244F11B5A693001BCE24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -758,6 +895,15 @@
 			buildConfigurations = (
 				D0B8585910E941A80045036F /* Debug */,
 				D0B8585A10E941A80045036F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D0CCD31D1473C5DD005CD75A /* Build configuration list for PBXNativeTarget "LocalizerDLL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0CCD31B1473C5DD005CD75A /* Debug */,
+				D0CCD31C1473C5DD005CD75A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
