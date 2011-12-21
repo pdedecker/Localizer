@@ -2488,6 +2488,19 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         }
 
         boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+        boost::shared_ptr<ImageOutputWriter> averageOutputWriter;
+        DataFolderAndName averageOutputWaveParams;
+        
+        if (doAverage != 0) {
+            // check that the requested wave name is not too long for the output name
+            // return an error otherwise
+            if (strlen(outputWaveParams.name) > MAX_OBJ_NAME - 4)   // make room for the "_avg" suffix
+                return NAME_TOO_LONG;
+            averageOutputWaveParams.dfH = outputWaveParams.dfH;
+            strcpy(averageOutputWaveParams.name, outputWaveParams.name);
+            strcat(averageOutputWaveParams.name, "_avg");
+            averageOutputWriter = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(averageOutputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+        }
 
         boost::shared_ptr<ProgressReporter> progressReporter;
 
@@ -2501,7 +2514,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             }
         }
 
-        DoSOFIAnalysis(imageLoader, outputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup);
+        DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup);
     }
     catch (int e) {
         return e;

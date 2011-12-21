@@ -46,6 +46,7 @@ class SOFIFrameVerifier;
 class SOFINoImageInCalculation;
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+                    boost::shared_ptr<ImageOutputWriter> averageImageOutputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup);
 
@@ -63,6 +64,7 @@ public:
 	virtual ~SOFICalculator() {;}
 	
 	virtual void addNewImage(ImagePtr image) = 0;
+    virtual ImagePtr getAverageImage() = 0; // must be called before getResult()
 	virtual ImagePtr getResult() = 0;
 	
 protected:
@@ -74,6 +76,7 @@ public:
 	~SOFICalculator_Order2_auto() {;}
 	
 	void addNewImage(ImagePtr image);
+    ImagePtr getAverageImage() {return ImagePtr(new Image(*averageImage));}
 	ImagePtr getResult();
 	
 protected:
@@ -90,6 +93,7 @@ public:
 	~SOFICalculator_Order2_cross() {;}
 	
 	void addNewImage(ImagePtr image);
+    ImagePtr getAverageImage() {return ImagePtr(new Image(*averageImage));}
 	ImagePtr getResult();
 	
 protected:

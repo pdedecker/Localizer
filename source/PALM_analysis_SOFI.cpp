@@ -30,10 +30,13 @@
 #include "PALM_analysis_SOFI.h"
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
+                    boost::shared_ptr<ImageOutputWriter> averageImageOutputWriter,
 					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
+    
+    int doAverage = averageImageOutputWriter.get() != NULL;
     
     if (nFramesToInclude == (size_t)-1)
         nFramesToInclude = nImages - nFramesToSkip;
@@ -77,7 +80,9 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	size_t nFramesProcessedInThisRun;
 	size_t nFramesProcessedTotal = 0;
 	ImagePtr outputImage;
+    ImagePtr averageOutputImage;
 	ImagePtr sofiImage;
+    ImagePtr averageImage;
 	size_t nImagesInBlock;
 	int status;
 	int isValidFrame;
@@ -126,6 +131,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			}
 			
             try {
+                if (doAverage)
+                    averageOutputImage = sofiCalculator->getAverageImage();
                 outputImage = sofiCalculator->getResult();
             }
             catch (SOFINoImageInCalculation e) {
@@ -142,6 +149,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			} else {
 				*sofiImage += *outputImage * weightOfThisBlock;
 			}
+            if (doAverage && averageImage.get() == NULL) {
+                averageImage = averageOutputImage;
+            } else {
+                *averageImage += *averageOutputImage * weightOfThisBlock;
+            }
 		}
 		
 		if (nImagesInBlock > 0) {
@@ -150,6 +162,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			if (crossCorrelate != 0)
 				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
 			outputWriter->write_image(sofiImage);
+            
+            if (doAverage) {
+                *averageImage /= sumOfBlockWeights;
+                averageImageOutputWriter->write_image(averageImage);
+            }
 		}
 	}
 	progressReporter->CalculationDone();
