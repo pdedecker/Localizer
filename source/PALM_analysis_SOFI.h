@@ -40,6 +40,8 @@
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_ProgressReporting.h"
 
+struct SingleSOFICalculation;
+class XCSOFIKernelProvider;
 class SOFIFrameVerifier;
 
 // exception classes
@@ -106,6 +108,28 @@ protected:
 	ImagePtr averageImage;
 	
 	size_t nEvaluations;
+};
+
+typedef struct {
+    int outputRow;
+    int outputCol;  // in terms of the CROPPED OUTPUT image!
+    
+    std::vector<int> inputRowDeltas;
+    std::vector<int> inputColDeltas; // relative (delta) coordinates of the INPUT pixels that are to be included
+    
+    std::vector<int> imageIndices;  // relative time of the INPUT images required for each calculation
+                                    // 0 is the current one, +1 means the next one, +2 the one after that, ...
+} SOFIPixelCalculation;
+
+class XCSOFIKernelProvider {
+public:
+    XCSOFIKernelProvider() {;}
+    ~XCSOFIKernelProvider() {;}
+    
+    void getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol);
+    void getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol);
+    void getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols);
+    boost::shared_array<std::vector<SOFIPixelCalculation> > getKernel(int order, int lagTime, int &nRows, int &nCols);
 };
 
 class SOFICorrector_Order2 {

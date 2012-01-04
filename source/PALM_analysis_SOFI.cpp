@@ -377,6 +377,111 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
 	return imageToReturn;
 }
 
+void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) {
+    switch (order) {
+        case 2:
+            firstRow = 2;
+            firstCol = 2;
+            break;
+        default:
+            // TODO: error
+            break;
+    }
+}
+
+void XCSOFIKernelProvider::getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol) {
+    switch (order) {
+        case 2:
+            lastRow = (nRowsInput - 1) - 1;
+            lastCol = (nColsInput - 1) - 1;
+            break;
+        case 3:
+            // TODO
+        default:
+            // TODO: error
+            break;
+    }
+}
+
+void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols) {
+    switch (order) {
+        case 2:
+            nRows = 2 * nRowsInput - 4;
+            nCols = 2 * nColsInput - 4;
+            break;
+        case 3:
+            // TODO
+            
+        default:
+            // todo: ERROR
+            break;
+    }
+}
+
+boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::getKernel(int order, int lagTime, int &nRows, int &nCols) {
+    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel;
+    
+    switch (order) {
+        case 2:
+        {
+            // kernel size is 9
+            kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[9]);
+            SOFIPixelCalculation sofiPixelCalculation;
+            // always two inputs for 2nd order
+            sofiPixelCalculation.inputRowDeltas.reserve(2);
+            sofiPixelCalculation.inputColDeltas.reserve(2);
+            sofiPixelCalculation.imageIndices.reserve(2);
+            sofiPixelCalculation.imageIndices[0] = 0;
+            sofiPixelCalculation.imageIndices[1] = 0;
+            
+            // the auto pixel at relative coordinates (0,0), expressed as a crosscorrelation
+            sofiPixelCalculation.inputRowDeltas[0] = -1;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            kernel[0].push_back(sofiPixelCalculation);
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = -1;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            kernel[0].push_back(sofiPixelCalculation);
+            
+            // vertical (along cols) cross pixel
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            kernel[1].push_back(sofiPixelCalculation);
+            
+            // horizontal (along rows) cross pixel
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            kernel[3].push_back(sofiPixelCalculation);
+            
+            // diagonal cross pixel
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = +1;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            kernel[5].push_back(sofiPixelCalculation);
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            kernel[5].push_back(sofiPixelCalculation);
+            
+            // all other pixels are left for the next invocation of the kernel
+            break;
+        }
+        default:
+            // TODO error
+            break;
+    }
+    return kernel;
+}
+
 ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
 	size_t nRows = imageToCorrect->rows();
 	size_t nCols = imageToCorrect->cols();
