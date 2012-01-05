@@ -31,6 +31,7 @@
 #define PALM_ANALYSIS_SOFI_H
 
 #include <queue>
+#include <list>
 #include <vector>
 
 #include <eigen3/Eigen/Eigen>
@@ -40,7 +41,7 @@
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_ProgressReporting.h"
 
-struct SingleSOFICalculation;
+class SingleSOFICalculation;
 class XCSOFIKernelProvider;
 class SOFIFrameVerifier;
 
@@ -100,7 +101,7 @@ public:
 	
 protected:
 	size_t lagTime;
-	std::queue<ImagePtr> imageQueue;
+	std::list<ImagePtr> imageQueue;
 	
 	ImagePtr outputImageCrossCorrelation;
 	ImagePtr outputImageHorizontalAutoCorrelation;
@@ -110,16 +111,17 @@ protected:
 	size_t nEvaluations;
 };
 
-typedef struct {
-    int outputRow;
-    int outputCol;  // in terms of the CROPPED OUTPUT image!
-    
+class SOFIPixelCalculation {
+public:
     std::vector<int> inputRowDeltas;
     std::vector<int> inputColDeltas; // relative (delta) coordinates of the INPUT pixels that are to be included
     
     std::vector<int> imageIndices;  // relative time of the INPUT images required for each calculation
                                     // 0 is the current one, +1 means the next one, +2 the one after that, ...
-} SOFIPixelCalculation;
+    void getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol);
+    int outputRowDelta; // used by getOutputPixelCoordinates
+    int outputColDelta;
+};
 
 class XCSOFIKernelProvider {
 public:
