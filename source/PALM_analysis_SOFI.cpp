@@ -74,7 +74,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	ImagePtr currentImage;
 	imageLoader->spoolTo(nFramesToSkip);
 	
-	size_t nFramesInThisGroup;
+	size_t nFramesInThisGroup, nFramesIncludedInCalculation;
 	size_t nFramesProcessedInThisRun;
 	size_t nFramesProcessedTotal = 0;
 	ImagePtr outputImage;
@@ -104,6 +104,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			if (nImagesInBlock < lagTime + 1)
 				break;
 			
+            nFramesIncludedInCalculation = 0;
 			for (size_t i = 0; i < nImagesInBlock; ++i) {
 				currentImage = imageLoader->readNextImage();
 				
@@ -117,15 +118,10 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 				}
 				if (isValidFrame == 1) {
 					sofiCalculator->addNewImage(currentImage);
+                    nFramesIncludedInCalculation += 1;
 				}
 				nFramesProcessedInThisRun += 1;
 				nFramesProcessedTotal += 1;
-			}
-			
-			status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
-			if (status != 0) {
-				progressReporter->CalculationAborted();
-				throw USER_ABORTED("Abort requested by user");
 			}
 			
             try {
@@ -139,7 +135,14 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
                 // continue with the other images and hope that they make up for it
                 continue;
             }
-			weightOfThisBlock = (double)(nImagesInBlock) / (double)(blockSize);
+            
+            status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
+			if (status != 0) {
+				progressReporter->CalculationAborted();
+				throw USER_ABORTED("Abort requested by user");
+			}
+            
+			weightOfThisBlock = static_cast<double>(nFramesIncludedInCalculation) / static_cast<double>(blockSize);
 			sumOfBlockWeights += weightOfThisBlock;
 				
 			if (sofiImage.get() == NULL) {
@@ -168,15 +171,13 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	progressReporter->CalculationDone();
 }
 
-SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs) :
-    order(order_rhs)
-{
-}
-
-void SOFICalculator_AutoCorrelation::addNewImage(ImagePtr newImage) {
+void SOFICalculator::addNewImage(ImagePtr newImage) {
 	// a new image is available
 	// this can be the start of the calculation, or we can be
 	// somewhere in the middle of the calculation
+    
+    if (newImage.get() == NULL)
+        throw std::runtime_error("NULL image provided to SOFICalculator::addNewImage");
 	
 	this->imageVector.push_back(newImage);
 	if (this->averageImage.get() == NULL) {
@@ -184,6 +185,21 @@ void SOFICalculator_AutoCorrelation::addNewImage(ImagePtr newImage) {
         this->averageImage->setConstant(0.0);
     }
     (*this->averageImage) += *newImage;
+}
+
+ImagePtr SOFICalculator::getAverageImage() const const {
+	// a new image is available
+	// this can be the start of the calculation, or we can be
+	// somewhere in the middle of the calculation
+	
+	if (this->averageImage.get() == NULL)
+        throw std::runtime_error("requested an average image but this->averageImage is NULL");
+    return this->averageImage;
+}
+
+SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs) :
+    order(order_rhs)
+{
 }
 
 ImagePtr SOFICalculator_AutoCorrelation::getResult() {
@@ -228,19 +244,10 @@ SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, 
 {
 }
 
-void SOFICalculator_CrossCorrelation::addNewImage(ImagePtr newImage) {
-	this->imageVector.push_back(newImage);
-    if (this->averageImage.get() == NULL) {
-        this->averageImage = ImagePtr(new Image(newImage->rows(), newImage->cols()));
-        this->averageImage->setConstant(0.0);
-    }
-    *(this->averageImage) += (*newImage);
-}
-
 ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     // verify that there are enough images in the input buffer
     if (this->imageVector.size() == 0)
-        throw std::runtime_error("no images for SOFICalculator_CrossCorrelation::getResult()");
+        throw SOFINoImageInCalculation("no images for SOFICalculator_CrossCorrelation::getResult()");
     
     ImagePtr firstImage = this->imageVector.front();
     
@@ -301,9 +308,12 @@ ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     
     // take the average
     (*outputImage) /= static_cast<double>(this->imageVector.size());
+    this->imageVector.clear();
+    this->averageImage->setConstant(0.0);
+    return outputImage;
                                        
 	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
-    int nKindsOfPixels = nPixelsInKernel;
+    /*int nKindsOfPixels = nPixelsInKernel;
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
     pixelAverages.setConstant(0.0);
@@ -341,7 +351,7 @@ ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     
     this->imageVector.clear();
     this->averageImage->setConstant(0.0);
-	return correctedImage;
+	return correctedImage;*/
 }
 
 void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) {
