@@ -320,7 +320,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
     }
     
     // take the average
-    (*outputImage) /= this->imageVector.size();
+    (*outputImage) /= static_cast<double>(this->imageVector.size());
                                        
 	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
     int nKindsOfPixels = nPixelsInKernel;
@@ -369,6 +369,10 @@ void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, in
             outputRow = 2 * inputRow - 2;
             outputCol = 2 * inputCol - 2;
             break;
+        case 3:
+            outputRow = 3 * inputRow - 3;
+            outputCol = 3 * inputCol - 3;
+            break;
         default:
             // todo: error
             break;
@@ -378,6 +382,10 @@ void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, in
 void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) {
     switch (order) {
         case 2:
+            firstRow = 1;
+            firstCol = 1;
+            break;
+        case 3:
             firstRow = 1;
             firstCol = 1;
             break;
@@ -394,7 +402,9 @@ void XCSOFIKernelProvider::getCoordinatesOfLastUsableInputPixel(int order, int n
             lastCol = (nColsInput - 1) - 1;
             break;
         case 3:
-            // TODO
+            lastRow = (nRowsInput - 1) - 1;
+            lastCol = (nColsInput - 1) - 1;
+            break;
         default:
             // TODO: error
             break;
@@ -408,8 +418,9 @@ void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int n
             nCols = 2 * nColsInput - 4;
             break;
         case 3:
-            // TODO
-            
+            nRows = 3 * nRowsInput - 6;
+            nCols = 2 * nColsInput - 6;
+            break;
         default:
             // todo: ERROR
             break;
@@ -422,7 +433,7 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
     switch (order) {
         case 2:
         {
-            // kernel size is 4
+            // kernel size is 2x2
             nRows = 2;
             nCols = 2;
             kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[4]);
@@ -484,7 +495,131 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             sofiPixelCalculation.outputColDelta = +1;
             kernel[3].push_back(sofiPixelCalculation);
             
-            // all other pixels are left for the next invocation of the kernel
+            break;
+        }
+        case 3:
+        {
+            // kernel size is 3x3
+            nRows = 3;
+            nCols = 3;
+            kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[9]);
+            SOFIPixelCalculation sofiPixelCalculation;
+            // always 3 inputs for 3rd order
+            sofiPixelCalculation.inputRowDeltas.resize(3);
+            sofiPixelCalculation.inputColDeltas.resize(3);
+            sofiPixelCalculation.imageIndices.resize(3);
+            sofiPixelCalculation.imageIndices[0] = 0;
+            sofiPixelCalculation.imageIndices[1] = 0;
+            sofiPixelCalculation.imageIndices[2] = 0;
+            
+            // the auto pixel at relative coordinates (0,0)
+            sofiPixelCalculation.inputRowDeltas[0] = -1;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = 0;
+            sofiPixelCalculation.outputRowDelta = 0;
+            sofiPixelCalculation.outputColDelta = 0;
+            kernel[0].push_back(sofiPixelCalculation);
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = -1;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = 0;
+            sofiPixelCalculation.inputColDeltas[2] = +1;
+            sofiPixelCalculation.outputRowDelta = 0;
+            sofiPixelCalculation.outputColDelta = 0;
+            kernel[0].push_back(sofiPixelCalculation);
+            
+            // AAB
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = 0;
+            sofiPixelCalculation.inputColDeltas[2] = +1;
+            sofiPixelCalculation.outputRowDelta = 0;
+            sofiPixelCalculation.outputColDelta = +1;
+            kernel[1].push_back(sofiPixelCalculation);
+            
+            // ABB
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            sofiPixelCalculation.inputRowDeltas[2] = 0;
+            sofiPixelCalculation.inputColDeltas[2] = +1;
+            sofiPixelCalculation.outputRowDelta = 0;
+            sofiPixelCalculation.outputColDelta = +2;
+            kernel[2].push_back(sofiPixelCalculation);
+            
+            // AAC
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = 0;
+            sofiPixelCalculation.outputRowDelta = +1;
+            sofiPixelCalculation.outputColDelta = 0;
+            kernel[3].push_back(sofiPixelCalculation);
+            
+            // ACC
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = 0;
+            sofiPixelCalculation.outputRowDelta = +2;
+            sofiPixelCalculation.outputColDelta = 0;
+            kernel[4].push_back(sofiPixelCalculation);
+            
+            // AAD
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = +1;
+            sofiPixelCalculation.outputRowDelta = +1;
+            sofiPixelCalculation.outputColDelta = +1;
+            kernel[5].push_back(sofiPixelCalculation);
+            
+            // ADD
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = +1;
+            sofiPixelCalculation.outputRowDelta = +2;
+            sofiPixelCalculation.outputColDelta = +2;
+            kernel[6].push_back(sofiPixelCalculation);
+            
+            // BCC
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = +1;
+            sofiPixelCalculation.inputRowDeltas[1] = +1;
+            sofiPixelCalculation.inputColDeltas[1] = 0;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = 0;
+            sofiPixelCalculation.outputRowDelta = +2;
+            sofiPixelCalculation.outputColDelta = +1;
+            kernel[7].push_back(sofiPixelCalculation);
+            
+            // BBC
+            sofiPixelCalculation.inputRowDeltas[0] = 0;
+            sofiPixelCalculation.inputColDeltas[0] = +1;
+            sofiPixelCalculation.inputRowDeltas[1] = 0;
+            sofiPixelCalculation.inputColDeltas[1] = +1;
+            sofiPixelCalculation.inputRowDeltas[2] = +1;
+            sofiPixelCalculation.inputColDeltas[2] = 0;
+            sofiPixelCalculation.outputRowDelta = +1;
+            sofiPixelCalculation.outputColDelta = +2;
+            kernel[8].push_back(sofiPixelCalculation);
+            
             break;
         }
         default:
