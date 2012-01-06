@@ -322,7 +322,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
     // take the average
     (*outputImage) /= this->imageVector.size();
                                        
-	/*// now normalize the pixel by requiring that the mean of every kind of pixel is the same
+	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
     int nKindsOfPixels = nPixelsInKernel;
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
@@ -360,8 +360,7 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
     }
     
     
-	return correctedImage;*/
-    return outputImage;
+	return correctedImage;
 }
 
 void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) {
