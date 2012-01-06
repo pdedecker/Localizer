@@ -300,20 +300,20 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
                 // loop over all the kernel
                 for (int k = 0; k < nPixelsInKernel; ++k) {
                     // loop over all calculations within this kernel pixel
-                    std::vector<SOFIPixelCalculation> calculationsForThisPixel = kernel[k];
+                    std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
                     summedVal = 0;
-                    for (int calculationIndex = 0; calculationIndex < calculationsForThisPixel.size(); ++calculationIndex) {
+                    for (int calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
                         // and finally, loop over the different operations that each input requires
-                        SOFIPixelCalculation thisCalculation = calculationsForThisPixel[calculationIndex];
+                        SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
                         currentVal = 1;
-                        for (int multiplicationIndex = 0; multiplicationIndex < thisCalculation.inputRowDeltas.size(); ++multiplicationIndex) {
-                            currentVal *= (*currentImage)(i + thisCalculation.inputRowDeltas[multiplicationIndex], j + thisCalculation.inputColDeltas[multiplicationIndex]);
+                        for (int multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
+                            currentVal *= (*currentImage)(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
                         }
                         summedVal += currentVal;
                     }
-                    summedVal /= static_cast<double>(calculationsForThisPixel.size());
-                    calculationsForThisPixel[0].getOutputPixelCoordinates(2, i, j, outputRow, outputCol);
-                    (*outputImage)(outputRow + calculationsForThisPixel[0].outputRowDelta, outputCol + calculationsForThisPixel[0].outputColDelta) += summedVal;
+                    summedVal /= static_cast<double>(calculationsForThisPixel->size());
+                    (*calculationsForThisPixel)[0].getOutputPixelCoordinates(2, i, j, outputRow, outputCol);
+                    (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
                 }
             }
         }
