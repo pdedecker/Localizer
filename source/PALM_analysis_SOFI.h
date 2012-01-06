@@ -101,7 +101,7 @@ public:
 	
 protected:
 	size_t lagTime;
-	std::list<ImagePtr> imageQueue;
+	std::vector<ImagePtr> imageVector;
 	
 	ImagePtr outputImageCrossCorrelation;
 	ImagePtr outputImageHorizontalAutoCorrelation;

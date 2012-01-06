@@ -251,82 +251,24 @@ SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs) :
 }
 
 void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
-	this->imageQueue.push(newImage);
-    
-    return;
-	
-	// if the length of the queue is less than lagTime + 1
-	// then it's impossible to produce output
-	if (this->imageQueue.size() < this->lagTime + 1)
-		return;
-	
-	// if we're here then the queue is long enough
-	size_t nRows = newImage->rows();
-	size_t nCols = newImage->cols();
-	
-	size_t nRowsOutputImage = 2 * nRows - 4;
-	size_t nColsOutputImage = 2 * nCols - 4;
-	
-	if (this->nEvaluations == 0) {
-		this->outputImageCrossCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
-		this->outputImageHorizontalAutoCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
-		this->outputImageVerticalAutoCorrelation = ImagePtr(new Image((int)(nRowsOutputImage), (int)(nColsOutputImage)));
-		
-		this->outputImageCrossCorrelation->setConstant(0.0);
-		this->outputImageHorizontalAutoCorrelation->setConstant(0.0);
-		this->outputImageVerticalAutoCorrelation->setConstant(0.0);
-		
-		this->averageImage = ImagePtr(new Image((int)nRows, (int)nCols));
-		this->averageImage->setConstant(0.0);
-	}
-	
-	ImagePtr previousImage = this->imageQueue.front();
-	ImagePtr currentImage = this->imageQueue.back();
-	
-	*this->averageImage += *previousImage;
-	
-	for (size_t j = 1; j < nCols - 1; ++j) {
-		for (size_t i = 1; i < nRows - 1; ++i) {
-			// first handle the autocorrelation
-			// these autocorrelation pixels are now calculated using crosscorrelation
-			// since these require the correlation of two pixels with an intermediate pixel
-			// in between, they might be more sensitive to noise. Therefore do two different
-			// correlations, and at the end average between them
-			(*outputImageHorizontalAutoCorrelation)(2*i - 2, 2*j - 2) += (*previousImage)(i - 1, j) * (*currentImage)(i + 1, j);
-			(*outputImageVerticalAutoCorrelation)(2*i - 2, 2*j - 2) += (*previousImage)(i, j - 1) * (*currentImage)(i, j + 1);
-			
-			// handle the horizontal and vertical pixel
-			(*outputImageCrossCorrelation)(2*i - 2 + 1, 2*j - 2) += (*previousImage)(i, j) * (*currentImage)(i + 1, j);
-			(*outputImageCrossCorrelation)(2*i - 2, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i, j + 1);
-			
-			// handle the diagonal pixel
-			(*outputImageCrossCorrelation)(2*i - 2 + 1, 2*j - 2 + 1) += (*previousImage)(i, j) * (*currentImage)(i + 1, j + 1);
-		}
-	}
-	
-	// remove the last image from the queue
-	this->imageQueue.pop();
-	this->nEvaluations += 1;
+	this->imageVector.push_back(newImage);
+    if (this->averageImage.get() == NULL) {
+        this->averageImage = ImagePtr(new Image(newImage->rows(), newImage->cols()));
+        this->averageImage->setConstant(0.0);
+    }
+    (*this->averageImage) += (*newImage);
 }
 
 ImagePtr SOFICalculator_Order2_cross::getResult() {
     // verify that there are enough images in the input buffer
     
-    // allocate an average image if required
-    ImagePtr firstImage = this->imageQueue.front();
-    if (this->averageImage.get() == NULL) {
-        this->averageImage = ImagePtr(new Image(firstImage->rows(), firstImage->cols()));
-    }
+    ImagePtr firstImage = this->imageVector.front();
     
-    // calculate the averageImage
-    this->averageImage->setConstant(0.0);
-    for (std::list<ImagePtr>::iterator it = this->imageQueue.begin(); it != imageQueue.end(); ++it) {
-        *(this->averageImage) += *(*it);
-    }
-    (*this->averageImage) /= static_cast<double>(this->imageQueue.size());
+    // normalize the average image
+    (*this->averageImage) /= static_cast<double>(this->imageVector.size());
     
     // and convert all the input images to fluctuation images by subtracting the average
-    for (std::list<ImagePtr>::iterator it = this->imageQueue.begin(); it != imageQueue.end(); ++it) {
+    for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
         *(*it) -= *(this->averageImage);
     }
     
@@ -350,13 +292,13 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
     ImagePtr currentImage;
     // main calculation
     // loop over all images
-    for (std::list<ImagePtr>::iterator it = this->imageQueue.begin(); it != this->imageQueue.end(); ++it) {
-        currentImage = *it;
+    for (int n = 0; n < this->imageVector.size(); ++n) {
+        currentImage = imageVector[n];
         // loop over all pixels in the input
         for (int i = firstRow; i <= lastRow; ++i) {
             for (int j = firstCol; j <= lastCol; ++j) {
                 // loop over all the kernel
-                for (int k = 0; k < nKernelRows; ++k) {
+                for (int k = 0; k < nPixelsInKernel; ++k) {
                     // loop over all calculations within this kernel pixel
                     std::vector<SOFIPixelCalculation> calculationsForThisPixel = kernel[k];
                     summedVal = 0;
@@ -371,13 +313,16 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
                     }
                     summedVal /= static_cast<double>(calculationsForThisPixel.size());
                     calculationsForThisPixel[0].getOutputPixelCoordinates(2, i, j, outputRow, outputCol);
-                    (*outputImage)(outputRow + calculationsForThisPixel[0].outputRowDelta, outputCol + calculationsForThisPixel[0].outputColDelta) = currentVal;
+                    (*outputImage)(outputRow + calculationsForThisPixel[0].outputRowDelta, outputCol + calculationsForThisPixel[0].outputColDelta) += summedVal;
                 }
             }
         }
     }
+    
+    // take the average
+    (*outputImage) /= this->imageVector.size();
                                        
-	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
+	/*// now normalize the pixel by requiring that the mean of every kind of pixel is the same
     int nKindsOfPixels = nPixelsInKernel;
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
@@ -404,18 +349,19 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
     pixelAverages(0, 0) = 1;
     
     // allocate the corrected image
-    ImagePtr correctedImage(new Image(nRowsOutput, nColsOutput));
+    ImagePtr correctedImage(new Image(*outputImage));
     // and correct it
     for (int i = 0; i < nRowsOutput; ++i) {
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
-            (*correctedImage) = (*outputImage) / pixelAverages(kindOfRow, kindOfCol);
+            (*correctedImage)(i, j) /= pixelAverages(kindOfRow, kindOfCol);
         }
     }
     
     
-	return correctedImage;
+	return correctedImage;*/
+    return outputImage;
 }
 
 void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) {
@@ -433,8 +379,8 @@ void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, in
 void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) {
     switch (order) {
         case 2:
-            firstRow = 2;
-            firstCol = 2;
+            firstRow = 1;
+            firstCol = 1;
             break;
         default:
             // TODO: error
@@ -478,6 +424,8 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
         case 2:
         {
             // kernel size is 4
+            nRows = 2;
+            nCols = 2;
             kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[4]);
             SOFIPixelCalculation sofiPixelCalculation;
             // always two inputs for 2nd order
@@ -518,12 +466,12 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             sofiPixelCalculation.inputRowDeltas[1] = 0;
             sofiPixelCalculation.inputColDeltas[1] = +1;
             sofiPixelCalculation.outputRowDelta = 0;
-            sofiPixelCalculation.outputColDelta = +;
+            sofiPixelCalculation.outputColDelta = +1;
             kernel[2].push_back(sofiPixelCalculation);
             
             // diagonal cross pixel
-            sofiPixelCalculation.inputRowDeltas[0] = 0;
-            sofiPixelCalculation.inputColDeltas[0] = +1;
+            sofiPixelCalculation.inputRowDeltas[0] = +1;
+            sofiPixelCalculation.inputColDeltas[0] = 0;
             sofiPixelCalculation.inputRowDeltas[1] = 0;
             sofiPixelCalculation.inputColDeltas[1] = +1;
             sofiPixelCalculation.outputRowDelta = +1;
