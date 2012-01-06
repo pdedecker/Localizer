@@ -73,42 +73,34 @@ public:
 protected:
 };
 
-class SOFICalculator_Order2_auto : public SOFICalculator {
+class SOFICalculator_AutoCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_Order2_auto(int lagTime);
-	~SOFICalculator_Order2_auto() {;}
+	SOFICalculator_AutoCorrelation(int order, int lagTime);
+	~SOFICalculator_AutoCorrelation() {;}
 	
 	void addNewImage(ImagePtr image);
     ImagePtr getAverageImage() {return ImagePtr(new Image(*averageImage));}
 	ImagePtr getResult();
 	
 protected:
-	size_t lagTime;
-	std::queue<ImagePtr> imageQueue;
-	ImagePtr outputImage;
+    int order;
+	std::vector<ImagePtr> imageVector;
 	ImagePtr averageImage;
-	size_t nEvaluations;
 };
 
-class SOFICalculator_Order2_cross : public SOFICalculator {
+class SOFICalculator_CrossCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_Order2_cross(int lagTime);
-	~SOFICalculator_Order2_cross() {;}
+	SOFICalculator_CrossCorrelation(int order, int lagTime);
+	~SOFICalculator_CrossCorrelation() {;}
 	
 	void addNewImage(ImagePtr image);
     ImagePtr getAverageImage() {return ImagePtr(new Image(*averageImage));}
 	ImagePtr getResult();
 	
 protected:
-	size_t lagTime;
+    int order;
 	std::vector<ImagePtr> imageVector;
-	
-	ImagePtr outputImageCrossCorrelation;
-	ImagePtr outputImageHorizontalAutoCorrelation;
-	ImagePtr outputImageVerticalAutoCorrelation;
 	ImagePtr averageImage;
-	
-	size_t nEvaluations;
 };
 
 class SOFIPixelCalculation {

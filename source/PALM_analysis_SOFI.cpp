@@ -58,12 +58,10 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	
 	boost::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_auto(lagTime));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTime));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_Order2_cross(lagTime));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTime));
 	}
-	
-	SOFICorrector_Order2 sofiCorrector;	// will only be used when crosscorrelating
 	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
 	int nGroups;
@@ -159,8 +157,6 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		if (nImagesInBlock > 0) {
 			*sofiImage /= sumOfBlockWeights;
 			
-			if (crossCorrelate != 0)
-				sofiImage = sofiCorrector.doImageCorrection(sofiImage);
 			outputWriter->write_image(sofiImage);
             
             if (doAverage) {
@@ -172,95 +168,79 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	progressReporter->CalculationDone();
 }
 
-SOFICalculator_Order2_auto::SOFICalculator_Order2_auto(int lagTime_rhs) :
-    lagTime(lagTime_rhs), nEvaluations(0)
+SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs) :
+    order(order_rhs)
 {
 }
 
-void SOFICalculator_Order2_auto::addNewImage(ImagePtr newImage) {
+void SOFICalculator_AutoCorrelation::addNewImage(ImagePtr newImage) {
 	// a new image is available
 	// this can be the start of the calculation, or we can be
 	// somewhere in the middle of the calculation
 	
-	this->imageQueue.push(newImage);
-	
-	// if the length of the queue is less than lagTime + 1
-	// then it's impossible to produce output
-	if (this->imageQueue.size() < this->lagTime + 1)
-		return;
-	
-	// if we're here then the queue is long enough
-	size_t nRows = newImage->rows();
-	size_t nCols = newImage->cols();
-	
-	// do the necessary images already exist?
-	if (this->outputImage.get() == NULL) {
-		this->outputImage = ImagePtr(new Image((int)nRows, (int)nCols));
-		this->outputImage->setConstant(0.0);
-		this->averageImage = ImagePtr(new Image((int)nRows, (int)nCols));
-		this->averageImage->setConstant(0.0);
-	}
-	
-	ImagePtr previousImage = this->imageQueue.front();
-	ImagePtr currentImage = this->imageQueue.back();
-	
-	*this->outputImage += ((*previousImage).array() * (*currentImage).array()).matrix();
-	*this->averageImage += *previousImage;
-	
-	// remove the last image from the queue
-	this->imageQueue.pop();
-	this->nEvaluations += 1;
+	this->imageVector.push_back(newImage);
+	if (this->averageImage.get() == NULL) {
+        this->averageImage = ImagePtr(new Image(newImage->rows(), newImage->cols()));
+        this->averageImage->setConstant(0.0);
+    }
+    (*this->averageImage) += *newImage;
 }
 
-ImagePtr SOFICalculator_Order2_auto::getResult() {
-	if (this->nEvaluations == 0) {
-        // cleanup for the next calculation
-        this->nEvaluations = 0;
-        this->averageImage->setConstant(0.0);
-        this->outputImage->setConstant(0.0);
-        
-        while (this->imageQueue.size() > 0)
-            this->imageQueue.pop();
+ImagePtr SOFICalculator_AutoCorrelation::getResult() {
+	if (this->imageVector.size() == 0) {
 		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
     }
+    
+    ImagePtr firstImage = this->imageVector.front();
 	
-	*this->averageImage /= (double)(this->nEvaluations);
-	*this->outputImage /= (double)(this->nEvaluations);
+	// normalize the average image
+    *(this->averageImage) /= static_cast<double>(this->imageVector.size());
+    
+    // and convert all the input images to fluctuation images by subtracting the average
+    for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
+        *(*it) -= *(this->averageImage);
+    }
 	
-	// correct for the fact that we have been multiplying intensities
-	// instead of fluctuations
-	*this->outputImage -= (*this->averageImage).array().square().matrix();
+	// since the lagtime is assumed to be zero for now, simply multiply the images together
+    ImagePtr outputImage(new Image(firstImage->rows(), firstImage->cols()));
+    ImagePtr subImage(new Image(firstImage->rows(), firstImage->cols()));
 	
-	ImagePtr imageToBeReturned(new Image(*this->outputImage));
+    outputImage->setConstant(0.0);
+    for (int n = 0; n < this->imageVector.size(); ++n) {
+        subImage->setConstant(1.0);
+        for (int i = 0; i < order; ++i) {
+            (*subImage).array() *= (*imageVector[n]).array();
+        }
+        *outputImage += *subImage;
+    }
+    
+    *outputImage /= static_cast<double>(this->imageVector.size());
 	
 	// now reset everything for the next calculation
 	// before returning
-	this->nEvaluations = 0;
-	this->averageImage->setConstant(0.0);
-	this->outputImage->setConstant(0.0);
-	
-	while (this->imageQueue.size() > 0)
-		this->imageQueue.pop();
-	
-	return imageToBeReturned;
+	this->imageVector.clear();
+    this->averageImage->setConstant(0.0);
+    return outputImage;
 }
 
-SOFICalculator_Order2_cross::SOFICalculator_Order2_cross(int lagTime_rhs) :
-    lagTime(lagTime_rhs), nEvaluations(0)
+SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs) :
+    order(order_rhs)
 {
 }
 
-void SOFICalculator_Order2_cross::addNewImage(ImagePtr newImage) {
+void SOFICalculator_CrossCorrelation::addNewImage(ImagePtr newImage) {
 	this->imageVector.push_back(newImage);
     if (this->averageImage.get() == NULL) {
         this->averageImage = ImagePtr(new Image(newImage->rows(), newImage->cols()));
         this->averageImage->setConstant(0.0);
     }
-    (*this->averageImage) += (*newImage);
+    *(this->averageImage) += (*newImage);
 }
 
-ImagePtr SOFICalculator_Order2_cross::getResult() {
+ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     // verify that there are enough images in the input buffer
+    if (this->imageVector.size() == 0)
+        throw std::runtime_error("no images for SOFICalculator_CrossCorrelation::getResult()");
     
     ImagePtr firstImage = this->imageVector.front();
     
@@ -359,7 +339,8 @@ ImagePtr SOFICalculator_Order2_cross::getResult() {
         }
     }
     
-    
+    this->imageVector.clear();
+    this->averageImage->setConstant(0.0);
 	return correctedImage;
 }
 
