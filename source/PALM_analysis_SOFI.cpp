@@ -259,10 +259,10 @@ ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     int outputRow, outputCol;
     int nKernelRows, nKernelCols;
     
-    kernelProvider.getSizeOfOutputImage(2, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
-    kernelProvider.getCoordinatesOfFirstUsableInputPixel(2, firstImage->rows(), firstImage->cols(), firstRow, firstCol);
-    kernelProvider.getCoordinatesOfLastUsableInputPixel(2, firstImage->rows(), firstImage->cols(), lastRow, lastCol);
-    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel = kernelProvider.getKernel(2, 0, nKernelRows, nKernelCols);
+    kernelProvider.getSizeOfOutputImage(order, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
+    kernelProvider.getCoordinatesOfFirstUsableInputPixel(order, firstImage->rows(), firstImage->cols(), firstRow, firstCol);
+    kernelProvider.getCoordinatesOfLastUsableInputPixel(order, firstImage->rows(), firstImage->cols(), lastRow, lastCol);
+    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel = kernelProvider.getKernel(order, 0, nKernelRows, nKernelCols);
     int nPixelsInKernel = nKernelRows * nKernelCols;
     
     // allocate the output image
@@ -292,7 +292,7 @@ ImagePtr SOFICalculator_CrossCorrelation::getResult() {
                         summedVal += currentVal;
                     }
                     summedVal /= static_cast<double>(calculationsForThisPixel->size());
-                    (*calculationsForThisPixel)[0].getOutputPixelCoordinates(2, i, j, outputRow, outputCol);
+                    (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
                     (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
                 }
             }
@@ -400,7 +400,7 @@ void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int n
             break;
         case 3:
             nRows = 3 * nRowsInput - 6;
-            nCols = 2 * nColsInput - 6;
+            nCols = 3 * nColsInput - 6;
             break;
         default:
             // todo: ERROR

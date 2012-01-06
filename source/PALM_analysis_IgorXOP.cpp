@@ -2348,8 +2348,14 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         psfWidth = 1.6;
     }
 
+    int order;
     if (p->ORDRFlagEncountered) {
         // Parameter: p->order
+        order = static_cast<int>(p->order + 0.5);
+        if (order <= 0)
+            return EXPECT_POS_NUM;
+    } else {
+        order = 2;
     }
 
     int lagTime;
@@ -2514,7 +2520,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             }
         }
 
-        DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, 2, crossCorrelate, nFramesToGroup);
+        DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup);
     }
     catch (int e) {
         return e;
