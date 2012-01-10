@@ -615,7 +615,6 @@ typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
 typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
-extern "C"
 int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -1025,7 +1024,6 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     }
 }
 
-extern "C"
 int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -1229,7 +1227,6 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     }
 }
 
-extern "C"
 int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -1503,7 +1500,6 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
     return err;
 }
 
-extern "C"
 int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -1669,7 +1665,6 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
     return 0;
 }
 
-extern "C"
 int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -1994,7 +1989,6 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     return err;
 }
 
-extern "C"
 int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -2075,7 +2069,6 @@ int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
     return err;
 }
 
-extern "C"
 int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
@@ -2250,7 +2243,6 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     return err;
 }
 
-extern "C"
 int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p) {
     int err = 0;
     size_t nBins;
@@ -2323,7 +2315,6 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
     return err;
 }
 
-extern "C"
 int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     gsl_set_error_handler_off();
     int err = 0;

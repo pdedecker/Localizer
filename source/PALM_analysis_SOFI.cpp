@@ -64,7 +64,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	}
 	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
-	int nGroups;
+	size_t nGroups;
 	if (nFramesToGroup != 0) {
 		nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
 	} else {
@@ -74,18 +74,12 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	ImagePtr currentImage;
 	imageLoader->spoolTo(nFramesToSkip);
 	
-	size_t nFramesInThisGroup, nFramesIncludedInCalculation;
-	size_t nFramesProcessedInThisRun;
+	size_t nFramesInThisGroup;
 	size_t nFramesProcessedTotal = 0;
-	ImagePtr outputImage;
-    ImagePtr averageOutputImage;
 	ImagePtr sofiImage;
     ImagePtr averageImage;
-	size_t nImagesInBlock;
 	int status;
 	int isValidFrame;
-	
-	double weightOfThisBlock, sumOfBlockWeights;
 	
 	progressReporter->CalculationStarted();
 	
@@ -96,78 +90,40 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			nFramesInThisGroup = nImagesToProcess;
 		}
 		
-		nFramesProcessedInThisRun = 0;
-		nImagesInBlock = 0;
-		sumOfBlockWeights = 0.0;
-		while (nFramesProcessedInThisRun < nFramesInThisGroup) {
-			nImagesInBlock = std::min(nFramesInThisGroup - nFramesProcessedInThisRun, blockSize);
-			if (nImagesInBlock < lagTime + 1)
-				break;
+		for (size_t i = 0; i < nFramesInThisGroup; ++i) {
+			currentImage = imageLoader->readNextImage();
 			
-            nFramesIncludedInCalculation = 0;
-			for (size_t i = 0; i < nImagesInBlock; ++i) {
-				currentImage = imageLoader->readNextImage();
-				
-				// verify if this is an acceptable image
-				isValidFrame = 1;
-				for (size_t j = 0; j < frameVerifiers.size(); j+=1) {
-					if (frameVerifiers[j]->isValidFrame(currentImage) != 1) {
-						isValidFrame = 0;
-						break;
-					}
+			// verify if this is an acceptable image
+			isValidFrame = 1;
+			for (size_t j = 0; j < frameVerifiers.size(); j+=1) {
+				if (frameVerifiers[j]->isValidFrame(currentImage) != 1) {
+					isValidFrame = 0;
+					break;
 				}
-				if (isValidFrame == 1) {
-					sofiCalculator->addNewImage(currentImage);
-                    nFramesIncludedInCalculation += 1;
-				}
-				nFramesProcessedInThisRun += 1;
-				nFramesProcessedTotal += 1;
 			}
 			
-            try {
-                sofiCalculator->getResult(outputImage, averageOutputImage);
-            }
-            catch (SOFINoImageInCalculation e) {
-                // insufficient images were included in this calculation to get a result
-                // this probably means that the verifier rejected (nearly) all of them
-                // continue with the other images and hope that they make up for it
-                continue;
-            }
-            
-            status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
-			if (status != 0) {
-				progressReporter->CalculationAborted();
-				throw USER_ABORTED("Abort requested by user");
+			sofiCalculator->addNewImage(currentImage);
+			nFramesProcessedTotal += 1;
+			if (nFramesProcessedTotal % 50 == 0) {
+				status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
+				if (status != 0) {
+					progressReporter->CalculationAborted();
+					throw USER_ABORTED("Abort requested by user");
+				}
 			}
-            
-			weightOfThisBlock = static_cast<double>(nFramesIncludedInCalculation) / static_cast<double>(blockSize);
-			sumOfBlockWeights += weightOfThisBlock;
-				
-			if (sofiImage.get() == NULL) {
-				sofiImage = outputImage;
-                *sofiImage *= weightOfThisBlock;
-			} else {
-				*sofiImage += *outputImage * weightOfThisBlock;
-			}
-            if (averageImage.get() == NULL) {
-                averageImage = averageOutputImage;
-                *averageImage *= weightOfThisBlock;
-            } else {
-                *averageImage += *averageOutputImage * weightOfThisBlock;
-            }
 		}
 		
-		if (sofiImage.get() != NULL) {
-			*sofiImage /= sumOfBlockWeights;
-			
-			outputWriter->write_image(sofiImage);
-            
-            if (doAverage) {
-                *averageImage /= sumOfBlockWeights;
-                averageImageOutputWriter->write_image(averageImage);
-            }
+		sofiCalculator->getResult(sofiImage, averageImage);
+		// safety check
+		if ((sofiImage.get() == NULL) || (averageImage.get() == NULL))
+			throw std::runtime_error("No output from sofiCalculator");
+		
+		outputWriter->write_image(sofiImage);
+		if (doAverage) {
+			averageImageOutputWriter->write_image(averageImage);
 		}
 	}
+	
 	progressReporter->CalculationDone();
 }
 
@@ -183,29 +139,43 @@ void SOFICalculator::addNewImage(ImagePtr newImage) {
     
     if (imageVector.size() == batchSize) {
         // it's time to calculate and store some output
-        double thisBatchWeight = static_cast<double>(imageVector.size()) / batchSize;
-        ImagePtr thisBatchAverage, thisBatchSOFI;
-        this->performCalculation(thisBatchSOFI, thisBatchAverage);
-        
-        // set up the output images if required
-        if (this->sofiImage.get() == NULL) {
-            this->sofiImage = thisBatchSOFI;
-        } else {
-            *(this->sofiImage) += *thisBatchSOFI * thisBatchWeight;
-        }
-        
-        if (this->averageImage.get() == NULL) {
-            this->averageImage = thisBatchAverage;
-        } else {
-            *(this->averageImage) += *thisBatchAverage * thisBatchWeight;
-        }
-        
-        sumOfWeightsIncluded += thisBatchWeight;
+        addNewBlockFromStoredImages();
     }
 }
 
+void SOFICalculator::addNewBlockFromStoredImages() {
+    double weightOfThisBlock = static_cast<double>(imageVector.size()) / static_cast<double>(batchSize);
+    
+    ImagePtr thisBatchAverage, thisBatchSOFI;
+    this->performCalculation(thisBatchSOFI, thisBatchAverage);
+    
+    // set up the output images if required
+    if (this->sofiImage.get() == NULL) {
+        this->sofiImage = thisBatchSOFI;
+    } else {
+        *(this->sofiImage) += *thisBatchSOFI * weightOfThisBlock;
+    }
+    
+    if (this->averageImage.get() == NULL) {
+        this->averageImage = thisBatchAverage;
+    } else {
+        *(this->averageImage) += *thisBatchAverage * weightOfThisBlock;
+    }
+    
+    sumOfWeightsIncluded += weightOfThisBlock;
+    imageVector.clear();
+}
+
 void SOFICalculator::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
-    // first check if the output exists
+    // process any images that may remain in the queue
+    try {
+        addNewBlockFromStoredImages();
+    }
+    catch (SOFINoImageInCalculation e) {
+        // this is no problem, it just means that there were not enough images left
+    }
+    
+    // now check whether the output images even exist
     if ((this->averageImage.get() == NULL) || (this->sofiImage.get() == NULL))
         throw std::runtime_error("Requested a SOFI image even though there are no evaluations");
     
@@ -248,7 +218,7 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     ImagePtr subImage(new Image(firstImage->rows(), firstImage->cols()));
 	
     outputImage->setConstant(0.0);
-    for (int n = 0; n < this->imageVector.size(); ++n) {
+    for (size_t n = 0; n < this->imageVector.size(); ++n) {
         subImage->setConstant(1.0);
         for (int i = 0; i < order; ++i) {
             (*subImage).array() *= (*imageVector[n]).array();
@@ -260,10 +230,6 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     
     calculatedSOFIImage = ImagePtr(new Image(*outputImage));
     calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
-	
-	// now reset everything for the next calculation
-	// before returning
-	this->imageVector.clear();
 }
 
 SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs, size_t batchSize) :
@@ -307,12 +273,13 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     
     // allocate the output image
     ImagePtr outputImage(new Image(nRowsOutput, nColsOutput));
+	outputImage->setConstant(0.0);
     
     double currentVal, summedVal;
     ImagePtr currentImage;
     // main calculation
     // loop over all images
-    for (int n = 0; n < this->imageVector.size(); ++n) {
+    for (size_t n = 0; n < this->imageVector.size(); ++n) {
         currentImage = imageVector[n];
         // loop over all pixels in the input
         for (int i = firstRow; i <= lastRow; ++i) {
@@ -320,13 +287,13 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                 // loop over all the kernel
                 for (int k = 0; k < nPixelsInKernel; ++k) {
                     // loop over all calculations within this kernel pixel
-                    std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
+                    const std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
                     summedVal = 0;
-                    for (int calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
+                    for (size_t calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
                         // and finally, loop over the different operations that each input requires
-                        SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
+                        const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
                         currentVal = 1;
-                        for (int multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
+                        for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
                             currentVal *= (*currentImage)(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
                         }
                         summedVal += currentVal;
@@ -341,17 +308,9 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     
     // take the average
     (*outputImage) /= static_cast<double>(this->imageVector.size());
-    if ((*outputImage).maxCoeff() > 1e50)
-        XOPNotice("Too large coeff in outputImage\r");
-    
-    calculatedSOFIImage = ImagePtr(new Image(*outputImage));
-    calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
-    
-    this->imageVector.clear();
-    return;
                                        
 	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
-    /*int nKindsOfPixels = nPixelsInKernel;
+    int nKindsOfPixels = nPixelsInKernel;
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
     pixelAverages.setConstant(0.0);
@@ -387,12 +346,13 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
         }
     }
     
-    this->imageVector.clear();
-    this->averageImage->setConstant(0.0);
-	return correctedImage;*/
+	calculatedSOFIImage = ImagePtr(new Image(*correctedImage));
+    calculatedAverageImage = ImagePtr(new Image(*correctedImage));
+    
+    return;
 }
 
-void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) {
+void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) const {
     switch (order) {
         case 2:
             outputRow = 2 * inputRow - 2;
@@ -403,12 +363,12 @@ void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, in
             outputCol = 3 * inputCol - 3;
             break;
         default:
-            // todo: error
+            throw std::runtime_error("Invalid case in getOutputPixelCoordinates");
             break;
     }
 }
 
-void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) {
+void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) const {
     switch (order) {
         case 2:
             firstRow = 1;
@@ -419,12 +379,12 @@ void XCSOFIKernelProvider::getCoordinatesOfFirstUsableInputPixel(int order, int 
             firstCol = 1;
             break;
         default:
-            // TODO: error
+            throw std::runtime_error("Invalid case in getCoordinatesOfFirstUsableInputPixel");
             break;
     }
 }
 
-void XCSOFIKernelProvider::getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol) {
+void XCSOFIKernelProvider::getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol) const {
     switch (order) {
         case 2:
             lastRow = (nRowsInput - 1) - 1;
@@ -435,12 +395,12 @@ void XCSOFIKernelProvider::getCoordinatesOfLastUsableInputPixel(int order, int n
             lastCol = (nColsInput - 1) - 1;
             break;
         default:
-            // TODO: error
+            throw std::runtime_error("Invalid case in getCoordinatesOfLastUsableInputPixel");
             break;
     }
 }
 
-void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols) {
+void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols) const {
     switch (order) {
         case 2:
             nRows = 2 * nRowsInput - 4;
@@ -451,12 +411,12 @@ void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int n
             nCols = 3 * nColsInput - 6;
             break;
         default:
-            // todo: ERROR
+            throw std::runtime_error("Invalid case in getSizeOfOutputImage");
             break;
     }
 }
 
-boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::getKernel(int order, int lagTime, int &nRows, int &nCols) {
+boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::getKernel(int order, int lagTime, int &nRows, int &nCols) const {
     boost::shared_array<std::vector<SOFIPixelCalculation> > kernel;
     
     switch (order) {
@@ -652,7 +612,7 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             break;
         }
         default:
-            // TODO error
+            throw std::runtime_error("Invalid case in getKernel");
             break;
     }
     return kernel;

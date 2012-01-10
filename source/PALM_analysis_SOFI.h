@@ -66,10 +66,11 @@ public:
 	SOFICalculator(size_t batchSize_rhs) {batchSize = batchSize_rhs; sumOfWeightsIncluded = 0.0;}
 	virtual ~SOFICalculator() {;}
 	
-	virtual void addNewImage(ImagePtr image);
-    virtual void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
+    void addNewImage(ImagePtr image);
+    void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
 	
 protected:
+    void addNewBlockFromStoredImages();
     virtual void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) = 0;
     
     std::vector<ImagePtr> imageVector;
@@ -109,7 +110,7 @@ public:
     
     std::vector<int> imageIndices;  // relative time of the INPUT images required for each calculation
                                     // 0 is the current one, +1 means the next one, +2 the one after that, ...
-    void getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol);
+    void getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) const;
     int outputRowDelta; // used by getOutputPixelCoordinates
     int outputColDelta;
 };
@@ -119,10 +120,10 @@ public:
     XCSOFIKernelProvider() {;}
     ~XCSOFIKernelProvider() {;}
     
-    void getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol);
-    void getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol);
-    void getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols);
-    boost::shared_array<std::vector<SOFIPixelCalculation> > getKernel(int order, int lagTime, int &nRows, int &nCols);
+    void getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) const;
+    void getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol) const;
+    void getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols) const;
+    boost::shared_array<std::vector<SOFIPixelCalculation> > getKernel(int order, int lagTime, int &nRows, int &nCols) const;
 };
 
 class SOFICorrector_Order2 {
