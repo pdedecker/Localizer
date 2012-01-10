@@ -63,36 +63,42 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
  */
 class SOFICalculator {
 public:
-	SOFICalculator() {;}
+	SOFICalculator(size_t batchSize_rhs) {batchSize = batchSize_rhs; sumOfWeightsIncluded = 0.0;}
 	virtual ~SOFICalculator() {;}
 	
 	virtual void addNewImage(ImagePtr image);
-	virtual void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) = 0;
+    virtual void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
 	
 protected:
+    virtual void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) = 0;
+    
     std::vector<ImagePtr> imageVector;
+    ImagePtr sofiImage;
     ImagePtr averageImage;
+    
+    size_t batchSize;
+    double sumOfWeightsIncluded;
 };
 
 class SOFICalculator_AutoCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_AutoCorrelation(int order, int lagTime);
+	SOFICalculator_AutoCorrelation(int order, int lagTime, size_t batchSize);
 	~SOFICalculator_AutoCorrelation() {;}
 	
-	void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
-	
 protected:
+    void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
+    
     int order;
 };
 
 class SOFICalculator_CrossCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_CrossCorrelation(int order, int lagTime);
+	SOFICalculator_CrossCorrelation(int order, int lagTime, size_t batchSize);
 	~SOFICalculator_CrossCorrelation() {;}
 	
-	void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
-	
 protected:
+    void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
+    
     int order;
 };
 

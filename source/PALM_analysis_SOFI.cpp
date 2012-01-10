@@ -58,9 +58,9 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	
 	boost::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTime));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTime, blockSize));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTime));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTime, blockSize));
 	}
 	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
@@ -173,38 +173,74 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 
 void SOFICalculator::addNewImage(ImagePtr newImage) {
 	// a new image is available
-	// this can be the start of the calculation, or we can be
-	// somewhere in the middle of the calculation
+	// add it to the queue, but if the queue reaches the batch size
+    // then a result needs to be computed and stored
     
     if (newImage.get() == NULL)
         throw std::runtime_error("NULL image provided to SOFICalculator::addNewImage");
 	
 	this->imageVector.push_back(newImage);
-	if (this->averageImage.get() == NULL) {
-        this->averageImage = ImagePtr(new Image(newImage->rows(), newImage->cols()));
-        this->averageImage->setConstant(0.0);
+    
+    if (imageVector.size() == batchSize) {
+        // it's time to calculate and store some output
+        double thisBatchWeight = static_cast<double>(imageVector.size()) / batchSize;
+        ImagePtr thisBatchAverage, thisBatchSOFI;
+        this->performCalculation(thisBatchSOFI, thisBatchAverage);
+        
+        // set up the output images if required
+        if (this->sofiImage.get() == NULL) {
+            this->sofiImage = thisBatchSOFI;
+        } else {
+            *(this->sofiImage) += *thisBatchSOFI * thisBatchWeight;
+        }
+        
+        if (this->averageImage.get() == NULL) {
+            this->averageImage = thisBatchAverage;
+        } else {
+            *(this->averageImage) += *thisBatchAverage * thisBatchWeight;
+        }
+        
+        sumOfWeightsIncluded += thisBatchWeight;
     }
-    (*this->averageImage) += *newImage;
 }
 
-SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs) :
+void SOFICalculator::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
+    // first check if the output exists
+    if ((this->averageImage.get() == NULL) || (this->sofiImage.get() == NULL))
+        throw std::runtime_error("Requested a SOFI image even though there are no evaluations");
+    
+    // calculate the averaged SOFI and average image
+    calculatedSOFIImage = ImagePtr(new Image(*sofiImage));
+    calculatedAverageImage = ImagePtr(new Image(*averageImage));
+    
+    *calculatedSOFIImage /= sumOfWeightsIncluded;
+    *calculatedAverageImage /= sumOfWeightsIncluded;
+}
+
+SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs, size_t batchSize) :
+    SOFICalculator(batchSize),
     order(order_rhs)
 {
 }
 
-void SOFICalculator_AutoCorrelation::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
+void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
 	if (this->imageVector.size() == 0) {
 		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
     }
     
     ImagePtr firstImage = this->imageVector.front();
 	
-	// normalize the average image
-    *(this->averageImage) /= static_cast<double>(this->imageVector.size());
+	// calculate the average image
+    ImagePtr thisBatchAverageImage(new Image(firstImage->rows(), firstImage->cols()));
+    thisBatchAverageImage->setConstant(0.0);
+    for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
+        *thisBatchAverageImage += *(*it);
+    }
+    *thisBatchAverageImage /= static_cast<double>(this->imageVector.size());
     
     // and convert all the input images to fluctuation images by subtracting the average
     for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
-        *(*it) -= *(this->averageImage);
+        *(*it) -= *thisBatchAverageImage;
     }
 	
 	// since the lagtime is assumed to be zero for now, simply multiply the images together
@@ -223,32 +259,37 @@ void SOFICalculator_AutoCorrelation::getResult(ImagePtr &calculatedSOFIImage, Im
     *outputImage /= static_cast<double>(this->imageVector.size());
     
     calculatedSOFIImage = ImagePtr(new Image(*outputImage));
-    calculatedAverageImage = ImagePtr(new Image(*averageImage));
+    calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
 	
 	// now reset everything for the next calculation
 	// before returning
 	this->imageVector.clear();
-    this->averageImage->setConstant(0.0);
 }
 
-SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs) :
+SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs, size_t batchSize) :
+    SOFICalculator(batchSize),
     order(order_rhs)
 {
 }
 
-void SOFICalculator_CrossCorrelation::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
+void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
     // verify that there are enough images in the input buffer
     if (this->imageVector.size() == 0)
         throw SOFINoImageInCalculation("no images for SOFICalculator_CrossCorrelation::getResult()");
     
     ImagePtr firstImage = this->imageVector.front();
-    
-    // normalize the average image
-    (*this->averageImage) /= static_cast<double>(this->imageVector.size());
+	
+	// calculate the average image
+    ImagePtr thisBatchAverageImage(new Image(firstImage->rows(), firstImage->cols()));
+    thisBatchAverageImage->setConstant(0.0);
+    for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
+        *thisBatchAverageImage += *(*it);
+    }
+    *thisBatchAverageImage /= static_cast<double>(this->imageVector.size());
     
     // and convert all the input images to fluctuation images by subtracting the average
     for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
-        *(*it) -= *(this->averageImage);
+        *(*it) -= *thisBatchAverageImage;
     }
     
     // set everything up
@@ -304,10 +345,9 @@ void SOFICalculator_CrossCorrelation::getResult(ImagePtr &calculatedSOFIImage, I
         XOPNotice("Too large coeff in outputImage\r");
     
     calculatedSOFIImage = ImagePtr(new Image(*outputImage));
-    calculatedAverageImage = ImagePtr(new Image(*averageImage));
+    calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
     
     this->imageVector.clear();
-    this->averageImage->setConstant(0.0);
     return;
                                        
 	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
