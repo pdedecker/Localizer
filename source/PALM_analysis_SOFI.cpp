@@ -125,9 +125,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			}
 			
             try {
-                if (doAverage)
-                    averageOutputImage = sofiCalculator->getAverageImage();
-                outputImage = sofiCalculator->getResult();
+                sofiCalculator->getResult(outputImage, averageOutputImage);
             }
             catch (SOFINoImageInCalculation e) {
                 // insufficient images were included in this calculation to get a result
@@ -147,17 +145,19 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 				
 			if (sofiImage.get() == NULL) {
 				sofiImage = outputImage;
+                *sofiImage *= weightOfThisBlock;
 			} else {
 				*sofiImage += *outputImage * weightOfThisBlock;
 			}
-            if (doAverage && averageImage.get() == NULL) {
+            if (averageImage.get() == NULL) {
                 averageImage = averageOutputImage;
+                *averageImage *= weightOfThisBlock;
             } else {
                 *averageImage += *averageOutputImage * weightOfThisBlock;
             }
 		}
 		
-		if (nImagesInBlock > 0) {
+		if (sofiImage.get() != NULL) {
 			*sofiImage /= sumOfBlockWeights;
 			
 			outputWriter->write_image(sofiImage);
@@ -187,22 +187,12 @@ void SOFICalculator::addNewImage(ImagePtr newImage) {
     (*this->averageImage) += *newImage;
 }
 
-ImagePtr SOFICalculator::getAverageImage() const const {
-	// a new image is available
-	// this can be the start of the calculation, or we can be
-	// somewhere in the middle of the calculation
-	
-	if (this->averageImage.get() == NULL)
-        throw std::runtime_error("requested an average image but this->averageImage is NULL");
-    return this->averageImage;
-}
-
 SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs) :
     order(order_rhs)
 {
 }
 
-ImagePtr SOFICalculator_AutoCorrelation::getResult() {
+void SOFICalculator_AutoCorrelation::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
 	if (this->imageVector.size() == 0) {
 		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
     }
@@ -231,12 +221,14 @@ ImagePtr SOFICalculator_AutoCorrelation::getResult() {
     }
     
     *outputImage /= static_cast<double>(this->imageVector.size());
+    
+    calculatedSOFIImage = ImagePtr(new Image(*outputImage));
+    calculatedAverageImage = ImagePtr(new Image(*averageImage));
 	
 	// now reset everything for the next calculation
 	// before returning
 	this->imageVector.clear();
     this->averageImage->setConstant(0.0);
-    return outputImage;
 }
 
 SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs) :
@@ -244,7 +236,7 @@ SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, 
 {
 }
 
-ImagePtr SOFICalculator_CrossCorrelation::getResult() {
+void SOFICalculator_CrossCorrelation::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
     // verify that there are enough images in the input buffer
     if (this->imageVector.size() == 0)
         throw SOFINoImageInCalculation("no images for SOFICalculator_CrossCorrelation::getResult()");
@@ -308,9 +300,15 @@ ImagePtr SOFICalculator_CrossCorrelation::getResult() {
     
     // take the average
     (*outputImage) /= static_cast<double>(this->imageVector.size());
+    if ((*outputImage).maxCoeff() > 1e50)
+        XOPNotice("Too large coeff in outputImage\r");
+    
+    calculatedSOFIImage = ImagePtr(new Image(*outputImage));
+    calculatedAverageImage = ImagePtr(new Image(*averageImage));
+    
     this->imageVector.clear();
     this->averageImage->setConstant(0.0);
-    return outputImage;
+    return;
                                        
 	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
     /*int nKindsOfPixels = nPixelsInKernel;

@@ -67,8 +67,7 @@ public:
 	virtual ~SOFICalculator() {;}
 	
 	virtual void addNewImage(ImagePtr image);
-    virtual ImagePtr getAverageImage() const; // must be called afer adding all images but before getResult()
-	virtual ImagePtr getResult() = 0;
+	virtual void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) = 0;
 	
 protected:
     std::vector<ImagePtr> imageVector;
@@ -80,7 +79,7 @@ public:
 	SOFICalculator_AutoCorrelation(int order, int lagTime);
 	~SOFICalculator_AutoCorrelation() {;}
 	
-	ImagePtr getResult();
+	void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
 	
 protected:
     int order;
@@ -91,7 +90,7 @@ public:
 	SOFICalculator_CrossCorrelation(int order, int lagTime);
 	~SOFICalculator_CrossCorrelation() {;}
 	
-	ImagePtr getResult();
+	void getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
 	
 protected:
     int order;

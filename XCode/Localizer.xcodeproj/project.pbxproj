@@ -565,7 +565,7 @@
 		4FADC23908B4156C00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
 				EXPORTED_SYMBOLS_FILE = "";
@@ -582,7 +582,7 @@
 					"\"HAVE_INLINE\"",
 				);
 				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = 4.2;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -636,6 +636,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",
@@ -671,6 +672,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",
