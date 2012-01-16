@@ -782,6 +782,8 @@ double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) 
 }*/
 
 SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_rhs) {
+	
+	validLimitsSet = true;
 	switch (storageType_rhs) {
             // some systems (e.g. the Nikon TIRF) never report absolutely saturated pixel
             // values, but instead report a different value close to it
@@ -810,19 +812,16 @@ SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_r
 		case STORAGE_TYPE_UINT64:
 			this->saturationValue = 18446744073709551615.0 - 1000.0;
 			break;
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_FP32:
-		case STORAGE_TYPE_FP64:
-			throw std::runtime_error("invalid storage type for saturation verification");
-			break;
 		default:
-			throw std::runtime_error("unknown storage type for saturation verification");
+			validLimitsSet = false;
 			break;
 	}
 }
 
 int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
+	if (validLimitsSet == false)
+		return 1;
+	
 	size_t nRows = frame->rows();
 	size_t nCols = frame->cols();
 	

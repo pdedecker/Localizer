@@ -155,6 +155,7 @@ public:
 	int isValidFrame(ImagePtr frame);
 	
 protected:
+	bool validLimitsSet;
 	double saturationValue;
 };
 
