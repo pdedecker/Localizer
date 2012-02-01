@@ -347,7 +347,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     }
     
 	calculatedSOFIImage = ImagePtr(new Image(*correctedImage));
-    calculatedAverageImage = ImagePtr(new Image(*correctedImage));
+    calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
     
     return;
 }
