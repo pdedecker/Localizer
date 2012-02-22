@@ -160,7 +160,7 @@ protected:
 	uint64_t xSize;
 	uint64_t ySize;
 	int storage_type;
-	size_t nextImageToRead;
+	uint64_t nextImageToRead;
 	
 	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
 };

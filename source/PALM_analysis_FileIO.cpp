@@ -600,7 +600,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 
 ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 	uint64_t offset;
-	size_t imageSize = xSize * ySize * 2; // assume a 16-bit format
+	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
 	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
@@ -692,7 +692,7 @@ void ImageLoaderPDE::parse_header_information() {
 
 ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 	size_t nPixels = this->xSize * this->ySize;
-	size_t offset, imageSize;
+	uint64_t offset, imageSize;
 	
 	ImagePtr image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
 	
