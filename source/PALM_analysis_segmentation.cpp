@@ -441,6 +441,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// so in that case the segmentation will have to run on a slightly smaller image
 	// by allocating the threshold_image first we make sure that the it will have
 	// the correct (original) size
+	int imageNeedsResizing = 0;
 	if (xSize % 2 != 0) {
 		xSize -= 1;
 		imageNeedsResizing = 1;

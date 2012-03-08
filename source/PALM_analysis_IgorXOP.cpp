@@ -891,6 +891,9 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         case THRESHOLD_METHOD_DIRECT:	// direct threshold
             thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
             break;
+		case THRESHOLD_METHOD_SMOOTHSIGMA:
+			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width));
+			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
             break;
@@ -1843,6 +1846,9 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         case THRESHOLD_METHOD_DIRECT:	// direct threshold
             thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
             break;
+		case THRESHOLD_METHOD_SMOOTHSIGMA:
+			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth));
+			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
             break;
