@@ -114,7 +114,6 @@ public:
 	ThresholdImage_GLRT_FFT(double PFA_param, double width_param);
 	~ThresholdImage_GLRT_FFT() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding();
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 	
 protected:
@@ -136,6 +135,26 @@ protected:
 	
 	double sum_squared_Gaussian;
 	size_t windowSize;
+};
+
+class ThresholdImage_SmoothSigma : public ThresholdImage {
+public:
+	ThresholdImage_SmoothSigma(double pdfStdDev) {_pdfStdDev = pdfStdDev;}
+	~ThresholdImage_SmoothSigma() {;}
+	
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	
+protected:
+	void _makeKernels(double psfWidth);
+	
+	double _pdfStdDev;
+	ImagePtr _averageKernel;
+	ImagePtr _smoothingKernel;
+	double _avgKernelSum;
+	
+	ConvolveMatricesWithFFTClass matrixConvolver;
+	
+	boost::mutex _kernelCalculationMutex;
 };
 
 class ThresholdImage_Preprocessor {

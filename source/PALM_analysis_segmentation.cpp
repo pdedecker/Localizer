@@ -429,6 +429,115 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	return threshold_image;
 }
 
+boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_SmoothSigma::do_thresholding(ImagePtr image) {
+	int nPointsInImage = image->rows() * image->cols();
+	if (nPointsInImage <= 1)
+		throw std::runtime_error("image too small");
+	
+	int xSize = image->rows();
+	int ySize = image->cols();
+	
+	// if the image has odd dimensions then the convolution will be throw an error
+	// so in that case the segmentation will have to run on a slightly smaller image
+	// by allocating the threshold_image first we make sure that the it will have
+	// the correct (original) size
+	if (xSize % 2 != 0) {
+		xSize -= 1;
+		imageNeedsResizing = 1;
+	}
+	if (ySize % 2 != 0) {
+		ySize -= 1;
+		imageNeedsResizing = 1;
+	}
+	
+	if (imageNeedsResizing == 1) {
+		ImagePtr reducedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+		for (size_t j = 0; j < ySize; ++j) {
+			for (size_t i = 0; i < xSize; ++i) {
+				(*reducedImage)(i,j) = (*image)(i,j);
+			}
+		}
+		image = reducedImage;	// modify the smart_ptr
+	}
+	
+	// do the required kernels exist?
+	{
+		boost::lock_guard<boost::mutex> lock(_kernelCalculationMutex);
+		if (_averageKernel.get() == NULL) {
+			assert(_smoothingKernel.get() == NULL);
+			int gaussKernelSize = ceil(_pdfStdDev * 3);
+			if (gaussKernelSize % 2 == 0)
+				gaussKernelSize += 1;
+			
+			int avgKernelSize = 3 * gaussKernelSize;
+			
+			int halfGaussKernelSize = gaussKernelSize / 2;
+			int halfAvgKernelSize = avgKernelSize / 2;
+			
+			_smoothingKernel = ImagePtr(new Image(image->rows(), image->cols()));
+			_averageKernel = ImagePtr(new Image(image->rows(), image->cols()));
+			_smoothingKernel->setConstant(0.0);
+			_averageKernel->setConstant(0.0);
+			
+			int imageCenterX = image->rows() / 2;
+			int imageCenterY = image->cols() / 2;
+			
+			// gaussian kernel
+			double offsetX, offsetY;
+			for (int i = 0; i < gaussKernelSize; ++i) {
+				for (int j = 0; j < gaussKernelSize; ++j) {
+					offsetX = static_cast<double>(i - halfGaussKernelSize);
+					offsetY = static_cast<double>(i - halfGaussKernelSize);
+					(*_smoothingKernel)(i + imageCenterX - halfGaussKernelSize, j + imageCenterY - halfGaussKernelSize) = exp(- (offsetX * offsetX + offsetY * offsetY) / (2.0 * _pdfStdDev));
+				}
+			}
+			
+			// average kernel
+			for (int i = 0; i < avgKernelSize; ++i) {
+				for (int j = 0; j < avgKernelSize; ++j) {
+					offsetX = static_cast<double>(i - halfAvgKernelSize);
+					offsetY = static_cast<double>(i - halfAvgKernelSize);
+					(*_averageKernel)(i + imageCenterX - halfAvgKernelSize, j + imageCenterY - halfAvgKernelSize) = 1 - exp(- (offsetX * offsetX + offsetY * offsetY) / (2.0 * _pdfStdDev));
+				}
+			}
+			_avgKernelSum = _averageKernel->sum();
+		}
+	}
+	
+	// subtract the average
+	ImagePtr averageConvolved = matrixConvolver.ConvolveMatricesWithFFT(image, _averageKernel);
+	(*averageConvolved) /= _avgKernelSum;
+	
+	ImagePtr averageSubtracted(GetRecycledMatrix(image->rows(), image->cols()), FreeRecycledMatrix);
+	(*averageSubtracted) = (*image) - (*averageConvolved);
+	
+	// and smooth it
+	ImagePtr smoothedSubtracted = matrixConvolver.ConvolveMatricesWithFFT(averageSubtracted, _smoothingKernel);
+	double average = smoothedSubtracted->sum() / static_cast<double>(nPointsInImage);
+	(*smoothedSubtracted).array() -= average;
+	
+	// finally get the standard deviation
+	double stdDev = 0;
+	
+	double* imageData = image->data();
+	for (int i = 0; i < nPointsInImage; ++i) {
+		stdDev += *imageData - static_cast<double>(nPointsInImage);
+		stdDev = stdDev * stdDev;
+		++imageData;
+	}
+	stdDev /= static_cast<double>(nPointsInImage - 1);
+	stdDev = sqrt(stdDev);
+	
+	double threshold = 5 * stdDev;
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>(image->rows(), image->cols()));
+	int* thresholdImageData = thresholdedImage->data();
+	imageData = image->data();
+	for (int i = 0; i < nPointsInImage; ++i) {
+		*thresholdImageData = (*imageData >= threshold) ? 255 : 0;
+	}
+	
+	return thresholdedImage;
+}
 
 ImagePtr ThresholdImage_Preprocessor_MedianFilter::do_preprocessing(ImagePtr image) {
 	
