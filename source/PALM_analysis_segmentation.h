@@ -139,7 +139,7 @@ protected:
 
 class ThresholdImage_SmoothSigma : public ThresholdImage {
 public:
-	ThresholdImage_SmoothSigma(double pdfStdDev) {_pdfStdDev = pdfStdDev;}
+	ThresholdImage_SmoothSigma(double pdfStdDev, double multiplicationFactor) : _pdfStdDev(pdfStdDev), _multiplicationFactor(multiplicationFactor) {}
 	~ThresholdImage_SmoothSigma() {;}
 	
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
@@ -148,6 +148,8 @@ protected:
 	void _makeKernels(double psfWidth);
 	
 	double _pdfStdDev;
+	double _multiplicationFactor;
+	
 	ImagePtr _averageKernel;
 	ImagePtr _smoothingKernel;
 	double _avgKernelSum;

@@ -430,8 +430,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 }
 
 boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_SmoothSigma::do_thresholding(ImagePtr image) {
-	int nPointsInImage = image->rows() * image->cols();
-	if (nPointsInImage <= 1)
+	if (image->rows() * image->cols() <= 1)
 		throw std::runtime_error("image too small");
 	
 	int xSize = image->rows();
@@ -441,6 +440,7 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	// so in that case the segmentation will have to run on a slightly smaller image
 	// by allocating the threshold_image first we make sure that the it will have
 	// the correct (original) size
+	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>(xSize, ySize));
 	int imageNeedsResizing = 0;
 	if (xSize % 2 != 0) {
 		xSize -= 1;
@@ -453,8 +453,8 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	
 	if (imageNeedsResizing == 1) {
 		ImagePtr reducedImage(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-		for (size_t j = 0; j < ySize; ++j) {
-			for (size_t i = 0; i < xSize; ++i) {
+		for (int j = 0; j < ySize; ++j) {
+			for (int i = 0; i < xSize; ++i) {
 				(*reducedImage)(i,j) = (*image)(i,j);
 			}
 		}
@@ -513,28 +513,29 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > Threshold
 	(*averageSubtracted) = (*image) - (*averageConvolved);
 	
 	// and smooth it
+	int nPointsInImage = image->rows() * image->cols();
 	ImagePtr smoothedSubtracted = matrixConvolver.ConvolveMatricesWithFFT(averageSubtracted, _smoothingKernel);
 	double average = smoothedSubtracted->sum() / static_cast<double>(nPointsInImage);
 	(*smoothedSubtracted).array() -= average;
 	
 	// finally get the standard deviation
 	double stdDev = 0;
+	double averageForStdDev = (*smoothedSubtracted).sum() / static_cast<double>(nPointsInImage);
 	
 	double* imageData = image->data();
 	for (int i = 0; i < nPointsInImage; ++i) {
-		stdDev += *imageData - static_cast<double>(nPointsInImage);
-		stdDev = stdDev * stdDev;
+		stdDev += (*imageData - averageForStdDev) * (*imageData - averageForStdDev);
 		++imageData;
 	}
 	stdDev /= static_cast<double>(nPointsInImage - 1);
 	stdDev = sqrt(stdDev);
 	
-	double threshold = 5 * stdDev;
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>(image->rows(), image->cols()));
-	int* thresholdImageData = thresholdedImage->data();
-	imageData = image->data();
-	for (int i = 0; i < nPointsInImage; ++i) {
-		*thresholdImageData = (*imageData >= threshold) ? 255 : 0;
+	double threshold = _multiplicationFactor * stdDev;
+	
+	for (int j = 0; j < ySize; ++j) {
+		for (int i = 0; i < xSize; ++i) {
+			(*thresholdedImage)(i, j) = ((*smoothedSubtracted)(i, j) >= threshold) ? 255 : 0;
+		}
 	}
 	
 	return thresholdedImage;
