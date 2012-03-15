@@ -87,7 +87,7 @@ struct LocalizationAnalysisRuntimeParams {
 	
 	// Parameters for /SSG flag group.
 	int SSGFlagEncountered;
-	double SmoothSigmaFactor;
+	double smoothSigmaFactor;
 	int SSGFlagParamsSet[1];
 	
 	// Parameters for /R flag group.
@@ -355,7 +355,7 @@ struct EmitterSegmentationRuntimeParams {
 	
 	// Parameters for /SSG flag group.
 	int SSGFlagEncountered;
-	double SmoothSigmaFactor;
+	double smoothSigmaFactor;
 	int SSGFlagParamsSet[1];
 	
 	// Parameters for /WDTH flag group.
@@ -754,8 +754,12 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     } else if (thresholding_method == THRESHOLD_METHOD_GLRT)
         PFA = 30;
 	
+	double smoothSigmaFactor = 5.0;
 	if (p->SSGFlagEncountered) {
-		// Parameter: p->SmoothSigmaFactor
+		// Parameter: p->smoothSigmaFactor
+		if (p->smoothSigmaFactor <= 0.0)
+			return EXPECT_POS_NUM;
+		smoothSigmaFactor = p->smoothSigmaFactor;
 	}
 
 
@@ -906,7 +910,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
             thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
             break;
 		case THRESHOLD_METHOD_SMOOTHSIGMA:
-			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width, 5.0));
+			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width, smoothSigmaFactor));
 			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
@@ -1738,8 +1742,12 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     } else if (method == THRESHOLD_METHOD_GLRT)
         return TOO_FEW_PARAMETERS;
 	
+	double smoothSigmaFactor = 5;
 	if (p->SSGFlagEncountered) {
-		// Parameter: p->SmoothSigmaFactor
+		// Parameter: p->smoothSigmaFactor
+		if (p->smoothSigmaFactor <= 0.0)
+			return EXPECT_POS_NUM;
+		smoothSigmaFactor = p->smoothSigmaFactor;
 	}
 
     if (p->WDTHFlagEncountered) {
@@ -1865,7 +1873,7 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
             thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
             break;
 		case THRESHOLD_METHOD_SMOOTHSIGMA:
-			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, 5.0));
+			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, smoothSigmaFactor));
 			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
@@ -2559,7 +2567,7 @@ static int RegisterLocalizationAnalysis(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the LocalizationAnalysisRuntimeParams structure as well.
-	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /SSG=number:SmoothSigmaFactor /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
+	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /SSG=number:smoothSigmaFactor /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
 	runtimeNumVarList = "V_flag;";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, kOperationIsThreadSafe);
@@ -2607,7 +2615,7 @@ static int RegisterEmitterSegmentation(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
-	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /SSG=number:SmoothSigmaFactor /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /SSG=number:smoothSigmaFactor /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
 	runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
