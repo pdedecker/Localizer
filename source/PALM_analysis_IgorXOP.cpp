@@ -42,99 +42,104 @@ typedef struct LocalizerProgStruct* LocalizerProgStructPtr;
 // Runtime param structure for LocalizationAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct LocalizationAnalysisRuntimeParams {
-    // Flag parameters.
-
-    // Parameters for /M flag group.
-    int MFlagEncountered;
-    double method;
-    int MFlagParamsSet[1];
-
-    // Parameters for /D flag group.
-    int DFlagEncountered;
-    double thresholding_method;
-    int DFlagParamsSet[1];
-
-    // Parameters for /Y flag group.
-    int YFlagEncountered;
-    double camera_type;
-    int YFlagParamsSet[1];
-
-    // Parameters for /G flag group.
-    int GFlagEncountered;
-    double preprocessing;
-    double postprocessing;
-    int GFlagParamsSet[2];
-
-    // Parameters for /F flag group.
-    int FFlagEncountered;
-    double particle_finder;
-    int FFlagParamsSet[1];
-
-    // Parameters for /PVER flag group.
-    int PVERFlagEncountered;
-    double particleVerifiers[100];			// Optional parameter.
-    int PVERFlagParamsSet[100];
-
-    // Parameters for /T flag group.
-    int TFlagEncountered;
-    double treshold_parameter;
-    int TFlagParamsSet[1];
-
-    // Parameters for /PFA flag group.
-    int PFAFlagEncountered;
-    double PFA;
-    int PFAFlagParamsSet[1];
-
-    // Parameters for /R flag group.
-    int RFlagEncountered;
-    double radius;
-    int RFlagParamsSet[1];
-
-    // Parameters for /W flag group.
-    int WFlagEncountered;
-    double initial_width;
-    int WFlagParamsSet[1];
-
-    // Parameters for /S flag group.
-    int SFlagEncountered;
-    double sigma;
-    int SFlagParamsSet[1];
-
-    // Parameters for /RNG flag group.
-    int RNGFlagEncountered;
-    double firstFrame;
-    double lastFrame;
-    int RNGFlagParamsSet[2];
-
-    // Parameters for /PROG flag group.
-    int PROGFlagEncountered;
-    LocalizerProgStruct* progStruct;
-    int PROGFlagParamsSet[1];
-
-    // Parameters for /DEST flag group.
-    int DESTFlagEncountered;
-    DataFolderAndName dest;
-    int DESTFlagParamsSet[1];
-
-    // Parameters for /Q flag group.
-    int QFlagEncountered;
-    // There are no fields for this group because it has no parameters.
-
-    // Parameters for /Z flag group.
-    int ZFlagEncountered;
-    // There are no fields for this group because it has no parameters.
-
-    // Main parameters.
-
-    // Parameters for simple main group #0.
-    int experiment_fileEncountered;
-    Handle experiment_file;
-    int experiment_fileParamsSet[1];
-
-    // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+	// Flag parameters.
+	
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double method;
+	int MFlagParamsSet[1];
+	
+	// Parameters for /D flag group.
+	int DFlagEncountered;
+	double thresholding_method;
+	int DFlagParamsSet[1];
+	
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double camera_type;
+	int YFlagParamsSet[1];
+	
+	// Parameters for /G flag group.
+	int GFlagEncountered;
+	double preprocessing;
+	double postprocessing;
+	int GFlagParamsSet[2];
+	
+	// Parameters for /F flag group.
+	int FFlagEncountered;
+	double particle_finder;
+	int FFlagParamsSet[1];
+	
+	// Parameters for /PVER flag group.
+	int PVERFlagEncountered;
+	double particleVerifiers[100];			// Optional parameter.
+	int PVERFlagParamsSet[100];
+	
+	// Parameters for /T flag group.
+	int TFlagEncountered;
+	double treshold_parameter;
+	int TFlagParamsSet[1];
+	
+	// Parameters for /PFA flag group.
+	int PFAFlagEncountered;
+	double PFA;
+	int PFAFlagParamsSet[1];
+	
+	// Parameters for /SSG flag group.
+	int SSGFlagEncountered;
+	double SmoothSigmaFactor;
+	int SSGFlagParamsSet[1];
+	
+	// Parameters for /R flag group.
+	int RFlagEncountered;
+	double radius;
+	int RFlagParamsSet[1];
+	
+	// Parameters for /W flag group.
+	int WFlagEncountered;
+	double initial_width;
+	int WFlagParamsSet[1];
+	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double sigma;
+	int SFlagParamsSet[1];
+	
+	// Parameters for /RNG flag group.
+	int RNGFlagEncountered;
+	double firstFrame;
+	double lastFrame;
+	int RNGFlagParamsSet[2];
+	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
+	// Parameters for /Z flag group.
+	int ZFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int experiment_fileEncountered;
+	Handle experiment_file;
+	int experiment_fileParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationAnalysisRuntimeParams LocalizationAnalysisRuntimeParams;
 typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimeParamsPtr;
@@ -331,65 +336,70 @@ typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
 // Runtime param structure for EmitterSegmentation operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct EmitterSegmentationRuntimeParams {
-    // Flag parameters.
-
-    // Parameters for /M flag group.
-    int MFlagEncountered;
-    double method;
-    int MFlagParamsSet[1];
-
-    // Parameters for /ABS flag group.
-    int ABSFlagEncountered;
-    double absoluteThreshold;
-    int ABSFlagParamsSet[1];
-
-    // Parameters for /PFA flag group.
-    int PFAFlagEncountered;
-    double PFA;
-    int PFAFlagParamsSet[1];
-
-    // Parameters for /WDTH flag group.
-    int WDTHFlagEncountered;
-    double PSFWidth;
-    int WDTHFlagParamsSet[1];
-
-    // Parameters for /G flag group.
-    int GFlagEncountered;
-    double preprocessing;
-    double postprocessing;
-    int GFlagParamsSet[2];
-
-    // Parameters for /F flag group.
-    int FFlagEncountered;
-    double particle_finder;
-    int FFlagParamsSet[1];
-
-    // Parameters for /PVER flag group.
-    int PVERFlagEncountered;
-    double particleVerifiers[100];			// Optional parameter.
-    int PVERFlagParamsSet[100];
-
-    // Parameters for /R flag group.
-    int RFlagEncountered;
-    double radiusBetweenParticles;
-    int RFlagParamsSet[1];
-
-    // Parameters for /S flag group.
-    int SFlagEncountered;
-    double output_located_particles;
-    int SFlagParamsSet[1];
-
-    // Main parameters.
-
-    // Parameters for simple main group #0.
-    int CCD_FrameEncountered;
-    waveHndl CCD_Frame;
-    int CCD_FrameParamsSet[1];
-
-    // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+	// Flag parameters.
+	
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double method;
+	int MFlagParamsSet[1];
+	
+	// Parameters for /ABS flag group.
+	int ABSFlagEncountered;
+	double absoluteThreshold;
+	int ABSFlagParamsSet[1];
+	
+	// Parameters for /PFA flag group.
+	int PFAFlagEncountered;
+	double PFA;
+	int PFAFlagParamsSet[1];
+	
+	// Parameters for /SSG flag group.
+	int SSGFlagEncountered;
+	double SmoothSigmaFactor;
+	int SSGFlagParamsSet[1];
+	
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
+	double PSFWidth;
+	int WDTHFlagParamsSet[1];
+	
+	// Parameters for /G flag group.
+	int GFlagEncountered;
+	double preprocessing;
+	double postprocessing;
+	int GFlagParamsSet[2];
+	
+	// Parameters for /F flag group.
+	int FFlagEncountered;
+	double particle_finder;
+	int FFlagParamsSet[1];
+	
+	// Parameters for /PVER flag group.
+	int PVERFlagEncountered;
+	double particleVerifiers[100];			// Optional parameter.
+	int PVERFlagParamsSet[100];
+	
+	// Parameters for /R flag group.
+	int RFlagEncountered;
+	double radiusBetweenParticles;
+	int RFlagParamsSet[1];
+	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double output_located_particles;
+	int SFlagParamsSet[1];
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int CCD_FrameEncountered;
+	waveHndl CCD_Frame;
+	int CCD_FrameParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct EmitterSegmentationRuntimeParams EmitterSegmentationRuntimeParams;
 typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParamsPtr;
@@ -743,6 +753,10 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
             analysisOptionsStream << "PFA:" << PFA << ';';
     } else if (thresholding_method == THRESHOLD_METHOD_GLRT)
         PFA = 30;
+	
+	if (p->SSGFlagEncountered) {
+		// Parameter: p->SmoothSigmaFactor
+	}
 
 
     if (p->RFlagEncountered) {
@@ -1723,6 +1737,10 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         PFA = p->PFA;
     } else if (method == THRESHOLD_METHOD_GLRT)
         return TOO_FEW_PARAMETERS;
+	
+	if (p->SSGFlagEncountered) {
+		// Parameter: p->SmoothSigmaFactor
+	}
 
     if (p->WDTHFlagEncountered) {
         // Parameter: p->PSFWidth
@@ -2541,8 +2559,8 @@ static int RegisterLocalizationAnalysis(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the LocalizationAnalysisRuntimeParams structure as well.
-    cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
-    runtimeNumVarList = "V_flag;";
+	cmdTemplate = "LocalizationAnalysis /M=number:method /D=number:thresholding_method /Y=number:camera_type /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /T=number:treshold_parameter /PFA=number:PFA /SSG=number:SmoothSigmaFactor /R=number:radius /W=number:initial_width /S=number:sigma /RNG={number:firstFrame, number:lastFrame} /PROG=structure:{progStruct, LocalizerProgStruct} /DEST=DataFolderAndName:{dest,real} /Q /Z string:experiment_file";
+	runtimeNumVarList = "V_flag;";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationAnalysisRuntimeParams), (void*)ExecuteLocalizationAnalysis, kOperationIsThreadSafe);
 }
@@ -2589,8 +2607,8 @@ static int RegisterEmitterSegmentation(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
-    cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
-    runtimeNumVarList = "";
+	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /SSG=number:SmoothSigmaFactor /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+	runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
 }
