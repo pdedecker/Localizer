@@ -34,15 +34,10 @@
 #include "boost/smart_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
-#include <eigen3/Eigen/Eigen>
+#include <gsl/gsl_histogram.h>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_MatrixRecycler.h"
 #include "PALM_analysis_Convolver.h"
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_sort.h>
-#include <gsl/gsl_sort_vector.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_histogram.h>
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
@@ -141,7 +136,7 @@ public:
 	virtual ImagePtr do_preprocessing(ImagePtr image) = 0;
 };
 
-class ThresholdImage_Preprocessor_DoNothing : public ThresholdImage_Preprocessor {	// WARNING: we assume that both x and y are odd
+class ThresholdImage_Preprocessor_DoNothing : public ThresholdImage_Preprocessor {
 public:
 	ThresholdImage_Preprocessor_DoNothing() {;}
 	~ThresholdImage_Preprocessor_DoNothing() {;}
@@ -175,7 +170,7 @@ protected:
 	
 	boost::mutex generateKernelMutex;
 	
-	ImagePtr Gaussian_kernel;	// automatically initialized to a NULL pointer
+	ImagePtr Gaussian_kernel;
 	double width;
 	size_t kernel_x_size;
 	size_t kernel_y_size;
@@ -202,8 +197,7 @@ public:
 	virtual boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) = 0;
 };
 
-class ThresholdImage_Postprocessor_DoNothing : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
-	// but do not have any active neighbours
+class ThresholdImage_Postprocessor_DoNothing : public ThresholdImage_Postprocessor {
 public:
 	ThresholdImage_Postprocessor_DoNothing() {;}
 	~ThresholdImage_Postprocessor_DoNothing() {;}
@@ -211,8 +205,7 @@ public:
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) {return thresholded_image;}
 };
 
-class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {	// remove pixels that are considered to be 'on'
-	// but do not have any active neighbours
+class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {
 public:
 	ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	~ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}

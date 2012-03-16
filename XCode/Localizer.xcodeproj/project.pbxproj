@@ -89,11 +89,9 @@
 		8D01CCD10486CAD60068D4B7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../resources/Info.plist; sourceTree = SOURCE_ROOT; };
 		D0006D2B12CFD34D00539A8F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
 		D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_storage.cpp; path = ../source/PALM_analysis_storage.cpp; sourceTree = SOURCE_ROOT; };
-		D018444E10E371B000277419 /* Localized positions formats.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Localized positions formats.txt"; sourceTree = "<group>"; wrapsLines = 1; };
 		D01D290A136CE9710094B975 /* PALM_analysis_ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_ProgressReporting.h; path = ../source/PALM_analysis_ProgressReporting.h; sourceTree = SOURCE_ROOT; };
 		D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_ProgressReporting.cpp; path = ../source/PALM_analysis_ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
 		D01F3B0A13E0800D00A42472 /* Localizer.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = Localizer.r; path = ../resources/Localizer.r; sourceTree = SOURCE_ROOT; };
-		D0246CC9116B16BA00F19D13 /* Fit functions.tex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Fit functions.tex"; sourceTree = "<group>"; };
 		D027E935151311CF005B8664 /* PALM_analysis_Convolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Convolver.h; path = ../source/PALM_analysis_Convolver.h; sourceTree = SOURCE_ROOT; };
 		D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Convolver.cpp; path = ../source/PALM_analysis_Convolver.cpp; sourceTree = SOURCE_ROOT; };
 		D03321001074B8B80097124C /* PALM_analysis_PALMImages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_PALMImages.h; path = ../source/PALM_analysis_PALMImages.h; sourceTree = SOURCE_ROOT; };
@@ -117,14 +115,11 @@
 		D09576110D30171E00506A92 /* PALM_analysis_IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_IgorXOP.h; path = ../source/PALM_analysis_IgorXOP.h; sourceTree = SOURCE_ROOT; };
 		D09810480D5B18B10074692A /* PALM_analysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis.cpp; path = ../source/PALM_analysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* PALM_analysis_Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Processing.h; path = ../source/PALM_analysis_Processing.h; sourceTree = SOURCE_ROOT; };
-		D09EC67611B44B9600B98EF9 /* PDE file format.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "PDE file format.txt"; sourceTree = "<group>"; };
-		D0A9C2CD135F449F00D076AE /* Include dylib.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Include dylib.txt"; sourceTree = "<group>"; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0B8585710E941A80045036F /* LocalizationAnalysis */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LocalizationAnalysis; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
-		D0D1B10B10E8EFA9009336E7 /* Wave note metadata.txt */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; path = "Wave note metadata.txt"; sourceTree = "<group>"; wrapsLines = 1; };
 		D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_MatrixRecycler.h; path = ../source/PALM_analysis_MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
 		D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_MatrixRecycler.cpp; path = ../source/PALM_analysis_MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
 		D0F0E2CE10EBE26600F9A855 /* PALM_analysis_IgorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_IgorUtilities.h; path = ../source/PALM_analysis_IgorUtilities.h; sourceTree = SOURCE_ROOT; };
@@ -258,11 +253,6 @@
 		D018444510E370D800277419 /* Design documents */ = {
 			isa = PBXGroup;
 			children = (
-				D018444E10E371B000277419 /* Localized positions formats.txt */,
-				D0D1B10B10E8EFA9009336E7 /* Wave note metadata.txt */,
-				D0246CC9116B16BA00F19D13 /* Fit functions.tex */,
-				D09EC67611B44B9600B98EF9 /* PDE file format.txt */,
-				D0A9C2CD135F449F00D076AE /* Include dylib.txt */,
 			);
 			name = "Design documents";
 			sourceTree = "<group>";

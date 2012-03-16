@@ -34,15 +34,10 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
-#include <eigen3/Eigen/Eigen>
-#include "PALM_analysis_errors.h"
-#include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_defines.h"
-#include "PALM_analysis_segmentation.h"
-#include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_Localization.h"
-#include "PALM_analysis_storage.h"
 #include "PALM_analysis_ProgressReporting.h"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #ifdef WITH_IGOR
@@ -56,7 +51,9 @@ class ThresholdImage;
 class ThresholdImage_Preprocessor;
 class ThresholdImage_Postprocessor;
 class ParticleFinder;
-class FitPositions;
+class ParticleVerifier;
+class LocalizedPositionsContainer;
+class Particle;
 
 
 boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 

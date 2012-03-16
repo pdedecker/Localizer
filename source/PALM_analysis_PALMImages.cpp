@@ -28,6 +28,7 @@
  */
 
 #include "PALM_analysis_PALMImages.h"
+#include <gsl/gsl_cdf.h>
 
 NormalCDFLookupTable::NormalCDFLookupTable() {
 	// allocate an array of 1001 doubles containing the CDF of a normal distribution

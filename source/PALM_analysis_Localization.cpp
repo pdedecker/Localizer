@@ -28,6 +28,13 @@
  */
 
 #include "PALM_analysis_Localization.h"
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_blas.h>
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
                                                                                              boost::shared_ptr<std::list<Particle> > positions) {

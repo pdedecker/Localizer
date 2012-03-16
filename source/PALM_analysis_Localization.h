@@ -33,18 +33,13 @@
 #define GSL_RANGE_CHECK_OFF	// this is not required since Eigen::MatrixXddoes range checks
 
 #include <list>
+#include "boost/smart_ptr.hpp"
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <stdexcept>
+
 #include "PALM_analysis_segmentation.h"
 #include "PALM_analysis_storage.h"
-#include "boost/smart_ptr.hpp"
-#include <eigen3/Eigen/Eigen>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_sort.h>
-#include <gsl/gsl_sort_vector.h>
-#include <gsl/gsl_blas.h>
-#include <stdexcept>
 
 class LocalizedPosition;
 class LocalizedPositionsContainer;

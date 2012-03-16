@@ -29,6 +29,12 @@
 
 #include "PALM_analysis.h"
 
+#include "PALM_analysis_errors.h"
+#include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_segmentation.h"
+#include "PALM_analysis_ParticleFinding.h"
+#include "PALM_analysis_storage.h"
+
 
 boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
 																									  boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {

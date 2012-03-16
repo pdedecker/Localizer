@@ -28,6 +28,10 @@
  */
 
 #include "PALM_analysis_segmentation.h"
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_sort.h>
+#include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_blas.h>
 
 boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdImage_Direct::do_thresholding(ImagePtr image) {
 	
