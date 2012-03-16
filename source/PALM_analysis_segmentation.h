@@ -37,7 +37,7 @@
 #include <eigen3/Eigen/Eigen>
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_MatrixRecycler.h"
-#include <fftw3.h>
+#include "PALM_analysis_Convolver.h"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
@@ -81,32 +81,6 @@ public:
 	ThresholdImage_Triangle() {;}
 	
 	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
-};
-
-class ConvolveMatricesWithFFTClass {
-public:
-	ConvolveMatricesWithFFTClass() {;}
-	~ConvolveMatricesWithFFTClass();
-	
-	ImagePtr ConvolveMatrixWithSmallKernel(ImagePtr image, ImagePtr kernel);
-	ImagePtr ConvolveMatricesWithFFT(ImagePtr image1, ImagePtr image2);
-	ImagePtr ConvolveMatrixWithGivenFFT(ImagePtr image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2);
-	
-	// http://www.leptonica.com/convolution.html
-	ImagePtr ConvolveMatrixWithFlatKernel(ImagePtr image, size_t kernelXSize, size_t kernelYSize);
-	
-	/**
-	 * Get the FFT of a single image, possibly for later use in a convolution.
-	 * The x and y size of the transformed image will be returned by reference in FFT_xSize and FFT_ySize.
-	 */
-	boost::shared_ptr<fftw_complex> DoForwardFFT(ImagePtr image);
-	
-	/**
-	 * Calculate the reverse FFT
-	 */
-	ImagePtr DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize);
-protected:
-	static boost::mutex FFTWPlannerMutex;
 };
 
 class ThresholdImage_GLRT_FFT : public ThresholdImage {
