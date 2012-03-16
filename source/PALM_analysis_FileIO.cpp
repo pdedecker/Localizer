@@ -466,10 +466,9 @@ void ImageLoaderAndor::parse_header_information() {
 
 ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 	uint64_t offset;
-	float current_float = 0;
-	uint64_t cache_offset = 0;
+	int nBytesInImage = xSize * ySize * sizeof(float);
 	
-	boost::scoped_array<float> single_image_buffer(new float[xSize * ySize]);
+	boost::scoped_array<char> single_image_buffer(new char[nBytesInImage]);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -477,10 +476,10 @@ ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
-		offset = this->header_length + this->nextImageToRead * (xSize) * (ySize) * sizeof(float);
+		offset = this->header_length + this->nextImageToRead * nBytesInImage;
 		
 		file.seekg(offset);
-		file.read((char *)single_image_buffer.get(), (xSize * ySize * sizeof(float)));
+		file.read((char *)single_image_buffer.get(), nBytesInImage);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
@@ -492,13 +491,7 @@ ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 		this->nextImageToRead += 1;
 	}
 	
-	for (size_t j  = 0; j < ySize; j++) {
-		for (size_t i = 0; i < xSize; i++) {
-			current_float = single_image_buffer[cache_offset];
-			(*image)(i, j) = (double)current_float;
-			cache_offset++;
-		}
-	}
+	CopyBufferToImage<float>(single_image_buffer.get(), image);
 	
 	return image;
 }
@@ -598,14 +591,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 		this->nextImageToRead += 1;
 	}
 	
-	uint16_t *uint16tPtr = (uint16_t *)single_image_buffer.get();
-	
-	for (size_t j  = 0; j < ySize; j++) {
-		for (size_t i = 0; i < xSize; i++) {
-			(*image)(i, j) = (double)(*uint16tPtr);
-			++uint16tPtr;
-		}
-	}
+	CopyBufferToImage<uint16_t>(single_image_buffer.get(), image);
 	
 	return image;
 }
