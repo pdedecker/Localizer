@@ -67,16 +67,26 @@ using boost::int8_t;
  (i.e. as read from a file) to an Image.
  */
 template <typename T>
-void WriteBufferToImage(char *buffer, ImagePtr imagePtr) {
+void CopyBufferToImage(char *buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
     T *bufferPtr = reinterpret_cast<T *>(buffer);
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    for (size_t j  = 0; j < nCols; j++) {
-        for (size_t i = 0; i < nRows; i++) {
-            (*imagePtr)(i, j) = static_cast<double>(*bufferPtr);
-            ++bufferPtr;
-        }
-    }
+	
+	if (treatAsRowMajor == 0) {
+		for (size_t j  = 0; j < nCols; j++) {
+			for (size_t i = 0; i < nRows; i++) {
+				(*imagePtr)(i, j) = static_cast<double>(*bufferPtr);
+				++bufferPtr;
+			}
+		}
+	} else {
+		for (size_t i = 0; i < nRows; i++) {
+			for (size_t j  = 0; j < nCols; j++) {
+				(*imagePtr)(i, j) = static_cast<double>(*bufferPtr);
+				++bufferPtr;
+			}
+		}
+	}
 }
 
 /**
@@ -84,16 +94,26 @@ void WriteBufferToImage(char *buffer, ImagePtr imagePtr) {
  while converting to the requested number type
  */
 template <typename T>
-void WriteImageToBuffer(ImagePtr imagePtr, char *buffer) {
+void CopyImageToBuffer(ImagePtr imagePtr, char *buffer, int treatAsRowMajor = 0) {
 	T* bufferPtr = reinterpret_cast<T *>(buffer);
 	size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    for (size_t j  = 0; j < nCols; j++) {
-        for (size_t i = 0; i < nRows; i++) {
-            *bufferPtr = static_cast<T>((*imagePtr)(i, j));
-            ++bufferPtr;
-        }
-    }
+	
+	if (treatAsRowMajor == 0) {
+		for (size_t j  = 0; j < nCols; j++) {
+			for (size_t i = 0; i < nRows; i++) {
+				*bufferPtr = static_cast<T>((*imagePtr)(i, j));
+				++bufferPtr;
+			}
+		}
+	} else {
+		for (size_t i = 0; i < nRows; i++) {
+			for (size_t j  = 0; j < nCols; j++) {
+				*bufferPtr = static_cast<T>((*imagePtr)(i, j));
+				++bufferPtr;
+			}
+		}
+	}
 }
 
 /**

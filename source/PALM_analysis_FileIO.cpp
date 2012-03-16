@@ -325,19 +325,19 @@ ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
 	
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4-byte float
-            WriteBufferToImage<float>(single_image_buffer.get(), image);
+            CopyBufferToImage<float>(single_image_buffer.get(), image);
 			break;
             
 		case STORAGE_TYPE_UINT32:	// 4-byte long
-			WriteBufferToImage<uint32_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<uint32_t>(single_image_buffer.get(), image);
 			break;
             
 		case STORAGE_TYPE_INT16:	// 2-byte signed short
-			WriteBufferToImage<int16_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<int16_t>(single_image_buffer.get(), image);
 			break;
 			
 		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
-			WriteBufferToImage<uint16_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<uint16_t>(single_image_buffer.get(), image);
 			break;
             
 		default:
@@ -716,31 +716,31 @@ ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 	
 	switch (this->storage_type) {
         case STORAGE_TYPE_INT8:
-            WriteBufferToImage<int8_t>(buffer.get(), image);
+            CopyBufferToImage<int8_t>(buffer.get(), image, 1);
             break;
             
         case STORAGE_TYPE_UINT8:
-            WriteBufferToImage<uint8_t>(buffer.get(), image);
+            CopyBufferToImage<uint8_t>(buffer.get(), image, 1);
             break;
             
         case STORAGE_TYPE_INT16:
-            WriteBufferToImage<int16_t>(buffer.get(), image);
+            CopyBufferToImage<int16_t>(buffer.get(), image, 1);
             break;
             
         case STORAGE_TYPE_UINT16:
-            WriteBufferToImage<uint16_t>(buffer.get(), image);
+            CopyBufferToImage<uint16_t>(buffer.get(), image, 1);
             break;
             
 		case STORAGE_TYPE_UINT32:
-            WriteBufferToImage<uint32_t>(buffer.get(), image);
+            CopyBufferToImage<uint32_t>(buffer.get(), image, 1);
             break;
             
 		case STORAGE_TYPE_FP32:
-            WriteBufferToImage<float>(buffer.get(), image);
+            CopyBufferToImage<float>(buffer.get(), image, 1);
             break;
             
 		case STORAGE_TYPE_FP64:
-            WriteBufferToImage<double>(buffer.get(), image);
+            CopyBufferToImage<double>(buffer.get(), image, 1);
             break;
             
 		default:
@@ -1377,28 +1377,28 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	switch (this->storageType) {
 		case STORAGE_TYPE_INT8:
-			WriteImageToBuffer<int8_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<int8_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_UINT8:
-			WriteImageToBuffer<uint8_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<uint8_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_INT16:
-			WriteImageToBuffer<int16_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<int16_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_UINT16:
-			WriteImageToBuffer<uint16_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<uint16_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_INT32:
-			WriteImageToBuffer<int32_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<int32_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_UINT32:
-			WriteImageToBuffer<uint32_t>(imageToWrite, buffer.get());
+			CopyImageToBuffer<uint32_t>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_FP32:
-			WriteImageToBuffer<float>(imageToWrite, buffer.get());
+			CopyImageToBuffer<float>(imageToWrite, buffer.get(), 1);
 			break;
 		case STORAGE_TYPE_FP64:
-			WriteImageToBuffer<double>(imageToWrite, buffer.get());
+			CopyImageToBuffer<double>(imageToWrite, buffer.get(), 1);
 			break;
 	}
 	
