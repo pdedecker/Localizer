@@ -195,76 +195,31 @@ LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHnd
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_2DGauss::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_2DGauss::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 12;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 12));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).integral;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).width;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
-		value[0] = this->positionsVector.at(i).background;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 6;
-		value[0] = this->positionsVector.at(i).integralDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 7;
-		value[0] = this->positionsVector.at(i).widthDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 8;
-		value[0] = this->positionsVector.at(i).xPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 9;
-		value[0] = this->positionsVector.at(i).yPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 10;
-		value[0] = this->positionsVector.at(i).backgroundDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 11;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
+		(*matrix)(i, 2) = this->positionsVector.at(i).width;
+		(*matrix)(i, 3) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 4) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 5) = this->positionsVector.at(i).background;
+		(*matrix)(i, 6) = this->positionsVector.at(i).integralDeviation;
+		(*matrix)(i, 7) = this->positionsVector.at(i).widthDeviation;
+		(*matrix)(i, 8) = this->positionsVector.at(i).xPositionDeviation;
+		(*matrix)(i, 9) = this->positionsVector.at(i).yPositionDeviation;
+		(*matrix)(i, 10) = this->positionsVector.at(i).backgroundDeviation;
+		(*matrix)(i, 11) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGauss::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;
@@ -377,70 +332,29 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_2DGaussFixedWidth::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 10;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 10));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).integral;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).background;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
-		value[0] = this->positionsVector.at(i).integralDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 6;
-		value[0] = this->positionsVector.at(i).xPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 7;
-		value[0] = this->positionsVector.at(i).yPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 8;
-		value[0] = this->positionsVector.at(i).backgroundDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 9;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
+		(*matrix)(i, 2) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 3) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 4) = this->positionsVector.at(i).background;
+		(*matrix)(i, 5) = this->positionsVector.at(i).integralDeviation;
+		(*matrix)(i, 6) = this->positionsVector.at(i).xPositionDeviation;
+		(*matrix)(i, 7) = this->positionsVector.at(i).yPositionDeviation;
+		(*matrix)(i, 8) = this->positionsVector.at(i).backgroundDeviation;
+		(*matrix)(i, 9) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;
@@ -627,88 +541,35 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_Ellipsoidal2DGaussian::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 16;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 16));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).integral;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).xWidth;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).yWidth;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 6;
-		value[0] = this->positionsVector.at(i).correlation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 7;
-		value[0] = this->positionsVector.at(i).background;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 8;
-		value[0] = this->positionsVector.at(i).integralDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 9;
-		value[0] = this->positionsVector.at(i).xWidthDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 10;
-		value[0] = this->positionsVector.at(i).yWidthDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 11;
-		value[0] = this->positionsVector.at(i).xPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 12;
-		value[0] = this->positionsVector.at(i).yPositionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 13;
-		value[0] = this->positionsVector.at(i).correlationDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 14;
-		value[0] = this->positionsVector.at(i).backgroundDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 15;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
+		(*matrix)(i, 2) = this->positionsVector.at(i).xWidth;
+		(*matrix)(i, 3) = this->positionsVector.at(i).yWidth;
+		(*matrix)(i, 4) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 5) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 6) = this->positionsVector.at(i).correlation;
+		(*matrix)(i, 7) = this->positionsVector.at(i).background;
+		(*matrix)(i, 8) = this->positionsVector.at(i).integralDeviation;
+		(*matrix)(i, 9) = this->positionsVector.at(i).xWidthDeviation;
+		(*matrix)(i, 10) = this->positionsVector.at(i).yWidthDeviation;
+		(*matrix)(i, 11) = this->positionsVector.at(i).xPositionDeviation;
+		(*matrix)(i, 12) = this->positionsVector.at(i).yPositionDeviation;
+		(*matrix)(i, 13) = this->positionsVector.at(i).correlationDeviation;
+		(*matrix)(i, 14) = this->positionsVector.at(i).backgroundDeviation;
+		(*matrix)(i, 15) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // #ifdef WITH_IGOR
 
 void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;
@@ -811,52 +672,23 @@ LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveH
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_Centroid::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_Centroid::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 4;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 4));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 2) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 3) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;
@@ -969,55 +801,24 @@ LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multipli
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_Multiplication::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_Multiplication::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 5;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 5));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).width;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).width;
+		(*matrix)(i, 2) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 3) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 4) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;
@@ -1134,58 +935,25 @@ LocalizedPositionsContainer_ZeissPALM::LocalizedPositionsContainer_ZeissPALM(wav
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_ZeissPALM::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_ZeissPALM::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 6;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 6));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).integral;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).positionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
+		(*matrix)(i, 2) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 3) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 4) = this->positionsVector.at(i).positionDeviation;
+		(*matrix)(i, 5) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_ZeissPALM::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
@@ -1267,64 +1035,27 @@ LocalizedPositionsContainer_MLEwG::LocalizedPositionsContainer_MLEwG(waveHndl po
 		this->positionsVector.push_back(singlePosition);
 	}
 }
+#endif // #ifdef WITH_IGOR
 
-waveHndl LocalizedPositionsContainer_MLEwG::writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const {
-	long dimensionSizes[MAX_DIMENSIONS+1];
-	int err;
-	waveHndl outputWave;
+ImagePtr LocalizedPositionsContainer_MLEwG::getLocalizedPositionsAsMatrix() const {
 	size_t nPositions = this->positionsVector.size();
-	dimensionSizes[0] = nPositions;
-	dimensionSizes[1] = 8;	// magic number
-	dimensionSizes[2] = 0;
 	
-	err = MDMakeWave(&outputWave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-	if (err != 0)
-		throw err;
-	
-	long indices[MAX_DIMENSIONS];
-	double value[2];
+	ImagePtr matrix(new Image(static_cast<int>(nPositions), 8));	// magic number
+	matrix->setConstant(0.0);
 	
 	for (size_t i = 0; i < nPositions; ++i) {
-		indices[0] = i;
-		indices[1] = 0;
-		value[0] = this->positionsVector.at(i).frameNumber;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 1;
-		value[0] = this->positionsVector.at(i).integral;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 2;
-		value[0] = this->positionsVector.at(i).width;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 3;
-		value[0] = this->positionsVector.at(i).xPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 4;
-		value[0] = this->positionsVector.at(i).yPosition;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 5;
-		value[0] = this->positionsVector.at(i).background;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 6;
-		value[0] = this->positionsVector.at(i).positionDeviation;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
-		indices[1] = 7;
-		value[0] = this->positionsVector.at(i).nFramesPresent;
-		err = MDSetNumericWavePointValue(outputWave, indices, value);
+		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
+		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
+		(*matrix)(i, 2) = this->positionsVector.at(i).width;
+		(*matrix)(i, 3) = this->positionsVector.at(i).xPosition;
+		(*matrix)(i, 4) = this->positionsVector.at(i).yPosition;
+		(*matrix)(i, 5) = this->positionsVector.at(i).background;
+		(*matrix)(i, 6) = this->positionsVector.at(i).positionDeviation;
+		(*matrix)(i, 7) = this->positionsVector.at(i).nFramesPresent;
 	}
 	
-	if (waveNote.size() != 0) {
-		// set the waveNote to the string passed in
-		Handle waveNoteHandle = NewHandle(waveNote.length());
-		if (waveNoteHandle == NULL)
-			throw std::bad_alloc();
-		
-		PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-		SetWaveNote(outputWave, waveNoteHandle);
-	}
-	
-	return outputWave;
+	return matrix;
 }
-#endif // WITH_IGOR
 
 void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePath, std::string header) const {
 	std::ofstream outputFile;

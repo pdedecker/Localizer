@@ -267,9 +267,7 @@ public:
 	virtual void setFrameNumbers(size_t frameNumber) = 0;
 	
 	// save the positions localized this far under different formats
-#ifdef WITH_IGOR
-	virtual waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const = 0;
-#endif
+	virtual ImagePtr getLocalizedPositionsAsMatrix() const = 0;
 	virtual void writePositionsToFile(std::string filePath, std::string waveNote) const = 0;
 	
 	// sort the positions according to ascending frame number, with no guarantees
@@ -321,9 +319,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -369,9 +365,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -427,9 +421,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -469,9 +461,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -513,9 +503,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -558,9 +546,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const {throw std::runtime_error("There is no meaning to write Zeiss positions to a file");}
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
@@ -607,9 +593,7 @@ public:
 		}
 	}
 	
-#ifdef WITH_IGOR
-	waveHndl writePositionsToWave(DataFolderAndName outputWaveParams, std::string waveNote) const;
-#endif
+	ImagePtr getLocalizedPositionsAsMatrix() const;
 	void writePositionsToFile(std::string filePath, std::string header) const;
 	
 	void sortPositionsByFrameNumber() {std::sort(positionsVector.begin(), positionsVector.end(), sortCompareFrameNumber);}
