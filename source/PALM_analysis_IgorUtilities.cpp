@@ -787,4 +787,35 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName) {
     return DPWave;
 }
 
+waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAndName) {
+	waveHndl outputWave;
+	int err = 0;
+	
+	long dimensionSizes[MAX_DIMENSIONS + 1];
+	
+	// special case:
+    // if the matrix is NULL (such as when there are no positions found)
+    // then we return an empty wave
+    if (matrix.get() == NULL) {
+        dimensionSizes[0] = 0;
+		err = MDMakeWave(&outputWave, dataFolderAndName.name, dataFolderAndName.dfH, dimensionSizes, NT_FP64, 1);
+		if (err != 0)
+			throw err;
+		
+		
+        return outputWave;
+		
+    }
+	
+	dimensionSizes[0] = matrix->rows();
+	dimensionSizes[1] = matrix->cols();
+	dimensionSizes[2] = 0;
+	err = MDMakeWave(&outputWave, dataFolderAndName.name, dataFolderAndName.dfH, dimensionSizes, NT_FP64, 1);
+	if (err != 0)
+		throw err;
+	
+	err = MDStoreDPDataInNumericWave(outputWave, matrix->data());
+	return outputWave;
+}
+
 

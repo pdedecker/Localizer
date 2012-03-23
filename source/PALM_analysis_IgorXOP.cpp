@@ -1014,8 +1014,20 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
                                                                                                    progressReporter, firstFrameToAnalyze,
                                                                                                    lastFrameToAnalyze));
 
+		// do the calculation
         localizedPositions = analysisController->DoPALMAnalysis(image_loader);
-        localizedPositions->writePositionsToWave(outputWaveParams, analysisOptionsStream.str());
+		
+		// store the result
+		ImagePtr localizedPositionsMatrix = localizedPositions->getLocalizedPositionsAsMatrix();
+		waveHndl positionsWave = CopyMatrixToIgorDPWave(localizedPositionsMatrix, outputWaveParams);
+		std::string waveNote = analysisOptionsStream.str();
+		if (!waveNote.empty()) {
+			Handle waveNoteHandle = NewHandle(waveNote.length());
+			if (waveNoteHandle == NULL)
+				throw std::bad_alloc();
+			PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
+			SetWaveNote(positionsWave, waveNoteHandle);
+		}
     }
     catch (std::bad_alloc) {
         err = NOMEM;

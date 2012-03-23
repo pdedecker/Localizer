@@ -96,5 +96,6 @@ waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std
 ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave);
 
 waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName);
+waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAndName);
 
 #endif
