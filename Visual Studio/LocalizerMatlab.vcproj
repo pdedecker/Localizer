@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\include&quot;;&quot;C:\Program Files\MATLAB\R2010b\extern\include&quot;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -57,6 +58,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/export:mexFunction"
+				AdditionalDependencies="libmx.lib libmex.lib libmat.lib libtiff.lib libfftw3.a libgcc.a libmingwex.a libgsl.a libgslcblas.a libboost_thread-vc90-mt-1_47.lib libboost_date_time-vc90-mt-1_47.lib"
+				OutputFile="$(OutDir)\$(ProjectName).mexw32"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)\..\lib\win&quot;;&quot;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft&quot;"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>

@@ -48,11 +48,13 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
 		mexErrMsgTxt("First input argument must be a selector string");
 	
-	char* inputString = mxArrayToString(inputArray);
-	if (inputString == NULL)
-		mexErrMsgTxt("Input argument must be a string");
-	std::string filePath(inputString);
-	mxFree(inputString);
+	std::string selector = GetMatlabString(inputArray);
+	if (boost::iequals(selector, "localize")) {
+		MatlabLocalization(nlhs, plhs, nrhs, prhs);
+	} else {
+		mexErrMsgTxt("Unknown selector");
+	}
+
 }
 
 /**
@@ -66,8 +68,11 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 */
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 5)
+	if (nrhs != 6)
 		mexErrMsgTxt("Must have exactly 6 input arguments for localize");
+
+	if (nlhs != 1)
+		mexErrMsgTxt("Must have exactly one left hand side argument for localize");
 	
 	const mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
@@ -82,7 +87,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	
 	// index 2 - must be a string, either 'GLRT' or 'SmoothSigma' (not case sensitive)
 	array = prhs[2];
-	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
+	if (mxGetClassID(array) != mxCHAR_CLASS)
 		mexErrMsgTxt("3rd argument must be a string (the segmentation algorithm)");
 	std::string segmentationStr = GetMatlabString(array);
 	
@@ -105,12 +110,12 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	
 	// index 4 - must be a string, currently only '2DGauss' is allowed
 	array = prhs[4];
-	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
+	if (mxGetClassID(array) != mxCHAR_CLASS)
 		mexErrMsgTxt("5th argument must be a string (the localization algorithm)");
 	std::string localizationStr = GetMatlabString(array);
 	
 	int localizationAlgorithm;
-	if (boost::iequals(segmentationStr, "2DGauss")) {
+	if (boost::iequals(localizationStr, "2DGauss")) {
 		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS;
 	} else {
 		mexErrMsgTxt("Unknown localization algorithm");
@@ -118,7 +123,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	
 	// index 5 - must be the data file path
 	array = prhs[5];
-	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
+	if (mxGetClassID(array) != mxCHAR_CLASS)
 		mexErrMsgTxt("6th argument must be a string (the path to the file containing the data)");
 	
 	std::string filePath = GetMatlabString(array);
@@ -174,6 +179,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		double* positionsPtr = localizedPositions->data();
 		double* outputPositionsPtr = mxGetPr(outputArray);
 		memcpy(outputPositionsPtr, positionsPtr, localizedPositions->rows() * localizedPositions->cols() * sizeof(double));
+		plhs[0] = outputArray;
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
