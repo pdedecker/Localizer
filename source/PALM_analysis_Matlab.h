@@ -26,11 +26,16 @@
  to convey the resulting work.
  */
 
+#include <string>
+#include "boost/algorithm/string.hpp"
+
 #include "mex.h"
+
+class ImageLoader;
 
 void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 
-std::string GetMatlabString(mxArray* array);
+std::string GetMatlabString(const mxArray* array);
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
 int GetFileStorageType(std::string &filePath);

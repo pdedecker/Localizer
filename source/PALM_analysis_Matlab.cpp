@@ -28,11 +28,10 @@
 
 #include "PALM_analysis_Matlab.h"
 
-#include <string>
-#include <boost/algorithm/string>
-
 #include "PALM_analysis_defines.h"
 #include "PALM_analysis.h"
+#include "PALM_analysis_ParticleFinding.h"
+#include "PALM_analysis_FileIO.h"
 
 /**
  The Matlab interface exports just a single 'gateway' function, mexFunction. This is the only
@@ -45,7 +44,7 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if (nrhs < 1)
 		mexErrMsgTxt("Must have more than 1 input argument");
 	
-	mxArray* inputArray = prhs[0];
+	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
 		mexErrMsgTxt("First input argument must be a selector string");
 	
@@ -65,18 +64,17 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
  4 - localization algorithm. '2DGauss' only for now
  5 - file path
 */
-int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
-	char* str;
+void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
 	if (nrhs != 5)
 		mexErrMsgTxt("Must have exactly 6 input arguments for localize");
 	
-	mxArray* array;
+	const mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
 	
 	// index 1 - must be a single number
 	array = prhs[1];
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (maxGetClassID(array) != mxDOUBLE_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("2nd argument must be a scalar of type double (the PSF standard deviation)");
 	double psfWidth = *(mxGetPr(array));
 	if (psfWidth <= 0.0)
@@ -84,7 +82,7 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 	
 	// index 2 - must be a string, either 'GLRT' or 'SmoothSigma' (not case sensitive)
 	array = prhs[2];
-	if ((mxGetN(array) != 1) || (maxGetClassID(array) != mxCHAR_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
 		mexErrMsgTxt("3rd argument must be a string (the segmentation algorithm)");
 	std::string segmentationStr = GetMatlabString(array);
 	
@@ -99,15 +97,15 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 	
 	// index 3 - must be a single number
 	array = prhs[3];
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (maxGetClassID(array) != mxDOUBLE_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("4th argument must be a scalar of type double (the segmentation parameter)");
-	double thresholdParam = *(mxGetPtr(array));
+	double thresholdParam = *(mxGetPr(array));
 	if (thresholdParam <= 0.0)
 		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
 	
 	// index 4 - must be a string, currently only '2DGauss' is allowed
 	array = prhs[4];
-	if ((mxGetN(array) != 1) || (maxGetClassID(array) != mxCHAR_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
 		mexErrMsgTxt("5th argument must be a string (the localization algorithm)");
 	std::string localizationStr = GetMatlabString(array);
 	
@@ -120,7 +118,7 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 	
 	// index 5 - must be the data file path
 	array = prhs[5];
-	if ((mxGetN(array) != 1) || (maxGetClassID(array) != mxCHAR_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxCHAR_CLASS))
 		mexErrMsgTxt("6th argument must be a string (the path to the file containing the data)");
 	
 	std::string filePath = GetMatlabString(array);
@@ -132,10 +130,10 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 		boost::shared_ptr<ThresholdImage> thresholder;
 		switch(segmentationAlgorithm) {
 			case THRESHOLD_METHOD_GLRT:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(thresholdParam, psfWidth));
 				break;
 			case THRESHOLD_METHOD_SMOOTHSIGMA:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width, smoothSigmaFactor));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, thresholdParam));
 				break;
 			default:
 				throw std::runtime_error("Unknown segmentation method");
@@ -147,13 +145,13 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 		
 		boost::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent8());
 		
-		std::vector<size_t> particleVerifierMethods;
+		std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
 		particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(psfWidth)));
 		
 		boost::shared_ptr<FitPositions> positionsFitter;
 		switch (localizationAlgorithm) {
             case LOCALIZATION_METHOD_2DGAUSS:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, 1.0));
                 break;
             default:
                 throw std::runtime_error("Unknown localization method");
@@ -169,7 +167,7 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
 																								-1));
 		
 		// do the actual calculation
-        ImagePtr localizedPositions = analysisController->DoPALMAnalysis(imageLoader);
+        ImagePtr localizedPositions = analysisController->DoPALMAnalysis(imageLoader)->getLocalizedPositionsAsMatrix();
 		mxArray* outputArray = mxCreateDoubleMatrix(localizedPositions->rows(), localizedPositions->cols(), mxREAL);
 		if (outputArray == NULL)
 			throw std::bad_alloc();
@@ -187,17 +185,14 @@ int MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs)
         mexErrMsgTxt("User abort");
     }
     catch (std::runtime_error e) {
-        XOPNotice(e.what());
-        mexErrMsgTxt(e.what().c_str());
+        mexErrMsgTxt(e.what());
     }
     catch (...) {
         mexErrMsgTxt("Unknown error");
     }
-	
-    SetOperationNumVar("V_flag", err);
 }
 
-std::string GetMatlabString(mxArray* array) {
+std::string GetMatlabString(const mxArray* array) {
 	char *str = NULL;
 	str = mxArrayToString(array);
 	if (str == NULL)
@@ -209,7 +204,6 @@ std::string GetMatlabString(mxArray* array) {
 
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path) {
     boost::shared_ptr<ImageLoader> image_loader;
-    size_t estimatedCameraType;
 	
     int estimatedCameraType = GetFileStorageType(data_file_path);
 	
