@@ -69,6 +69,8 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 	
 	this->firstFrameToAnalyze = firstFrame;
 	this->lastFrameToAnalyze = lastFrame;
+	if (lastFrame < firstFrame && (firstFrame != (size_t)-1))
+		throw std::runtime_error("invalid range of frames to analyze specified");
 	
 	this->errorMessage.assign("");
 }
