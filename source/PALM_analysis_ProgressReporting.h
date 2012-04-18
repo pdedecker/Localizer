@@ -36,6 +36,10 @@
 #include "XOPStandardHeaders.h"
 #endif
 
+#ifdef WITH_MATLAB
+#include "mex.h"
+#endif
+
 
 /**
  * @brief An abstract base class that provides progress updates and allows user aborts
@@ -117,4 +121,18 @@ public:
 	void CalculationAborted() {std::cout << " Abort requested by user\n"; std::cout.flush();}
 };
 
+#ifdef WITH_MATLAB
+class ProgressReporter_MatlabCommandLine : public ProgressReporter {
+public:
+	ProgressReporter_MatlabCommandLine() {;}
+	ProgressReporter_MatlabCommandLine() {;}
+	
+	void CalculationStarted() {previousPercentage = 0; mexPrintf("Running calculation...");}
+	int UpdateCalculationProgress(double progress, double maxProgress);
+	void CalculationDone() {mexPrintf("Calculation finished!\n");}
+	void CalculationAborted() {mexPrintf("Abort requested by user\r");}
+	
+protected:
+	double previousPercentage;
+};
 #endif

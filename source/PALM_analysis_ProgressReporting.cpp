@@ -98,5 +98,18 @@ int ProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress
 	
 	return (int)(result + 0.5);
 }
-
 #endif // WITH_IGOR
+
+#if WITH_MATLAB
+int ProgressReporter_MatlabCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
+	double percentDone = progress / maxProgress * 100.0;
+	
+	// unfortunately there does not appear to be a simple way to detect a user abort in Matlab
+	
+	if (percentDone - previousPercentage > 5.0) {
+		previousPercentage = floor(percentDone / 5.0) * 5.0;
+		mexPrintf("%.0lf%% ", previousPercentage);
+	}
+	return 0;
+}
+#endif // WITH_MATLAB

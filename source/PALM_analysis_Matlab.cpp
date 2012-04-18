@@ -51,6 +51,8 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	std::string selector = GetMatlabString(inputArray);
 	if (boost::iequals(selector, "localize")) {
 		MatlabLocalization(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "testsegmentation")) {
+		MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
 	} else {
 		mexErrMsgTxt("Unknown selector");
 	}
@@ -180,6 +182,183 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		double* outputPositionsPtr = mxGetPr(outputArray);
 		memcpy(outputPositionsPtr, positionsPtr, localizedPositions->rows() * localizedPositions->cols() * sizeof(double));
 		plhs[0] = outputArray;
+	}
+	catch (std::bad_alloc) {
+        mexErrMsgTxt("Insufficient memory");
+    }
+    catch (int e) {
+        mexErrMsgTxt("Int error");
+    }
+    catch (USER_ABORTED e) {
+        mexErrMsgTxt("User abort");
+    }
+    catch (std::runtime_error e) {
+        mexErrMsgTxt(e.what());
+    }
+    catch (...) {
+        mexErrMsgTxt("Unknown error");
+    }
+}
+
+/**
+ Function that will handle segmentation testing. The input arguments must be of the form
+ 0 - the string "testsegmentation"
+ 1 - the expect standard deviation of the psf
+ 2 - segmentation algorithm, 'glrt' or 'smoothsigma'
+ 3 - the PFA if GLRT, otherwise smoothsigma factor
+ 4 - mxArray containing the image to segment
+ */
+void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	// input validation
+	if (nrhs != 5)
+		mexErrMsgTxt("Must have exactly 5 input arguments for testsegmentation");
+	
+	if (nlhs != 2)
+		mexErrMsgTxt("Must have exactly two left hand side arguments for testsegmentation");
+	
+	const mxArray* array;
+	// the mxArray at index 0 will have been checked already by mexFunction
+	
+	// index 1 - must be a single number
+	array = prhs[1];
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("2nd argument must be a scalar of type double (the PSF standard deviation)");
+	double psfWidth = *(mxGetPr(array));
+	if (psfWidth <= 0.0)
+		mexErrMsgTxt("Expected positive non-zero number for the PSF width");
+	
+	// index 2 - must be a string, either 'GLRT' or 'SmoothSigma' (not case sensitive)
+	array = prhs[2];
+	if (mxGetClassID(array) != mxCHAR_CLASS)
+		mexErrMsgTxt("3rd argument must be a string (the segmentation algorithm)");
+	std::string segmentationStr = GetMatlabString(array);
+	
+	int segmentationAlgorithm;
+	if (boost::iequals(segmentationStr, "GLRT")) {
+		segmentationAlgorithm = THRESHOLD_METHOD_GLRT;
+	} else if (boost::iequals(segmentationStr, "SmoothSigma")) {
+		segmentationAlgorithm = THRESHOLD_METHOD_SMOOTHSIGMA;
+	} else {
+		mexErrMsgTxt("Unknown segmentation algorithm");
+	}
+	
+	// index 3 - must be a single number
+	array = prhs[3];
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("4th argument must be a scalar of type double (the segmentation parameter)");
+	double segmentationParameter = *(mxGetPr(array));
+	if (segmentationParameter <= 0.0)
+		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
+	
+	// index 4 - must contain the image to segment
+	array = prhs[4];
+	if ((mxGetN(array) <= 1) || (mxGetM(array) <= 1))
+		mexErrMsgTxt("5th argument must be a 2D matrix (the image to segment)");
+	double segmentationParameter = *(mxGetPr(array));
+	
+	size_t nRows = mxGetN(array);
+	size_t nCols = mxGetM(array);
+	
+	try {
+		ImagePtr imageToSegment(new Image(static_cast<int>(nRows), static_cast<int>(nCols)));
+		char* buffer = reinterpret_cast<char*>mxGetPr(array);
+		
+		switch (mxGetClassID(array)) {
+			case mxINT16_CLASS:
+				CopyBufferToImage<int16_t>(buffer, imageToSegment);
+				break;
+			case mxUINT16_CLASS:
+				CopyBufferToImage<uint16_t>(buffer, imageToSegment);
+				break;
+			case mxINT32_CLASS:
+				CopyBufferToImage<int32_t>(buffer, imageToSegment);
+				break;
+			case mxUINT32_CLASS:
+				CopyBufferToImage<uint32_t>(buffer, imageToSegment);
+				break;
+			case mxINT64_CLASS:
+				CopyBufferToImage<int64_t>(buffer, imageToSegment);
+				break;
+			case mxUINT64_CLASS:
+				CopyBufferToImage<uint64_t>(buffer, imageToSegment);
+				break;
+			case mxSINGLE_CLASS:
+				CopyBufferToImage<float>(buffer, imageToSegment);
+				break;
+			case mxSINGLE_CLASS:
+				CopyBufferToImage<float>(buffer, imageToSegment);
+				break;
+			case mxDOUBLE_CLASS:
+				CopyBufferToImage<double>(buffer, imageToSegment);
+				break;
+			case mxDOUBLE_CLASS:
+				CopyBufferToImage<double>(buffer, imageToSegment);
+				break;
+			default:
+				mexErrMsgTxt("The image to segment is not of a real numeric type");
+				break;
+		}
+		
+		boost::shared_ptr<ThresholdImage> thresholder;
+		switch(method) {
+			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(segmentationParameter, PSFWidth));
+				break;
+			case THRESHOLD_METHOD_SMOOTHSIGMA:
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, segmentationParameter));
+				break;
+			default:
+				throw std::runtime_error("Unknown segmentation method");
+				break;
+        }
+		
+		boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
+		boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
+		boost::shared_ptr<ParticleFinder> particlefinder(new ParticleFinder_adjacent8());
+		
+		// calculate the threshold
+        boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = do_processing_and_thresholding(imageToSegment, preprocessor, thresholder, postprocessor);
+		boost::shared_ptr<std::list<Particle> > located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
+		
+		// and copy the results back out
+		size_t segmentedRows = thresholded_image->rows();
+		size_t segmentedCols = thresholded_image->cols();
+		size_t nSegmentedPoints = segmentedRows * segmentedCols;
+		
+		// store the segmented image
+		mwSize ndims = 2;
+		mwSize dims[2];
+		dims[0] = segmentedRows;
+		dims[1] = segmentedCols;
+		mxArray* segmentedOutputMatrix = mxCreateNumericArray(ndims, &dims, mxUINT8_CLASS, mxREAL);
+		if (segmentedOutputMatrix == NULL)
+			throw std::bad_alloc();
+		
+		uint8_t* segmentedOutputPtr = reinterpret_cast<uint8_t*>(mxGetPr(segmentedOutputMatrix));
+		int* segmentedImagePtr = thresholded_image->data();
+		for (int i = 0; i < nSegmentedPoints; ++i) {
+			segmentedOutputPtr[i] = segmentedImagePtr[i];
+		}
+		
+		// store the particles
+		size_t nParticles = located_particles->size();
+		ndims = 2;
+		dims[0] = nParticles;
+		dims[1] = 4;
+		mxArray* particleOutputMatrix = mxCreateNumericArray(ndims, &dims, mxDOUBLE_CLASS, mxREAL);
+		double* particleOutputPtr = reinterpret_cast<double>(mxGetPr(particleOutputMatrix));
+		if (particleOutputMatrix == NULL)
+			throw std::bad_alloc();
+		
+		for (std::list<Particle>::iterator it = located_particles->begin(), int offset = 0; it != located_particles->end(); ++it, ++offset) {
+			particleOutputPtr[offset] = (*it).intensity;
+			particleOutputPtr[offset * nParticles] = (*it).x;
+			particleOutputPtr[offset * 2 * nParticles] = (*it).y;
+			particleOutputPtr[offset * 3 * nParticles] = (*it).background;
+		}
+		
+		plhs[0] = segmentedOutputMatrix;
+		plhs[1] = particleOutputMatrix;
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
