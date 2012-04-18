@@ -113,3 +113,5 @@ int ProgressReporter_MatlabCommandLine::UpdateCalculationProgress(double progres
 	return 0;
 }
 #endif // WITH_MATLAB
+
+#endif
