@@ -442,65 +442,66 @@ typedef struct ConvolveImagesRuntimeParams* ConvolveImagesRuntimeParamsPtr;
 // Runtime param structure for LocalizationBitmap operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct LocalizationBitmapRuntimeParams {
-    // Flag parameters.
-
-    // Parameters for /M flag group.
-    int MFlagEncountered;
-    double deviationMethod;
-    int MFlagParamsSet[1];
-
-    // Parameters for /S flag group.
-    int SFlagEncountered;
-    double scaleFactor;
-    int SFlagParamsSet[1];
-
-    // Parameters for /L flag group.
-    int LFlagEncountered;
-    double upperLimit;
-    int LFlagParamsSet[1];
-
-    // Parameters for /W flag group.
-    int WFlagEncountered;
-    double CCDXSize;
-    double CCDYSize;
-    double outputImageScaleFactor;
-    int WFlagParamsSet[3];
-
-    // Parameters for /WGHT flag group.
-    int WGHTFlagEncountered;
-    double emitterWeighing;
-    int WGHTFlagParamsSet[1];
-
-    // Parameters for /MULT flag group.
-    int MULTFlagEncountered;
-    double cameraMultiplicationFactor;
-    int MULTFlagParamsSet[1];
-
-    // Parameters for /WDTH flag group.
-    int WDTHFlagEncountered;
-    double PSFWidth;
-    int WDTHFlagParamsSet[1];
-
-    // Parameters for /PROG flag group.
-    int PROGFlagEncountered;
-    LocalizerProgStruct* progStruct;
-    int PROGFlagParamsSet[1];
-
-    // Parameters for /Q flag group.
-    int QFlagEncountered;
-    // There are no fields for this group because it has no parameters.
-
-    // Main parameters.
-
-    // Parameters for simple main group #0.
-    int positionsWaveEncountered;
-    waveHndl positionsWave;
-    int positionsWaveParamsSet[1];
-
-    // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+	// Flag parameters.
+	
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double deviationMethod;
+	int MFlagParamsSet[1];
+	
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double scaleFactor;
+	int SFlagParamsSet[1];
+	
+	// Parameters for /L flag group.
+	int LFlagEncountered;
+	double upperLimit;
+	int LFlagParamsSet[1];
+	
+	// Parameters for /W flag group.
+	int WFlagEncountered;
+	double CCDXSize;
+	double CCDYSize;
+	double outputImageScaleFactor;
+	int WFlagParamsSet[3];
+	
+	// Parameters for /WGHT flag group.
+	int WGHTFlagEncountered;
+	double emitterWeighing;
+	int WGHTFlagParamsSet[1];
+	
+	// Parameters for /CAL flag group.
+	int CALFlagEncountered;
+	double offset;
+	double multiplicationFactor;
+	int CALFlagParamsSet[2];
+	
+	// Parameters for /WDTH flag group.
+	int WDTHFlagEncountered;
+	double PSFWidth;
+	int WDTHFlagParamsSet[1];
+	
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+	
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+	
+	// Main parameters.
+	
+	// Parameters for simple main group #0.
+	int positionsWaveEncountered;
+	waveHndl positionsWave;
+	int positionsWaveParamsSet[1];
+	
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct LocalizationBitmapRuntimeParams LocalizationBitmapRuntimeParams;
 typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsPtr;
@@ -2117,7 +2118,7 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     int method, emitterWeighing;
-    double scaleFactor, upperLimit, PSFWidth, cameraMultiplicationFactor;
+    double scaleFactor, upperLimit, PSFWidth;
     size_t imageWidth, imageHeight, xSize, ySize;
 
     waveHndl positionsWave;
@@ -2196,13 +2197,16 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     } else {
         PSFWidth = 1.5;
     }
-
-    if (p->MULTFlagEncountered) {
-        // Parameter: p->cameraMultiplicationFactor
-        cameraMultiplicationFactor = p->cameraMultiplicationFactor;
-        if (cameraMultiplicationFactor <= 0)
-            return EXPECT_POS_NUM;
-    } else if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
+	
+	double cameraMultiplicationFactor, cameraOffset;
+	if (p->CALFlagEncountered) {
+		// Parameter: p->offset
+		// Parameter: p->multiplicationFactor
+		if (p->multiplicationFactor <= 0.0)
+			return EXPECT_POS_NUM;
+		cameraOffset = p->offset;
+		cameraMultiplicationFactor = p->multiplicationFactor;
+	} else if (method == PALMBITMAP_DEVIATION_GAUSSIANMASK) {
         return TOO_FEW_PARAMETERS;
     }
 
@@ -2243,7 +2247,7 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
             deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
             break;
         case PALMBITMAP_DEVIATION_GAUSSIANMASK:
-            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraMultiplicationFactor));
+            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraOffset, cameraMultiplicationFactor));
             break;
         default:
             throw std::runtime_error("Unknown deviation calculation method (/M flag)");
@@ -2651,8 +2655,8 @@ static int RegisterLocalizationBitmap(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the LocalizationBitmapRuntimeParams structure as well.
-    cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /MULT=number:cameraMultiplicationFactor /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} /Q wave:positionsWave";
-    runtimeNumVarList = "";
+	cmdTemplate = "LocalizationBitmap /M=number:deviationMethod /S=number:scaleFactor /L=number:upperLimit /W={number:CCDXSize, number:CCDYSize, number:outputImageScaleFactor} /WGHT=number:emitterWeighing /CAL={number:offset, number:multiplicationFactor} /WDTH=number:PSFWidth /PROG=structure:{progStruct, LocalizerProgStruct} /Q wave:positionsWave";
+	runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(LocalizationBitmapRuntimeParams), (void*)ExecuteLocalizationBitmap, kOperationIsThreadSafe);
 }

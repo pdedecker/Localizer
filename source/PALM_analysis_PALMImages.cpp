@@ -152,3 +152,22 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 	
 	return outputImage;
 }
+
+double PALMBitmapImageDeviationCalculator_GaussianMask::getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {
+	double integral = positions->getIntegral(index);
+	double background = positions->getBackground(index);
+	
+	if ((integral == -1.0) || (background == -1.0))
+		throw std::runtime_error("the used positions do not provide a PSF width and/or background estimate (use a different localization algorithm)");
+		
+	background = floor((background - cameraOffset) / cameraMultiplicationFactor + 0.5);
+	background = (background < 0.0) ? 0.0 : background;
+	integral = floor(integral / cameraMultiplicationFactor + 0.5);
+	integral = (integral < 0.0) ? 0.0 : integral;
+	
+	double deviation;
+	double psfWidthSquared = PSFWidth * PSFWidth;
+	deviation = (psfWidthSquared + 1.0 / 12.0) / integral;
+	//deviation += 8 * M_PI * psfWidthSquared * psfWidthSquared * background * background / (integral * integral);
+	return sqrt(deviation);
+}

@@ -136,20 +136,20 @@ private:
  */
 class PALMBitmapImageDeviationCalculator_GaussianMask : public PALMBitmapImageDeviationCalculator {
 public:
-	PALMBitmapImageDeviationCalculator_GaussianMask(double PSFWidth_rhs, double cameraMultiplicationFactor_rhs) : PSFWidth(PSFWidth_rhs), cameraMultiplicationFactor(cameraMultiplicationFactor_rhs) {}
+	PALMBitmapImageDeviationCalculator_GaussianMask(double PSFWidth_rhs, double cameraOffset_rhs, double cameraMultiplicationFactor_rhs) : 
+		PSFWidth(PSFWidth_rhs), 
+		cameraMultiplicationFactor(cameraMultiplicationFactor_rhs),
+		cameraOffset(cameraOffset_rhs)
+		{}
+	
 	~PALMBitmapImageDeviationCalculator_GaussianMask() {;}
 	
-	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {
-		if (positions->getIntegral(index) != 0.0) {
-			return sqrt(PSFWidth * PSFWidth / (positions->getIntegral(index) / cameraMultiplicationFactor) * (16.0 / 9.0 + 8.0 * M_PI * PSFWidth * PSFWidth / (positions->getIntegral(index) / cameraMultiplicationFactor)));
-		} else {
-			throw std::runtime_error("the used positions do not provide a PSF width estimate (use a different localization algorithm)");
-		}
-	}
+	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index);
 	
 private:
 	double PSFWidth;
 	double cameraMultiplicationFactor;
+	double cameraOffset;
 };
 
 #endif
