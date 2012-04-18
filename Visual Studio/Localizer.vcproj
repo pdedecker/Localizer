@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\source\PALM_analysis_Convolver.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\source\PALM_analysis_FileIO.cpp"
 				>
 			</File>
@@ -253,6 +257,10 @@
 			>
 			<File
 				RelativePath="..\source\PALM_analysis.h"
+				>
+			</File>
+			<File
+				RelativePath="..\source\PALM_analysis_Convolver.h"
 				>
 			</File>
 			<File

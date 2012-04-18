@@ -104,7 +104,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			
 			sofiCalculator->addNewImage(currentImage);
 			nFramesProcessedTotal += 1;
-			if (nFramesProcessedTotal % 50 == 0) {
+			if (nFramesProcessedTotal % 25 == 0) {
 				status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
 				if (status != 0) {
 					progressReporter->CalculationAborted();
