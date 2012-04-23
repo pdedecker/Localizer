@@ -66,7 +66,7 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
  2 - segmentation algorithm, 'glrt' or 'smoothsigma'
  3 - the PFA if GLRT, otherwise smoothsigma factor
  4 - localization algorithm. '2DGauss' only for now
- 5 - file path
+ 5 - file path or a matrix containing numeric data
 */
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
@@ -123,16 +123,26 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		mexErrMsgTxt("Unknown localization algorithm");
 	}
 	
+	std::string filePath
+	mxArray* dataArray = NULL;
 	// index 5 - must be the data file path
 	array = prhs[5];
-	if (mxGetClassID(array) != mxCHAR_CLASS)
-		mexErrMsgTxt("6th argument must be a string (the path to the file containing the data)");
-	
-	std::string filePath = GetMatlabString(array);
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		filePath = GetMatlabString(array);
+	} else {
+		// assume that this is a valid data array
+		// if it isn't then the image loader will throw an error
+		dataArray = array;
+	}
 	
 	// now run the actual localization
 	try {
-		boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(filePath);
+		boost::shared_ptr<ImageLoader> imageLoader;
+		if (!filePath.empty()) {
+			imageLoader = GetImageLoader(filePath);
+		} else {
+			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+		}
 		
 		boost::shared_ptr<ThresholdImage> thresholder;
 		switch(segmentationAlgorithm) {

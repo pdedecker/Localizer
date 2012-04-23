@@ -324,7 +324,7 @@ protected:
 #ifdef WITH_MATLAB
 class ImageLoaderMatlab : public ImageLoader {
 public:
-	ImageLoaderMatlab(mxArray matlabArray);
+	ImageLoaderMatlab(mxArray* matlabArray);
 	~ImageLoaderMatlab() {;}
 	
 	ImagePtr readNextImage(size_t &index);
