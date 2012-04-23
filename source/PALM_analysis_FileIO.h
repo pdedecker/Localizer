@@ -52,6 +52,10 @@
 #include "PALM_analysis_IgorUtilities.h"
 #endif
 
+#ifdef WITH_MATLAB
+#include "mex.h"
+#endif
+
 using boost::uint64_t;
 using boost::int64_t;
 using boost::uint32_t;
@@ -317,7 +321,20 @@ protected:
 };
 #endif // WITH_IGOR
 
-
+#ifdef WITH_MATLAB
+class ImageLoaderMatlab : public ImageLoader {
+public:
+	ImageLoaderMatlab(mxArray matlabArray);
+	~ImageLoaderMatlab() {;}
+	
+	ImagePtr readNextImage(size_t &index);
+	
+protected:
+	void parse_header_information() {;}
+	
+	mxArray* _matlabArray;
+};
+#endif // WITH_MATLAB
 
 class ImageOutputWriter {
 public:
