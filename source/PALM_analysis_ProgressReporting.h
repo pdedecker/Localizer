@@ -136,3 +136,5 @@ protected:
 	double previousPercentage;
 };
 #endif
+
+#endif

@@ -2554,8 +2554,11 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
                 progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
-
-        DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup);
+		
+		ImagePtr sofiImage, averageImage;
+        DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImage, averageImage);
+		outputWriter->write_image(sofiImage);
+		averageOutputWriter->write_image(averageImage);
     }
     catch (int e) {
         return e;

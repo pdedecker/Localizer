@@ -114,4 +114,3 @@ int ProgressReporter_MatlabCommandLine::UpdateCalculationProgress(double progres
 }
 #endif // WITH_MATLAB
 
-#endif
