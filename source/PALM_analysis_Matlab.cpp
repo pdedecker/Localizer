@@ -125,7 +125,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	
 	std::string filePath
 	mxArray* dataArray = NULL;
-	// index 5 - must be the data file path
+	// index 5 - must be the data
 	array = prhs[5];
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
@@ -266,48 +266,9 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		mexErrMsgTxt("5th argument must be a 2D matrix (the image to segment)");
 	double segmentationParameter = *(mxGetPr(array));
 	
-	size_t nRows = mxGetN(array);
-	size_t nCols = mxGetM(array);
-	
 	try {
-		ImagePtr imageToSegment(new Image(static_cast<int>(nRows), static_cast<int>(nCols)));
-		char* buffer = reinterpret_cast<char*>mxGetPr(array);
-		
-		switch (mxGetClassID(array)) {
-			case mxINT16_CLASS:
-				CopyBufferToImage<int16_t>(buffer, imageToSegment);
-				break;
-			case mxUINT16_CLASS:
-				CopyBufferToImage<uint16_t>(buffer, imageToSegment);
-				break;
-			case mxINT32_CLASS:
-				CopyBufferToImage<int32_t>(buffer, imageToSegment);
-				break;
-			case mxUINT32_CLASS:
-				CopyBufferToImage<uint32_t>(buffer, imageToSegment);
-				break;
-			case mxINT64_CLASS:
-				CopyBufferToImage<int64_t>(buffer, imageToSegment);
-				break;
-			case mxUINT64_CLASS:
-				CopyBufferToImage<uint64_t>(buffer, imageToSegment);
-				break;
-			case mxSINGLE_CLASS:
-				CopyBufferToImage<float>(buffer, imageToSegment);
-				break;
-			case mxSINGLE_CLASS:
-				CopyBufferToImage<float>(buffer, imageToSegment);
-				break;
-			case mxDOUBLE_CLASS:
-				CopyBufferToImage<double>(buffer, imageToSegment);
-				break;
-			case mxDOUBLE_CLASS:
-				CopyBufferToImage<double>(buffer, imageToSegment);
-				break;
-			default:
-				mexErrMsgTxt("The image to segment is not of a real numeric type");
-				break;
-		}
+		boost::scoped_ptr<ImageLoader> imageLoader(new(ImageLoaderMatlab(mxGetPr(array))));
+		ImagePtr imageToSegment = imageLoader->readImage(0);
 		
 		boost::shared_ptr<ThresholdImage> thresholder;
 		switch(method) {
@@ -366,6 +327,92 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 			particleOutputPtr[offset * 2 * nParticles] = (*it).y;
 			particleOutputPtr[offset * 3 * nParticles] = (*it).background;
 		}
+		
+		plhs[0] = segmentedOutputMatrix;
+		plhs[1] = particleOutputMatrix;
+	}
+	catch (std::bad_alloc) {
+        mexErrMsgTxt("Insufficient memory");
+    }
+    catch (int e) {
+        mexErrMsgTxt("Int error");
+    }
+    catch (USER_ABORTED e) {
+        mexErrMsgTxt("User abort");
+    }
+    catch (std::runtime_error e) {
+        mexErrMsgTxt(e.what());
+    }
+    catch (...) {
+        mexErrMsgTxt("Unknown error");
+    }
+}
+
+/**
+ Function that will handle SOFI calculations. The input arguments must be of the form
+ 0 - the string "sofi"
+ 1 - the desired order
+ 2 - boolean: do cross correlation
+ 3 - file path or a matrix containing numeric data
+ */
+void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	// input validation
+	if (nrhs != 4)
+		mexErrMsgTxt("Must have exactly 5 input arguments for sofi");
+	
+	if (nlhs != 2)
+		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi");
+	
+	const mxArray* array;
+	// the mxArray at index 0 will have been checked already by mexFunction
+	
+	// index 1 - must be a single number
+	array = prhs[1];
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
+	int correlationOrder = *(mxGetPr(array));
+	if ((correlationOrder < 2) || (correlationOrder > 3))
+		mexErrMsgTxt("Expected 2 or 3 for the correlation order");
+	
+	// index 2 - must be a boolean
+	bool doCrossCorrelation;
+	array = prhs[2];
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
+	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
+	
+	// index 3 - must be a single number
+	array = prhs[3];
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("4th argument must be a scalar of type double (the segmentation parameter)");
+	double segmentationParameter = *(mxGetPr(array));
+	if (segmentationParameter <= 0.0)
+		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
+	
+	// index 4 - must be the data
+	std::string filePath
+	mxArray* dataArray = NULL;
+	array = prhs[4];
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		filePath = GetMatlabString(array);
+	} else {
+		// assume that this is a valid data array
+		// if it isn't then the image loader will throw an error
+		dataArray = array;
+	}
+	
+	size_t nRows = mxGetN(array);
+	size_t nCols = mxGetM(array);
+	
+	try {
+		boost::shared_ptr<ImageLoader> imageLoader;
+		if (!filePath.empty()) {
+			imageLoader = GetImageLoader(filePath);
+		} else {
+			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+		}
+		
+		DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup);
 		
 		plhs[0] = segmentedOutputMatrix;
 		plhs[1] = particleOutputMatrix;
