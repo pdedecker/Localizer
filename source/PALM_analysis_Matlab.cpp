@@ -32,6 +32,7 @@
 #include "PALM_analysis.h"
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_FileIO.h"
+#include "PALM_analysis_SOFI.h"
 
 /**
  The Matlab interface exports just a single 'gateway' function, mexFunction. This is the only
@@ -175,7 +176,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
                 break;
 		}
 		
-		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_Silent);
+		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabCommandLine);
 		
 		boost::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
 																								postprocessor, particleFinder, particleVerifiers,
@@ -381,18 +382,10 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
 	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
 	
-	// index 3 - must be a single number
-	array = prhs[3];
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("4th argument must be a scalar of type double (the segmentation parameter)");
-	double segmentationParameter = *(mxGetPr(array));
-	if (segmentationParameter <= 0.0)
-		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
-	
-	// index 4 - must be the data
+	// index 3 - must be the data
 	std::string filePath
 	mxArray* dataArray = NULL;
-	array = prhs[4];
+	array = prhs[3];
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 	} else {
@@ -412,7 +405,13 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 		
-		DoSOFIAnalysis(imageLoader, outputWriter, averageOutputWriter, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup);
+		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabCommandLine);
+		
+		// no frame verifiers for now
+		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
+		int nFramesToSkip = 0, nFramesToInclude = -1, lagTime = 0;
+		ImagePtr sofiOutputImage, averageOutputImage
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, -1, sofiOutputImage, averageOutputImage);
 		
 		plhs[0] = segmentedOutputMatrix;
 		plhs[1] = particleOutputMatrix;
