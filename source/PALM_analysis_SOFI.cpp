@@ -78,7 +78,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 	size_t nFramesProcessedTotal = 0;
 	ImagePtr sofiImage;
     ImagePtr averageImage;
-	int status;
+	int status, spinProcessStatus;
 	int isValidFrame;
 	
 	progressReporter->CalculationStarted();
@@ -106,7 +106,14 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 			nFramesProcessedTotal += 1;
 			if (nFramesProcessedTotal % 25 == 0) {
 				status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
-				if (status != 0) {
+				
+				#ifdef WITH_IGOR
+					spinProcessStatus = SpinProcess();
+				#else
+					spinProcessStatus = 0;
+				#endif // WITH_IGOR
+				
+				if ((status != 0) || (spinProcessStatus != 0)) {
 					progressReporter->CalculationAborted();
 					throw USER_ABORTED("Abort requested by user");
 				}
