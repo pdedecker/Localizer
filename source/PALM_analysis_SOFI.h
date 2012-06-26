@@ -48,10 +48,10 @@ class SOFIFrameVerifier;
 // exception classes
 class SOFINoImageInCalculation;
 
-void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-                    boost::shared_ptr<ImageOutputWriter> averageImageOutputWriter,
-					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup);
+void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
+					boost::shared_ptr<ProgressReporter> progressReporter,
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					ImagePtr& sofiOutputImage, ImagePtr& averageOutputImage);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
  * In addition it's possible that the calculation will only operate on subranges

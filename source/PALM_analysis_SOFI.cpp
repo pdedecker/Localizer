@@ -29,14 +29,12 @@
 
 #include "PALM_analysis_SOFI.h"
 
-void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_ptr<ImageOutputWriter> outputWriter,
-                    boost::shared_ptr<ImageOutputWriter> averageImageOutputWriter,
-					std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup) {
+void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
+					boost::shared_ptr<ProgressReporter> progressReporter,
+					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					ImagePtr& sofiOutputImage, ImagePtr& averageOutputImage) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
-    
-    int doAverage = averageImageOutputWriter.get() != NULL;
     
     if (nFramesToInclude == (size_t)-1)
         nFramesToInclude = nImages - nFramesToSkip;
@@ -125,10 +123,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, boost::shared_pt
 		if ((sofiImage.get() == NULL) || (averageImage.get() == NULL))
 			throw std::runtime_error("No output from sofiCalculator");
 		
-		outputWriter->write_image(sofiImage);
-		if (doAverage) {
-			averageImageOutputWriter->write_image(averageImage);
-		}
+		sofiOutputImage = ImagePtr(sofiImage);
+		averageOutputImage = ImagePtr(averageImage);
 	}
 	
 	progressReporter->CalculationDone();

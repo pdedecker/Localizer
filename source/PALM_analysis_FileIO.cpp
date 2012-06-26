@@ -1247,7 +1247,113 @@ ImagePtr ImageLoaderIgor::readNextImage(size_t &index) {
 }
 #endif // WITH_IGOR
 
+#ifdef WITH_MATLAB
+ImageLoaderMatlab::ImageLoaderMatlab(mxArray* matlabArray) {
+	_matlabArray = matlabArray;
+	
+	mwSize nDims = mxGetNumberOfDimensions(matlabArray);
+	if ((nDims < 2) || (nDims > 3))
+		throw std::runtime_error("Expected 2D or 3D matrix");
+	
+	const mwSize* dimensionSizes = mxGetDimensions(matlabArray);
+	xSize = static_cast<size_t>(dimensionSizes[0]);
+	ySize = static_cast<size_t>(dimensionSizes[1]);
+	if (nDims == 3)
+		nImages = static_cast<size_t>(dimensionSizes[2]);
+	else
+		nImages = 1;
+	
+	this->storage_type = static_cast<int>(mxGetClassID(matlabArray));
+	this->checkForReasonableValues();
+}
 
+ImagePtr ImageLoaderMatlab::readNextImage(size_t &index) {
+	int index;
+	size_t nPixels = this->xSize * this->ySize;
+	
+	{
+		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		if (this->nextImageToRead >= nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
+	}
+	
+	// allocate a new image
+	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	
+	char* dataPtr = reinterpret_cast<char*>(mxGetData(_matlabArray));
+	
+	switch (mxGetClassID(_matlabArray)) {
+		case mxINT8_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(int8_t);
+			CopyBufferToImage<int8_t>(reinterpret_cast<int8_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxUINT8_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(uint8_t);
+			CopyBufferToImage<uint8_t>(reinterpret_cast<uint8_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxINT16_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(int16_t);
+			CopyBufferToImage<int16_t>(reinterpret_cast<int16_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxUINT16_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(uint16_t);
+			CopyBufferToImage<uint16_t>(reinterpret_cast<uint16_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxINT32_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(int32_t);
+			CopyBufferToImage<int32_t>(reinterpret_cast<int32_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxUINT32_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(uint32_t);
+			CopyBufferToImage<uint32_t>(reinterpret_cast<uint32_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxINT64_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(int64_t);
+			CopyBufferToImage<int64_t>(reinterpret_cast<int64_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxUINT64_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(uint64_t);
+			CopyBufferToImage<uint64_t>(reinterpret_cast<uint64_t*>(dataPtr + offset), image);
+			break;
+		}
+		case mxSINGLE_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(float);
+			CopyBufferToImage<float>(reinterpret_cast<float*>(dataPtr + offset), image);
+			break;
+		}
+		case mxDOUBLE_CLASS:
+		{
+			size_t offset = index * nPixels * sizeof(double);
+			CopyBufferToImage<double>(reinterpret_cast<double*>(dataPtr + offset), image);
+			break;
+		}
+		default:
+			throw std::runtime_error("Unknown or unsupported matrix class ID");
+			break;
+	}
+	
+	return image;
+}
+#endif // WITH_MATLAB
 
 ImageOutputWriter::ImageOutputWriter() {
 	outputFilePath.assign("");

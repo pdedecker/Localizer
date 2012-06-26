@@ -10,6 +10,7 @@
 		D0006D2D12CFD34D00539A8F /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D0006D2E12CFD34D00539A8F /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D0069ECF117B8EB700112C90 /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
+		D0128F60151CB06400D683EC /* PALM_analysis_Matlab.h in Headers */ = {isa = PBXBuildFile; fileRef = D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */; };
 		D01D290C136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
@@ -89,6 +90,8 @@
 		8D01CCD10486CAD60068D4B7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../resources/Info.plist; sourceTree = SOURCE_ROOT; };
 		D0006D2B12CFD34D00539A8F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
 		D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_storage.cpp; path = ../source/PALM_analysis_storage.cpp; sourceTree = SOURCE_ROOT; };
+		D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Matlab.h; path = ../source/PALM_analysis_Matlab.h; sourceTree = SOURCE_ROOT; };
+		D0128F5D151CB06400D683EC /* PALM_analysis_Matlab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Matlab.cpp; path = ../source/PALM_analysis_Matlab.cpp; sourceTree = SOURCE_ROOT; };
 		D01D290A136CE9710094B975 /* PALM_analysis_ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_ProgressReporting.h; path = ../source/PALM_analysis_ProgressReporting.h; sourceTree = SOURCE_ROOT; };
 		D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_ProgressReporting.cpp; path = ../source/PALM_analysis_ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
 		D01F3B0A13E0800D00A42472 /* Localizer.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = Localizer.r; path = ../resources/Localizer.r; sourceTree = SOURCE_ROOT; };
@@ -204,8 +207,9 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				D0CCD33A1473C704005CD75A /* LocalizerDLL */,
 				D0F0E35110EBEC2900F9A855 /* Igor */,
+				D0128F58151CAD2A00D683EC /* Matlab */,
+				D0CCD33A1473C704005CD75A /* LocalizerDLL */,
 				D0F0E35210EBEC3500F9A855 /* Commandline */,
 				D08B48E30D52381800C99DE3 /* PALM_analysis.h */,
 				D09810480D5B18B10074692A /* PALM_analysis.cpp */,
@@ -248,6 +252,15 @@
 				D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D0128F58151CAD2A00D683EC /* Matlab */ = {
+			isa = PBXGroup;
+			children = (
+				D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */,
+				D0128F5D151CB06400D683EC /* PALM_analysis_Matlab.cpp */,
+			);
+			name = Matlab;
 			sourceTree = "<group>";
 		};
 		D018444510E370D800277419 /* Design documents */ = {
@@ -297,6 +310,7 @@
 			files = (
 				D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */,
 				D027E937151311CF005B8664 /* PALM_analysis_Convolver.h in Headers */,
+				D0128F60151CB06400D683EC /* PALM_analysis_Matlab.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
