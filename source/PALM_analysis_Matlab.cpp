@@ -124,7 +124,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		mexErrMsgTxt("Unknown localization algorithm");
 	}
 	
-	std::string filePath
+	std::string filePath;
 	mxArray* dataArray = NULL;
 	// index 5 - must be the data
 	array = prhs[5];
@@ -133,7 +133,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	} else {
 		// assume that this is a valid data array
 		// if it isn't then the image loader will throw an error
-		dataArray = array;
+		dataArray = const_cast<mxArray*>(array);
 	}
 	
 	// now run the actual localization
@@ -265,19 +265,18 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 	array = prhs[4];
 	if ((mxGetN(array) <= 1) || (mxGetM(array) <= 1))
 		mexErrMsgTxt("5th argument must be a 2D matrix (the image to segment)");
-	double segmentationParameter = *(mxGetPr(array));
 	
 	try {
-		boost::scoped_ptr<ImageLoader> imageLoader(new(ImageLoaderMatlab(mxGetPr(array))));
+		boost::scoped_ptr<ImageLoader> imageLoader(new ImageLoaderMatlab(const_cast<mxArray*>(array)));
 		ImagePtr imageToSegment = imageLoader->readImage(0);
 		
 		boost::shared_ptr<ThresholdImage> thresholder;
-		switch(method) {
+		switch(segmentationAlgorithm) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(segmentationParameter, PSFWidth));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(segmentationParameter, psfWidth));
 				break;
 			case THRESHOLD_METHOD_SMOOTHSIGMA:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, segmentationParameter));
+				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, segmentationParameter));
 				break;
 			default:
 				throw std::runtime_error("Unknown segmentation method");
@@ -290,7 +289,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		
 		// calculate the threshold
         boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = do_processing_and_thresholding(imageToSegment, preprocessor, thresholder, postprocessor);
-		boost::shared_ptr<std::list<Particle> > located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
+		boost::shared_ptr<std::list<Particle> > located_particles = particlefinder->findPositions(imageToSegment, thresholded_image);
 		
 		// and copy the results back out
 		size_t segmentedRows = thresholded_image->rows();
@@ -302,7 +301,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		mwSize dims[2];
 		dims[0] = segmentedRows;
 		dims[1] = segmentedCols;
-		mxArray* segmentedOutputMatrix = mxCreateNumericArray(ndims, &dims, mxUINT8_CLASS, mxREAL);
+		mxArray* segmentedOutputMatrix = mxCreateNumericArray(ndims, dims, mxUINT8_CLASS, mxREAL);
 		if (segmentedOutputMatrix == NULL)
 			throw std::bad_alloc();
 		
@@ -317,12 +316,13 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		ndims = 2;
 		dims[0] = nParticles;
 		dims[1] = 4;
-		mxArray* particleOutputMatrix = mxCreateNumericArray(ndims, &dims, mxDOUBLE_CLASS, mxREAL);
-		double* particleOutputPtr = reinterpret_cast<double>(mxGetPr(particleOutputMatrix));
+		mxArray* particleOutputMatrix = mxCreateNumericArray(ndims, dims, mxDOUBLE_CLASS, mxREAL);
+		double* particleOutputPtr = reinterpret_cast<double*>(mxGetPr(particleOutputMatrix));
 		if (particleOutputMatrix == NULL)
 			throw std::bad_alloc();
 		
-		for (std::list<Particle>::iterator it = located_particles->begin(), int offset = 0; it != located_particles->end(); ++it, ++offset) {
+		int offset = 0;
+		for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it, ++offset) {
 			particleOutputPtr[offset] = (*it).intensity;
 			particleOutputPtr[offset * nParticles] = (*it).x;
 			particleOutputPtr[offset * 2 * nParticles] = (*it).y;
@@ -364,11 +364,11 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi");
 	
-	const mxArray* array;
+	mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
 	
 	// index 1 - must be a single number
-	array = prhs[1];
+	array = const_cast<mxArray*>(prhs[1]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
 	int correlationOrder = *(mxGetPr(array));
@@ -377,15 +377,15 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	
 	// index 2 - must be a boolean
 	bool doCrossCorrelation;
-	array = prhs[2];
+	array = const_cast<mxArray*>(prhs[2]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
 	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
 	
 	// index 3 - must be the data
-	std::string filePath
+	std::string filePath;
 	mxArray* dataArray = NULL;
-	array = prhs[3];
+	array = const_cast<mxArray*>(prhs[3]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 	} else {
@@ -410,11 +410,8 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		// no frame verifiers for now
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		int nFramesToSkip = 0, nFramesToInclude = -1, lagTime = 0;
-		ImagePtr sofiOutputImage, averageOutputImage
+		ImagePtr sofiOutputImage, averageOutputImage;
 		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, -1, sofiOutputImage, averageOutputImage);
-		
-		plhs[0] = segmentedOutputMatrix;
-		plhs[1] = particleOutputMatrix;
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
@@ -505,4 +502,20 @@ int GetFileStorageType(std::string &filePath) {
 	
     // if we're still here then the extension was not recognized
     throw std::runtime_error("Unable to deduce the file type");
+}
+
+mxArray* ConvertImageToArray(ImagePtr image) {
+
+	mxArray* outputMatrix = mxCreateDoubleMatrix(image->rows(), image->cols(), mxREAL);
+	if (outputMatrix == NULL)
+		throw std::bad_alloc();
+
+	int nElements = image->rows() * image->cols();
+
+	if (nElements > 0) {
+		double *firstOutputElement = mxGetPr(outputMatrix);
+		memcpy(firstOutputElement, image->data(), nElements * sizeof(double));
+	}
+
+	return outputMatrix;
 }

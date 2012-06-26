@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="LocalizerMatlab"
 	ProjectGUID="{DA0C40C2-FE46-4191-B6C5-F8B945341707}"
 	RootNamespace="LocalizerMatlab"
@@ -41,6 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\include&quot;;&quot;C:\Program Files\MATLAB\R2010b\extern\include&quot;"
+				PreprocessorDefinitions="WITH_MATLAB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -115,7 +116,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)\..\include&quot;;&quot;C:\Program Files\MATLAB\R2010b\extern\include&quot;"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG ;WITH_MATLAB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="2"

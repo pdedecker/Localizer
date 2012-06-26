@@ -1268,7 +1268,6 @@ ImageLoaderMatlab::ImageLoaderMatlab(mxArray* matlabArray) {
 }
 
 ImagePtr ImageLoaderMatlab::readNextImage(size_t &index) {
-	int index;
 	size_t nPixels = this->xSize * this->ySize;
 	
 	{
@@ -1289,61 +1288,61 @@ ImagePtr ImageLoaderMatlab::readNextImage(size_t &index) {
 		case mxINT8_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(int8_t);
-			CopyBufferToImage<int8_t>(reinterpret_cast<int8_t*>(dataPtr + offset), image);
+			CopyBufferToImage<int8_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxUINT8_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(uint8_t);
-			CopyBufferToImage<uint8_t>(reinterpret_cast<uint8_t*>(dataPtr + offset), image);
+			CopyBufferToImage<uint8_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxINT16_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(int16_t);
-			CopyBufferToImage<int16_t>(reinterpret_cast<int16_t*>(dataPtr + offset), image);
+			CopyBufferToImage<int16_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxUINT16_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(uint16_t);
-			CopyBufferToImage<uint16_t>(reinterpret_cast<uint16_t*>(dataPtr + offset), image);
+			CopyBufferToImage<uint16_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxINT32_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(int32_t);
-			CopyBufferToImage<int32_t>(reinterpret_cast<int32_t*>(dataPtr + offset), image);
+			CopyBufferToImage<int32_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxUINT32_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(uint32_t);
-			CopyBufferToImage<uint32_t>(reinterpret_cast<uint32_t*>(dataPtr + offset), image);
+			CopyBufferToImage<uint32_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxINT64_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(int64_t);
-			CopyBufferToImage<int64_t>(reinterpret_cast<int64_t*>(dataPtr + offset), image);
+			CopyBufferToImage<int64_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxUINT64_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(uint64_t);
-			CopyBufferToImage<uint64_t>(reinterpret_cast<uint64_t*>(dataPtr + offset), image);
+			CopyBufferToImage<uint64_t>(dataPtr + offset, image);
 			break;
 		}
 		case mxSINGLE_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(float);
-			CopyBufferToImage<float>(reinterpret_cast<float*>(dataPtr + offset), image);
+			CopyBufferToImage<float>(dataPtr + offset, image);
 			break;
 		}
 		case mxDOUBLE_CLASS:
 		{
 			size_t offset = index * nPixels * sizeof(double);
-			CopyBufferToImage<double>(reinterpret_cast<double*>(dataPtr + offset), image);
+			CopyBufferToImage<double>(dataPtr + offset, image);
 			break;
 		}
 		default:

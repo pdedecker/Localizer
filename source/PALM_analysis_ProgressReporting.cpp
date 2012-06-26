@@ -28,6 +28,7 @@
  */
 
 #include "PALM_analysis_ProgressReporting.h"
+#include <math.h>
 
 int ProgressReporter_Silent::UpdateCalculationProgress(double progress, double maxProgress) {
 #ifdef WITH_IGOR

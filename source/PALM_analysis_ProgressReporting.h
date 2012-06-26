@@ -125,7 +125,7 @@ public:
 class ProgressReporter_MatlabCommandLine : public ProgressReporter {
 public:
 	ProgressReporter_MatlabCommandLine() {;}
-	ProgressReporter_MatlabCommandLine() {;}
+	~ProgressReporter_MatlabCommandLine() {;}
 	
 	void CalculationStarted() {previousPercentage = 0; mexPrintf("Running calculation...");}
 	int UpdateCalculationProgress(double progress, double maxProgress);
