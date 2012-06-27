@@ -48,16 +48,22 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
 		mexErrMsgTxt("First input argument must be a selector string");
-	
-	std::string selector = GetMatlabString(inputArray);
-	if (boost::iequals(selector, "localize")) {
-		MatlabLocalization(nlhs, plhs, nrhs, prhs);
-	} else if (boost::iequals(selector, "testsegmentation")) {
-		MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
-	} else {
-		mexErrMsgTxt("Unknown selector");
-	}
 
+	try {
+		std::string selector = GetMatlabString(inputArray);
+		if (boost::iequals(selector, "localize")) {
+			MatlabLocalization(nlhs, plhs, nrhs, prhs);
+		} else if (boost::iequals(selector, "testsegmentation")) {
+			MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
+		} else if (boost::iequals(selector, "sofi")) {
+			MatlabSOFI(nlhs, plhs, nrhs, prhs);
+		} else {
+			mexErrMsgTxt("Unknown selector");
+		}
+	}
+	catch (...) {
+		mexErrMsgTxt("An unknown error occured");
+	}
 }
 
 /**

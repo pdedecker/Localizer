@@ -38,6 +38,7 @@ class ImageLoader;
 void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
+void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 
 std::string GetMatlabString(const mxArray* array);
 boost::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
