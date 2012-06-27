@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2008-2009. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2008-2011. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -26,6 +26,11 @@
 #include <boost/interprocess/detail/managed_open_or_create_impl.hpp>
 #include <boost/interprocess/detail/xsi_shared_memory_file_wrapper.hpp>
 #include <boost/interprocess/creation_tags.hpp>
+//These includes needed to fulfill default template parameters of
+//predeclarations in interprocess_fwd.hpp
+#include <boost/interprocess/mem_algo/rbtree_best_fit.hpp>  
+#include <boost/interprocess/sync/mutex_family.hpp>
+#include <boost/interprocess/indexes/iset_index.hpp>
 
 namespace boost {
 
@@ -41,33 +46,37 @@ template
          template<class IndexConfig> class IndexType
       >
 class basic_managed_xsi_shared_memory 
-   : public detail::basic_managed_memory_impl
+   : public ipcdetail::basic_managed_memory_impl
       <CharType, AllocationAlgorithm, IndexType
-      ,detail::managed_open_or_create_impl<xsi_shared_memory_file_wrapper, false, true>::ManagedOpenOrCreateUserOffset>
-   , private detail::managed_open_or_create_impl<xsi_shared_memory_file_wrapper, false, true>
+      ,ipcdetail::managed_open_or_create_impl
+         < xsi_shared_memory_file_wrapper, AllocationAlgorithm::Alignment
+         , false, true>::ManagedOpenOrCreateUserOffset>
+   , private ipcdetail::managed_open_or_create_impl
+      <xsi_shared_memory_file_wrapper, AllocationAlgorithm::Alignment, false, true>
 {
    /// @cond
    public:
    typedef xsi_shared_memory_file_wrapper device_type;
 
    public:
-   typedef detail::managed_open_or_create_impl
-      <xsi_shared_memory_file_wrapper, false, true>            base2_t;
-   typedef detail::basic_managed_memory_impl 
+   typedef ipcdetail::managed_open_or_create_impl
+      <xsi_shared_memory_file_wrapper, AllocationAlgorithm::Alignment, false, true>            base2_t;
+   typedef ipcdetail::basic_managed_memory_impl 
       <CharType, AllocationAlgorithm, IndexType,
       base2_t::ManagedOpenOrCreateUserOffset>   base_t;
 
-   typedef detail::create_open_func<base_t>        create_open_func_t;
+   typedef ipcdetail::create_open_func<base_t>        create_open_func_t;
 
    basic_managed_xsi_shared_memory *get_this_pointer()
    {  return this;   }
 
    private:
    typedef typename base_t::char_ptr_holder_t   char_ptr_holder_t;
-   BOOST_INTERPROCESS_MOVABLE_BUT_NOT_COPYABLE(basic_managed_xsi_shared_memory)
+   BOOST_MOVABLE_BUT_NOT_COPYABLE(basic_managed_xsi_shared_memory)
    /// @endcond
 
    public: //functions
+   typedef typename base_t::size_type              size_type;
 
    //!Destroys *this and indicates that the calling process is finished using
    //!the resource. The destructor function will deallocate
@@ -89,7 +98,7 @@ class basic_managed_xsi_shared_memory
                              std::size_t size, const void *addr = 0, const permissions& perm = permissions())
       : base_t()
       , base2_t(create_only, key, size, read_write, addr, 
-                create_open_func_t(get_this_pointer(), detail::DoCreate), perm)
+                create_open_func_t(get_this_pointer(), ipcdetail::DoCreate), perm)
    {}
 
    //!Creates shared memory and creates and places the segment manager if
@@ -102,7 +111,7 @@ class basic_managed_xsi_shared_memory
       : base_t()
       , base2_t(open_or_create, key, size, read_write, addr, 
                 create_open_func_t(get_this_pointer(), 
-                detail::DoOpenOrCreate), perm)
+                ipcdetail::DoOpenOrCreate), perm)
    {}
 
    //!Connects to a created shared memory and its segment manager.
@@ -113,7 +122,7 @@ class basic_managed_xsi_shared_memory
       : base_t()
       , base2_t(open_only, key, read_only, addr, 
                 create_open_func_t(get_this_pointer(), 
-                detail::DoOpen))
+                ipcdetail::DoOpen))
    {}
 
    //!Connects to a created shared memory and its segment manager.
@@ -123,12 +132,12 @@ class basic_managed_xsi_shared_memory
       : base_t()
       , base2_t(open_only, key, read_write, addr, 
                 create_open_func_t(get_this_pointer(), 
-                detail::DoOpen))
+                ipcdetail::DoOpen))
    {}
 
    //!Moves the ownership of "moved"'s managed memory to *this.
    //!Does not throw
-   basic_managed_xsi_shared_memory(BOOST_INTERPROCESS_RV_REF(basic_managed_xsi_shared_memory) moved)
+   basic_managed_xsi_shared_memory(BOOST_RV_REF(basic_managed_xsi_shared_memory) moved)
    {
       basic_managed_xsi_shared_memory tmp;
       this->swap(moved);
@@ -137,9 +146,9 @@ class basic_managed_xsi_shared_memory
 
    //!Moves the ownership of "moved"'s managed memory to *this.
    //!Does not throw
-   basic_managed_xsi_shared_memory &operator=(BOOST_INTERPROCESS_RV_REF(basic_managed_xsi_shared_memory) moved)
+   basic_managed_xsi_shared_memory &operator=(BOOST_RV_REF(basic_managed_xsi_shared_memory) moved)
    {
-      basic_managed_xsi_shared_memory tmp(boost::interprocess::move(moved));
+      basic_managed_xsi_shared_memory tmp(boost::move(moved));
       this->swap(tmp);
       return *this;
    }

@@ -310,11 +310,6 @@ boost
     namespace
     exception_detail
         {
-#if defined(__GNUC__) 
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4) 
-#  pragma GCC visibility push (default) 
-# endif
-#endif
         template <class T>
         struct
         error_info_injector:
@@ -331,11 +326,6 @@ boost
                 {
                 }
             };
-#if defined(__GNUC__) 
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4) 
-#  pragma GCC visibility pop 
-# endif
-#endif
 
         struct large_size { char c[256]; };
         large_size dispatch_boost_exception( exception const * );
@@ -383,11 +373,6 @@ boost
     namespace
     exception_detail
         {
-#if defined(__GNUC__) 
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4) 
-#  pragma GCC visibility push (default) 
-# endif
-#endif
         class
         clone_base
             {
@@ -454,11 +439,6 @@ boost
                 throw*this;
                 }
             };
-#if defined(__GNUC__) 
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || (__GNUC__ > 4) 
-#  pragma GCC visibility pop 
-# endif
-#endif
         }
 
     template <class T>

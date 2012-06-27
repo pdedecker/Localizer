@@ -1,6 +1,6 @@
 // Boost.Geometry (aka GGL, Generic Geometry Library)
 
-// Copyright (c) 2007-2011 Barend Gehrels, Amsterdam, the Netherlands.
+// Copyright (c) 2007-2012 Barend Gehrels, Amsterdam, the Netherlands.
 
 // Use, modification and distribution is subject to the Boost Software License,
 // Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -27,6 +27,7 @@
 #include <boost/geometry/views/closeable_view.hpp>
 #include <boost/geometry/views/reversible_view.hpp>
 
+#include <boost/geometry/algorithms/detail/overlay/append_no_duplicates.hpp>
 
 namespace boost { namespace geometry
 {
@@ -92,16 +93,46 @@ struct copy_segments_ring
 
         for (size_type i = 0; i < count; ++i, ++it)
         {
-#ifdef BOOST_GEOMETRY_DEBUG_INTERSECTION
-            std::cout << "  add: ("
-                << geometry::get<0>(*it) << ", " << geometry::get<1>(*it) << ")"
-                << std::endl;
-#endif
-            geometry::append(current_output, *it);
+            detail::overlay::append_no_duplicates(current_output, *it);
         }
     }
 };
 
+template
+<
+    typename LineString,
+    bool Reverse,
+    typename SegmentIdentifier,
+    typename RangeOut
+>
+struct copy_segments_linestring
+{
+
+    typedef typename boost::range_iterator<LineString const>::type iterator;
+
+    static inline void apply(LineString const& ls,
+            SegmentIdentifier const& seg_id, int to_index,
+            RangeOut& current_output)
+    {
+        int const from_index = seg_id.segment_index + 1;
+
+        // Sanity check
+        if (from_index > to_index || from_index < 0 || to_index >= boost::size(ls))
+        {
+            return;
+        }
+
+        typedef typename boost::range_difference<LineString>::type size_type;
+        size_type const count = to_index - from_index + 1;
+
+        typename boost::range_iterator<LineString const>::type it = boost::begin(ls) + from_index;
+
+        for (size_type i = 0; i < count; ++i, ++it)
+        {
+            detail::overlay::append_no_duplicates(current_output, *it);
+        }
+    }
+};
 
 template
 <
@@ -164,7 +195,8 @@ struct copy_segments_box
         //    (see comments in ring-version)
         for (int i = 0; i < count; i++, index++)
         {
-            geometry::append(current_output, bp[index % 5]);
+            detail::overlay::append_no_duplicates(current_output, bp[index % 5]);
+
         }
     }
 };
@@ -210,6 +242,21 @@ struct copy_segments<ring_tag, Ring, Reverse, SegmentIdentifier, RangeOut>
         >
 {};
 
+
+
+template
+<
+    typename LineString,
+    bool Reverse,
+    typename SegmentIdentifier,
+    typename RangeOut
+>
+struct copy_segments<linestring_tag, LineString, Reverse, SegmentIdentifier, RangeOut>
+    : detail::copy_segments::copy_segments_linestring
+        <
+            LineString, Reverse, SegmentIdentifier, RangeOut
+        >
+{};
 
 template
 <
