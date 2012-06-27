@@ -1,9 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Localizer", "Localizer.vcproj", "{DF78B16E-519A-4D74-A7F5-18A36F5402E4}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Localizer", "Localizer.vcxproj", "{DF78B16E-519A-4D74-A7F5-18A36F5402E4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LocalizerMatlab", "LocalizerMatlab.vcproj", "{DA0C40C2-FE46-4191-B6C5-F8B945341707}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LocalizerMatlab", "LocalizerMatlab.vcxproj", "{DA0C40C2-FE46-4191-B6C5-F8B945341707}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

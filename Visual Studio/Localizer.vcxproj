@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DF78B16E-519A-4D74-A7F5-18A36F5402E4}</ProjectGuid>
+    <RootNamespace>Localizer</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.xop</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.xop</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT MSVCRT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\PALM_analysis.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_Convolver.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_FileIO.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_IgorUtilities.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_IgorXOP.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_Localization.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_MatrixRecycler.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_PALMImages.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_ParticleFinding.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_PositionsProcessing.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_Processing.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_ProgressReporting.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_segmentation.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_SOFI.cpp" />
+    <ClCompile Include="..\source\PALM_analysis_storage.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\PALM_analysis.h" />
+    <ClInclude Include="..\source\PALM_analysis_Convolver.h" />
+    <ClInclude Include="..\source\PALM_analysis_defines.h" />
+    <ClInclude Include="..\source\PALM_analysis_errors.h" />
+    <ClInclude Include="..\source\PALM_analysis_FileIO.h" />
+    <ClInclude Include="..\source\PALM_analysis_IgorUtilities.h" />
+    <ClInclude Include="..\source\PALM_analysis_IgorXOP.h" />
+    <ClInclude Include="..\source\PALM_analysis_Localization.h" />
+    <ClInclude Include="..\source\PALM_analysis_MatrixRecycler.h" />
+    <ClInclude Include="..\source\PALM_analysis_PALMImages.h" />
+    <ClInclude Include="..\source\PALM_analysis_ParticleFinding.h" />
+    <ClInclude Include="..\source\PALM_analysis_PositionsProcessing.h" />
+    <ClInclude Include="..\source\PALM_analysis_Processing.h" />
+    <ClInclude Include="..\source\PALM_analysis_ProgressReporting.h" />
+    <ClInclude Include="..\source\PALM_analysis_segmentation.h" />
+    <ClInclude Include="..\source\PALM_analysis_SOFI.h" />
+    <ClInclude Include="..\source\PALM_analysis_storage.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\PALMAnalysisXOP.rc" />
+    <ResourceCompile Include="..\resources\PALMAnalysisXOPWinCustom.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
