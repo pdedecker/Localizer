@@ -104,9 +104,9 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libz.a;libjpeg.a;liblzma.a;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -149,9 +149,9 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libz.a;libjpeg.a;liblzma.a;libfftw3.a;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
