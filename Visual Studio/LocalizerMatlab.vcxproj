@@ -68,9 +68,9 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.mexw32</TargetExt>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.mexw32</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.mexw64</TargetExt>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.mexw32</TargetExt>
-    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.mexw32</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.mexw64</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -85,11 +85,12 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libjpeg.a;liblzma.a;libz.a;libfftw-3.3.lib;libgcc.a;libmingwex.a;gsl.lib;cblas.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -104,9 +105,9 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libz.a;libjpeg.a;liblzma.a;libfftw3.a;libgcc.a;libmingwex.a;libgsl.a;libgslcblas.a;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw-3.3.lib;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2010b\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -125,13 +126,14 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw3.a;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libjpeg.a;liblzma.a;libz.a;libfftw-3.3.lib;libgcc.a;libmingwex.a;gsl.lib;cblas.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,9 +151,9 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/export:mexFunction %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.a;libz.a;libjpeg.a;liblzma.a;libfftw3.a;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmx.lib;libmex.lib;libmat.lib;libtiff.lib;libfftw-3.3.lib;libgcc.a;libmingwex.a;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2010b\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
