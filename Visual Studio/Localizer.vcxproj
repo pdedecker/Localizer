@@ -67,7 +67,7 @@
       <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>LIBCMT MSVCRT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
@@ -98,7 +98,7 @@
       <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_49.lib;libboost_date_time-vc100-mt-1_49.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
