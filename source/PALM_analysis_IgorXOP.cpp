@@ -1716,9 +1716,9 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     std::vector<size_t> particleVerifierMethods;
 
     // long numDimensions;
-    long dimensionSizes[MAX_DIMENSIONS+1];
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
     long x_size, y_size;
-    long indices[MAX_DIMENSIONS];
+    CountInt indices[MAX_DIMENSIONS];
     double value[2];
 
 

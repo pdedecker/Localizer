@@ -263,8 +263,8 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
     double summed_intensity;
 
     waveHndl output_wave;
-    long dimension_sizes[MAX_DIMENSIONS + 1];
-    dimension_sizes[0] = (long)n_images;
+    CountInt dimension_sizes[MAX_DIMENSIONS + 1];
+    dimension_sizes[0] = n_images;
     dimension_sizes[1] = 0;
     int result;
 
@@ -400,7 +400,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
     ImagePtr average_image(new Image((int)xRange, (int)yRange));
 
     waveHndl output_wave;
-    long dimension_sizes[MAX_DIMENSIONS + 1];
+    CountInt dimension_sizes[MAX_DIMENSIONS + 1];
     dimension_sizes[0] = xRange;
     dimension_sizes[1] = yRange;
     dimension_sizes[2] = 0;
@@ -454,7 +454,7 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
     size_t y_size = image_loader->getYSize();
     int result;
     waveHndl output_wave;
-    long dimension_sizes[MAX_DIMENSIONS + 1];
+    CountInt dimension_sizes[MAX_DIMENSIONS + 1];
 
     long xRange, yRange;
 
@@ -585,7 +585,7 @@ waveHndl FetchWaveUsingFullPath(std::string wavePath) {
     return fetchedWave;
 }
 
-waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int type, int overwrite) {
+waveHndl MakeWaveUsingFullPath(std::string wavePath, CountInt *dimensionSizes, int type, int overwrite) {
     waveHndl createdWave;
     DataFolderHandle dataFolder;
     size_t wavePathOffset, position;
@@ -691,8 +691,8 @@ waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std
     waveHndl DPWave;
 
     int err;
-    long indices[MAX_DIMENSIONS];
-    long dimensionSizes[MAX_DIMENSIONS+1];
+    CountInt indices[MAX_DIMENSIONS];
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
     double value[2];
 
 
@@ -754,7 +754,7 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName) {
     waveHndl DPWave;
 
     int err;
-    long dimensionSizes[MAX_DIMENSIONS+1];
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
 
     // special case:
     // if the matrix is NULL (such as when there are no positions found)
@@ -791,7 +791,7 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAnd
 	waveHndl outputWave;
 	int err = 0;
 	
-	long dimensionSizes[MAX_DIMENSIONS + 1];
+	CountInt dimensionSizes[MAX_DIMENSIONS + 1];
 	
 	// special case:
     // if the matrix is NULL (such as when there are no positions found)

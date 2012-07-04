@@ -149,7 +149,7 @@ LocalizedPositionsContainer_2DGauss::LocalizedPositionsContainer_2DGauss(waveHnd
 	LocalizedPosition_2DGauss singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -292,7 +292,7 @@ LocalizedPositionsContainer_2DGaussFixedWidth::LocalizedPositionsContainer_2DGau
 	LocalizedPosition_2DGaussFixedWidth singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -483,7 +483,7 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 	LocalizedPosition_Ellipsoidal2DGauss singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -650,7 +650,7 @@ LocalizedPositionsContainer_Centroid::LocalizedPositionsContainer_Centroid(waveH
 	LocalizedPosition_Centroid singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -776,7 +776,7 @@ LocalizedPositionsContainer_Multiplication::LocalizedPositionsContainer_Multipli
 	LocalizedPosition_Multiplication singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -907,7 +907,7 @@ LocalizedPositionsContainer_ZeissPALM::LocalizedPositionsContainer_ZeissPALM(wav
 	LocalizedPosition_ZeissPALM singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {
@@ -1001,7 +1001,7 @@ LocalizedPositionsContainer_MLEwG::LocalizedPositionsContainer_MLEwG(waveHndl po
 	LocalizedPosition_MLEwG singlePosition;
 	size_t nPositions = dimensionSizes[0];
 	this->positionsVector.reserve(nPositions);
-	long indices[MAX_DIMENSIONS];
+	CountInt indices[MAX_DIMENSIONS];
 	double value[2];
 	
 	for (size_t i = 0; i < nPositions; ++i) {

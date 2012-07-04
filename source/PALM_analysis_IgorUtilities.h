@@ -83,7 +83,7 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);
-waveHndl MakeWaveUsingFullPath(std::string wavePath, long *dimensionSizes, int type, int overwrite);
+waveHndl MakeWaveUsingFullPath(std::string wavePath, CountInt *dimensionSizes, int type, int overwrite);
 
 // Routines to convert between handles and C strings
 std::string ConvertHandleToString(Handle handle);

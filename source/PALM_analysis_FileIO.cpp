@@ -1854,7 +1854,7 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
-		long dimensionSizes[MAX_DIMENSIONS + 1];
+		CountInt dimensionSizes[MAX_DIMENSIONS + 1];
 		
 		dimensionSizes[0] = xSize;
 		dimensionSizes[1] = ySize;
