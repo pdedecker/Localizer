@@ -38,12 +38,13 @@ int main(int argc, char *argv[]) {
 		("help", "produce help message")
 		("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing. Typically not required.")
 		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
-		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. The only recommended option is \"glrt\".")
+		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. Recommended options are \"glrt\" and \"smoothsigma\".")
 		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
 		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Multiple options are allowed. Options are \"none\", \"removeoverlapping\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
 		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
 		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
 		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
+		("ssg", po::value<double>(), "Multiplication factor for SmoothSigma thresholding.")
 		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
 		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
 	;
@@ -82,8 +83,8 @@ int main(int argc, char *argv[]) {
 	}
 	
 	
-	// glrt and direct thresholding require extra parameters
-	double pfa, directThreshold;
+	// thresholding requires extra parameters
+	double pfa, directThreshold, smoothSigmaFactor;
 	if (segmentationName == std::string("glrt")) {
 		if (vm.count("pfa") == 0) {
 			throw std::runtime_error("The 'glrt' segmentation algorithm was chosen, but a pfa value was not specified (--pfa flag)");
@@ -91,12 +92,18 @@ int main(int argc, char *argv[]) {
 			pfa = vm["pfa"].as<double>();
 		}
 	}
-	
 	if (segmentationName == std::string("direct")) {
 		if (vm.count("pfa") == 0) {
 			throw std::runtime_error("The 'direct' segmentation algorithm was chosen, but a threshold value was not specified (--threshold flag)");
 		} else {
 			directThreshold = vm["threshold"].as<double>();
+		}
+	}
+	if (segmentationName == std::string("smoothsigma")) {
+		if (vm.count("ssg") == 0) {
+			throw std::runtime_error("The 'smoothsigma' segmentation algorithm was chosen, but a multiplication factor was not specified (--ssg flag)");
+		} else {
+			smoothSigmaFactor = vm["ssg"].as<double>();
 		}
 	}
 	
@@ -107,7 +114,7 @@ int main(int argc, char *argv[]) {
 	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
 	
 	// get the thresholder
-	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth);
+	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth, smoothSigmaFactor);
 	
 	// get the particle finder
 	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
@@ -224,7 +231,7 @@ boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string
 	throw std::runtime_error("Unknown postprocessor algorithm");
 }
 
-boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth) {
+boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double smoothSigmaFactor, double psfWidth) {
 	if (name == std::string("glrt"))
 		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
 	
@@ -236,6 +243,9 @@ boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double p
 	
 	if (name == std::string("direct"))
 		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold));
+	
+	if (name == std::string("ssg"))
+		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, smoothSigmaFactor));
 	
 	// if we get here then we didn't recognize the preprocessor
 	throw std::runtime_error("Unknown segmentation algorithm");

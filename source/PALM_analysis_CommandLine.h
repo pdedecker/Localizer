@@ -48,7 +48,7 @@ int main(int argc, char *argv[]);
 // and convert them to integer constants
 boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name);
 boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name);
-boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth);
+boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth, double smoothSigmaFactor);
 boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name);
 boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma);
 boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth);
