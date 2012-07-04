@@ -43,26 +43,21 @@
 void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	
 	if (nrhs < 1)
-		mexErrMsgTxt("Must have more than 1 input argument");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"localize\", \"testsegmentation\", or \"sofi\")");
 	
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
-		mexErrMsgTxt("First input argument must be a selector string");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"localize\", \"testsegmentation\", or \"sofi\")");
 
-	try {
-		std::string selector = GetMatlabString(inputArray);
-		if (boost::iequals(selector, "localize")) {
-			MatlabLocalization(nlhs, plhs, nrhs, prhs);
-		} else if (boost::iequals(selector, "testsegmentation")) {
-			MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
-		} else if (boost::iequals(selector, "sofi")) {
-			MatlabSOFI(nlhs, plhs, nrhs, prhs);
-		} else {
-			mexErrMsgTxt("Unknown selector");
-		}
-	}
-	catch (...) {
-		mexErrMsgTxt("An unknown error occured");
+	std::string selector = GetMatlabString(inputArray);
+	if (boost::iequals(selector, "localize")) {
+		MatlabLocalization(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "testsegmentation")) {
+		MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "sofi")) {
+		MatlabSOFI(nlhs, plhs, nrhs, prhs);
+	} else {
+		mexErrMsgTxt("Unknown selector (should be one of \"localize\", \"testsegmentation\", or \"sofi\")");
 	}
 }
 
@@ -78,7 +73,13 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
 	if (nrhs != 6)
-		mexErrMsgTxt("Must have exactly 6 input arguments for localize");
+		mexErrMsgTxt("Must have exactly 6 input arguments for localize\n\
+					 1 - the string \"localize\"\
+					 2. the estimated standard deviation of the PSF (in pixels)\n\
+					 3. the segmentation algorithm (\"glrt\" or \"smoothsigma\"\n\
+					 4. the PFA if GLRT, otherwise smoothsigma factor\n\
+					 5. the localization algorithm. '2DGauss' only for now\n\
+					 6. string containing the path to the file, or a 2D or 3D matrix containing image data");
 
 	if (nlhs != 1)
 		mexErrMsgTxt("Must have exactly one left hand side argument for localize");
@@ -228,8 +229,13 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
 	if (nrhs != 5)
-		mexErrMsgTxt("Must have exactly 5 input arguments for testsegmentation");
-	
+		mexErrMsgTxt("Must have exactly 5 input arguments for testsegmentation\n\
+					 0 - the string \"testsegmentation\"\n\
+					 1 - the expect standard deviation of the psf\n\
+					 2 - segmentation algorithm, \"glrt\" or \"smoothsigma\"\n\
+					 3 - the PFA if GLRT, otherwise smoothsigma factor\n\
+					 4 - mxArray containing the image to segment");
+
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for testsegmentation");
 	
@@ -359,16 +365,20 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
  Function that will handle SOFI calculations. The input arguments must be of the form
  0 - the string "sofi"
  1 - the desired order
- 2 - boolean: do cross correlation
+ 2 - single number: 0 for autocorrelation, 1 for crosscorrelation
  3 - file path or a matrix containing numeric data
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
 	if (nrhs != 4)
-		mexErrMsgTxt("Must have exactly 5 input arguments for sofi");
+		mexErrMsgTxt("Must have exactly 4 input arguments for sofi\n\
+					 1. the string \"sofi\"\n\
+					 2. the desired order (2 or 3)\n\
+					 3. single number: 0 for autocorrelation, 1 for crosscorrelation\n\
+					 4. file path or a matrix containing numeric data");
 	
 	if (nlhs != 2)
-		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi");
+		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
 	
 	mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
@@ -417,7 +427,10 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		int nFramesToSkip = 0, nFramesToInclude = -1, lagTime = 0;
 		ImagePtr sofiOutputImage, averageOutputImage;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, -1, sofiOutputImage, averageOutputImage);
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImage, averageOutputImage);
+
+		plhs[0] = ConvertImageToArray(sofiOutputImage);
+		plhs[1] = ConvertImageToArray(averageOutputImage);
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
