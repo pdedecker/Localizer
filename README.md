@@ -1,7 +1,7 @@
-Localizer readme
-================
+README
+======
 
-Welcome to the source code for Localizer, which implements various kinds of analyses related to superresolution microscopy. The routines were lovingly hand-crafted by [Peter Dedecker](peter.dedecker@chem.kuleuven.be), who currently resides at the [Department of Chemistry](http://chem.kuleuven.be) at the [University of Leuven](http://www.kuleuven.be). This repository is available at at [https://bitbucket.org/pdedecker/localizer](https://bitbucket.org/pdedecker/localizer).
+Welcome to the source code for Localizer, which implements various kinds of analyses related to superresolution microscopy. The routines were lovingly hand-crafted by [Peter Dedecker](<peter.dedecker@chem.kuleuven.be>), who currently resides at the [Department of Chemistry](http://www.chem.kuleuven.be/department/department_en.html) at the [University of Leuven](http://www.kuleuven.be). This repository is available at at [https://bitbucket.org/pdedecker/localizer](https://bitbucket.org/pdedecker/localizer).
 
 The fastest way to get started with Localizer is to [download the ready-made binaries appropriate for your platform](http://sushi.chem.kuleuven.be/svn/Localizer). At present there are binaries for [Igor Pro](http://www.wavemetrics.com) and for [Matlab](http://www.themathworks.com). There is also a command-line interface that allows Localizer to function in a commandline environment, which is mostly aimed at experienced users and will require compilation (see below).
 
@@ -49,3 +49,7 @@ Compiling the plugin for Matlab
     1. In the left list, click "Linker" and then "General". Modify the "Additional Library Directories" to point to the correct folder for your Matlab installation.
 1.  Build the 'LocalizerMatlab' project.
 1.  Make whatever changes you see fit!
+
+Compiling the command-line tool
+===============================
+Instructions on how to do this are included in the "LinuxCompile.sh" script included with the source code.
