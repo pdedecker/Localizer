@@ -7,7 +7,7 @@ The fastest way to get started with Localizer is to [download the ready-made bin
 
 If you are unfamiliar with programming the Igor Pro plugin will be the best option, since it comes with a complete graphical interface to use for analyzing your PALM/STORM or SOFI data, including visualization, clustering analysis, drift correction, etc. Igor Pro is commercial software, but [a free 30-day trial version is available for direct download](http://www.wavemetrics.com/support/demos.htm). Localizer will function without restrictions during the trial period. After the trial period Localizer will continue to function normally, but you will be unable to save the data or figures it generates.
 
-Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer).
+Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document, while for the Matlab plugin you can examine the example ".m" files.
 
 At present I do not have a Linux or Macintosh version of the Matlab plugin. That is simply because I only have a Windows version of Matlab. Given Linux and/or Mac Matlab installations, it should be a rather easy to create suitable plugins. If this interests you and you have these installations, let me know!
 
