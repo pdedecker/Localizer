@@ -253,7 +253,8 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 					 4 - 2D matrix containing the image to segment");
 
 	if (nlhs != 2)
-		mexErrMsgTxt("Must have exactly two left hand side arguments for testsegmentation");
+		mexErrMsgTxt("Must have exactly two left hand side arguments for testsegmentation: the\
+					 binary segmented image and list of estimated particles (not localized!)");
 	
 	const mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
@@ -269,7 +270,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 	// index 2 - must be a string, either 'GLRT' or 'SmoothSigma' (not case sensitive)
 	array = prhs[2];
 	if (mxGetClassID(array) != mxCHAR_CLASS)
-		mexErrMsgTxt("3rd argument must be a string (the segmentation algorithm)");
+		mexErrMsgTxt("3rd argument must be a string (the segmentation algorithm, 'GLRT' or 'SmoothSigma')");
 	std::string segmentationStr = GetMatlabString(array);
 	
 	int segmentationAlgorithm;
@@ -352,9 +353,9 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		int offset = 0;
 		for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it, ++offset) {
 			particleOutputPtr[offset] = (*it).intensity;
-			particleOutputPtr[offset * nParticles] = (*it).x;
-			particleOutputPtr[offset * 2 * nParticles] = (*it).y;
-			particleOutputPtr[offset * 3 * nParticles] = (*it).background;
+			particleOutputPtr[offset + nParticles] = (*it).x;
+			particleOutputPtr[offset + 2 * nParticles] = (*it).y;
+			particleOutputPtr[offset + 3 * nParticles] = (*it).background;
 		}
 		
 		plhs[0] = segmentedOutputMatrix;
