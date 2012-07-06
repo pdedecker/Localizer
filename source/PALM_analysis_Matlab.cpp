@@ -78,7 +78,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 					 2. the estimated standard deviation of the PSF (in pixels)\n\
 					 3. the segmentation algorithm (\"glrt\" or \"smoothsigma\"\n\
 					 4. the PFA if GLRT, otherwise smoothsigma factor\n\
-					 5. the localization algorithm. '2DGauss' only for now\n\
+					 5. the localization algorithm. '2DGauss', '2DGaussFixedWidth', 'IterativeMultiplication', 'Centroid', 'Ellipsoidal2DGauss', or 'MLEwG'\n\
 					 6. string containing the path to the file, or a 2D or 3D matrix containing image data");
 
 	if (nlhs != 1)
@@ -117,16 +117,26 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	double thresholdParam = *(mxGetPr(array));
 	if (thresholdParam <= 0.0)
 		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
-	
+
 	// index 4 - must be a string, currently only '2DGauss' is allowed
 	array = prhs[4];
 	if (mxGetClassID(array) != mxCHAR_CLASS)
 		mexErrMsgTxt("5th argument must be a string (the localization algorithm)");
 	std::string localizationStr = GetMatlabString(array);
-	
+
 	int localizationAlgorithm;
 	if (boost::iequals(localizationStr, "2DGauss")) {
 		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS;
+	} else if (boost::iequals(localizationStr, "2DGaussFixedWidth")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH;
+	} else if (boost::iequals(localizationStr, "IterativeMultiplication")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_MULTIPLICATION;
+	} else if (boost::iequals(localizationStr, "Centroid")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_CENTROID;
+	} else if (boost::iequals(localizationStr, "Ellipsoidal2DGauss")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL;
+	} else if (boost::iequals(localizationStr, "MLEwG")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_MLEwG;
 	} else {
 		mexErrMsgTxt("Unknown localization algorithm");
 	}
