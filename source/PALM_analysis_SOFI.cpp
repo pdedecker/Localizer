@@ -32,9 +32,11 @@
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					boost::shared_ptr<ProgressReporter> progressReporter,
 					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
-					ImagePtr& sofiOutputImage, ImagePtr& averageOutputImage) {
+					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
+	sofiOutputImages.clear();
+	averageOutputImages.clear();
     
     if (nFramesToInclude == (size_t)-1)
         nFramesToInclude = nImages - nFramesToSkip;
@@ -123,8 +125,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
 		if ((sofiImage.get() == NULL) || (averageImage.get() == NULL))
 			throw std::runtime_error("No output from sofiCalculator");
 		
-		sofiOutputImage = ImagePtr(sofiImage);
-		averageOutputImage = ImagePtr(averageImage);
+		sofiOutputImages.push_back(sofiImage);
+		averageOutputImages.push_back(averageImage);
 	}
 	
 	progressReporter->CalculationDone();

@@ -2559,10 +2559,12 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             }
         }
 		
-		ImagePtr sofiImage, averageImage;
-        DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImage, averageImage);
-		outputWriter->write_image(sofiImage);
-		averageOutputWriter->write_image(averageImage);
+		std::vector<ImagePtr> sofiImages, averageImages;
+        DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImages, averageImages);
+		for (int i = 0; i < sofiImages.size(); ++i) {
+			outputWriter->write_image(sofiImages.at(i));
+			averageOutputWriter->write_image(averageImages.at(i));
+		}
     }
     catch (int e) {
         return e;

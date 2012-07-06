@@ -16,9 +16,11 @@ Downloading and modifying the source code
 The Localizer code is licensed under the GPL license, which means that you are free to modify and distribute the code, provided that you provide proper attribution, and that any such code is governed by a compatible license (which means that your code must be similarly free). If this license is restrictive for your application, contact me and we may be able to work it out.
 
 You can download the code using the links above. I use three different systems to compile the code:
+
 *   [Xcode](https://developer.apple.com/xcode/) on Macintosh.
 *   [Visual C++ Express](https://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-cpp-express) on Windows. For 64-bit development you will also want to install the [Windows SDK 7.1](https://www.microsoft.com/en-us/download/details.aspx?id=8279).
 *   A simple shell script on Linux.
+
 All of these tools are freely available, and can be downloaded from the provided links. The shell script is included with the source code. To compile the Igor Pro and Matlab plugins you will also need a copy of the [Igor XOP Toolkit](http://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm) and/or a working Matlab installation. This is important – without the XOP Toolkit or a Matlab installation you will not be able to compile the plugins!
 
 If you modify or improve this code in any way, I would appreciate if you could communicate these changes back to me so that it can be included for the benefit of other users (with proper attribution). For this it might help if you are familiar with [git](http://git-scm.com/).
