@@ -56,8 +56,10 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "sofi")) {
 		MatlabSOFI(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "readccdimages")) {
+		MatlabReadCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
-		mexErrMsgTxt("Unknown selector (should be one of \"localize\", \"testsegmentation\", or \"sofi\")");
+		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"localize\", \"testsegmentation\", or \"sofi\")");
 	}
 }
 
@@ -74,12 +76,14 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	// input validation
 	if (nrhs != 6)
 		mexErrMsgTxt("Must have exactly 6 input arguments for localize\n\
-					 1 - the string \"localize\"\
+					 1 - the string \"localize\"\n\
 					 2. the estimated standard deviation of the PSF (in pixels)\n\
 					 3. the segmentation algorithm (\"glrt\" or \"smoothsigma\"\n\
 					 4. the PFA if GLRT, otherwise smoothsigma factor\n\
 					 5. the localization algorithm. '2DGauss', '2DGaussFixedWidth', 'IterativeMultiplication', 'Centroid', 'Ellipsoidal2DGauss', or 'MLEwG'\n\
-					 6. string containing the path to the file, or a 2D or 3D matrix containing image data");
+					 6. string containing the path to the file, or a 2D or 3D matrix containing image data\n\
+					 \n\n\
+					 The format of the returned positions depends on the localization algorithm. See localize.m for the details.");
 
 	if (nlhs != 1)
 		mexErrMsgTxt("Must have exactly one left hand side argument for localize");
@@ -147,6 +151,8 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	array = prhs[5];
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
+		if (filePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
 	} else {
 		// assume that this is a valid data array
 		// if it isn't then the image loader will throw an error
@@ -244,7 +250,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 					 1 - the expect standard deviation of the psf\n\
 					 2 - segmentation algorithm, \"glrt\" or \"smoothsigma\"\n\
 					 3 - the PFA if GLRT, otherwise smoothsigma factor\n\
-					 4 - mxArray containing the image to segment");
+					 4 - 2D matrix containing the image to segment");
 
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for testsegmentation");
@@ -385,7 +391,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 					 1. the string \"sofi\"\n\
 					 2. the desired order (2 or 3)\n\
 					 3. single number: 0 for autocorrelation, 1 for crosscorrelation\n\
-					 4. file path or a matrix containing numeric data");
+					 4. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
@@ -414,6 +420,8 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	array = const_cast<mxArray*>(prhs[3]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
+		if (filePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
 	} else {
 		// assume that this is a valid data array
 		// if it isn't then the image loader will throw an error
@@ -441,6 +449,86 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 
 		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
 		plhs[1] = ConvertImageToArray(averageOutputImages.at(0));
+	}
+	catch (std::bad_alloc) {
+        mexErrMsgTxt("Insufficient memory");
+    }
+    catch (int e) {
+        mexErrMsgTxt("Int error");
+    }
+    catch (USER_ABORTED e) {
+        mexErrMsgTxt("User abort");
+    }
+    catch (std::runtime_error e) {
+        mexErrMsgTxt(e.what());
+    }
+    catch (...) {
+        mexErrMsgTxt("Unknown error");
+    }
+}
+
+/**
+ Function that will load images from disk. The input arguments must be of the form
+ 0 - the string "readccdimages"
+ 1 - the index of the first image to read (starting from 0)
+ 2 - the number of images to read
+ 3 - file path or a matrix containing numeric data
+ */
+void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	// input validation
+	if (nrhs != 4)
+		mexErrMsgTxt("Must have exactly 4 input arguments for readccdimages\n\
+					 1. the string \"readccdimages\"\n\
+					 2. the index of the first image to read (starting from 0)\n\
+					 3. the number of images to read\n\
+					 4. file path to a data file, or a 2D or 3D matrix containing numeric data");
+	
+	if (nlhs != 1)
+		mexErrMsgTxt("Must have exactly one left hand side argument for readccdimages");
+
+	mxArray* array;
+	// the mxArray at index 0 will have been checked already by mexFunction
+	
+	// index 1 - must be a single number - the index of the first image to read
+	array = const_cast<mxArray*>(prhs[1]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("2nd argument must be a double scalar: the index of the first image to read (starting from 0)");
+	int firstImageToRead = *(mxGetPr(array));
+	if (firstImageToRead < 0)
+		firstImageToRead = -1;
+	
+	// index 2 - must be a single number - the number of images to read
+	bool doCrossCorrelation;
+	array = const_cast<mxArray*>(prhs[2]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("3nd argument must be a double scalar: the number of images to read (or -1)");
+	int nImagesToRead = *(mxGetPr(array));
+	if (nImagesToRead < 0)
+		nImagesToRead = -1;
+
+	// index 3 - must be the data
+	std::string filePath;
+	mxArray* dataArray = NULL;
+	array = const_cast<mxArray*>(prhs[3]);
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		filePath = GetMatlabString(array);
+		if (filePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
+	} else {
+		// assume that this is a valid data array
+		// if it isn't then the image loader will throw an error
+		dataArray = array;
+	}
+
+	try {
+		boost::shared_ptr<ImageLoader> imageLoader;
+		if (!filePath.empty()) {
+			imageLoader = GetImageLoader(filePath);
+		} else {
+			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+		}
+
+		plhs[0] = ConvertImagesToArray(imageLoader, firstImageToRead, nImagesToRead);
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
@@ -544,6 +632,120 @@ mxArray* ConvertImageToArray(ImagePtr image) {
 	if (nElements > 0) {
 		double *firstOutputElement = mxGetPr(outputMatrix);
 		memcpy(firstOutputElement, image->data(), nElements * sizeof(double));
+	}
+
+	return outputMatrix;
+}
+
+mxArray* ConvertImagesToArray(boost::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
+	size_t nImages = imageLoader->getNImages();
+	size_t xSize = imageLoader->getXSize();
+	size_t ySize = imageLoader->getYSize();
+
+	// allocate the output matrix
+	// try to match the required storage type
+	int storageType = imageLoader->getStorageType();
+	mxClassID classID;
+	size_t bytesPixel;
+	switch (storageType) {
+		case STORAGE_TYPE_INT8:
+			classID = mxINT8_CLASS;
+			bytesPixel = 1;
+			break;
+		case STORAGE_TYPE_UINT8:
+			classID = mxUINT8_CLASS;
+			bytesPixel = 1;
+			break;
+		case STORAGE_TYPE_INT16:
+			classID = mxINT16_CLASS;
+			bytesPixel = 2;
+			break;
+		case STORAGE_TYPE_UINT16:
+			classID = mxUINT16_CLASS;
+			bytesPixel = 2;
+			break;
+		case STORAGE_TYPE_INT32:
+			classID = mxINT32_CLASS;
+			bytesPixel = 4;
+			break;
+		case STORAGE_TYPE_UINT32:
+			classID = mxUINT32_CLASS;
+			bytesPixel = 4;
+			break;
+		case STORAGE_TYPE_INT64:
+			classID = mxINT8_CLASS;
+			bytesPixel = 8;
+			break;
+		case STORAGE_TYPE_UINT64:
+			classID = mxUINT8_CLASS;
+			bytesPixel = 8;
+			break;
+			case STORAGE_TYPE_FP32:
+			classID = mxSINGLE_CLASS;
+			bytesPixel = 4;
+			break;
+		case STORAGE_TYPE_FP64:
+			classID = mxDOUBLE_CLASS;
+			bytesPixel = 8;
+			break;
+		default:
+			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
+			break;
+	}
+
+	if (firstImage < 0)
+		firstImage = 0;
+	if ((nImagesToRead < 0) || (nImagesToRead > nImages - firstImage))
+		nImagesToRead = nImages - firstImage;
+
+	mwSize ndim = 3;
+	mwSize dims[3] = {xSize, ySize, nImagesToRead};
+	mxArray* outputMatrix = mxCreateNumericArray(ndim, dims, classID, mxREAL);
+	if (outputMatrix == NULL)
+		throw std::bad_alloc();
+
+	size_t bytesPerImage = xSize * ySize * bytesPixel;
+	char* arrayPtr = reinterpret_cast<char*>(mxGetPr(outputMatrix));
+
+	imageLoader->spoolTo(firstImage);
+	for (size_t i = 0; i < nImagesToRead; ++i) {
+		ImagePtr thisImage = imageLoader->readNextImage();
+		char* bufferPtr = arrayPtr + i * bytesPerImage;
+		switch (storageType) {
+			case STORAGE_TYPE_INT8:
+				CopyImageToBuffer<int8_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_UINT8:
+				CopyImageToBuffer<uint8_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_INT16:
+				CopyImageToBuffer<int16_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_UINT16:
+				CopyImageToBuffer<uint16_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_INT32:
+				CopyImageToBuffer<int32_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_UINT32:
+				CopyImageToBuffer<uint32_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_INT64:
+				CopyImageToBuffer<int64_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_UINT64:
+				CopyImageToBuffer<uint64_t>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_FP32:
+				CopyImageToBuffer<float>(thisImage, bufferPtr);
+				break;
+			case STORAGE_TYPE_FP64:
+				CopyImageToBuffer<double>(thisImage, bufferPtr);
+			break;
+		default:
+			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
+			break;
+		}
 	}
 
 	return outputMatrix;
