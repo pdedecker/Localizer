@@ -436,11 +436,11 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		// no frame verifiers for now
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		int nFramesToSkip = 0, nFramesToInclude = -1, lagTime = 0;
-		ImagePtr sofiOutputImage, averageOutputImage;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImage, averageOutputImage);
+		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
 
-		plhs[0] = ConvertImageToArray(sofiOutputImage);
-		plhs[1] = ConvertImageToArray(averageOutputImage);
+		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
+		plhs[1] = ConvertImageToArray(averageOutputImages.at(0));
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
