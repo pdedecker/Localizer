@@ -49,7 +49,7 @@ waitbar *waitbar_create         /* return a pointer to the new waitbar */
     int error ;
     waitbar *h ;
 	
-    h = mxMalloc (sizeof (waitbar)) ;
+    h = reinterpret_cast<waitbar*>(mxMalloc (sizeof (waitbar)));
     h->fraction = mxCreateDoubleScalar (fraction) ;
     h->message = mxCreateString (message) ;
 	

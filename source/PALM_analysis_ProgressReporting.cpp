@@ -113,5 +113,32 @@ int ProgressReporter_MatlabCommandLine::UpdateCalculationProgress(double progres
 	}
 	return 0;
 }
+
+ProgressReporter_MatlabWaitMex::~ProgressReporter_MatlabWaitMex() {
+	if (waitBar != NULL) {
+		waitbar_destroy(waitBar);
+		waitBar = NULL;
+	}
+}
+
+void ProgressReporter_MatlabWaitMex::CalculationStarted() {
+	previousPercentage = 0.0;
+	waitBar = waitbar_create(0.0, "Calculating...");
+}
+
+int ProgressReporter_MatlabWaitMex::UpdateCalculationProgress(double progress, double maxProgress) {
+	double percentage = progress / maxProgress * 100.0;
+	if (percentage - previousPercentage > 1.0) {
+		waitbar_update(percentage / 100.0, waitBar, "Calculating...");
+		previousPercentage = percentage;
+	}
+
+	return 0;
+}
+
+void ProgressReporter_MatlabWaitMex::CalculationDone() {
+	waitbar_update(1, waitBar, "Calculating...");
+}
+
 #endif // WITH_MATLAB
 

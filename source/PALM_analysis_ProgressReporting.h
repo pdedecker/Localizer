@@ -38,6 +38,7 @@
 
 #ifdef WITH_MATLAB
 #include "mex.h"
+#include "WaitMex.h"
 #endif
 
 
@@ -134,6 +135,21 @@ public:
 	
 protected:
 	double previousPercentage;
+};
+
+class ProgressReporter_MatlabWaitMex : public ProgressReporter {
+	public:
+	ProgressReporter_MatlabWaitMex() : previousPercentage(0), waitBar(NULL) {}
+	~ProgressReporter_MatlabWaitMex();
+	
+	void CalculationStarted();
+	int UpdateCalculationProgress(double progress, double maxProgress);
+	void CalculationDone();
+	void CalculationAborted() {this->CalculationDone();}
+	
+protected:
+	double previousPercentage;
+	waitbar* waitBar;
 };
 #endif
 

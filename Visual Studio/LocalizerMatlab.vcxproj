@@ -182,6 +182,7 @@
     <ClCompile Include="..\source\PALM_analysis_segmentation.cpp" />
     <ClCompile Include="..\source\PALM_analysis_SOFI.cpp" />
     <ClCompile Include="..\source\PALM_analysis_storage.cpp" />
+    <ClCompile Include="..\source\WaitMex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\PALM_analysis.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="..\source\PALM_analysis_segmentation.h" />
     <ClInclude Include="..\source\PALM_analysis_SOFI.h" />
     <ClInclude Include="..\source\PALM_analysis_storage.h" />
+    <ClInclude Include="..\source\WaitMex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -199,7 +199,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
                 break;
 		}
 		
-		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabCommandLine);
+		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
 		boost::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
 																								postprocessor, particleFinder, particleVerifiers,
@@ -440,7 +440,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 		
-		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabCommandLine);
+		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
 		// no frame verifiers for now
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
