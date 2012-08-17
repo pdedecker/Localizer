@@ -27,7 +27,7 @@ If you modify or improve this code in any way, I would appreciate if you could c
 
 License
 =======
-You're free to distribute this code or the compiled products in any way, provided that you provide proper attribution in your code and/or the products you derive from them. "Proper attribution" is a clearly visible notice containing e.g. "this product is based on Localizer, created by Peter Dedecker at the University of Leuven, available at https://bitbucket.org/pdedecker/localizer".
+You're free to distribute this code or the compiled products in any way, provided that you provide proper attribution in your code and/or the products you derive from them. You're also free to include whatever parts of this code in your own work, provided that any distribution of this work is governed by a license compatible with the GPLv3, and subject to the same attribution clause. "Proper attribution" is a clearly visible notice containing e.g. "this product is based on Localizer, created by Peter Dedecker at the University of Leuven, available at https://bitbucket.org/pdedecker/localizer".
 
 Compiling the plugin for Igor Pro
 =================================

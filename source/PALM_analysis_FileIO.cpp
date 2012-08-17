@@ -30,6 +30,33 @@
 #include "PALM_analysis_MatrixRecycler.h"
 #include "PALM_analysis_FileIO.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int64_t GetLastModificationTime(const std::string& path) {
+	int64_t modTime;
+	
+#ifdef _WIN32
+	struct _stat buffer;
+	int err = _stat(path.c_str(), &buffer);
+	if (err != 0)
+		throw std::runtime_error("non-zero return from _stat()");
+	
+	modTime = static_cast<int64_t>(buffer.st_mtime);
+	
+#else	// not _WIN32
+	struct stat buffer;
+	int err = stat(path.c_str(), &buffer);
+	if (err != 0)
+		throw std::runtime_error("non-zero return from _stat()");
+	
+	modTime = static_cast<int64_t>(buffer.st_mtime);
+	
+#endif	// _WIN32
+	
+	return modTime;
+}
+
 #ifdef _WIN32
 WindowsFileStream::~WindowsFileStream() {
     if (this->fileRef != NULL) {

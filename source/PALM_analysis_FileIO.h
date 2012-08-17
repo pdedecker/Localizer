@@ -65,6 +65,11 @@ using boost::int16_t;
 using boost::uint8_t;
 using boost::int8_t;
 
+/**
+ Returns last modification time of the file pointed to by path, in some non-portable
+ but internally consistent int format.
+*/
+int64_t GetLastModificationTime(const std::string& path);
 
 /**
  Function that writes the contents of a char* buffer containing a single image
