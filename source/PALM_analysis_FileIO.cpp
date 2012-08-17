@@ -523,6 +523,8 @@ ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 	return image;
 }
 
+std::map<std::string, ImageLoaderHamamatsu::ImageOffsets> ImageLoaderHamamatsu::_offsetsMap;
+
 ImageLoaderHamamatsu::ImageLoaderHamamatsu(std::string rhs) {
 	this->filePath = rhs;
 	
@@ -544,52 +546,90 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 
 void ImageLoaderHamamatsu::parse_header_information() {
 	
-	ImageLoaderHamamatsu_HeaderStructure header;
+	// do we already have information on the offsets of the images for this file?
+	if (_offsetsMap.count(this->filePath) != 0) {
+		// we have information, now check if the timestamp is still okay
+		if (GetLastModificationTime(this->filePath) != _offsetsMap[this->filePath].modificationTime) {
+			// looks like the file was modified
+			// delete the offset information, it will be recreated below
+			_offsetsMap.erase(this->filePath);
+		}
+	}
 	
+	// now create the offsets map if needed (if it did not exist or was deleted above)
+	if (_offsetsMap.count(this->filePath) == 0) {
+		ImageLoaderHamamatsu::ImageOffsets imageOffsets;
+		ImageLoaderHamamatsu_HeaderStructure header;
+		
+		file.seekg(0);
+		
+		int nImagesRead = 0;
+		int nImagesInFile = -1;
+		int thisImageXSize, thisImageYSize;
+		uint64_t nextHeaderOffset = 0;
+		do {
+			file.seekg(nextHeaderOffset);
+			
+			file.read((char *)&(header.magic), sizeof(header.magic));
+			file.read((char *)&(header.commentLength), sizeof(header.commentLength));
+			file.read((char *)&(header.xSize), sizeof(header.xSize));
+			file.read((char *)&(header.ySize), sizeof(header.ySize));
+			file.read((char *)&(header.xBinning), sizeof(header.xBinning));
+			file.read((char *)&(header.yBinning), sizeof(header.yBinning));
+			file.read((char *)&(header.storageFormat), sizeof(header.storageFormat));
+			file.read((char *)&(header.nImages), sizeof(header.nImages));
+			file.read((char *)&(header.nChannels), sizeof(header.nChannels));
+			file.read((char *)&(header.channel), sizeof(header.channel));
+			file.read((char *)&(header.timeStamp), sizeof(header.timeStamp));
+			file.read((char *)&(header.marker), sizeof(header.marker));
+			file.read((char *)&(header.misc), sizeof(header.misc));
+			
+			if (nImagesInFile == -1)
+				nImagesInFile = header.nImages;
+			thisImageXSize = header.xSize;
+			thisImageYSize = header.ySize;
+			
+			if (header.storageFormat != 2) {	// not UINT16
+				std::string error;
+				error = "The file at \"";
+				error += this->filePath;
+				error += "\" specifies that it doesn't use UINT16 for storage. This usually means that the manufacturer's software corrupted the file.";
+				throw ERROR_READING_FILE_DATA(error);
+			}
+			
+			// was there an error reading the file?
+			if (file.fail() != 0) {
+				std::string error;
+				error = "Error parsing the header information in \"";
+				error += this->filePath;
+				error += "\" assuming the Hamamatsu format";
+				throw ERROR_READING_FILE_DATA(error);
+			}
+			
+			imageOffsets.offsets.push_back(nextHeaderOffset + header.commentLength + 64);
+			nextHeaderOffset += header.commentLength + 64 + thisImageXSize * thisImageYSize * sizeof(uint16_t);
+			
+			nImagesRead += 1;
+		} while (nImagesRead < nImagesInFile);
+		
+		// store the obtained offsets and information
+		imageOffsets.xSize = thisImageXSize;
+		imageOffsets.ySize = thisImageYSize;
+		imageOffsets.modificationTime = GetLastModificationTime(this->filePath);
+		
+		_offsetsMap[this->filePath] = imageOffsets;
+		
+		file.seekg(0);
+	}
+	
+	this->nImages = _offsetsMap[this->filePath].offsets.size();
+	this->xSize = _offsetsMap[this->filePath].xSize;
+	this->ySize = _offsetsMap[this->filePath].ySize;
+	this->_offsets = _offsetsMap[this->filePath].offsets;
 	this->storage_type = STORAGE_TYPE_UINT16;
 	
-	file.seekg(0);
-	
-	file.read((char *)&(header.magic), sizeof(header.magic));
-	file.read((char *)&(header.commentLength), sizeof(header.commentLength));
-	file.read((char *)&(header.xSize), sizeof(header.xSize));
-	file.read((char *)&(header.ySize), sizeof(header.ySize));
-	file.read((char *)&(header.xBinning), sizeof(header.xBinning));
-	file.read((char *)&(header.yBinning), sizeof(header.yBinning));
-	file.read((char *)&(header.storageFormat), sizeof(header.storageFormat));
-	file.read((char *)&(header.nImages), sizeof(header.nImages));
-	file.read((char *)&(header.nChannels), sizeof(header.nChannels));
-	file.read((char *)&(header.channel), sizeof(header.channel));
-	file.read((char *)&(header.timeStamp), sizeof(header.timeStamp));
-	file.read((char *)&(header.marker), sizeof(header.marker));
-	file.read((char *)&(header.misc), sizeof(header.misc));
-	
-	if (header.storageFormat != 2) {	// not UINT16
-		std::string error;
-		error = "The file at \"";
-		error += this->filePath;
-		error += "\" specifies that it doesn't use UINT16 for storage. This usually means that the manufacturer's software corrupted the file.";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	this->header_length = header.commentLength + 64;
-	this->xSize = header.xSize;
-	this->ySize = header.ySize;
-	this->nImages = header.nImages;
-	
-	// was there an error reading the file?
-	if (file.fail() != 0) {
-		std::string error;
-		error = "Error parsing the header information in \"";
-		error += this->filePath;
-		error += "\" assuming the Hamamatsu format";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	file.seekg(0);
 	this->checkForReasonableValues();
 }
-
 
 ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 	uint64_t offset;
@@ -603,7 +643,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
-		offset = (this->nextImageToRead + 1) * header_length + this->nextImageToRead * imageSize;
+		offset = _offsets.at(nextImageToRead);
 		
 		file.seekg(offset);
 		file.read(single_image_buffer.get(), imageSize);

@@ -36,6 +36,7 @@
 #include <queue>
 #include <list>
 #include <string>
+#include <map>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_defines.h"
@@ -269,6 +270,14 @@ public:
 
 class ImageLoaderHamamatsu : public ImageLoader {
 public:
+	class ImageOffsets {
+	public:
+		std::vector<uint64_t> offsets;
+		int64_t modificationTime;
+		uint64_t xSize;
+		uint64_t ySize;
+	};
+	
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
@@ -276,6 +285,9 @@ public:
 	
 protected:
 	void parse_header_information();
+	
+	static std::map<std::string, ImageLoaderHamamatsu::ImageOffsets> _offsetsMap;
+	std::vector<uint64_t> _offsets;
 };
 
 class ImageLoaderPDE : public ImageLoader {
