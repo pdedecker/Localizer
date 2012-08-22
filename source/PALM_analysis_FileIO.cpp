@@ -34,13 +34,22 @@
 #include <sys/stat.h>
 
 int64_t GetLastModificationTime(const std::string& path) {
-	int64_t modTime;
+	int64_t modTime = 1;
 	
 #ifdef _WIN32
 	struct _stat buffer;
 	int err = _stat(path.c_str(), &buffer);
-	if (err != 0)
-		throw std::runtime_error("non-zero return from _stat()");
+	if ((err != 0) && (errno != 0)) {
+		// for whatever reason _stat() will return -1 but not set errno,
+		// which leads me to believe that this -1 value does not indicate an error.
+		// the microsoft docs say that _stat() should return non-zero for error, and should
+		// set errno as well. So I'm seeing undocumented behavior.
+		char errorMessage[100];
+		sprintf(errorMessage, "Return value %d from _stat(), errno is %d", err, errno);
+		if (errno != 0) {
+			throw std::runtime_error(errorMessage);
+		}
+	}
 	
 	modTime = static_cast<int64_t>(buffer.st_mtime);
 	
