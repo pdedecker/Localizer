@@ -1412,60 +1412,46 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         // set up compression for those files that use it
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
+		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
             compression = COMPRESSION_NONE;
             break;
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
             compression = COMPRESSION_DEFLATE;
             break;
         }
+		
+		// determine the output storage type
+		int storageType;
+		switch (method) {
+			case PROCESSING_AVERAGESUBTRACTION:
+            case PROCESSING_DIFFERENCEIMAGE:
+				storageType = STORAGE_TYPE_FP32;
+				break;
+			case PROCESSING_CONVERTTOPHOTONS:
+				storageType = STORAGE_TYPE_UINT32;
+				break;
+			default:
+				storageType = image_loader->getStorageType();
+		}
 
         // the output number type depends on the requested information
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-            // the storage type depends on the method
-            switch (method) {
-            case PROCESSING_AVERAGESUBTRACTION:
-            case PROCESSING_DIFFERENCEIMAGE:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_FP32));
-                break;
-            case PROCESSING_CONVERTTOPHOTONS:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, STORAGE_TYPE_UINT32));
-                break;
-            default:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, image_loader->getStorageType()));
-                break;
-            }
+			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
             break;
+		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
+			output_writer = boost::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+			break;
         case IMAGE_OUTPUT_TYPE_IGOR:
-            switch (method) {
-            case PROCESSING_AVERAGESUBTRACTION:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_FP32));
-                break;
-            case PROCESSING_DIFFERENCEIMAGE:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, STORAGE_TYPE_FP32));
-                break;
-            case PROCESSING_CONVERTTOPHOTONS:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, STORAGE_TYPE_UINT16));
-                break;
-            default:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, image_loader->getStorageType()));
-                break;
+			if (method == PROCESSING_DIFFERENCEIMAGE) {
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, storageType));
+			} else {
+                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, storageType));
             }
             break;
         case IMAGE_OUTPUT_TYPE_PDE:
-            switch (method) {
-            case PROCESSING_AVERAGESUBTRACTION:
-            case PROCESSING_DIFFERENCEIMAGE:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_FP32));
-                break;
-            case PROCESSING_CONVERTTOPHOTONS:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, STORAGE_TYPE_UINT32));
-                break;
-            default:
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, image_loader->getStorageType()));
-                break;
-            }
+			output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, storageType));
             break;
         default:
             throw std::runtime_error("Unsupported output format (/OUT flag)");

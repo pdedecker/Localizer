@@ -1864,6 +1864,25 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
+MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, int compression_rhs, int storageType_rhs) {
+	baseOutputFilePath = baseOutputFilePath_rhs;
+	overwrite = overwrite_rhs;
+	compression = compression_rhs;
+	storageType = storageType_rhs;
+}
+
+void MultiFileTIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
+	char imageIndexStr[50];
+	sprintf(imageIndexStr, "%06d", static_cast<int>(this->nImagesWritten));
+	
+	std::string thisFileName = this->baseOutputFilePath + std::string(imageIndexStr) + std::string(".tif");
+	
+	TIFFImageOutputWriter singleFileOutputWriter(thisFileName, this->overwrite, this->compression, this->storageType);
+	singleFileOutputWriter.write_image(imageToWrite);
+	
+	++this->nImagesWritten;
+}
+
 #ifdef WITH_IGOR
 IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nImages_rhs, int overwrite_rhs, int storageType_rhs) {
 	

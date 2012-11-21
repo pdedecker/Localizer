@@ -414,6 +414,20 @@ protected:
 	TIFF *tiff_file;
 };
 
+class MultiFileTIFFImageOutputWriter : public ImageOutputWriter {
+public:
+	MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, int compression_rhs, int storageType_rhs);
+	// baseOutputFilePath must be the full path to the output base name
+	// so if we want files such as /folder/base0000.tif then baseOutputFilePath is /folder/base
+	
+	void write_image(ImagePtr imageToWrite);
+protected:
+	std::string baseOutputFilePath;
+	int overwrite;
+	int compression;	// if 1 then don't compress the data, otherwise compress
+	int storageType;
+};
+
 #ifdef WITH_IGOR
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
