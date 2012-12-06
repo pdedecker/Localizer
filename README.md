@@ -9,6 +9,8 @@ If you are unfamiliar with programming the Igor Pro plugin will be the best opti
 
 Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document, while for the Matlab plugin you can examine the example ".m" files.
 
+Example data to play around with can be found [here for SOFI](http://sushi.chem.kuleuven.be/SOFI.tif.zip) and [here for localization microscopy](http://sushi.chem.kuleuven.be/PALM.pde.zip). The SOFI data shows a Hek cell transfected using Lyn-Dronpa, while the localization data shows a fixed HeLa cell that expressed Lyn-Dendra2.
+
 At present I do not have a Linux or Macintosh version of the Matlab plugin. That is simply because I only have a Windows version of Matlab. Given Linux and/or Mac Matlab installations, it should be a rather easy to create suitable plugins. If this interests you and you have these installations, let me know!
 
 Downloading and modifying the source code
