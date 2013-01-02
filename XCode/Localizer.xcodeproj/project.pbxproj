@@ -658,7 +658,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
-				GCC_VERSION = "";
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",
@@ -694,7 +694,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
-				GCC_VERSION = "";
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",

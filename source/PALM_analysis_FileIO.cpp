@@ -619,6 +619,12 @@ void ImageLoaderHamamatsu::parse_header_information() {
 			nextHeaderOffset += header.commentLength + 64 + thisImageXSize * thisImageYSize * sizeof(uint16_t);
 			
 			nImagesRead += 1;
+			
+			if ((nImagesRead % 20) == 0) {
+				int abort = SpinProcess();
+				if (abort)
+					throw USER_ABORTED("user abort");
+			}
 		} while (nImagesRead < nImagesInFile);
 		
 		// store the obtained offsets and information
