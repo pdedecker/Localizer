@@ -1178,7 +1178,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 #ifdef MACIGOR
         const char *fileFilterStr = "Data Files::.spe,.sif,.his,.tif,.tiff,.lsm,.pde;";
 #else
-        const char *fileFilterStr = "Data Files\0.spe;.sif;.his;.tif;.tiff;.lsm;.pde\0\0";
+        const char *fileFilterStr = "Data Files (*.spe;*.sif;*.his;*.tif;*.tiff;*.lsm;*.pde)\0*.spe;*.sif;*.his;*.tif;*.tiff;*.lsm;*.pde\0\0";
 #endif
         err = XOPOpenFileDialog("Open images", fileFilterStr, NULL, "", filePathFromDialog);
         if (err != 0) {
