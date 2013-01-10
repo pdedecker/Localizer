@@ -74,8 +74,8 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 	ImagePtr outputImage(new Image((int)imageWidth, (int)imageHeight));
 	outputImage->setConstant(0.0);
 	
-	double imageWidthScaleFactor = static_cast<double>(imageWidth) / static_cast<double>(xSize);
-	double imageHeightScaleFactor = static_cast<double>(imageHeight) / static_cast<double>(ySize);
+	double imageWidthScaleFactor = static_cast<double>(imageWidth - 1) / static_cast<double>(xSize - 1);
+	double imageHeightScaleFactor = static_cast<double>(imageHeight - 1) / static_cast<double>(ySize - 1);
 	
 	// update the progress reporter
 	this->progressReporter->CalculationStarted();
