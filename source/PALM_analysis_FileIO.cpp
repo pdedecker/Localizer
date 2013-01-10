@@ -620,11 +620,13 @@ void ImageLoaderHamamatsu::parse_header_information() {
 			
 			nImagesRead += 1;
 			
+			#ifdef WITH_IGOR
 			if ((nImagesRead % 20) == 0) {
 				int abort = SpinProcess();
 				if (abort)
 					throw USER_ABORTED("user abort");
 			}
+			#endif
 		} while (nImagesRead < nImagesInFile);
 		
 		// store the obtained offsets and information
