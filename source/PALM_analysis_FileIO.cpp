@@ -234,7 +234,7 @@ void ImageLoader::spoolTo(size_t index) {
 	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	// don't do any work if its not required
+	// don't do any work if it's not required
 	if (this->nextImageToRead != index)
 		this->nextImageToRead = index;
 }
@@ -312,7 +312,7 @@ void ImageLoaderSPE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
+ImagePtr ImageLoaderSPE::readNextImage(size_t &indexOfImageThatWasRead) {
 	uint64_t offset;
 	
 	uint64_t imageSize, pixelSize;
@@ -355,7 +355,7 @@ ImagePtr ImageLoaderSPE::readNextImage(size_t &index) {
 			error += "\" assuming the SPE format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
-		index = this->nextImageToRead;
+		indexOfImageThatWasRead = this->nextImageToRead;
 		this->nextImageToRead += 1;
 	}
 	
@@ -500,7 +500,7 @@ void ImageLoaderAndor::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
+ImagePtr ImageLoaderAndor::readNextImage(size_t &indexOfImageThatWasRead) {
 	uint64_t offset;
 	int nBytesInImage = xSize * ySize * sizeof(float);
 	
@@ -523,7 +523,7 @@ ImagePtr ImageLoaderAndor::readNextImage(size_t &index) {
 			error += "\" assuming the Andor format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
-		index = this->nextImageToRead;
+		indexOfImageThatWasRead = this->nextImageToRead;
 		this->nextImageToRead += 1;
 	}
 	
@@ -648,7 +648,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
+ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
@@ -671,7 +671,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &index) {
 			error += "\" assuming the Hamamatsu format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
-		index = this->nextImageToRead;
+		indexOfImageThatWasRead = this->nextImageToRead;
 		this->nextImageToRead += 1;
 	}
 	
@@ -733,7 +733,7 @@ void ImageLoaderPDE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
+ImagePtr ImageLoaderPDE::readNextImage(size_t &indexOfImageThatWasRead) {
 	size_t nPixels = this->xSize * this->ySize;
 	uint64_t offset, imageSize;
 	
@@ -779,7 +779,7 @@ ImagePtr ImageLoaderPDE::readNextImage(size_t &index) {
 			error += "\" assuming the simple image format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
-		index = this->nextImageToRead;
+		indexOfImageThatWasRead = this->nextImageToRead;
 		this->nextImageToRead += 1;
 	}
 	
@@ -1025,18 +1025,18 @@ void ImageLoaderTIFF::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderTIFF::readNextImage(size_t &index) {
+ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 	int result;
-	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
-	
-	if (this->nextImageToRead >= this->nImages)
-		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
 	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}
+	
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	
+	if (this->nextImageToRead >= this->nImages)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	// advance the active TIFF directory to that needed to read the next image
 	while (this->currentDirectoryIndex != directoryIndices.at(this->nextImageToRead)) {
@@ -1129,7 +1129,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &index) {
 		}
 	}
 	
-	index = this->nextImageToRead;
+	indexOfImageThatWasRead = this->nextImageToRead;
 	this->nextImageToRead += 1;
 	
 	return image;
@@ -1152,6 +1152,136 @@ void ImageLoaderTIFF::spoolTo(size_t index) {
 		this->nextImageToRead = index;
 		this->currentDirectoryIndex = this->directoryIndices.at(index);
 	}
+}
+
+ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
+	// assume that filePath consists of something such as the following
+	// /path/to/folder/XXXX123.YYY where X is character (but the last one is not a number)
+	// and Y is the extension. "/path/to/folder/XXXX" is the base file path, YYY is the
+	// extension, and the number of digits in between is assumed to be constant for every
+	// file in the sequence
+	
+	size_t stringLength = filePath.length();
+	size_t extensionStartIndex = filePath.rfind('.');
+	size_t lengthOfExtension;
+	if (extensionStartIndex == std::string::npos) {
+		// no extension. Maybe this is OK but it probably is an error.
+		// pretend that everything is fine.
+		extension.clear();
+	} else {
+		extension = filePath.substr(extensionStartIndex);
+	}
+	lengthOfExtension = extension.length();
+	
+	// now determine how many digits there are that indicate the position of each file in the
+	// frame sequence. Assume that all digits that precede the extension are part of this index.
+	int nIndexDigits = 0;
+	for (int i = extensionStartIndex - 1; i >= 0; --i) {
+		if (isdigit(filePath[i]))
+			nIndexDigits += 1;
+	}
+	if (nIndexDigits == 0) {
+		std::string error("Unable to determine the numbering format for the multi-tiff file at \"");
+		error += filePath;
+		error += "\"";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	if (nIndexDigits > 9) {	// arbitrary limit
+		std::string error("The numeric index of the images at \"");
+		error += filePath;
+		error += "\" appears to contain too many digits to be realistic";
+		throw ERROR_READING_FILE_DATA(error);
+	}
+	
+	nDigitsInNumber = nIndexDigits;
+	
+	// everything coming before the index digits is the base file path
+	this->baseFilePath = filePath.substr(0, stringLength - lengthOfExtension - nDigitsInNumber);
+	
+	// now try to figure out how many files there are in this data set. simply iterate over all possible indices,
+	// testing which files exist.
+	int largestIndex = 1;
+	for (int i = 0; i < nIndexDigits; ++i)
+		largestIndex *= 10;
+	largestIndex -= 1;
+	boost::scoped_array<char> imageIndexStr(new char[nDigitsInNumber + 1]);
+	std::string thisFilePath;
+	int firstIndex = -1, lastIndex = -1;
+	for (int i = 0; i <= largestIndex; ++i) {
+		char formatString[10];
+		sprintf(formatString, "%%%dd", nDigitsInNumber);
+		sprintf(imageIndexStr.get(), formatString, i);
+		thisFilePath = baseFilePath;
+		thisFilePath += std::string(imageIndexStr.get());
+		thisFilePath += extension;
+		
+		try {
+			ImageLoaderTIFF imageLoaderTIFF(thisFilePath);
+			
+			// get out the image metadata while we're at it
+			this->xSize = imageLoaderTIFF.getXSize();
+			this->ySize = imageLoaderTIFF.getYSize();
+			this->storage_type = imageLoaderTIFF.getStorageType();
+		}
+		catch (CANNOT_OPEN_FILE e) {
+			// file does not exist
+			// if we previously found one or more valid files then we're probably finished.
+			// if we haven't found any valid files yet then keep on looking.
+			if (firstIndex == -1) {
+				continue;
+			} else {
+				lastIndex = i - 1;
+				break;
+			}
+		}
+		catch (std::runtime_error e) {
+			std::string error;
+			error = "One or more of the files do not seem to be valid TIFF files. I tried the file at \"";
+			error += thisFilePath;
+			error += "\"";
+			throw std::runtime_error(error);
+		}
+	}
+	
+	if (firstIndex == -1) {
+		// no images found
+		std::string error = "Unable to find valid TIFF files using the base file path \"";
+		error += baseFilePath;
+		error += "\"";
+		throw std::runtime_error(error);
+	}
+	
+	this->firstImageIndex = firstIndex;
+	this->nImages = lastIndex - firstIndex + 1;
+	
+	this->checkForReasonableValues();
+}
+
+ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	
+	if (this->nextImageToRead >= this->nImages)
+		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+	
+	int imageIndexOnDisk = this->firstImageIndex + this->nextImageToRead;
+	
+	boost::scoped_array<char> imageIndexStr(new char[this->nDigitsInNumber + 1]);
+	char formatString[10];
+	sprintf(formatString, "%%%dd", nDigitsInNumber);
+	sprintf(imageIndexStr.get(), formatString, imageIndexOnDisk);
+	
+	std::string filePath = this->baseFilePath;
+	filePath += imageIndexStr.get();
+	filePath += this->extension;
+	
+	ImageLoaderTIFF imageLoaderTIFF(filePath);
+	size_t dummy;
+	ImagePtr image = imageLoaderTIFF.readNextImage(dummy);
+	
+	indexOfImageThatWasRead = this->nextImageToRead;
+	this->nextImageToRead += 1;
+	
+	return image;
 }
 
 #ifdef WITH_IGOR

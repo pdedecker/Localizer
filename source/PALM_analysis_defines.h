@@ -45,7 +45,7 @@ typedef boost::shared_ptr<Image> ImagePtr;
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors
 const int kMaxImageDimension = 10000;
-const int kMaxNFrames = 1000000;
+const int kMaxNFrames = 10000000;
 
 const int STORAGE_TYPE_INT4 = 0;
 const int STORAGE_TYPE_UINT4 = 1;
@@ -86,6 +86,8 @@ const int CAMERA_TYPE_TIFF = 3;
 const int CAMERA_TYPE_PDE = 4;	// a custom, very simple image format. Not currently used anywhere
 const int CAMERA_TYPE_ZEISS = 5;	// Zeiss .lsm files. Not working currently
 const int CAMERA_TYPE_IGOR_WAVE = 6;
+const int CAMERA_TYPE_MATLAB_MATRIX = 7;
+const int CAMERA_TYPE_MULTIFILE_TIFF = 8;
 
 const int PREPROCESSOR_NONE = 0;
 const int PREPROCESSOR_3X3MEDIAN = 1;

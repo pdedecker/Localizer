@@ -188,13 +188,13 @@ public:
 	 * for the caller to know which image was returned. This is returned by reference
 	 * in the argument. The non-reentrant version below does not require this argument.
 	 */
-	virtual ImagePtr readNextImage(size_t &index) = 0;
+	virtual ImagePtr readNextImage(size_t &indexOfImageThatWasRead) = 0;
 	ImagePtr readNextImage();
 	/*
 	 * Get the next image in the file and loop to the begin after the last image.
 	 * Not reentrant.
 	 */
-	ImagePtr readNextImageAndLoop(size_t &index);
+	ImagePtr readNextImageAndLoop(size_t &indexOfImageThatWasRead);
 	/*
 	 * Spool the file so the specified frame will be the one read by readNextImage
 	 */
@@ -205,8 +205,6 @@ public:
 	void rewind() {this->spoolTo(0);}
 	
 protected:
-	virtual void parse_header_information() = 0;
-	
 	/**
 	 * Check if the values parsed from the header (xSize etc)
 	 * are reasonable. If not throw an std::runtime error
@@ -234,7 +232,7 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information();
@@ -245,7 +243,7 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information();
@@ -281,7 +279,7 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information();
@@ -295,7 +293,7 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information();
@@ -306,7 +304,7 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 	/*
 	 * The implementation of spoolTo in the base ImageLoader class
@@ -323,13 +321,28 @@ protected:
 	size_t currentDirectoryIndex;
 };
 
+class ImageLoaderMultiFileTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
+public:
+	ImageLoaderMultiFileTIFF(std::string rhs);
+	~ImageLoaderMultiFileTIFF() {;}
+	
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	
+protected:
+	std::string baseFilePath;
+	std::string extension;	// includes the '.'
+	int nDigitsInNumber;
+	
+	int firstImageIndex;
+};
+
 #ifdef WITH_IGOR
 class ImageLoaderIgor : public ImageLoader {
 public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information() {;}
@@ -344,7 +357,7 @@ public:
 	ImageLoaderMatlab(mxArray* matlabArray);
 	~ImageLoaderMatlab() {;}
 	
-	ImagePtr readNextImage(size_t &index);
+	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
 protected:
 	void parse_header_information() {;}

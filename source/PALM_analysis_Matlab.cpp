@@ -122,7 +122,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	if (thresholdParam <= 0.0)
 		mexErrMsgTxt("Expected positive non-zero number for the segmentation parameter");
 
-	// index 4 - must be a string, currently only '2DGauss' is allowed
+	// index 4 - must be a string
 	array = prhs[4];
 	if (mxGetClassID(array) != mxCHAR_CLASS)
 		mexErrMsgTxt("5th argument must be a string (the localization algorithm)");

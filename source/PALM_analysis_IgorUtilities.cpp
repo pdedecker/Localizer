@@ -106,30 +106,33 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
     }
 
     switch (estimatedCameraType) {
-    case CAMERA_TYPE_WINSPEC:	// spe files
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
-        break;
-    case CAMERA_TYPE_ANDOR:
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
-        break;
-    case CAMERA_TYPE_HAMAMATSU:
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
-        break;
-    case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
-        break;
-    case CAMERA_TYPE_PDE:
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
-        break;
-    case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
-        break;
-    case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
-        image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
-        break;
-    default:
-        throw std::runtime_error("Unsupported CCD file type (/Y flag)");
-        break;
+		case CAMERA_TYPE_WINSPEC:	// spe files
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
+			break;
+		case CAMERA_TYPE_ANDOR:
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
+			break;
+		case CAMERA_TYPE_HAMAMATSU:
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
+			break;
+		case CAMERA_TYPE_TIFF:
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			break;
+		case CAMERA_TYPE_PDE:
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
+			break;
+		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			break;
+		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
+			break;
+		case CAMERA_TYPE_MULTIFILE_TIFF:
+			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderMultiFileTIFF(convertedFilePath));
+			break;
+		default:
+			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
+			break;
     }
 
     return image_loader;
