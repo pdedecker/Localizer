@@ -80,7 +80,7 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 					 2. the estimated standard deviation of the PSF (in pixels)\n\
 					 3. the segmentation algorithm (\"glrt\" or \"smoothsigma\"\n\
 					 4. the PFA if GLRT, otherwise smoothsigma factor\n\
-					 5. the localization algorithm. '2DGauss', '2DGaussFixedWidth', 'IterativeMultiplication', 'Centroid', 'Ellipsoidal2DGauss', or 'MLEwG'\n\
+					 5. the localization algorithm. '2DGauss', '2DGaussFixedWidth', 'IterativeMultiplication', 'Centroid', 'Ellipsoidal2DGauss', 'Ellipsoidal2DGaussAstigmatism', or 'MLEwG'\n\
 					 6. string containing the path to the file, or a 2D or 3D matrix containing image data\n\
 					 \n\n\
 					 The format of the returned positions depends on the localization algorithm. See localize.m for the details.");
@@ -139,6 +139,8 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		localizationAlgorithm = LOCALIZATION_METHOD_CENTROID;
 	} else if (boost::iequals(localizationStr, "Ellipsoidal2DGauss")) {
 		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL;
+	} else if (boost::iequals(localizationStr, "Ellipsoidal2DGaussAstigmatism")) {
+		localizationAlgorithm = LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM;
 	} else if (boost::iequals(localizationStr, "MLEwG")) {
 		localizationAlgorithm = LOCALIZATION_METHOD_MLEwG;
 	} else {
@@ -192,7 +194,25 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		boost::shared_ptr<FitPositions> positionsFitter;
 		switch (localizationAlgorithm) {
             case LOCALIZATION_METHOD_2DGAUSS:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, 1.0));
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_MULTIPLICATION:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
+                break;
+            case LOCALIZATION_METHOD_CENTROID:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
+                break;
+            case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma));
+                break;
+			case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
+				positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+				break;
+            case LOCALIZATION_METHOD_MLEwG:
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
                 break;
             default:
                 throw std::runtime_error("Unknown localization method");

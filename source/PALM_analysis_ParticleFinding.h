@@ -151,7 +151,7 @@ protected:
  */
 class ParticleVerifier_EllipsoidalGaussian : public ParticleVerifier {
 public:
-	ParticleVerifier_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian(initialPSFWidth_rhs, sigma_rhs)) {}
+	ParticleVerifier_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian_SymmetricPSF(initialPSFWidth_rhs, sigma_rhs)) {}
 	~ParticleVerifier_EllipsoidalGaussian() {;}
 	
 	
@@ -159,7 +159,7 @@ public:
 		verifier.fit_positions(image, positions);
 	}
 protected:
-	FitPositions_EllipsoidalGaussian verifier;
+	FitPositions_EllipsoidalGaussian_SymmetricPSF verifier;
 };
 
 #endif

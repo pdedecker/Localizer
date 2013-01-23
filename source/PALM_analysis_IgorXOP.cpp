@@ -985,8 +985,11 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
                 positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma));
                 break;
+			case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
+				positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+				break;
             case LOCALIZATION_METHOD_MLEwG:
                 positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
                 break;
