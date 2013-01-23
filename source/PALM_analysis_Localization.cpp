@@ -37,10 +37,10 @@
 #include <gsl/gsl_blas.h>
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
-                                                                                             boost::shared_ptr<std::list<Particle> > positions) {
+                                                                                             boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -101,8 +101,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 
 
     // iterate over all the determined positions
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         iterations = 0;
 
         amplitude = (*it).intensity;
@@ -117,7 +117,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -153,33 +153,33 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
         } while ((status == GSL_CONTINUE) && (iterations < 200));
 
         if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the reported positions within the window?
         if ((gsl_vector_get(fit_iterator->x, 2) < x_offset) || (gsl_vector_get(fit_iterator->x, 2) > x_max) || (gsl_vector_get(fit_iterator->x, 3) < y_offset) || (gsl_vector_get(fit_iterator->x, 3) > y_max)) {
             // the reported positions are not within the window, we should reject them
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the fitted coordinates close enough to the initial guess?
         if ((fabs(gsl_vector_get(fit_iterator->x, 2) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 3) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // is the amplitude close enough to the initial value to be trusted?
         if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
             // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
             // the output fit width is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -222,10 +222,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const ImagePtr image,
-                                                                                              boost::shared_ptr<std::list<Particle> > positions) {
+                                                                                              boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -286,8 +286,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 
 
     // iterate over all the determined positions
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         iterations = 0;
 
         amplitude = (*it).intensity;
@@ -302,7 +302,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -338,27 +338,27 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
         } while ((status == GSL_CONTINUE) && (iterations < 200));
 
         if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the reported positions within the window?
         if ((gsl_vector_get(fit_iterator->x, 1) < x_offset) || (gsl_vector_get(fit_iterator->x, 1) > x_max) || (gsl_vector_get(fit_iterator->x, 2) < y_offset) || (gsl_vector_get(fit_iterator->x, 2) > y_max)) {
             // the reported positions are not within the window, we should reject them
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the fitted coordinates close enough to the initial guess?
         if ((fabs(gsl_vector_get(fit_iterator->x, 1) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 2) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // is the fitted amplitude close enough to the initial value to be trusted?
         if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
             // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -400,10 +400,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const ImagePtr image,
-                                                                                               boost::shared_ptr<std::list<Particle> > positions) {
+                                                                                               boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -462,8 +462,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
 
     // iterate over all the determined positions
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         iterations = 0;
 
         amplitude = (*it).intensity;
@@ -479,7 +479,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -517,27 +517,27 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         } while ((status == GSL_CONTINUE) && (iterations < 200));
 
         if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the reported positions within the window?
         if ((gsl_vector_get(fit_iterator->x, 3) < x_offset) || (gsl_vector_get(fit_iterator->x, 3) > x_max) || (gsl_vector_get(fit_iterator->x, 4) < y_offset) || (gsl_vector_get(fit_iterator->x, 4) > y_max)) {
             // the reported positions are not within the window, we should reject them
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the fitted coordinates close enough to the initial guess?
         if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // is the fitted amplitude close enough to the initial value to be trusted?
         if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
             // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -545,7 +545,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         if (((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5))
 			&& ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5))) {
             // the output fit width is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -596,9 +596,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_SymmetricPSF::fit_positions(const ImagePtr image,
-																											boost::shared_ptr<std::list<Particle> > positions) {
+																											boost::shared_ptr<std::list<Particle> > particles) {
 	// first fit all spots using restricted conditions on the spot shape, then reject the invalid ones
-	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> rawPositions(boost::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian>(ellipsoidalFitter.fit_positions(image, positions)));
+	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> rawPositions(boost::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian>(ellipsoidalFitter.fit_positions(image, particles)));
 	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> acceptedPositions(new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
 	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizedPosition(new LocalizedPosition_Ellipsoidal2DGauss());
 	int nPositions = rawPositions->getNPositions();
@@ -616,10 +616,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -671,8 +671,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
     }
 
     // iterate over all the determined positions
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         iterations = 0;
 
         integral = (*it).intensity * 2.0 * M_PI * this->initialPSFWidth * this->initialPSFWidth;;
@@ -687,7 +687,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -725,34 +725,34 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
         } while ((status == GSL_CONTINUE) && (iterations < 200));
 
         if (gsl_vector_get(fit_iterator->x, 4) <= 0) {	// reject fits that have negative amplitudes
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the reported positions within the window?
         if ((gsl_vector_get(fit_iterator->x, 0) < x_offset) || (gsl_vector_get(fit_iterator->x, 0) > x_max) || (gsl_vector_get(fit_iterator->x, 1) < y_offset) || (gsl_vector_get(fit_iterator->x, 1) > y_max)) {
             // the reported positions are not within the window, we should reject them
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // are the fitted coordinates close enough to the initial guess?
         if ((fabs(gsl_vector_get(fit_iterator->x, 0) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 1) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         // is the amplitude close enough to the initial value to be trusted?
         if ((gsl_vector_get(fit_iterator->x, 4) < integral / 2.0) || (gsl_vector_get(fit_iterator->x, 4) > integral * 1.5)) {
             // the output fit integral is more than a factor of two different from the initial value, drop this point
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
         if ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5)) {
             // the output fit width is more than a factor of two different from the initial value, drop this point
             dummy = gsl_vector_get(fit_iterator->x, 2);
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -777,10 +777,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const ImagePtr image,
-                                                                                         boost::shared_ptr<std::list<Particle> > positions) {
+                                                                                         boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -812,8 +812,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
     image_subset = ImagePtr(new Image((int)size_of_subset, (int)size_of_subset));
     image_subset_mask = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         amplitude = (*it).intensity;
         x0_initial = (*it).x;
         y0_initial = (*it).y;
@@ -826,7 +826,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
         y_max = floor(y0_initial + (double)cutoff_radius);
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
 
@@ -925,10 +925,10 @@ int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, 
 
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const ImagePtr image,
-                                                                                   boost::shared_ptr<std::list<Particle> > positions) {
+                                                                                   boost::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
-    if (positions->size() == 0) {
+    if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
@@ -946,8 +946,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
     boost::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
     boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
 
-    std::list<Particle>::iterator it = positions->begin();
-    while (it != positions->end()) {
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
         x0_initial = (*it).x;
         y0_initial = (*it).y;
         current_x = 0;
@@ -960,7 +960,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
         y_max = floor(y0_initial + (double)cutoff_radius);
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// the point is too close to the edge
-            it = positions->erase(it);
+            it = particles->erase(it);
             continue;
         }
         
