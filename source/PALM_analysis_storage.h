@@ -430,6 +430,9 @@ public:
 	
 	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_ELLIPSOIDAL2DGAUSS;}
 	
+	// added for use in FitPositions_EllipsoidalGaussian_SymmetricPSF
+	LocalizedPosition_Ellipsoidal2DGauss getLocalizedPositionAtIndex(int i) {return positionsVector.at(i);}
+	
 protected:
 	std::vector<LocalizedPosition_Ellipsoidal2DGauss> positionsVector;
 };

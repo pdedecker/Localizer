@@ -105,6 +105,21 @@ protected:
     double initialPSFWidth;
 };
 
+class FitPositions_EllipsoidalGaussian_SymmetricPSF : public FitPositions {
+public:
+    FitPositions_EllipsoidalGaussian_SymmetricPSF(double initialPSFWidth_rhs, double sigma_rhs) : 
+		ellipsoidalFitter(FitPositions_EllipsoidalGaussian(initialPSFWidth_rhs, sigma_rhs)),
+		initialPSFWidth(initialPSFWidth_rhs)
+		{}
+    ~FitPositions_EllipsoidalGaussian_SymmetricPSF() {;}
+	
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+	
+protected:
+    FitPositions_EllipsoidalGaussian ellipsoidalFitter;
+    double initialPSFWidth;
+};
+
 /**
  * @brief fits the positions using a Poissonian-based MLE estimation, as described in 10.1038/NMETH.1447
  */

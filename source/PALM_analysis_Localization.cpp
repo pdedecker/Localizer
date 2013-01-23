@@ -541,14 +541,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
             continue;
         }
 
-        // are the standard deviations in the x and y direction close enough?
-        if ((0.75 * gsl_vector_get(fit_iterator->x, 1) > gsl_vector_get(fit_iterator->x, 2)) || (1.25 * gsl_vector_get(fit_iterator->x, 1) < gsl_vector_get(fit_iterator->x, 2))) {
-            // the standard deviations in x and y differ by more than 25%, drop this point
-            it = positions->erase(it);
-            continue;
-        }
-
-        if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
+		// is at least one of the fitted widths close enough to the initial value to be realistic?
+        if (((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5))
+			&& ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5))) {
             // the output fit width is more than a factor of two different from the initial value, drop this point
             it = positions->erase(it);
             continue;
@@ -598,6 +593,27 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
     return fitted_positions;
 
+}
+
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_SymmetricPSF::fit_positions(const ImagePtr image,
+																											boost::shared_ptr<std::list<Particle> > positions) {
+	// first fit all spots using restricted conditions on the spot shape, then reject the invalid ones
+	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> rawPositions(boost::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian>(ellipsoidalFitter.fit_positions(image, positions)));
+	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> acceptedPositions(new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizedPosition(new LocalizedPosition_Ellipsoidal2DGauss());
+	int nPositions = rawPositions->getNPositions();
+	for (int i = 0; i < nPositions; ++i) {
+		*localizedPosition = rawPositions->getLocalizedPositionAtIndex(i);
+		// are the standard deviations in the x and y direction close enough?
+		if ((0.75 * localizedPosition->xWidth > localizedPosition->yWidth) || (1.25 * localizedPosition->xWidth < localizedPosition->yWidth)) {
+			continue;
+		}
+		
+		acceptedPositions->addPosition(localizedPosition);
+	}
+	
+    return acceptedPositions;
+	
 }
 
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
