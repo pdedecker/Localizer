@@ -1130,7 +1130,6 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
 
     size_t xSize = imageSubset->rows();
     size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
     double xOffset = fitDataLocal->xOffset;
     double yOffset = fitDataLocal->yOffset;
     double sigma = fitDataLocal->sigma;
@@ -1147,19 +1146,25 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
     if (r == 0) {
         return GSL_FAILURE;
     }
-
+	
+	double sqStdDev = 2.0 * r * r;
+	double cubeStdDev = sqStdDev * SQRT2 * r;
+	dfdoffset = 1/sigma;
+	double xDiff, yDiff;
+	size_t arrayOffset = 0;
     for (size_t j = 0; j < ySize; ++j) {
         for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
-
-            exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
+			
+			xDiff = x0 - x;
+			yDiff = y0 - y;
+            exp_factor = exp(- (xDiff * xDiff + yDiff * yDiff) / sqStdDev);
 
             dfdA = exp_factor / sigma;
-            dfdr = (2 * (y - y0) * (y - y0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r) + 2 * (x - x0) * (x - x0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r)) * exp_factor * amplitude / sigma;
-            dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdoffset = 1/sigma;
+            dfdr = ((2.0 * yDiff * yDiff + 2.0 * xDiff * xDiff) / cubeStdDev) * exp_factor * amplitude / sigma;
+            dfdx0 = (2.0 * (x - x0) * exp_factor * amplitude) / (sqStdDev * sigma);
+            dfdy0 = (2.0 * (y - y0) * exp_factor * amplitude) / (sqStdDev * sigma);
 
             gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
             gsl_matrix_set(jacobian, arrayOffset, 1, dfdr);
