@@ -1003,7 +1003,6 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 
     size_t xSize = imageSubset->rows();
     size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
     double xOffset = fitDataLocal->xOffset;
     double yOffset = fitDataLocal->yOffset;
     double sigma = fitDataLocal->sigma;
@@ -1014,22 +1013,30 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
     double y0 = gsl_vector_get(params, 3);
     double offset = gsl_vector_get(params, 4);
 
-    double x,y, function_value, square_deviation;
+    double x,y;
 
     if (r == 0) {
         return GSL_FAILURE;
     }
-
-    for (size_t j = 0; j < ySize; ++j) {
-        for (size_t i = 0; i < xSize; ++i) {
-            x = xOffset + (double)i;
+	
+	double *outputData = deviations->data;
+	for (size_t j = 0; j < ySize; ++j) {
+		for (size_t i = 0; i < xSize; ++i) {
+			x = xOffset + (double)i;
             y = yOffset + (double)j;
-            function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
-            square_deviation = (function_value - (*imageSubset)(i, j)) / sigma;
-            gsl_vector_set(deviations, arrayOffset, square_deviation);
-            ++arrayOffset;
-        }
-    }
+			*outputData = -1.0 * ((x0 - x) * (x0 - x) + (y0 - y) * (y0 - y));
+			outputData += 1;
+		}
+	}
+	outputData = deviations->data;
+	double stdDevSq = 2 * r * r;
+	Eigen::Map<Eigen::ArrayXXd> mappedArray(deviations->data, xSize, ySize);
+	mappedArray /= stdDevSq;
+	mappedArray = mappedArray.exp();
+	mappedArray *= amplitude;
+	mappedArray += offset;
+	mappedArray -= imageSubset->array();
+	mappedArray /= sigma;
     return GSL_SUCCESS;
 }
 
