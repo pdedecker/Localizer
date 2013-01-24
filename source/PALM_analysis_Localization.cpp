@@ -535,16 +535,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         }
 
         // is the fitted amplitude close enough to the initial value to be trusted?
-        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
-            // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = particles->erase(it);
-            continue;
-        }
-
-		// is at least one of the fitted widths close enough to the initial value to be realistic?
-        if (((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5))
-			&& ((gsl_vector_get(fit_iterator->x, 2) < initialPSFWidth * 0.5) || (gsl_vector_get(fit_iterator->x, 2) > initialPSFWidth * 1.5))) {
-            // the output fit width is more than a factor of two different from the initial value, drop this point
+        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
             it = particles->erase(it);
             continue;
         }
@@ -608,6 +599,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_
 		if ((0.75 * localizedPosition->xWidth > localizedPosition->yWidth) || (1.25 * localizedPosition->xWidth < localizedPosition->yWidth)) {
 			continue;
 		}
+		
+		// is at least one of the fitted widths close enough to the initial value to be realistic?
+        if (((localizedPosition->xWidth < initialPSFWidth * 0.5) || (localizedPosition->xWidth > initialPSFWidth * 1.5))
+			&& ((localizedPosition->yWidth < initialPSFWidth * 0.5) || (localizedPosition->yWidth > initialPSFWidth * 1.5))) {
+            continue;
+        }
 		
 		acceptedPositions->addPosition(localizedPosition);
 	}
