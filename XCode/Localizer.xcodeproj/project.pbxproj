@@ -623,7 +623,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				LLVM_LTO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CPLUSPLUSFLAGS = "";
+				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_LDFLAGS = (
 					"\"../lib/mac/libtiff.a\"",
 					"\"../lib/mac/libboost_thread-mt.a\"",
@@ -702,7 +702,7 @@
 				INFOPLIST_FILE = ../resources/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_CPLUSPLUSFLAGS = "";
+				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					../../XOPSupport/XCode4/libXOPSupport.a,

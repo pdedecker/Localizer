@@ -1029,68 +1029,49 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 		}
 	}
 	outputData = deviations->data;
-	double stdDevSq = 2 * r * r;
+	double stdDevSq = 2.0 * r * r;
 	Eigen::Map<Eigen::ArrayXXd> mappedArray(deviations->data, xSize, ySize);
-	mappedArray /= stdDevSq;
-	mappedArray = mappedArray.exp();
-	mappedArray *= amplitude;
-	mappedArray += offset;
-	mappedArray -= imageSubset->array();
-	mappedArray /= sigma;
+	mappedArray = ((((mappedArray / stdDevSq).exp() * amplitude) + offset) - imageSubset->array()) / sigma;
+
     return GSL_SUCCESS;
 }
 
 int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
     // params contains the current values of the parameters - amplitude, width, etc.
     // fitData is an object that contains the experimental data
-
-
-    measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-    ImagePtr imageSubset = fitDataLocal->imageSubset;
-
-    size_t xSize = imageSubset->rows();
-    size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
-    double xOffset = fitDataLocal->xOffset;
-    double yOffset = fitDataLocal->yOffset;
-    double sigma = fitDataLocal->sigma;
+	measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
     double r = fitDataLocal->width;
 
     double amplitude = gsl_vector_get(params, 0);
     double x0 = gsl_vector_get(params, 1);
     double y0 = gsl_vector_get(params, 2);
     double offset = gsl_vector_get(params, 3);
-
-    double x,y, function_value, square_deviation;
-
-    if (r == 0) {
-        return GSL_FAILURE;
-    }
-
-    for (size_t j = 0; j < ySize; ++j) {
-        for (size_t i = 0; i < xSize; ++i) {
-            x = xOffset + (double)i;
-            y = yOffset + (double)j;
-            function_value = offset + amplitude * exp(- (((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) + ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r))));
-            square_deviation = (function_value - (*imageSubset)(i, j)) / sigma;
-            gsl_vector_set(deviations, arrayOffset, square_deviation);
-            ++arrayOffset;
-        }
-    }
+	
+	gsl_vector* paramsIncludingWidth = gsl_vector_alloc(5);
+	if (paramsIncludingWidth == NULL)
+		return GSL_FAILURE;
+	gsl_vector_set(paramsIncludingWidth, 0, amplitude);
+	gsl_vector_set(paramsIncludingWidth, 1, r);
+	gsl_vector_set(paramsIncludingWidth, 2, x0);
+	gsl_vector_set(paramsIncludingWidth, 3, y0);
+	gsl_vector_set(paramsIncludingWidth, 4, offset);
+	
+	int result = FitFunction_SymmetricGaussian(paramsIncludingWidth, fitData_rhs, deviations);
+	gsl_vector_free(paramsIncludingWidth);
+	if (result != 0)
+		return result;
+    
     return GSL_SUCCESS;
 }
 
 int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
     // params contains the current values of the parameters - amplitude, width, etc.
     // fitData is an object that contains the experimental data
-
-
     measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
     ImagePtr imageSubset = fitDataLocal->imageSubset;
 
     size_t xSize = imageSubset->rows();
     size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
     double xOffset = fitDataLocal->xOffset;
     double yOffset = fitDataLocal->yOffset;
     double sigma = fitDataLocal->sigma;
@@ -1107,20 +1088,29 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
         return GSL_FAILURE;
     }
 
-    double x,y, function_value, square_deviation;
-
-    for (size_t j = 0; j < ySize; ++j) {
+    double x,y;
+	double xDiff, yDiff;
+	double constantCorrTerm = -1.0 / (2.0 * (1 - corr * corr));
+	double sqSigmaX = sigmaX * sigmaX;
+	double sqSigmaY = sigmaY * sigmaY;
+	double *outputData = deviations->data;
+	
+	for (size_t j = 0; j < ySize; ++j) {
         for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
-            function_value = amplitude * exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX
-                                                                                    + (y - y0) * (y - y0) / sigmaY / sigmaY
-                                                                                    - 2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY)) + offset;
-            square_deviation = (function_value - (*imageSubset)(i, j)) / sigma;
-            gsl_vector_set(deviations, arrayOffset, square_deviation);
-            ++arrayOffset;
-        }
-    }
+			
+			xDiff = x - x0;
+			yDiff = y - y0;
+			
+			*outputData = constantCorrTerm * (xDiff * xDiff / sqSigmaX + yDiff * yDiff / sqSigmaY - 2.0 * corr * xDiff * yDiff / sigmaX / sigmaY);
+			outputData += 1;
+		}
+	}
+	
+	Eigen::Map<Eigen::ArrayXXd> mappedArray(deviations->data, xSize, ySize);
+	mappedArray = ((mappedArray.exp() * amplitude + offset) - imageSubset->array()) / sigma;
+
     return GSL_SUCCESS;
 }
 
@@ -1181,47 +1171,44 @@ int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_
 
 int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
     measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-    ImagePtr imageSubset = fitDataLocal->imageSubset;
-
-    size_t xSize = imageSubset->rows();
-    size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
-    double xOffset = fitDataLocal->xOffset;
-    double yOffset = fitDataLocal->yOffset;
-    double sigma = fitDataLocal->sigma;
     double r = fitDataLocal->width;
-
+	
     double amplitude = gsl_vector_get(params, 0);
     double x0 = gsl_vector_get(params, 1);
     double y0 = gsl_vector_get(params, 2);
-
-    double x,y, exp_factor;
-    double dfdA, dfdx0, dfdy0,dfdoffset;
-
-    if (r == 0) {
-        return GSL_FAILURE;
-    }
-
-    for (size_t j = 0; j < ySize; ++j) {
-        for (size_t i = 0; i < xSize; ++i) {
-            x = xOffset + (double)i;
-            y = yOffset + (double)j;
-
-            exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
-
-            dfdA = exp_factor / sigma;
-            dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdoffset = 1/sigma;
-
-            gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
-            gsl_matrix_set(jacobian, arrayOffset, 1, dfdx0);
-            gsl_matrix_set(jacobian, arrayOffset, 2, dfdy0);
-            gsl_matrix_set(jacobian, arrayOffset, 3, dfdoffset);
-            ++arrayOffset;
-        }
-    }
-
+    double offset = gsl_vector_get(params, 3);
+	
+	gsl_vector* paramsIncludingWidth = gsl_vector_alloc(5);
+	if (paramsIncludingWidth == NULL)
+		return GSL_FAILURE;
+	gsl_vector_set(paramsIncludingWidth, 0, amplitude);
+	gsl_vector_set(paramsIncludingWidth, 1, r);
+	gsl_vector_set(paramsIncludingWidth, 2, x0);
+	gsl_vector_set(paramsIncludingWidth, 3, y0);
+	gsl_vector_set(paramsIncludingWidth, 4, offset);
+	
+	gsl_matrix* jacobianIncludingWidth = gsl_matrix_alloc(jacobian->size1, 5);
+	if (jacobianIncludingWidth == NULL) {
+		gsl_vector_free(paramsIncludingWidth);
+		return GSL_FAILURE;
+	}
+	
+	int result = Jacobian_SymmetricGaussian(paramsIncludingWidth, fitData_rhs, jacobianIncludingWidth);
+	gsl_vector_free(paramsIncludingWidth);
+	if (result != 0) {
+		gsl_matrix_free(jacobianIncludingWidth);
+		return result;
+	}
+	
+	for (int i = 0; i < jacobian->size1; ++i) {
+		gsl_matrix_set(jacobian, i, 0, gsl_matrix_get(jacobianIncludingWidth, i, 0));
+		gsl_matrix_set(jacobian, i, 1, gsl_matrix_get(jacobianIncludingWidth, i, 2));
+		gsl_matrix_set(jacobian, i, 2, gsl_matrix_get(jacobianIncludingWidth, i, 3));
+		gsl_matrix_set(jacobian, i, 3, gsl_matrix_get(jacobianIncludingWidth, i, 4));
+	}
+	
+	gsl_matrix_free(jacobianIncludingWidth);
+	
     return GSL_SUCCESS;
 
 }
@@ -1244,34 +1231,44 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
     double y0 = gsl_vector_get(params, 4);
     double corr = gsl_vector_get(params, 5);
 
-    double x,y, exp_factor, denominator;
-    double dfdA, dfdsigmaX, dfdsigmaY, dfdx0, dfdy0, dfdcorr,dfdoffset;
+    double x,y, exp_factor;
+    double dfdA, dfdsigmaX, dfdsigmaY, dfdx0, dfdy0, dfdcorr;
 
     if ((sigmaX == 0) || (sigmaY == 0)) {
         return GSL_FAILURE;
     }
 
-    denominator = 2 * (1 - corr * corr) * sigma;
+    double denominator = 2.0 * (1.0 - corr * corr) * sigma;
+	double dfdoffset = 1.0 / sigma;
+	double xDiff, yDiff, sqXDiff, sqYDiff;
+	double constantCorrTerm = -1.0 / (2.0 * (1.0 - corr * corr));
+	double oneMinusSqCorr = 1.0 - corr * corr;
+	double sqSigmaX = sigmaX * sigmaX;
+	double sqSigmaY = sigmaY * sigmaY;
+	double sigmaXsigmaY = sigmaX * sigmaY;
 
     for (size_t j = 0; j < ySize; ++j) {
         for (size_t i = 0; i < xSize; ++i) {
             x = xOffset + (double)i;
             y = yOffset + (double)j;
+			
+			xDiff = x - x0;
+			yDiff = y - y0;
+			sqXDiff = xDiff * xDiff;
+			sqYDiff = yDiff * yDiff;
 
-            exp_factor = exp(- 1.0 / (2.0 * (1.0 - corr * corr)) * ((x - x0) * (x - x0) / sigmaX / sigmaX
-                                                                    + (y - y0) * (y - y0) / sigmaY / sigmaY
-                                                                    - 2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY));
-
+            exp_factor = exp(constantCorrTerm * (sqXDiff / sqSigmaX
+												 + sqYDiff / sqSigmaY
+												 - 2.0 * corr * xDiff * yDiff / sigmaXsigmaY));
+			
             dfdA = exp_factor / sigma;
-            dfdsigmaX = - amplitude * (2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaX / sigmaY - 2.0 * (x - x0) * (x - x0) / sigmaX / sigmaX / sigmaX) * exp_factor / denominator;
-            dfdsigmaY = - amplitude * (2.0 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY / sigmaY - 2.0 * (y - y0) * (y - y0) / sigmaY / sigmaY / sigmaY) * exp_factor / denominator;
-            dfdx0 = - amplitude * (2 * corr * (y - y0) / sigmaX / sigmaY - 2 * (x - x0) / sigmaX / sigmaX) * exp_factor / denominator;
-            dfdy0 = - amplitude * (2 * corr * (x - x0) / sigmaX / sigmaY - 2 * (y - y0) / sigmaY / sigmaY) * exp_factor / denominator;
-            dfdcorr = amplitude * ((x - x0) * (y - y0) / (1 - corr * corr) / sigmaX / sigmaY - corr * (- 2 * corr * (x - x0) * (y - y0) / sigmaX / sigmaY
-                                                                                                       + (y - y0) * (y - y0) / sigmaY / sigmaY + (x - x0) * (x - x0) / sigmaX / sigmaX) / (1 - corr * corr) / (1 - corr * corr)) * exp_factor / sigma;
-            dfdoffset = 1.0 / sigma;
-
-            gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
+            dfdsigmaX = - amplitude * (2.0 * corr * xDiff * yDiff / sqSigmaX / sigmaY - 2.0 * sqXDiff / (sqSigmaX * sigmaX)) * exp_factor / denominator;
+            dfdsigmaY = - amplitude * (2.0 * corr * xDiff * yDiff / sigmaX / sqSigmaY - 2.0 * sqYDiff / (sqSigmaY * sigmaY)) * exp_factor / denominator;
+            dfdx0 = - amplitude * (2.0 * corr * yDiff / sigmaXsigmaY - 2.0 * xDiff / sqSigmaX) * exp_factor / denominator;
+            dfdy0 = - amplitude * (2.0 * corr * xDiff / sigmaXsigmaY - 2.0 * yDiff / sqSigmaY) * exp_factor / denominator;
+            dfdcorr = amplitude * (xDiff * yDiff / oneMinusSqCorr / sigmaXsigmaY - corr * (- 2.0 * corr * xDiff * yDiff + sqYDiff + sqXDiff) / sigmaXsigmaY / oneMinusSqCorr / oneMinusSqCorr) * exp_factor / sigma;
+			
+			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
             gsl_matrix_set(jacobian, arrayOffset, 1, dfdsigmaX);
             gsl_matrix_set(jacobian, arrayOffset, 2, dfdsigmaY);
             gsl_matrix_set(jacobian, arrayOffset, 3, dfdx0);
@@ -1286,57 +1283,15 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 
 }
 
-int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *model_values, gsl_matrix *jacobian) {
-    measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
-    ImagePtr imageSubset = fitDataLocal->imageSubset;
-
-    size_t xSize = imageSubset->rows();
-    size_t ySize = imageSubset->cols();
-    size_t arrayOffset = 0;
-    double xOffset = fitDataLocal->xOffset;
-    double yOffset = fitDataLocal->yOffset;
-    double sigma = fitDataLocal->sigma;
-
-    double amplitude = gsl_vector_get(params, 0);
-    double r = gsl_vector_get(params, 1);
-    double x0 = gsl_vector_get(params, 2);
-    double y0 = gsl_vector_get(params, 3);
-    double offset = gsl_vector_get(params, 4);
-
-    double x,y, function_value, square_deviation, exp_factor;
-    double dfdA, dfdr, dfdx0, dfdy0, dfdoffset;
-
-    if (r == 0) {
-        return GSL_FAILURE;
-    }
-
-    for (size_t j = 0; j < ySize; ++j) {
-        for (size_t i = 0; i < xSize; ++i) {
-            x = xOffset + (double)i;
-            y = yOffset + (double)j;
-
-            exp_factor = exp(- ((x0 - x)/ (SQRT2 * r)) * ((x0 - x)/ (SQRT2 * r)) - ((y0 - y) / (SQRT2 * r)) * ((y0 - y) / (SQRT2 * r)));
-
-            function_value = offset + amplitude * exp_factor;
-            square_deviation = (function_value - (*imageSubset)(i, j)) / sigma;
-
-            dfdA = exp_factor / sigma;
-            dfdr = (2 * (y - y0) * (y - y0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r) + 2 * (x - x0) * (x - x0) / (SQRT2 * r) / (SQRT2 * r) / (SQRT2 * r)) * exp_factor * amplitude / sigma;
-            dfdx0 = (2 * (x - x0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdy0 = (2 * (y - y0) * exp_factor * amplitude) / ((SQRT2 * r) * (SQRT2 * r) * sigma);
-            dfdoffset = 1/sigma;
-
-            gsl_vector_set(model_values, arrayOffset, square_deviation);
-
-            gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
-            gsl_matrix_set(jacobian, arrayOffset, 1, dfdr);
-            gsl_matrix_set(jacobian, arrayOffset, 2, dfdx0);
-            gsl_matrix_set(jacobian, arrayOffset, 3, dfdy0);
-            gsl_matrix_set(jacobian, arrayOffset, 4, dfdoffset);
-
-            ++arrayOffset;
-        }
-    }
+int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+    int result;
+    result = FitFunction_SymmetricGaussian(params, measured_intensities_struct, model_values);
+    if (result != GSL_SUCCESS)
+        return result;
+    result = Jacobian_SymmetricGaussian(params, measured_intensities_struct, jacobian);
+    if (result != GSL_SUCCESS)
+        return result;
+	
     return GSL_SUCCESS;
 }
 
