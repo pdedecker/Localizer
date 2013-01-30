@@ -120,6 +120,19 @@ protected:
     double initialPSFWidth;
 };
 
+class FitPositions_EllipsoidalGaussian2 : public FitPositions {
+public:
+    FitPositions_EllipsoidalGaussian2(double initialPSFWidth_rhs, double sigma_rhs) {initialPSFWidth = initialPSFWidth_rhs; sigma = sigma_rhs; cutoff_radius = std::ceil(initialPSFWidth_rhs * 4.0);}
+    ~FitPositions_EllipsoidalGaussian2() {;}
+	
+    boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > particles);
+	
+protected:
+    double sigma;
+    size_t cutoff_radius;
+    double initialPSFWidth;
+};
+
 /**
  * @brief fits the positions using a Poissonian-based MLE estimation, as described in 10.1038/NMETH.1447
  */
@@ -179,15 +192,18 @@ protected:
 int FitFunction_SymmetricGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 int FitFunction_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
+int FitFunction_EllipsoidalGaussian2(const gsl_vector *params, void *measured_intensities, gsl_vector *deviations);
 
 
 int Jacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
+int Jacobian_EllipsoidalGaussian2(const gsl_vector *params, void *measured_intensities, gsl_matrix *jacobian);
 
 int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_FixedWidthGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
+int FitFunctionAndJacobian_EllipsoidalGaussian2(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian);
 
 double MinimizationFunction_MLEwG(const gsl_vector *fittedParams, void *fitData_rhs);
 double CalculateMLEwGVariance(double PSFWidth, double nPhotons, double background);

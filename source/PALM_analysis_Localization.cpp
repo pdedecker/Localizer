@@ -586,6 +586,193 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
 }
 
+boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian2::fit_positions(const ImagePtr image,
+                                                                                               boost::shared_ptr<std::list<Particle> > particles) {
+	
+    // some safety checks
+    if (particles->size() == 0) {
+        // if no positions were found then there is no reason to run the analysis
+        // we need to catch this here and not upstream since then we can return an appropriate
+        // instance of LocalizedPositionsContainer
+        return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+    }
+	
+    size_t size_of_subset = 2 * cutoff_radius + 1;
+    double x_offset, y_offset, x_max, y_max;
+    size_t number_of_intensities = size_of_subset * size_of_subset;
+    size_t xSize = image->rows();
+    size_t ySize = image->cols();
+	
+    double x0_initial, y0_initial, amplitude, background, theta_initial;
+    double chi, degreesOfFreedom, c;
+    long iterations = 0;
+    int status;
+	
+    ImagePtr image_subset;
+    boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+    boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
+	
+    image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
+	
+    // initialize the solver
+    const gsl_multifit_fdfsolver_type *solver;
+    gsl_multifit_fdfsolver *fit_iterator;
+	
+    solver = gsl_multifit_fdfsolver_lmsder;
+    measured_data_Gauss_fits fitData;
+    gsl_multifit_function_fdf f;
+	
+    gsl_vector *fit_parameters = gsl_vector_alloc(7);
+    if (fit_parameters == NULL) {
+        throw std::bad_alloc();
+    }
+	
+    fit_iterator = gsl_multifit_fdfsolver_alloc(solver, number_of_intensities, 7);
+    if (fit_iterator == NULL) {
+        gsl_vector_free(fit_parameters);
+        throw std::bad_alloc();
+    }
+	
+    gsl_matrix *covarianceMatrix = gsl_matrix_alloc(7, 7);
+    if (covarianceMatrix == NULL) {
+        gsl_vector_free(fit_parameters);
+        gsl_multifit_fdfsolver_free(fit_iterator);
+        throw std::bad_alloc();
+    }
+	
+    f.f = &FitFunction_EllipsoidalGaussian2;
+    f.df = &Jacobian_EllipsoidalGaussian2;
+    f.fdf = &FitFunctionAndJacobian_EllipsoidalGaussian2;
+    f.n = number_of_intensities;
+    f.p = 7;
+    f.params = (void *)&fitData;
+	
+	
+    // iterate over all the determined positions
+    std::list<Particle>::iterator it = particles->begin();
+    while (it != particles->end()) {
+        iterations = 0;
+		
+        amplitude = (*it).intensity;
+        x0_initial = (*it).x;
+        y0_initial = (*it).y;
+        theta_initial = 0.0;
+        background = (*it).background;
+		
+        x_offset = floor(x0_initial - (double)cutoff_radius);
+        y_offset = floor(y0_initial - (double)cutoff_radius);
+        x_max = floor(x0_initial + (double)cutoff_radius);
+        y_max = floor(y0_initial + (double)cutoff_radius);
+		
+        if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
+            // we cannot include it
+            it = particles->erase(it);
+            continue;
+        }
+		
+        for (size_t k = y_offset; k <= y_max; k++) {
+            for (size_t j = x_offset; j <= x_max; j++) {
+                (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
+            }
+        }
+		
+        fitData.xOffset = x_offset;
+        fitData.yOffset = y_offset;
+        fitData.imageSubset = image_subset;
+        fitData.sigma = sigma;
+		
+        // provide the initial parameters
+        gsl_vector_set(fit_parameters, 0, amplitude);
+        gsl_vector_set(fit_parameters, 1, this->initialPSFWidth);
+        gsl_vector_set(fit_parameters, 2, this->initialPSFWidth);
+        gsl_vector_set(fit_parameters, 3, x0_initial);
+        gsl_vector_set(fit_parameters, 4, y0_initial);
+        gsl_vector_set(fit_parameters, 5, theta_initial);
+        gsl_vector_set(fit_parameters, 6, background);
+		
+        // set the solver
+        gsl_multifit_fdfsolver_set(fit_iterator, &f, fit_parameters);
+		
+        // run the iterations
+        do {
+            iterations++;
+            status = gsl_multifit_fdfsolver_iterate(fit_iterator);
+            if (status != 0)
+                break;
+			
+            status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
+        } while ((status == GSL_CONTINUE) && (iterations < 200));
+		
+        if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
+            it = particles->erase(it);
+            continue;
+        }
+		
+        // are the reported positions within the window?
+        if ((gsl_vector_get(fit_iterator->x, 3) < x_offset) || (gsl_vector_get(fit_iterator->x, 3) > x_max) || (gsl_vector_get(fit_iterator->x, 4) < y_offset) || (gsl_vector_get(fit_iterator->x, 4) > y_max)) {
+            // the reported positions are not within the window, we should reject them
+            it = particles->erase(it);
+            continue;
+        }
+		
+        // are the fitted coordinates close enough to the initial guess?
+        if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
+            it = particles->erase(it);
+            continue;
+        }
+		
+        // is the fitted amplitude close enough to the initial value to be trusted?
+        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
+            it = particles->erase(it);
+            continue;
+        }
+		
+        // calculate the covariance matrix
+        gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
+        chi = gsl_blas_dnrm2(fit_iterator->f);
+        degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
+        c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
+		
+        // store the fitted parameters
+		
+        localizationResult->xWidth = gsl_vector_get(fit_iterator->x, 1);
+        localizationResult->yWidth = gsl_vector_get(fit_iterator->x, 2);
+        localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 3);
+        localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
+        localizationResult->correlation = gsl_vector_get(fit_iterator->x, 5);
+        localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
+		
+        localizationResult->xWidthDeviation = c * gsl_matrix_get(covarianceMatrix, 1, 1);
+        localizationResult->yWidthDeviation = c * gsl_matrix_get(covarianceMatrix, 2, 2);
+        localizationResult->xPositionDeviation = c * gsl_matrix_get(covarianceMatrix, 3, 3);
+        localizationResult->yPositionDeviation = c * gsl_matrix_get(covarianceMatrix, 4, 4);
+        localizationResult->correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
+        localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
+		
+        localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation
+                                                                                          * localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
+        localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation * localizationResult->correlation)
+		* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
+																		 * c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
+																		 + localizationResult->correlation * localizationResult->correlation * localizationResult->correlationDeviation
+																		 * localizationResult->correlationDeviation / (1 - localizationResult->correlation * localizationResult->correlation)
+																		 / (1 - localizationResult->correlation * localizationResult->correlation) + localizationResult->xWidthDeviation
+																		 * localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
+																		 + localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
+																		 / localizationResult->yWidth);
+		
+        fitted_positions->addPosition(localizationResult);
+        ++it;
+    }
+	
+    gsl_multifit_fdfsolver_free(fit_iterator);
+    gsl_vector_free(fit_parameters);
+    gsl_matrix_free(covarianceMatrix);
+	
+    return fitted_positions;
+	
+}
+
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_SymmetricPSF::fit_positions(const ImagePtr image,
 																											boost::shared_ptr<std::list<Particle> > particles) {
 	// first fit all spots using restricted conditions on the spot shape, then reject the invalid ones
@@ -1114,6 +1301,58 @@ int FitFunction_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs,
     return GSL_SUCCESS;
 }
 
+int FitFunction_EllipsoidalGaussian2(const gsl_vector *params, void *fitData_rhs, gsl_vector *deviations) {
+    // params contains the current values of the parameters - amplitude, width, etc.
+    // fitData is an object that contains the experimental data
+    measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+    ImagePtr imageSubset = fitDataLocal->imageSubset;
+	
+    size_t xSize = imageSubset->rows();
+    size_t ySize = imageSubset->cols();
+    double xOffset = fitDataLocal->xOffset;
+    double yOffset = fitDataLocal->yOffset;
+    double sigma = fitDataLocal->sigma;
+	
+    double amplitude = gsl_vector_get(params, 0);
+    double sigmaX = gsl_vector_get(params, 1);
+    double sigmaY = gsl_vector_get(params, 2);
+    double x0 = gsl_vector_get(params, 3);
+    double y0 = gsl_vector_get(params, 4);
+    double theta = gsl_vector_get(params, 5);
+    double offset = gsl_vector_get(params, 6);
+	
+    if ((sigmaX == 0) || (sigmaY == 0)) {
+        return GSL_FAILURE;
+    }
+	
+    double x,y;
+	double minusTheta = - theta;
+	double xDiff, yDiff;
+	double numerator1, numerator2;
+	double *outputData = deviations->data;
+	
+	for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
+            x = xOffset + (double)i;
+            y = yOffset + (double)j;
+			
+			xDiff = x - x0;
+			yDiff = y - y0;
+			
+			numerator1 = cos(minusTheta) * xDiff - sin(minusTheta) * yDiff;
+			numerator2 = sin(minusTheta) * xDiff + cos(minusTheta) * yDiff;
+			
+			*outputData = -numerator1 * numerator1 / (2.0 * sigmaX * sigmaX) - numerator2 * numerator2 / (2.0 * sigmaY * sigmaY);
+			outputData += 1;
+		}
+	}
+	
+	Eigen::Map<Eigen::ArrayXXd> mappedArray(deviations->data, xSize, ySize);
+	mappedArray = ((mappedArray.exp() * amplitude + offset) - imageSubset->array()) / sigma;
+	
+    return GSL_SUCCESS;
+}
+
 int Jacobian_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
     measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
     ImagePtr imageSubset = fitDataLocal->imageSubset;
@@ -1283,6 +1522,80 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 
 }
 
+template<typename T>
+T square(T val) {
+	return val * val;
+}
+
+int Jacobian_EllipsoidalGaussian2(const gsl_vector *params, void *fitData_rhs, gsl_matrix *jacobian) {
+    measured_data_Gauss_fits *fitDataLocal = (measured_data_Gauss_fits *)fitData_rhs;
+    ImagePtr imageSubset = fitDataLocal->imageSubset;
+	
+    size_t xSize = imageSubset->rows();
+    size_t ySize = imageSubset->cols();
+    size_t arrayOffset = 0;
+    double xOffset = fitDataLocal->xOffset;
+    double yOffset = fitDataLocal->yOffset;
+    double sigma = fitDataLocal->sigma;
+	
+    double amplitude = gsl_vector_get(params, 0);
+    double sigmaX = gsl_vector_get(params, 1);
+    double sigmaY = gsl_vector_get(params, 2);
+    double x0 = gsl_vector_get(params, 3);
+    double y0 = gsl_vector_get(params, 4);
+    double theta = gsl_vector_get(params, 5);
+	
+    double x,y;
+    double dfdA, dfdsigmaX, dfdsigmaY, dfdx0, dfdy0, dfdtheta;
+	
+    if ((sigmaX == 0) || (sigmaY == 0)) {
+        return GSL_FAILURE;
+    }
+	
+	double xDiff, yDiff;
+	double numerator1, numerator2;
+	double expFactor;
+	double minusTheta = -1.0 * theta;
+	double sinTheta = sin(minusTheta);
+	double cosTheta = cos(minusTheta);
+	double dfdoffset = 1.0 / sigma;
+	
+    for (size_t j = 0; j < ySize; ++j) {
+        for (size_t i = 0; i < xSize; ++i) {
+            x = xOffset + (double)i;
+            y = yOffset + (double)j;
+			
+			xDiff = x - x0;
+			yDiff = y - y0;
+			
+			numerator1 = cosTheta * xDiff - sinTheta * yDiff;
+			numerator2 = sinTheta * xDiff + cosTheta * yDiff;
+			
+            expFactor = exp(- (numerator1 * numerator1 / (2.0 * sigmaX * sigmaX) + numerator2 * numerator2 / (2.0 * sigmaY * sigmaY)));
+			
+			dfdA = expFactor / sigma;
+			dfdsigmaX = (numerator1 * numerator1 * amplitude * expFactor / (sigmaX * sigmaX * sigmaX)) / sigma;
+			dfdsigmaY = (numerator2 * numerator2 * amplitude * expFactor / (sigmaY * sigmaY * sigmaY)) / sigma;
+			dfdx0 = amplitude * (sinTheta * numerator2 / square(sigmaY) + cosTheta * numerator1 / square(sigmaX)) * expFactor / sigma;
+			dfdy0 = amplitude * (cosTheta * numerator2 / square(sigmaY) - sinTheta * numerator1 / square(sigmaX)) * expFactor / sigma;
+			dfdtheta = -amplitude * (numerator2 * numerator1 / square(sigmaY) - numerator2 * numerator1 / square(sigmaX)) * expFactor / sigma;
+			
+			
+			gsl_matrix_set(jacobian, arrayOffset, 0, dfdA);
+            gsl_matrix_set(jacobian, arrayOffset, 1, dfdsigmaX);
+            gsl_matrix_set(jacobian, arrayOffset, 2, dfdsigmaY);
+            gsl_matrix_set(jacobian, arrayOffset, 3, dfdx0);
+            gsl_matrix_set(jacobian, arrayOffset, 4, dfdy0);
+            gsl_matrix_set(jacobian, arrayOffset, 5, dfdtheta);
+            gsl_matrix_set(jacobian, arrayOffset, 6, dfdoffset);
+            ++arrayOffset;
+        }
+    }
+	
+    return GSL_SUCCESS;
+	
+}
+
 int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
     int result;
     result = FitFunction_SymmetricGaussian(params, measured_intensities_struct, model_values);
@@ -1316,6 +1629,18 @@ int FitFunctionAndJacobian_EllipsoidalGaussian(const gsl_vector *params, void *m
     if (result != GSL_SUCCESS)
         return result;
 
+    return GSL_SUCCESS;
+}
+
+int FitFunctionAndJacobian_EllipsoidalGaussian2(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
+    int result;
+    result = FitFunction_EllipsoidalGaussian2(params, measured_intensities_struct, model_values);
+    if (result != GSL_SUCCESS)
+        return result;
+    result = Jacobian_EllipsoidalGaussian2(params, measured_intensities_struct, jacobian);
+    if (result != GSL_SUCCESS)
+        return result;
+	
     return GSL_SUCCESS;
 }
 
