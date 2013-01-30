@@ -137,19 +137,19 @@ public:
 	size_t nFramesPresent;	// the number of frames this position was localized in
 	
 	double integral;
-	double xWidth;
-	double yWidth;
+	double stdDev1;
+	double stdDev2;
 	double xPosition;
 	double yPosition;
-	double correlation;
+	double theta;
 	double background;
 	
 	double integralDeviation;
-	double xWidthDeviation;
-	double yWidthDeviation;
+	double stdDev1Deviation;
+	double stdDev2Deviation;
 	double xPositionDeviation;
 	double yPositionDeviation;
-	double correlationDeviation;
+	double thetaDeviation;
 	double backgroundDeviation;
 	
 	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_ELLIPSOIDAL2DGAUSS;}
@@ -395,17 +395,17 @@ public:
 	size_t getNPositions() const {return positionsVector.size();}
 	size_t getFrameNumber(size_t index) const {return positionsVector.at(index).frameNumber;}
 	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
-	double getXWidth(size_t index) const {return positionsVector.at(index).xWidth;}
-	double getYWidth(size_t index) const {return positionsVector.at(index).yWidth;}
-	double getCorrelation(size_t index) const {return positionsVector.at(index).correlation;}
+	double getXWidth(size_t index) const {return positionsVector.at(index).stdDev1;}
+	double getYWidth(size_t index) const {return positionsVector.at(index).stdDev2;}
+	double getRotation(size_t index) const {return positionsVector.at(index).theta;}
 	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	double getBackground(size_t index) const {return positionsVector.at(index).background;}
 	
 	double getIntegralDeviation(size_t index) const {return positionsVector.at(index).integralDeviation;}
-	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).xWidthDeviation;}
-	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).yWidthDeviation;}
-	double getCorrelationDeviation(size_t index) const {return positionsVector.at(index).correlationDeviation;}
+	double getXWidthDeviation(size_t index) const {return positionsVector.at(index).stdDev1Deviation;}
+	double getYWidthDeviation(size_t index) const {return positionsVector.at(index).stdDev2Deviation;}
+	double getCorrelationDeviation(size_t index) const {return positionsVector.at(index).thetaDeviation;}
 	double getXPositionDeviation(size_t index) const {return positionsVector.at(index).xPositionDeviation;}
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).yPositionDeviation;}
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}

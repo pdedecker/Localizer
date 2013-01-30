@@ -497,10 +497,10 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 		singlePosition.integral = value[0];
 		indices[1] = 2;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.xWidth = value[0];
+		singlePosition.stdDev1 = value[0];
 		indices[1] = 3;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.yWidth = value[0];
+		singlePosition.stdDev2 = value[0];
 		indices[1] = 4;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.xPosition = value[0];
@@ -509,7 +509,7 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 		singlePosition.yPosition = value[0];
 		indices[1] = 6;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.correlation = value[0];
+		singlePosition.theta = value[0];
 		indices[1] = 7;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.background = value[0];
@@ -518,10 +518,10 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 		singlePosition.integralDeviation = value[0];
 		indices[1] = 9;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.xWidthDeviation = value[0];
+		singlePosition.stdDev1Deviation = value[0];
 		indices[1] = 10;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.yWidthDeviation = value[0];
+		singlePosition.stdDev2Deviation = value[0];
 		indices[1] = 11;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.xPositionDeviation = value[0];
@@ -530,7 +530,7 @@ LocalizedPositionsContainer_Ellipsoidal2DGaussian::LocalizedPositionsContainer_E
 		singlePosition.yPositionDeviation = value[0];
 		indices[1] = 13;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
-		singlePosition.correlationDeviation = value[0];
+		singlePosition.thetaDeviation = value[0];
 		indices[1] = 14;
 		err = MDGetNumericWavePointValue(positionsWave, indices, value);
 		singlePosition.backgroundDeviation = value[0];
@@ -552,18 +552,18 @@ ImagePtr LocalizedPositionsContainer_Ellipsoidal2DGaussian::getLocalizedPosition
 	for (size_t i = 0; i < nPositions; ++i) {
 		(*matrix)(i, 0) = this->positionsVector.at(i).frameNumber;
 		(*matrix)(i, 1) = this->positionsVector.at(i).integral;
-		(*matrix)(i, 2) = this->positionsVector.at(i).xWidth;
-		(*matrix)(i, 3) = this->positionsVector.at(i).yWidth;
+		(*matrix)(i, 2) = this->positionsVector.at(i).stdDev1;
+		(*matrix)(i, 3) = this->positionsVector.at(i).stdDev2;
 		(*matrix)(i, 4) = this->positionsVector.at(i).xPosition;
 		(*matrix)(i, 5) = this->positionsVector.at(i).yPosition;
-		(*matrix)(i, 6) = this->positionsVector.at(i).correlation;
+		(*matrix)(i, 6) = this->positionsVector.at(i).theta;
 		(*matrix)(i, 7) = this->positionsVector.at(i).background;
 		(*matrix)(i, 8) = this->positionsVector.at(i).integralDeviation;
-		(*matrix)(i, 9) = this->positionsVector.at(i).xWidthDeviation;
-		(*matrix)(i, 10) = this->positionsVector.at(i).yWidthDeviation;
+		(*matrix)(i, 9) = this->positionsVector.at(i).stdDev1Deviation;
+		(*matrix)(i, 10) = this->positionsVector.at(i).stdDev2Deviation;
 		(*matrix)(i, 11) = this->positionsVector.at(i).xPositionDeviation;
 		(*matrix)(i, 12) = this->positionsVector.at(i).yPositionDeviation;
-		(*matrix)(i, 13) = this->positionsVector.at(i).correlationDeviation;
+		(*matrix)(i, 13) = this->positionsVector.at(i).thetaDeviation;
 		(*matrix)(i, 14) = this->positionsVector.at(i).backgroundDeviation;
 		(*matrix)(i, 15) = this->positionsVector.at(i).nFramesPresent;
 	}
@@ -589,18 +589,18 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std
 	outputFile << "DATA FOLLOWS" << "\n";
 	outputFile << "First frame" << "\t";
 	outputFile << "Integrated intensity" << "\t";
-	outputFile << "Fitted PSF standard deviation along x (pixel)" << "\t";
-	outputFile << "Fitted PSF standard deviation along y (pixel)" << "\t";
+	outputFile << "Fitted PSF standard deviation along first principal axis (pixel)" << "\t";
+	outputFile << "Fitted PSF standard deviation along second principal axis (pixel)" << "\t";
 	outputFile << "X position (pixel)" << "\t";
 	outputFile << "Y position (pixel)" << "\t";
-	outputFile << "Correlation between x and y" << "\t";
+	outputFile << "Angular rotation (radians)" << "\t";
 	outputFile << "Background" << "\t";
 	outputFile << "Intensity deviation" << "\t";
-	outputFile << "PSF width deviation along x (pixel)" << "\t";
-	outputFile << "PSF width deviation along y (pixel)" << "\t";
+	outputFile << "PSF width deviation along first principal axis (pixel)" << "\t";
+	outputFile << "PSF width deviation along second principal axis (pixel)" << "\t";
 	outputFile << "X position deviation (pixel)" << "\t";
 	outputFile << "Y position deviation (pixel)" << "\t";
-	outputFile << "Correlation deviation" << "\t";
+	outputFile << "Rotation deviation" << "\t";
 	outputFile << "Background deviation" << "\t";
 	outputFile << "Number of frames where this emitter is present" << "\n";
 	
@@ -608,18 +608,18 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::writePositionsToFile(std
 	for (std::vector<LocalizedPosition_Ellipsoidal2DGauss>::const_iterator it = this->positionsVector.begin(); it != this->positionsVector.end(); ++it) {
 		outputFile << (*it).frameNumber << "\t";
 		outputFile << (*it).integral << "\t";
-		outputFile << (*it).xWidth << "\t";
-		outputFile << (*it).yWidth << "\t";
+		outputFile << (*it).stdDev1 << "\t";
+		outputFile << (*it).stdDev2 << "\t";
 		outputFile << (*it).xPosition << "\t";
 		outputFile << (*it).yPosition << "\t";
-		outputFile << (*it).correlation << "\t";
+		outputFile << (*it).theta << "\t";
 		outputFile << (*it).background << "\t";
 		outputFile << (*it).integralDeviation << "\t";
-		outputFile << (*it).xWidthDeviation << "\t";
-		outputFile << (*it).yWidthDeviation << "\t";
+		outputFile << (*it).stdDev1Deviation << "\t";
+		outputFile << (*it).stdDev2Deviation << "\t";
 		outputFile << (*it).xPositionDeviation << "\t";
 		outputFile << (*it).yPositionDeviation << "\t";
-		outputFile << (*it).correlationDeviation << "\t";
+		outputFile << (*it).thetaDeviation << "\t";
 		outputFile << (*it).backgroundDeviation << "\t";
 		outputFile << (*it).nFramesPresent << "\n";
 		

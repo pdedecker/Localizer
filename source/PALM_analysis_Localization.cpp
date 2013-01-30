@@ -566,33 +566,35 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
         c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 
+		double correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
+		
         // store the fitted parameters
 
-        localizationResult->xWidth = stdDev1;
-        localizationResult->yWidth = stdDev2;
+        localizationResult->stdDev1 = stdDev1;
+        localizationResult->stdDev2 = stdDev2;
         localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 3);
         localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
-        localizationResult->correlation = theta;
+        localizationResult->theta = theta;
         localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
 
-        localizationResult->xWidthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-        localizationResult->yWidthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+        localizationResult->stdDev1Deviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+        localizationResult->stdDev2Deviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
         localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
         localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
-        localizationResult->correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
+        localizationResult->thetaDeviation = 0.0;
         localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
 
         localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation
-                                                                                          * fittedCorrelation) * localizationResult->xWidth * localizationResult->yWidth;
+                                                                                          * fittedCorrelation) * localizationResult->stdDev1 * localizationResult->stdDev2;
         localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation * fittedCorrelation)
-		* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
+		* localizationResult->stdDev1 * localizationResult->stdDev2 * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
                                                                                  * c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
-                                                                                 + fittedCorrelation * fittedCorrelation * localizationResult->correlationDeviation
-                                                                                 * localizationResult->correlationDeviation / (1 - fittedCorrelation * fittedCorrelation)
-                                                                                 / (1 - fittedCorrelation * fittedCorrelation) + localizationResult->xWidthDeviation
-                                                                                 * localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
-                                                                                 + localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
-                                                                                 / localizationResult->yWidth);
+                                                                                 + fittedCorrelation * fittedCorrelation * correlationDeviation
+                                                                                 * correlationDeviation / (1 - fittedCorrelation * fittedCorrelation)
+                                                                                 / (1 - fittedCorrelation * fittedCorrelation) + localizationResult->stdDev1Deviation
+                                                                                 * localizationResult->stdDev1Deviation / localizationResult->stdDev1 / localizationResult->stdDev1
+                                                                                 + localizationResult->stdDev2Deviation * localizationResult->stdDev2Deviation / localizationResult->stdDev2
+                                                                                 / localizationResult->stdDev2);
 
         fitted_positions->addPosition(localizationResult);
         ++it;
@@ -755,20 +757,20 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian2
 		
         // store the fitted parameters
 		
-        localizationResult->xWidth = gsl_vector_get(fit_iterator->x, 1);
-        localizationResult->yWidth = gsl_vector_get(fit_iterator->x, 2);
+        localizationResult->stdDev1 = gsl_vector_get(fit_iterator->x, 1);
+        localizationResult->stdDev2 = gsl_vector_get(fit_iterator->x, 2);
         localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 3);
         localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
-        localizationResult->correlation = gsl_vector_get(fit_iterator->x, 5);
+        localizationResult->theta = gsl_vector_get(fit_iterator->x, 5);
         localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
 		
-        localizationResult->xWidthDeviation = c * gsl_matrix_get(covarianceMatrix, 1, 1);
-        localizationResult->yWidthDeviation = c * gsl_matrix_get(covarianceMatrix, 2, 2);
+        localizationResult->stdDev1Deviation = c * gsl_matrix_get(covarianceMatrix, 1, 1);
+        localizationResult->stdDev2Deviation = c * gsl_matrix_get(covarianceMatrix, 2, 2);
         localizationResult->xPositionDeviation = c * gsl_matrix_get(covarianceMatrix, 3, 3);
         localizationResult->yPositionDeviation = c * gsl_matrix_get(covarianceMatrix, 4, 4);
-        localizationResult->correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
+        localizationResult->thetaDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
         localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
-		
+		/*
         localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation
                                                                                           * localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
         localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation * localizationResult->correlation)
@@ -780,7 +782,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian2
 																		 * localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
 																		 + localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
 																		 / localizationResult->yWidth);
-		
+		*/
         fitted_positions->addPosition(localizationResult);
         ++it;
     }
@@ -802,14 +804,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_
 	int nPositions = rawPositions->getNPositions();
 	for (int i = 0; i < nPositions; ++i) {
 		*localizedPosition = rawPositions->getLocalizedPositionAtIndex(i);
-		// are the standard deviations in the x and y direction close enough?
-		if ((0.75 * localizedPosition->xWidth > localizedPosition->yWidth) || (1.25 * localizedPosition->xWidth < localizedPosition->yWidth)) {
+		// are the standard deviations in both directions close enough?
+		if ((0.75 * localizedPosition->stdDev1 > localizedPosition->stdDev2) || (1.25 * localizedPosition->stdDev1 < localizedPosition->stdDev2)) {
 			continue;
 		}
 		
 		// is at least one of the fitted widths close enough to the initial value to be realistic?
-        if (((localizedPosition->xWidth < initialPSFWidth * 0.5) || (localizedPosition->xWidth > initialPSFWidth * 1.5))
-			&& ((localizedPosition->yWidth < initialPSFWidth * 0.5) || (localizedPosition->yWidth > initialPSFWidth * 1.5))) {
+        if (((localizedPosition->stdDev1 < initialPSFWidth * 0.7) || (localizedPosition->stdDev1 > initialPSFWidth * 1.3))
+			&& ((localizedPosition->stdDev2 < initialPSFWidth * 0.7) || (localizedPosition->stdDev2 > initialPSFWidth * 1.3))) {
             continue;
         }
 		
