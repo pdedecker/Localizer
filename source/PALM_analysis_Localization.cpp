@@ -546,8 +546,10 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		double fittedCorrelation = gsl_vector_get(fit_iterator->x, 5);
 		gaussCovarMatrix << fittedSigmaX * fittedSigmaX, fittedCorrelation * fittedSigmaX * fittedSigmaY, fittedCorrelation * fittedSigmaX * fittedSigmaY, fittedSigmaY * fittedSigmaY;
 		Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eigenSolver(gaussCovarMatrix);
-		if (eigenSolver.info() != Eigen::Success)
+		if (eigenSolver.info() != Eigen::Success) {
+			it = particles->erase(it);
 			continue;
+		}
 		Eigen::Vector2d eigenValues = eigenSolver.eigenvalues();
 		Eigen::Matrix2d eigenVectors = eigenSolver.eigenvectors();
 		double stdDev1 = sqrt(eigenValues[0]);
@@ -558,7 +560,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		} else {
 			theta = atan(eigenVectors(0, 0) / eigenVectors(1, 0));
 		}
-		std::cout << gaussCovarMatrix << std::endl << eigenValues << std::endl << eigenVectors;
+		
+		// is at least one of the calculated standard deviations close enough to the PSF standard deviation?
+		if (! (((stdDev1 >= 0.7 * initialPSFWidth) && (stdDev1 <= 1.3 * initialPSFWidth)) || ((stdDev2 >= 0.7 * initialPSFWidth) && (stdDev2 <= 1.3 * initialPSFWidth)))) {
+			it = particles->erase(it);
+            continue;
+		}
 
         // calculate the covariance matrix
         gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
@@ -584,9 +591,9 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         localizationResult->thetaDeviation = 0.0;
         localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
 
-        localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation
+        localizationResult->integral = 2.0 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation
                                                                                           * fittedCorrelation) * localizationResult->stdDev1 * localizationResult->stdDev2;
-        localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation * fittedCorrelation)
+        localizationResult->integralDeviation = 2.0 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation * fittedCorrelation)
 		* localizationResult->stdDev1 * localizationResult->stdDev2 * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
                                                                                  * c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
                                                                                  + fittedCorrelation * fittedCorrelation * correlationDeviation
