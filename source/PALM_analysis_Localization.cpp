@@ -539,6 +539,26 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
             it = particles->erase(it);
             continue;
         }
+		
+		// calculate the eigenvectors and eigenvalues of the covariance matrix of the 2D Gaussian to get the rotation and principal axes
+		Eigen::Matrix2d gaussCovarMatrix;
+		double fittedSigmaX = gsl_vector_get(fit_iterator->x, 1), fittedSigmaY = gsl_vector_get(fit_iterator->x, 2);
+		double fittedCorrelation = gsl_vector_get(fit_iterator->x, 5);
+		gaussCovarMatrix << fittedSigmaX * fittedSigmaX, fittedCorrelation * fittedSigmaX * fittedSigmaY, fittedCorrelation * fittedSigmaX * fittedSigmaY, fittedSigmaY * fittedSigmaY;
+		Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eigenSolver(gaussCovarMatrix);
+		if (eigenSolver.info() != Eigen::Success)
+			continue;
+		Eigen::Vector2d eigenValues = eigenSolver.eigenvalues();
+		Eigen::Matrix2d eigenVectors = eigenSolver.eigenvectors();
+		double stdDev1 = sqrt(eigenValues[0]);
+		double stdDev2 = sqrt(eigenValues[1]);
+		double theta;
+		if (eigenVectors(1, 0) == 0) {
+			theta = 1.57079632679;	// pi/2
+		} else {
+			theta = atan(eigenVectors(0, 0) / eigenVectors(1, 0));
+		}
+		std::cout << gaussCovarMatrix << std::endl << eigenValues << std::endl << eigenVectors;
 
         // calculate the covariance matrix
         gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
@@ -548,11 +568,11 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
         // store the fitted parameters
 
-        localizationResult->xWidth = gsl_vector_get(fit_iterator->x, 1);
-        localizationResult->yWidth = gsl_vector_get(fit_iterator->x, 2);
+        localizationResult->xWidth = stdDev1;
+        localizationResult->yWidth = stdDev2;
         localizationResult->xPosition = gsl_vector_get(fit_iterator->x, 3);
         localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
-        localizationResult->correlation = gsl_vector_get(fit_iterator->x, 5);
+        localizationResult->correlation = theta;
         localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
 
         localizationResult->xWidthDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
@@ -562,14 +582,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         localizationResult->correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
         localizationResult->backgroundDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 6, 6));
 
-        localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation
-                                                                                          * localizationResult->correlation) * localizationResult->xWidth * localizationResult->yWidth;
-        localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - localizationResult->correlation * localizationResult->correlation)
+        localizationResult->integral = 2 * PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation
+                                                                                          * fittedCorrelation) * localizationResult->xWidth * localizationResult->yWidth;
+        localizationResult->integralDeviation = 2 * M_PI * gsl_vector_get(fit_iterator->x, 0) * sqrt(1 - fittedCorrelation * fittedCorrelation)
 		* localizationResult->xWidth * localizationResult->yWidth * sqrt(c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0))
                                                                                  * c * sqrt(gsl_matrix_get(covarianceMatrix, 0, 0)) / gsl_vector_get(fit_iterator->x, 0) / gsl_vector_get(fit_iterator->x, 0)
-                                                                                 + localizationResult->correlation * localizationResult->correlation * localizationResult->correlationDeviation
-                                                                                 * localizationResult->correlationDeviation / (1 - localizationResult->correlation * localizationResult->correlation)
-                                                                                 / (1 - localizationResult->correlation * localizationResult->correlation) + localizationResult->xWidthDeviation
+                                                                                 + fittedCorrelation * fittedCorrelation * localizationResult->correlationDeviation
+                                                                                 * localizationResult->correlationDeviation / (1 - fittedCorrelation * fittedCorrelation)
+                                                                                 / (1 - fittedCorrelation * fittedCorrelation) + localizationResult->xWidthDeviation
                                                                                  * localizationResult->xWidthDeviation / localizationResult->xWidth / localizationResult->xWidth
                                                                                  + localizationResult->yWidthDeviation * localizationResult->yWidthDeviation / localizationResult->yWidth
                                                                                  / localizationResult->yWidth);
