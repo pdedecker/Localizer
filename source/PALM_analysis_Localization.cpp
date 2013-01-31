@@ -570,7 +570,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         // calculate the covariance matrix
         gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
         chi = gsl_blas_dnrm2(fit_iterator->f);
-        degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 5;
+        degreesOfFreedom = (2 * cutoff_radius - 1) * (2 * cutoff_radius - 1) - 7;
         c = GSL_MAX_DBL(1, chi / sqrt(degreesOfFreedom));
 
 		double correlationDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 5, 5));
