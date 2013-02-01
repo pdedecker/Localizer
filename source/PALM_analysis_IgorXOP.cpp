@@ -958,7 +958,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
                 particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
                 break;
             case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
+                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma)));
                 break;
             case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
                 particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
@@ -1925,7 +1925,7 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
                     particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1)));
                     break;
                 case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1)));
+                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1)));
                     break;
                 case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
                     particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));

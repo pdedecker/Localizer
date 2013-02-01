@@ -151,8 +151,24 @@ protected:
  */
 class ParticleVerifier_EllipsoidalGaussian : public ParticleVerifier {
 public:
-	ParticleVerifier_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian_SymmetricPSF(initialPSFWidth_rhs, sigma_rhs)) {}
+	ParticleVerifier_EllipsoidalGaussian(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian(initialPSFWidth_rhs, sigma_rhs)) {}
 	~ParticleVerifier_EllipsoidalGaussian() {;}
+	
+	
+	void VerifyParticles(ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
+		verifier.fit_positions(image, positions);
+	}
+protected:
+	FitPositions_EllipsoidalGaussian verifier;
+};
+
+/**
+ * Verify the particles by seeing if they pass the fitting of a FitPositions_EllipsoidalGaussian_SymmetricPSF class
+ */
+class ParticleVerifier_EllipsoidalGaussian_SymmetricPSF : public ParticleVerifier {
+public:
+	ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(double initialPSFWidth_rhs, double sigma_rhs) : verifier(FitPositions_EllipsoidalGaussian_SymmetricPSF(initialPSFWidth_rhs, sigma_rhs)) {}
+	~ParticleVerifier_EllipsoidalGaussian_SymmetricPSF() {;}
 	
 	
 	void VerifyParticles(ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {

@@ -177,8 +177,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
             continue;
         }
 
-        if ((gsl_vector_get(fit_iterator->x, 1) < initialPSFWidth / 2.0) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
-            // the output fit width is more than a factor of two different from the initial value, drop this point
+		// is the fitted standard deviation close enough to the expected value?
+        if ((gsl_vector_get(fit_iterator->x, 1) < 0.7 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.3)) {
             it = particles->erase(it);
             continue;
         }
@@ -556,7 +556,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 		double stdDev2 = sqrt(eigenValues[1]);
 		double theta;
 		if (eigenVectors(1, 0) == 0) {
-			theta = 1.57079632679;	// pi/2
+			theta = 0;
 		} else {
 			theta = atan(eigenVectors(0, 0) / eigenVectors(1, 0));
 		}
@@ -583,9 +583,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
         localizationResult->yPosition = gsl_vector_get(fit_iterator->x, 4);
         localizationResult->theta = theta;
         localizationResult->background = gsl_vector_get(fit_iterator->x, 6);
-
-        localizationResult->stdDev1Deviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
-        localizationResult->stdDev2Deviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		
+		double xStdDevDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 1, 1));
+		double yStdDevDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 2, 2));
+		
+        localizationResult->stdDev1Deviation = xStdDevDeviation * cos(theta) + yStdDevDeviation * sin(theta);
+        localizationResult->stdDev2Deviation = xStdDevDeviation * sin(theta) + yStdDevDeviation * cos(theta);
         localizationResult->xPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 3, 3));
         localizationResult->yPositionDeviation = c * sqrt(gsl_matrix_get(covarianceMatrix, 4, 4));
         localizationResult->thetaDeviation = 0.0;
