@@ -192,27 +192,28 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 		particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(psfWidth)));
 		
 		boost::shared_ptr<FitPositions> positionsFitter;
+		double sigma = 1.0;
 		switch (localizationAlgorithm) {
             case LOCALIZATION_METHOD_2DGAUSS:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_MULTIPLICATION:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_CENTROID:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(psfWidth, sigma));
                 break;
 			case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
-				positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+				positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
 				break;
             case LOCALIZATION_METHOD_MLEwG:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
+                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
                 break;
             default:
                 throw std::runtime_error("Unknown localization method");
