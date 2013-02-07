@@ -175,6 +175,7 @@ public:
 	size_t getXSize() const {return xSize;}
 	size_t getYSize() const {return ySize;}
 	int getStorageType() const {return storage_type;}
+	virtual int getFileType() = 0;
 	
 	/**
 	 * readImage explicitly asks for the image at a certain index, but is not reentrant.
@@ -234,6 +235,8 @@ public:
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
+	int getFileType() {return CAMERA_TYPE_WINSPEC;}
+	
 protected:
 	void parse_header_information();
 };
@@ -244,6 +247,8 @@ public:
 	~ImageLoaderAndor();
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	
+	int getFileType() {return CAMERA_TYPE_ANDOR;}
 	
 protected:
 	void parse_header_information();
@@ -281,6 +286,8 @@ public:
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
+	int getFileType() {return CAMERA_TYPE_HAMAMATSU;}
+	
 protected:
 	void parse_header_information();
 	
@@ -294,6 +301,8 @@ public:
 	~ImageLoaderPDE();
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	
+	int getFileType() {return CAMERA_TYPE_PDE;}
 	
 protected:
 	void parse_header_information();
@@ -312,6 +321,8 @@ public:
 	 */
 	void spoolTo(size_t index);
 	
+	int getFileType() {return CAMERA_TYPE_TIFF;}
+	
 protected:
 	void parse_header_information();
 	
@@ -327,6 +338,8 @@ public:
 	~ImageLoaderMultiFileTIFF() {;}
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	
+	int getFileType() {return CAMERA_TYPE_MULTIFILE_TIFF;}
 	
 protected:
 	std::string baseFilePath;
@@ -344,6 +357,8 @@ public:
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
+	int getFileType() {return CAMERA_TYPE_IGOR_WAVE;}
+	
 protected:
 	void parse_header_information() {;}
 	
@@ -358,6 +373,8 @@ public:
 	~ImageLoaderMatlab() {;}
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	
+	int getFileType() {return CAMERA_TYPE_MATLAB_MATRIX;}
 	
 protected:
 	void parse_header_information() {;}

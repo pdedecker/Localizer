@@ -1177,8 +1177,11 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 	// frame sequence. Assume that all digits that precede the extension are part of this index.
 	int nIndexDigits = 0;
 	for (int i = extensionStartIndex - 1; i >= 0; --i) {
-		if (isdigit(filePath[i]))
+		if (isdigit(filePath[i])) {
 			nIndexDigits += 1;
+		} else {
+			break;
+		}
 	}
 	if (nIndexDigits == 0) {
 		std::string error("Unable to determine the numbering format for the multi-tiff file at \"");
@@ -1209,7 +1212,7 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 	int firstIndex = -1, lastIndex = -1;
 	for (int i = 0; i <= largestIndex; ++i) {
 		char formatString[10];
-		sprintf(formatString, "%%%dd", nDigitsInNumber);
+		sprintf(formatString, "%%0%dd", nDigitsInNumber);
 		sprintf(imageIndexStr.get(), formatString, i);
 		thisFilePath = baseFilePath;
 		thisFilePath += std::string(imageIndexStr.get());
@@ -1217,6 +1220,9 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 		
 		try {
 			ImageLoaderTIFF imageLoaderTIFF(thisFilePath);
+			
+			if (firstIndex == -1)
+				firstIndex = i;
 			
 			// get out the image metadata while we're at it
 			this->xSize = imageLoaderTIFF.getXSize();
@@ -1267,7 +1273,7 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead
 	
 	boost::scoped_array<char> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
-	sprintf(formatString, "%%%dd", nDigitsInNumber);
+	sprintf(formatString, "%%0%dd", nDigitsInNumber);
 	sprintf(imageIndexStr.get(), formatString, imageIndexOnDisk);
 	
 	std::string filePath = this->baseFilePath;

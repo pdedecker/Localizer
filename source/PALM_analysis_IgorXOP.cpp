@@ -2357,11 +2357,15 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     int err = 0;
 
     // Flag parameters.
-
+	
     int cameraType;
     if (p->YFlagEncountered) {
         // Parameter: p->cameraType
-        cameraType = (int)(p->cameraType + 0.5);
+		if (p->cameraType < 0) {
+			cameraType = -1;
+		} else {
+			cameraType = (int)(p->cameraType + 0.5);
+		}
     } else {
         cameraType = -1;
     }
@@ -2590,7 +2594,7 @@ static int RegisterReadCCDImages(void) {
 
     // NOTE: If you change this template, you must change the ReadCCDImagesRuntimeParams structure as well.
     cmdTemplate = "ReadCCDImages /Y=number:camera_type /H /S=number:firstImage /C=number:nImagesToRead /Z /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} [string:filePath]";
-    runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_storageType;V_firstImageLoaded;V_lastImageLoaded;";
+    runtimeNumVarList = "V_flag;V_numberOfImages;V_xSize;V_ySize;V_storageType;V_firstImageLoaded;V_lastImageLoaded;V_fileType;";
     runtimeStrVarList = "S_filePath;";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ReadCCDImagesRuntimeParams), (void*)ExecuteReadCCDImages, kOperationIsThreadSafe);
 }

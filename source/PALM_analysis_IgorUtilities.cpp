@@ -179,22 +179,25 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
 
     result = SetOperationNumVar("V_numberOfImages", nImages);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_xSize", x_size);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_ySize", y_size);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_storageType", storage_type);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_firstImageLoaded", firstImage);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_lastImageLoaded", firstImage + nImagesToLoad - 1);
     if (result != 0)
-        throw result;
+        throw int(result);
+	result = SetOperationNumVar("V_fileType", image_loader->getFileType());
+	if (result != 0)
+		throw int(result);
 
     // allocate the object that will write the data to Igor
     IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storage_type);
@@ -235,22 +238,25 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
 
     result = SetOperationNumVar("V_numberOfImages", total_n_images);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_xSize", x_size);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_ySize", y_size);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_storageType", storageType);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_firstImageLoaded", -1);
     if (result != 0)
-        throw result;
+        throw int(result);
     result = SetOperationNumVar("V_lastImageLoaded", -1);
     if (result != 0)
-        throw result;
+        throw int(result);
+	result = SetOperationNumVar("V_fileType", image_loader->getFileType());
+	if (result != 0)
+		throw int(result);
 
     return 0;
 }
