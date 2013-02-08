@@ -1200,65 +1200,28 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 	
 	// everything coming before the index digits is the base file path
 	this->baseFilePath = filePath.substr(0, stringLength - lengthOfExtension - nDigitsInNumber);
+	std::string indexOfThisImageStr = filePath.substr(stringLength - lengthOfExtension - nDigitsInNumber, nDigitsInNumber);
 	
-	// now try to figure out how many files there are in this data set. simply iterate over all possible indices,
-	// testing which files exist.
-	int largestIndex = 1;
-	for (int i = 0; i < nIndexDigits; ++i)
-		largestIndex *= 10;
-	largestIndex -= 1;
-	boost::scoped_array<char> imageIndexStr(new char[nDigitsInNumber + 1]);
-	std::string thisFilePath;
-	int firstIndex = -1, lastIndex = -1;
-	for (int i = 0; i <= largestIndex; ++i) {
-		char formatString[10];
-		sprintf(formatString, "%%0%dd", nDigitsInNumber);
-		sprintf(imageIndexStr.get(), formatString, i);
-		thisFilePath = baseFilePath;
-		thisFilePath += std::string(imageIndexStr.get());
-		thisFilePath += extension;
-		
-		try {
-			ImageLoaderTIFF imageLoaderTIFF(thisFilePath);
-			
-			if (firstIndex == -1)
-				firstIndex = i;
-			
-			// get out the image metadata while we're at it
-			this->xSize = imageLoaderTIFF.getXSize();
-			this->ySize = imageLoaderTIFF.getYSize();
-			this->storage_type = imageLoaderTIFF.getStorageType();
-		}
-		catch (CANNOT_OPEN_FILE e) {
-			// file does not exist
-			// if we previously found one or more valid files then we're probably finished.
-			// if we haven't found any valid files yet then keep on looking.
-			if (firstIndex == -1) {
-				continue;
-			} else {
-				lastIndex = i - 1;
-				break;
-			}
-		}
-		catch (std::runtime_error e) {
-			std::string error;
-			error = "One or more of the files do not seem to be valid TIFF files. I tried the file at \"";
-			error += thisFilePath;
-			error += "\"";
-			throw std::runtime_error(error);
-		}
-	}
+	// try to load the provided image to get the metadata
+	ImageLoaderTIFF imageLoaderTIFF(filePath);
+	this->xSize = imageLoaderTIFF.getXSize();
+	this->ySize = imageLoaderTIFF.getYSize();
+	this->storage_type = imageLoaderTIFF.getStorageType();
 	
-	if (firstIndex == -1) {
-		// no images found
-		std::string error = "Unable to find valid TIFF files using the base file path \"";
-		error += baseFilePath;
+	// now figure out how many images there are in the dataset
+	// get the index of the current image
+	int indexOfThisImage;
+	int nItemsMatched = sscanf(indexOfThisImageStr.c_str(), "%d", &indexOfThisImage);
+	if (nItemsMatched != 1) {
+		std::string error("Error parsing the numeric index for the image at \"");
+		error += filePath;
 		error += "\"";
-		throw std::runtime_error(error);
+		throw ERROR_READING_FILE_DATA(error);
 	}
 	
-	this->firstImageIndex = firstIndex;
-	this->nImages = lastIndex - firstIndex + 1;
+	std::pair<int, int> firstAndLastIndices = findFirstAndLastValidImageIndices(indexOfThisImage);
+	this->firstImageIndex = firstAndLastIndices.first;
+	this->nImages = firstAndLastIndices.second - firstAndLastIndices.first + 1;
 	
 	this->checkForReasonableValues();
 }
@@ -1269,7 +1232,19 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	int imageIndexOnDisk = this->firstImageIndex + this->nextImageToRead;
+	std::string filePath = getFilePathForImageAtIndex(this->nextImageToRead);
+	ImageLoaderTIFF imageLoaderTIFF(filePath);
+	size_t dummy;
+	ImagePtr image = imageLoaderTIFF.readNextImage(dummy);
+	
+	indexOfImageThatWasRead = this->nextImageToRead;
+	this->nextImageToRead += 1;
+	
+	return image;
+}
+
+std::string ImageLoaderMultiFileTIFF::getFilePathForImageAtIndex(int index) {
+	int imageIndexOnDisk = this->firstImageIndex + index;
 	
 	boost::scoped_array<char> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
@@ -1279,15 +1254,89 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead
 	std::string filePath = this->baseFilePath;
 	filePath += imageIndexStr.get();
 	filePath += this->extension;
+	return filePath;
+}
+
+bool ImageLoaderMultiFileTIFF::imageFileAtIndexExists(int index) {
+	std::string thisFilePath = getFilePathForImageAtIndex(index);
 	
-	ImageLoaderTIFF imageLoaderTIFF(filePath);
-	size_t dummy;
-	ImagePtr image = imageLoaderTIFF.readNextImage(dummy);
+	bool exists = true;
+	try {
+		ImageLoaderTIFF imageLoaderTIFF(thisFilePath);
+	}
+	catch (...) {
+		exists = false;
+	}
 	
-	indexOfImageThatWasRead = this->nextImageToRead;
-	this->nextImageToRead += 1;
+	return exists;
+}
+
+std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(int knownValidImageIndex) {
+	std::pair<int, int> firstAndLastIndices;
 	
-	return image;
+	assert(knownValidImageIndex >= 0);
+	
+	int trialIndex;
+	int lower, upper, mid;
+	
+	// find the first image index that is valid
+	if (imageFileAtIndexExists(0)) {
+		// check if the first image is simply at index zero
+		firstAndLastIndices.first = 0;
+	} else {
+		// find an invalid index less than knownValidImageIndex
+		for (int delta = -1; ; delta *= 2) {
+			trialIndex = trialIndex + delta;
+			if (trialIndex < 0) {
+				trialIndex = -1;	// the image at -1 certainly doesn't exist
+				break;
+			}
+			if (!imageFileAtIndexExists(trialIndex))
+				break;
+		}
+		
+		// now we have a known bad and a known good index. Find the first index that is valid.
+		lower = trialIndex;
+		upper = knownValidImageIndex;
+		for (;;) {
+			if (upper - lower == 1) {
+				firstAndLastIndices.first = upper;
+				break;
+			}
+			
+			mid = (lower + upper) / 2;
+			if (imageFileAtIndexExists(mid)) {
+				upper = mid;
+			} else {
+				lower = mid;
+			}
+		}
+	}
+	
+	// now find the last index that is valid. First find an index that is invalid.
+	trialIndex = knownValidImageIndex + 1;
+	for (int delta = 1; ; delta *= 2) {
+		trialIndex = trialIndex + delta;
+		if (!imageFileAtIndexExists(trialIndex))
+			break;
+	}
+	
+	lower = knownValidImageIndex; upper = trialIndex;
+	for (;;) {
+		if (upper - lower == 1) {
+			firstAndLastIndices.second = lower;
+			break;
+		}
+		
+		mid = (lower + upper) / 2;
+		if (imageFileAtIndexExists(mid)) {
+			lower = mid;
+		} else {
+			upper = mid;
+		}
+	}
+	
+	return firstAndLastIndices;
 }
 
 #ifdef WITH_IGOR

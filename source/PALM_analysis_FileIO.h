@@ -37,6 +37,7 @@
 #include <list>
 #include <string>
 #include <map>
+#include <utility>
 #include "PALM_analysis_errors.h"
 #include "PALM_analysis_storage.h"
 #include "PALM_analysis_defines.h"
@@ -342,10 +343,13 @@ public:
 	int getFileType() {return CAMERA_TYPE_MULTIFILE_TIFF;}
 	
 protected:
+	std::string getFilePathForImageAtIndex(int index);
+	bool imageFileAtIndexExists(int index);
+	std::pair<int, int> findFirstAndLastValidImageIndices(int knownValidImageIndex);
+	
 	std::string baseFilePath;
 	std::string extension;	// includes the '.'
 	int nDigitsInNumber;
-	
 	int firstImageIndex;
 };
 
