@@ -647,7 +647,6 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     // the information is added in semicolon-separated key:value pairs
 
     size_t preprocessing_method;
-    size_t thresholding_method;
     size_t postprocessing_method;
     std::vector<size_t> particleVerifierMethods;
 
@@ -675,6 +674,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         method = LOCALIZATION_METHOD_2DGAUSS;
     }
 
+	int thresholding_method;
     if (p->DFlagEncountered) {
         // Parameter: p->thresholding_method
         thresholding_method = (int)(p->thresholding_method + 0.5);
@@ -718,20 +718,22 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 
     if (p->PVERFlagEncountered) {
         int* paramsSet = &p->PVERFlagParamsSet[0];
-        size_t particleVerifierMethod;
+        int particleVerifierMethod;
 
         for (int i=0; i<100; i++) {
             if (paramsSet[i] == 0)
                 break;		// No more parameters.
 
-            particleVerifierMethod = (size_t)(p->particleVerifiers[i] + 0.5);
+            particleVerifierMethod = (int)(p->particleVerifiers[i] + 0.5);
 
             if ((particleVerifierMethod == PARTICLEVERIFIER_SYMMETRICGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS)) {
                 // there's no need to fit the same positions with the same algorithm twice, drop this verification
                 continue;
-            } else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
+            } else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL)) {
                 continue;
-            }
+            } else if ((particleVerifierMethod == PARTICLEVERIFIER_ELLIPSOIDALGAUSS_ASTIG) && (method == LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM)) {
+				continue;
+			}
 
             particleVerifierMethods.push_back(particleVerifierMethod);
         }
@@ -957,12 +959,15 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
             case PARTICLEVERIFIER_SYMMETRICGAUSS:
                 particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
                 break;
-            case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
+            case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
                 particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma)));
                 break;
             case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
                 particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
                 break;
+			case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_ASTIG:
+				particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
+				break;
             default:
                 throw std::runtime_error("Unknown particle verifying method");
                 break;
@@ -1691,13 +1696,10 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
-    size_t method;
     size_t preprocessing_method, postprocessing_method;
-    size_t particle_finding_method;
     size_t offset;
     int output_located_particles;
     double absoluteThreshold, PFA, PSFWidth;
-    double radiusBetweenParticles;
     waveHndl CCD_Frame_wave;
     waveHndl threshold_image_wave;
     ImagePtr CCD_Frame;
@@ -1723,7 +1725,8 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 
 
     // Flag parameters.
-
+	
+	int method;
     if (p->MFlagEncountered) {
         // Parameter: p->method
         method = (size_t)(p->method + 0.5);
@@ -1777,10 +1780,11 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     } else {
         output_located_particles = 0;
     }
-
+	
+	int particle_finding_method;
     if (p->FFlagEncountered) {	// choose which particle finder we want to use
         // Parameter: p->particle_finder
-        particle_finding_method = (size_t)(p->particle_finder + 0.5);
+        particle_finding_method = (int)(p->particle_finder + 0.5);
     } else {
         particle_finding_method = PARTICLEFINDER_ADJACENT8;
     }
@@ -1800,7 +1804,8 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     } else {
         particleVerifierMethods.push_back(PARTICLEVERIFIER_NONE);
     }
-
+	
+	double radiusBetweenParticles;
     if (p->RFlagEncountered) {
         // Parameter: p->radiusBetweenParticles
         radiusBetweenParticles = p->radiusBetweenParticles;
@@ -1918,21 +1923,24 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
             // several particle verifiers can be used
             for (std::vector<size_t>::iterator it = particleVerifierMethods.begin(); it != particleVerifierMethods.end(); ++it) {
                 switch (*it) {
-                case PARTICLEVERIFIER_NONE:
-                    // no particle verification requested for this entry, do nothing
-                    break;
-                case PARTICLEVERIFIER_SYMMETRICGAUSS:
-                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1)));
-                    break;
-                case PARTICLEVERIFIER_ELLIPSOIDALGAUSS:
-                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1)));
-                    break;
-                case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
-                    particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
-                    break;
-                default:
-                    throw std::runtime_error("Unknown particle verifying method");
-                    break;
+					case PARTICLEVERIFIER_NONE:
+						// no particle verification requested for this entry, do nothing
+						break;
+					case PARTICLEVERIFIER_SYMMETRICGAUSS:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0)));
+						break;
+					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1.0)));
+						break;
+					case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
+						break;
+					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_ASTIG:
+						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1.0)));
+						break;
+					default:
+						throw std::runtime_error("Unknown particle verifying method");
+						break;
                 }
             }
         }
@@ -2554,7 +2562,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 		
 		std::vector<ImagePtr> sofiImages, averageImages;
         DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImages, averageImages);
-		for (int i = 0; i < sofiImages.size(); ++i) {
+		for (size_t i = 0; i < sofiImages.size(); ++i) {
 			outputWriter->write_image(sofiImages.at(i));
 			averageOutputWriter->write_image(averageImages.at(i));
 		}
