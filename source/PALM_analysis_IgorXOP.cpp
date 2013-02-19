@@ -2564,7 +2564,8 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImages, averageImages);
 		for (size_t i = 0; i < sofiImages.size(); ++i) {
 			outputWriter->write_image(sofiImages.at(i));
-			averageOutputWriter->write_image(averageImages.at(i));
+			if (doAverage != 0)
+				averageOutputWriter->write_image(averageImages.at(i));
 		}
     }
     catch (int e) {
