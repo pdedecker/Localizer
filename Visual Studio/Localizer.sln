@@ -17,7 +17,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|Win32.ActiveCfg = Debug|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|Win32.Build.0 = Debug|Win32
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|x64.ActiveCfg = Debug|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|x64.ActiveCfg = Debug|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|x64.Build.0 = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|Win32.ActiveCfg = Debug-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|Win32.Build.0 = Debug-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.ActiveCfg = Debug-Matlab|x64
