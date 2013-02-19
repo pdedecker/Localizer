@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// (C) Copyright Ion Gaztanaga 2005-2011. Distributed under the Boost
+// (C) Copyright Ion Gaztanaga 2005-2012. Distributed under the Boost
 // Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
@@ -37,7 +37,7 @@ namespace ipcdetail {
 
 class named_condition;
 
-//!A mutex with a global name, so it can be found from different 
+//!A mutex with a global name, so it can be found from different
 //!processes. This mutex can't be placed in shared memory, and
 //!each process should have it's own named mutex.
 class shm_named_mutex
@@ -56,7 +56,7 @@ class shm_named_mutex
    //!Throws interprocess_exception on error.
    shm_named_mutex(create_only_t create_only, const char *name, const permissions &perm = permissions());
 
-   //!Opens or creates a global mutex with a name. 
+   //!Opens or creates a global mutex with a name.
    //!If the mutex is created, this call is equivalent to
    //!shm_named_mutex(create_only_t, ... )
    //!If the mutex is already created, this call is equivalent
@@ -85,7 +85,7 @@ class shm_named_mutex
    //!Throws interprocess_exception if a severe error is found
    void lock();
 
-   //!Tries to lock the interprocess_mutex, returns false when interprocess_mutex 
+   //!Tries to lock the interprocess_mutex, returns false when interprocess_mutex
    //!is already locked, returns true when success.
    //!Throws interprocess_exception if a severe error is found
    bool try_lock();
@@ -100,8 +100,9 @@ class shm_named_mutex
    static bool remove(const char *name);
 
    /// @cond
-   interprocess_mutex *mutex() const
-   {  return static_cast<interprocess_mutex*>(m_shmem.get_user_address()); }
+   typedef interprocess_mutex internal_mutex_type;
+   interprocess_mutex &internal_mutex()
+   {  return *static_cast<interprocess_mutex*>(m_shmem.get_user_address()); }
 
    private:
    friend class ipcdetail::interprocess_tester;
@@ -153,13 +154,13 @@ inline shm_named_mutex::shm_named_mutex(open_only_t, const char *name)
 {}
 
 inline void shm_named_mutex::lock()
-{  this->mutex()->lock();  }
+{  this->internal_mutex().lock();  }
 
 inline void shm_named_mutex::unlock()
-{  this->mutex()->unlock();  }
+{  this->internal_mutex().unlock();  }
 
 inline bool shm_named_mutex::try_lock()
-{  return this->mutex()->try_lock();  }
+{  return this->internal_mutex().try_lock();  }
 
 inline bool shm_named_mutex::timed_lock(const boost::posix_time::ptime &abs_time)
 {
@@ -167,7 +168,7 @@ inline bool shm_named_mutex::timed_lock(const boost::posix_time::ptime &abs_time
       this->lock();
       return true;
    }
-   return this->mutex()->timed_lock(abs_time);
+   return this->internal_mutex().timed_lock(abs_time);
 }
 
 inline bool shm_named_mutex::remove(const char *name)
