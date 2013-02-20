@@ -1028,12 +1028,12 @@ void ImageLoaderTIFF::parse_header_information() {
 ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 	int result;
 	
+	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	
 	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
 	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}
-	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
