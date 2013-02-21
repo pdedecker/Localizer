@@ -36,6 +36,10 @@
 #include <gsl/gsl_sort_vector.h>
 #include <gsl/gsl_blas.h>
 
+#ifdef WITH_MKL
+	#include "mkl_vml.h"
+#endif
+
 boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
                                                                                              boost::shared_ptr<std::list<Particle> > particles) {
 
@@ -1063,7 +1067,13 @@ int FitFunction_SymmetricGaussian(const gsl_vector *params, void *fitData_rhs, g
 	outputData = deviations->data;
 	double stdDevSq = 2.0 * r * r;
 	Eigen::Map<Eigen::ArrayXXd> mappedArray(deviations->data, xSize, ySize);
+#ifdef WITH_MKL
+	mappedArray /= stdDevSq;
+	vdExp(xSize * ySize, outputData, outputData);
+	mappedArray = (mappedArray * amplitude + offset - imageSubset->array()) / sigma;
+#else
 	mappedArray = ((((mappedArray / stdDevSq).exp() * amplitude) + offset) - imageSubset->array()) / sigma;
+#endif
 
     return GSL_SUCCESS;
 }

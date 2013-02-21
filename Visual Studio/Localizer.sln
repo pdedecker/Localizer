@@ -11,6 +11,8 @@ Global
 		Debug-Matlab|x64 = Debug-Matlab|x64
 		Release-Igor|Win32 = Release-Igor|Win32
 		Release-Igor|x64 = Release-Igor|x64
+		Release-Igor-MKL|Win32 = Release-Igor-MKL|Win32
+		Release-Igor-MKL|x64 = Release-Igor-MKL|x64
 		Release-Matlab|Win32 = Release-Matlab|Win32
 		Release-Matlab|x64 = Release-Matlab|x64
 	EndGlobalSection
@@ -27,6 +29,10 @@ Global
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|Win32.Build.0 = Release|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|x64.ActiveCfg = Release|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|x64.Build.0 = Release|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|Win32.ActiveCfg = Release-Igor-MKL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|Win32.Build.0 = Release-Igor-MKL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|x64.ActiveCfg = Release-Igor-MKL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|x64.Build.0 = Release-Igor-MKL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|Win32.ActiveCfg = Release-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|Win32.Build.0 = Release-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.ActiveCfg = Release-Matlab|x64
