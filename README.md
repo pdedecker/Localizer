@@ -5,7 +5,7 @@ Welcome to the source code for Localizer, which implements various kinds of anal
 
 A paper on Localizer is now available from the [Journal of Biomedical Optics](http://spie.org/x866.xml). [Download the paper here](http://sushi.chem.kuleuven.be/LocalizerJBO.pdf) after checking that you have access to the journal. Please cite this paper if Localizer turns out to be useful for your research.
 
-*The fastest way to get started with Localizer is to [download the ready-made binaries appropriate for your platform](http://sushi.chem.kuleuven.be/svn/Localizer). This is all that you need to use the software*. 
+*The fastest way to get started with Localizer is to [download the ready-made binaries appropriate for your platform](http://sushi.chem.kuleuven.be/svn/Localizer). This is all that you need to use the software*. If you have trouble accessing that link then try [this one](http://134.58.38.13/svn/Localizer).
 
 At present there are binaries for [Igor Pro](http://www.wavemetrics.com) and for [Matlab](http://www.themathworks.com). There is also a command-line interface that allows Localizer to function in a commandline environment, which is mostly aimed at experienced users and will require compilation (see below).
 
