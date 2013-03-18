@@ -88,6 +88,9 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 		if ((fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
 			continue;
 		}
+		if (fittedIntegral == 0.0) {
+			continue;
+		}
 		
 		if (n%100 == 0) {
 			// every 100 iterations provide a progress update
