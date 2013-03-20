@@ -134,7 +134,7 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 		if (endY >= imageHeight)
 			endY = imageHeight - 1;
 		
-		for (size_t j = startY; j < endY; ++j) {
+		for (size_t j = startY; j <= endY; ++j) {
 			for (size_t i = startX; i <= endX; ++i) {
 				// take into account that each pixel really should contain the integral of the Gaussian
 				// how much is this pixel shifted with respect to the center of the emitter?

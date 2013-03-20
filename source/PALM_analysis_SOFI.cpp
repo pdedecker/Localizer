@@ -289,7 +289,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
         // loop over all pixels in the input
         for (int i = firstRow; i <= lastRow; ++i) {
             for (int j = firstCol; j <= lastCol; ++j) {
-                // loop over all the kernel
+                // loop over the kernel
                 for (int k = 0; k < nPixelsInKernel; ++k) {
                     // loop over all calculations within this kernel pixel
                     const std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
