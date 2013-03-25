@@ -636,6 +636,10 @@ int GetFileStorageType(std::string &filePath) {
         return CAMERA_TYPE_TIFF;
     if (boost::algorithm::iequals(extension, "tiff"))
         return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "btf"))
+        return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "tf8"))
+        return CAMERA_TYPE_TIFF;
     if (boost::algorithm::iequals(extension, "lsm"))
         return CAMERA_TYPE_TIFF;
 	
