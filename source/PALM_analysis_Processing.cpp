@@ -263,6 +263,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 	
 	this->progressReporter->CalculationStarted();
 	
+	image_loader->spoolTo(0);
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
@@ -274,7 +275,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 			}
 		}
 		
-		current_image = image_loader->readImage(n);
+		current_image = image_loader->readNextImage();
 		output_writer->write_image(current_image);
 	}
 	this->progressReporter->CalculationDone();
@@ -300,6 +301,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	
 	this->progressReporter->CalculationStarted();
 	
+	image_loader->spoolTo(0);
 	for (size_t n = 0; n < total_number_of_images; ++n) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
@@ -311,7 +313,7 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 			}
 		}
 		
-		loadedImage = image_loader->readImage(n);
+		loadedImage = image_loader->readNextImage();
 		croppedImage = ImagePtr (new Image((int)croppedXSize, (int)croppedYSize));
 		
 		for (size_t y = startY; y <= endY; ++y) {
@@ -338,8 +340,9 @@ void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageL
 	int abortStatus;
 	this->progressReporter->CalculationStarted();
 	
+	image_loader->spoolTo(0);
 	for (size_t n = 0; n < total_number_of_images; ++n) {
-		loadedImage = image_loader->readImage(n);
+		loadedImage = image_loader->readNextImage();
 		for (size_t j = 0; j < y_size; ++j) {
 			for (size_t i = 0; i < x_size; ++i) {
 				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;
