@@ -59,6 +59,16 @@
 		D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */; };
 		D0E6FD11131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
 		D0E6FD12131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
+		D0EAE29E170C54680012ED0E /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */; };
+		D0EAE29F170C54680012ED0E /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE296170C54680012ED0E /* libboost_system-mt.a */; };
+		D0EAE2A0170C54680012ED0E /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE297170C54680012ED0E /* libboost_thread-mt.a */; };
+		D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE298170C54680012ED0E /* libfftw3.a */; };
+		D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE299170C54680012ED0E /* libgsl.a */; };
+		D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
+		D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
+		D0EAE2A5170C54680012ED0E /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29C170C54680012ED0E /* libtiff.a */; };
+		D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
+		D0EAE2B0170C54AF0012ED0E /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */; };
 		D0F4245211B5A6B1001BCE24 /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
 		D0F4245311B5A6B1001BCE24 /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
 		D0F4245411B5A6B1001BCE24 /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
@@ -127,6 +137,16 @@
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
 		D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_MatrixRecycler.h; path = ../source/PALM_analysis_MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
 		D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_MatrixRecycler.cpp; path = ../source/PALM_analysis_MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
+		D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = SOURCE_ROOT; };
+		D0EAE296170C54680012ED0E /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = SOURCE_ROOT; };
+		D0EAE297170C54680012ED0E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = SOURCE_ROOT; };
+		D0EAE298170C54680012ED0E /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = ../lib/mac/libfftw3.a; sourceTree = SOURCE_ROOT; };
+		D0EAE299170C54680012ED0E /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = ../lib/mac/libgsl.a; sourceTree = SOURCE_ROOT; };
+		D0EAE29A170C54680012ED0E /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../lib/mac/libjpeg.a; sourceTree = SOURCE_ROOT; };
+		D0EAE29B170C54680012ED0E /* liblzma.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblzma.a; path = ../lib/mac/liblzma.a; sourceTree = SOURCE_ROOT; };
+		D0EAE29C170C54680012ED0E /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = SOURCE_ROOT; };
+		D0EAE29D170C54680012ED0E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../lib/mac/libz.a; sourceTree = SOURCE_ROOT; };
+		D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode/libXOPSupport.a; sourceTree = SOURCE_ROOT; };
 		D0F0E2CE10EBE26600F9A855 /* PALM_analysis_IgorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_IgorUtilities.h; path = ../source/PALM_analysis_IgorUtilities.h; sourceTree = SOURCE_ROOT; };
 		D0F0E2CF10EBE26600F9A855 /* PALM_analysis_IgorUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_IgorUtilities.cpp; path = ../source/PALM_analysis_IgorUtilities.cpp; sourceTree = SOURCE_ROOT; };
 		D0F0E35510EBEC6200F9A855 /* PALM_analysis_CommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_CommandLine.h; path = ../source/PALM_analysis_CommandLine.h; sourceTree = "<group>"; };
@@ -145,6 +165,16 @@
 			files = (
 				D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */,
 				D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */,
+				D0EAE29E170C54680012ED0E /* libboost_date_time-mt.a in Frameworks */,
+				D0EAE29F170C54680012ED0E /* libboost_system-mt.a in Frameworks */,
+				D0EAE2A0170C54680012ED0E /* libboost_thread-mt.a in Frameworks */,
+				D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */,
+				D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */,
+				D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */,
+				D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */,
+				D0EAE2A5170C54680012ED0E /* libtiff.a in Frameworks */,
+				D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */,
+				D0EAE2B0170C54AF0012ED0E /* libXOPSupport.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -190,6 +220,16 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */,
+				D0EAE296170C54680012ED0E /* libboost_system-mt.a */,
+				D0EAE297170C54680012ED0E /* libboost_thread-mt.a */,
+				D0EAE298170C54680012ED0E /* libfftw3.a */,
+				D0EAE299170C54680012ED0E /* libgsl.a */,
+				D0EAE29A170C54680012ED0E /* libjpeg.a */,
+				D0EAE29B170C54680012ED0E /* liblzma.a */,
+				D0EAE29C170C54680012ED0E /* libtiff.a */,
+				D0EAE29D170C54680012ED0E /* libz.a */,
+				D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */,
 				D0006D2B12CFD34D00539A8F /* Accelerate.framework */,
 				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
 			);
@@ -568,16 +608,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "";
-				OTHER_LDFLAGS = (
-					"\"../lib/mac/libtiff.a\"",
-					"\"../lib/mac/libboost_thread-mt.a\"",
-					"\"../lib/mac/libboost_date_time-mt.a\"",
-					"\"../lib/mac/libz.a\"",
-					"\"../lib/mac/libboost_system-mt.a\"",
-					"\"../lib/mac/libjpeg.a\"",
-					"\"../lib/mac/libgsl.a\"",
-					"\"../lib/mac/libfftw3.a\"",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.6;
 				WRAPPER_EXTENSION = "";
@@ -624,16 +655,7 @@
 				LLVM_LTO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
-				OTHER_LDFLAGS = (
-					"\"../lib/mac/libtiff.a\"",
-					"\"../lib/mac/libboost_thread-mt.a\"",
-					"\"../lib/mac/libboost_date_time-mt.a\"",
-					"\"../lib/mac/libz.a\"",
-					"\"../lib/mac/libboost_system-mt.a\"",
-					"\"../lib/mac/libjpeg.a\"",
-					"\"../lib/mac/libgsl.a\"",
-					"\"../lib/mac/libfftw3.a\"",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.6;
 				WRAPPER_EXTENSION = "";
@@ -665,7 +687,11 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib/mac\"",
+					"\"$(SRCROOT)/../../XOPSupport/Xcode\"",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					../../XOPSupport/XCode4/libXOPSupport.a,
@@ -701,7 +727,11 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../lib/mac\"",
+					"\"$(SRCROOT)/../../XOPSupport/Xcode\"",
+				);
 				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
