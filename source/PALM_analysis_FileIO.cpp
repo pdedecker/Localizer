@@ -1285,6 +1285,7 @@ std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(
 		firstAndLastIndices.first = 0;
 	} else {
 		// find an invalid index less than knownValidImageIndex
+		trialIndex = knownValidImageIndex;
 		for (int delta = -1; ; delta *= 2) {
 			trialIndex = trialIndex + delta;
 			if (trialIndex < 0) {
