@@ -31,14 +31,17 @@
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					int nFramesToSkip, int nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
 	sofiOutputImages.clear();
 	averageOutputImages.clear();
+	
+	if (nFramesToSkip < 0)
+		nFramesToSkip = 0;
     
-    if (nFramesToInclude == (size_t)-1)
+    if (nFramesToInclude <= 0)
         nFramesToInclude = nImages - nFramesToSkip;
     
     if (nFramesToSkip + nFramesToInclude > nImages)

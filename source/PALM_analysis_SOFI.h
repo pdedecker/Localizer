@@ -50,7 +50,7 @@ class SOFINoImageInCalculation;
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					boost::shared_ptr<ProgressReporter> progressReporter,
-					size_t nFramesToSkip, size_t nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					int nFramesToSkip, int nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)

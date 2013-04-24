@@ -2456,15 +2456,15 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 		}
 	}
 
-    size_t nFramesToSkip = 0;
-    size_t nFramesToInclude = (size_t)-1;
+    int nFramesToSkip = 0;
+    int nFramesToInclude = -1;
     if (p->SUBFlagEncountered) {
 		// Parameter: p->framesToSkip
         if (p->framesToSkip > 0)
-            nFramesToSkip = (size_t)(p->framesToSkip + 0.5);
+            nFramesToSkip = (int)(p->framesToSkip + 0.5);
 		// Parameter: p->nFramesToInclude
         if (p->nFramesToInclude > 0)
-            nFramesToInclude = (size_t)(p->nFramesToInclude + 0.5);
+            nFramesToInclude = (int)(p->nFramesToInclude + 0.5);
 	}
 
     int useIgorFunctionForProgress;
