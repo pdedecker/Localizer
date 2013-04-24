@@ -408,20 +408,22 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 4)
-		mexErrMsgTxt("Must have exactly 4 input arguments for sofi\n\
+	if (nrhs != 6)
+		mexErrMsgTxt("Must have exactly 6 input arguments for sofi\n\
 					 1. the string \"sofi\"\n\
 					 2. the desired order (2 or 3)\n\
 					 3. single number: 0 for autocorrelation, 1 for crosscorrelation\n\
-					 4. file path to a data file, or a 2D or 3D matrix containing numeric data");
+					 4. number of frames to skip at the beginning\n\
+					 5. number of frames to include in the calculation (<=0 means all frames up to the end)\n\
+					 6. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
 	
 	mxArray* array;
-	// the mxArray at index 0 will have been checked already by mexFunction
+	// the mxArray at index 0 (the string "sofi") will have been checked already by mexFunction
 	
-	// index 1 - must be a single number
+	// index 1 - must be a single number (order)
 	array = const_cast<mxArray*>(prhs[1]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
@@ -429,17 +431,35 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if ((correlationOrder < 2) || (correlationOrder > 3))
 		mexErrMsgTxt("Expected 2 or 3 for the correlation order");
 	
-	// index 2 - must be a boolean
+	// index 2 - must be a boolean (auto or cross)
 	bool doCrossCorrelation;
 	array = const_cast<mxArray*>(prhs[2]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
 	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
 	
-	// index 3 - must be the data
+	// index 3 - must be a single number (number of frames to skip)
+	size_t nFramesToSkip;
+	array = const_cast<mxArray*>(prhs[3]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("4th argument must be a double scalar (number of frames to skip)");
+	nFramesToSkip = static_cast<size_t>(*mxGetPr(array) + 0.5);
+	
+	// index 4 - must be a single number (number of frames to include)
+	size_t nFramesToInclude;
+	array = const_cast<mxArray*>(prhs[4]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("5th argument must be a double scalar (number of frames to include)");
+	if (*mxGetPr(array) <= 0) {
+		nFramesToInclude = static_cast<size_t>(-1);
+	} else {
+		nFramesToSkip = static_cast<size_t>(*mxGetPr(array) + 0.5);
+	}
+	
+	// index 5 - must be the data
 	std::string filePath;
 	mxArray* dataArray = NULL;
-	array = const_cast<mxArray*>(prhs[3]);
+	array = const_cast<mxArray*>(prhs[5]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 		if (filePath.empty())
@@ -465,7 +485,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		
 		// no frame verifiers for now
 		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-		int nFramesToSkip = 0, nFramesToInclude = -1, lagTime = 0;
+		int lagTime = 0;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
 		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
 
