@@ -545,86 +545,86 @@ typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClustering
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct SOFIAnalysisRuntimeParams {
 	// Flag parameters.
-    
+	
 	// Parameters for /Y flag group.
 	int YFlagEncountered;
 	double cameraType;
 	int YFlagParamsSet[1];
-    
+	
 	// Parameters for /WDTH flag group.
 	int WDTHFlagEncountered;
 	double psfWidth;
 	int WDTHFlagParamsSet[1];
-    
+	
 	// Parameters for /ORDR flag group.
 	int ORDRFlagEncountered;
 	double order;
 	int ORDRFlagParamsSet[1];
-    
+	
 	// Parameters for /LAG flag group.
 	int LAGFlagEncountered;
-	double lagTime;
-	int LAGFlagParamsSet[1];
-    
+	double lagTimes[100];					// Optional parameter.
+	int LAGFlagParamsSet[100];
+	
 	// Parameters for /XC flag group.
 	int XCFlagEncountered;
 	double doCrossCorrelation;
 	int XCFlagParamsSet[1];
-    
+	
 	// Parameters for /GRP flag group.
 	int GRPFlagEncountered;
 	double nFramesToGroup;
 	int GRPFlagParamsSet[1];
-    
+	
 	// Parameters for /SUB flag group.
 	int SUBFlagEncountered;
 	double framesToSkip;
 	double nFramesToInclude;
 	int SUBFlagParamsSet[2];
-    
+	
 	// Parameters for /MAX flag group.
 	int MAXFlagEncountered;
 	double maxPixelVal;
 	int MAXFlagParamsSet[1];
-    
+	
 	// Parameters for /NSAT flag group.
 	int NSATFlagEncountered;
 	double noSaturatedPixels;				// Optional parameter.
 	int NSATFlagParamsSet[1];
-    
+	
 	// Parameters for /AVG flag group.
 	int AVGFlagEncountered;
 	double doAverage;						// Optional parameter.
 	int AVGFlagParamsSet[1];
-    
+	
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
 	int PROGFlagParamsSet[1];
-    
+	
 	// Parameters for /Q flag group.
 	int QFlagEncountered;
 	// There are no fields for this group because it has no parameters.
-    
+	
 	// Parameters for /DEST flag group.
 	int DESTFlagEncountered;
 	DataFolderAndName dest;
 	int DESTFlagParamsSet[1];
-    
+	
 	// Main parameters.
-    
+	
 	// Parameters for simple main group #0.
 	int inputFilePathEncountered;
 	Handle inputFilePath;
 	int inputFilePathParamsSet[1];
-    
+	
 	// These are postamble fields that Igor sets.
 	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
 	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
 typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()	// Reset structure alignment to default.
 
 int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
@@ -2397,16 +2397,28 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     } else {
         order = 2;
     }
-
-    int lagTime;
+	
+	std::vector<int> lagTimes;
     if (p->LAGFlagEncountered) {
-        // Parameter: p->lagTime
-        if (p->lagTime < 0)
-            throw EXPECT_POS_NUM;
-        lagTime = (int)(p->lagTime + 0.5);
-    } else {
-        lagTime = 0;
-    }
+		// Array-style optional parameter: p->lagTimes
+		int* paramsSet = &p->LAGFlagParamsSet[0];
+		int nLagTimesSpecified = 0;
+		double d1;
+		for(int i=0; i<100; i++) {
+			if (paramsSet[i] == 0)
+				break;		// No more parameters.
+			d1 = p->lagTimes[i];
+			if (d1 < 0)
+				return EXPECT_POS_NUM;
+			int lagTime = static_cast<int>(d1 + 0.5);
+			lagTimes.push_back(lagTime);
+			nLagTimesSpecified += 1;
+		}
+		if (nLagTimesSpecified != order - 1) {
+			XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
+			return PALM_ANALYSIS_XOP_ERROR;
+		}
+	}
 
     int crossCorrelate;
     if (p->XCFlagEncountered) {
@@ -2561,7 +2573,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         }
 		
 		std::vector<ImagePtr> sofiImages, averageImages;
-        DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTime, order, crossCorrelate, nFramesToGroup, sofiImages, averageImages);
+        DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter, nFramesToSkip, nFramesToInclude, lagTimes, order, crossCorrelate, nFramesToGroup, sofiImages, averageImages);
 		for (size_t i = 0; i < sofiImages.size(); ++i) {
 			outputWriter->write_image(sofiImages.at(i));
 			if (doAverage != 0)
@@ -2687,7 +2699,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG=number:lagTime /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG={number[100]:lagTimes} /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);

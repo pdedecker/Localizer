@@ -37,6 +37,8 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
 	size_t blockSize = 50;
 	sofiOutputImages.clear();
 	averageOutputImages.clear();
+	if (lagTimes.empty() && (order > 0))
+		lagTimes.resize(order - 1, 0);
 	int largestLagTime = *(std::max_element(lagTimes.begin(), lagTimes.end()));
 	
 	if (nFramesToSkip < 0)
