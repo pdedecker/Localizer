@@ -37,7 +37,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
 	size_t blockSize = 50;
 	sofiOutputImages.clear();
 	averageOutputImages.clear();
-	int largestLagTime = std::max_element(lagTimes.begin(), lagTimes.end());
+	int largestLagTime = *(std::max_element(lagTimes.begin(), lagTimes.end()));
 	
 	if (nFramesToSkip < 0)
 		nFramesToSkip = 0;
@@ -62,9 +62,9 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
 	
 	boost::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTime, blockSize));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTimes, blockSize));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTime, blockSize));
+		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTimes, blockSize));
 	}
 	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
@@ -207,7 +207,7 @@ SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, st
 }
 
 void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
-	int largestLagTime = std::max_element(_lagTimes);
+	int largestLagTime = *(std::max_element(_lagTimes.begin(), _lagTimes.end()));
 	if (this->imageVector.size() == 0) {
 		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no input images available");
     }
@@ -232,15 +232,20 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
 	
 	// determine how many evaluations we can make given the lag times
 	int nEvaluations = this->imageVector.size() - largestLagTime;
+	// set up a lag time vector that explicitly includes the zero-lag time for the first contribution,
+	// so that all contributions can be treated symetrically.
+	std::vector<int> expandedLagTimes = _lagTimes;
+	expandedLagTimes.insert(expandedLagTimes.begin(), 0);
+	
+	// allocate support images
     ImagePtr outputImage(new Image(firstImage->rows(), firstImage->cols()));
     ImagePtr subImage(new Image(firstImage->rows(), firstImage->cols()));
 	
     outputImage->setConstant(0.0);
     for (size_t n = 0; n < nEvaluations; ++n) {
         subImage->setConstant(1.0);
-		(*subImage).array() *= (*imageVector[n]).array();	// the first image is always at lag time zero
-        for (int i = 1; i < order; ++i) {
-            (*subImage).array() *= (*imageVector[n + _lagTimes.at(i)]).array();
+        for (int i = 0; i < order; ++i) {
+            (*subImage).array() *= (*imageVector.at(n + expandedLagTimes.at(i))).array();
         }
         *outputImage += *subImage;
     }
@@ -251,16 +256,28 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
 }
 
-SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, int lagTime_rhs, size_t batchSize) :
+SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, std::vector<int> lagTimes, size_t batchSize) :
     SOFICalculator(batchSize),
-    order(order_rhs)
+    order(order_rhs),
+	_lagTimes(lagTimes)
 {
+	// only allow order 2 or 3 for now
+	if ((order != 2) && (order != 3))
+		throw std::runtime_error("SOFI cross correlation currently supports only orders 2 or 3");
+	
+	// for an order of n there should be exactly (n - 1) lag times
+	if (_lagTimes.size() != order - 1)
+		throw std::runtime_error("A SOFI image of order n requires (n - 1) lag times to be specified");
 }
 
 void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
+	int largestLagTime = *(std::max_element(_lagTimes.begin(), _lagTimes.end()));
     // verify that there are enough images in the input buffer
     if (this->imageVector.size() == 0)
         throw SOFINoImageInCalculation("no images for SOFICalculator_CrossCorrelation::getResult()");
+	if (this->imageVector.size() <= largestLagTime) {
+		throw SOFINoImageInCalculation("Requested a SOFI image even though there are not enough input images available");
+    }
     
     ImagePtr firstImage = this->imageVector.front();
 	
@@ -276,6 +293,13 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     for (std::vector<ImagePtr>::iterator it = this->imageVector.begin(); it != imageVector.end(); ++it) {
         *(*it) -= *thisBatchAverageImage;
     }
+	
+	// determine how many evaluations we can make given the lag times
+	int nEvaluations = this->imageVector.size() - largestLagTime;
+	// set up a lag time vector that explicitly includes the zero-lag time for the first contribution,
+	// so that all contributions can be treated symetrically.
+	std::vector<int> expandedLagTimes = _lagTimes;
+	expandedLagTimes.insert(expandedLagTimes.begin(), 0);
     
     // set everything up
     XCSOFIKernelProvider kernelProvider;
@@ -295,11 +319,9 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
 	outputImage->setConstant(0.0);
     
     double currentVal, summedVal;
-    ImagePtr currentImage;
     // main calculation
     // loop over all images
-    for (size_t n = 0; n < this->imageVector.size(); ++n) {
-        currentImage = imageVector[n];
+    for (size_t n = 0; n < nEvaluations; ++n) {
         // loop over all pixels in the input
         for (int i = firstRow; i <= lastRow; ++i) {
             for (int j = firstCol; j <= lastCol; ++j) {
@@ -313,7 +335,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                         const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
                         currentVal = 1;
                         for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
-                            currentVal *= (*currentImage)(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
+                            currentVal *= (*imageVector.at(n + expandedLagTimes.at(multiplicationIndex)))(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
                         }
                         summedVal += currentVal;
                     }

@@ -95,13 +95,14 @@ protected:
 
 class SOFICalculator_CrossCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_CrossCorrelation(int order, int lagTime, size_t batchSize);
+	SOFICalculator_CrossCorrelation(int order, std::vector<int> lagTimes, size_t batchSize);
 	~SOFICalculator_CrossCorrelation() {;}
 	
 protected:
     void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
     
     int order;
+	std::vector<int> _lagTimes;
 };
 
 class SOFIPixelCalculation {
