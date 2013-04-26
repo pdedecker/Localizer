@@ -50,7 +50,7 @@ class SOFINoImageInCalculation;
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					boost::shared_ptr<ProgressReporter> progressReporter,
-					int nFramesToSkip, int nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					int nFramesToSkip, int nFramesToInclude, std::vector<int> lagTimes, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages);
 
 /* The precise SOFI calculation depends on the type of calculation (order, crosscorrelation or not, etc)
@@ -83,13 +83,14 @@ protected:
 
 class SOFICalculator_AutoCorrelation : public SOFICalculator {
 public:
-	SOFICalculator_AutoCorrelation(int order, int lagTime, size_t batchSize);
+	SOFICalculator_AutoCorrelation(int order, std::vector<int> lagTimes, size_t batchSize);
 	~SOFICalculator_AutoCorrelation() {;}
 	
 protected:
     void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
     
     int order;
+	std::vector<int> _lagTimes;
 };
 
 class SOFICalculator_CrossCorrelation : public SOFICalculator {

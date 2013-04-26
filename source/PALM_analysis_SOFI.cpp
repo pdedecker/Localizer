@@ -31,12 +31,13 @@
 
 void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					boost::shared_ptr<ProgressReporter> progressReporter,
-					int nFramesToSkip, int nFramesToInclude, int lagTime, int order, int crossCorrelate, int nFramesToGroup, 
+					int nFramesToSkip, int nFramesToInclude, std::vector<int> lagTimes, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages) {
 	size_t nImages = imageLoader->getNImages();
 	size_t blockSize = 50;
 	sofiOutputImages.clear();
 	averageOutputImages.clear();
+	int largestLagTime = std::max_element(lagTimes.begin(), lagTimes.end());
 	
 	if (nFramesToSkip < 0)
 		nFramesToSkip = 0;
@@ -47,13 +48,13 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
     if (nFramesToSkip + nFramesToInclude > nImages)
         throw std::runtime_error("Too many images requested");
 	
-	if (nImages <= lagTime)
-		throw std::runtime_error("Not enough images for the requested lagtime");
+	if ((nImages <= largestLagTime) || (largestLagTime <= blockSize))
+		throw std::runtime_error("Lag time too long");
 	
-	if (nFramesToSkip > nImages - lagTime)
+	if (nFramesToSkip > nImages - largestLagTime)
 		throw std::runtime_error("Too many frames are being skipped (/SKIP flag)");
 	
-	if ((nFramesToGroup <= lagTime) && (nFramesToGroup != 0))
+	if ((nFramesToGroup <= largestLagTime) && (nFramesToGroup != 0))
 		throw std::runtime_error("Cannot group less frames than the lag time");
     
     // adjust to the range requested by the user
@@ -148,6 +149,7 @@ void SOFICalculator::addNewImage(ImagePtr newImage) {
     if (imageVector.size() == batchSize) {
         // it's time to calculate and store some output
         addNewBlockFromStoredImages();
+		imageVector.clear();
     }
 }
 
@@ -171,7 +173,6 @@ void SOFICalculator::addNewBlockFromStoredImages() {
     }
     
     sumOfWeightsIncluded += weightOfThisBlock;
-    imageVector.clear();
 }
 
 void SOFICalculator::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
@@ -195,15 +196,23 @@ void SOFICalculator::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculat
     *calculatedAverageImage /= sumOfWeightsIncluded;
 }
 
-SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, int lagTime_rhs, size_t batchSize) :
+SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, std::vector<int> lagTimes, size_t batchSize) :
     SOFICalculator(batchSize),
-    order(order_rhs)
+    order(order_rhs),
+	_lagTimes(lagTimes)
 {
+	// for an order of n there should be exactly (n - 1) lag times
+	if (_lagTimes.size() != order - 1)
+		throw std::runtime_error("A SOFI image of order n requires (n - 1) lag times to be specified");
 }
 
 void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) {
+	int largestLagTime = std::max_element(_lagTimes);
 	if (this->imageVector.size() == 0) {
-		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no evaluations");
+		throw SOFINoImageInCalculation("Requested a SOFI image even though there are no input images available");
+    }
+	if (this->imageVector.size() <= largestLagTime) {
+		throw SOFINoImageInCalculation("Requested a SOFI image even though there are not enough input images available");
     }
     
     ImagePtr firstImage = this->imageVector.front();
@@ -221,20 +230,22 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
         *(*it) -= *thisBatchAverageImage;
     }
 	
-	// since the lagtime is assumed to be zero for now, simply multiply the images together
+	// determine how many evaluations we can make given the lag times
+	int nEvaluations = this->imageVector.size() - largestLagTime;
     ImagePtr outputImage(new Image(firstImage->rows(), firstImage->cols()));
     ImagePtr subImage(new Image(firstImage->rows(), firstImage->cols()));
 	
     outputImage->setConstant(0.0);
-    for (size_t n = 0; n < this->imageVector.size(); ++n) {
+    for (size_t n = 0; n < nEvaluations; ++n) {
         subImage->setConstant(1.0);
-        for (int i = 0; i < order; ++i) {
-            (*subImage).array() *= (*imageVector[n]).array();
+		(*subImage).array() *= (*imageVector[n]).array();	// the first image is always at lag time zero
+        for (int i = 1; i < order; ++i) {
+            (*subImage).array() *= (*imageVector[n + _lagTimes.at(i)]).array();
         }
         *outputImage += *subImage;
     }
     
-    *outputImage /= static_cast<double>(this->imageVector.size());
+    *outputImage /= static_cast<double>(nEvaluations);
     
     calculatedSOFIImage = ImagePtr(new Image(*outputImage));
     calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
