@@ -443,7 +443,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	array = const_cast<mxArray*>(prhs[3]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("4th argument must be a double scalar (number of frames to skip)");
-	if (*mxGetPr(array) <= 0); {
+	if (*mxGetPr(array) <= 0) {
 		nFramesToSkip = 0;
 	} else {
 		nFramesToSkip = static_cast<int>(*mxGetPr(array) + 0.5);
