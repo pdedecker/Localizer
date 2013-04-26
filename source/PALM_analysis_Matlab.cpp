@@ -439,21 +439,25 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
 	
 	// index 3 - must be a single number (number of frames to skip)
-	size_t nFramesToSkip;
+	int nFramesToSkip = 0;
 	array = const_cast<mxArray*>(prhs[3]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("4th argument must be a double scalar (number of frames to skip)");
-	nFramesToSkip = static_cast<size_t>(*mxGetPr(array) + 0.5);
+	if (*mxGetPr(array) <= 0); {
+		nFramesToSkip = 0;
+	} else {
+		nFramesToSkip = static_cast<int>(*mxGetPr(array) + 0.5);
+	}
 	
 	// index 4 - must be a single number (number of frames to include)
-	size_t nFramesToInclude;
+	int nFramesToInclude = -1;
 	array = const_cast<mxArray*>(prhs[4]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("5th argument must be a double scalar (number of frames to include)");
 	if (*mxGetPr(array) <= 0) {
-		nFramesToInclude = static_cast<size_t>(-1);
+		nFramesToInclude = -1;
 	} else {
-		nFramesToSkip = static_cast<size_t>(*mxGetPr(array) + 0.5);
+		nFramesToInclude = static_cast<int>(*mxGetPr(array) + 0.5);
 	}
 	
 	// index 5 - must be the data
