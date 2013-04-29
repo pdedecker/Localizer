@@ -111,7 +111,7 @@ void MatrixRecycler::freeAllMatrices() {
  * A global instance of MatrixRecycler to be used in the
  * segmentation
  */
-boost::shared_ptr<MatrixRecycler> globalMatrixRecycler(new MatrixRecycler);
+std::shared_ptr<MatrixRecycler> globalMatrixRecycler(new MatrixRecycler);
 
 Image* GetRecycledMatrix(size_t nRows, size_t nCols) {
 	return globalMatrixRecycler->getMatrix(nRows, nCols);

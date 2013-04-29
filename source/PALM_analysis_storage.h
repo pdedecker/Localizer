@@ -229,9 +229,9 @@ public:
 	// or from a file containing positions written to disk
 	// the functions will discern the type of positions and return a LocalizedPositionsContainer of the correct type
 #ifdef WITH_IGOR
-	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave);
+	static std::shared_ptr<LocalizedPositionsContainer> GetPositionsFromWave(waveHndl positionsWave);
 #endif
-	static boost::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string filePath);
+	static std::shared_ptr<LocalizedPositionsContainer> GetPositionsFromFile(std::string filePath);
 	
 	// constructor and destructor
 	LocalizedPositionsContainer() {;}
@@ -260,8 +260,8 @@ public:
 	virtual double getBackgroundDeviation(size_t index) const {return 0;}
 	
 	// add positions
-	virtual void addPosition(boost::shared_ptr<LocalizedPosition> newPosition) = 0;
-	virtual void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) = 0;
+	virtual void addPosition(std::shared_ptr<LocalizedPosition> newPosition) = 0;
+	virtual void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) = 0;
 	
 	// set the frame numbers for all positions
 	virtual void setFrameNumbers(size_t frameNumber) = 0;
@@ -309,8 +309,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -355,8 +355,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -411,8 +411,8 @@ public:
 	double getBackgroundDeviation(size_t index) const {return positionsVector.at(index).backgroundDeviation;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -454,8 +454,8 @@ public:
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -496,8 +496,8 @@ public:
 	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -539,8 +539,8 @@ public:
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {
@@ -586,8 +586,8 @@ public:
 	double getYPositionDeviation(size_t index) const {return positionsVector.at(index).positionDeviation;}
 	
 	// adding new positions
-	void addPosition(boost::shared_ptr<LocalizedPosition> newPosition);
-	void addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
 	
 	// set the frame numbers for all positions
 	void setFrameNumbers(size_t frameNumber) {

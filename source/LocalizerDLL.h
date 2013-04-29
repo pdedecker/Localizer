@@ -44,7 +44,7 @@ EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file 
                                   int* nPositions,          // number of positions in result
                                   int* nColumns);           // number of columns in the array
 
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
+std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
 
 EXPORT void LocalizerFreeArray(double *arrayPtr);           // function to clean up arrays allocated by this program
 

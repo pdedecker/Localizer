@@ -92,8 +92,8 @@ int GetFileStorageType(std::string &filePath) {
     throw std::runtime_error("Unable to deduce the file type");
 }
 
-boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path) {
-    boost::shared_ptr<ImageLoader> image_loader;
+std::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path) {
+    std::shared_ptr<ImageLoader> image_loader;
     size_t estimatedCameraType;
     std::string convertedFilePath;
 
@@ -111,28 +111,28 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 
     switch (estimatedCameraType) {
 		case CAMERA_TYPE_WINSPEC:	// spe files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
 			break;
 		case CAMERA_TYPE_ANDOR:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
 			break;
 		case CAMERA_TYPE_HAMAMATSU:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
 			break;
 		case CAMERA_TYPE_TIFF:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
 			break;
 		case CAMERA_TYPE_PDE:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
 			break;
 		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
 			break;
 		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
 			break;
 		case CAMERA_TYPE_MULTIFILE_TIFF:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderMultiFileTIFF(convertedFilePath));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderMultiFileTIFF(convertedFilePath));
 			break;
 		default:
 			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
@@ -144,7 +144,7 @@ boost::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& d
 }
 
 int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
-                        boost::shared_ptr<ProgressReporter> progressReporter) {
+                        std::shared_ptr<ProgressReporter> progressReporter) {
     size_t nImages = image_loader->getNImages();
     size_t maxNImagesToLoad, nImagesToLoad;
     size_t x_size, y_size;
@@ -267,7 +267,7 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
 
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                           long startX, long startY, long endX, long endY,
-                                          boost::shared_ptr<ProgressReporter> progressReporter) {
+                                          std::shared_ptr<ProgressReporter> progressReporter) {
     size_t n_images = image_loader->getNImages();
     size_t x_size = image_loader->getXSize();
     size_t y_size = image_loader->getYSize();
@@ -342,7 +342,7 @@ waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderA
 
 waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                            long startX, long startY, long endX, long endY,
-                                           boost::shared_ptr<ProgressReporter> progressReporter) {
+                                           std::shared_ptr<ProgressReporter> progressReporter) {
 
     int numDimensions;
     CountInt dimensionSizes[MAX_DIMENSIONS+1];
@@ -387,7 +387,7 @@ waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolder
 
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                  long startX, long startY, long endX, long endY,
-                                 boost::shared_ptr<ProgressReporter> progressReporter) {
+                                 std::shared_ptr<ProgressReporter> progressReporter) {
     size_t n_images = image_loader->getNImages();
     size_t x_size = image_loader->getXSize();
     size_t y_size = image_loader->getYSize();
@@ -461,7 +461,7 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
 
 waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                 long startX, long startY, long endX, long endY,
-                                boost::shared_ptr<ProgressReporter> progressReporter) {
+                                std::shared_ptr<ProgressReporter> progressReporter) {
     size_t n_images = image_loader->getNImages();
     size_t x_size = image_loader->getXSize();
     size_t y_size = image_loader->getYSize();
@@ -700,7 +700,7 @@ std::string ConvertPathToNativePath(std::string filePath) {
 
 }
 
-waveHndl CopyVectorToIgorDPWave(boost::shared_ptr<std::vector<double> > vec, std::string waveName) {
+waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::string waveName) {
     waveHndl DPWave;
 
     int err;

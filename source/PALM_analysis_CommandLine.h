@@ -46,15 +46,15 @@ int main(int argc, char *argv[]);
 
 // function that will parse the string command line arguments
 // and convert them to integer constants
-boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name);
-boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name);
-boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth, double smoothSigmaFactor);
-boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name);
-boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma);
-boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth);
+std::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name);
+std::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name);
+std::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double psfWidth, double smoothSigmaFactor);
+std::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name);
+std::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma);
+std::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth);
 
 // function that will guess the CCD file type and return an image loader
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
+std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
 
 // function that takes the CCD file path and return an output string for the localized positions
 std::string GetOutputPositionsFilePath(std::string dataFilePath);

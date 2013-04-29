@@ -35,21 +35,21 @@ EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file 
                                   int* nPositions,          // number of positions in result
                                   int* nColumns) {          // number of columns in the array
     try {
-        boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
-        boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
-        boost::shared_ptr<ThresholdImage> thresholder(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
-        boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
-        boost::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent4());
-        boost::shared_ptr<FitPositions> fitPositions(new FitPositions_SymmetricGaussian(psfWidth, 1.0));
-        std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
+        std::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
+        std::shared_ptr<ThresholdImage> thresholder(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
+        std::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
+        std::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent4());
+        std::shared_ptr<FitPositions> fitPositions(new FitPositions_SymmetricGaussian(psfWidth, 1.0));
+        std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
         
-        boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_Silent);
+        std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_Silent);
         
-        boost::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
+        std::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
                                                                                                 postprocessor, particleFinder, particleVerifiers,
                                                                                                 fitPositions,
                                                                                                 progressReporter, -1, -1));
-        boost::shared_ptr<LocalizedPositionsContainer> localizedPositions = analysisController->doPALMAnalysis(imageLoader);
+        std::shared_ptr<LocalizedPositionsContainer> localizedPositions = analysisController->doPALMAnalysis(imageLoader);
     }
     catch (...) {
         return -1;
@@ -58,26 +58,26 @@ EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file 
     return 0;
 }
 
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
+std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
     std::string fileExtension = filePath.substr(filePath.length() - 3, 3);
 	
 	// convert the extension to lowercase for easy comparison
 	std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 	
 	if (fileExtension == std::string("spe"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderSPE(filePath));
 	
 	if (fileExtension == std::string("sif"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderAndor(filePath));
 	
 	if (fileExtension == std::string("his"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
 	
 	if (fileExtension == std::string("tif"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
 	
 	if (fileExtension == std::string("pde"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
 	
 	// if we get here then we don't recognize the file type
 	throw (std::runtime_error("Unknown data file type with extension " + fileExtension));

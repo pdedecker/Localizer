@@ -3,24 +3,9 @@
 //
 // Copyright (C) 2008-2009 Gael Guennebaud <gael.guennebaud@inria.fr>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 3 of the License, or (at your option) any later version.
-//
-// Alternatively, you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 2 of
-// the License, or (at your option) any later version.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef EIGEN_GENERAL_BLOCK_PANEL_H
 #define EIGEN_GENERAL_BLOCK_PANEL_H
@@ -84,8 +69,8 @@ inline void manage_caching_sizes(Action action, std::ptrdiff_t* l1=0, std::ptrdi
   * - the number of scalars that fit into a packet (when vectorization is enabled).
   *
   * \sa setCpuCacheSizes */
-template<typename LhsScalar, typename RhsScalar, int KcFactor>
-void computeProductBlockingSizes(std::ptrdiff_t& k, std::ptrdiff_t& m, std::ptrdiff_t& n)
+template<typename LhsScalar, typename RhsScalar, int KcFactor, typename SizeType>
+void computeProductBlockingSizes(SizeType& k, SizeType& m, SizeType& n)
 {
   EIGEN_UNUSED_VARIABLE(n);
   // Explanations:
@@ -106,13 +91,13 @@ void computeProductBlockingSizes(std::ptrdiff_t& k, std::ptrdiff_t& m, std::ptrd
   };
 
   manage_caching_sizes(GetAction, &l1, &l2);
-  k = std::min<std::ptrdiff_t>(k, l1/kdiv);
-  std::ptrdiff_t _m = k>0 ? l2/(4 * sizeof(LhsScalar) * k) : 0;
+  k = std::min<SizeType>(k, l1/kdiv);
+  SizeType _m = k>0 ? l2/(4 * sizeof(LhsScalar) * k) : 0;
   if(_m<m) m = _m & mr_mask;
 }
 
-template<typename LhsScalar, typename RhsScalar>
-inline void computeProductBlockingSizes(std::ptrdiff_t& k, std::ptrdiff_t& m, std::ptrdiff_t& n)
+template<typename LhsScalar, typename RhsScalar, typename SizeType>
+inline void computeProductBlockingSizes(SizeType& k, SizeType& m, SizeType& n)
 {
   computeProductBlockingSizes<LhsScalar,RhsScalar,1>(k, m, n);
 }

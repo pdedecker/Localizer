@@ -32,7 +32,7 @@
 #include "PALM_analysis_ProgressReporting.h"
 #include "PALM_analysis_FileIO.h"
 
-void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+void CCDImagesProcessorAverageSubtraction::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	// depending on the value of this->n_frames_averaging we either need to subtract the entire movie or just a small part
 	this->progressReporter->CalculationStarted();
 	
@@ -45,7 +45,7 @@ void CCDImagesProcessorAverageSubtraction::convert_images(boost::shared_ptr<Imag
 	this->progressReporter->CalculationDone();
 }
 
-void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {	
+void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {	
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
 	
@@ -110,7 +110,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(boost::s
 	
 }
 
-void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
+void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
 	
 	ImagePtr currentImage;
 	size_t xSize = image_loader->getXSize();
@@ -212,7 +212,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(boost::shared_
 	}
 }
 
-void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+void CCDImagesProcessorDifferenceImage::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	ImagePtr current_image;
 	ImagePtr next_image;
 	size_t total_number_of_images = image_loader->getNImages();
@@ -256,7 +256,7 @@ void CCDImagesProcessorDifferenceImage::convert_images(boost::shared_ptr<ImageLo
 	this->progressReporter->CalculationDone();
 }
 
-void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	ImagePtr current_image;
 	size_t total_number_of_images = image_loader->getNImages();
 	int abortStatus;
@@ -281,7 +281,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(boost::shared_p
 	this->progressReporter->CalculationDone();
 }
 
-void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+void CCDImagesProcessorCrop::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	size_t total_number_of_images = image_loader->getNImages();
 	int abortStatus;
 	
@@ -296,8 +296,8 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	this->croppedXSize = endX - startX + 1;
 	this->croppedYSize = endY - startY + 1;
 	
-	boost::shared_ptr<Image > croppedImage;
-	boost::shared_ptr<Image > loadedImage;
+	std::shared_ptr<Image > croppedImage;
+	std::shared_ptr<Image > loadedImage;
 	
 	this->progressReporter->CalculationStarted();
 	
@@ -327,15 +327,15 @@ void CCDImagesProcessorCrop::convert_images(boost::shared_ptr<ImageLoader> image
 	this->progressReporter->CalculationDone();
 }
 
-void CCDImagesProcessorConvertToPhotons::convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) {
+void CCDImagesProcessorConvertToPhotons::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	assert(this->multiplicationFactor > 0.0);
 	
 	size_t total_number_of_images = image_loader->getNImages();
 	size_t x_size = image_loader->getXSize();
 	size_t y_size = image_loader->getYSize();
 	
-	boost::shared_ptr<Image > loadedImage;
-	boost::shared_ptr<Image > convertedImage (new Image((int)x_size, (int)y_size));;
+	std::shared_ptr<Image > loadedImage;
+	std::shared_ptr<Image > convertedImage (new Image((int)x_size, (int)y_size));;
 	
 	int abortStatus;
 	this->progressReporter->CalculationStarted();

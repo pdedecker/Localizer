@@ -7,24 +7,9 @@
 // Copyright (C) 2010 Hauke Heibel <hauke.heibel@gmail.com>
 // Copyright (C) 2010 Thomas Capricelli <orzel@freehackers.org>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 3 of the License, or (at your option) any later version.
-//
-// Alternatively, you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 2 of
-// the License, or (at your option) any later version.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
 /*****************************************************************************
@@ -103,11 +88,11 @@ inline void throw_std_bad_alloc()
 /** \internal Like malloc, but the returned pointer is guaranteed to be 16-byte aligned.
   * Fast, but wastes 16 additional bytes of memory. Does not throw any exception.
   */
-inline void* handmade_aligned_malloc(size_t size)
+inline void* handmade_aligned_malloc(std::size_t size)
 {
   void *original = std::malloc(size+16);
   if (original == 0) return 0;
-  void *aligned = reinterpret_cast<void*>((reinterpret_cast<size_t>(original) & ~(size_t(15))) + 16);
+  void *aligned = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(original) & ~(std::size_t(15))) + 16);
   *(reinterpret_cast<void**>(aligned) - 1) = original;
   return aligned;
 }
@@ -123,13 +108,18 @@ inline void handmade_aligned_free(void *ptr)
   * Since we know that our handmade version is based on std::realloc
   * we can use std::realloc to implement efficient reallocation.
   */
-inline void* handmade_aligned_realloc(void* ptr, size_t size, size_t = 0)
+inline void* handmade_aligned_realloc(void* ptr, std::size_t size, std::size_t = 0)
 {
   if (ptr == 0) return handmade_aligned_malloc(size);
   void *original = *(reinterpret_cast<void**>(ptr) - 1);
+  std::ptrdiff_t previous_offset = static_cast<char *>(ptr)-static_cast<char *>(original);
   original = std::realloc(original,size+16);
   if (original == 0) return 0;
-  void *aligned = reinterpret_cast<void*>((reinterpret_cast<size_t>(original) & ~(size_t(15))) + 16);
+  void *aligned = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(original) & ~(std::size_t(15))) + 16);
+  void *previous_aligned = static_cast<char *>(original)+previous_offset;
+  if(aligned!=previous_aligned)
+    std::memmove(aligned, previous_aligned, size);
+  
   *(reinterpret_cast<void**>(aligned) - 1) = original;
   return aligned;
 }
@@ -138,7 +128,7 @@ inline void* handmade_aligned_realloc(void* ptr, size_t size, size_t = 0)
 *** Implementation of generic aligned realloc (when no realloc can be used)***
 *****************************************************************************/
 
-void* aligned_malloc(size_t size);
+void* aligned_malloc(std::size_t size);
 void  aligned_free(void *ptr);
 
 /** \internal
@@ -219,7 +209,7 @@ inline void* aligned_malloc(size_t size)
     if(posix_memalign(&result, 16, size)) result = 0;
   #elif EIGEN_HAS_MM_MALLOC
     result = _mm_malloc(size, 16);
-  #elif (defined _MSC_VER)
+#elif defined(_MSC_VER) && (!defined(_WIN32_WCE))
     result = _aligned_malloc(size, 16);
   #else
     result = handmade_aligned_malloc(size);
@@ -242,7 +232,7 @@ inline void aligned_free(void *ptr)
     std::free(ptr);
   #elif EIGEN_HAS_MM_MALLOC
     _mm_free(ptr);
-  #elif defined(_MSC_VER)
+  #elif defined(_MSC_VER) && (!defined(_WIN32_WCE))
     _aligned_free(ptr);
   #else
     handmade_aligned_free(ptr);
@@ -760,7 +750,7 @@ public:
          __asm__ __volatile__ ("cpuid": "=a" (abcd[0]), "=b" (abcd[1]), "=c" (abcd[2]), "=d" (abcd[3]) : "a" (func), "c" (id) );
 #    endif
 #  elif defined(_MSC_VER)
-#    if (_MSC_VER > 1500)
+#    if (_MSC_VER > 1500) && ( defined(_M_IX86) || defined(_M_X64) )
 #      define EIGEN_CPUID(abcd,func,id) __cpuidex((int*)abcd,func,id)
 #    endif
 #  endif

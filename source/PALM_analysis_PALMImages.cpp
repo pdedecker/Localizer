@@ -61,7 +61,7 @@ double NormalCDFLookupTable::getNormalCDF(double x, double sigma) {
     return cdfTable[lowerIndex] * (fractionalIndex - static_cast<double>(lowerIndex)) + cdfTable[lowerIndex + 1] * (static_cast<double>(lowerIndex + 1) - fractionalIndex);
 }
 
-ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+ImagePtr PALMBitmapImageCalculator::CalculateImage(std::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 																				size_t ySize, size_t imageWidth, size_t imageHeight) {
 	int progressStatus;
 	double fittedXPos, fittedYPos, fittedIntegral;
@@ -156,7 +156,7 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(boost::shared_ptr<LocalizedPo
 	return outputImage;
 }
 
-double PALMBitmapImageDeviationCalculator_GaussianMask::getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {
+double PALMBitmapImageDeviationCalculator_GaussianMask::getDeviation(std::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {
 	double integral = positions->getIntegral(index);
 	double background = positions->getBackground(index);
 	

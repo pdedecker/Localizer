@@ -1030,7 +1030,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
-	boost::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
+	std::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
 	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}

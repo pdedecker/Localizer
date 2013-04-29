@@ -29,8 +29,10 @@
 
 #include "PALM_analysis_SOFI.h"
 
-void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
-					boost::shared_ptr<ProgressReporter> progressReporter,
+#include "tbb/tbb.h"
+
+void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
+					std::shared_ptr<ProgressReporter> progressReporter,
 					int nFramesToSkip, int nFramesToInclude, std::vector<int> lagTimes, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages) {
 	if (lagTimes.empty() && (order > 0))
@@ -64,11 +66,11 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
     // adjust to the range requested by the user
     nImages = nFramesToSkip + nFramesToInclude;
 	
-	boost::shared_ptr<SOFICalculator> sofiCalculator;
+	std::shared_ptr<SOFICalculator> sofiCalculator;
 	if (crossCorrelate == 0) {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTimes, blockSize));
+		sofiCalculator = std::shared_ptr<SOFICalculator>(new SOFICalculator_AutoCorrelation(order, lagTimes, blockSize));
 	} else {
-		sofiCalculator = boost::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTimes, blockSize));
+		sofiCalculator = std::shared_ptr<SOFICalculator>(new SOFICalculator_CrossCorrelation(order, lagTimes, blockSize));
 	}
 	
 	size_t nImagesToProcess = nImages - nFramesToSkip;
@@ -299,7 +301,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     }
 	
 	// determine how many evaluations we can make given the lag times
-	int nEvaluations = this->imageVector.size() - largestLagTime;
+	size_t nEvaluations = this->imageVector.size() - largestLagTime;
 	// set up a lag time vector that explicitly includes the zero-lag time for the first contribution,
 	// so that all contributions can be treated symetrically.
 	std::vector<int> expandedLagTimes = _lagTimes;
@@ -325,30 +327,35 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     double currentVal, summedVal;
     // main calculation
     // loop over all images
-    for (size_t n = 0; n < nEvaluations; ++n) {
-        // loop over all pixels in the input
-        for (int i = firstRow; i <= lastRow; ++i) {
-            for (int j = firstCol; j <= lastCol; ++j) {
-                // loop over the kernel
-                for (int k = 0; k < nPixelsInKernel; ++k) {
-                    // loop over all calculations within this kernel pixel
-                    const std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
-                    summedVal = 0;
-                    for (size_t calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
-                        // and finally, loop over the different operations that each input requires
-                        const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
-                        currentVal = 1;
-                        for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
-                            currentVal *= (*imageVector.at(n + expandedLagTimes.at(multiplicationIndex)))(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, nEvaluations), [&](const tbb::blocked_range<size_t> &thisRange) {
+        for (size_t n = thisRange.begin(); n != thisRange.end(); ++n) {
+            // loop over all pixels in the input
+            for (int i = firstRow; i <= lastRow; ++i) {
+                for (int j = firstCol; j <= lastCol; ++j) {
+                    // loop over the kernel
+                    for (int k = 0; k < nPixelsInKernel; ++k) {
+                        // loop over all calculations within this kernel pixel
+                        const std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
+                        summedVal = 0;
+                        for (size_t calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
+                            // and finally, loop over the different operations that each input requires
+                            const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
+                            currentVal = 1;
+                            for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
+                                currentVal *= (*imageVector.at(n + expandedLagTimes.at(multiplicationIndex)))(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
+                            }
+                            summedVal += currentVal;
                         }
-                        summedVal += currentVal;
+                        summedVal /= static_cast<double>(calculationsForThisPixel->size());
+                        (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
+                        (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
                     }
-                    summedVal /= static_cast<double>(calculationsForThisPixel->size());
-                    (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
-                    (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
                 }
             }
         }
+    });
+    for (size_t n = 0; n < nEvaluations; ++n) {
+        
     }
     
     // take the average

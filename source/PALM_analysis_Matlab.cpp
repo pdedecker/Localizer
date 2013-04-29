@@ -163,66 +163,66 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 	
 	// now run the actual localization
 	try {
-		boost::shared_ptr<ImageLoader> imageLoader;
+		std::shared_ptr<ImageLoader> imageLoader;
 		if (!filePath.empty()) {
 			imageLoader = GetImageLoader(filePath);
 		} else {
-			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 		
-		boost::shared_ptr<ThresholdImage> thresholder;
+		std::shared_ptr<ThresholdImage> thresholder;
 		switch(segmentationAlgorithm) {
 			case THRESHOLD_METHOD_GLRT:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(thresholdParam, psfWidth));
+				thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(thresholdParam, psfWidth));
 				break;
 			case THRESHOLD_METHOD_SMOOTHSIGMA:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, thresholdParam));
+				thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, thresholdParam));
 				break;
 			default:
 				throw std::runtime_error("Unknown segmentation method");
 				break;
         }
 		
-		boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
-		boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
+		std::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
+		std::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
 		
-		boost::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent8());
+		std::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent8());
 		
-		std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-		particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(psfWidth)));
+		std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
+		particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(psfWidth)));
 		
-		boost::shared_ptr<FitPositions> positionsFitter;
+		std::shared_ptr<FitPositions> positionsFitter;
 		double sigma = 1.0;
 		switch (localizationAlgorithm) {
             case LOCALIZATION_METHOD_2DGAUSS:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_MULTIPLICATION:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
                 break;
             case LOCALIZATION_METHOD_CENTROID:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(psfWidth, sigma));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(psfWidth, sigma));
                 break;
 			case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
-				positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
+				positionsFitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
 				break;
             case LOCALIZATION_METHOD_MLEwG:
-                positionsFitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
+                positionsFitter = std::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
                 break;
             default:
                 throw std::runtime_error("Unknown localization method");
                 break;
 		}
 		
-		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
+		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
-		boost::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
+		std::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
 																								postprocessor, particleFinder, particleVerifiers,
 																								positionsFitter,
 																								progressReporter, -1,
@@ -320,26 +320,26 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		boost::scoped_ptr<ImageLoader> imageLoader(new ImageLoaderMatlab(const_cast<mxArray*>(array)));
 		ImagePtr imageToSegment = imageLoader->readImage(0);
 		
-		boost::shared_ptr<ThresholdImage> thresholder;
+		std::shared_ptr<ThresholdImage> thresholder;
 		switch(segmentationAlgorithm) {
 			case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(segmentationParameter, psfWidth));
+				thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(segmentationParameter, psfWidth));
 				break;
 			case THRESHOLD_METHOD_SMOOTHSIGMA:
-				thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, segmentationParameter));
+				thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, segmentationParameter));
 				break;
 			default:
 				throw std::runtime_error("Unknown segmentation method");
 				break;
         }
 		
-		boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
-		boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
-		boost::shared_ptr<ParticleFinder> particlefinder(new ParticleFinder_adjacent8());
+		std::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
+		std::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
+		std::shared_ptr<ParticleFinder> particlefinder(new ParticleFinder_adjacent8());
 		
 		// calculate the threshold
-        boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = do_processing_and_thresholding(imageToSegment, preprocessor, thresholder, postprocessor);
-		boost::shared_ptr<std::list<Particle> > located_particles = particlefinder->findPositions(imageToSegment, thresholded_image);
+        std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image = do_processing_and_thresholding(imageToSegment, preprocessor, thresholder, postprocessor);
+		std::shared_ptr<std::list<Particle> > located_particles = particlefinder->findPositions(imageToSegment, thresholded_image);
 		
 		// and copy the results back out
 		size_t segmentedRows = thresholded_image->rows();
@@ -478,17 +478,17 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	size_t nCols = mxGetM(array);
 	
 	try {
-		boost::shared_ptr<ImageLoader> imageLoader;
+		std::shared_ptr<ImageLoader> imageLoader;
 		if (!filePath.empty()) {
 			imageLoader = GetImageLoader(filePath);
 		} else {
-			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 		
-		boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
+		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
 		// no frame verifiers for now
-		std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
+		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		int lagTime = 0;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
 		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
@@ -567,11 +567,11 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 	}
 
 	try {
-		boost::shared_ptr<ImageLoader> imageLoader;
+		std::shared_ptr<ImageLoader> imageLoader;
 		if (!filePath.empty()) {
 			imageLoader = GetImageLoader(filePath);
 		} else {
-			imageLoader = boost::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 
 		plhs[0] = ConvertImagesToArray(imageLoader, firstImageToRead, nImagesToRead);
@@ -603,29 +603,29 @@ std::string GetMatlabString(const mxArray* array) {
 	return stdStr;
 }
 
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path) {
-    boost::shared_ptr<ImageLoader> image_loader;
+std::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path) {
+    std::shared_ptr<ImageLoader> image_loader;
 	
     int estimatedCameraType = GetFileStorageType(data_file_path);
 	
     switch (estimatedCameraType) {
 		case CAMERA_TYPE_WINSPEC:	// spe files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderSPE(data_file_path));
 			break;
 		case CAMERA_TYPE_ANDOR:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderAndor(data_file_path));
 			break;
 		case CAMERA_TYPE_HAMAMATSU:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(data_file_path));
 			break;
 		case CAMERA_TYPE_TIFF:	// 3 is reserved for TIFF files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
 		case CAMERA_TYPE_PDE:
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderPDE(data_file_path));
 			break;
 		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
-			image_loader = boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(data_file_path));
 			break;
 		default:
 			throw std::runtime_error("Unsupported CCD file type");
@@ -687,7 +687,7 @@ mxArray* ConvertImageToArray(ImagePtr image) {
 	return outputMatrix;
 }
 
-mxArray* ConvertImagesToArray(boost::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
+mxArray* ConvertImagesToArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
 	size_t nImages = imageLoader->getNImages();
 	size_t xSize = imageLoader->getXSize();
 	size_t ySize = imageLoader->getYSize();

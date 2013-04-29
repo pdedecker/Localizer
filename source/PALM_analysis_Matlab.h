@@ -42,7 +42,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 
 std::string GetMatlabString(const mxArray* array);
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
+std::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
 int GetFileStorageType(std::string &filePath);
 mxArray* ConvertImageToArray(ImagePtr image);
-mxArray* ConvertImagesToArray(boost::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);
+mxArray* ConvertImagesToArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);

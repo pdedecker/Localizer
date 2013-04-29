@@ -48,8 +48,8 @@ class SOFIFrameVerifier;
 // exception classes
 class SOFINoImageInCalculation;
 
-void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
-					boost::shared_ptr<ProgressReporter> progressReporter,
+void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
+					std::shared_ptr<ProgressReporter> progressReporter,
 					int nFramesToSkip, int nFramesToInclude, std::vector<int> lagTimes, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages);
 

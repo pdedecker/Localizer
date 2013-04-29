@@ -43,6 +43,7 @@
 		D0A9C2FA135F4EED00D076AE /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
 		D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
 		D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
+		D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
 		D0CCD31F1473C6B6005CD75A /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
 		D0CCD3211473C6B6005CD75A /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
 		D0CCD3231473C6B6005CD75A /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
@@ -132,6 +133,7 @@
 		D09810AF0D5B6E850074692A /* PALM_analysis_Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Processing.h; path = ../source/PALM_analysis_Processing.h; sourceTree = SOURCE_ROOT; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0B8585710E941A80045036F /* LocalizationAnalysis */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LocalizationAnalysis; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
@@ -175,6 +177,7 @@
 				D0EAE2A5170C54680012ED0E /* libtiff.a in Frameworks */,
 				D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */,
 				D0EAE2B0170C54AF0012ED0E /* libXOPSupport.a in Frameworks */,
+				D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +233,7 @@
 				D0EAE29C170C54680012ED0E /* libtiff.a */,
 				D0EAE29D170C54680012ED0E /* libz.a */,
 				D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */,
+				D0C7D190172E77CD0048356A /* libtbb.dylib */,
 				D0006D2B12CFD34D00539A8F /* Accelerate.framework */,
 				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
 			);
@@ -370,6 +374,7 @@
 				D0A9C2FB135F4EED00D076AE /* Frameworks */,
 				D0A9C2FF135F4EED00D076AE /* Rez */,
 				D0A9C301135F4EED00D076AE /* CopyFiles */,
+				D0118575172EA410001F165A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -482,6 +487,22 @@
 		};
 /* End PBXRezBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		D0118575172EA410001F165A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$TARGET_BUILD_DIR/$WRAPPER_NAME/Contents\"\nrm -R -f Frameworks\t# remove the old folder if it exists\nmkdir Frameworks\t\t# create a new one\ncd Frameworks\ncp \"$PROJECT_DIR/../lib/mac/libtbb.dylib\" .\n#cp \"$PROJECT_DIR/../lib/mac/libtbbmalloc.dylib\" .\n# now the otool part:\ninstall_name_tool -change libtbb.dylib @loader_path/../Frameworks/libtbb.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n#install_name_tool -change libtbbmalloc.dylib @loader_path/../Frameworks/libtbbmalloc.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D0A9C2EE135F4EED00D076AE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -582,7 +603,9 @@
 		4FADC23808B4156C00ABE55E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
 				EXPORTED_SYMBOLS_FILE = "";
@@ -593,6 +616,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"\"HAVE_INLINE\"",
 					"\"_DEBUG_\"",
+					"__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -610,7 +634,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -619,6 +643,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
 				EXPORTED_SYMBOLS_FILE = "";
@@ -633,6 +659,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					"\"HAVE_INLINE\"",
+					"__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0",
 				);
 				GCC_UNROLL_LOOPS = YES;
 				GCC_VERSION = 4.2;
@@ -657,7 +684,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx10.7;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
@@ -680,7 +707,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",
@@ -698,7 +725,7 @@
 				);
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
-				SDKROOT = macosx10.6;
+				SDKROOT = $inherited;
 				WRAPPER_EXTENSION = xop;
 				ZERO_LINK = YES;
 			};
@@ -720,7 +747,7 @@
 					WITH_IGOR,
 					TARGET_OS_MAC,
 				);
-				GCC_VERSION = 4.2;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"\"../../XOPSupport\"",
 					"$(inherited)",
@@ -739,7 +766,7 @@
 				);
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
-				SDKROOT = macosx10.6;
+				SDKROOT = $inherited;
 				WRAPPER_EXTENSION = xop;
 			};
 			name = Release;
@@ -748,7 +775,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = NO;
 				EXPORTED_SYMBOLS_FILE = "";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -768,7 +795,7 @@
 					"/opt/local/lib/libboost_program_options-mt.a",
 				);
 				PRODUCT_NAME = LocalizationAnalysis;
-				SDKROOT = macosx10.6;
+				SDKROOT = $inherited;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = dynamic;
 			};
 			name = Debug;
@@ -777,7 +804,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				EXPORTED_SYMBOLS_FILE = "";
@@ -797,7 +824,7 @@
 					"/opt/local/lib/libboost_program_options-mt.a",
 				);
 				PRODUCT_NAME = LocalizationAnalysis;
-				SDKROOT = "";
+				SDKROOT = $inherited;
 				ZERO_LINK = NO;
 			};
 			name = Release;

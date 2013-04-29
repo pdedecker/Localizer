@@ -50,7 +50,7 @@
  * Their code is provided below with only very minor changes (make xl0 etc. nonglobal).
  */
 
-boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
+std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
 																	 double calculationRange, size_t nBins, double lowerX, double upperX,
 																	 double lowerY, double upperY);
 

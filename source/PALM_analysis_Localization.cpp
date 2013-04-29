@@ -40,15 +40,15 @@
 	#include "mkl_vml.h"
 #endif
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
-                                                                                             boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit_positions(const ImagePtr image,
+                                                                                             std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
+        return std::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -65,8 +65,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
     double relativeAmplitudeError, relativeWidthError;
 
     ImagePtr image_subset;
-    boost::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
-    boost::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
+    std::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
+    std::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
 
     image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
@@ -225,15 +225,15 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::f
 
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const ImagePtr image,
-                                                                                              boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fit_positions(const ImagePtr image,
+                                                                                              std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> (new LocalizedPositionsContainer_2DGaussFixedWidth());
+        return std::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> (new LocalizedPositionsContainer_2DGaussFixedWidth());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -250,8 +250,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
     double relativeAmplitudeError;
 
     ImagePtr image_subset;
-    boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
-    boost::shared_ptr<LocalizedPosition_2DGaussFixedWidth> localizationResult (new LocalizedPosition_2DGaussFixedWidth());
+    std::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
+    std::shared_ptr<LocalizedPosition_2DGaussFixedWidth> localizationResult (new LocalizedPosition_2DGaussFixedWidth());
 
     image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
@@ -403,15 +403,15 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const ImagePtr image,
-                                                                                               boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::fit_positions(const ImagePtr image,
+                                                                                               std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+        return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -426,8 +426,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
     int status;
 
     ImagePtr image_subset;
-    boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
-    boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
+    std::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+    std::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
 
     image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
@@ -622,12 +622,12 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian:
 
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_SymmetricPSF::fit_positions(const ImagePtr image,
-																											boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_SymmetricPSF::fit_positions(const ImagePtr image,
+																											std::shared_ptr<std::list<Particle> > particles) {
 	// first fit all spots using restricted conditions on the spot shape, then reject the invalid ones
-	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> rawPositions(boost::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian>(ellipsoidalFitter.fit_positions(image, particles)));
-	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> acceptedPositions(new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
-	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizedPosition(new LocalizedPosition_Ellipsoidal2DGauss());
+	std::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> rawPositions(std::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian>(ellipsoidalFitter.fit_positions(image, particles)));
+	std::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> acceptedPositions(new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
+	std::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizedPosition(new LocalizedPosition_Ellipsoidal2DGauss());
 	int nPositions = rawPositions->getNPositions();
 	for (int i = 0; i < nPositions; ++i) {
 		*localizedPosition = rawPositions->getLocalizedPositionAtIndex(i);
@@ -649,14 +649,14 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian_
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(const ImagePtr image, std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_MLEwG> (new LocalizedPositionsContainer_MLEwG());
+        return std::shared_ptr<LocalizedPositionsContainer_MLEwG> (new LocalizedPositionsContainer_MLEwG());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -671,8 +671,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
     double dummy;
 
     ImagePtr image_subset;
-    boost::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
-    boost::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
+    std::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
+    std::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
 
     image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
@@ -809,15 +809,15 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions
 
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const ImagePtr image,
-                                                                                         boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_positions(const ImagePtr image,
+                                                                                         std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_Multiplication> (new LocalizedPositionsContainer_Multiplication());
+        return std::shared_ptr<LocalizedPositionsContainer_Multiplication> (new LocalizedPositionsContainer_Multiplication());
     }
 
     size_t size_of_subset = 2 * cutoff_radius + 1;
@@ -839,8 +839,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_p
 
     ImagePtr image_subset;
     ImagePtr image_subset_mask;
-    boost::shared_ptr<LocalizedPositionsContainer_Multiplication> fitted_positions (new LocalizedPositionsContainer_Multiplication());
-    boost::shared_ptr<LocalizedPosition_Multiplication> localizationResult (new LocalizedPosition_Multiplication());
+    std::shared_ptr<LocalizedPositionsContainer_Multiplication> fitted_positions (new LocalizedPositionsContainer_Multiplication());
+    std::shared_ptr<LocalizedPosition_Multiplication> localizationResult (new LocalizedPosition_Multiplication());
 
     image_subset = ImagePtr(new Image((int)size_of_subset, (int)size_of_subset));
     image_subset_mask = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
@@ -957,15 +957,15 @@ int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, 
 }
 
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const ImagePtr image,
-                                                                                   boost::shared_ptr<std::list<Particle> > particles) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positions(const ImagePtr image,
+                                                                                   std::shared_ptr<std::list<Particle> > particles) {
 
     // some safety checks
     if (particles->size() == 0) {
         // if no positions were found then there is no reason to run the analysis
         // we need to catch this here and not upstream since then we can return an appropriate
         // instance of LocalizedPositionsContainer
-        return boost::shared_ptr<LocalizedPositionsContainer_Centroid> (new LocalizedPositionsContainer_Centroid());
+        return std::shared_ptr<LocalizedPositionsContainer_Centroid> (new LocalizedPositionsContainer_Centroid());
     }
 
     size_t xSize = image->rows();
@@ -976,8 +976,8 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsCentroid::fit_positio
     double current_x, current_y;
     double denominator, threshold;
 
-    boost::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
-    boost::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
+    std::shared_ptr<LocalizedPositionsContainer_Centroid> fitted_positions (new LocalizedPositionsContainer_Centroid());
+    std::shared_ptr<LocalizedPosition_Centroid> localizationResult (new LocalizedPosition_Centroid());
 
     std::list<Particle>::iterator it = particles->begin();
     while (it != particles->end()) {

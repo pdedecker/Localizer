@@ -61,13 +61,13 @@ class ProgressReporter;
  */
 class CCDImagesProcessor {
 public:
-	CCDImagesProcessor(boost::shared_ptr<ProgressReporter> progressReporter_rhs) : progressReporter(progressReporter_rhs) {}
+	CCDImagesProcessor(std::shared_ptr<ProgressReporter> progressReporter_rhs) : progressReporter(progressReporter_rhs) {}
 	virtual ~CCDImagesProcessor() {;}
 	
-	virtual void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer) = 0;
+	virtual void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) = 0;
 	
 protected:
-	boost::shared_ptr<ProgressReporter> progressReporter;
+	std::shared_ptr<ProgressReporter> progressReporter;
 };
 
 /**
@@ -75,18 +75,18 @@ protected:
  */
 class CCDImagesProcessorAverageSubtraction : public CCDImagesProcessor {	// subtracts averages or partial averages from the image trace
 public:
-	CCDImagesProcessorAverageSubtraction(boost::shared_ptr<ProgressReporter> progressReporter_rhs, size_t nFramesAveraging_rhs) : CCDImagesProcessor(progressReporter_rhs), n_frames_averaging(nFramesAveraging_rhs) {}
+	CCDImagesProcessorAverageSubtraction(std::shared_ptr<ProgressReporter> progressReporter_rhs, size_t nFramesAveraging_rhs) : CCDImagesProcessor(progressReporter_rhs), n_frames_averaging(nFramesAveraging_rhs) {}
 	~CCDImagesProcessorAverageSubtraction() {;}
 
-	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 	size_t get_n_frames_averaging() const {return n_frames_averaging;}
 	
 protected:
 	size_t n_frames_averaging;	// how many frames do we average over?
 	
-	void subtractAverageOfEntireMovie(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
-	void subtractRollingAverage(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage);
+	void subtractAverageOfEntireMovie(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
+	void subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage);
 };
 
 /**
@@ -94,10 +94,10 @@ protected:
  */
 class CCDImagesProcessorDifferenceImage : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorDifferenceImage(boost::shared_ptr<ProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
+	CCDImagesProcessorDifferenceImage(std::shared_ptr<ProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
 	~CCDImagesProcessorDifferenceImage() {;}
 	
-	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 // there are no protected members
 };
@@ -107,10 +107,10 @@ public:
  */
 class CCDImagesProcessorConvertToSimpleFileFormat : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToSimpleFileFormat(boost::shared_ptr<ProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
+	CCDImagesProcessorConvertToSimpleFileFormat(std::shared_ptr<ProgressReporter> progressReporter_rhs) : CCDImagesProcessor(progressReporter_rhs) {}
 	~CCDImagesProcessorConvertToSimpleFileFormat() {;}
 	
-	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 	// there are no protected members
 };
@@ -121,10 +121,10 @@ public:
  */
 class CCDImagesProcessorCrop : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorCrop(boost::shared_ptr<ProgressReporter> progressReporter_rhs, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) : CCDImagesProcessor(progressReporter_rhs), startX(startX_rhs), endX(endX_rhs), startY(startY_rhs), endY(endY_rhs) {}
+	CCDImagesProcessorCrop(std::shared_ptr<ProgressReporter> progressReporter_rhs, size_t startX_rhs, size_t endX_rhs, size_t startY_rhs, size_t endY_rhs) : CCDImagesProcessor(progressReporter_rhs), startX(startX_rhs), endX(endX_rhs), startY(startY_rhs), endY(endY_rhs) {}
 	~CCDImagesProcessorCrop() {;}
 	
-	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 protected:
 	size_t startX, endX, startY, endY;	// the points between which we should crop
@@ -136,10 +136,10 @@ protected:
  */
 class CCDImagesProcessorConvertToPhotons : public CCDImagesProcessor {
 public:
-	CCDImagesProcessorConvertToPhotons(boost::shared_ptr<ProgressReporter> progressReporter_rhs, double multiplicationFactor_rhs, double offset_rhs) : CCDImagesProcessor(progressReporter_rhs), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
+	CCDImagesProcessorConvertToPhotons(std::shared_ptr<ProgressReporter> progressReporter_rhs, double multiplicationFactor_rhs, double offset_rhs) : CCDImagesProcessor(progressReporter_rhs), multiplicationFactor(multiplicationFactor_rhs), offset(offset_rhs) {}
 	~CCDImagesProcessorConvertToPhotons() {;}
 	
-	void convert_images(boost::shared_ptr<ImageLoader> image_loader, boost::shared_ptr<ImageOutputWriter> output_writer);
+	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 protected:
 	double multiplicationFactor;

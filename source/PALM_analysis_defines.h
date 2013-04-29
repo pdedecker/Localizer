@@ -40,7 +40,7 @@
 
 // the typedef for an image
 typedef Eigen::MatrixXd Image;
-typedef boost::shared_ptr<Image> ImagePtr;
+typedef std::shared_ptr<Image> ImagePtr;
 
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors

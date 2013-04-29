@@ -48,7 +48,7 @@ public:
 	ThresholdImage() {;}
 	virtual ~ThresholdImage() {;}
 	
-	virtual boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image) = 0;
+	virtual std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image) = 0;
 };
 
 class ThresholdImage_Direct : public ThresholdImage {
@@ -57,7 +57,7 @@ public:
 	ThresholdImage_Direct(double thresh_parameter) {threshold = thresh_parameter;}
 	~ThresholdImage_Direct() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 	
 protected:
 	double threshold;
@@ -68,14 +68,14 @@ public:
 	ThresholdImage_Isodata() {;}
 	~ThresholdImage_Isodata() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 };
 
 class ThresholdImage_Triangle : public ThresholdImage {
 public:
 	ThresholdImage_Triangle() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 };
 
 class ThresholdImage_GLRT_FFT : public ThresholdImage {
@@ -83,7 +83,7 @@ public:
 	ThresholdImage_GLRT_FFT(double PFA_param, double width_param);
 	~ThresholdImage_GLRT_FFT() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 	
 protected:
 	void MakeKernels(size_t xSize, size_t ySize);
@@ -100,7 +100,7 @@ protected:
 	
 	size_t kernelXSize, kernelYSize;
 	ImagePtr smallGaussianKernel;
-	boost::shared_ptr<fftw_complex> GaussianKernelFFT;
+	std::shared_ptr<fftw_complex> GaussianKernelFFT;
 	
 	double sum_squared_Gaussian;
 	size_t windowSize;
@@ -111,7 +111,7 @@ public:
 	ThresholdImage_SmoothSigma(double pdfStdDev, double multiplicationFactor) : _pdfStdDev(pdfStdDev), _multiplicationFactor(multiplicationFactor) {}
 	~ThresholdImage_SmoothSigma() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_thresholding(ImagePtr image);
 	
 protected:
 	void _makeKernels(double psfWidth);
@@ -194,7 +194,7 @@ public:
 	ThresholdImage_Postprocessor() {;}
 	virtual ~ThresholdImage_Postprocessor() {;}
 	
-	virtual boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) = 0;
+	virtual std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) = 0;
 };
 
 class ThresholdImage_Postprocessor_DoNothing : public ThresholdImage_Postprocessor {
@@ -202,7 +202,7 @@ public:
 	ThresholdImage_Postprocessor_DoNothing() {;}
 	~ThresholdImage_Postprocessor_DoNothing() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) {return thresholded_image;}
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image) {return thresholded_image;}
 };
 
 class ThresholdImage_Postprocessor_RemoveIsolatedPixels : public ThresholdImage_Postprocessor {
@@ -210,7 +210,7 @@ public:
 	ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	~ThresholdImage_Postprocessor_RemoveIsolatedPixels() {;}
 	
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image);
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_postprocessing(std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image, ImagePtr image);
 };
 
 gsl_histogram * make_histogram_from_matrix(ImagePtr image, size_t number_of_bins);

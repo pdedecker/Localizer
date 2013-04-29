@@ -655,16 +655,16 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     size_t postprocessing_method;
     std::vector<size_t> particleVerifierMethods;
 
-    boost::shared_ptr<ImageLoader> image_loader;
-    boost::shared_ptr<FitPositions> positions_fitter;
-    boost::shared_ptr<ThresholdImage> thresholder;
-    boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
-    boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
-    boost::shared_ptr<ParticleFinder> particle_finder;
-    std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-    boost::shared_ptr<PALMAnalysisController> analysisController;
-    boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
-    boost::shared_ptr<ProgressReporter> progressReporter;
+    std::shared_ptr<ImageLoader> image_loader;
+    std::shared_ptr<FitPositions> positions_fitter;
+    std::shared_ptr<ThresholdImage> thresholder;
+    std::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
+    std::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
+    std::shared_ptr<ParticleFinder> particle_finder;
+    std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
+    std::shared_ptr<PALMAnalysisController> analysisController;
+    std::shared_ptr<LocalizedPositionsContainer> localizedPositions;
+    std::shared_ptr<ProgressReporter> progressReporter;
 
     // Flag parameters.
 
@@ -877,25 +877,25 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // which preprocessing do we wish to do?
         switch(preprocessing_method) {
         case PREPROCESSOR_NONE:	// no preprocessing
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
             break;
         case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
             break;
         case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
             break;
         case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
             break;
         case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
             break;
         case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
             break;
         case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
             break;
         default:
             throw std::runtime_error("Unknown segmentation preprocessing method");
@@ -906,19 +906,19 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // choose which thresholding we want to do
         switch(thresholding_method) {
         case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, initial_width));
             break;
         case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
             break;
         case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
             break;
         case THRESHOLD_METHOD_DIRECT:	// direct threshold
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(directThreshold));
             break;
 		case THRESHOLD_METHOD_SMOOTHSIGMA:
-			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width, smoothSigmaFactor));
+			thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(initial_width, smoothSigmaFactor));
 			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
@@ -928,10 +928,10 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // which postprocessing do we wish to do?
         switch(postprocessing_method) {
         case POSTPROCESSOR_NONE:	// no postprocessing
-            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
+            postprocessor = std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
             break;
         case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
-            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+            postprocessor = std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
             break;
         default:
             throw std::runtime_error("Unknown segmentation postprocessing method");
@@ -941,13 +941,13 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // which particle finding method do we wish to use?
         switch (particle_finding_method) {
         case PARTICLEFINDER_ADJACENT4:
-            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
+            particle_finder = std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
             break;
         case PARTICLEFINDER_ADJACENT8:
-            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
+            particle_finder = std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
             break;
         case PARTICLEFINDER_RADIUS:	// traditional radius approach
-            particle_finder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
+            particle_finder = std::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
             break;
         default:
             throw std::runtime_error("Unknown particle finding method");
@@ -962,16 +962,16 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
                 // no particle verification requested for this entry, do nothing
                 break;
             case PARTICLEVERIFIER_SYMMETRICGAUSS:
-                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
+                particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
                 break;
             case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
-                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma)));
+                particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma)));
                 break;
             case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
-                particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
+                particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(initial_width)));
                 break;
 			case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_ASTIG:
-				particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
+				particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(initial_width, sigma)));
 				break;
             default:
                 throw std::runtime_error("Unknown particle verifying method");
@@ -983,25 +983,25 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         if (p->MFlagEncountered) {
             switch (method) {
             case LOCALIZATION_METHOD_2DGAUSS:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(initial_width, sigma));
                 break;
             case LOCALIZATION_METHOD_MULTIPLICATION:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositionsMultiplication(initial_width, sigma));
                 break;
             case LOCALIZATION_METHOD_CENTROID:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositionsCentroid(initial_width));
                 break;
             case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma));
                 break;
 			case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
-				positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
+				positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(initial_width, sigma));
 				break;
             case LOCALIZATION_METHOD_MLEwG:
-                positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
+                positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_MLEwG(initial_width));
                 break;
             default:
                 throw std::runtime_error("Unknown localization method");
@@ -1009,20 +1009,20 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
             }
 
         } else {
-            positions_fitter = boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(initial_width, sigma));
         }
 
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 
-        analysisController = boost::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor,
+        analysisController = std::shared_ptr<PALMAnalysisController> (new PALMAnalysisController(thresholder, preprocessor,
                                                                                                    postprocessor, particle_finder, particleVerifiers,
                                                                                                    positions_fitter,
                                                                                                    progressReporter, firstFrameToAnalyze,
@@ -1082,7 +1082,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     int header_only = 0;
     DataFolderAndName dataFolderAndName;
 
-    boost::shared_ptr<ImageLoader> image_loader;
+    std::shared_ptr<ImageLoader> image_loader;
 
     // Flag parameters.
 
@@ -1213,14 +1213,14 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     }
 
     try {
-        boost::shared_ptr<ProgressReporter> progressReporter;
+        std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 
@@ -1290,9 +1290,9 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
     std::string input_file_path;
     std::string output_file_path;
 
-    boost::shared_ptr<ImageLoader> image_loader;
-    boost::shared_ptr<ImageOutputWriter> output_writer;
-    boost::shared_ptr<CCDImagesProcessor> ccd_image_processor;
+    std::shared_ptr<ImageLoader> image_loader;
+    std::shared_ptr<ImageOutputWriter> output_writer;
+    std::shared_ptr<CCDImagesProcessor> ccd_image_processor;
 
 
     // Flag parameters.
@@ -1451,20 +1451,20 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-			output_writer = boost::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+			output_writer = std::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
             break;
 		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
-			output_writer = boost::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+			output_writer = std::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
 			break;
         case IMAGE_OUTPUT_TYPE_IGOR:
 			if (method == PROCESSING_DIFFERENCEIMAGE) {
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, storageType));
+                output_writer = std::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages() - 1, 1, storageType));
 			} else {
-                output_writer = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, storageType));
+                output_writer = std::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(output_file_path, image_loader->getNImages(), 1, storageType));
             }
             break;
         case IMAGE_OUTPUT_TYPE_PDE:
-			output_writer = boost::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, storageType));
+			output_writer = std::shared_ptr<ImageOutputWriter>(new PDEImageOutputWriter(output_file_path, overwrite, storageType));
             break;
         default:
             throw std::runtime_error("Unsupported output format (/OUT flag)");
@@ -1472,33 +1472,33 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         }
 
         // get a progress reporter
-        boost::shared_ptr<ProgressReporter> progressReporter;
+        std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 
         // do the actual procedure
         switch (method) {
         case PROCESSING_AVERAGESUBTRACTION:		// subtract an average from the trace
-            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
+            ccd_image_processor = std::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorAverageSubtraction(progressReporter, nFramesAveraging));
             break;
         case PROCESSING_DIFFERENCEIMAGE:		// generate a difference image
-            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
+            ccd_image_processor = std::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorDifferenceImage(progressReporter));
             break;
         case PROCESSING_CHANGEFORMAT:		// convert to a different form (determined by the output writer)
-            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(progressReporter));
+            ccd_image_processor = std::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToSimpleFileFormat(progressReporter));
             break;
         case PROCESSING_CROP:		// output a cropped version of the image
-            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(progressReporter, startX, endX, startY, endY));
+            ccd_image_processor = std::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorCrop(progressReporter, startX, endX, startY, endY));
             break;
         case PROCESSING_CONVERTTOPHOTONS:
-            ccd_image_processor = boost::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplicationFactor, cameraOffset));
+            ccd_image_processor = std::shared_ptr<CCDImagesProcessor>(new CCDImagesProcessorConvertToPhotons(progressReporter, cameraMultiplicationFactor, cameraOffset));
             break;
         default:
             throw std::runtime_error("Unknown CCD postprocessing method");
@@ -1546,7 +1546,7 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 
     std::string input_file_path;
 
-    boost::shared_ptr<ImageLoader> image_loader;
+    std::shared_ptr<ImageLoader> image_loader;
 
     // Flag parameters.
 
@@ -1648,14 +1648,14 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
         input_file_path = ConvertHandleToString(p->input_file);
         image_loader = GetImageLoader(camera_type, input_file_path);
 
-        boost::shared_ptr<ProgressReporter> progressReporter;
+        std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent());
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 
@@ -1708,7 +1708,7 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     waveHndl CCD_Frame_wave;
     waveHndl threshold_image_wave;
     ImagePtr CCD_Frame;
-    boost::shared_ptr<std::list<Particle> > located_particles;
+    std::shared_ptr<std::list<Particle> > located_particles;
     std::vector<size_t> particleVerifierMethods;
 
     // long numDimensions;
@@ -1718,15 +1718,15 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     double value[2];
 
 
-    boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
+    std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
 
 
-    boost::shared_ptr<ThresholdImage> thresholder;
-    boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
-    boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
-    boost::shared_ptr<ParticleFinder> particlefinder;
-    std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-    boost::shared_ptr<ParticleVerifier> particleVerifier;
+    std::shared_ptr<ThresholdImage> thresholder;
+    std::shared_ptr<ThresholdImage_Preprocessor> preprocessor;
+    std::shared_ptr<ThresholdImage_Postprocessor> postprocessor;
+    std::shared_ptr<ParticleFinder> particlefinder;
+    std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
+    std::shared_ptr<ParticleVerifier> particleVerifier;
 
 
     // Flag parameters.
@@ -1847,25 +1847,25 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         // which preprocessing do we wish to do?
         switch(preprocessing_method) {
         case PREPROCESSOR_NONE:	// no preprocessing
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
             break;
         case PREPROCESSOR_3X3MEDIAN:	// 3x3 median filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
             break;
         case PREPROCESSOR_5X5MEDIAN:	// 5x5 median filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
             break;
         case PREPROCESSOR_1X1GAUSSIAN:	// 1x1 Gaussian filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
             break;
         case PREPROCESSOR_2X2GAUSSIAN:	// 2x2 Gaussian filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
             break;
         case PREPROCESSOR_3X3MEAN:	// 3x3 mean filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
             break;
         case PREPROCESSOR_5X5MEAN:	// 5x5 mean filter
-            preprocessor = boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
+            preprocessor = std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
             break;
         default:
             throw std::runtime_error("Unknown segmentation preprocessing method");
@@ -1873,19 +1873,19 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         }
         switch(method) {
         case THRESHOLD_METHOD_GLRT:	// the GLRT test proposed by Arnauld et al in Nat Methods 5:687 2008
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(PFA, PSFWidth));
             break;
         case THRESHOLD_METHOD_ISODATA:	// isodata algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
             break;
         case THRESHOLD_METHOD_TRIANGLE:	// modified triangle algorithm (http://www.ph.tn.tudelft.nl/Courses/FIP/noframes/fip-Segmenta.html)
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
             break;
         case THRESHOLD_METHOD_DIRECT:	// direct threshold
-            thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
+            thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(absoluteThreshold));
             break;
 		case THRESHOLD_METHOD_SMOOTHSIGMA:
-			thresholder = boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, smoothSigmaFactor));
+			thresholder = std::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(PSFWidth, smoothSigmaFactor));
 			break;
         default:
             throw std::runtime_error("Unknown segmentation method");
@@ -1896,10 +1896,10 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         // which postprocessing do we wish to do?
         switch(postprocessing_method) {
         case POSTPROCESSOR_NONE:	// no postprocessing
-            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
+            postprocessor = std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
             break;
         case POSTPROCESSOR_REMOVE_ISOLATED_PIXELS:	// remove isolated pixels
-            postprocessor = boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+            postprocessor = std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
             break;
         default:
             throw std::runtime_error("Unknown segmentation postprocessing method");
@@ -1911,13 +1911,13 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         if (output_located_particles == 1) {
             switch (particle_finding_method) {
             case PARTICLEFINDER_ADJACENT4:
-                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
+                particlefinder = std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
                 break;
             case PARTICLEFINDER_ADJACENT8:
-                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
+                particlefinder = std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
                 break;
             case PARTICLEFINDER_RADIUS:	// traditional radius approach
-                particlefinder = boost::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
+                particlefinder = std::shared_ptr<ParticleFinder>(new ParticleFinder_radius(radiusBetweenParticles));
                 break;
             default:
                 throw std::runtime_error("Unknown particle finding method");
@@ -1932,16 +1932,16 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 						// no particle verification requested for this entry, do nothing
 						break;
 					case PARTICLEVERIFIER_SYMMETRICGAUSS:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0)));
+						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0)));
 						break;
 					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1.0)));
+						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1.0)));
 						break;
 					case PARTICLEVERIFIER_REMOVEOVERLAPPINGPARTICLES:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
+						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_RemoveOverlappingParticles(PSFWidth)));
 						break;
 					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_ASTIG:
-						particleVerifiers.push_back(boost::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1.0)));
+						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian(PSFWidth, 1.0)));
 						break;
 					default:
 						throw std::runtime_error("Unknown particle verifying method");
@@ -1981,7 +1981,7 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
             located_particles = particlefinder->findPositions(CCD_Frame, thresholded_image);
 
             // if the located particles are to be verified before fitting then do so
-            for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
+            for (std::vector<std::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
                 (*it)->VerifyParticles(CCD_Frame, located_particles);
             }
 
@@ -2127,9 +2127,9 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     int useIgorFunctionForProgress = 0;
     FUNCREF igorProgressReporterFunction;
 
-    boost::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
-    boost::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
-    boost::shared_ptr<ProgressReporter> progressReporter;
+    std::shared_ptr<PALMBitmapImageCalculator> imageCalculator;
+    std::shared_ptr<PALMBitmapImageDeviationCalculator> deviationCalculator;
+    std::shared_ptr<ProgressReporter> progressReporter;
     ImagePtr image;
 
     // Flag parameters.
@@ -2243,31 +2243,31 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
         // get the object that will calculate the standard deviation
         switch (method) {
         case PALMBITMAP_DEVIATION_SAME:
-            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
+            deviationCalculator = std::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_Constant(scaleFactor));
             break;
         case PALMBITMAP_DEVIATION_FITUNCERTAINTY:
-            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
+            deviationCalculator = std::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_FitUncertainty(scaleFactor, upperLimit));
             break;
         case PALMBITMAP_DEVIATION_GAUSSIANMASK:
-            deviationCalculator = boost::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraOffset, cameraMultiplicationFactor));
+            deviationCalculator = std::shared_ptr<PALMBitmapImageDeviationCalculator> (new PALMBitmapImageDeviationCalculator_GaussianMask(PSFWidth, cameraOffset, cameraMultiplicationFactor));
             break;
         default:
             throw std::runtime_error("Unknown deviation calculation method (/M flag)");
         }
 
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 
         // do the actual calculation
-        imageCalculator = boost::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
-        boost::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
+        imageCalculator = std::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
+        std::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
         image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
         CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
     }
@@ -2336,8 +2336,8 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
 
 
     try {
-        boost::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
-        boost::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
+        std::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
+        std::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
 
         binWidth = calculationRange / (double)nBins;
         double dimOffset = binWidth;
@@ -2553,7 +2553,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 
     try {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
-        boost::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
 
         int nGroups;
         size_t nImagesToProcess;
@@ -2569,20 +2569,20 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         }
 
         // check if any frame verifiers need to be used
-        boost::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
-        std::vector<boost::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
+        std::shared_ptr<SOFIFrameVerifier> sofiFrameVerifier;
+        std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 
         if (noSaturatedPixels != 0) {
-            sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
+            sofiFrameVerifier = std::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType()));
             frameVerifiers.push_back(sofiFrameVerifier);
         }
         if (limitMaxPixelVal != 0) {
-            sofiFrameVerifier = boost::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_MaxPixelValue(maxPixelVal));
+            sofiFrameVerifier = std::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_MaxPixelValue(maxPixelVal));
             frameVerifiers.push_back(sofiFrameVerifier);
         }
 
-        boost::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
-        boost::shared_ptr<ImageOutputWriter> averageOutputWriter;
+        std::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+        std::shared_ptr<ImageOutputWriter> averageOutputWriter;
         DataFolderAndName averageOutputWaveParams;
         
         if (doAverage != 0) {
@@ -2593,18 +2593,18 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             averageOutputWaveParams.dfH = outputWaveParams.dfH;
             strcpy(averageOutputWaveParams.name, outputWaveParams.name);
             strcat(averageOutputWaveParams.name, "_avg");
-            averageOutputWriter = boost::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(averageOutputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+            averageOutputWriter = std::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(averageOutputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
         }
 
-        boost::shared_ptr<ProgressReporter> progressReporter;
+        std::shared_ptr<ProgressReporter> progressReporter;
 
         if (quiet == 1) {
-            progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
         } else {
             if (useIgorFunctionForProgress != 0) {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
-                progressReporter = boost::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
             }
         }
 		

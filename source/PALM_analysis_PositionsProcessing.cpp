@@ -29,7 +29,7 @@
 
 #include "PALM_analysis_PositionsProcessing.h"
 
-boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shared_ptr<LocalizedPositionsContainer> positions,
+std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
 																	 double calculationRange, size_t nBins, double lowerX, double upperX,
 																	 double lowerY, double upperY) {
 	size_t nPositions = positions->getNPositions();
@@ -60,7 +60,7 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
 	// provide that positions as arrays suitable for the actual calculation
 	boost::scoped_array<double> xPositions(new double[nPositions]);
 	boost::scoped_array<double> yPositions(new double[nPositions]);
-	boost::shared_ptr<std::vector<double> > lFunction(new std::vector<double>(nBins));
+	std::shared_ptr<std::vector<double> > lFunction(new std::vector<double>(nBins));
 	
 	for (size_t i = 0; i < nPositions; ++i) {
 		xPositions[i] = positions->getXPosition(i);
@@ -76,7 +76,7 @@ boost::shared_ptr<std::vector<double> > CalculateLFunctionClustering(boost::shar
     // have automatically reduced it. It reports the correct number of points
     // in nBins
     if (nBins != lFunction->size()) {
-        boost::shared_ptr<std::vector<double> > resizedLFunction(new std::vector<double>(nBins));
+        std::shared_ptr<std::vector<double> > resizedLFunction(new std::vector<double>(nBins));
         for (size_t i = 0; i < nBins; i+=1) {
             (*resizedLFunction)[i] = (*lFunction)[i];
         }

@@ -68,19 +68,19 @@ protected:
  */
 class PALMBitmapImageCalculator {
 public:
-	PALMBitmapImageCalculator(boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs, int emitterWeighingMethod_rhs,
-							  boost::shared_ptr<ProgressReporter> progressReporter_rhs) {
+	PALMBitmapImageCalculator(std::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator_rhs, int emitterWeighingMethod_rhs,
+							  std::shared_ptr<ProgressReporter> progressReporter_rhs) {
 		devationCalculator = devationCalculator_rhs; emitterWeighingMethod = emitterWeighingMethod_rhs; progressReporter = progressReporter_rhs;
 	}
 	~PALMBitmapImageCalculator() {;}
 	
-	ImagePtr CalculateImage(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
+	ImagePtr CalculateImage(std::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
 														 size_t ySize, size_t imageWidth, size_t imageHeight);
 	
 	
 protected:
-	boost::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
-	boost::shared_ptr<ProgressReporter> progressReporter;
+	std::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
+	std::shared_ptr<ProgressReporter> progressReporter;
 	NormalCDFLookupTable cdfTable;
 	int emitterWeighingMethod;
 };
@@ -93,7 +93,7 @@ public:
 	PALMBitmapImageDeviationCalculator() {;}
 	virtual ~PALMBitmapImageDeviationCalculator() {;}
 	
-	virtual double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) = 0;
+	virtual double getDeviation(std::shared_ptr<LocalizedPositionsContainer> positions, size_t index) = 0;
 };
 
 /**
@@ -107,7 +107,7 @@ public:
 	PALMBitmapImageDeviationCalculator_FitUncertainty(double scaleFactor_rhs, double upperLimit_rhs) {scaleFactor = scaleFactor_rhs; upperLimit = upperLimit_rhs;}
 	~PALMBitmapImageDeviationCalculator_FitUncertainty() {;}
 	
-	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return ((positions->getXPositionDeviation(index) < upperLimit) ? (positions->getXPositionDeviation(index) * scaleFactor) : -1);}
+	double getDeviation(std::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return ((positions->getXPositionDeviation(index) < upperLimit) ? (positions->getXPositionDeviation(index) * scaleFactor) : -1);}
 	
 private:
 	double scaleFactor;
@@ -123,7 +123,7 @@ public:
 	PALMBitmapImageDeviationCalculator_Constant(double deviation_rhs) {deviation = deviation_rhs;}
 	PALMBitmapImageDeviationCalculator_Constant() {;}
 	
-	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return deviation;}
+	double getDeviation(std::shared_ptr<LocalizedPositionsContainer> positions, size_t index) {return deviation;}
 	
 private:
 	double deviation;
@@ -144,7 +144,7 @@ public:
 	
 	~PALMBitmapImageDeviationCalculator_GaussianMask() {;}
 	
-	double getDeviation(boost::shared_ptr<LocalizedPositionsContainer> positions, size_t index);
+	double getDeviation(std::shared_ptr<LocalizedPositionsContainer> positions, size_t index);
 	
 private:
 	double PSFWidth;

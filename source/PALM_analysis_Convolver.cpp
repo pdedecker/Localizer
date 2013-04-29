@@ -89,19 +89,23 @@ ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(ImagePtr image1, 
 		throw std::runtime_error("tried to convolve images with uneven dimensions");
 	
 	// do the forward transforms
-	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image1);
-	boost::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2);
+	std::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image1);
+	std::shared_ptr<fftw_complex> array2_FFT = DoForwardFFT(image2);
 	
 	n_FFT_values = x_size1 * y_size1;
 	nColumns = x_size1 / 2 + 1;	// the order of the dimensions will be swapped because of column-major ordering
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
-		complex_value[0] = array1_FFT.get()[i][0] * array2_FFT.get()[i][0] - array1_FFT.get()[i][1] * array2_FFT.get()[i][1];
+        //complex_value[0] = array1Ptr[2*i] * array2Ptr[2*i] - array1Ptr[2*i+1] * array2Ptr[2*i+1];
+        //complex_value[1] = array1Ptr[2*i] * array2Ptr[2*i+1] + array1Ptr[2*i+1] * array2Ptr[2*i];
+		complex_value[0] = array1_FFT.get()[i][0] * (array2_FFT.get()[i])[0] - array1_FFT.get()[i][1] * array2_FFT.get()[i][1];
 		complex_value[1] = array1_FFT.get()[i][0] * array2_FFT.get()[i][1] + array1_FFT.get()[i][1] * array2_FFT.get()[i][0];
 		
 		// store the result in the first array
 		// we add in a comb function so the origin is at the center of the image
+        //array1Ptr[2*i] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+        //array2Ptr[2*i+1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 		array1_FFT.get()[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
@@ -112,7 +116,7 @@ ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatricesWithFFT(ImagePtr image1, 
 	
 }
 
-ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(ImagePtr image, boost::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
+ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(ImagePtr image, std::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2) {
 	size_t x_size1, y_size1;
 	
 	x_size1 = image->rows();
@@ -131,18 +135,22 @@ ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithGivenFFT(ImagePtr image
 		throw std::runtime_error("tried to convolve images with uneven dimensions");
 	
 	// do the forward transforms
-	boost::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image);
+	std::shared_ptr<fftw_complex> array1_FFT = DoForwardFFT(image);
 	
 	n_FFT_values = x_size1 * y_size1;
 	nColumns = x_size1 / 2 + 1;	// the order of the dimensions will be swapped because of column-major ordering
 	
 	// now do the convolution
 	for (size_t i = 0; i < n_FFT_values; i++) {
+        //complex_value[0] = array1Ptr[2*i] * array2Ptr[2*i] - array1Ptr[2*i+1] * array2Ptr[2*i+1];
+        //complex_value[0] = array1Ptr[2*i] * array2Ptr[2*i+1] - array1Ptr[2*i+1] * array2Ptr[2*i];
 		complex_value[0] = (array1_FFT.get()[i][0] * array2_FFT.get()[i][0]) - (array1_FFT.get()[i][1] * array2_FFT.get()[i][1]);
 		complex_value[1] = (array1_FFT.get()[i][0] * array2_FFT.get()[i][1]) + (array1_FFT.get()[i][1] * array2_FFT.get()[i][0]);
 		
 		// store the result in the first array
 		// we add in a comb function so the origin is at the center of the image
+        //array1Ptr[2*i] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
+        //array1Ptr[2*i+1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 		array1_FFT.get()[i][0] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[0];
 		array1_FFT.get()[i][1] = (2.0 * (double)((i / nColumns + i % nColumns) % 2) - 1.0) * -1.0 * complex_value[1];
 	}
@@ -193,14 +201,14 @@ ImagePtr ConvolveMatricesWithFFTClass::ConvolveMatrixWithFlatKernel(ImagePtr ima
 	return convolvedImage;
 }
 
-boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(ImagePtr image) {
+std::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(ImagePtr image) {
 	
 	size_t xSize = image->rows();
 	size_t ySize = image->cols();
 	size_t nPixels = xSize * ySize;
 	fftw_plan forwardPlan;
 	
-	boost::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nPixels), fftw_free);
+	std::shared_ptr<fftw_complex> array_FFT((fftw_complex *)fftw_malloc(sizeof(fftw_complex) * nPixels), fftw_free);
 	if (array_FFT.get() == NULL) {
 		throw std::bad_alloc();
 	}
@@ -221,7 +229,7 @@ boost::shared_ptr<fftw_complex> ConvolveMatricesWithFFTClass::DoForwardFFT(Image
 	return array_FFT;
 }
 
-ImagePtr ConvolveMatricesWithFFTClass::DoReverseFFT(boost::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
+ImagePtr ConvolveMatricesWithFFTClass::DoReverseFFT(std::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize) {
 	
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	

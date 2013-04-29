@@ -56,8 +56,8 @@ class LocalizedPositionsContainer;
 class Particle;
 
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
-																		 boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
+std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, std::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+																		 std::shared_ptr<ThresholdImage> thresholder, std::shared_ptr<ThresholdImage_Postprocessor> postprocessor);
 
 
 
@@ -70,17 +70,17 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_proces
  */
 class PALMAnalysisController {
 public:
-	PALMAnalysisController(boost::shared_ptr<ThresholdImage> thresholder_rhs,
-						   boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
-						   boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-						   boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
-						   std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
-						   boost::shared_ptr<FitPositions> fitPositions_rhs,
-						   boost::shared_ptr<ProgressReporter> progressReporter_rhs,
+	PALMAnalysisController(std::shared_ptr<ThresholdImage> thresholder_rhs,
+						   std::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+						   std::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+						   std::shared_ptr<ParticleFinder> particleFinder_rhs, 
+						   std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
+						   std::shared_ptr<FitPositions> fitPositions_rhs,
+						   std::shared_ptr<ProgressReporter> progressReporter_rhs,
 						   size_t firstFrame = (size_t)-1, size_t lastFrame = (size_t)-1);
 	~PALMAnalysisController() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs);
+	std::shared_ptr<LocalizedPositionsContainer> DoPALMAnalysis(std::shared_ptr<ImageLoader> imageLoader_rhs);
 	// runs a PALM analysis according to the parameters passed in as objects in the constructor
 	// on the data file represented by the imageloader
 	// returns a LocalizedPositionsContainer containing fitted PALM positions
@@ -91,18 +91,18 @@ protected:
 	size_t lastFrameToAnalyze;
 	
 	size_t nFramesRemainingToBeProcessed;
-	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
+	std::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	friend void ThreadPoolWorker(PALMAnalysisController* controller);
 	
-	boost::shared_ptr<ImageLoader> imageLoader;
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor;
-	boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
-	boost::shared_ptr<ParticleFinder> particleFinder;
-	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
-	boost::shared_ptr<FitPositions> fitPositions;
-	boost::shared_ptr<ProgressReporter> progressReporter;
+	std::shared_ptr<ImageLoader> imageLoader;
+	std::shared_ptr<ThresholdImage> thresholder;
+	std::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor;
+	std::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor;
+	std::shared_ptr<ParticleFinder> particleFinder;
+	std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
+	std::shared_ptr<FitPositions> fitPositions;
+	std::shared_ptr<ProgressReporter> progressReporter;
 	
 	boost::mutex acquireFrameForProcessingMutex;
 	boost::mutex addLocalizedPositionsMutex;
@@ -131,23 +131,23 @@ void ThreadPoolWorker(PALMAnalysisController* controller);
  */
 class FitPositionsDeflate : public FitPositions {
 public:
-	FitPositionsDeflate(boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor_rhs, boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor_rhs,
-						boost::shared_ptr<ThresholdImage> thresholder_rhs, boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
-						boost::shared_ptr<FitPositions> positionsFitter_rhs) {
+	FitPositionsDeflate(std::shared_ptr <ThresholdImage_Preprocessor> preprocessor_rhs, std::shared_ptr <ThresholdImage_Postprocessor> postprocessor_rhs,
+						std::shared_ptr<ThresholdImage> thresholder_rhs, std::shared_ptr<ParticleFinder> particleFinder_rhs, 
+						std::shared_ptr<FitPositions> positionsFitter_rhs) {
 		preprocessor = preprocessor_rhs; postprocessor = postprocessor_rhs; thresholder = thresholder_rhs; positionsFitter = positionsFitter_rhs; positionsFitter = positionsFitter_rhs;}
 	
 	~FitPositionsDeflate() {;}
 	
-	boost::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions);
+	std::shared_ptr<LocalizedPositionsContainer> fit_positions(const ImagePtr image, std::shared_ptr<std::list<Particle> > positions);
 	
 protected:
-	ImagePtr subtractLocalizedPositions(ImagePtr image, boost::shared_ptr<LocalizedPositionsContainer> positions);
+	ImagePtr subtractLocalizedPositions(ImagePtr image, std::shared_ptr<LocalizedPositionsContainer> positions);
 	
-	boost::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
-	boost::shared_ptr <ThresholdImage_Postprocessor> postprocessor;
-	boost::shared_ptr<ThresholdImage> thresholder;
-	boost::shared_ptr<ParticleFinder> particleFinder;
-	boost::shared_ptr<FitPositions> positionsFitter;
+	std::shared_ptr <ThresholdImage_Preprocessor> preprocessor;
+	std::shared_ptr <ThresholdImage_Postprocessor> postprocessor;
+	std::shared_ptr<ThresholdImage> thresholder;
+	std::shared_ptr<ParticleFinder> particleFinder;
+	std::shared_ptr<FitPositions> positionsFitter;
 };
 
 #endif

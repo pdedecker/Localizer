@@ -36,13 +36,13 @@
 #include "PALM_analysis_storage.h"
 
 
-boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, boost::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
-																									  boost::shared_ptr<ThresholdImage> thresholder, boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
+std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_processing_and_thresholding(ImagePtr image, std::shared_ptr<ThresholdImage_Preprocessor>preprocessor, 
+																									  std::shared_ptr<ThresholdImage> thresholder, std::shared_ptr<ThresholdImage_Postprocessor> postprocessor) {
 	// this function takes care of the thresholding and the associated pre- and postprocessing
 	
 	ImagePtr preprocessed_image;
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > postprocessed_image;
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholded_image;
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > postprocessed_image;
 	
 	preprocessed_image = preprocessor->do_preprocessing(image);
 	thresholded_image = thresholder->do_thresholding(preprocessed_image);
@@ -51,13 +51,13 @@ boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > do_proces
 	return postprocessed_image;
 }
 
-PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage> thresholder_rhs,
-												boost::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
-												boost::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
-												boost::shared_ptr<ParticleFinder> particleFinder_rhs, 
-												std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
-												boost::shared_ptr<FitPositions> fitPositions_rhs,
-												boost::shared_ptr<ProgressReporter> progressReporter_rhs,
+PALMAnalysisController::PALMAnalysisController (std::shared_ptr<ThresholdImage> thresholder_rhs,
+												std::shared_ptr<ThresholdImage_Preprocessor> thresholdImagePreprocessor_rhs,
+												std::shared_ptr<ThresholdImage_Postprocessor> thresholdImagePostprocessor_rhs,
+												std::shared_ptr<ParticleFinder> particleFinder_rhs, 
+												std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers_rhs,
+												std::shared_ptr<FitPositions> fitPositions_rhs,
+												std::shared_ptr<ProgressReporter> progressReporter_rhs,
 												size_t firstFrame, size_t lastFrame) {
 	thresholder = thresholder_rhs;
 	thresholdImagePreprocessor = thresholdImagePreprocessor_rhs;
@@ -75,19 +75,19 @@ PALMAnalysisController::PALMAnalysisController (boost::shared_ptr<ThresholdImage
 	this->errorMessage.assign("");
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(boost::shared_ptr<ImageLoader> imageLoader_rhs) {
+std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(std::shared_ptr<ImageLoader> imageLoader_rhs) {
 	this->imageLoader = imageLoader_rhs;
 	this->nImages = imageLoader->getNImages();
 	
 	size_t numberOfThreads;
 	size_t firstFrame, lastFrame;
 	size_t nFramesToBeAnalyzed;
-	std::vector<boost::shared_ptr<boost::thread> > threads;
-	boost::shared_ptr<boost::thread> singleThreadPtr;
+	std::vector<std::shared_ptr<boost::thread> > threads;
+	std::shared_ptr<boost::thread> singleThreadPtr;
 	int firstThreadHasFinished, spinProcessStatus, progressStatus;
 	size_t nFramesAnalyzed;
 	
-	this->localizedPositions = boost::shared_ptr<LocalizedPositionsContainer>();
+	this->localizedPositions = std::shared_ptr<LocalizedPositionsContainer>();
 	
 	if (this->nImages == 0) {	// if there are no images to load, do not do any processing
 		return this->localizedPositions;
@@ -126,7 +126,7 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 	// start the thread pool
 	threads.clear();
 	for (size_t j = 0; j < numberOfThreads; ++j) {
-		singleThreadPtr = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(ThreadPoolWorker, this)));
+		singleThreadPtr = std::shared_ptr<boost::thread>(new boost::thread(boost::bind(ThreadPoolWorker, this)));
 		threads.push_back(singleThreadPtr);
 	}
 	
@@ -201,9 +201,9 @@ boost::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAna
 void ThreadPoolWorker(PALMAnalysisController* controller) {
 	size_t currentImageToProcess;
 	ImagePtr currentImage;
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage;
-	boost::shared_ptr<std::list<Particle> > locatedParticles;
-	boost::shared_ptr<LocalizedPositionsContainer> localizedPositions;
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage;
+	std::shared_ptr<std::list<Particle> > locatedParticles;
+	std::shared_ptr<LocalizedPositionsContainer> localizedPositions;
 	
 	try {
 		for (;;) {	// loop continuously looking for more images until there are none left
@@ -232,7 +232,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			locatedParticles = controller->particleFinder->findPositions(currentImage, thresholdedImage);
 			
 			// if the located particles are to be verified before fitting then do so
-			for (std::vector<boost::shared_ptr<ParticleVerifier> >::iterator it = controller->particleVerifiers.begin(); it != controller->particleVerifiers.end(); ++it) {
+			for (std::vector<std::shared_ptr<ParticleVerifier> >::iterator it = controller->particleVerifiers.begin(); it != controller->particleVerifiers.end(); ++it) {
 				(*it)->VerifyParticles(currentImage, locatedParticles);
 			}
 			
@@ -288,14 +288,14 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	
 }
 
-boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const ImagePtr image, boost::shared_ptr<std::list<Particle> > positions) {
+std::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_positions(const ImagePtr image, std::shared_ptr<std::list<Particle> > positions) {
 	// TODO: for now we ignore the starting positions and ending position provided as arguments
 	
-	boost::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
-	boost::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
+	std::shared_ptr<LocalizedPositionsContainer> positionsFittedThusFar;
+	std::shared_ptr<LocalizedPositionsContainer> positionsLocalizedThisFrame;
 	ImagePtr subtractedImage;
-	boost::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > segmentedImage;
-	boost::shared_ptr<std::list<Particle> > locatedParticles;
+	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > segmentedImage;
+	std::shared_ptr<std::list<Particle> > locatedParticles;
 	
 	// get an initial set of positions to start from
 	positionsFittedThusFar = this->positionsFitter->fit_positions(image, positions);
@@ -333,7 +333,7 @@ boost::shared_ptr<LocalizedPositionsContainer> FitPositionsDeflate::fit_position
 }
 
 
-ImagePtr FitPositionsDeflate::subtractLocalizedPositions(ImagePtr image, boost::shared_ptr<LocalizedPositionsContainer> positions) {
+ImagePtr FitPositionsDeflate::subtractLocalizedPositions(ImagePtr image, std::shared_ptr<LocalizedPositionsContainer> positions) {
 	double fittedXPos, fittedYPos, fittedIntegral, fittedXWidth, fittedYWidth;
 	double centerX, centerY, calculatedAmplitude;
 	long startX, endX, startY, endY;

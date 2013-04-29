@@ -110,29 +110,29 @@ int main(int argc, char *argv[]) {
 	double psfWidth = vm["psf-width"].as<double>();
 	
 	// get the pre- and postprocessors
-	boost::shared_ptr<ThresholdImage_Preprocessor> preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
-	boost::shared_ptr<ThresholdImage_Postprocessor> postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
+	std::shared_ptr<ThresholdImage_Preprocessor> preprocessor = GetPreProcessorType(vm["preprocessing"].as<std::string>());
+	std::shared_ptr<ThresholdImage_Postprocessor> postprocessor = GetPostProcessorType(vm["postprocessing"].as<std::string>());
 	
 	// get the thresholder
-	boost::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth, smoothSigmaFactor);
+	std::shared_ptr<ThresholdImage> thresholder = GetSegmentationType(segmentationName, pfa, directThreshold, psfWidth, smoothSigmaFactor);
 	
 	// get the particle finder
-	boost::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
+	std::shared_ptr<ParticleFinder> particleFinder = GetParticleFinderType(particleFinderName);
 	
 	// get the positions verifier
-	std::vector<boost::shared_ptr<ParticleVerifier> > particleVerifiers;
+	std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
 	for (std::vector<std::string>::iterator it = particleVerifierNames.begin(); it != particleVerifierNames.end(); ++it) {
 		particleVerifiers.push_back(GetParticleVerifierType(*it, psfWidth, 1.0));
 	}
 	
 	// get the positions fitter
-	boost::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
+	std::shared_ptr<FitPositions> positionsFitter = GetPositionsFitter(localizationName, psfWidth);
 	
 	// get a progress reporter
-	boost::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_stdout());
+	std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_stdout());
 	
 	// get an analysis controller
-	boost::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
+	std::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
 																							postprocessor, particleFinder, particleVerifiers,
 																							positionsFitter,
 																							progressReporter));
@@ -141,10 +141,10 @@ int main(int argc, char *argv[]) {
 	if (nInputFiles == 0)
 		std::cout << "No input files specified!\n";
 	
-	boost::shared_ptr<ImageLoader> imageLoader;
+	std::shared_ptr<ImageLoader> imageLoader;
 	std::string outputFilePath;
 	std::ostringstream header;
-	boost::shared_ptr<LocalizedPositionsContainer> fittedPositions;
+	std::shared_ptr<LocalizedPositionsContainer> fittedPositions;
 	
 	for (size_t i = 0; i < nInputFiles; ++i) {
 		try {
@@ -193,119 +193,119 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-boost::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name) {
+std::shared_ptr<ThresholdImage_Preprocessor> GetPreProcessorType(std::string name) {
 	
 	if (name == std::string("none"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_DoNothing());
 	
 	if (name == std::string("3x3median"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(3,3));
 	
 	if (name == std::string("5x5median"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MedianFilter(5,5));
 	
 	if (name == std::string("1x1gaussian"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(1));
 	
 	if (name == std::string("2x2gaussian"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_GaussianSmoothing(2));
 	
 	if (name == std::string("3x3mean"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(3,3));
 	
 	if (name == std::string("5x5mean"))
-		return boost::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
+		return std::shared_ptr<ThresholdImage_Preprocessor>(new ThresholdImage_Preprocessor_MeanFilter(5,5));
 	
 	// if we get here then we didn't recognize the preprocessor
 	throw std::runtime_error("Unknown preprocessor option");
 }
 
-boost::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name) {
+std::shared_ptr<ThresholdImage_Postprocessor> GetPostProcessorType(std::string name) {
 	if (name == std::string("none"))
-		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
+		return std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_DoNothing());
 	
 	if (name == std::string("removeisolated"))
-		return boost::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
+		return std::shared_ptr<ThresholdImage_Postprocessor>(new ThresholdImage_Postprocessor_RemoveIsolatedPixels());
 	
 	// if we get here then we didn't recognize the postprocessor
 	throw std::runtime_error("Unknown postprocessor algorithm");
 }
 
-boost::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double smoothSigmaFactor, double psfWidth) {
+std::shared_ptr<ThresholdImage> GetSegmentationType(std::string name, double pfa, double threshold, double smoothSigmaFactor, double psfWidth) {
 	if (name == std::string("glrt"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
+		return std::shared_ptr<ThresholdImage>(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
 	
 	if (name == std::string("isodata"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
+		return std::shared_ptr<ThresholdImage>(new ThresholdImage_Isodata());
 	
 	if (name == std::string("triangle"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
+		return std::shared_ptr<ThresholdImage>(new ThresholdImage_Triangle());
 	
 	if (name == std::string("direct"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold));
+		return std::shared_ptr<ThresholdImage>(new ThresholdImage_Direct(threshold));
 	
 	if (name == std::string("ssg"))
-		return boost::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, smoothSigmaFactor));
+		return std::shared_ptr<ThresholdImage>(new ThresholdImage_SmoothSigma(psfWidth, smoothSigmaFactor));
 	
 	// if we get here then we didn't recognize the preprocessor
 	throw std::runtime_error("Unknown segmentation algorithm");
 }
 
-boost::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name) {
+std::shared_ptr<ParticleFinder> GetParticleFinderType(std::string name) {
 	if (name == std::string("4way"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
+		return std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent4());
 	
 	if (name == std::string("8way"))
-		return boost::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
+		return std::shared_ptr<ParticleFinder>(new ParticleFinder_adjacent8());
 	
 	// if we get here then we didn't recognize the particlefinder
 	throw std::runtime_error("Unknown particle finding algorithm");
 }
 
-boost::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma) {
+std::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, double psfWidth, double sigma) {
 	if (name == std::string("none"))
-		return boost::shared_ptr<ParticleVerifier>();
+		return std::shared_ptr<ParticleVerifier>();
 	
 	if (name == std::string("removeoverlapping"))
-		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_RemoveOverlappingParticles(psfWidth));
+		return std::shared_ptr<ParticleVerifier>(new ParticleVerifier_RemoveOverlappingParticles(psfWidth));
 	
 	if (name == std::string("symmetric2dgauss"))
-		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_SymmetricGaussian(psfWidth, sigma));
+		return std::shared_ptr<ParticleVerifier>(new ParticleVerifier_SymmetricGaussian(psfWidth, sigma));
 	
 	if (name == std::string("ellipsoidal2dgauss"))
-		return boost::shared_ptr<ParticleVerifier>(new ParticleVerifier_EllipsoidalGaussian(psfWidth, sigma));
+		return std::shared_ptr<ParticleVerifier>(new ParticleVerifier_EllipsoidalGaussian(psfWidth, sigma));
 	
 	// if we get here then we didn't recognize the particleverifier
 	throw std::runtime_error("Unknown particle verification algorithm");
 }
 	
 
-boost::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth) {
+std::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth) {
 	double sigma = 1;
 	
 	if (name == std::string("symmetric2dgauss"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
+		return std::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(psfWidth, sigma));
 	
 	if (name == std::string("symmetric2dgaussfixedwidth"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
+		return std::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(psfWidth, sigma));
 	
 	if (name == std::string("ellipsoidal2dgauss"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
+		return std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(psfWidth, sigma));
 	
 	if (name == std::string("multiplication"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
+		return std::shared_ptr<FitPositions>(new FitPositionsMultiplication(psfWidth, sigma));
 	
 	if (name == std::string("centroid"))
-		return boost::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
+		return std::shared_ptr<FitPositions>(new FitPositionsCentroid(psfWidth));
 	
 	if (name == std::string("mlewg"))
-		return boost::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
+		return std::shared_ptr<FitPositions>(new FitPositions_MLEwG(psfWidth));
 	
 	// if we get here then we didn't recognize the localizing algorithm
 	throw std::runtime_error("Unknown localization algorithm");
 }
 
-boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
+std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	// look at the file extension
 	std::string fileExtension = filePath.substr(filePath.length() - 3, 3);
 	
@@ -313,19 +313,19 @@ boost::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 	
 	if (fileExtension == std::string("spe"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderSPE(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderSPE(filePath));
 	
 	if (fileExtension == std::string("sif"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderAndor(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderAndor(filePath));
 	
 	if (fileExtension == std::string("his"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
 	
 	if (fileExtension == std::string("tif"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
 	
 	if (fileExtension == std::string("pde"))
-		return boost::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
+		return std::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
 	
 	// if we get here then we don't recognize the file type
 	throw (std::runtime_error("Unknown data file type with extension " + fileExtension));

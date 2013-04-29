@@ -31,7 +31,7 @@
 
 #ifdef WITH_IGOR
 
-boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPositionsFromWave(waveHndl positionsWave) {
+std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPositionsFromWave(waveHndl positionsWave) {
 	int err;
 	size_t findPosition;
 	
@@ -65,37 +65,37 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:0;");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGauss(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:1;");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_2DGaussFixedWidth(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:2");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Multiplication(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Multiplication(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:3");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Centroid(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Centroid(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:4");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_ZeissPALM(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_ZeissPALM(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:5");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian(positionsWave));
 	}
 	
 	findPosition = waveNote.find("LOCALIZATION METHOD:6");
 	if (findPosition != (size_t)-1) {
-		return boost::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_MLEwG(positionsWave));
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_MLEwG(positionsWave));
 	}
 	
 	// if we are still here then we don't recognize the type of localization used
@@ -103,18 +103,18 @@ boost::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetP
 }
 #endif // #ifdef WITH_IGOR
 
-void LocalizedPositionsContainer_2DGauss::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_2DGauss::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_2DGauss> newPosition_2DGauss(boost::static_pointer_cast<LocalizedPosition_2DGauss> (newPosition));
+	std::shared_ptr<LocalizedPosition_2DGauss> newPosition_2DGauss(std::static_pointer_cast<LocalizedPosition_2DGauss> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_2DGauss);
 }
 
-void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_2DGauss::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_2DGauss to itself");
@@ -126,7 +126,7 @@ void LocalizedPositionsContainer_2DGauss::addPositions(boost::shared_ptr<Localiz
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_2DGauss> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_2DGauss> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_2DGauss> newPositionsContainer_2DGauss(std::static_pointer_cast<LocalizedPositionsContainer_2DGauss> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_2DGauss>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
@@ -407,18 +407,18 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::writePositionsToFile(std::st
 	outputFile.close();
 }
 
-void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_2DGaussFixedWidth::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_2DGaussFixedWidth> newPosition_2DGaussFixedWidth(boost::static_pointer_cast<LocalizedPosition_2DGaussFixedWidth> (newPosition));
+	std::shared_ptr<LocalizedPosition_2DGaussFixedWidth> newPosition_2DGaussFixedWidth(std::static_pointer_cast<LocalizedPosition_2DGaussFixedWidth> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_2DGaussFixedWidth);
 }
 
-void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_2DGaussFixedWidth to itself");
@@ -430,25 +430,25 @@ void LocalizedPositionsContainer_2DGaussFixedWidth::addPositions(boost::shared_p
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> newPositionsContainer_2DGaussFixedWidth(boost::static_pointer_cast<LocalizedPositionsContainer_2DGaussFixedWidth> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> newPositionsContainer_2DGaussFixedWidth(std::static_pointer_cast<LocalizedPositionsContainer_2DGaussFixedWidth> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_2DGaussFixedWidth>::iterator it = newPositionsContainer_2DGaussFixedWidth->positionsVector.begin(); it != newPositionsContainer_2DGaussFixedWidth->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
 	}
 }
 
-void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_2DGauss");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> newPosition_Ellipsoidal2DGauss(boost::static_pointer_cast<LocalizedPosition_Ellipsoidal2DGauss> (newPosition));
+	std::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> newPosition_Ellipsoidal2DGauss(std::static_pointer_cast<LocalizedPosition_Ellipsoidal2DGauss> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_Ellipsoidal2DGauss);
 }
 
-void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_2DGauss to itself");
@@ -460,7 +460,7 @@ void LocalizedPositionsContainer_Ellipsoidal2DGaussian::addPositions(boost::shar
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> newPositionsContainer_Ellipsoidal2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> newPositionsContainer_Ellipsoidal2DGauss(std::static_pointer_cast<LocalizedPositionsContainer_Ellipsoidal2DGaussian> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_Ellipsoidal2DGauss>::iterator it = newPositionsContainer_Ellipsoidal2DGauss->positionsVector.begin(); it != newPositionsContainer_Ellipsoidal2DGauss->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
@@ -730,18 +730,18 @@ void LocalizedPositionsContainer_Centroid::writePositionsToFile(std::string file
 	outputFile.close();
 }
 
-void LocalizedPositionsContainer_Centroid::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_Centroid::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Centroid");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_Centroid> newPosition_Centroid(boost::static_pointer_cast<LocalizedPosition_Centroid> (newPosition));
+	std::shared_ptr<LocalizedPosition_Centroid> newPosition_Centroid(std::static_pointer_cast<LocalizedPosition_Centroid> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_Centroid);
 }
 
-void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_Centroid::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_Centroid to itself");
@@ -753,7 +753,7 @@ void LocalizedPositionsContainer_Centroid::addPositions(boost::shared_ptr<Locali
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_Centroid> newPositionsContainer_Centroid(boost::static_pointer_cast<LocalizedPositionsContainer_Centroid> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_Centroid> newPositionsContainer_Centroid(std::static_pointer_cast<LocalizedPositionsContainer_Centroid> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_Centroid>::iterator it = newPositionsContainer_Centroid->positionsVector.begin(); it != newPositionsContainer_Centroid->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
@@ -861,18 +861,18 @@ void LocalizedPositionsContainer_Multiplication::writePositionsToFile(std::strin
 	outputFile.close();
 }
 
-void LocalizedPositionsContainer_Multiplication::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_Multiplication::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_Multiplication> newPosition_Multiplication(boost::static_pointer_cast<LocalizedPosition_Multiplication> (newPosition));
+	std::shared_ptr<LocalizedPosition_Multiplication> newPosition_Multiplication(std::static_pointer_cast<LocalizedPosition_Multiplication> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_Multiplication);
 }
 
-void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_Multiplication::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_Multiplication to itself");
@@ -884,7 +884,7 @@ void LocalizedPositionsContainer_Multiplication::addPositions(boost::shared_ptr<
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_Multiplication> newPositionsContainer_2DGauss(boost::static_pointer_cast<LocalizedPositionsContainer_Multiplication> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_Multiplication> newPositionsContainer_2DGauss(std::static_pointer_cast<LocalizedPositionsContainer_Multiplication> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_Multiplication>::iterator it = newPositionsContainer_2DGauss->positionsVector.begin(); it != newPositionsContainer_2DGauss->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
@@ -955,18 +955,18 @@ ImagePtr LocalizedPositionsContainer_ZeissPALM::getLocalizedPositionsAsMatrix() 
 	return matrix;
 }
 
-void LocalizedPositionsContainer_ZeissPALM::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_ZeissPALM::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_ZeissPALM> newPosition_ZeissPALM(boost::static_pointer_cast<LocalizedPosition_ZeissPALM> (newPosition));
+	std::shared_ptr<LocalizedPosition_ZeissPALM> newPosition_ZeissPALM(std::static_pointer_cast<LocalizedPosition_ZeissPALM> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_ZeissPALM);
 }
 
-void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_ZeissPALM::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_ZeissPALM to itself");
@@ -978,7 +978,7 @@ void LocalizedPositionsContainer_ZeissPALM::addPositions(boost::shared_ptr<Local
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_ZeissPALM> newPositionsContainer_ZeissPALM(boost::static_pointer_cast<LocalizedPositionsContainer_ZeissPALM> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_ZeissPALM> newPositionsContainer_ZeissPALM(std::static_pointer_cast<LocalizedPositionsContainer_ZeissPALM> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_ZeissPALM>::iterator it = newPositionsContainer_ZeissPALM->positionsVector.begin(); it != newPositionsContainer_ZeissPALM->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
@@ -1104,18 +1104,18 @@ void LocalizedPositionsContainer_MLEwG::writePositionsToFile(std::string filePat
 	outputFile.close();
 }
 
-void LocalizedPositionsContainer_MLEwG::addPosition(boost::shared_ptr<LocalizedPosition> newPosition) {
+void LocalizedPositionsContainer_MLEwG::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
 	// check if the type of positions that we are adding is suitable
 	if (newPosition->getPositionType() != this->getPositionsType())
 		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_MLEwG");
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPosition_MLEwG> newPosition_MLEwG(boost::static_pointer_cast<LocalizedPosition_MLEwG> (newPosition));
+	std::shared_ptr<LocalizedPosition_MLEwG> newPosition_MLEwG(std::static_pointer_cast<LocalizedPosition_MLEwG> (newPosition));
 	
 	this->positionsVector.push_back(*newPosition_MLEwG);
 }
 
-void LocalizedPositionsContainer_MLEwG::addPositions(boost::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+void LocalizedPositionsContainer_MLEwG::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
 	// are we trying to add the same container to itself?
 	if (this == newPositionsContainer.get()) {
 		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_MLEwG to itself");
@@ -1127,7 +1127,7 @@ void LocalizedPositionsContainer_MLEwG::addPositions(boost::shared_ptr<Localized
 	}
 	
 	// cast the pointer to the more specific type
-	boost::shared_ptr<LocalizedPositionsContainer_MLEwG> newPositionsContainer_MLEwG(boost::static_pointer_cast<LocalizedPositionsContainer_MLEwG> (newPositionsContainer));
+	std::shared_ptr<LocalizedPositionsContainer_MLEwG> newPositionsContainer_MLEwG(std::static_pointer_cast<LocalizedPositionsContainer_MLEwG> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_MLEwG>::iterator it = newPositionsContainer_MLEwG->positionsVector.begin(); it != newPositionsContainer_MLEwG->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
