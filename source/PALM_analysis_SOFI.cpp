@@ -33,13 +33,15 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
 					boost::shared_ptr<ProgressReporter> progressReporter,
 					int nFramesToSkip, int nFramesToInclude, std::vector<int> lagTimes, int order, int crossCorrelate, int nFramesToGroup, 
 					std::vector<ImagePtr>& sofiOutputImages, std::vector<ImagePtr>& averageOutputImages) {
-	size_t nImages = imageLoader->getNImages();
-	size_t blockSize = 50;
-	sofiOutputImages.clear();
-	averageOutputImages.clear();
 	if (lagTimes.empty() && (order > 0))
 		lagTimes.resize(order - 1, 0);
 	int largestLagTime = *(std::max_element(lagTimes.begin(), lagTimes.end()));
+	if (largestLagTime > 100)
+		throw std::runtime_error("Lag times larger than 100 are not supported");
+	size_t blockSize = std::max(50, 2 * largestLagTime);
+	size_t nImages = imageLoader->getNImages();
+	sofiOutputImages.clear();
+	averageOutputImages.clear();
 	
 	if (nFramesToSkip < 0)
 		nFramesToSkip = 0;
@@ -50,7 +52,7 @@ void DoSOFIAnalysis(boost::shared_ptr<ImageLoader> imageLoader, std::vector<boos
     if (nFramesToSkip + nFramesToInclude > nImages)
         throw std::runtime_error("Too many images requested");
 	
-	if ((nImages <= largestLagTime) || (largestLagTime <= blockSize))
+	if ((nFramesToInclude <= largestLagTime) || (largestLagTime > blockSize))
 		throw std::runtime_error("Lag time too long");
 	
 	if (nFramesToSkip > nImages - largestLagTime)

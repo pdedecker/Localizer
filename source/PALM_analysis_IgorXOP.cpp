@@ -566,6 +566,11 @@ struct SOFIAnalysisRuntimeParams {
 	double lagTimes[100];					// Optional parameter.
 	int LAGFlagParamsSet[100];
 	
+	// Parameters for /LAGW flag group.
+	int LAGWFlagEncountered;
+	waveHndl lagTimesWave;
+	int LAGWFlagParamsSet[1];
+	
 	// Parameters for /XC flag group.
 	int XCFlagEncountered;
 	double doCrossCorrelation;
@@ -2399,6 +2404,12 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     }
 	
 	std::vector<int> lagTimes;
+	// only one of the LAG or LAGW flags can be specified
+	if (p->LAGFlagEncountered && p->LAGWFlagEncountered) {
+		XOPNotice("Only one of the \"LAG\" or \"LAGW\" flags can be set\r");
+		return PALM_ANALYSIS_XOP_ERROR;
+	}
+	
     if (p->LAGFlagEncountered) {
 		// Array-style optional parameter: p->lagTimes
 		int* paramsSet = &p->LAGFlagParamsSet[0];
@@ -2418,6 +2429,31 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 			XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
 			return PALM_ANALYSIS_XOP_ERROR;
 		}
+	}
+	
+	if (p->LAGWFlagEncountered) {
+		// Parameter: p->lagTimesWave (test for NULL handle before using)
+		waveHndl lagTimesWave = p->lagTimesWave;
+		if (lagTimesWave == NULL)
+			return NOWAV;
+		int waveType = WaveType(lagTimesWave);
+		if ((waveType == TEXT_WAVE_TYPE) || (waveType == WAVE_TYPE) || (waveType == DATAFOLDER_TYPE) || (waveType & NT_CMPLX))
+			return NT_INCOMPATIBLE;
+		int nLagTimesInWave = WavePoints(lagTimesWave);
+		if (nLagTimesInWave < order - 1) {
+			XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
+			return PALM_ANALYSIS_XOP_ERROR;
+		}
+		boost::scoped_array<double> doubleBuffer(new double[nLagTimesInWave]);
+		lagTimes.resize(nLagTimesInWave);
+		err = MDGetDPDataFromNumericWave(lagTimesWave, doubleBuffer.get());
+		if (err != 0)
+			return err;
+		for (int i = 0; i < nLagTimesInWave; ++i) {
+			lagTimes[i] = doubleBuffer[i];
+		}
+		// drop any lag times that may be unnecessary
+		lagTimes.resize(order - 1);
 	}
 
     int crossCorrelate;
@@ -2699,7 +2735,7 @@ static int RegisterSOFIAnalysis(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the SOFIAnalysisRuntimeParams structure as well.
-	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG={number[100]:lagTimes} /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "SOFIAnalysis /Y=number:cameraType /WDTH=number:psfWidth /ORDR=number:order /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /XC=number:doCrossCorrelation /GRP=number:nFramesToGroup /SUB={number:framesToSkip,number:nFramesToInclude} /MAX=number:maxPixelVal /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
