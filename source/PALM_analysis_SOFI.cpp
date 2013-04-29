@@ -30,6 +30,7 @@
 #include "PALM_analysis_SOFI.h"
 
 #include "tbb/tbb.h"
+#include "tbb/spin_mutex.h"
 
 void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers, 
 					std::shared_ptr<ProgressReporter> progressReporter,
@@ -311,7 +312,6 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     XCSOFIKernelProvider kernelProvider;
     int firstRow, firstCol, lastRow, lastCol;
     int nRowsOutput, nColsOutput;
-    int outputRow, outputCol;
     int nKernelRows, nKernelCols;
     
     kernelProvider.getSizeOfOutputImage(order, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
@@ -324,10 +324,11 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     ImagePtr outputImage(new Image(nRowsOutput, nColsOutput));
 	outputImage->setConstant(0.0);
     
-    double currentVal, summedVal;
+    tbb::spin_mutex spinMutex;
     // main calculation
     // loop over all images
     tbb::parallel_for(tbb::blocked_range<size_t>(0, nEvaluations), [&](const tbb::blocked_range<size_t> &thisRange) {
+        int outputRow, outputCol;
         for (size_t n = thisRange.begin(); n != thisRange.end(); ++n) {
             // loop over all pixels in the input
             for (int i = firstRow; i <= lastRow; ++i) {
@@ -336,11 +337,11 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                     for (int k = 0; k < nPixelsInKernel; ++k) {
                         // loop over all calculations within this kernel pixel
                         const std::vector<SOFIPixelCalculation> *calculationsForThisPixel = &(kernel[k]);
-                        summedVal = 0;
+                        double summedVal = 0.0;
                         for (size_t calculationIndex = 0; calculationIndex < calculationsForThisPixel->size(); ++calculationIndex) {
                             // and finally, loop over the different operations that each input requires
                             const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
-                            currentVal = 1;
+                            double currentVal = 1.0;
                             for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
                                 currentVal *= (*imageVector.at(n + expandedLagTimes.at(multiplicationIndex)))(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
                             }
@@ -348,15 +349,15 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                         }
                         summedVal /= static_cast<double>(calculationsForThisPixel->size());
                         (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
-                        (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
+                        {
+                            tbb::spin_mutex::scoped_lock(spinMutex);
+                            (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
+                        }
                     }
                 }
             }
         }
     });
-    for (size_t n = 0; n < nEvaluations; ++n) {
-        
-    }
     
     // take the average
     (*outputImage) /= static_cast<double>(this->imageVector.size());
