@@ -202,7 +202,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_52.lib;libboost_date_time-vc100-mt-gd-1_52.lib;libboost_system-vc100-mt-gd-1_52.lib;libboost_chrono-vc100-mt-gd-1_52.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_53.lib;libboost_date_time-vc100-mt-gd-1_53.lib;libboost_system-vc100-mt-gd-1_53.lib;libboost_chrono-vc100-mt-gd-1_53.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -231,7 +231,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_52.lib;libboost_date_time-vc100-mt-gd-1_52.lib;libboost_system-vc100-mt-gd-1_52.lib;libboost_chrono-vc100-mt-gd-1_52.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_53.lib;libboost_date_time-vc100-mt-gd-1_53.lib;libboost_system-vc100-mt-gd-1_53.lib;libboost_chrono-vc100-mt-gd-1_53.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -260,7 +260,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_52.lib;libboost_date_time-vc100-mt-gd-1_52.lib;libboost_system-vc100-mt-gd-1_52.lib;libboost_chrono-vc100-mt-gd-1_52.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_53.lib;libboost_date_time-vc100-mt-gd-1_53.lib;libboost_system-vc100-mt-gd-1_53.lib;libboost_chrono-vc100-mt-gd-1_53.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -287,7 +287,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_52.lib;libboost_date_time-vc100-mt-gd-1_52.lib;libboost_system-vc100-mt-gd-1_52.lib;libboost_chrono-vc100-mt-gd-1_52.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_53.lib;libboost_date_time-vc100-mt-gd-1_53.lib;libboost_system-vc100-mt-gd-1_53.lib;libboost_chrono-vc100-mt-gd-1_53.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2010b\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -319,7 +319,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_53.lib;libboost_chrono-vc100-mt-1_53.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -353,7 +353,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;mkl_intel_c.lib;mkl_sequential.lib;mkl_core.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;mkl_intel_c.lib;mkl_sequential.lib;mkl_core.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR.lib;XOPSupport.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).xop</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Intel\Composer XE\mkl\lib\ia32;$(SolutionDir)\..\lib\win32;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -387,7 +387,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win32;C:\Program Files\MATLAB\R2010b\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -422,7 +422,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_53.lib;libboost_chrono-vc100-mt-1_53.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -455,7 +455,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;mkl_intel_lp64.lib;mkl_sequential.lib;mkl_core.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;mkl_intel_lp64.lib;mkl_sequential.lib;mkl_core.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.xop</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Intel\Composer XE\mkl\lib\intel64;$(SolutionDir)\..\lib\win64;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -488,7 +488,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;cblas.lib;libboost_thread-vc100-mt-1_52.lib;libboost_date_time-vc100-mt-1_52.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2010b\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
