@@ -489,9 +489,9 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		
 		// no frame verifiers for now
 		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-		int lagTime = 0;
+		std::vector<int> lagTimes;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTime, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
 
 		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
 		plhs[1] = ConvertImageToArray(averageOutputImages.at(0));
