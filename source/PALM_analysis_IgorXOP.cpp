@@ -2759,23 +2759,23 @@ static int RegisterOperations(void)		// Register any operations with Igor.
 {
     int result;
 
-    if (result = RegisterLocalizationAnalysis())
+    if ((result = RegisterLocalizationAnalysis()))
         return result;
-    if (result = RegisterReadCCDImages())
+    if ((result = RegisterReadCCDImages()))
         return result;
-    if (result = RegisterProcessCCDImages())
+    if ((result = RegisterProcessCCDImages()))
         return result;
-    if (result = RegisterAnalyzeCCDImages())
+    if ((result = RegisterAnalyzeCCDImages()))
         return result;
-    if (result = RegisterEmitterSegmentation())
+    if ((result = RegisterEmitterSegmentation()))
         return result;
-    if (result = RegisterConvolveImages())
+    if ((result = RegisterConvolveImages()))
         return result;
-    if (result = RegisterLocalizationBitmap())
+    if ((result = RegisterLocalizationBitmap()))
         return result;
-    if (result = RegisterRipleyLFunctionClustering())
+    if ((result = RegisterRipleyLFunctionClustering()))
         return result;
-    if (result = RegisterSOFIAnalysis())
+    if ((result = RegisterSOFIAnalysis()))
         return result;
 
     // There are no more operations added by this XOP.
@@ -2802,7 +2802,7 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle) {
         return EXIT_FAILURE;
     }
 
-    if (result = RegisterOperations()) {
+    if ((result = RegisterOperations())) {
         SetXOPResult(result);
     }
     else {

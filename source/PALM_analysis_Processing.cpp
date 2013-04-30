@@ -115,7 +115,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(std::shared_pt
 	ImagePtr currentImage;
 	size_t xSize = image_loader->getXSize();
 	size_t ySize = image_loader->getYSize();
-	size_t nFramesInMovie = image_loader->getNImages();
+	int nFramesInMovie = image_loader->getNImages();
 	int nFramesSurroundingFrame = nFramesInAverage / 2;
 	int abortStatus;
 	
