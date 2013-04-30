@@ -483,9 +483,6 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             // always two inputs for 2nd order
             sofiPixelCalculation.inputRowDeltas.resize(2);
             sofiPixelCalculation.inputColDeltas.resize(2);
-            sofiPixelCalculation.imageIndices.resize(2);
-            sofiPixelCalculation.imageIndices[0] = 0;
-            sofiPixelCalculation.imageIndices[1] = 0;
             
             // the auto pixel at relative coordinates (0,0), expressed as a crosscorrelation
             sofiPixelCalculation.inputRowDeltas[0] = -1;
@@ -549,10 +546,6 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             // always 3 inputs for 3rd order
             sofiPixelCalculation.inputRowDeltas.resize(3);
             sofiPixelCalculation.inputColDeltas.resize(3);
-            sofiPixelCalculation.imageIndices.resize(3);
-            sofiPixelCalculation.imageIndices[0] = 0;
-            sofiPixelCalculation.imageIndices[1] = 0;
-            sofiPixelCalculation.imageIndices[2] = 0;
             
             // the auto pixel at relative coordinates (0,0)
             sofiPixelCalculation.inputRowDeltas[0] = -1;
@@ -721,118 +714,6 @@ ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
 	
 	return correctedImage;
 }
-
-/*ImagePtr SOFICorrector_Order2::doImageCorrection(ImagePtr imageToCorrect) {
-	// estimate the PSF standard deviation
-	double optimalPSFStdDev = determinePSFStdDev(imageToCorrect);
-	
-	ImagePtr correctedImage = performPSFCorrection(imageToCorrect.get(), optimalPSFStdDev);
-	return correctedImage;
-}
-
-double SOFICorrector_Order2::determinePSFStdDev(ImagePtr imageToCorrect) {
-	const gsl_min_fminimizer_type * minizerType = gsl_min_fminimizer_brent;
-	gsl_min_fminimizer *minimizer = gsl_min_fminimizer_alloc(minizerType);
-	if (minimizer == NULL) {
-		throw std::bad_alloc();
-	}
-	
-	gsl_function func;
-	func.function = SOFICorrector_Order2::functionToMinimize;
-	func.params = (void *)(&(*imageToCorrect));
-	
-	int status;
-	
-	// try to initialize the minimizer
-	// somewhat annoyingly, the solver refuses to do anything
-	// unless the boundaries and starting value indicate a minimum
-	// so if we don't get lucky right away then search some more
-	// for a starting guess
-	double initialPSFWidth = 2.0;	// TODO: provide this initial value in a more sensible way
-	status = gsl_min_fminimizer_set(minimizer, &func, initialPSFWidth, 0.1, 10.0);
-	if (status == GSL_EINVAL) {
-		double updatedInitialGuess = 0.1 + 0.5;
-		do {
-			status = gsl_min_fminimizer_set(minimizer, &func, updatedInitialGuess, 0.1, 10);
-			updatedInitialGuess += 0.5;
-		} while ((status == GSL_EINVAL) && (updatedInitialGuess < 10.0));
-	}
-	
-	if (status == GSL_EINVAL) {
-		// we didn't find any acceptable interval
-		throw std::runtime_error("Unable to find acceptable starting guess for the PSF correction in 2nd order XC");
-	}
-	
-	int maxIterations = 100, iterations = 0;
-	for (;;) {
-		status = gsl_min_fminimizer_iterate(minimizer);
-		if (status != GSL_SUCCESS) {
-			gsl_min_fminimizer_free(minimizer);
-			throw std::runtime_error("gsl_min_fminimizer_iterate reported an error");
-		}
-		
-		status = gsl_min_test_interval(gsl_min_fminimizer_x_lower(minimizer), gsl_min_fminimizer_x_upper(minimizer), 0.001, 0.0);
-		if (status == GSL_SUCCESS)
-			break;
-		
-		iterations += 1;
-		if (iterations > maxIterations)
-			break;
-	}
-	
-	double minimum = gsl_min_fminimizer_minimum(minimizer);
-	gsl_min_fminimizer_free(minimizer);
-	
-	return minimum;
-}
-
-ImagePtr SOFICorrector_Order2::performPSFCorrection(Image *image, double psfStdDev) {
-	size_t nRows = image->rows();
-	size_t nCols = image->cols();
-	
-	double autoPixelFactor = exp(- sqrt(2.0) / (2.0 * psfStdDev * psfStdDev));
-	double horizontalFactor = exp(- (1.0 / 2.0) / (2.0 * psfStdDev * psfStdDev));
-	double diagonalFactor = exp(- 1.0 / (2.0 * psfStdDev * psfStdDev));	// the 1.0 comes from sqrt(2.0) / sqrt(2.0)
-	
-	ImagePtr correctedImage(new Image(*image));
-	
-	// only loop over the crosscorrelation pixels
-	for (size_t j = 0; j < nCols; ++j) {
-		for (size_t i = 0; i < nRows; ++i) {
-			if ((i % 2 == 0) && (j % 2 == 0)) {
-				// autocorrelation pixel
-				(*correctedImage)(i, j) /= autoPixelFactor;
-				continue;
-			}
-			if ((i % 2 == 1) && (j % 2 == 1)) {
-				// this is a diagonal crosscorrelation pixel
-				(*correctedImage)(i, j) /= diagonalFactor;
-			} else {
-				(*correctedImage)(i, j) /= horizontalFactor;
-			}
-		}
-	}
-	
-	return correctedImage;
-}
-
-double SOFICorrector_Order2::functionToMinimize(double psfStdDev, void *params) {
-	Image* image = (Image *)params;
-	
-	size_t nRows = image->rows();
-	size_t nCols = image->cols();
-	
-	ImagePtr correctedImage = performPSFCorrection(image, psfStdDev);
-	
-	// calculate the relative variance of the mean
-	double avg, avgOfSquares, variance;
-	
-	avg = (*image).sum() / (double)(nRows * nCols);
-	avgOfSquares = (*image).array().square().sum() / (double)(nRows * nCols);
-	variance = avgOfSquares - avg * avg;
-	
-	return variance / (avg * avg);
-}*/
 
 SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_rhs) {
 	

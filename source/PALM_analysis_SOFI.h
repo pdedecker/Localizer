@@ -109,9 +109,6 @@ class SOFIPixelCalculation {
 public:
     std::vector<int> inputRowDeltas;
     std::vector<int> inputColDeltas; // relative (delta) coordinates of the INPUT pixels that are to be included
-    
-    std::vector<int> imageIndices;  // relative time of the INPUT images required for each calculation
-                                    // 0 is the current one, +1 means the next one, +2 the one after that, ...
     void getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) const;
     int outputRowDelta; // used by getOutputPixelCoordinates
     int outputColDelta;
