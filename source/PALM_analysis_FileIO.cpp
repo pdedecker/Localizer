@@ -2147,7 +2147,11 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		
 		dimensionSizes[0] = xSize;
 		dimensionSizes[1] = ySize;
-		dimensionSizes[2] = this->nImagesTotal;
+        if (this->nImagesTotal == 1) {
+            dimensionSizes[2] = 0;  // some Igor operations insist on an mxn wave and complain about mxnx1
+        } else {
+            dimensionSizes[2] = this->nImagesTotal;
+        }
 		dimensionSizes[3] = 0;
 		
 		// the way to make the wave depends on whether this object was constructed with a full path
