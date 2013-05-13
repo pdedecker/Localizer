@@ -42,6 +42,11 @@
 typedef Eigen::MatrixXd Image;
 typedef std::shared_ptr<Image> ImagePtr;
 
+template<typename T>
+T square(T val) {
+	return val * val;
+}
+
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors
 const int kMaxImageDimension = 10000;

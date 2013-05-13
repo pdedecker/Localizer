@@ -1325,11 +1325,6 @@ int Jacobian_EllipsoidalGaussian(const gsl_vector *params, void *fitData_rhs, gs
 
 }
 
-template<typename T>
-T square(T val) {
-	return val * val;
-}
-
 int FitFunctionAndJacobian_SymmetricGaussian(const gsl_vector *params, void *measured_intensities_struct, gsl_vector *model_values, gsl_matrix *jacobian) {
     int result;
     result = FitFunction_SymmetricGaussian(params, measured_intensities_struct, model_values);

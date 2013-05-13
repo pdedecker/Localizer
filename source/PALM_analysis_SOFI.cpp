@@ -362,12 +362,20 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     // take the average
     (*outputImage) /= static_cast<double>(this->imageVector.size());
                                        
-	// now normalize the pixel by requiring that the mean of every kind of pixel is the same
+	// Each type of cross-cumulant has a different scaling factor depending on the distance between the contributing
+    // pixels. Originally we corrected for this by scaling the values so that every kind of pixel has the same mean
+    // value. However, this did not fix the checkerboarding completely since there appears to be some kind of residual
+    // correlation as an artifact of camera readout. So now we normalize by requiring that the mean and standard deviation
+    // of each type of pixel are the same. This is achieved by transforming each type of pixel according to y = ax + b.
     int nKindsOfPixels = nPixelsInKernel;
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
+    Eigen::MatrixXd pixelVariances(nKernelRows, nKernelCols);
+    Eigen::MatrixXd aFactor(nKernelRows, nKernelCols), bTerm(nKernelRows, nKernelCols);
     pixelAverages.setConstant(0.0);
+    pixelVariances.setConstant(0.0);
     int nPixelsOfEachKind = nRowsOutput * nColsOutput / nKindsOfPixels;
+    // calculate averages
     for (int i = 0; i < nRowsOutput; ++i) {
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
@@ -375,18 +383,30 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
             pixelAverages(kindOfRow, kindOfCol) += (*outputImage)(i, j);
         }
     }
-    
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
+    
+    // calculate variances
+    for (int i = 0; i < nRowsOutput; ++i) {
+        for (int j = 0; j < nColsOutput; ++j) {
+            kindOfRow = i % nKernelRows;
+            kindOfCol = j % nKernelCols;
+            pixelVariances(kindOfRow, kindOfCol) += square<double>((*outputImage)(i, j) - pixelAverages(kindOfRow, kindOfCol));
+        }
+    }
+    pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
     
     // now determine correction factors, arbitrary to the first element
     for (int i = 0; i < nKernelRows; ++i) {
         for (int j = 0; j < nKernelCols; ++j) {
-            if (i == 0 && j == 0)
+            if (i == 0 && j == 0) {
+                aFactor(i, j) = 1.0;
+                bTerm(i, j) = 0.0;
                 continue;
-            pixelAverages(i, j) = pixelAverages(i, j) / pixelAverages(0, 0);
+            }
+            aFactor(i, j) = std::sqrt(pixelVariances(0, 0) / pixelVariances(i, j));
+            bTerm(i, j) = pixelAverages(0, 0) - aFactor(i, j) * pixelAverages(i, j);
         }
     }
-    pixelAverages(0, 0) = 1;
     
     // allocate the corrected image
     ImagePtr correctedImage(new Image(*outputImage));
@@ -395,7 +415,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
-            (*correctedImage)(i, j) /= pixelAverages(kindOfRow, kindOfCol);
+            (*correctedImage)(i, j) = (*correctedImage)(i, j) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
         }
     }
     
