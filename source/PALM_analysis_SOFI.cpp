@@ -327,11 +327,11 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     // main calculation
     // loop over all images
     tbb::parallel_for(tbb::blocked_range<size_t>(0, nEvaluations), [&](const tbb::blocked_range<size_t> &thisRange) {
-        int outputRow, outputCol;
+        int outputRow, outputCol, order = _order;
         for (size_t n = thisRange.begin(); n != thisRange.end(); ++n) {
             // loop over all pixels in the input
-            for (int i = firstRow; i <= lastRow; ++i) {
-                for (int j = firstCol; j <= lastCol; ++j) {
+            for (int j = firstCol; j <= lastCol; ++j) {
+                for (int i = firstRow; i <= lastRow; ++i) {
                     // loop over the kernel
                     for (int k = 0; k < nPixelsInKernel; ++k) {
                         // loop over all calculations within this kernel pixel
@@ -347,7 +347,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                             summedVal += currentVal;
                         }
                         summedVal /= static_cast<double>(calculationsForThisPixel->size());
-                        (*calculationsForThisPixel)[0].getOutputPixelCoordinates(_order, i, j, outputRow, outputCol);
+                        (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
                         {
                             tbb::spin_mutex::scoped_lock(spinMutex);
                             (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
@@ -390,8 +390,8 @@ void SOFICalculator_CrossCorrelation::performCorrection(ImagePtr imageToCorrect)
     int nPixelsOfEachKind = nRowsOutput * nColsOutput / nKindsOfPixels;
     
     // calculate averages
-    for (int i = 0; i < nRowsOutput; ++i) {
-        for (int j = 0; j < nColsOutput; ++j) {
+    for (int j = 0; j < nColsOutput; ++j) {
+        for (int i = 0; i < nRowsOutput; ++i) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
             pixelAverages(kindOfRow, kindOfCol) += (*imageToCorrect)(i, j);
@@ -400,8 +400,8 @@ void SOFICalculator_CrossCorrelation::performCorrection(ImagePtr imageToCorrect)
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
     
     // calculate variances
-    for (int i = 0; i < nRowsOutput; ++i) {
-        for (int j = 0; j < nColsOutput; ++j) {
+    for (int j = 0; j < nColsOutput; ++j) {
+        for (int i = 0; i < nRowsOutput; ++i) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
             pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(i, j) - pixelAverages(kindOfRow, kindOfCol));
@@ -410,8 +410,8 @@ void SOFICalculator_CrossCorrelation::performCorrection(ImagePtr imageToCorrect)
     pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
     
     // now determine correction factors, arbitrary to the first element
-    for (int i = 0; i < nKernelRows; ++i) {
-        for (int j = 0; j < nKernelCols; ++j) {
+    for (int j = 0; j < nKernelCols; ++j) {
+        for (int i = 0; i < nKernelRows; ++i) {
             if (i == 0 && j == 0) {
                 aFactor(i, j) = 1.0;
                 bTerm(i, j) = 0.0;
@@ -423,8 +423,8 @@ void SOFICalculator_CrossCorrelation::performCorrection(ImagePtr imageToCorrect)
     }
     
     // perform the correction
-    for (int i = 0; i < nRowsOutput; ++i) {
-        for (int j = 0; j < nColsOutput; ++j) {
+    for (int j = 0; j < nColsOutput; ++j) {
+        for (int i = 0; i < nRowsOutput; ++i) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
             (*imageToCorrect)(i, j) = (*imageToCorrect)(i, j) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
