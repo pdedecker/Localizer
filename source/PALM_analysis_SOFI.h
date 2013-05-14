@@ -63,7 +63,7 @@ void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::s
  */
 class SOFICalculator {
 public:
-	SOFICalculator(size_t batchSize_rhs) {batchSize = batchSize_rhs; sumOfWeightsIncluded = 0.0;}
+	SOFICalculator(int order, std::vector<int> lagTimes_rhs, size_t batchSize) : _order(order), _lagTimes(lagTimes_rhs), _batchSize(batchSize), sumOfWeightsIncluded(0.0) {}
 	virtual ~SOFICalculator() {;}
 	
     void addNewImage(ImagePtr image);
@@ -72,12 +72,15 @@ public:
 protected:
     void addNewBlockFromStoredImages();
     virtual void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage) = 0;
+    virtual void performCorrection(ImagePtr imageToCorrect) = 0;
     
+    int _order;
+    std::vector<int> _lagTimes;
     std::vector<ImagePtr> imageVector;
     ImagePtr sofiImage;
     ImagePtr averageImage;
     
-    size_t batchSize;
+    size_t _batchSize;
     double sumOfWeightsIncluded;
 };
 
@@ -88,9 +91,7 @@ public:
 	
 protected:
     void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
-    
-    int order;
-	std::vector<int> _lagTimes;
+    void performCorrection(ImagePtr imageToCorrect) {;}
 };
 
 class SOFICalculator_CrossCorrelation : public SOFICalculator {
@@ -100,9 +101,7 @@ public:
 	
 protected:
     void performCalculation(ImagePtr &calculatedSOFIImage, ImagePtr &calculatedAverageImage);
-    
-    int order;
-	std::vector<int> _lagTimes;
+    void performCorrection(ImagePtr imageToCorrect);
 };
 
 class SOFIPixelCalculation {

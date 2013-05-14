@@ -153,7 +153,7 @@ void SOFICalculator::addNewImage(ImagePtr newImage) {
 	
 	this->imageVector.push_back(newImage);
     
-    if (imageVector.size() == batchSize) {
+    if (imageVector.size() == _batchSize) {
         // it's time to calculate and store some output
         addNewBlockFromStoredImages();
 		imageVector.clear();
@@ -161,7 +161,8 @@ void SOFICalculator::addNewImage(ImagePtr newImage) {
 }
 
 void SOFICalculator::addNewBlockFromStoredImages() {
-    double weightOfThisBlock = static_cast<double>(imageVector.size()) / static_cast<double>(batchSize);
+    int largestLagTime = *(std::max_element(_lagTimes.begin(), _lagTimes.end()));
+    double weightOfThisBlock = static_cast<double>(imageVector.size() - largestLagTime) / static_cast<double>(_batchSize - largestLagTime);
     
     ImagePtr thisBatchAverage, thisBatchSOFI;
     this->performCalculation(thisBatchSOFI, thisBatchAverage);
@@ -201,12 +202,12 @@ void SOFICalculator::getResult(ImagePtr &calculatedSOFIImage, ImagePtr &calculat
     
     *calculatedSOFIImage /= sumOfWeightsIncluded;
     *calculatedAverageImage /= sumOfWeightsIncluded;
+    
+    performCorrection(calculatedSOFIImage);
 }
 
-SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order_rhs, std::vector<int> lagTimes, size_t batchSize) :
-    SOFICalculator(batchSize),
-    order(order_rhs),
-	_lagTimes(lagTimes)
+SOFICalculator_AutoCorrelation::SOFICalculator_AutoCorrelation(int order, std::vector<int> lagTimes, size_t batchSize) :
+    SOFICalculator(order, lagTimes, batchSize)
 {
 	// for an order of n there should be exactly (n - 1) lag times
 	if (_lagTimes.size() != order - 1)
@@ -251,7 +252,7 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     outputImage->setConstant(0.0);
     for (size_t n = 0; n < nEvaluations; ++n) {
         subImage->setConstant(1.0);
-        for (int i = 0; i < order; ++i) {
+        for (int i = 0; i < _order; ++i) {
             (*subImage).array() *= (*imageVector.at(n + expandedLagTimes.at(i))).array();
         }
         *outputImage += *subImage;
@@ -263,10 +264,8 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
 }
 
-SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order_rhs, std::vector<int> lagTimes, size_t batchSize) :
-    SOFICalculator(batchSize),
-    order(order_rhs),
-	_lagTimes(lagTimes)
+SOFICalculator_CrossCorrelation::SOFICalculator_CrossCorrelation(int order, std::vector<int> lagTimes, size_t batchSize) :
+    SOFICalculator(order, lagTimes, batchSize)
 {
 	// only allow order 2 or 3 for now
 	if ((order != 2) && (order != 3))
@@ -314,10 +313,10 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     int nRowsOutput, nColsOutput;
     int nKernelRows, nKernelCols;
     
-    kernelProvider.getSizeOfOutputImage(order, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
-    kernelProvider.getCoordinatesOfFirstUsableInputPixel(order, firstImage->rows(), firstImage->cols(), firstRow, firstCol);
-    kernelProvider.getCoordinatesOfLastUsableInputPixel(order, firstImage->rows(), firstImage->cols(), lastRow, lastCol);
-    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel = kernelProvider.getKernel(order, 0, nKernelRows, nKernelCols);
+    kernelProvider.getSizeOfOutputImage(_order, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
+    kernelProvider.getCoordinatesOfFirstUsableInputPixel(_order, firstImage->rows(), firstImage->cols(), firstRow, firstCol);
+    kernelProvider.getCoordinatesOfLastUsableInputPixel(_order, firstImage->rows(), firstImage->cols(), lastRow, lastCol);
+    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel = kernelProvider.getKernel(_order, 0, nKernelRows, nKernelCols);
     int nPixelsInKernel = nKernelRows * nKernelCols;
     
     // allocate the output image
@@ -348,7 +347,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                             summedVal += currentVal;
                         }
                         summedVal /= static_cast<double>(calculationsForThisPixel->size());
-                        (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
+                        (*calculationsForThisPixel)[0].getOutputPixelCoordinates(_order, i, j, outputRow, outputCol);
                         {
                             tbb::spin_mutex::scoped_lock(spinMutex);
                             (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
@@ -360,14 +359,28 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     });
     
     // take the average
-    (*outputImage) /= static_cast<double>(this->imageVector.size());
-                                       
-	// Each type of cross-cumulant has a different scaling factor depending on the distance between the contributing
+    (*outputImage) /= static_cast<double>(nEvaluations);
+    
+	calculatedSOFIImage = outputImage;
+    calculatedAverageImage = thisBatchAverageImage;
+    
+    return;
+}
+
+void SOFICalculator_CrossCorrelation::performCorrection(ImagePtr imageToCorrect) {
+    // Each type of cross-cumulant has a different scaling factor depending on the distance between the contributing
     // pixels. Originally we corrected for this by scaling the values so that every kind of pixel has the same mean
     // value. However, this did not fix the checkerboarding completely since there appears to be some kind of residual
     // correlation as an artifact of camera readout. So now we normalize by requiring that the mean and standard deviation
     // of each type of pixel are the same. This is achieved by transforming each type of pixel according to y = ax + b.
-    int nKindsOfPixels = nPixelsInKernel;
+    int nRowsOutput = imageToCorrect->rows();
+    int nColsOutput = imageToCorrect->cols();
+    
+    XCSOFIKernelProvider kernelProvider;
+    int nKernelRows, nKernelCols;
+    kernelProvider.getKernel(_order, 0, nKernelRows, nKernelCols);
+    int nKindsOfPixels = nKernelRows * nKernelCols;
+    
     int kindOfRow, kindOfCol;
     Eigen::MatrixXd pixelAverages(nKernelRows, nKernelCols);
     Eigen::MatrixXd pixelVariances(nKernelRows, nKernelCols);
@@ -375,12 +388,13 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     pixelAverages.setConstant(0.0);
     pixelVariances.setConstant(0.0);
     int nPixelsOfEachKind = nRowsOutput * nColsOutput / nKindsOfPixels;
+    
     // calculate averages
     for (int i = 0; i < nRowsOutput; ++i) {
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
-            pixelAverages(kindOfRow, kindOfCol) += (*outputImage)(i, j);
+            pixelAverages(kindOfRow, kindOfCol) += (*imageToCorrect)(i, j);
         }
     }
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
@@ -390,7 +404,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
-            pixelVariances(kindOfRow, kindOfCol) += square<double>((*outputImage)(i, j) - pixelAverages(kindOfRow, kindOfCol));
+            pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(i, j) - pixelAverages(kindOfRow, kindOfCol));
         }
     }
     pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
@@ -408,21 +422,14 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
         }
     }
     
-    // allocate the corrected image
-    ImagePtr correctedImage(new Image(*outputImage));
-    // and correct it
+    // perform the correction
     for (int i = 0; i < nRowsOutput; ++i) {
         for (int j = 0; j < nColsOutput; ++j) {
             kindOfRow = i % nKernelRows;
             kindOfCol = j % nKernelCols;
-            (*correctedImage)(i, j) = (*correctedImage)(i, j) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
+            (*imageToCorrect)(i, j) = (*imageToCorrect)(i, j) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
         }
     }
-    
-	calculatedSOFIImage = ImagePtr(new Image(*correctedImage));
-    calculatedAverageImage = ImagePtr(new Image(*thisBatchAverageImage));
-    
-    return;
 }
 
 void SOFIPixelCalculation::getOutputPixelCoordinates(int order, int inputRow, int inputCol, int &outputRow, int &outputCol) const {
