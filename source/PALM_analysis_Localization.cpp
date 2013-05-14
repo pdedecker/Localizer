@@ -174,15 +174,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
             continue;
         }
 
-        // is the amplitude close enough to the initial value to be trusted?
-        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 1.5)) {
-            // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = particles->erase(it);
-            continue;
-        }
-
 		// is the fitted standard deviation close enough to the expected value?
-        if ((gsl_vector_get(fit_iterator->x, 1) < 0.7 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.3)) {
+        if ((gsl_vector_get(fit_iterator->x, 1) < 0.5 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
             it = particles->erase(it);
             continue;
         }
@@ -359,13 +352,6 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
             continue;
         }
 
-        // is the fitted amplitude close enough to the initial value to be trusted?
-        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
-            // the output fit amplitude is more than a factor of two different from the initial value, drop this point
-            it = particles->erase(it);
-            continue;
-        }
-
         // calculate the covariance matrix
         gsl_multifit_covar(fit_iterator->J, 0.0, covarianceMatrix);
         chi = gsl_blas_dnrm2(fit_iterator->f);
@@ -534,12 +520,6 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 
         // are the fitted coordinates close enough to the initial guess?
         if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = particles->erase(it);
-            continue;
-        }
-
-        // is the fitted amplitude close enough to the initial value to be trusted?
-        if ((gsl_vector_get(fit_iterator->x, 0) < amplitude / 2.0) || (gsl_vector_get(fit_iterator->x, 0) > amplitude * 2.0)) {
             it = particles->erase(it);
             continue;
         }
