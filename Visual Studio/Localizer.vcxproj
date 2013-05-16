@@ -488,7 +488,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_52.lib;libboost_chrono-vc100-mt-1_52.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff.lib;libfftw-3.3.lib;gsl.lib;tbb.lib;cblas.lib;libboost_thread-vc100-mt-1_53.lib;libboost_date_time-vc100-mt-1_53.lib;libboost_system-vc100-mt-1_53.lib;libboost_chrono-vc100-mt-1_53.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2010b\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

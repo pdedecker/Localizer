@@ -408,14 +408,17 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 6)
-		mexErrMsgTxt("Must have exactly 6 input arguments for sofi\n\
+	if (nrhs != 7)
+		mexErrMsgTxt("Must have exactly 7 input arguments for sofi\n\
 					 1. the string \"sofi\"\n\
 					 2. the desired order (2 or 3)\n\
-					 3. single number: 0 for autocorrelation, 1 for crosscorrelation\n\
-					 4. number of frames to skip at the beginning\n\
-					 5. number of frames to include in the calculation (<=0 means all frames up to the end)\n\
-					 6. file path to a data file, or a 2D or 3D matrix containing numeric data");
+					 3. single number: 0 for autocumulants, 1 for crosscumulants\n\
+					 4. 1D matrix containing time lags to use in the calculation. An empty matrix\n\
+						is equivalent to specifying time lags of zero. For a calculation of order N\n\
+						at least (N - 1) values must be specified. Excess values will be ignored.\n\
+					 5. number of frames to skip at the beginning\n\
+					 6. number of frames to include in the calculation (<=0 means all frames up to the end)\n\
+					 7. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
@@ -437,10 +440,25 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
 	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
-	
-	// index 3 - must be a single number (number of frames to skip)
-	int nFramesToSkip = 0;
+
+	// index 3 - must be an empty or 1D matrix containing time lags
+	std::vector<int> lagTimes;
 	array = const_cast<mxArray*>(prhs[3]);
+	if ((mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("3nd argument must be a 1D or empty matrix containing lag times");
+	int nLagTimes = mxGetN(array);
+	if ((nLagTimes > 0) && (nLagTimes < correlationOrder - 1))
+		mexErrMsgTxt("a calculation of order N requires at least (N-1) lag times");
+	for (int i = 0; i < nLagTimes; ++i) {
+		int thisLagTime = static_cast<int>(*(mxGetPr(array) + i));
+		if (thisLagTime < 0)
+			mexErrMsgTxt("all time lags must be >= 0");
+		lagTimes.push_back(thisLagTime);
+	}
+	
+	// index 4 - must be a single number (number of frames to skip)
+	int nFramesToSkip = 0;
+	array = const_cast<mxArray*>(prhs[4]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("4th argument must be a double scalar (number of frames to skip)");
 	if (*mxGetPr(array) <= 0) {
@@ -449,9 +467,9 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		nFramesToSkip = static_cast<int>(*mxGetPr(array) + 0.5);
 	}
 	
-	// index 4 - must be a single number (number of frames to include)
+	// index 5 - must be a single number (number of frames to include)
 	int nFramesToInclude = -1;
-	array = const_cast<mxArray*>(prhs[4]);
+	array = const_cast<mxArray*>(prhs[5]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("5th argument must be a double scalar (number of frames to include)");
 	if (*mxGetPr(array) <= 0) {
@@ -460,10 +478,10 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		nFramesToInclude = static_cast<int>(*mxGetPr(array) + 0.5);
 	}
 	
-	// index 5 - must be the data
+	// index 6 - must be the data
 	std::string filePath;
 	mxArray* dataArray = NULL;
-	array = const_cast<mxArray*>(prhs[5]);
+	array = const_cast<mxArray*>(prhs[6]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 		if (filePath.empty())
@@ -489,7 +507,6 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		
 		// no frame verifiers for now
 		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-		std::vector<int> lagTimes;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
 		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
 
