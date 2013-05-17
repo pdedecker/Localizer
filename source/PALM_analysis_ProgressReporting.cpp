@@ -101,7 +101,7 @@ int ProgressReporter_IgorUserFunction::UpdateCalculationProgress(double progress
 }
 #endif // WITH_IGOR
 
-#if WITH_MATLAB
+#ifdef WITH_MATLAB
 int ProgressReporter_MatlabCommandLine::UpdateCalculationProgress(double progress, double maxProgress) {
 	double percentDone = progress / maxProgress * 100.0;
 	

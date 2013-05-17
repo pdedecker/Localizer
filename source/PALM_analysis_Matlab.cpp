@@ -766,7 +766,7 @@ mxArray* ConvertImagesToArray(std::shared_ptr<ImageLoader> imageLoader, int firs
 		nImagesToRead = nImages - firstImage;
 
 	mwSize ndim = 3;
-	mwSize dims[3] = {xSize, ySize, nImagesToRead};
+	mwSize dims[3] = {xSize, ySize, static_cast<mwSize>(nImagesToRead)};
 	mxArray* outputMatrix = mxCreateNumericArray(ndim, dims, classID, mxREAL);
 	if (outputMatrix == NULL)
 		throw std::bad_alloc();
