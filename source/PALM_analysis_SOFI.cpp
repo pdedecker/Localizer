@@ -342,15 +342,17 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
                             const SOFIPixelCalculation *thisCalculation = &((*calculationsForThisPixel)[calculationIndex]);
                             double currentVal = 1.0;
                             for (size_t multiplicationIndex = 0; multiplicationIndex < thisCalculation->inputRowDeltas.size(); ++multiplicationIndex) {
-                                currentVal *= (*imageVector.at(n + expandedLagTimes.at(multiplicationIndex)))(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
+                                currentVal *= (*imageVector[n + expandedLagTimes[multiplicationIndex]])(i + thisCalculation->inputRowDeltas[multiplicationIndex], j + thisCalculation->inputColDeltas[multiplicationIndex]);
                             }
                             summedVal += currentVal;
                         }
                         summedVal /= static_cast<double>(calculationsForThisPixel->size());
                         (*calculationsForThisPixel)[0].getOutputPixelCoordinates(order, i, j, outputRow, outputCol);
+                        outputRow += (*calculationsForThisPixel)[0].outputRowDelta;
+                        outputCol += (*calculationsForThisPixel)[0].outputColDelta;
                         {
                             tbb::spin_mutex::scoped_lock(spinMutex);
-                            (*outputImage)(outputRow + (*calculationsForThisPixel)[0].outputRowDelta, outputCol + (*calculationsForThisPixel)[0].outputColDelta) += summedVal;
+                            (*outputImage)(outputRow, outputCol) += summedVal;
                         }
                     }
                 }
