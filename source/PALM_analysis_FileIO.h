@@ -311,26 +311,26 @@ protected:
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
+    class ImageOffsets {
+    public:
+		std::vector<uint64_t> offsets;
+		int64_t modificationTime;
+    };
+    
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
 	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
 	
-	/*
-	 * The implementation of spoolTo in the base ImageLoader class
-	 * is overridden due to the linked list nature of TIFF files
-	 */
-	void spoolTo(size_t index);
-	
 	int getFileType() {return CAMERA_TYPE_TIFF;}
 	
 protected:
 	void parse_header_information();
+    void _extractSampleFormat();
 	
 	TIFF* tiff_file;
-	std::vector<size_t> directoryIndices;
-	
-	size_t currentDirectoryIndex;
+    static std::map<std::string, ImageLoaderTIFF::ImageOffsets> _offsetsMap;
+	std::vector<uint64_t> _directoryOffsets;
 };
 
 class ImageLoaderMultiFileTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library

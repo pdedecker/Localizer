@@ -234,9 +234,7 @@ void ImageLoader::spoolTo(size_t index) {
 	if (index >= nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	// don't do any work if it's not required
-	if (this->nextImageToRead != index)
-		this->nextImageToRead = index;
+    this->nextImageToRead = index;
 }
 
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
@@ -821,11 +819,11 @@ ImagePtr ImageLoaderPDE::readNextImage(size_t &indexOfImageThatWasRead) {
 	return image;
 }
 
+std::map<std::string, ImageLoaderTIFF::ImageOffsets> ImageLoaderTIFF::_offsetsMap;
+
 ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 	TIFFSetWarningHandler(NULL);
 	this->filePath = rhs;
-	
-	this->currentDirectoryIndex = 0;
 	
 	tiff_file = NULL;
 	tiff_file = TIFFOpen(this->filePath.c_str(), "rm");
@@ -850,89 +848,106 @@ ImageLoaderTIFF::~ImageLoaderTIFF() {
 
 void ImageLoaderTIFF::parse_header_information() {
 	int result;
-	uint16_t result_uint16;
+	uint32_t result_uint32;
+    
+    result = TIFFSetDirectory(tiff_file, 0);
+    if (result != 1)
+        throw std::runtime_error("Error reading from the file");
+    
+    _extractSampleFormat();
+    
+    // do we already have information on the offsets of the images for this file?
+	if (_offsetsMap.count(this->filePath) != 0) {
+		// we have information, now check if the timestamp is still okay
+		if (GetLastModificationTime(this->filePath) != _offsetsMap[this->filePath].modificationTime) {
+			// looks like the file was modified
+			// delete the offset information, it will be recreated below
+			_offsetsMap.erase(this->filePath);
+		} else {
+            // we still have valid offsets
+            _directoryOffsets = _offsetsMap[this->filePath].offsets;
+        }
+	}
+    
+    // now create the offsets map if needed (if it did not exist or was deleted above)
+	if (_offsetsMap.count(this->filePath) == 0) {
+		ImageLoaderTIFF::ImageOffsets imageOffsets;
+        
+        // how many images are there in the file?
+        // because there is a possibility of a file with different
+        // subfile types (e.g. Zeiss LSM files), we need to go over all of them
+        // and look at which subfiles are the ones we're interested in
+        imageOffsets.modificationTime = GetLastModificationTime(this->filePath);
+        do {
+            result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
+
+            if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
+                // this is one of the subtypes that we don't support
+                // do nothing with it
+            } else {
+                // if we're here then the image is appropriate, store the offset to its IFD
+                int64_t ifdOffset = TIFFCurrentDirOffset(tiff_file);
+                _directoryOffsets.push_back(ifdOffset);
+            }
+        } while (TIFFReadDirectory(tiff_file) == 1);
+        
+        imageOffsets.offsets = _directoryOffsets;
+        
+        _offsetsMap[this->filePath] = imageOffsets;
+    }
+	
+	this->nImages = _directoryOffsets.size();
+    
+	this->checkForReasonableValues();
+}
+
+void ImageLoaderTIFF::_extractSampleFormat() {
+    int result;
+    uint16_t result_uint16;
 	uint32_t result_uint32;
 	int isInt;
 	size_t bitsPerPixel;
-	
-	// how many images are there in the file?
-	// because there is a possibility of a file with different
-	// subfile types (e.g. Zeiss LSM files), we need to go over all of them
-	// and look at which subfiles are the ones we're interested in
-	result = TIFFSetDirectory(tiff_file, 0);
-	if (result != 1)
-		throw std::runtime_error("Error reading from the file");
-	
-	for (size_t index = 0; ; ++index) {
-		result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
-		
-		if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
-			// this is one of the subtypes that we don't support
-			// do nothing with it
-		} else {
-			// if we're here then the image is appropriate, store its index
-			directoryIndices.push_back(index);
-		}
-		
-		if (TIFFReadDirectory(tiff_file) != 1) {
-			// there are no more directories in the file,
-			break;
-		}
-	}
-	
-	
-	this->nImages = directoryIndices.size();
-	
-	// obtain some properties from the first image in the file
-	// we assume that these properties are the for all other valid subfiles
-	result = TIFFSetDirectory(tiff_file, directoryIndices[0]);
-	if (result != 1)
-		throw std::runtime_error("Error reading from the file");
-	
-	// is the image in grayscale format?
-	result = TIFFGetField(tiff_file, TIFFTAG_PHOTOMETRIC, &result_uint16);
-	if (result != 1) {
-		std::string error;
-		error = "The image at\"";
-		error += this->filePath;
-		error += "\" is not a grayscale image";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
-		std::string error;
-		error = "The image at\"";
-		error += this->filePath;
-		error += "\" is not a grayscale image";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	// is it a binary image?
-	result = TIFFGetField(tiff_file, TIFFTAG_BITSPERSAMPLE, &result_uint16);
-	if (result != 1) {
-		std::string error;
-		error = "The image at\"";
-		error += this->filePath;
-		error += "\" is not a grayscale image";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
-		std::string error;
-		error = "The image at\"";
-		error += this->filePath;
-		error += "\" is not a grayscale image";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	bitsPerPixel = (unsigned int)result_uint16;
+    
+    // is the image in grayscale format?
+    result = TIFFGetField(tiff_file, TIFFTAG_PHOTOMETRIC, &result_uint16);
+    if (result != 1) {
+        std::string error;
+        error = "The image at\"";
+        error += this->filePath;
+        error += "\" is not a grayscale image";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+    if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
+        std::string error;
+        error = "The image at\"";
+        error += this->filePath;
+        error += "\" is not a grayscale image";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+    
+    // is it a binary image?
+    result = TIFFGetField(tiff_file, TIFFTAG_BITSPERSAMPLE, &result_uint16);
+    if (result != 1) {
+        std::string error;
+        error = "The image at\"";
+        error += this->filePath;
+        error += "\" is not a grayscale image";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+    if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
+        std::string error;
+        error = "The image at\"";
+        error += this->filePath;
+        error += "\" is not a grayscale image";
+        throw ERROR_READING_FILE_DATA(error);
+    }
+    bitsPerPixel = (unsigned int)result_uint16;
 	
 	// is the data in unsigned integer or floating point format?
 	result = TIFFGetField(tiff_file, TIFFTAG_SAMPLEFORMAT, &result_uint16);
 	if (result != 1) {	// if the field does not exist then we assume that it is integer format
 		result_uint16 = 1;
 	}
-	
 	switch (result_uint16) {
 		case 1:
 			isInt = 1;
@@ -998,7 +1013,6 @@ void ImageLoaderTIFF::parse_header_information() {
 		error += "\" does not specify a width";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
 	xSize = (size_t)(result_uint32);
 	
 	// what is the y size?
@@ -1010,19 +1024,7 @@ void ImageLoaderTIFF::parse_header_information() {
 		error += "\" does not specify a height";
 		throw ERROR_READING_FILE_DATA(error);
 	}
-	
 	ySize = (size_t)(result_uint32);
-	
-	result = TIFFSetDirectory(tiff_file, directoryIndices[0]);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the directory for the image at\"";
-		error += this->filePath;
-		error += "\"";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	
-	this->checkForReasonableValues();
 }
 
 ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
@@ -1039,17 +1041,14 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	// advance the active TIFF directory to that needed to read the next image
-	while (this->currentDirectoryIndex != directoryIndices.at(this->nextImageToRead)) {
-		result = TIFFReadDirectory(this->tiff_file);
-		this->currentDirectoryIndex += 1;
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the directory for the image at\"";
-			error += this->filePath;
-			error += "\"";
-			throw ERROR_READING_FILE_DATA(error);
-		}
-	}
+    result = TIFFSetSubDirectory(tiff_file, _directoryOffsets.at(this->nextImageToRead));
+    if (result != 1) {
+        std::string error;
+        error = "Unable to set the directory for the image at\"";
+        error += this->filePath;
+        error += "\"";
+        throw ERROR_READING_FILE_DATA(error);
+    }
 	
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
@@ -1135,24 +1134,6 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 	return image;
 }
 
-void ImageLoaderTIFF::spoolTo(size_t index) {
-	int result;
-	
-	// don't do any work unless it is required
-	if (this->nextImageToRead != index) {
-		result = TIFFSetDirectory(this->tiff_file, this->directoryIndices.at(index));
-		if (result != 1) {
-			std::string error;
-			error = "Unable to set the directory for the image at\"";
-			error += this->filePath;
-			error += "\"";
-			throw ERROR_READING_FILE_DATA(error);
-		}
-		
-		this->nextImageToRead = index;
-		this->currentDirectoryIndex = this->directoryIndices.at(index);
-	}
-}
 
 ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 	// assume that filePath consists of something such as the following
