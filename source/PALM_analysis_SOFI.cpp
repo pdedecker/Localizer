@@ -61,8 +61,8 @@ void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::s
 	if (nFramesToSkip > nImages - largestLagTime)
 		throw std::runtime_error("Too many frames are being skipped (/SKIP flag)");
 	
-	if ((nFramesToGroup <= largestLagTime) && (nFramesToGroup != 0))
-		throw std::runtime_error("Cannot group less frames than the lag time");
+	if ((nFramesToGroup <= blockSize) && (nFramesToGroup != 0))
+		throw std::runtime_error("Number of input images per group too low");
     
     // adjust to the range requested by the user
     nImages = nFramesToSkip + nFramesToInclude;
@@ -115,7 +115,7 @@ void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::s
 			
 			sofiCalculator->addNewImage(currentImage);
 			nFramesProcessedTotal += 1;
-			if (nFramesProcessedTotal % 25 == 0) {
+			if (nFramesProcessedTotal % blockSize == 0) {
 				status = progressReporter->UpdateCalculationProgress(nFramesProcessedTotal, nImagesToProcess);
 				
 				#ifdef WITH_IGOR
