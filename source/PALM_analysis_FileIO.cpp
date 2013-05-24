@@ -404,24 +404,24 @@ ImageLoaderAndor::~ImageLoaderAndor() {
 }
 
 void ImageLoaderAndor::parse_header_information() {
-	size_t temp;
-	size_t xBinning, yBinning;
-	size_t frameXSize, frameYSize;
-	size_t xStart, yStart, xEnd, yEnd;
+	int temp;
+	int xBinning, yBinning;
+	int frameXSize, frameYSize, nImagesHeader;
+	int xStart, yStart, xEnd, yEnd;
 	int result;
-	boost::scoped_array<char> headerBuffer(new char[60001]);
+	boost::scoped_array<char> headerBuffer(new char[500001]);
 	boost::scoped_array<char> singleLineBuffer(new char[4096]);
 	std::string singleLine;
 	
 	storage_type = STORAGE_TYPE_FP32;
 	
-	this->file.read(headerBuffer.get(), 60001);
+	this->file.read(headerBuffer.get(), 500000);
 	if (this->file.good() != 1)
 		throw std::runtime_error(std::string("Error encountered assuming the Andor format on the file at ") + this->filePath);
 	
-	headerBuffer[60000] = '\0';
+	headerBuffer[500000] = '\0';
 	// look for and replace any intermediate nul characters
-	for (int i = 0; i < 60000; ++i) {	// make sure that there are no intermediate NULL characters
+	for (int i = 0; i < 500000; ++i) {	// make sure that there are no intermediate NULL characters
 		if (headerBuffer[i] == '\0') {
 			headerBuffer[i] = '1';
 		}
@@ -446,39 +446,39 @@ void ImageLoaderAndor::parse_header_information() {
 		}
 	}
 	
-	// as usual Visual Studio is failing for whatever reason on these conversions
-	// (no, a %Iu format specifier doesn't work either)
-	// so we'll have to handle them the ugly way. Thanks again, Microsoft!
-#ifdef WIN32
-	int wTemp, wFrameYSize, wFrameXSize, WNImages;
-	result = sscanf(singleLine.c_str(), "Pixel number%d 1 %d %d 1 %d", &wTemp, &wFrameYSize, &wFrameXSize, &WNImages);
-	frameYSize = wFrameYSize; frameXSize = wFrameXSize; this->nImages = WNImages;
-#else
-	result = sscanf(singleLine.c_str(), "Pixel number%zu 1 %zu %zu 1 %zu", &temp, &frameYSize, &frameXSize, &this->nImages);
-#endif
+	result = sscanf(singleLine.c_str(), "Pixel number%d 1 %d %d 1 %d", &temp, &frameYSize, &frameXSize, &nImagesHeader);
 	if (result != 4)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
 	ss.getline(singleLineBuffer.get(), 4096);
 	singleLine = singleLineBuffer.get();
-	
-#ifdef WIN32
-	int wXStart, wYStart, wYEnd, wXEnd, wXBinning, wYBinning;
-	result = sscanf(singleLine.c_str(), "%d %d %d %d %d %d %d", &wTemp, &wXStart, &wYEnd, &wXEnd, &wYStart, &wXBinning, &wYBinning);
-	xStart = wXStart; yEnd = wYEnd; xEnd = wXEnd; yStart = wYStart; xBinning = wXBinning; yBinning = wYBinning;
-#else
-	result = sscanf(singleLine.c_str(), "%zu %zu %zu %zu %zu %zu %zu", &temp, &xStart, &yEnd, &xEnd, &yStart, &xBinning, &yBinning);
-#endif
+	result = sscanf(singleLine.c_str(), "%d %d %d %d %d %d %d", &temp, &xStart, &yEnd, &xEnd, &yStart, &xBinning, &yBinning);
 	if (result != 7)
 		throw std::runtime_error(std::string("an error occured parsing the file assuming the Andor format"));
 	
 	this->xSize = (xEnd - xStart + 1) / xBinning;
 	this->ySize = (yEnd - yStart + 1) / yBinning;	// integer division
+    this->nImages = nImagesHeader;
 	
-	// now there are some lines that may contain timestamps. There are as many lines as there are images
-	for (size_t i = 0;  i < nImages; i++) {
-		ss.getline(singleLineBuffer.get(), 4096);
-	}
+    // apparently some Andor files have a bunch of empty lines next, and after that lines that may contain timestamps or trigger information.
+    // The number of lines with timestamps is equal to the number of images in the file. In all the files I've seen the timestamps always
+    // contain simply '0' and some whitespace. So we will now read lines until we find line containing '0', and assume that this is the first
+    // line containing the timestamp information.
+    for (;;) {
+        ss.getline(singleLineBuffer.get(), 4096);
+        if ((ss.eof() == 1) || (ss.fail() == 1))
+			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+        singleLine = singleLineBuffer.get();
+        if (singleLine.find('0') != std::string::npos)
+            break;
+    }
+    
+    // if we're here then we just read the first line containing the time stamps. Now read the remaining lines.
+    for (int i = 1; i < nImagesHeader; ++i) {
+        ss.getline(singleLineBuffer.get(), 4096);
+        if ((ss.eof() == 1) || (ss.fail() == 1))
+			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+    }
 	
 	this->header_length = ss.tellg();
 	
