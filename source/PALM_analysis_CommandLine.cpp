@@ -311,7 +311,7 @@ std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
 	if (fileExtension == std::string("his"))
 		return std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
 	
-	if (fileExtension == std::string("tif"))
+	if ((fileExtension == std::string("tif")) || (fileExtension == std::string("btf")) || (fileExtension == std::string("tf8")))
 		return std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
 	
 	if (fileExtension == std::string("pde"))
