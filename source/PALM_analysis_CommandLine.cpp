@@ -19,10 +19,10 @@
  
  Additional permission under GNU GPL version 3 section 7
  
- If you modify this Program, or any covered work, by 
- linking or combining it with libraries required for interaction 
- with analysis programs such as Igor Pro or Matlab, 
- the licensors of this Program grant you additional permission 
+ If you modify this Program, or any covered work, by
+ linking or combining it with libraries required for interaction
+ with analysis programs such as Igor Pro or Matlab,
+ the licensors of this Program grant you additional permission
  to convey the resulting work.
  */
 
@@ -35,18 +35,18 @@ namespace po = boost::program_options;
 int main(int argc, char *argv[]) {
 	po::options_description desc("Allowed options");
 	desc.add_options()
-		("help", "produce help message")
-		("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing. Typically not required.")
-		("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
-		("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. Recommended options are \"glrt\" and \"smoothsigma\".")
-		("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\"")
-		("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Multiple options are allowed. Options are \"none\", \"removeoverlapping\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
-		("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
-		("pfa", po::value<double>(), "Threshold parameter for GLRT localization.")
-		("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
-		("ssg", po::value<double>(), "Multiplication factor for SmoothSigma thresholding.")
-		("psf-width", po::value<double>()->default_value(2.0), "Estimated standard deviation of the PSF (in pixels).")
-		("input-file", po::value< std::vector<std::string> >(), "Input file containing CCD images")
+    ("help", "produce help message")
+    ("preprocessing", po::value<std::string>()->default_value("none"), "segmentation preprocessing. Typically not required.")
+    ("postprocessing", po::value<std::string>()->default_value("none"), "segmentation postprocessing. Typically not required.")
+    ("segmentation", po::value<std::string>()->default_value("glrt"), "segmentation algorithm to use. Recommended options are \"glrt\" and \"smoothsigma\".")
+    ("particlefinding", po::value<std::string>()->default_value("4way"), "particle finding algorithm to use. Options are \"4way\", and \"8way\".")
+    ("particleverifier", po::value<std::vector<std::string> >()->composing(), "particle verification to use. Multiple options are allowed. Options are \"none\", \"removeoverlapping\", \"symmetric2dgauss\" and \"ellipsoidal2dgauss\".")
+    ("localization", po::value<std::string>()->default_value("symmetric2dgauss"), "localization algorithm to use. Options are \"symmetric2dgauss\", \"symmetric2dgaussfixedwidth\", \"ellipsoidal2dgauss\", \"multiplication\", \"centroid\", and \"mlewg\".")
+    ("pfa", po::value<double>()->default_value(25.0), "Threshold parameter for GLRT localization.")
+    ("threshold", po::value<double>(), "Threshold parameter for direct thresholding.")
+    ("ssg", po::value<double>()->default_value(5.0), "Multiplication factor for SmoothSigma thresholding.")
+    ("psf-width", po::value<double>()->default_value(1.6), "Estimated standard deviation of the PSF (in pixels).")
+    ("input-file", po::value< std::vector<std::string> >(), "Path to input file containing CCD images. The flag itself is optional, any arguments to the program not preceded by a flag are considered to be input files.")
 	;
 	
 	// tell program options that arguments without a flag are input CCD files
@@ -84,29 +84,17 @@ int main(int argc, char *argv[]) {
 	
 	
 	// thresholding requires extra parameters
-	double pfa, directThreshold, smoothSigmaFactor;
-	if (segmentationName == std::string("glrt")) {
-		if (vm.count("pfa") == 0) {
-			throw std::runtime_error("The 'glrt' segmentation algorithm was chosen, but a pfa value was not specified (--pfa flag)");
-		} else {
-			pfa = vm["pfa"].as<double>();
-		}
-	}
+	double pfa, directThreshold = -1.0, smoothSigmaFactor;
 	if (segmentationName == std::string("direct")) {
-		if (vm.count("pfa") == 0) {
+		if (vm.count("threshold") == 0) {
 			throw std::runtime_error("The 'direct' segmentation algorithm was chosen, but a threshold value was not specified (--threshold flag)");
 		} else {
 			directThreshold = vm["threshold"].as<double>();
 		}
 	}
-	if (segmentationName == std::string("smoothsigma")) {
-		if (vm.count("ssg") == 0) {
-			throw std::runtime_error("The 'smoothsigma' segmentation algorithm was chosen, but a multiplication factor was not specified (--ssg flag)");
-		} else {
-			smoothSigmaFactor = vm["ssg"].as<double>();
-		}
-	}
-	
+    
+    pfa = vm["pfa"].as<double>();
+    smoothSigmaFactor = vm["ssg"].as<double>();
 	double psfWidth = vm["psf-width"].as<double>();
 	
 	// get the pre- and postprocessors
@@ -132,10 +120,10 @@ int main(int argc, char *argv[]) {
 	std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_stdout());
 	
 	// get an analysis controller
-	std::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor, 
-																							postprocessor, particleFinder, particleVerifiers,
-																							positionsFitter,
-																							progressReporter));
+	std::shared_ptr<PALMAnalysisController> analysisController (new PALMAnalysisController(thresholder, preprocessor,
+                                                                                           postprocessor, particleFinder, particleVerifiers,
+                                                                                           positionsFitter,
+                                                                                           progressReporter));
 	// run the PALM analysis for every input file
 	size_t nInputFiles = inputFiles.size();
 	if (nInputFiles == 0)
@@ -166,6 +154,8 @@ int main(int argc, char *argv[]) {
 			header << "X SIZE:" << imageLoader->getXSize() << "\n";
 			header << "Y SIZE:" << imageLoader->getYSize() << "\n";
 			header << "PFA:" << pfa << "\n";
+            header << "SMOOTH SIGMA FACTOR:" << smoothSigmaFactor << "\n";
+            header << "DIRECT THRESHOLD:" << directThreshold << "\n";
 			header << "PSF WIDTH:" << psfWidth << "\n";
 			header << "THRESHOLD METHOD:" << segmentationName << "\n";
 			header << "PARTICLE FINDING:" << particleFinderName << "\n";
@@ -187,7 +177,7 @@ int main(int argc, char *argv[]) {
 		catch (...) {
 			std::cerr << "the file at " << inputFiles.at(i) << " failed for an unknown reason" << std::endl;
 		}
-			
+        
 	}
 	
 	return 0;
@@ -278,7 +268,7 @@ std::shared_ptr<ParticleVerifier> GetParticleVerifierType(std::string name, doub
 	// if we get here then we didn't recognize the particleverifier
 	throw std::runtime_error("Unknown particle verification algorithm");
 }
-	
+
 
 std::shared_ptr<FitPositions> GetPositionsFitter(std::string name, double psfWidth) {
 	double sigma = 1;
