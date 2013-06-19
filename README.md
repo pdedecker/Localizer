@@ -13,7 +13,7 @@ If you are unfamiliar with programming the Igor Pro plugin will be the best opti
 
 Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document, while for the Matlab plugin you can examine the example ".m" files.
 
-Example data to play around with can be found [here for SOFI](http://sushi.chem.kuleuven.be/SOFI.tif.zip) and [here for localization microscopy](http://sushi.chem.kuleuven.be/PALM.tif.zip). The SOFI data shows a Hek cell transfected using Lyn-Dronpa, while the localization data shows a fixed HeLa cell that expressed Lyn-Dendra2.
+Example data to play around with can be found [here for SOFI](http://sushi.chem.kuleuven.be/SOFI.tif.zip) (or [here](http://134.58.38.13/SOFI.tif.zip)) and [here for localization microscopy](http://sushi.chem.kuleuven.be/PALM.tif.zip) (or [here](http://134.58.38.13/PALM.tif.zip)). The SOFI data shows a Hek cell transfected using Lyn-Dronpa, while the localization data shows a fixed HeLa cell that expressed Lyn-Dendra2.
 
 At present I do not have a Linux version of the Matlab plugin. That is simply because I do not have access to a Linux version of Matlab. If this interests you and you have these installations, let me know!
 
