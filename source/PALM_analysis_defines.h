@@ -49,7 +49,7 @@ T square(T val) {
 
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors
-const int kMaxImageDimension = 10000;
+const int kMaxImageDimension = 50000;
 const int kMaxNFrames = 10000000;
 
 const int STORAGE_TYPE_INT4 = 0;
