@@ -41,8 +41,10 @@ void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::s
 	int largestLagTime = *(std::max_element(lagTimes.begin(), lagTimes.end()));
 	if (largestLagTime > 100)
 		throw std::runtime_error("Lag times larger than 100 are not supported");
-	size_t blockSize = std::max(50, 2 * largestLagTime);
-	size_t nImages = imageLoader->getNImages();
+	int nImages = imageLoader->getNImages();
+    int blockSize = std::min(nImages, std::max(50, 2 * largestLagTime));
+    if (nFramesToGroup > 0)
+        blockSize = std::min(blockSize, nFramesToGroup);
 	sofiOutputImages.clear();
 	averageOutputImages.clear();
 	
@@ -56,12 +58,12 @@ void DoSOFIAnalysis(std::shared_ptr<ImageLoader> imageLoader, std::vector<std::s
         throw std::runtime_error("Too many images requested");
 	
 	if ((nFramesToInclude <= largestLagTime) || (largestLagTime > blockSize))
-		throw std::runtime_error("Lag time too long");
+		throw std::runtime_error("Lag time too long for the number of images in the movie or 'make movie' settings");
 	
 	if (nFramesToSkip > nImages - largestLagTime)
 		throw std::runtime_error("Too many frames are being skipped (/SKIP flag)");
 	
-	if ((nFramesToGroup <= blockSize) && (nFramesToGroup != 0))
+	if ((nFramesToGroup < blockSize) && (nFramesToGroup != 0))
 		throw std::runtime_error("Number of input images per group too low");
     
     // adjust to the range requested by the user
