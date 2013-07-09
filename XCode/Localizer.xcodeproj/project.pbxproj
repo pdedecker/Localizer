@@ -913,6 +913,7 @@
 				D0C2582F1746C045001C2EB1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D0CCD31D1473C5DD005CD75A /* Build configuration list for PBXNativeTarget "LocalizerDLL" */ = {
 			isa = XCConfigurationList;

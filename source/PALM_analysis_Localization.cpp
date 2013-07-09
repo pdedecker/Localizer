@@ -51,9 +51,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
         return std::shared_ptr<LocalizedPositionsContainer_2DGauss> (new LocalizedPositionsContainer_2DGauss());
     }
 
-    size_t size_of_subset = 2 * cutoff_radius + 1;
-    double x_offset, y_offset, x_max, y_max;
-    size_t number_of_intensities = size_of_subset * size_of_subset;
+    int size_of_subset = 2 * cutoff_radius + 1;
+    int x_offset, y_offset, x_max, y_max;
+    int number_of_intensities = size_of_subset * size_of_subset;
     size_t xSize = image->rows();
     size_t ySize = image->cols();
 
@@ -64,11 +64,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
 
     double relativeAmplitudeError, relativeWidthError;
 
-    ImagePtr image_subset;
+    ImagePtr image_subset(new Image(size_of_subset, size_of_subset));
     std::shared_ptr<LocalizedPositionsContainer_2DGauss> fitted_positions (new LocalizedPositionsContainer_2DGauss());
     std::shared_ptr<LocalizedPosition_2DGauss> localizationResult (new LocalizedPosition_2DGauss());
-
-    image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
     // initialize the solver
     const gsl_multifit_fdfsolver_type *solver;
@@ -116,8 +114,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
         y_offset = floor(y0_initial - (double)cutoff_radius);
-        x_max = floor(x0_initial + (double)cutoff_radius);
-        y_max = floor(y0_initial + (double)cutoff_radius);
+        x_max = x_offset + size_of_subset - 1;
+        y_max = y_offset + size_of_subset - 1;
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
@@ -229,9 +227,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
         return std::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> (new LocalizedPositionsContainer_2DGaussFixedWidth());
     }
 
-    size_t size_of_subset = 2 * cutoff_radius + 1;
-    double x_offset, y_offset, x_max, y_max;
-    size_t number_of_intensities = size_of_subset * size_of_subset;
+    int size_of_subset = 2 * cutoff_radius + 1;
+    int x_offset, y_offset, x_max, y_max;
+    int number_of_intensities = size_of_subset * size_of_subset;
     size_t xSize = image->rows();
     size_t ySize = image->cols();
 
@@ -242,11 +240,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
 
     double relativeAmplitudeError;
 
-    ImagePtr image_subset;
+    ImagePtr image_subset(new Image(size_of_subset, size_of_subset));
     std::shared_ptr<LocalizedPositionsContainer_2DGaussFixedWidth> fitted_positions (new LocalizedPositionsContainer_2DGaussFixedWidth());
     std::shared_ptr<LocalizedPosition_2DGaussFixedWidth> localizationResult (new LocalizedPosition_2DGaussFixedWidth());
-
-    image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
     // initialize the solver
     const gsl_multifit_fdfsolver_type *solver;
@@ -294,8 +290,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
         y_offset = floor(y0_initial - (double)cutoff_radius);
-        x_max = floor(x0_initial + (double)cutoff_radius);
-        y_max = floor(y0_initial + (double)cutoff_radius);
+        x_max = x_offset + size_of_subset - 1;
+        y_max = y_offset + size_of_subset - 1;
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
@@ -400,9 +396,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
         return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
     }
 
-    size_t size_of_subset = 2 * cutoff_radius + 1;
-    double x_offset, y_offset, x_max, y_max;
-    size_t number_of_intensities = size_of_subset * size_of_subset;
+    int size_of_subset = 2 * cutoff_radius + 1;
+    int x_offset, y_offset, x_max, y_max;
+    int number_of_intensities = size_of_subset * size_of_subset;
     size_t xSize = image->rows();
     size_t ySize = image->cols();
 
@@ -411,11 +407,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
     long iterations = 0;
     int status;
 
-    ImagePtr image_subset;
+    ImagePtr image_subset(new Image(size_of_subset, size_of_subset));
     std::shared_ptr<LocalizedPositionsContainer_Ellipsoidal2DGaussian> fitted_positions (new LocalizedPositionsContainer_Ellipsoidal2DGaussian());
     std::shared_ptr<LocalizedPosition_Ellipsoidal2DGauss> localizationResult (new LocalizedPosition_Ellipsoidal2DGauss());
-
-    image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
     // initialize the solver
     const gsl_multifit_fdfsolver_type *solver;
@@ -464,8 +458,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
         y_offset = floor(y0_initial - (double)cutoff_radius);
-        x_max = floor(x0_initial + (double)cutoff_radius);
-        y_max = floor(y0_initial + (double)cutoff_radius);
+        x_max = x_offset + size_of_subset - 1;
+        y_max = y_offset + size_of_subset - 1;
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
@@ -639,8 +633,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(c
         return std::shared_ptr<LocalizedPositionsContainer_MLEwG> (new LocalizedPositionsContainer_MLEwG());
     }
 
-    size_t size_of_subset = 2 * cutoff_radius + 1;
-    double x_offset, y_offset, x_max, y_max;
+    int size_of_subset = 2 * cutoff_radius + 1;
+    int x_offset, y_offset, x_max, y_max;
     size_t xSize = image->rows();
     size_t ySize = image->cols();
 
@@ -650,11 +644,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(c
     double size;
     double dummy;
 
-    ImagePtr image_subset;
+    ImagePtr image_subset(new Image(size_of_subset, size_of_subset));
     std::shared_ptr<LocalizedPositionsContainer_MLEwG> fitted_positions (new LocalizedPositionsContainer_MLEwG());
     std::shared_ptr<LocalizedPosition_MLEwG> localizationResult (new LocalizedPosition_MLEwG());
-
-    image_subset = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
     gsl_multimin_fminimizer *fit_iterator = NULL;
@@ -695,8 +687,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(c
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
         y_offset = floor(y0_initial - (double)cutoff_radius);
-        x_max = floor(x0_initial + (double)cutoff_radius);
-        y_max = floor(y0_initial + (double)cutoff_radius);
+        x_max = x_offset + size_of_subset - 1;
+        y_max = y_offset + size_of_subset - 1;
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image
             // we cannot include it
@@ -800,10 +792,10 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
         return std::shared_ptr<LocalizedPositionsContainer_Multiplication> (new LocalizedPositionsContainer_Multiplication());
     }
 
-    size_t size_of_subset = 2 * cutoff_radius + 1;
+    int size_of_subset = 2 * cutoff_radius + 1;
     size_t xSize = image->rows();
     size_t ySize = image->cols();
-    double x_offset, y_offset, x_max, y_max;
+    int x_offset, y_offset, x_max, y_max;
 
     double x0_initial, y0_initial, amplitude, background, threshold;
     size_t iterations = 0;
@@ -817,13 +809,10 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
     double current_x, current_y;
     double numerator_x, numerator_y, denominator;
 
-    ImagePtr image_subset;
-    ImagePtr image_subset_mask;
+    ImagePtr image_subset(new Image(size_of_subset, size_of_subset));
+    ImagePtr image_subset_mask(new Image(size_of_subset, size_of_subset));
     std::shared_ptr<LocalizedPositionsContainer_Multiplication> fitted_positions (new LocalizedPositionsContainer_Multiplication());
     std::shared_ptr<LocalizedPosition_Multiplication> localizationResult (new LocalizedPosition_Multiplication());
-
-    image_subset = ImagePtr(new Image((int)size_of_subset, (int)size_of_subset));
-    image_subset_mask = ImagePtr (new Image((int)size_of_subset, (int)size_of_subset));
 
     std::list<Particle>::iterator it = particles->begin();
     while (it != particles->end()) {
@@ -833,10 +822,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
         background = (*it).background;
 
         x_offset = floor(x0_initial - (double)cutoff_radius);
-        y_offset = floor(y0_initial - (double)
-                         cutoff_radius);
-        x_max = floor(x0_initial + (double)cutoff_radius);
-        y_max = floor(y0_initial + (double)cutoff_radius);
+        y_offset = floor(y0_initial - (double)cutoff_radius);
+        x_max = x_offset + size_of_subset - 1;
+        y_max = y_offset + size_of_subset - 1;
 
         if ((x_offset < 0) || (x_max > (xSize - 1)) || (y_offset < 0) || (y_max > (ySize - 1))) {	// this position is too close to the edge of the image, we cannot include it
             it = particles->erase(it);
