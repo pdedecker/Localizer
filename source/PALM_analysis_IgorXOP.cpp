@@ -2555,12 +2555,15 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
 
-        int nGroups;
-        size_t nImagesToProcess;
         if (nFramesToSkip >= imageLoader->getNImages())
             return ORN_OFFSET_OUT_OT_RANGE;
-
-        nImagesToProcess = imageLoader->getNImages() - nFramesToSkip;
+        int nGroups;
+        size_t nImagesToProcess;
+        if (nFramesToInclude == -1) {
+            nImagesToProcess = imageLoader->getNImages() - nFramesToSkip;
+        } else {
+            nImagesToProcess = nFramesToInclude;
+        }
 
         if (nFramesToGroup != 0) {
             nGroups = ceil((double)(nImagesToProcess) / (double)(nFramesToGroup));
