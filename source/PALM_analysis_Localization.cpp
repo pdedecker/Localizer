@@ -153,6 +153,9 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
 
             status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
         } while ((status == GSL_CONTINUE) && (iterations < 200));
+        
+        // make sure standard deviation is positive
+        gsl_vector_set(fit_iterator->x, 1, std::abs(gsl_vector_get(fit_iterator->x, 1)));
 
         if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
             it = particles->erase(it);
