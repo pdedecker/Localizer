@@ -170,10 +170,10 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
         }
 
         // are the fitted coordinates close enough to the initial guess?
-        if ((fabs(gsl_vector_get(fit_iterator->x, 2) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 3) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = particles->erase(it);
-            continue;
-        }
+        //if ((fabs(gsl_vector_get(fit_iterator->x, 2) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 3) - y0_initial) > 2.0 * initialPSFWidth)) {
+        //     it = particles->erase(it);
+        //     continue;
+        //}
 
 		// is the fitted standard deviation close enough to the expected value?
         if ((gsl_vector_get(fit_iterator->x, 1) < 0.5 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
@@ -502,6 +502,10 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 
             status = gsl_multifit_test_delta(fit_iterator->dx, fit_iterator->x, 1e-4, 1e-4);
         } while ((status == GSL_CONTINUE) && (iterations < 200));
+        
+        // make sure all standard deviations are positive
+        gsl_vector_set(fit_iterator->x, 1, std::abs(gsl_vector_get(fit_iterator->x, 1)));
+        gsl_vector_set(fit_iterator->x, 2, std::abs(gsl_vector_get(fit_iterator->x, 2)));
 
         if (gsl_vector_get(fit_iterator->x, 0) <= 0) {	// reject fits that have negative amplitudes
             it = particles->erase(it);
@@ -516,10 +520,10 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
         }
 
         // are the fitted coordinates close enough to the initial guess?
-        if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
-            it = particles->erase(it);
-            continue;
-        }
+        //if ((fabs(gsl_vector_get(fit_iterator->x, 3) - x0_initial) > 2.0 * initialPSFWidth) || (fabs(gsl_vector_get(fit_iterator->x, 4) - y0_initial) > 2.0 * initialPSFWidth)) {
+        //    it = particles->erase(it);
+        //   continue;
+        //}
 		
 		// calculate the eigenvectors and eigenvalues of the covariance matrix of the 2D Gaussian to get the rotation and principal axes
 		Eigen::Matrix2d gaussCovarMatrix;
@@ -543,7 +547,7 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 		}
 		
 		// is at least one of the calculated standard deviations close enough to the PSF standard deviation?
-		if (! (((stdDev1 >= 0.7 * initialPSFWidth) && (stdDev1 <= 1.3 * initialPSFWidth)) || ((stdDev2 >= 0.7 * initialPSFWidth) && (stdDev2 <= 1.3 * initialPSFWidth)))) {
+		if (! (((stdDev1 >= 0.5 * initialPSFWidth) && (stdDev1 <= 1.5 * initialPSFWidth)) || ((stdDev2 >= 0.7 * initialPSFWidth) && (stdDev2 <= 1.3 * initialPSFWidth)))) {
 			it = particles->erase(it);
             continue;
 		}
