@@ -547,7 +547,7 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 		}
 		
 		// is at least one of the calculated standard deviations close enough to the PSF standard deviation?
-		if (! (((stdDev1 >= 0.5 * initialPSFWidth) && (stdDev1 <= 1.5 * initialPSFWidth)) || ((stdDev2 >= 0.7 * initialPSFWidth) && (stdDev2 <= 1.3 * initialPSFWidth)))) {
+		if (! (((stdDev1 >= 0.5 * initialPSFWidth) && (stdDev1 <= 1.5 * initialPSFWidth)) || ((stdDev2 >= 0.5 * initialPSFWidth) && (stdDev2 <= 1.5 * initialPSFWidth)))) {
 			it = particles->erase(it);
             continue;
 		}
