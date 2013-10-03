@@ -591,7 +591,7 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 
-		plhs[0] = ConvertImagesToArray(imageLoader, firstImageToRead, nImagesToRead);
+		plhs[0] = LoadImagesIntoArray(imageLoader, firstImageToRead, nImagesToRead);
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
@@ -704,7 +704,7 @@ mxArray* ConvertImageToArray(ImagePtr image) {
 	return outputMatrix;
 }
 
-mxArray* ConvertImagesToArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
+mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
 	size_t nImages = imageLoader->getNImages();
 	size_t xSize = imageLoader->getXSize();
 	size_t ySize = imageLoader->getYSize();

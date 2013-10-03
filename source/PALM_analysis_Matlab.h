@@ -45,4 +45,4 @@ std::string GetMatlabString(const mxArray* array);
 std::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
 int GetFileStorageType(std::string &filePath);
 mxArray* ConvertImageToArray(ImagePtr image);
-mxArray* ConvertImagesToArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);
+mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);
