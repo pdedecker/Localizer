@@ -27,6 +27,7 @@
  */
 
 #include <string>
+#include <vector>
 #include "boost/algorithm/string.hpp"
 
 #include "mex.h"
@@ -45,4 +46,5 @@ std::string GetMatlabString(const mxArray* array);
 std::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path);
 int GetFileStorageType(std::string &filePath);
 mxArray* ConvertImageToArray(ImagePtr image);
+mxArray* ConvertImagesToArray(const std::vector<ImagePtr>& images);
 mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);

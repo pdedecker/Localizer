@@ -704,6 +704,34 @@ mxArray* ConvertImageToArray(ImagePtr image) {
 	return outputMatrix;
 }
 
+mxArray* ConvertImagesToArray(const std::vector<ImagePtr>& images) {
+    int nImages = images.size();
+    int nRows, nCols;
+    if (nImages == 0) {
+        nRows = 0;
+        nCols = 0;
+    } else {
+        nRows = images[0]->rows();
+        nCols = images[0]->cols();
+    }
+    int nPixels = nRows * nCols;
+    
+    mwSize dims[3];
+    dims[0] = nRows;
+    dims[1] = nCols;
+    dims[2] = nImages;
+    mxArray* outputArray = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+	if (outputArray == NULL)
+		throw std::bad_alloc();
+    
+    double* arrayPtr = mxGetPr(outputArray);
+    for (int i = 0; i < nImages; ++i) {
+        memcpy(arrayPtr + i * nPixels, images[i]->data(), nPixels * sizeof(double));
+    }
+    
+    return outputArray;
+}
+
 mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
 	size_t nImages = imageLoader->getNImages();
 	size_t xSize = imageLoader->getXSize();
