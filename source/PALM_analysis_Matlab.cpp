@@ -492,9 +492,6 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		dataArray = array;
 	}
 	
-	size_t nRows = mxGetN(array);
-	size_t nCols = mxGetM(array);
-	
 	try {
 		std::shared_ptr<ImageLoader> imageLoader;
 		if (!filePath.empty()) {
@@ -510,8 +507,8 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
 		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
 
-		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
-		plhs[1] = ConvertImageToArray(averageOutputImages.at(0));
+		plhs[0] = ConvertImagesToArray(sofiOutputImages);
+		plhs[1] = ConvertImagesToArray(averageOutputImages);
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
