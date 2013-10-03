@@ -505,9 +505,9 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		// no frame verifiers for now
 		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 50, sofiOutputImages, averageOutputImages);
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, -1, sofiOutputImages, averageOutputImages);
 
-		plhs[0] = ConvertImagesToArray(sofiOutputImages);
+		plhs[0] = ConvertImagesToArray(sofiOutputImages);   // was saving only the first image. Noticed by Matthieu Dumont, who also created a fix.
 		plhs[1] = ConvertImagesToArray(averageOutputImages);
 	}
 	catch (std::bad_alloc) {
