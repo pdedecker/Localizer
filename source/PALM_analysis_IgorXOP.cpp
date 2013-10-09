@@ -1542,7 +1542,7 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
     DataFolderAndName outputWaveParams;
     int useIgorFunctionForProgress = 0;
     FUNCREF igorProgressReporterFunction;
-    long startX, startY, endX, endY, swap;
+    long startX, startY, endX, endY;
 
     std::string input_file_path;
 
@@ -1579,7 +1579,7 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
         if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
             return EXPECT_POS_NUM;
         }
-        if ((p->startX >= p->endX) || (p->startY >= p->endY)) {
+        if ((p->startX > p->endX) || (p->startY > p->endY)) {
             return EXPECT_POS_NUM;	// update this with the proper error message
         }
 
@@ -1587,26 +1587,8 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
         endX = (long)(p->endX + 0.5);
         startY = (long)(p->startY + 0.5);
         endY = (long)(p->endY + 0.5);
-
-        if (startX < 0)
-            startX = 0;
-        if (startY < 0)
-            startY = 0;
-        if (startX > endX) {
-            swap = endX;
-            endX = startX;
-            startX = swap;
-        }
-        if (startY > endY) {
-            swap = endY;
-            endY = startY;
-            startY = swap;
-        }
-
-
-
     } else {
-        startX = endX = startY = endY = -1;	// by convention '-1' means that we take the whole image
+        startX = endX = startY = endY = -1;	// by convention a negative value for any of these means that we take the whole image
     }
 
     if (p->PROGFlagEncountered) {
