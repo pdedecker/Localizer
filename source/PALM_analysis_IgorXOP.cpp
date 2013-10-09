@@ -1661,8 +1661,11 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 
         switch (method) {
         case ANALYZING_SUMMEDTRACE:
-            construct_summed_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-            break;
+            {
+                std::vector<double> trace = ConstructSummedIntensityTrace(image_loader, progressReporter, startX, startY, endX, endY);
+                CopyVectorToIgorDPWave(trace, outputWaveParams);
+                break;
+            }
         case ANALYZING_AVERAGEIMAGE:
             construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
             break;
@@ -1670,8 +1673,11 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
             calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
             break;
         case ANALYZING_AVERAGETRACE:
-            construct_average_intensity_trace(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-            break;
+            {
+                std::vector<double> trace = ConstructAverageIntensityTrace(image_loader, progressReporter, startX, startY, endX, endY);
+                CopyVectorToIgorDPWave(trace, outputWaveParams);
+                break;
+            }
         default:
             throw std::runtime_error("Unknown analysis method");
         }

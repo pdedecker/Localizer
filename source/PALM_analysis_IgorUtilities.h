@@ -65,6 +65,12 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
 int ParseCCDHeaders(ImageLoader *image_loader);
 
 // Routines that process CCD files and return data to Igor
+std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY, bool doAverage);
+
+std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
+
+std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
+
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                           long startX, long startY, long endX, long endY,
                                           std::shared_ptr<ProgressReporter> progressReporter);
@@ -92,6 +98,7 @@ std::string ConvertPathToNativePath(std::string filePath);
 
 // routines to convert data from and to Igor format
 waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::string waveName);
+waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, DataFolderAndName outputWaveParams);
 
 ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave);
 

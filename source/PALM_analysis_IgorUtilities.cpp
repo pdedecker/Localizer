@@ -265,6 +265,67 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
     return 0;
 }
 
+std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY, bool doAverage) {
+    int nImages = imageLoader->getNImages();
+    int xSize = imageLoader->getXSize();
+    int ySize = imageLoader->getYSize();
+    
+    double summedIntensity;
+    
+    // any value negative in the ROI means we want full image
+    if ((startX < 0) || (endX < 0) || (startY < 0) || (endY < 0)) {
+        startX = startY = 0;
+        endX = xSize - 1;
+        endY = ySize - 1;
+    } else {
+        if ((startX > endX) || (startY > endY))
+            throw kBadROIDimensions;
+        if ((endX >= xSize)|| (endY >= ySize)) {
+            throw kBadROIDimensions;
+        }
+    }
+    int nPixelsInROI = (endX - startX + 1) * (endY - startY + 1);
+    std::vector<double> trace(nImages);
+    
+    progressReporter->CalculationStarted();
+    int progressStatus;
+    imageLoader->rewind();
+    for (int i = 0; i < nImages; ++i) {
+        if (i % 20 == 0) {
+            progressStatus = progressReporter->UpdateCalculationProgress(i, nImages);
+            if (progressStatus != 0) {
+                progressReporter->CalculationAborted();
+                throw USER_ABORTED("");
+            }
+        }
+        
+        ImagePtr currentImage = imageLoader->readNextImage();
+        summedIntensity = 0.0;
+        for (int k = startY; k <= endY; k++) {
+            for (int j = startX; j <= endX; j++) {
+                summedIntensity += (*currentImage)(j, k);
+            }
+        }
+        trace[i] = summedIntensity;
+    }
+    
+    if (doAverage) {
+        for (int i = 0; i < nImages; ++i) {
+            trace[i] /= static_cast<double>(nPixelsInROI);
+        }
+    }
+    
+    return trace;
+}
+
+std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY) {
+    return ConstructIntensityTrace(imageLoader, progressReporter, startX, startY, endX, endY, false);
+}
+
+std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY) {
+    return ConstructIntensityTrace(imageLoader, progressReporter, startX, startY, endX, endY, true);
+}
+
 waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                           long startX, long startY, long endX, long endY,
                                           std::shared_ptr<ProgressReporter> progressReporter) {
@@ -730,6 +791,24 @@ waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::
     }
 
     return DPWave;
+}
+
+waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, DataFolderAndName outputWaveParams) {
+    waveHndl wave;
+    int nElements = vec.size();
+    
+    int err;
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
+    dimensionSizes[0] = nElements;
+    dimensionSizes[1] = 0;
+    
+    err = MDMakeWave(&wave, outputWaveParams.name, outputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+    if (err)
+        throw err;
+    
+    void* waveDataPtr = WaveData(wave);
+    memcpy(waveDataPtr, &(vec[0]), nElements * sizeof(double));
+    return wave;
 }
 
 
