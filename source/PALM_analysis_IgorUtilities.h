@@ -71,14 +71,6 @@ std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> i
 
 std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
 
-waveHndl construct_summed_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                          long startX, long startY, long endX, long endY,
-                                          std::shared_ptr<ProgressReporter> progressReporter);
-
-waveHndl construct_average_intensity_trace(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                           long startX, long startY, long endX, long endY,
-                                           std::shared_ptr<ProgressReporter> progressReporter);
-
 waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
                                  long startX, long startY, long endX, long endY,
                                  std::shared_ptr<ProgressReporter> progressReporter);
