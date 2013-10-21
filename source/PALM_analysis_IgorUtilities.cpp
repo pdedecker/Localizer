@@ -326,12 +326,10 @@ std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> 
     return ConstructIntensityTrace(imageLoader, progressReporter, startX, startY, endX, endY, true);
 }
 
-waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                 long startX, long startY, long endX, long endY,
-                                 std::shared_ptr<ProgressReporter> progressReporter) {
-    size_t n_images = image_loader->getNImages();
-    size_t x_size = image_loader->getXSize();
-    size_t y_size = image_loader->getYSize();
+ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
+    size_t n_images = imageLoader->getNImages();
+    size_t x_size = imageLoader->getXSize();
+    size_t y_size = imageLoader->getYSize();
 
     long xRange, yRange;
 
@@ -353,13 +351,6 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
     ImagePtr current_image;
     ImagePtr average_image(new Image((int)xRange, (int)yRange));
 
-    waveHndl output_wave;
-    CountInt dimension_sizes[MAX_DIMENSIONS + 1];
-    dimension_sizes[0] = xRange;
-    dimension_sizes[1] = yRange;
-    dimension_sizes[2] = 0;
-    int result;
-
     average_image->setConstant(0.0);
 
     int progressStatus;
@@ -374,41 +365,24 @@ waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName ou
             }
         }
 
-        current_image = image_loader->readNextImage(nextFrameRead);
+        current_image = imageLoader->readNextImage(nextFrameRead);
         assert(i == nextFrameRead);
-
-        // add the values of the newly loaded image to the average image
+        
         (*average_image) += (*current_image);
     }
 
-    // divide by the number of images
     *average_image /= (double)n_images;
-
-    // try to create the output wave
-    result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
-    if (result != 0)
-        throw result;
-
-    // write the output data to the wave
-    result = MDStoreDPDataInNumericWave(output_wave, average_image->data());
-    if (result != 0)
-        throw result;
 
     progressReporter->CalculationDone();
 
-    return output_wave;
+    return average_image;
 }
 
 
-waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                long startX, long startY, long endX, long endY,
-                                std::shared_ptr<ProgressReporter> progressReporter) {
-    size_t n_images = image_loader->getNImages();
-    size_t x_size = image_loader->getXSize();
-    size_t y_size = image_loader->getYSize();
-    int result;
-    waveHndl output_wave;
-    CountInt dimension_sizes[MAX_DIMENSIONS + 1];
+ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
+    size_t n_images = imageLoader->getNImages();
+    size_t x_size = imageLoader->getXSize();
+    size_t y_size = imageLoader->getYSize();
 
     long xRange, yRange;
 
@@ -427,7 +401,7 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
     xRange = endX - startX + 1;
     yRange = endY - startY + 1;
 
-    boost::scoped_ptr<Image> varianceImage(new Image((int)xRange, (int)yRange));
+    std::shared_ptr<Image> varianceImage(new Image((int)xRange, (int)yRange));
     boost::scoped_ptr<Image> average_image(new Image((int)xRange, (int)yRange));
     ImagePtr current_image;
 
@@ -447,14 +421,12 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
             }
         }
 
-        current_image = image_loader->readNextImage(nextFrameRead);
+        current_image = imageLoader->readNextImage(nextFrameRead);
         assert(nextFrameRead == i);
 
-        // add the values of the newly loaded image to the average image
         (*average_image) += (*current_image);
     }
 
-    // divide by the number of images
     *average_image /= (double)n_images;
 
     // now loop over the images again, calculating the standard deviation of each pixel
@@ -467,31 +439,17 @@ waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName out
             }
         }
 
-        current_image = image_loader->readImage(i);
+        current_image = imageLoader->readImage(i);
 
         // add the deviation of the newly loaded image from the mean to the stddev image
         (*varianceImage) += ((*current_image) - (*average_image)).array().square().matrix();
     }
 
-    // divide by the number of images to get the average deviation
     *varianceImage /= (double)n_images;
-
-    // try to create the output wave
-    dimension_sizes[0] = xRange;
-    dimension_sizes[1] = yRange;
-    dimension_sizes[2] = 0;
-    result = MDMakeWave(&output_wave, outputWaveParams.name, outputWaveParams.dfH, dimension_sizes, NT_FP64, 1);
-    if (result != 0)
-        throw result;
-
-    // write the output data to the wave
-    result = MDStoreDPDataInNumericWave(output_wave, varianceImage->data());
-    if (result != 0)
-        throw result;
 
     progressReporter->CalculationDone();
 
-    return output_wave;
+    return varianceImage;
 }
 
 waveHndl FetchWaveUsingFullPath(std::string wavePath) {

@@ -1649,11 +1649,17 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
                 break;
             }
         case ANALYZING_AVERAGEIMAGE:
-            construct_average_image(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-            break;
+            {
+                ImagePtr avgImage = ConstructAverageImage(image_loader, startX, startY, endX, endY, progressReporter);
+                CopyMatrixToIgorDPWave(avgImage, outputWaveParams);
+                break;
+            }
         case ANALYZING_VARIANCEIMAGE:
-            calculateVarianceImage(image_loader.get(), outputWaveParams, startX, startY, endX, endY, progressReporter);
-            break;
+            {
+                ImagePtr varianceImage = ConstructVarianceImage(image_loader, startX, startY, endX, endY, progressReporter);
+                CopyMatrixToIgorDPWave(varianceImage, outputWaveParams);
+                break;
+            }
         case ANALYZING_AVERAGETRACE:
             {
                 std::vector<double> trace = ConstructAverageIntensityTrace(image_loader, progressReporter, startX, startY, endX, endY);

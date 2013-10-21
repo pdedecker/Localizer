@@ -71,13 +71,9 @@ std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> i
 
 std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
 
-waveHndl construct_average_image(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                 long startX, long startY, long endX, long endY,
-                                 std::shared_ptr<ProgressReporter> progressReporter);
+ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter);
 
-waveHndl calculateVarianceImage(ImageLoader *image_loader, DataFolderAndName outputWaveParams, 
-                                long startX, long startY, long endX, long endY,
-                                std::shared_ptr<ProgressReporter> progressReporter);
+ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);
