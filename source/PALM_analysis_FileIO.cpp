@@ -878,6 +878,7 @@ void ImageLoaderTIFF::parse_header_information() {
         // subfile types (e.g. Zeiss LSM files), we need to go over all of them
         // and look at which subfiles are the ones we're interested in
         imageOffsets.modificationTime = GetLastModificationTime(this->filePath);
+        int nImagesChecked = 0;
         do {
             result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
 
@@ -889,6 +890,16 @@ void ImageLoaderTIFF::parse_header_information() {
                 int64_t ifdOffset = TIFFCurrentDirOffset(tiff_file);
                 _directoryOffsets.push_back(ifdOffset);
             }
+            
+            nImagesChecked += 1;
+            #ifdef WITH_IGOR
+			if ((nImagesChecked % 20) == 0) {
+				int abort = SpinProcess();
+				if (abort)
+					throw USER_ABORTED("user abort");
+			}
+            #endif
+            
         } while (TIFFReadDirectory(tiff_file) == 1);
         
         imageOffsets.offsets = _directoryOffsets;
