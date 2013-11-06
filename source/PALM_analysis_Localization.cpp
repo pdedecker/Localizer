@@ -176,7 +176,7 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
         //}
 
 		// is the fitted standard deviation close enough to the expected value?
-        if ((gsl_vector_get(fit_iterator->x, 1) < 0.5 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
+        if ((gsl_vector_get(fit_iterator->x, 1) < 0.4 * initialPSFWidth) || (gsl_vector_get(fit_iterator->x, 1) > initialPSFWidth * 1.5)) {
             it = particles->erase(it);
             continue;
         }
@@ -547,7 +547,7 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
 		}
 		
 		// is at least one of the calculated standard deviations close enough to the PSF standard deviation?
-		if (! (((stdDev1 >= 0.5 * initialPSFWidth) && (stdDev1 <= 1.5 * initialPSFWidth)) || ((stdDev2 >= 0.5 * initialPSFWidth) && (stdDev2 <= 1.5 * initialPSFWidth)))) {
+		if (! (((stdDev1 >= 0.4 * initialPSFWidth) && (stdDev1 <= 1.5 * initialPSFWidth)) || ((stdDev2 >= 0.4 * initialPSFWidth) && (stdDev2 <= 1.5 * initialPSFWidth)))) {
 			it = particles->erase(it);
             continue;
 		}
