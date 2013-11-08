@@ -1076,20 +1076,20 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
 			case STORAGE_TYPE_UINT4:
 			{
-				char *charPtr = (char *)single_scanline_buffer.get();
+				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
 				for (size_t k = 0; k < xSize; k+=2) {
-					(*image)(k, j) = (double)(0x0000000F & (*charPtr));
-					(*image)(k + 1, j) = (double)((0x000000F0 & (*charPtr)) / 16);			  
-					++charPtr;
+					(*image)(k, j) = (double)(0x0000000F & (*uint8Ptr));
+					(*image)(k + 1, j) = (double)((0x000000F0 & (*uint8Ptr)) / 16);			  
+					++uint8Ptr;
 				}
 				break;
 			}
 			case STORAGE_TYPE_UINT8:
 			{
-				char *charPtr = (char *)single_scanline_buffer.get();
+				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
 				for (size_t k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*charPtr);
-					++charPtr;
+					(*image)(k, j) = (double)(*uint8Ptr);
+					++uint8Ptr;
 				}
 				break;
 			}
