@@ -421,7 +421,7 @@ void ImageLoaderAndor::parse_header_information() {
 	
 	headerBuffer[500000] = '\0';
 	// look for and replace any intermediate nul characters
-	for (int i = 0; i < 500000; ++i) {	// make sure that there are no intermediate NULL characters
+	for (int i = 0; i < 500000; ++i) {
 		if (headerBuffer[i] == '\0') {
 			headerBuffer[i] = '1';
 		}
@@ -473,22 +473,23 @@ void ImageLoaderAndor::parse_header_information() {
             break;
     }
     
-    // if we're here then we just read the first line containing the time stamps. Now read the remaining lines.
-    for (int i = 1; i < nImagesHeader; ++i) {
+    // previously, this code assumed that there would be lines containing '0' next, with one line for each image in the file. But I've now seen
+    // files where there is more than one such line for each image. I don't know what these lines are for, so now we just skip over any lines
+    // that contain only whitespace and a single number.
+    for (int i = 0; ; ++i) {
         ss.getline(singleLineBuffer.get(), 4096);
         if ((ss.eof() == 1) || (ss.fail() == 1))
-			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+			break;
+        singleLine = singleLineBuffer.get();
+        size_t firstNonWhiteSpace = singleLine.find_first_not_of(" \t");
+        size_t lastNonWhiteSpace = singleLine.find_last_not_of(" \t");
+        if ((firstNonWhiteSpace == std::string::npos) || (lastNonWhiteSpace == std::string::npos) || (firstNonWhiteSpace != lastNonWhiteSpace))
+            break;
+        char firstNonWhite = singleLine[firstNonWhiteSpace];
+        if ((firstNonWhite < '0') || (firstNonWhite > '9'))
+            break;
+        this->header_length = ss.tellg();
     }
-	
-	this->header_length = ss.tellg();
-	
-	// the line after this may be a single line containing just a zero without any spaces
-	// in that case add it to the header offset
-	ss.getline(singleLineBuffer.get(), 4096);
-	singleLine = singleLineBuffer.get();
-	if (singleLine == "0") {
-		this->header_length = ss.tellg();
-	}
 	
 	// did some error happen while reading the file?
 	if (ss.bad() == 1) {
@@ -500,7 +501,7 @@ void ImageLoaderAndor::parse_header_information() {
 
 ImagePtr ImageLoaderAndor::readNextImage(size_t &indexOfImageThatWasRead) {
 	uint64_t offset;
-	int nBytesInImage = xSize * ySize * sizeof(float);
+	uint64_t nBytesInImage = xSize * ySize * sizeof(float);
 	
 	boost::scoped_array<char> single_image_buffer(new char[nBytesInImage]);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
