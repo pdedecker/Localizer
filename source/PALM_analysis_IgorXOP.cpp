@@ -28,6 +28,8 @@
 
 #include "PALM_analysis_IgorXOP.h"
 
+#include "NewSOFI.h"
+
 #pragma pack(2)
 struct LocalizerProgStruct {
     uint32_t version;
@@ -629,6 +631,31 @@ struct SOFIAnalysisRuntimeParams {
 };
 typedef struct SOFIAnalysisRuntimeParams SOFIAnalysisRuntimeParams;
 typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
+#pragma pack()	// Reset structure alignment to default.
+
+// Runtime param structure for NewSOFI operation.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+struct NewSOFIRuntimeParams {
+	// Flag parameters.
+    
+	// Parameters for /ORDR flag group.
+	int ORDRFlagEncountered;
+	double order;
+	int ORDRFlagParamsSet[1];
+    
+	// Main parameters.
+    
+	// Parameters for simple main group #0.
+	int inputFilePathEncountered;
+	Handle inputFilePath;
+	int inputFilePathParamsSet[1];
+    
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+};
+typedef struct NewSOFIRuntimeParams NewSOFIRuntimeParams;
+typedef struct NewSOFIRuntimeParams* NewSOFIRuntimeParamsPtr;
 #pragma pack()	// Reset structure alignment to default.
 
 int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
@@ -2629,6 +2656,58 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     return err;
 }
 
+static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
+	int err = 0;
+    
+    int order;
+    if (p->ORDRFlagEncountered) {
+		// Parameter: p->order
+        order = static_cast<int>(p->order);
+        if (order <= 1) {
+            return EXPECT_POS_NUM;
+        }
+	} else {
+        order = 2;
+    }
+    
+	// Main parameters.
+    
+	if (p->inputFilePathEncountered) {
+		// Parameter: p->inputFilePath (test for NULL handle before using)
+        if (p->inputFilePath == NULL)
+            return EXPECTED_STRING_EXPR;
+	} else {
+        return EXPECTED_STRING_EXPR;
+    }
+    
+    try {
+        std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(-1, inputFilePath);
+        std::shared_ptr<ProgressReporter> progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+        std::vector<ImagePtr> sofiOutputImages;
+        DoNewSOFI(imageLoader, progressReporter, order, sofiOutputImages);
+        waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), "M_NewSOFI");
+        double offset = 2.0;
+        double delta = 1.0 / static_cast<double>(order);
+        MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
+        MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (...) {
+        XOPNotice("An unknown error occurred\r");
+        return WM_UNKNOWN_ERROR;
+    }
+    
+	return err;
+}
+
 static int RegisterLocalizationAnalysis(void) {
     const char* cmdTemplate;
     const char* runtimeNumVarList;
@@ -2738,6 +2817,18 @@ static int RegisterSOFIAnalysis(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIAnalysisRuntimeParams), (void*)ExecuteSOFIAnalysis, 0);
 }
 
+static int RegisterNewSOFI(void) {
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
+    
+	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
+	cmdTemplate = "NewSOFI /ORDR=number:order string:inputFilePath";
+	runtimeNumVarList = "";
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
+}
+
 /*	XOPEntry()
 
  This is the entry point from the host application to the XOP for all
@@ -2773,6 +2864,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
     if ((result = RegisterRipleyLFunctionClustering()))
         return result;
     if ((result = RegisterSOFIAnalysis()))
+        return result;
+    if ((result = RegisterNewSOFI()))
         return result;
 
     // There are no more operations added by this XOP.

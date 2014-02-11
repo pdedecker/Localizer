@@ -85,5 +85,8 @@ resource 'XOPC' (1100) {
 		
 		"SOFIAnalysis",
 		XOPOp+utilOp+compilableOp,
+        
+        "NewSOFI",
+        XOPOp+utilOp+compilableOp,
 	}
 };

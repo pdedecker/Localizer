@@ -14,6 +14,12 @@
 		D027E937151311CF005B8664 /* PALM_analysis_Convolver.h in Headers */ = {isa = PBXBuildFile; fileRef = D027E935151311CF005B8664 /* PALM_analysis_Convolver.h */; };
 		D027E938151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */; };
 		D027E93A151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */; };
+		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
+		D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
+		D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */ = {isa = PBXBuildFile; fileRef = D056459E18AA1F72001A22D9 /* NewSOFI.h */; };
+		D05645A418AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D05645A218AA211F001A22D9 /* NewSOFIKernels.cpp */; };
+		D05645A518AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D05645A218AA211F001A22D9 /* NewSOFIKernels.cpp */; };
+		D05645A618AA211F001A22D9 /* NewSOFIKernels.h in Headers */ = {isa = PBXBuildFile; fileRef = D05645A318AA211F001A22D9 /* NewSOFIKernels.h */; };
 		D090E533139685610099D837 /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
 		D0A9C2ED135F4EED00D076AE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		D0A9C2EF135F4EED00D076AE /* PALM_analysis_IgorXOP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09576100D30171E00506A92 /* PALM_analysis_IgorXOP.cpp */; };
@@ -112,6 +118,10 @@
 		D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_PALMImages.cpp; path = ../source/PALM_analysis_PALMImages.cpp; sourceTree = SOURCE_ROOT; };
 		D043F47315A712B7006A3D54 /* WaitMex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaitMex.h; path = ../source/WaitMex.h; sourceTree = SOURCE_ROOT; };
 		D043F47415A712B7006A3D54 /* WaitMex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaitMex.cpp; path = ../source/WaitMex.cpp; sourceTree = SOURCE_ROOT; };
+		D056459D18AA1F72001A22D9 /* NewSOFI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NewSOFI.cpp; path = ../source/NewSOFI.cpp; sourceTree = "<group>"; };
+		D056459E18AA1F72001A22D9 /* NewSOFI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSOFI.h; path = ../source/NewSOFI.h; sourceTree = "<group>"; };
+		D05645A218AA211F001A22D9 /* NewSOFIKernels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NewSOFIKernels.cpp; path = ../source/NewSOFIKernels.cpp; sourceTree = "<group>"; };
+		D05645A318AA211F001A22D9 /* NewSOFIKernels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSOFIKernels.h; path = ../source/NewSOFIKernels.h; sourceTree = "<group>"; };
 		D084B0630F7F7236004E7AE3 /* PALM_analysis_defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_defines.h; path = ../source/PALM_analysis_defines.h; sourceTree = SOURCE_ROOT; };
 		D08B48E30D52381800C99DE3 /* PALM_analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis.h; path = ../source/PALM_analysis.h; sourceTree = SOURCE_ROOT; };
 		D08BADD20F80C59400D08A6C /* PALM_analysis_FileIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_FileIO.h; path = ../source/PALM_analysis_FileIO.h; sourceTree = SOURCE_ROOT; };
@@ -280,6 +290,10 @@
 				D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */,
 				D090E531139685610099D837 /* PALM_analysis_SOFI.h */,
 				D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */,
+				D056459E18AA1F72001A22D9 /* NewSOFI.h */,
+				D056459D18AA1F72001A22D9 /* NewSOFI.cpp */,
+				D05645A318AA211F001A22D9 /* NewSOFIKernels.h */,
+				D05645A218AA211F001A22D9 /* NewSOFIKernels.cpp */,
 				D08BAEBD0F80C8B900D08A6C /* PALM_analysis_storage.h */,
 				D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */,
 				D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */,
@@ -356,6 +370,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */,
+				D05645A618AA211F001A22D9 /* NewSOFIKernels.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -514,6 +530,8 @@
 				D01D290C136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp in Sources */,
 				D090E533139685610099D837 /* PALM_analysis_SOFI.cpp in Sources */,
 				D027E93A151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */,
+				D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
+				D05645A418AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -536,6 +554,8 @@
 				D0C258441746C1A2001C2EB1 /* PALM_analysis_SOFI.cpp in Sources */,
 				D0C258461746C1A2001C2EB1 /* PALM_analysis_storage.cpp in Sources */,
 				D0C258481746C1A2001C2EB1 /* PALM_analysis_MatrixRecycler.cpp in Sources */,
+				D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
+				D05645A518AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
