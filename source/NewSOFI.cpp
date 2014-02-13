@@ -58,15 +58,11 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     XOPNotice(ostream.str().c_str());
     
     // calculate all products over the images
-    //tbb::spin_mutex spinMutex;
     for (int n = 0; n < nImages; ++n) {
         //tbb::parallel_for(0, nImages, [&](const int n) {
         progressReporter->UpdateCalculationProgress(n, nImages);
         ImagePtr currentImage = imageLoader->readImage(n);
-        //for (auto it = pixelMap.begin(); it != pixelMap.end(); ++it) {
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
-            //const PixelCombination& currentCombination = it->first;
-            //ImagePtr matrix = it->second;
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
             for (int col = 2; col < nCols - 2; ++col) {
@@ -78,7 +74,6 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
                     (*matrix)(row - 2, col - 2) += product;
                 }
             }
-        //}
         });
     }
 
@@ -89,23 +84,23 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     
     // and make the SOFI image
     ImagePtr sofiImage(new Image(order * (nRows - 4), order * (nCols - 4)));
-    Eigen::MatrixXd evaluated(nRows - 4, nCols - 4);
-    for (auto kernelIt = kernels.cbegin(); kernelIt != kernels.cend(); ++kernelIt) {
+    tbb::parallel_do(kernels.cbegin(), kernels.cend(), [=,&pixelMap,&sofiImage](const SOFIKernel& kernel) {
+        Eigen::MatrixXd evaluated(nRows - 4, nCols - 4);
         evaluated.setConstant(0.0);
-        for (auto partitionsSetIt = kernelIt->combinations.cbegin(); partitionsSetIt != kernelIt->combinations.cend(); ++partitionsSetIt) {
+        for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
             evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap);
         }
-        if (kernelIt->combinations.size() > 1)
-            evaluated /= static_cast<double>(kernelIt->combinations.size());
+        if (kernel.combinations.size() > 1)
+            evaluated /= static_cast<double>(kernel.combinations.size());
         
         for (int col = 0; col < nCols - 4; ++col) {
             for (int row = 0; row < nRows - 4; ++row) {
                 int baseOutputRow = row * order;
                 int baseOutputCol = col * order;
-                (*sofiImage)(baseOutputRow + kernelIt->outputDeltaX, baseOutputCol + kernelIt->outputDeltaY) = evaluated(row, col);
+                (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
             }
         }
-    }
+    });
     
     sofiOutputImages.clear();
     sofiOutputImages.push_back(sofiImage);
