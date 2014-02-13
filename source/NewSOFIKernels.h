@@ -35,6 +35,7 @@ public:
 };
 
 GroupOfPartitions AllPartitions(PixelCombination pixelCombination);
+std::string PrintPartition(const Partition& partition);
 std::string ParititionTest();
 
 std::vector<SOFIPixelCombination> sofiPixelCombinations2();

@@ -54,7 +54,6 @@ GroupOfPartitions AllPartitions(PixelCombination pixelCombination) {
     std::vector<int> kkLast = LastPartition(nElements).first;
     std::vector<int> MMLast = LastPartition(nElements).second;
     
-    bool breakAfterNext = false;
     for ( ; ; ) {
         Partition partition;
         int nSubsets = *(std::max_element(kk.begin(), kk.end())) + 1;
@@ -68,12 +67,9 @@ GroupOfPartitions AllPartitions(PixelCombination pixelCombination) {
         }
         groupOfPartitions.push_back(partition);
         
-        if (breakAfterNext)
-            break;
-        
-        NextPartition(kk, MM);
         if (kk == kkLast)
-            breakAfterNext = true;
+            break;
+        NextPartition(kk, MM);
     }
     
     return groupOfPartitions;
@@ -106,6 +102,7 @@ void NextPartition(std::vector<int>& kk, std::vector<int>& MM) {
                 kk[j] = kk[0];
                 MM[j] = MM[i];
             }
+            return;
         }
     }
 }
@@ -123,17 +120,23 @@ std::string ParititionTest() {
     for (int i = 0; i < nPartitions; ++i) {
         ss << "Partition " << i << ":\r";
         Partition partition = groupOfPartitions[i];
-        int nSubsets = partition.size();
-        for (int j = 0; j < nSubsets; ++j) {
-            ss << "{";
-            for (auto pixelIt = partition[j].cbegin(); pixelIt != partition[j].cend(); ++pixelIt) {
-                ss << "(" << pixelIt->first << "," << pixelIt->second << ") ";
-            }
-            ss << "} ";
-        }
-        ss << "\r";
+        ss << PrintPartition(partition);
     }
     
+    return ss.str();
+}
+
+std::string PrintPartition(const Partition& partition) {
+    std::ostringstream ss;
+    int nSubsets = partition.size();
+    for (int j = 0; j < nSubsets; ++j) {
+        ss << "{";
+        for (auto pixelIt = partition[j].cbegin(); pixelIt != partition[j].cend(); ++pixelIt) {
+            ss << "(" << pixelIt->first << "," << pixelIt->second << ") ";
+        }
+        ss << "} ";
+    }
+    ss << "\r";
     return ss.str();
 }
 
