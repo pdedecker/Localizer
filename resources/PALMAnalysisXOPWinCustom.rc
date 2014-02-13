@@ -48,6 +48,9 @@ BEGIN
 	"SOFIAnalysis\0",
 	XOPOp | utilOp | compilableOp,
 
+	"NewSOFI\0",
+	XOPOp | utilOp | compilableOp,
+
 	"\0"							// NOTE: NULL required to terminate the resource.
 END
 

@@ -501,6 +501,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\NewSOFI.cpp" />
+    <ClCompile Include="..\source\NewSOFIKernels.cpp" />
     <ClCompile Include="..\source\PALM_analysis.cpp" />
     <ClCompile Include="..\source\PALM_analysis_Convolver.cpp" />
     <ClCompile Include="..\source\PALM_analysis_FileIO.cpp" />
@@ -544,6 +546,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\NewSOFI.h" />
+    <ClInclude Include="..\source\NewSOFIKernels.h" />
     <ClInclude Include="..\source\PALM_analysis.h" />
     <ClInclude Include="..\source\PALM_analysis_Convolver.h" />
     <ClInclude Include="..\source\PALM_analysis_defines.h" />
