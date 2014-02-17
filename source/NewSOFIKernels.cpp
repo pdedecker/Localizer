@@ -3,6 +3,28 @@
 #include <algorithm>
 #include <sstream>
 
+std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination);
+
+std::vector<SOFIKernel> KernelsForOrder(const int order) {
+    std::vector<SOFIKernel> kernels;
+    
+    if (order == 2) {
+        kernels = PixelCombinationsToKernels(sofiPixelCombinations2());
+    } else if (order == 3) {
+        kernels = PixelCombinationsToKernels(sofiPixelCombinations3());
+    } else if (order == 4) {
+        kernels = PixelCombinationsToKernels(sofiPixelCombinations4());
+    } else if (order == 5) {
+        kernels = PixelCombinationsToKernels(sofiPixelCombinations5());
+    } else if (order == 6) {
+        kernels = PixelCombinationsToKernels(sofiPixelCombinations6());
+    } else {
+        throw std::runtime_error("unsupported order");
+    }
+    
+    return kernels;
+}
+
 SOFIKernel PixelCombinationToKernel(const SOFIPixelCombination& sofiPixelCombination);
 
 std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination) {

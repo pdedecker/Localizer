@@ -27,7 +27,7 @@ public:
     std::vector<GroupOfPartitions> combinations;
 };
 
-std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination);
+std::vector<SOFIKernel> KernelsForOrder(const int order);
 
 class ComparePixelCombinations {
 public:

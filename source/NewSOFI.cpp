@@ -22,21 +22,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     
     progressReporter->CalculationStarted();
     
-    std::vector<SOFIKernel> kernels;
-    if (order == 2) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations2());
-    } else if (order == 3) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations3());
-    } else if (order == 4) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations4());
-    } else if (order == 5) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations5());
-    } else if (order == 6) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations6());
-    } else {
-        throw std::runtime_error("unsupported order");
-    }
-    
+    std::vector<SOFIKernel> kernels = KernelsForOrder(order);
     std::map<PixelCombination, ImagePtr , ComparePixelCombinations> pixelMap;
     
     // store all needed pixel combinations in the map
