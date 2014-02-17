@@ -15,6 +15,8 @@ double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 
+ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order);
+
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
@@ -93,9 +95,10 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
             }
         }
     });
-    
+
+    ImagePtr correctedImage = PerformPixelationCorrection(sofiImage, order);
     sofiOutputImages.clear();
-    sofiOutputImages.push_back(sofiImage);
+    sofiOutputImages.push_back(correctedImage);
     
     progressReporter->CalculationDone();
 }
@@ -150,4 +153,64 @@ double Prefactor(int nPartitions) {
             throw std::runtime_error("no prefactor");
             return 1.0;
     }
+}
+
+ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order) {
+    int nRows = rawImage->rows();
+    int nCols = rawImage->cols();
+    
+    ImagePtr correctedImage(new Image(nRows, nCols));
+    correctedImage->setConstant(0.0);
+    Eigen::ArrayXXd aFactor(order, order), bTerm(order, order);
+    int nKernelRows = order, nKernelCols = order;
+    int nPixelsOfEachKind = nRows * nCols / (order * order);
+    int kindOfRow, kindOfCol;
+    
+    // calculate averages
+    Eigen::ArrayXXd pixelAverages(order, order);
+    pixelAverages.setConstant(0.0);
+    for (int col = 0; col < nCols; ++col) {
+        for (int row = 0; row < nRows; ++row) {
+            kindOfRow = row % nKernelRows;
+            kindOfCol = col % nKernelCols;
+            pixelAverages(kindOfRow, kindOfCol) += (*rawImage)(row, col);
+        }
+    }
+    pixelAverages /= static_cast<double>(nPixelsOfEachKind);
+    
+    // calculate variances
+    Eigen::ArrayXXd pixelVariances(order, order);
+    pixelVariances.setConstant(0.0);
+    for (int col = 0; col < nCols; ++col) {
+        for (int row = 0; row < nRows; ++row) {
+            kindOfRow = row % nKernelRows;
+            kindOfCol = col % nKernelCols;
+            pixelVariances(kindOfRow, kindOfCol) += square<double>((*rawImage)(row, col) - pixelAverages(kindOfRow, kindOfCol));
+        }
+    }
+    pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
+    
+    // now determine correction factors, arbitrary to the first element
+    for (int col = 0; col < nKernelCols; ++col) {
+        for (int row = 0; row < nKernelRows; ++row) {
+            if (row == 0 && col == 0) {
+                aFactor(row, col) = 1.0;
+                bTerm(row, col) = 0.0;
+                continue;
+            }
+            aFactor(row, col) = std::sqrt(pixelVariances(0, 0) / pixelVariances(row, col));
+            bTerm(row, col) = pixelAverages(0, 0) - aFactor(row, col) * pixelAverages(row, col);
+        }
+    }
+    
+    // perform the correction
+    for (int col = 0; col < nCols; ++col) {
+        for (int row = 0; row < nRows; ++row) {
+            kindOfRow = row % nKernelRows;
+            kindOfCol = col % nKernelCols;
+            (*correctedImage)(row, col) = (*rawImage)(row, col) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
+        }
+    }
+    
+    return correctedImage;
 }
