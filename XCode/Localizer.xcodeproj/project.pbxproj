@@ -629,7 +629,7 @@
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx10.8;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -679,7 +679,7 @@
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.7;
+				SDKROOT = macosx10.8;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
@@ -720,7 +720,6 @@
 				);
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
-				SDKROOT = $inherited;
 				WRAPPER_EXTENSION = xop;
 				ZERO_LINK = YES;
 			};
@@ -760,7 +759,6 @@
 				);
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
-				SDKROOT = $inherited;
 				WRAPPER_EXTENSION = xop;
 			};
 			name = Release;

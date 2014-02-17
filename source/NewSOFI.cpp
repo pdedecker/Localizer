@@ -40,21 +40,25 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     std::map<PixelCombination, ImagePtr , ComparePixelCombinations> pixelMap;
     
     // store all needed pixel combinations in the map
+    int allCombinations = 0;
     for (auto kernelIt = kernels.cbegin(); kernelIt != kernels.cend(); ++kernelIt) {
         const std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
         for (auto partitionsSetIt = GroupOfPartitions.cbegin(); partitionsSetIt != GroupOfPartitions.cend(); ++partitionsSetIt) {
             for (auto partitionsIt = partitionsSetIt->cbegin(); partitionsIt != partitionsSetIt->cend(); ++partitionsIt) {
                 for (auto subsetIt = partitionsIt->cbegin(); subsetIt != partitionsIt->cend(); ++subsetIt) {
-                    ImagePtr matrix(new Image(nRows - 4, nCols - 4));
-                    matrix->setConstant(0.0);
-                    pixelMap.insert(std::pair<PixelCombination, ImagePtr>(*subsetIt, matrix));
+                    allCombinations += 1;
+                    if (!pixelMap.count(*subsetIt)) {
+                        ImagePtr matrix(new Image(nRows - 4, nCols - 4));
+                        matrix->setConstant(0.0);
+                        pixelMap.insert(std::pair<PixelCombination, ImagePtr>(*subsetIt, matrix));
+                    }
                 }
             }
         }
     }
     
     std::ostringstream ostream;
-    ostream << "Map has total of " << pixelMap.size() << " entries\r";
+    ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
     XOPNotice(ostream.str().c_str());
     
     // calculate all products over the images
