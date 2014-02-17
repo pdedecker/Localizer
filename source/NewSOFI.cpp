@@ -64,7 +64,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     // calculate all products over the images
     for (int n = 0; n < nImages; ++n) {
         //tbb::parallel_for(0, nImages, [&](const int n) {
-        progressReporter->UpdateCalculationProgress(n, nImages);
+        int abortStatus = progressReporter->UpdateCalculationProgress(n, nImages);
+        if (abortStatus)
+            throw USER_ABORTED("user abort");
         ImagePtr currentImage = imageLoader->readImage(n);
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
