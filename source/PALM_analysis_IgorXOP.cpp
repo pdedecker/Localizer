@@ -1080,7 +1080,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         err = PALM_ANALYSIS_XOP_ERROR;
@@ -1283,7 +1283,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         err = PALM_ANALYSIS_XOP_ERROR;
@@ -1547,7 +1547,7 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return SYNERR;
@@ -1707,7 +1707,7 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return SYNERR;
@@ -2045,7 +2045,7 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
@@ -2125,7 +2125,7 @@ int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
@@ -2302,7 +2302,7 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
@@ -2370,7 +2370,7 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
@@ -2643,7 +2643,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     catch (int e) {
         return e;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
@@ -2695,7 +2695,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     catch (int e) {
         return e;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return PALM_ANALYSIS_XOP_ERROR;
