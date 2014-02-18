@@ -15,7 +15,7 @@ double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 
-ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order);
+void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
     int nRows = imageLoader->getXSize();
@@ -96,9 +96,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
         }
     });
 
-    ImagePtr correctedImage = PerformPixelationCorrection(sofiImage, order);
+    PerformPixelationCorrection(sofiImage, order);
     sofiOutputImages.clear();
-    sofiOutputImages.push_back(correctedImage);
+    sofiOutputImages.push_back(sofiImage);
     
     progressReporter->CalculationDone();
 }
@@ -155,12 +155,10 @@ double Prefactor(int nPartitions) {
     }
 }
 
-ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order) {
-    int nRows = rawImage->rows();
-    int nCols = rawImage->cols();
+void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order) {
+    int nRows = imageToCorrect->rows();
+    int nCols = imageToCorrect->cols();
     
-    ImagePtr correctedImage(new Image(nRows, nCols));
-    correctedImage->setConstant(0.0);
     Eigen::ArrayXXd aFactor(order, order), bTerm(order, order);
     int nKernelRows = order, nKernelCols = order;
     int nPixelsOfEachKind = nRows * nCols / (order * order);
@@ -173,7 +171,7 @@ ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order) {
         for (int row = 0; row < nRows; ++row) {
             kindOfRow = row % nKernelRows;
             kindOfCol = col % nKernelCols;
-            pixelAverages(kindOfRow, kindOfCol) += (*rawImage)(row, col);
+            pixelAverages(kindOfRow, kindOfCol) += (*imageToCorrect)(row, col);
         }
     }
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
@@ -185,7 +183,7 @@ ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order) {
         for (int row = 0; row < nRows; ++row) {
             kindOfRow = row % nKernelRows;
             kindOfCol = col % nKernelCols;
-            pixelVariances(kindOfRow, kindOfCol) += square<double>((*rawImage)(row, col) - pixelAverages(kindOfRow, kindOfCol));
+            pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(row, col) - pixelAverages(kindOfRow, kindOfCol));
         }
     }
     pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
@@ -208,9 +206,7 @@ ImagePtr PerformPixelationCorrection(const ImagePtr rawImage, const int order) {
         for (int row = 0; row < nRows; ++row) {
             kindOfRow = row % nKernelRows;
             kindOfCol = col % nKernelCols;
-            (*correctedImage)(row, col) = (*rawImage)(row, col) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
+            (*imageToCorrect)(row, col) = (*imageToCorrect)(row, col) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
         }
     }
-    
-    return correctedImage;
 }
