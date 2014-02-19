@@ -9,6 +9,10 @@
 #include "tbb/spin_mutex.h"
 #include "XOPStandardHeaders.h"
 
+#include "NewSOFIKernels.h"
+
+void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages);
+
 double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
@@ -16,92 +20,6 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
-    int nRows = imageLoader->getXSize();
-    int nCols = imageLoader->getYSize();
-    int nImages = imageLoader->getNImages();
-    
-    progressReporter->CalculationStarted();
-    
-    std::vector<SOFIKernel> kernels = KernelsForOrder(order);
-    std::map<PixelCombination, ImagePtr , ComparePixelCombinations> pixelMap;
-    
-    // store all needed pixel combinations in the map
-    int allCombinations = 0;
-    for (auto kernelIt = kernels.cbegin(); kernelIt != kernels.cend(); ++kernelIt) {
-        const std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
-        for (auto partitionsSetIt = GroupOfPartitions.cbegin(); partitionsSetIt != GroupOfPartitions.cend(); ++partitionsSetIt) {
-            for (auto partitionsIt = partitionsSetIt->cbegin(); partitionsIt != partitionsSetIt->cend(); ++partitionsIt) {
-                for (auto subsetIt = partitionsIt->cbegin(); subsetIt != partitionsIt->cend(); ++subsetIt) {
-                    allCombinations += 1;
-                    if (!pixelMap.count(*subsetIt)) {
-                        ImagePtr matrix(new Image(nRows - 4, nCols - 4));
-                        matrix->setConstant(0.0);
-                        pixelMap.insert(std::pair<PixelCombination, ImagePtr>(*subsetIt, matrix));
-                    }
-                }
-            }
-        }
-    }
-    
-    std::ostringstream ostream;
-    ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
-    XOPNotice(ostream.str().c_str());
-    
-    // calculate all products over the images
-    for (int n = 0; n < nImages; ++n) {
-        //tbb::parallel_for(0, nImages, [&](const int n) {
-        int abortStatus = progressReporter->UpdateCalculationProgress(n, nImages);
-        if (abortStatus)
-            throw USER_ABORTED("user abort");
-        ImagePtr currentImage = imageLoader->readImage(n);
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
-            const PixelCombination& currentCombination = item.first;
-            ImagePtr matrix = item.second;
-            for (int col = 2; col < nCols - 2; ++col) {
-                for (int row = 2; row < nRows - 2; ++row) {
-                    double product = 1.0;
-                    for (size_t i = 0; i < currentCombination.size(); ++i) {
-                        product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
-                    }
-                    (*matrix)(row - 2, col - 2) += product;
-                }
-            }
-        });
-    }
-
-    // normalize by number of images
-    for (auto it = pixelMap.begin(); it != pixelMap.end(); ++it) {
-        *(it->second) /= static_cast<double>(nImages);
-    }
-    
-    // and make the SOFI image
-    ImagePtr sofiImage(new Image(order * (nRows - 4), order * (nCols - 4)));
-    tbb::parallel_do(kernels.cbegin(), kernels.cend(), [=,&pixelMap,&sofiImage](const SOFIKernel& kernel) {
-        Eigen::MatrixXd evaluated(nRows - 4, nCols - 4);
-        evaluated.setConstant(0.0);
-        for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
-            evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap);
-        }
-        if (kernel.combinations.size() > 1)
-            evaluated /= static_cast<double>(kernel.combinations.size());
-        
-        for (int col = 0; col < nCols - 4; ++col) {
-            for (int row = 0; row < nRows - 4; ++row) {
-                int baseOutputRow = row * order;
-                int baseOutputCol = col * order;
-                (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
-            }
-        }
-    });
-
-    PerformPixelationCorrection(sofiImage, order);
-    sofiOutputImages.clear();
-    sofiOutputImages.push_back(sofiImage);
-    
-    progressReporter->CalculationDone();
-}
-
-void DoNewSOFI2(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
     if (nImages == 0)
         throw std::runtime_error("SOFI without input images");

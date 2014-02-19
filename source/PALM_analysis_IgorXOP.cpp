@@ -2687,7 +2687,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(-1, inputFilePath);
         std::shared_ptr<ProgressReporter> progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
         std::vector<ImagePtr> sofiOutputImages;
-        DoNewSOFI2(imageLoader, progressReporter, order, sofiOutputImages);
+        DoNewSOFI(imageLoader, progressReporter, order, sofiOutputImages);
         waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), "M_NewSOFI");
         double offset = 2.0;
         double delta = 1.0 / static_cast<double>(order);
