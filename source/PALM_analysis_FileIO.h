@@ -247,7 +247,7 @@ public:
     virtual ImagePtr readNextImage(int &indexOfImageThatWasRead);
     virtual void spoolTo(int index);
     
-    void setImageRange(const int firstImageToInclude, const int lastImageToInclude);
+    void setImageRange(int firstImageToInclude, int lastImageToInclude);
     void setROI(int minX, int maxX, int minY, int maxY);
     
 private:

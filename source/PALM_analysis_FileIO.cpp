@@ -294,8 +294,10 @@ void ImageLoaderWrapper::spoolTo(int index) {
     _baseImageLoader->spoolTo(index + _firstImageToInclude);
 }
 
-void ImageLoaderWrapper::setImageRange(const int firstImageToInclude, const int lastImageToInclude) {
-    if ((firstImageToInclude < 0) || (lastImageToInclude >= _baseImageLoader->getNImages()))
+void ImageLoaderWrapper::setImageRange(int firstImageToInclude, int lastImageToInclude) {
+    if (lastImageToInclude < 0)
+        lastImageToInclude = _baseImageLoader->getNImages() - 1;
+    if ((firstImageToInclude < 0) || (lastImageToInclude >= _baseImageLoader->getNImages()) || (firstImageToInclude > lastImageToInclude))
         throw std::runtime_error("invalid setImageRange()");
     
     _firstImageToInclude = firstImageToInclude;

@@ -638,10 +638,45 @@ typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
 struct NewSOFIRuntimeParams {
 	// Flag parameters.
     
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double cameraType;
+	int YFlagParamsSet[1];
+    
 	// Parameters for /ORDR flag group.
 	int ORDRFlagEncountered;
 	double order;
 	int ORDRFlagParamsSet[1];
+    
+	// Parameters for /SUB flag group.
+	int SUBFlagEncountered;
+	double framesToSkip;
+	double nFramesToInclude;
+	int SUBFlagParamsSet[2];
+    
+	// Parameters for /NSAT flag group.
+	int NSATFlagEncountered;
+	double noSaturatedPixels;				// Optional parameter.
+	int NSATFlagParamsSet[1];
+    
+	// Parameters for /AVG flag group.
+	int AVGFlagEncountered;
+	double doAverage;						// Optional parameter.
+	int AVGFlagParamsSet[1];
+    
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+    
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+    
+	// Parameters for /DEST flag group.
+	int DESTFlagEncountered;
+	DataFolderAndName dest;
+	int DESTFlagParamsSet[1];
     
 	// Main parameters.
     
@@ -2661,6 +2696,12 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 	int err = 0;
     
+    int cameraType = -1;
+    if (p->YFlagEncountered) {
+		// Parameter: p->cameraType
+        cameraType = p->cameraType + 0.5;
+	}
+    
     int order;
     if (p->ORDRFlagEncountered) {
 		// Parameter: p->order
@@ -2670,6 +2711,62 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         }
 	} else {
         order = 2;
+    }
+    
+    int nFramesToSkip = 0;
+    int nFramesToInclude = -1;
+    if (p->SUBFlagEncountered) {
+		// Parameter: p->framesToSkip
+        // Parameter: p->nFramesToInclude
+        if ((p->framesToSkip < 0) || (p->nFramesToInclude <= 0))
+            return EXPECT_POS_NUM;
+        nFramesToSkip = p->framesToSkip + 0.5;
+        nFramesToInclude = p->nFramesToInclude + 0.5;
+	}
+    
+    bool removeSaturatedPixels = false;
+    if (p->NSATFlagEncountered) {
+        removeSaturatedPixels = true;
+		if (p->NSATFlagParamsSet[0]) {
+			// Optional parameter: p->noSaturatedPixels
+            removeSaturatedPixels = (p->noSaturatedPixels != 0);
+		}
+	}
+    
+    bool wantAverageImage = false;
+    if (p->AVGFlagEncountered) {
+        wantAverageImage = true;
+		if (p->AVGFlagParamsSet[0]) {
+			// Optional parameter: p->doAverage
+            wantAverageImage = (p->doAverage != 0);
+		}
+	}
+    
+    bool useIgorFunctionForProgress;
+    FUNCREF igorProgressReporterFunction;
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = true;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = false;
+    }
+    
+    bool quiet = false;
+    if (p->QFlagEncountered) {
+        quiet = true;
+    } else {
+        if (!RunningInMainThread())
+            quiet = true;	// no progress reporting if running in an Igor-preemptive thread
+    }
+    
+    DataFolderAndName outputWaveParams;
+    if (p->DESTFlagEncountered) {
+        // Parameter: p->dest
+        outputWaveParams = p->dest;
+    } else {
+        outputWaveParams.dfH = NULL;
+        strcpy(outputWaveParams.name, "M_SOFI");
     }
     
 	// Main parameters.
@@ -2685,17 +2782,40 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     try {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(-1, inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
+        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);
+        
         std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-        std::shared_ptr<ProgressReporter> progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+        if (removeSaturatedPixels) {
+            frameVerifiers.push_back(std::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType())));
+        }
+
+        std::shared_ptr<ProgressReporter> progressReporter;
+        if (quiet == 1) {
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
         std::vector<ImagePtr> sofiOutputImages;
-        bool wantAverageImage = false;
         ImagePtr averageImage;
-        DoNewSOFI(imageLoader, frameVerifiers, progressReporter, order, sofiOutputImages, wantAverageImage, averageImage);
-        waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), "M_NewSOFI");
+        DoNewSOFI(imageLoaderWrapper, frameVerifiers, progressReporter, order, sofiOutputImages, wantAverageImage, averageImage);
+        waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), outputWaveParams);
         double offset = 2.0;
         double delta = 1.0 / static_cast<double>(order);
         MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
         MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
+        if (wantAverageImage) {
+            DataFolderAndName averageOutputWaveParams;
+            averageOutputWaveParams.dfH = outputWaveParams.dfH;
+            strcpy(averageOutputWaveParams.name, outputWaveParams.name);
+            strcat(averageOutputWaveParams.name, "_avg");
+            CopyMatrixToIgorDPWave(averageImage, averageOutputWaveParams);
+        }
+            
     }
     catch (int e) {
         return e;
@@ -2828,7 +2948,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /ORDR=number:order string:inputFilePath";
+	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR=number:order /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
