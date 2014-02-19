@@ -11,7 +11,7 @@
 
 #include "NewSOFIKernels.h"
 
-void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages);
 
 double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
@@ -19,7 +19,7 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
-void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
+void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
     if (nImages == 0)
         throw std::runtime_error("SOFI without input images");
@@ -48,9 +48,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     for (int n = 0; n < nBatches; ++n) {
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
-        nImagesInSubCalculation.push_back(lastImageToProcess - firstImageToProcess + 1);
         std::vector<ImagePtr> subImages;
-        RawSOFIWorker(imageLoader, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages);
+        nImagesInSubCalculation.push_back(nImagesIncluded);
         for (size_t j = 0; j < nOrders; ++j) {
             allSubImages[j].push_back(subImages[j]);
         }
@@ -81,10 +81,11 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     progressReporter->CalculationDone();
 }
 
-void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesToInclude = lastImageToProcess - firstImageToProcess + 1;
+    int nImagesIncluded = 0;
     
     // store all needed pixel combinations in the map
     // if the map is non-empty, we assume that it was already setup by a previous call to RawSOFIWorker, so we can prevent unnecessary work.
@@ -120,10 +121,27 @@ void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImag
     
     // calculate all products over the images
     for (int n = firstImageToProcess; n <= lastImageToProcess; ++n) {
+        // update progress and check for abort
         int abortStatus = progressReporter->UpdateCalculationProgress(imagesProcessedSoFar, totalNumberOfImagesToProcess);
         if (abortStatus)
             throw USER_ABORTED("user abort");
+        
+        imagesProcessedSoFar += 1;
         ImagePtr currentImage = imageLoader->readImage(n);
+        
+        // check that the frame is valid
+        bool isValidFrame = true;
+        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
+            if (!(*verifierIt)->isValidFrame(currentImage)) {
+                isValidFrame = false;
+                break;
+            }
+        }
+        if (!isValidFrame)
+            continue;
+        nImagesIncluded += 1;
+        
+        // do the actual calculation
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
@@ -137,7 +155,6 @@ void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImag
                 }
             }
         });
-        imagesProcessedSoFar += 1;
     }
     
     // normalize by number of images
@@ -172,6 +189,8 @@ void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImag
         });
         sofiImages.push_back(sofiImage);
     }
+    
+    return nImagesIncluded;
 }
 
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap) {

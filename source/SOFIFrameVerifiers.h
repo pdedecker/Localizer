@@ -8,7 +8,7 @@ public:
 	SOFIFrameVerifier() {;}
 	virtual ~SOFIFrameVerifier() {;}
 	
-	virtual int isValidFrame(ImagePtr frame) = 0;
+	virtual bool isValidFrame(ImagePtr frame) const = 0;
 };
 
 class SOFIFrameVerifier_NoSaturation : public SOFIFrameVerifier {
@@ -16,9 +16,9 @@ public:
 	SOFIFrameVerifier_NoSaturation(int storageType_rhs);
 	~SOFIFrameVerifier_NoSaturation() {;}
 	
-	int isValidFrame(ImagePtr frame);
+	bool isValidFrame(ImagePtr frame) const;
 	
-protected:
+private:
 	bool validLimitsSet;
 	double saturationValue;
 };
@@ -28,9 +28,9 @@ public:
 	SOFIFrameVerifier_MaxPixelValue(int maxPixelValue_rhs) {maxPixelValue = maxPixelValue_rhs;}
 	~SOFIFrameVerifier_MaxPixelValue() {;}
 	
-	int isValidFrame(ImagePtr frame);
+	bool isValidFrame(ImagePtr frame) const;
 	
-protected:
+private:
 	double maxPixelValue;
 };
 

@@ -37,9 +37,9 @@ SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_r
 	}
 }
 
-int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
+bool SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) const {
 	if (validLimitsSet == false)
-		return 1;
+		return true;
 	
 	size_t nRows = frame->rows();
 	size_t nCols = frame->cols();
@@ -50,14 +50,14 @@ int SOFIFrameVerifier_NoSaturation::isValidFrame(ImagePtr frame) {
 	double *dataPtr = frame->data();
 	for (size_t i = 0; i < nPixels; i+=1) {
 		if (dataPtr[i] >= localSaturationValue) {
-			return 0;
+			return false;
 		}
 	}
 	
-	return 1;
+	return true;
 }
 
-int SOFIFrameVerifier_MaxPixelValue::isValidFrame(ImagePtr image) {
+bool SOFIFrameVerifier_MaxPixelValue::isValidFrame(ImagePtr image) const {
 	size_t nRows = image->rows();
 	size_t nCols = image->cols();
 	
@@ -67,9 +67,9 @@ int SOFIFrameVerifier_MaxPixelValue::isValidFrame(ImagePtr image) {
 	double *dataPtr = image->data();
 	for (size_t i = 0; i < nPixels; i+=1) {
 		if (dataPtr[i] > localMaxPixelValue) {
-			return 0;
+			return false;
 		}
 	}
 	
-	return 1;
+	return true;
 }
