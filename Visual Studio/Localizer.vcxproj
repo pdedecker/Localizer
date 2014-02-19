@@ -536,6 +536,7 @@
     <ClCompile Include="..\source\PALM_analysis_segmentation.cpp" />
     <ClCompile Include="..\source\PALM_analysis_SOFI.cpp" />
     <ClCompile Include="..\source\PALM_analysis_storage.cpp" />
+    <ClCompile Include="..\source\SOFIFrameVerifiers.cpp" />
     <ClCompile Include="..\source\WaitMex.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -583,6 +584,7 @@
     <ClInclude Include="..\source\PALM_analysis_segmentation.h" />
     <ClInclude Include="..\source\PALM_analysis_SOFI.h" />
     <ClInclude Include="..\source\PALM_analysis_storage.h" />
+    <ClInclude Include="..\source\SOFIFrameVerifiers.h" />
     <ClInclude Include="..\source\WaitMex.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
