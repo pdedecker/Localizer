@@ -40,6 +40,7 @@
 
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_ProgressReporting.h"
+#include "SOFIFrameVerifiers.h"
 
 class SingleSOFICalculation;
 class XCSOFIKernelProvider;
@@ -135,37 +136,6 @@ protected:
 	//double determinePSFStdDev(ImagePtr imageToCorrect);
 	//static ImagePtr performPSFCorrection(Image *image, double psfStdDev);
 	//static double functionToMinimize(double psfStdDev, void *params);
-};
-
-class SOFIFrameVerifier {
-public:
-	SOFIFrameVerifier() {;}
-	virtual ~SOFIFrameVerifier() {;}
-	
-	virtual int isValidFrame(ImagePtr frame) = 0;
-};
-
-class SOFIFrameVerifier_NoSaturation : public SOFIFrameVerifier {
-public:
-	SOFIFrameVerifier_NoSaturation(int storageType_rhs);
-	~SOFIFrameVerifier_NoSaturation() {;}
-	
-	int isValidFrame(ImagePtr frame);
-	
-protected:
-	bool validLimitsSet;
-	double saturationValue;
-};
-
-class SOFIFrameVerifier_MaxPixelValue : public SOFIFrameVerifier {
-public:
-	SOFIFrameVerifier_MaxPixelValue(int maxPixelValue_rhs) {maxPixelValue = maxPixelValue_rhs;}
-	~SOFIFrameVerifier_MaxPixelValue() {;}
-	
-	int isValidFrame(ImagePtr frame);
-	
-protected:
-	double maxPixelValue;
 };
 
 class SOFINoImageInCalculation : public std::runtime_error {
