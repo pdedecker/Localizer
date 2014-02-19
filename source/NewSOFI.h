@@ -9,6 +9,6 @@
 #include "PALM_analysis_ProgressReporting.h"
 #include "SOFIFrameVerifiers.h"
 
-void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages);
+void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages, bool wantAverageImage, ImagePtr& averageImage);
 
 #endif

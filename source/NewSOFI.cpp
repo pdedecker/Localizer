@@ -11,7 +11,7 @@
 
 #include "NewSOFIKernels.h"
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage);
 
 double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
@@ -19,7 +19,7 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
-void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
+void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages, bool wantAverageImage, ImagePtr& averageImage) {
     int nImages = imageLoader->getNImages();
     if (nImages == 0)
         throw std::runtime_error("SOFI without input images");
@@ -34,6 +34,11 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::
     std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
     std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
     std::vector<int> nImagesInSubCalculation;
+    int totalNumberOfImagesIncluded = 0;
+    if (wantAverageImage) {
+        averageImage = ImagePtr(new Image(imageLoader->getXSize(), imageLoader->getYSize()));
+        averageImage->setConstant(0.0);
+    }
     
     progressReporter->CalculationStarted();
     
@@ -49,8 +54,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages, wantAverageImage, averageImage);
         nImagesInSubCalculation.push_back(nImagesIncluded);
+        totalNumberOfImagesIncluded += nImagesIncluded;
         for (size_t j = 0; j < nOrders; ++j) {
             allSubImages[j].push_back(subImages[j]);
         }
@@ -78,10 +84,13 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::
     
     sofiOutputImages = mergedImages;
     
+    if (wantAverageImage)
+        *averageImage /= static_cast<double>(totalNumberOfImagesIncluded);
+    
     progressReporter->CalculationDone();
 }
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesToInclude = lastImageToProcess - firstImageToProcess + 1;
@@ -140,6 +149,8 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         if (!isValidFrame)
             continue;
         nImagesIncluded += 1;
+        if (wantAverageImage)
+            *averageImage += *currentImage;
         
         // do the actual calculation
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {

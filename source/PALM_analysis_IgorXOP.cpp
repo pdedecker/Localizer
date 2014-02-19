@@ -2688,7 +2688,9 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
         std::shared_ptr<ProgressReporter> progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
         std::vector<ImagePtr> sofiOutputImages;
-        DoNewSOFI(imageLoader, frameVerifiers, progressReporter, order, sofiOutputImages);
+        bool wantAverageImage = false;
+        ImagePtr averageImage;
+        DoNewSOFI(imageLoader, frameVerifiers, progressReporter, order, sofiOutputImages, wantAverageImage, averageImage);
         waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), "M_NewSOFI");
         double offset = 2.0;
         double delta = 1.0 / static_cast<double>(order);
