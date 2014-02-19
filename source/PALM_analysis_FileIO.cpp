@@ -215,26 +215,112 @@ void ImageLoader::checkForReasonableValues() {
 	}
 }
 
-ImagePtr ImageLoader::readImage(size_t index) {
+ImagePtr ImageLoader::readImage(int index) {
 	this->spoolTo(index);
 	return this->readNextImage(index);
 }
 
 ImagePtr ImageLoader::readNextImage() {
-	size_t dummy;
+	int dummy;
 	return this->readNextImage(dummy);
 }
 
-ImagePtr ImageLoader::readNextImageAndLoop(size_t &index) {
+ImagePtr ImageLoader::readNextImageAndLoop(int &index) {
 	this->spoolTo(index % this->nImages);
 	return this->readNextImage(index);
 }
 
-void ImageLoader::spoolTo(size_t index) {
-	if (index >= nImages)
+void ImageLoader::spoolTo(int index) {
+	if (index >= this->getNImages())
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
     this->nextImageToRead = index;
+}
+
+ImageLoaderWrapper::ImageLoaderWrapper(std::shared_ptr<ImageLoader> baseImageLoader) :
+    _baseImageLoader(baseImageLoader),
+    _firstImageToInclude(0),
+    _minX(0),
+    _minY(0),
+    _haveCustomROI(false)
+{
+    if ((_baseImageLoader->getNImages() < 1) || (_baseImageLoader->getXSize() < 1) || (_baseImageLoader->getYSize() < 1))
+        throw std::runtime_error("ImageLoaderWrapper with invalid base loader");
+    
+    _lastImageToInclude = _baseImageLoader->getNImages() - 1;
+    _maxX = _baseImageLoader->getXSize() - 1;
+    _maxY = _baseImageLoader->getYSize() - 1;
+}
+
+int ImageLoaderWrapper::getNImages() const {
+    return (_lastImageToInclude - _firstImageToInclude + 1);
+}
+
+int ImageLoaderWrapper::getXSize() const {
+    return (_maxX - _minX + 1);
+}
+
+int ImageLoaderWrapper::getYSize() const {
+    return (_maxY - _minY + 1);
+}
+
+int ImageLoaderWrapper::getStorageType() const {
+    return _baseImageLoader->getStorageType();
+}
+
+int ImageLoaderWrapper::getFileType() const {
+    return _baseImageLoader->getFileType();
+}
+
+ImagePtr ImageLoaderWrapper::readNextImage(int &indexOfImageThatWasRead) {
+    ImagePtr image = _baseImageLoader->readNextImage(indexOfImageThatWasRead);
+    if (_haveCustomROI) {
+        int nOutputRows = this->getXSize();
+        int nOutputCols = this->getYSize();
+        ImagePtr croppedImage(new Image(nOutputRows, nOutputCols));
+        for (int col = 0; col < nOutputCols; ++col) {
+            for (int row = 0; row < nOutputRows; ++row) {
+                (*croppedImage)(row, col) = (*image)(row + _minX, col + _minY);
+            }
+        }
+        return croppedImage;
+    } else {
+        return image;
+    }
+}
+
+void ImageLoaderWrapper::spoolTo(int index) {
+    _baseImageLoader->spoolTo(index + _firstImageToInclude);
+}
+
+void ImageLoaderWrapper::setImageRange(const int firstImageToInclude, const int lastImageToInclude) {
+    if ((firstImageToInclude < 0) || (lastImageToInclude >= _baseImageLoader->getNImages()))
+        throw std::runtime_error("invalid setImageRange()");
+    
+    _firstImageToInclude = firstImageToInclude;
+    _lastImageToInclude = lastImageToInclude;
+}
+
+void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {
+    if (minX == -1)
+        minX = 0;
+    if (minY == -1)
+        minY = 0;
+    if (maxX == -1)
+        maxX = _baseImageLoader->getXSize() - 1;
+    if (maxY == -1)
+        maxY = _baseImageLoader->getYSize() - 1;
+    
+    _minX = clip(minX, 0, _baseImageLoader->getXSize() - 1);
+    _maxX = clip(maxX, 0, _baseImageLoader->getXSize() - 1);
+    _minY = clip(minY, 0, _baseImageLoader->getYSize() - 1);
+    _maxY = clip(maxY, 0, _baseImageLoader->getYSize() - 1);
+    
+    if ((_minX != 0) || (_minY != 0) || (_maxX != _baseImageLoader->getXSize() - 1) || (_maxY != _baseImageLoader->getYSize() - 1)) {
+        _haveCustomROI = true;
+    } else {
+        _haveCustomROI = false;
+    }
 }
 
 ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
@@ -310,7 +396,7 @@ void ImageLoaderSPE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderSPE::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	
 	uint64_t imageSize, pixelSize;
@@ -499,7 +585,7 @@ void ImageLoaderAndor::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderAndor::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t nBytesInImage = xSize * ySize * sizeof(float);
 	
@@ -551,6 +637,22 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 		file.close();
 }
 
+class ImageLoaderHamamatsu_HeaderStructure {
+public:
+	uint16 magic;
+	uint16 commentLength;
+	uint16 xSize;
+	uint16 ySize;
+	uint16 xBinning;	// uncertain
+	uint16 yBinning;	// uncertain
+	uint16 storageFormat;
+	uint32 nImages;
+	uint16 nChannels;
+	uint16 channel;		// uncertain
+	double timeStamp;
+	uint32 marker;
+	uint32 misc;		// function unknown
+};
 
 void ImageLoaderHamamatsu::parse_header_information() {
 	
@@ -647,7 +749,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderHamamatsu::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
@@ -732,7 +834,7 @@ void ImageLoaderPDE::parse_header_information() {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderPDE::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	size_t nPixels = this->xSize * this->ySize;
 	uint64_t offset, imageSize;
 	
@@ -1039,7 +1141,7 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	ySize = (size_t)(result_uint32);
 }
 
-ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	int result;
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
@@ -1064,7 +1166,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 	
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
-	for (size_t j = 0; j < ySize; ++j) {
+	for (int j = 0; j < ySize; ++j) {
 		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
 		if (result != 1) {
 			std::string error;
@@ -1078,7 +1180,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_UINT4:
 			{
 				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; k+=2) {
+				for (int k = 0; k < xSize; k+=2) {
 					(*image)(k, j) = (double)(0x0000000F & (*uint8Ptr));
 					(*image)(k + 1, j) = (double)((0x000000F0 & (*uint8Ptr)) / 16);			  
 					++uint8Ptr;
@@ -1088,7 +1190,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_UINT8:
 			{
 				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; ++k) {
+				for (int k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*uint8Ptr);
 					++uint8Ptr;
 				}
@@ -1097,7 +1199,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_UINT16:
 			{
 				uint16_t *uint16tPtr = (uint16_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; ++k) {
+				for (int k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*uint16tPtr);
 					++uint16tPtr;
 				}
@@ -1106,7 +1208,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_UINT32:
 			{
 				uint32_t *uint32tPtr = (uint32_t *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; ++k) {
+				for (int k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*uint32tPtr);
 					++uint32tPtr;
 				}
@@ -1115,7 +1217,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_FP32:
 			{
 				float *floatPtr = (float *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; ++k) {
+				for (int k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*floatPtr);
 					++floatPtr;
 				}
@@ -1124,7 +1226,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
 			case STORAGE_TYPE_FP64:
 			{
 				double *doublePtr = (double *)single_scanline_buffer.get();
-				for (size_t k = 0; k < xSize; ++k) {
+				for (int k = 0; k < xSize; ++k) {
 					(*image)(k, j) = (double)(*doublePtr);
 					++doublePtr;
 				}
@@ -1219,7 +1321,7 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead) {
+ImagePtr ImageLoaderMultiFileTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
 	if (this->nextImageToRead >= this->nImages)
@@ -1227,7 +1329,7 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(size_t &indexOfImageThatWasRead
 	
 	std::string filePath = getFilePathForImageAtIndex(this->nextImageToRead);
 	ImageLoaderTIFF imageLoaderTIFF(filePath);
-	size_t dummy;
+	int dummy;
 	ImagePtr image = imageLoaderTIFF.readNextImage(dummy);
 	
 	indexOfImageThatWasRead = this->nextImageToRead;
@@ -1401,7 +1503,7 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderIgor::readNextImage(size_t &index) {
+ImagePtr ImageLoaderIgor::readNextImage(int &index) {
 	int err;
 	int waveType = WaveType(this->igor_data_wave);
 	size_t waveDataOffset;
@@ -1530,7 +1632,7 @@ ImageLoaderMatlab::ImageLoaderMatlab(mxArray* matlabArray) {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderMatlab::readNextImage(size_t &index) {
+ImagePtr ImageLoaderMatlab::readNextImage(int &index) {
 	size_t nPixels = this->xSize * this->ySize;
 	
 	{

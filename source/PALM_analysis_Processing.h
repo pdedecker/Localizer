@@ -86,7 +86,7 @@ protected:
 	size_t n_frames_averaging;	// how many frames do we average over?
 	
 	void subtractAverageOfEntireMovie(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
-	void subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage);
+	void subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, int nFramesInAverage);
 };
 
 /**
@@ -127,8 +127,8 @@ public:
 	void convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer);
 	
 protected:
-	size_t startX, endX, startY, endY;	// the points between which we should crop
-	size_t croppedXSize, croppedYSize;
+	int startX, endX, startY, endY;	// the points between which we should crop
+	int croppedXSize, croppedYSize;
 };
 
 /**

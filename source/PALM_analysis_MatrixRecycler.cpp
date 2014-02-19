@@ -42,7 +42,7 @@ MatrixRecycler::~MatrixRecycler() {
 	}
 }
 
-Image* MatrixRecycler::getMatrix(size_t nRows, size_t nCols) {
+Image* MatrixRecycler::getMatrix(int nRows, int nCols) {
 	boost::lock_guard<boost::mutex> locker(this->recyclingMutex);
 	
 	// try to find an unused matrix that meets the requirements
@@ -113,7 +113,7 @@ void MatrixRecycler::freeAllMatrices() {
  */
 std::shared_ptr<MatrixRecycler> globalMatrixRecycler(new MatrixRecycler);
 
-Image* GetRecycledMatrix(size_t nRows, size_t nCols) {
+Image* GetRecycledMatrix(int nRows, int nCols) {
 	return globalMatrixRecycler->getMatrix(nRows, nCols);
 }
 

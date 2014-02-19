@@ -172,16 +172,16 @@ public:
 	ImageLoader();
 	virtual ~ImageLoader();
 	
-	size_t getNImages() const {return nImages;}
-	size_t getXSize() const {return xSize;}
-	size_t getYSize() const {return ySize;}
-	int getStorageType() const {return storage_type;}
-	virtual int getFileType() = 0;
+	virtual int getNImages() const {return nImages;}
+	virtual int getXSize() const {return xSize;}
+	virtual int getYSize() const {return ySize;}
+	virtual int getStorageType() const {return storage_type;}
+	virtual int getFileType() const = 0;
 	
 	/**
 	 * readImage explicitly asks for the image at a certain index, but is not reentrant.
 	 */
-	ImagePtr readImage(const size_t index);	// images are numbered from 0 to N - 1
+	ImagePtr readImage(const int index);	// images are numbered from 0 to N - 1
 	
 	/*
 	 * readNextImage asks for the next image in the sequence, and is
@@ -190,17 +190,17 @@ public:
 	 * for the caller to know which image was returned. This is returned by reference
 	 * in the argument. The non-reentrant version below does not require this argument.
 	 */
-	virtual ImagePtr readNextImage(size_t &indexOfImageThatWasRead) = 0;
+	virtual ImagePtr readNextImage(int &indexOfImageThatWasRead) = 0;
 	ImagePtr readNextImage();
 	/*
 	 * Get the next image in the file and loop to the begin after the last image.
 	 * Not reentrant.
 	 */
-	ImagePtr readNextImageAndLoop(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImageAndLoop(int &indexOfImageThatWasRead);
 	/*
 	 * Spool the file so the specified frame will be the one read by readNextImage
 	 */
-	void spoolTo(size_t index);
+	virtual void spoolTo(int index);
 	/*
 	 * 'Rewind' the file to the beginning so that readNextImage will return the first frame.
 	 */
@@ -220,13 +220,43 @@ protected:
 	std::ifstream file;
 #endif
 	uint64_t header_length;
-	size_t nImages;
-	uint64_t xSize;
-	uint64_t ySize;
+	int nImages;
+	int xSize;
+	int ySize;
 	int storage_type;
-	uint64_t nextImageToRead;
+	int nextImageToRead;
 	
 	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
+};
+
+/**
+ * Wraps around an existing ImageLoader, allowing it to appear as an ImageLoader with a lower number of images
+ * or a cropped ROI.
+ */
+class ImageLoaderWrapper : public ImageLoader {
+public:
+    ImageLoaderWrapper(std::shared_ptr<ImageLoader> baseImageLoader);
+    ~ImageLoaderWrapper() {;}
+    
+    virtual int getNImages() const;
+    virtual int getXSize() const;
+    virtual int getYSize() const;
+    virtual int getStorageType() const;
+	virtual int getFileType() const;
+    
+    virtual ImagePtr readNextImage(int &indexOfImageThatWasRead);
+    virtual void spoolTo(int index);
+    
+    void setImageRange(const int firstImageToInclude, const int lastImageToInclude);
+    void setROI(int minX, int maxX, int minY, int maxY);
+    
+private:
+    std::shared_ptr<ImageLoader> _baseImageLoader;
+    int _firstImageToInclude;
+    int _lastImageToInclude;
+    int _minX, _maxX;
+    int _minY, _maxY;
+    bool _haveCustomROI;
 };
 
 class ImageLoaderSPE : public ImageLoader {
@@ -234,11 +264,11 @@ public:
 	ImageLoaderSPE(std::string rhs);
 	~ImageLoaderSPE();
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_WINSPEC;}
+	int getFileType() const {return CAMERA_TYPE_WINSPEC;}
 	
-protected:
+private:
 	void parse_header_information();
 };
 
@@ -247,29 +277,12 @@ public:
 	ImageLoaderAndor(std::string rhs);
 	~ImageLoaderAndor();
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_ANDOR;}
+	int getFileType() const {return CAMERA_TYPE_ANDOR;}
 	
-protected:
+private:
 	void parse_header_information();
-};
-
-class ImageLoaderHamamatsu_HeaderStructure {
-public:
-	uint16 magic;
-	uint16 commentLength;
-	uint16 xSize;
-	uint16 ySize;
-	uint16 xBinning;	// uncertain
-	uint16 yBinning;	// uncertain
-	uint16 storageFormat;
-	uint32 nImages;
-	uint16 nChannels;
-	uint16 channel;		// uncertain
-	double timeStamp;
-	uint32 marker;
-	uint32 misc;		// function unknown
 };
 
 class ImageLoaderHamamatsu : public ImageLoader {
@@ -285,11 +298,11 @@ public:
 	ImageLoaderHamamatsu(std::string rhs);
 	~ImageLoaderHamamatsu();
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_HAMAMATSU;}
+	int getFileType() const {return CAMERA_TYPE_HAMAMATSU;}
 	
-protected:
+private:
 	void parse_header_information();
 	
 	static std::map<std::string, ImageLoaderHamamatsu::ImageOffsets> _offsetsMap;
@@ -301,11 +314,11 @@ public:
 	ImageLoaderPDE(std::string rhs);
 	~ImageLoaderPDE();
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_PDE;}
+	int getFileType() const {return CAMERA_TYPE_PDE;}
 	
-protected:
+private:
 	void parse_header_information();
 };
 
@@ -320,11 +333,11 @@ public:
 	ImageLoaderTIFF(std::string rhs);
 	~ImageLoaderTIFF();
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_TIFF;}
+	int getFileType() const {return CAMERA_TYPE_TIFF;}
 	
-protected:
+private:
 	void parse_header_information();
     void _extractSampleFormat();
 	
@@ -338,11 +351,11 @@ public:
 	ImageLoaderMultiFileTIFF(std::string rhs);
 	~ImageLoaderMultiFileTIFF() {;}
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_MULTIFILE_TIFF;}
+	int getFileType() const {return CAMERA_TYPE_MULTIFILE_TIFF;}
 	
-protected:
+private:
 	std::string getFilePathForImageAtIndex(int index);
 	bool imageFileAtIndexExists(int index);
 	std::pair<int, int> findFirstAndLastValidImageIndices(int knownValidImageIndex);
@@ -359,14 +372,12 @@ public:
 	ImageLoaderIgor(std::string waveName);
 	~ImageLoaderIgor() {;}
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_IGOR_WAVE;}
+	int getFileType() const {return CAMERA_TYPE_IGOR_WAVE;}
 	
-protected:
-	void parse_header_information() {;}
-	
-	waveHndl igor_data_wave;
+private:
+    waveHndl igor_data_wave;
 };
 #endif // WITH_IGOR
 
@@ -376,14 +387,12 @@ public:
 	ImageLoaderMatlab(mxArray* matlabArray);
 	~ImageLoaderMatlab() {;}
 	
-	ImagePtr readNextImage(size_t &indexOfImageThatWasRead);
+	ImagePtr readNextImage(int &indexOfImageThatWasRead);
 	
-	int getFileType() {return CAMERA_TYPE_MATLAB_MATRIX;}
+	int getFileType() const {return CAMERA_TYPE_MATLAB_MATRIX;}
 	
-protected:
-	void parse_header_information() {;}
-	
-	mxArray* _matlabArray;
+private:
+    mxArray* _matlabArray;
 };
 #endif // WITH_MATLAB
 

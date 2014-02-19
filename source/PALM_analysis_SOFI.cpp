@@ -252,7 +252,7 @@ void SOFICalculator_AutoCorrelation::performCalculation(ImagePtr &calculatedSOFI
     ImagePtr subImage(new Image(firstImage->rows(), firstImage->cols()));
 	
     outputImage->setConstant(0.0);
-    for (size_t n = 0; n < nEvaluations; ++n) {
+    for (int n = 0; n < nEvaluations; ++n) {
         subImage->setConstant(1.0);
         for (int i = 0; i < _order; ++i) {
             (*subImage).array() *= (*imageVector.at(n + expandedLagTimes.at(i))).array();

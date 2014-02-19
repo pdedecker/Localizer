@@ -199,7 +199,7 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 }
 
 void ThreadPoolWorker(PALMAnalysisController* controller) {
-	size_t currentImageToProcess;
+	int currentImageToProcess;
 	ImagePtr currentImage;
 	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage;
 	std::shared_ptr<std::list<Particle> > locatedParticles;
@@ -340,8 +340,8 @@ ImagePtr FitPositionsDeflate::subtractLocalizedPositions(ImagePtr image, std::sh
 	double distanceXSquared, distanceYSquared, currentIntensity;
 	
 	size_t nPositions = positions->getNPositions();
-	size_t xSize = image->rows();
-	size_t ySize = image->cols();
+	int xSize = image->rows();
+	int ySize = image->cols();
 	ImagePtr outputImage(new Image((int)xSize, (int)ySize));
 	outputImage = image;
 	
@@ -371,8 +371,8 @@ ImagePtr FitPositionsDeflate::subtractLocalizedPositions(ImagePtr image, std::sh
 		if (endY >= ySize)
 			endY = ySize - 1;
 		
-		for (size_t j = startY; j < endY; ++j) {
-			for (size_t i = startX; i <= endX; ++i) {
+		for (int j = startY; j < endY; ++j) {
+			for (int i = startX; i <= endX; ++i) {
 				distanceXSquared = ((double)i - (double)centerX) * ((double)i - (double)centerX);
 				distanceYSquared = ((double)j - (double)centerY) * ((double)j - (double)centerY);
 				currentIntensity = calculatedAmplitude * exp(- (distanceXSquared + distanceYSquared) / (2 * fittedXWidth * fittedYWidth));

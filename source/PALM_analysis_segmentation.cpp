@@ -642,8 +642,8 @@ void ThresholdImage_Preprocessor_GaussianSmoothing::generate_Gaussian_kernel(siz
 ImagePtr ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(ImagePtr image) {
 	
 	ImagePtr filtered_image;
-	size_t x_size = image->rows();
-	size_t y_size = image->cols();
+	int x_size = image->rows();
+	int y_size = image->cols();
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	{

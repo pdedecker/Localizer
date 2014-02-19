@@ -59,7 +59,7 @@ int GetFileStorageType(std::string &filePath);
 std::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path);
 
 // Routines that return information on CCD files and image frames to Igor
-int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination, 
+int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRequested, int overwrite, DataFolderAndName destination, 
                         std::shared_ptr<ProgressReporter> progressReporter);
 
 int ParseCCDHeaders(ImageLoader *image_loader);

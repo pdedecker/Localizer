@@ -54,8 +54,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
     int size_of_subset = 2 * cutoff_radius + 1;
     int x_offset, y_offset, x_max, y_max;
     int number_of_intensities = size_of_subset * size_of_subset;
-    size_t xSize = image->rows();
-    size_t ySize = image->cols();
+    int xSize = image->rows();
+    int ySize = image->cols();
 
     double x0_initial, y0_initial, amplitude, background;
     double chi, degreesOfFreedom, c;
@@ -123,8 +123,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_SymmetricGaussian::fit
             continue;
         }
 
-        for (size_t k = y_offset; k <= y_max; k++) {
-            for (size_t j = x_offset; j <= x_max; j++) {
+        for (int k = y_offset; k <= y_max; k++) {
+            for (int j = x_offset; j <= x_max; j++) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
             }
         }
@@ -233,8 +233,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
     int size_of_subset = 2 * cutoff_radius + 1;
     int x_offset, y_offset, x_max, y_max;
     int number_of_intensities = size_of_subset * size_of_subset;
-    size_t xSize = image->rows();
-    size_t ySize = image->cols();
+    int xSize = image->rows();
+    int ySize = image->cols();
 
     double x0_initial, y0_initial, amplitude, background;
     double chi, degreesOfFreedom, c;
@@ -302,8 +302,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_FixedWidthGaussian::fi
             continue;
         }
 
-        for (size_t k = y_offset; k <= y_max; k++) {
-            for (size_t j = x_offset; j <= x_max; j++) {
+        for (int k = y_offset; k <= y_max; k++) {
+            for (int j = x_offset; j <= x_max; j++) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
             }
         }
@@ -402,8 +402,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
     int size_of_subset = 2 * cutoff_radius + 1;
     int x_offset, y_offset, x_max, y_max;
     int number_of_intensities = size_of_subset * size_of_subset;
-    size_t xSize = image->rows();
-    size_t ySize = image->cols();
+    int xSize = image->rows();
+    int ySize = image->cols();
 
     double x0_initial, y0_initial, amplitude, background, correlation_initial;
     double chi, degreesOfFreedom, c;
@@ -470,8 +470,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_EllipsoidalGaussian::f
             continue;
         }
 
-        for (size_t k = y_offset; k <= y_max; k++) {
-            for (size_t j = x_offset; j <= x_max; j++) {
+        for (int k = y_offset; k <= y_max; k++) {
+            for (int j = x_offset; j <= x_max; j++) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
             }
         }
@@ -642,8 +642,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(c
 
     int size_of_subset = 2 * cutoff_radius + 1;
     int x_offset, y_offset, x_max, y_max;
-    size_t xSize = image->rows();
-    size_t ySize = image->cols();
+    int xSize = image->rows();
+    int ySize = image->cols();
 
     double x0_initial, y0_initial, integral, background;
     long iterations = 0;
@@ -703,8 +703,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositions_MLEwG::fit_positions(c
             continue;
         }
 
-        for (size_t k = y_offset; k <= y_max; k++) {
-            for (size_t j = x_offset; j <= x_max; j++) {
+        for (int k = y_offset; k <= y_max; k++) {
+            for (int j = x_offset; j <= x_max; j++) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
             }
         }
@@ -800,8 +800,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
     }
 
     int size_of_subset = 2 * cutoff_radius + 1;
-    size_t xSize = image->rows();
-    size_t ySize = image->cols();
+    int xSize = image->rows();
+    int ySize = image->cols();
     int x_offset, y_offset, x_max, y_max;
 
     double x0_initial, y0_initial, amplitude, background, threshold;
@@ -839,8 +839,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
         }
 
         threshold = 0.0;
-        for (size_t k = y_offset; k <= y_max; ++k) {
-            for (size_t j = x_offset; j <= x_max; ++j) {
+        for (int k = y_offset; k <= y_max; ++k) {
+            for (int j = x_offset; j <= x_max; ++j) {
                 (*image_subset)(j - x_offset, k - y_offset) = (*image)(j, k);
                 threshold += (*image)(j, k);
             }
@@ -869,8 +869,8 @@ std::shared_ptr<LocalizedPositionsContainer> FitPositionsMultiplication::fit_pos
             numerator_x = 0.0;
             numerator_y = 0.0;
             denominator = 0.0;
-            for (size_t j = 0; j < size_of_subset; j++) {
-                for (size_t i = 0; i < size_of_subset; i++) {
+            for (int j = 0; j < size_of_subset; j++) {
+                for (int i = 0; i < size_of_subset; i++) {
                     if ((*image_subset)(i, j) < threshold)
                         continue;
                     numerator_x += (double)i * (*image_subset_mask)(i, j);
@@ -909,8 +909,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, 
                                                        double std_dev, double amplitude) {
     // we will replace the contents of masked_image with the multiplication of original_image and a gaussian centered at position (x,y)
 
-    size_t x_size = masked_image->rows();
-    size_t y_size = masked_image->cols();
+    int x_size = masked_image->rows();
+    int y_size = masked_image->cols();
 
     double gaussian_value, distance_squared;
 
@@ -918,8 +918,8 @@ int FitPositionsMultiplication::multiply_with_gaussian(ImagePtr original_image, 
         throw DIMENSIONS_SHOULD_BE_EQUAL(std::string("Matrix dimensions are not equal in FitPositionsMultiplication::multiply_with_gaussian"));
     }
 
-    for (size_t j = 0; j < y_size; j++) {
-        for (size_t i = 0; i < x_size; i++) {
+    for (int j = 0; j < y_size; j++) {
+        for (int i = 0; i < x_size; i++) {
             distance_squared = (x - (double)i) * (x - (double)i) + (y - (double)j) * (y - (double)j);
 
             gaussian_value = amplitude * exp(- distance_squared / (2 * std_dev * std_dev));
@@ -1217,7 +1217,7 @@ int Jacobian_FixedWidthGaussian(const gsl_vector *params, void *fitData_rhs, gsl
 		return result;
 	}
 	
-	for (int i = 0; i < jacobian->size1; ++i) {
+	for (size_t i = 0; i < jacobian->size1; ++i) {
 		gsl_matrix_set(jacobian, i, 0, gsl_matrix_get(jacobianIncludingWidth, i, 0));
 		gsl_matrix_set(jacobian, i, 1, gsl_matrix_get(jacobianIncludingWidth, i, 2));
 		gsl_matrix_set(jacobian, i, 2, gsl_matrix_get(jacobianIncludingWidth, i, 3));

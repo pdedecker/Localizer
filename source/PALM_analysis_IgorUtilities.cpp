@@ -143,11 +143,11 @@ std::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& dat
 
 }
 
-int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nImagesRequested, int overwrite, DataFolderAndName destination,
+int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRequested, int overwrite, DataFolderAndName destination,
                         std::shared_ptr<ProgressReporter> progressReporter) {
-    size_t nImages = image_loader->getNImages();
-    size_t maxNImagesToLoad, nImagesToLoad;
-    size_t x_size, y_size;
+    int nImages = image_loader->getNImages();
+    int maxNImagesToLoad, nImagesToLoad;
+    int x_size, y_size;
     int storage_type;
 
     int result;
@@ -159,7 +159,7 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
 
     // how many images should we load?
     maxNImagesToLoad = nImages - firstImage;
-    if (nImagesRequested == (size_t)-1) {
+    if (nImagesRequested == -1) {
         nImagesToLoad = maxNImagesToLoad;
     } else {
         if (nImagesRequested > maxNImagesToLoad) {
@@ -207,9 +207,9 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
     IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storage_type);
 
     // load the data and write it to Igor
-    size_t nextFrameRead;
+    int nextFrameRead;
     image_loader->spoolTo(firstImage);
-    for (size_t i = firstImage; i < firstImage + nImagesToLoad; i++) {
+    for (int i = firstImage; i < firstImage + nImagesToLoad; i++) {
         if (doProgress && (i % 10 == 0)) {
             progressStatus =  progressReporter->UpdateCalculationProgress(i - firstImage, nImagesToLoad);
             if (progressStatus != 0) {
@@ -233,9 +233,9 @@ int LoadPartialCCDImage(ImageLoader *image_loader, size_t firstImage, size_t nIm
 
 
 int ParseCCDHeaders(ImageLoader *image_loader) {
-    size_t total_n_images = image_loader->getNImages();
-    size_t x_size = image_loader->getXSize();
-    size_t y_size = image_loader->getYSize();
+    int total_n_images = image_loader->getNImages();
+    int x_size = image_loader->getXSize();
+    int y_size = image_loader->getYSize();
     int storageType = image_loader->getStorageType();
 
     int result;
@@ -327,9 +327,9 @@ std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> 
 }
 
 ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
-    size_t n_images = imageLoader->getNImages();
-    size_t x_size = imageLoader->getXSize();
-    size_t y_size = imageLoader->getYSize();
+    int n_images = imageLoader->getNImages();
+    int x_size = imageLoader->getXSize();
+    int y_size = imageLoader->getYSize();
 
     long xRange, yRange;
 
@@ -355,8 +355,8 @@ ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long st
 
     int progressStatus;
     progressReporter->CalculationStarted();
-    size_t nextFrameRead;
-    for (size_t i = 0; i < n_images; i++) {
+    int nextFrameRead;
+    for (int i = 0; i < n_images; i++) {
         if (i % 20 == 0) {
             progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
             if (progressStatus != 0) {
@@ -380,9 +380,9 @@ ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long st
 
 
 ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
-    size_t n_images = imageLoader->getNImages();
-    size_t x_size = imageLoader->getXSize();
-    size_t y_size = imageLoader->getYSize();
+    int n_images = imageLoader->getNImages();
+    int x_size = imageLoader->getXSize();
+    int y_size = imageLoader->getYSize();
 
     long xRange, yRange;
 
@@ -410,9 +410,9 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long s
 
     progressReporter->CalculationStarted();
     int progressStatus;
-    size_t nextFrameRead;
+    int nextFrameRead;
     // construct an average image
-    for (size_t i = 0; i < n_images; i++) {
+    for (int i = 0; i < n_images; i++) {
         if (i % 10 == 0) {
             progressStatus = progressReporter->UpdateCalculationProgress(i / 2, n_images);
             if (progressStatus != 0) {
@@ -430,7 +430,7 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long s
     *average_image /= (double)n_images;
 
     // now loop over the images again, calculating the standard deviation of each pixel
-    for (size_t i = 0; i < n_images; i++) {
+    for (int i = 0; i < n_images; i++) {
         if (i % 10 == 0) {
             progressStatus = progressReporter->UpdateCalculationProgress((i + n_images) / 2, n_images);
             if (progressStatus != 0) {

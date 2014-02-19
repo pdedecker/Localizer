@@ -49,9 +49,9 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(std::sha
 	// this function exists so that we could select between a partial or global average
 	// for now only global averaging is supported
 	
-	size_t x_size = image_loader->getXSize();
-	size_t y_size = image_loader->getYSize();
-	size_t total_number_of_images = image_loader->getNImages();
+	int x_size = image_loader->getXSize();
+	int y_size = image_loader->getYSize();
+	int total_number_of_images = image_loader->getNImages();
 	ImagePtr average_image;
 	ImagePtr loaded_image;
 	ImagePtr subtracted_image;
@@ -70,7 +70,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(std::sha
 	
 	average_image->setConstant(0.0);
 	
-	for (size_t n = 0; n < total_number_of_images; n++) {
+	for (int n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->readImage(n);
 		
 		(*average_image) += (*loaded_image);
@@ -90,7 +90,7 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(std::sha
 	*average_image /= (double)this->n_frames_averaging;
 	
 	// now subtract the average for each frame
-	for (size_t n = 0; n < total_number_of_images; n++) {
+	for (int n = 0; n < total_number_of_images; n++) {
 		loaded_image = image_loader->readImage(n);
 		
 		(*subtracted_image) = (*loaded_image) - (*average_image);
@@ -110,11 +110,11 @@ void CCDImagesProcessorAverageSubtraction::subtractAverageOfEntireMovie(std::sha
 	
 }
 
-void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, size_t nFramesInAverage) {
+void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer, int nFramesInAverage) {
 	
 	ImagePtr currentImage;
-	size_t xSize = image_loader->getXSize();
-	size_t ySize = image_loader->getYSize();
+	int xSize = image_loader->getXSize();
+	int ySize = image_loader->getYSize();
 	int nFramesInMovie = image_loader->getNImages();
 	int nFramesSurroundingFrame = nFramesInAverage / 2;
 	int abortStatus;
@@ -140,7 +140,7 @@ void CCDImagesProcessorAverageSubtraction::subtractRollingAverage(std::shared_pt
 	summedImages->setConstant(0.0);
 	
 	// start by loading a full set of images
-	for (size_t i = 0; i < nFramesInAverage; ++i) {
+	for (int i = 0; i < nFramesInAverage; ++i) {
 		currentImage = image_loader->readImage(i);
 		frameBuffer.push_front(currentImage);
 		(*summedImages) += (*currentImage);
@@ -282,7 +282,7 @@ void CCDImagesProcessorConvertToSimpleFileFormat::convert_images(std::shared_ptr
 }
 
 void CCDImagesProcessorCrop::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
-	size_t total_number_of_images = image_loader->getNImages();
+	int total_number_of_images = image_loader->getNImages();
 	int abortStatus;
 	
 	if ((startX >= endX) || (startY >= endY)) {
@@ -302,7 +302,7 @@ void CCDImagesProcessorCrop::convert_images(std::shared_ptr<ImageLoader> image_l
 	this->progressReporter->CalculationStarted();
 	
 	image_loader->spoolTo(0);
-	for (size_t n = 0; n < total_number_of_images; ++n) {
+	for (int n = 0; n < total_number_of_images; ++n) {
 		// test for user abort and provide a progress update every 10 frames
 		if (n % 10 == 0) {
 			abortStatus = this->progressReporter->UpdateCalculationProgress((double)n, (double)total_number_of_images);
@@ -316,8 +316,8 @@ void CCDImagesProcessorCrop::convert_images(std::shared_ptr<ImageLoader> image_l
 		loadedImage = image_loader->readNextImage();
 		croppedImage = ImagePtr (new Image((int)croppedXSize, (int)croppedYSize));
 		
-		for (size_t y = startY; y <= endY; ++y) {
-			for (size_t x = startX; x <= endX; ++x) {
+		for (int y = startY; y <= endY; ++y) {
+			for (int x = startX; x <= endX; ++x) {
 				(*croppedImage)(x - startX, y - startY) = (*loadedImage)(x, y);
 			}
 		}
@@ -330,9 +330,9 @@ void CCDImagesProcessorCrop::convert_images(std::shared_ptr<ImageLoader> image_l
 void CCDImagesProcessorConvertToPhotons::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	assert(this->multiplicationFactor > 0.0);
 	
-	size_t total_number_of_images = image_loader->getNImages();
-	size_t x_size = image_loader->getXSize();
-	size_t y_size = image_loader->getYSize();
+	int total_number_of_images = image_loader->getNImages();
+	int x_size = image_loader->getXSize();
+	int y_size = image_loader->getYSize();
 	
 	std::shared_ptr<Image > loadedImage;
 	std::shared_ptr<Image > convertedImage (new Image((int)x_size, (int)y_size));;
@@ -341,10 +341,10 @@ void CCDImagesProcessorConvertToPhotons::convert_images(std::shared_ptr<ImageLoa
 	this->progressReporter->CalculationStarted();
 	
 	image_loader->spoolTo(0);
-	for (size_t n = 0; n < total_number_of_images; ++n) {
+	for (int n = 0; n < total_number_of_images; ++n) {
 		loadedImage = image_loader->readNextImage();
-		for (size_t j = 0; j < y_size; ++j) {
-			for (size_t i = 0; i < x_size; ++i) {
+		for (int j = 0; j < y_size; ++j) {
+			for (int i = 0; i < x_size; ++i) {
 				(*convertedImage)(i, j) = ((*loadedImage)(i, j) - this->offset >= 0) ? (((*loadedImage)(i, j) - this->offset) / this->multiplicationFactor) : 0.0;
 			}
 		}

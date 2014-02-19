@@ -35,6 +35,8 @@
 #define ROLLING_AVERAGE_NEEDS_ODD_NUMBER_OF_FRAMES 2 + FIRST_XOP_ERR
 #endif // WITH_IGOR
 
+#include <algorithm>
+
 #include <boost/smart_ptr.hpp>
 #include <eigen3/Eigen/Eigen>
 
@@ -45,6 +47,11 @@ typedef std::shared_ptr<Image> ImagePtr;
 template<typename T>
 T square(T val) {
 	return val * val;
+}
+
+template<typename T>
+T clip (T a, T b, T c) {
+    return std::max(b, std::min(a, c));
 }
 
 // some 'reasonable' upper limits for various quantities

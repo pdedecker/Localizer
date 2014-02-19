@@ -730,9 +730,9 @@ mxArray* ConvertImagesToArray(const std::vector<ImagePtr>& images) {
 }
 
 mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
-	size_t nImages = imageLoader->getNImages();
-	size_t xSize = imageLoader->getXSize();
-	size_t ySize = imageLoader->getYSize();
+	int nImages = imageLoader->getNImages();
+	int xSize = imageLoader->getXSize();
+	int ySize = imageLoader->getYSize();
 
 	// allocate the output matrix
 	// try to match the required storage type
@@ -800,7 +800,7 @@ mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int first
 	char* arrayPtr = reinterpret_cast<char*>(mxGetPr(outputMatrix));
 
 	imageLoader->spoolTo(firstImage);
-	for (size_t i = 0; i < nImagesToRead; ++i) {
+	for (int i = 0; i < nImagesToRead; ++i) {
 		ImagePtr thisImage = imageLoader->readNextImage();
 		char* bufferPtr = arrayPtr + i * bytesPerImage;
 		switch (storageType) {

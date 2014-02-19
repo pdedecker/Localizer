@@ -42,7 +42,7 @@ public:
 	MatrixRecycler() {;}
 	~MatrixRecycler();
 	
-	Image *getMatrix(size_t nRows, size_t nCols);
+	Image *getMatrix(int nRows, int nCols);
 	void freeMatrix(Image *matrixToFree);
 	
 	// free all matrices allocated by this matrix
@@ -64,7 +64,7 @@ protected:
 /**
  * Obtain a matrix of the requested dimensions from the globalMatrixRecycler
  */
-Image* GetRecycledMatrix(size_t nRows, size_t nCols);
+Image* GetRecycledMatrix(int nRows, int nCols);
 
 /**
  * Mark a matrix from the globalMatrixRecycler as no longer in use

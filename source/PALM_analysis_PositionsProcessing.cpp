@@ -91,7 +91,8 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_t *nBins,
 			   double *outputArray, double calculationRange, double upperX, double lowerX,
 			   double upperY, double lowerY) {
-    int   nIncludedBins, i, j, ib;
+    size_t nIncludedBins;
+    int   ib;
     double xSize, ySize, xi, yi, sqrtArea, g, dm, alm;
     double sqDistance, x1, y1, sqMaxDistance, effectiveCalculationRange, binsPerDistance;
 	
@@ -106,13 +107,13 @@ void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_
     nIncludedBins = floor(binsPerDistance * effectiveCalculationRange + 1e-3);
     *nBins = nIncludedBins;
     sqMaxDistance = effectiveCalculationRange * effectiveCalculationRange;
-    for (i = 0; i < *nBins; i++)
+    for (size_t i = 0; i < *nBins; i++)
 		outputArray[i] = 0.0;
 	
-    for (i = 1; i < nPoints; i++) {
+    for (size_t i = 1; i < nPoints; i++) {
 		xi = xCoordinates[i];
 		yi = yCoordinates[i];
-		for (j = 0; j < i; j++) {
+		for (size_t j = 0; j < i; j++) {
 			x1 = xCoordinates[j] - xi;
 			y1 = yCoordinates[j] - yi;
 			sqDistance = x1 * x1 + y1 * y1;
@@ -127,7 +128,7 @@ void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_
     }
     sqDistance = 0.0;
     alm = 0.0;
-    for (i = 0; i < nIncludedBins; i++) {
+    for (size_t i = 0; i < nIncludedBins; i++) {
 		sqDistance += outputArray[i];
 		outputArray[i] = sqrt(sqDistance / M_PI) * sqrtArea;
     }

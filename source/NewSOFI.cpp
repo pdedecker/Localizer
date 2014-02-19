@@ -62,7 +62,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
             for (int col = 2; col < nCols - 2; ++col) {
                 for (int row = 2; row < nRows - 2; ++row) {
                     double product = 1.0;
-                    for (int i = 0; i < currentCombination.size(); ++i) {
+                    for (size_t i = 0; i < currentCombination.size(); ++i) {
                         product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
                     }
                     (*matrix)(row - 2, col - 2) += product;
@@ -121,7 +121,7 @@ Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<Pix
     int nCols = pixelMap.cbegin()->second->cols();
     Eigen::MatrixXd result(nRows, nCols);
     result.setConstant(1.0);
-    for (int i = 0; i < partition.size(); ++i) {
+    for (size_t i = 0; i < partition.size(); ++i) {
         PixelCombination subset = partition[i];
         result = result.cwiseProduct(*(pixelMap.at(subset)));
     }
