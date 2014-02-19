@@ -1,5 +1,5 @@
 /*
- Copyright 2008-2011 Peter Dedecker.
+ Copyright 2008-2014 Peter Dedecker.
  
  This file is part of Localizer.
  
@@ -19,10 +19,11 @@
  
  Additional permission under GNU GPL version 3 section 7
  
- If you modify this Program, or any covered work, by 
- linking or combining it with libraries required for interaction 
- with analysis programs such as Igor Pro or Matlab, 
- the licensors of this Program grant you additional permission 
+ If you modify this Program, or any covered work, by
+ linking or combining it with libraries required for interaction
+ with analysis programs such as Igor Pro or Matlab, or to acquire
+ data from or control hardware related to an experimental measurement,
+ the licensors of this Program grant you additional permission
  to convey the resulting work.
  */
 

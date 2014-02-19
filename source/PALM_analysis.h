@@ -1,5 +1,5 @@
 /*
- Copyright 2008-2011 Peter Dedecker.
+ Copyright 2008-2014 Peter Dedecker.
  
  This file is part of Localizer.
  
