@@ -65,15 +65,15 @@ int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRe
 int ParseCCDHeaders(ImageLoader *image_loader);
 
 // Routines that process CCD files and return data to Igor
-std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY, bool doAverage);
+std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, bool doAverage);
 
-std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
+std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter);
 
-std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY);
+std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter);
 
-ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter);
+ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter);
 
-ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter);
+ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter);
 
 // Routines that can fetch and make waves from datafolders
 waveHndl FetchWaveUsingFullPath(std::string wavePath);

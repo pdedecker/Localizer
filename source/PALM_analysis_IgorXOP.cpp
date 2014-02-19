@@ -1604,10 +1604,10 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 
         // check that they are all positive
         if ((p->startX < 0) || (p->endX < 0) || (p->startY < 0) || (p->endY < 0)) {
-            return EXPECT_POS_NUM;
+            return kBadROIDimensions;
         }
         if ((p->startX > p->endX) || (p->startY > p->endY)) {
-            return EXPECT_POS_NUM;	// update this with the proper error message
+            return kBadROIDimensions;	// update this with the proper error message
         }
 
         startX = (long)(p->startX + 0.5);
@@ -1656,6 +1656,8 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
     try {
         input_file_path = ConvertHandleToString(p->input_file);
         image_loader = GetImageLoader(camera_type, input_file_path);
+        std::shared_ptr<ImageLoader> croppedImageLoader(new ImageLoaderWrapper(image_loader));
+        dynamic_cast<ImageLoaderWrapper*>(croppedImageLoader.get())->setROI(startX, endX, startY, endY);
 
         std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
@@ -1671,25 +1673,25 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
         switch (method) {
         case ANALYZING_SUMMEDTRACE:
             {
-                std::vector<double> trace = ConstructSummedIntensityTrace(image_loader, progressReporter, startX, startY, endX, endY);
+                std::vector<double> trace = ConstructSummedIntensityTrace(croppedImageLoader, progressReporter);
                 CopyVectorToIgorDPWave(trace, outputWaveParams);
                 break;
             }
         case ANALYZING_AVERAGEIMAGE:
             {
-                ImagePtr avgImage = ConstructAverageImage(image_loader, startX, startY, endX, endY, progressReporter);
+                ImagePtr avgImage = ConstructAverageImage(image_loader, progressReporter);
                 CopyMatrixToIgorDPWave(avgImage, outputWaveParams);
                 break;
             }
         case ANALYZING_VARIANCEIMAGE:
             {
-                ImagePtr varianceImage = ConstructVarianceImage(image_loader, startX, startY, endX, endY, progressReporter);
+                ImagePtr varianceImage = ConstructVarianceImage(image_loader, progressReporter);
                 CopyMatrixToIgorDPWave(varianceImage, outputWaveParams);
                 break;
             }
         case ANALYZING_AVERAGETRACE:
             {
-                std::vector<double> trace = ConstructAverageIntensityTrace(image_loader, progressReporter, startX, startY, endX, endY);
+                std::vector<double> trace = ConstructAverageIntensityTrace(croppedImageLoader, progressReporter);
                 CopyVectorToIgorDPWave(trace, outputWaveParams);
                 break;
             }

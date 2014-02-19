@@ -274,6 +274,7 @@ int ImageLoaderWrapper::getFileType() const {
 
 ImagePtr ImageLoaderWrapper::readNextImage(int &indexOfImageThatWasRead) {
     ImagePtr image = _baseImageLoader->readNextImage(indexOfImageThatWasRead);
+    indexOfImageThatWasRead -= _firstImageToInclude;
     if (_haveCustomROI) {
         int nOutputRows = this->getXSize();
         int nOutputCols = this->getYSize();
@@ -299,6 +300,7 @@ void ImageLoaderWrapper::setImageRange(const int firstImageToInclude, const int 
     
     _firstImageToInclude = firstImageToInclude;
     _lastImageToInclude = lastImageToInclude;
+    _baseImageLoader->spoolTo(firstImageToInclude);
 }
 
 void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {

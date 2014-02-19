@@ -265,26 +265,13 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
     return 0;
 }
 
-std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY, bool doAverage) {
+std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, bool doAverage) {
     int nImages = imageLoader->getNImages();
     int xSize = imageLoader->getXSize();
     int ySize = imageLoader->getYSize();
+    int nPixelsInImage = xSize * ySize;
     
     double summedIntensity;
-    
-    // any value negative in the ROI means we want full image
-    if ((startX < 0) || (endX < 0) || (startY < 0) || (endY < 0)) {
-        startX = startY = 0;
-        endX = xSize - 1;
-        endY = ySize - 1;
-    } else {
-        if ((startX > endX) || (startY > endY))
-            throw kBadROIDimensions;
-        if ((endX >= xSize)|| (endY >= ySize)) {
-            throw kBadROIDimensions;
-        }
-    }
-    int nPixelsInROI = (endX - startX + 1) * (endY - startY + 1);
     std::vector<double> trace(nImages);
     
     progressReporter->CalculationStarted();
@@ -301,8 +288,8 @@ std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLo
         
         ImagePtr currentImage = imageLoader->readNextImage();
         summedIntensity = 0.0;
-        for (int k = startY; k <= endY; k++) {
-            for (int j = startX; j <= endX; j++) {
+        for (int k = 0; k < ySize; k++) {
+            for (int j = 0; j < xSize; j++) {
                 summedIntensity += (*currentImage)(j, k);
             }
         }
@@ -311,54 +298,37 @@ std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLo
     
     if (doAverage) {
         for (int i = 0; i < nImages; ++i) {
-            trace[i] /= static_cast<double>(nPixelsInROI);
+            trace[i] /= static_cast<double>(nPixelsInImage);
         }
     }
     
     return trace;
 }
 
-std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY) {
-    return ConstructIntensityTrace(imageLoader, progressReporter, startX, startY, endX, endY, false);
+std::vector<double> ConstructSummedIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter) {
+    return ConstructIntensityTrace(imageLoader, progressReporter, false);
 }
 
-std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, int startX, int startY, int endX, int endY) {
-    return ConstructIntensityTrace(imageLoader, progressReporter, startX, startY, endX, endY, true);
+std::vector<double> ConstructAverageIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter) {
+    return ConstructIntensityTrace(imageLoader, progressReporter, true);
 }
 
-ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
-    int n_images = imageLoader->getNImages();
-    int x_size = imageLoader->getXSize();
-    int y_size = imageLoader->getYSize();
-
-    long xRange, yRange;
-
-    if (endX > x_size - 1)
-        endX = x_size - 1;
-    if (endY > y_size - 1)
-        endY = y_size - 1;
-
-    if ((startX < 0) || (startY < 0) || (startY < 0) || (startY < 0)) {	// we want the full frame
-        startX = 0;
-        startY = 0;
-        endX = x_size - 1;
-        endY = y_size - 1;
-    }
-
-    xRange = endX - startX + 1;
-    yRange = endY - startY + 1;
+ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter) {
+    int nImages = imageLoader->getNImages();
+    int xSize = imageLoader->getXSize();
+    int ySize = imageLoader->getYSize();
 
     ImagePtr current_image;
-    ImagePtr average_image(new Image((int)xRange, (int)yRange));
+    ImagePtr average_image(new Image(xSize, ySize));
 
     average_image->setConstant(0.0);
 
     int progressStatus;
     progressReporter->CalculationStarted();
     int nextFrameRead;
-    for (int i = 0; i < n_images; i++) {
+    for (int i = 0; i < nImages; i++) {
         if (i % 20 == 0) {
-            progressStatus = progressReporter->UpdateCalculationProgress(i, n_images);
+            progressStatus = progressReporter->UpdateCalculationProgress(i, nImages);
             if (progressStatus != 0) {
                 progressReporter->CalculationAborted();
                 throw USER_ABORTED("");
@@ -371,7 +341,7 @@ ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long st
         (*average_image) += (*current_image);
     }
 
-    *average_image /= (double)n_images;
+    *average_image /= static_cast<double>(nImages);
 
     progressReporter->CalculationDone();
 
@@ -379,30 +349,13 @@ ImagePtr ConstructAverageImage(std::shared_ptr<ImageLoader> imageLoader, long st
 }
 
 
-ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long startX, long startY, long endX, long endY, std::shared_ptr<ProgressReporter> progressReporter) {
-    int n_images = imageLoader->getNImages();
-    int x_size = imageLoader->getXSize();
-    int y_size = imageLoader->getYSize();
+ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter) {
+    int nImages = imageLoader->getNImages();
+    int xSize = imageLoader->getXSize();
+    int ySize = imageLoader->getYSize();
 
-    long xRange, yRange;
-
-    if (endX > x_size - 1)
-        endX = x_size - 1;
-    if (endY > y_size - 1)
-        endY = y_size - 1;
-
-    if ((startX < 0) || (startY < 0) || (startY < 0) || (startY < 0)) {	// we want the full frame
-        startX = 0;
-        startY = 0;
-        endX = x_size - 1;
-        endY = y_size - 1;
-    }
-
-    xRange = endX - startX + 1;
-    yRange = endY - startY + 1;
-
-    std::shared_ptr<Image> varianceImage(new Image((int)xRange, (int)yRange));
-    boost::scoped_ptr<Image> average_image(new Image((int)xRange, (int)yRange));
+    std::shared_ptr<Image> varianceImage(new Image(xSize, ySize));
+    boost::scoped_ptr<Image> average_image(new Image(xSize, ySize));
     ImagePtr current_image;
 
     average_image->setConstant(0.0);
@@ -412,9 +365,9 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long s
     int progressStatus;
     int nextFrameRead;
     // construct an average image
-    for (int i = 0; i < n_images; i++) {
+    for (int i = 0; i < nImages; i++) {
         if (i % 10 == 0) {
-            progressStatus = progressReporter->UpdateCalculationProgress(i / 2, n_images);
+            progressStatus = progressReporter->UpdateCalculationProgress(i / 2, nImages);
             if (progressStatus != 0) {
                 progressReporter->CalculationAborted();
                 throw USER_ABORTED("");
@@ -427,12 +380,12 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long s
         (*average_image) += (*current_image);
     }
 
-    *average_image /= (double)n_images;
+    *average_image /= static_cast<double>(nImages);
 
     // now loop over the images again, calculating the standard deviation of each pixel
-    for (int i = 0; i < n_images; i++) {
+    for (int i = 0; i < nImages; i++) {
         if (i % 10 == 0) {
-            progressStatus = progressReporter->UpdateCalculationProgress((i + n_images) / 2, n_images);
+            progressStatus = progressReporter->UpdateCalculationProgress((i + nImages) / 2, nImages);
             if (progressStatus != 0) {
                 progressReporter->CalculationAborted();
                 throw USER_ABORTED("");
@@ -445,7 +398,7 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, long s
         (*varianceImage) += ((*current_image) - (*average_image)).array().square().matrix();
     }
 
-    *varianceImage /= (double)n_images;
+    *varianceImage /= static_cast<double>(nImages);
 
     progressReporter->CalculationDone();
 
