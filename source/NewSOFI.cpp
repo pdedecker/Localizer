@@ -103,21 +103,62 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
 
 void DoNewSOFI2(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
+    if (nImages == 0)
+        throw std::runtime_error("SOFI without input images");
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > orders;
     orders.push_back(std::pair<int, std::vector<SOFIKernel> >(order, KernelsForOrder(order)));
+    size_t nOrders = orders.size();
     int firstImageToProcess = 0;
-    int lastImageToProcess = nImages - 1;
+    int lastImageToProcess = 0;
     int imagesProcessedSoFar = 0;
     int totalNumberOfImagesToProcess = nImages;
     std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
+    std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
+    std::vector<int> nImagesInSubCalculation;
     
     progressReporter->CalculationStarted();
     
-    RawSOFIWorker(imageLoader, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, sofiOutputImages);
-    for (size_t i = 0; i < orders.size(); ++i) {
-        PerformPixelationCorrection(sofiOutputImages[i], orders[i].first);
+    // calculate a SOFI image for every batch of images
+    int batchSize = 100;
+    int nBatches;
+    if (nImages % batchSize == 0) {
+        nBatches = nImages / batchSize;
+    } else {
+        nBatches = nImages / batchSize + 1;
     }
+    for (int n = 0; n < nBatches; ++n) {
+        firstImageToProcess = lastImageToProcess;
+        lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
+        nImagesInSubCalculation.push_back(lastImageToProcess - firstImageToProcess + 1);
+        std::vector<ImagePtr> subImages;
+        RawSOFIWorker(imageLoader, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages);
+        for (size_t j = 0; j < nOrders; ++j) {
+            allSubImages[j].push_back(subImages[j]);
+        }
+    }
+    
+    // combine the batches into a single average image per order and perform pixelation correction
+    std::vector<ImagePtr> mergedImages(nOrders);
+    tbb::parallel_for<size_t>(0, nOrders, [&](size_t j) {
+        int order = orders.at(j).first;
+        const std::vector<ImagePtr>& theseSubImages = allSubImages.at(j);
+        ImagePtr mergedImage(new Image(theseSubImages.at(0)->rows(), theseSubImages.at(0)->cols()));
+        mergedImage->setConstant(0.0);
+        double summedContribution = 0.0;
+        for (int batch = 0; batch < nBatches; ++batch) {
+            double contribution = static_cast<double>(nImagesInSubCalculation.at(batch)) / static_cast<double>(batchSize);
+            *mergedImage += contribution * *(theseSubImages.at(batch));
+            summedContribution += contribution;
+        }
+        *mergedImage /= summedContribution;
+        
+        PerformPixelationCorrection(mergedImage, order);
+        
+        mergedImages.at(j) = mergedImage;
+    });
+    
+    sofiOutputImages = mergedImages;
     
     progressReporter->CalculationDone();
 }
