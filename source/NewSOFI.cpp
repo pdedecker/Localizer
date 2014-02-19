@@ -101,17 +101,38 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<Progres
     progressReporter->CalculationDone();
 }
 
+void DoNewSOFI2(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages) {
+    int nImages = imageLoader->getNImages();
+    
+    std::vector<std::pair<int, std::vector<SOFIKernel> > > orders;
+    orders.push_back(std::pair<int, std::vector<SOFIKernel> >(order, KernelsForOrder(order)));
+    int firstImageToProcess = 0;
+    int lastImageToProcess = nImages - 1;
+    int imagesProcessedSoFar = 0;
+    int totalNumberOfImagesToProcess = nImages;
+    std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
+    
+    progressReporter->CalculationStarted();
+    
+    RawSOFIWorker(imageLoader, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, sofiOutputImages);
+    for (size_t i = 0; i < orders.size(); ++i) {
+        PerformPixelationCorrection(sofiOutputImages[i], orders[i].first);
+    }
+    
+    progressReporter->CalculationDone();
+}
+
 void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
+    int nImagesToInclude = lastImageToProcess - firstImageToProcess + 1;
     
     // store all needed pixel combinations in the map
     // if the map is non-empty, we assume that it was already setup by a previous call to RawSOFIWorker, so we can prevent unnecessary work.
     if (pixelMap.empty()) {
         int allCombinations = 0;
         for (size_t i = 0; i < orders.size(); ++i) {
-            const std::pair<int, std::vector<SOFIKernel> >& calculation = orders[i];
-            const std::vector<SOFIKernel>& kernels = calculation.second;
+            const std::vector<SOFIKernel>& kernels = orders[i].second;
             for (auto kernelIt = kernels.cbegin(); kernelIt != kernels.cend(); ++kernelIt) {
                 const std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
                 for (auto partitionsSetIt = GroupOfPartitions.cbegin(); partitionsSetIt != GroupOfPartitions.cend(); ++partitionsSetIt) {
@@ -159,6 +180,12 @@ void RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImag
         });
         imagesProcessedSoFar += 1;
     }
+    
+    // normalize by number of images
+    tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
+        ImagePtr matrix = item.second;
+        (*matrix) /= static_cast<double>(nImagesToInclude);
+    });
     
     // and make the SOFI images
     sofiImages.clear();
