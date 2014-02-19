@@ -145,9 +145,9 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
                 }
             }
         }
-        std::ostringstream ostream;
-        ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
-        XOPNotice(ostream.str().c_str());
+        //std::ostringstream ostream;
+        //ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
+        //XOPNotice(ostream.str().c_str());
     }
     
     // clear all accumulated pixel combinations

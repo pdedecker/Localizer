@@ -2680,6 +2680,9 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     catch (int e) {
         return e;
     }
+    catch (std::bad_alloc e) {
+        return NOMEM;
+    }
     catch (std::runtime_error e) {
         XOPNotice(e.what());
         XOPNotice("\r");
@@ -2781,7 +2784,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     
     try {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
-        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(-1, inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
         dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);
         
@@ -2819,6 +2822,9 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     }
     catch (int e) {
         return e;
+    }
+    catch (std::bad_alloc e) {
+        return NOMEM;
     }
     catch (std::runtime_error e) {
         XOPNotice(e.what());
