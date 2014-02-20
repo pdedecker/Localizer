@@ -355,7 +355,7 @@ ImagePtr ConstructVarianceImage(std::shared_ptr<ImageLoader> imageLoader, std::s
     int ySize = imageLoader->getYSize();
 
     std::shared_ptr<Image> varianceImage(new Image(xSize, ySize));
-    boost::scoped_ptr<Image> average_image(new Image(xSize, ySize));
+    std::unique_ptr<Image> average_image(new Image(xSize, ySize));
     ImagePtr current_image;
 
     average_image->setConstant(0.0);
@@ -501,7 +501,7 @@ std::string ConvertHandleToString(Handle handle) {
     std::string convertedString;
 
     size_t stringLength = GetHandleSize(handle);
-    boost::scoped_array<char> cString(new char[stringLength + 1]);
+    std::unique_ptr<char[]> cString(new char[stringLength + 1]);
 
     err = GetCStringFromHandle(handle, cString.get(), stringLength);
     if (err != 0)

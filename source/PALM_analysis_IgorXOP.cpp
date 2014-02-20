@@ -2502,7 +2502,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 			XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
 			return PALM_ANALYSIS_XOP_ERROR;
 		}
-		boost::scoped_array<double> doubleBuffer(new double[nLagTimesInWave]);
+		std::unique_ptr<double[]> doubleBuffer(new double[nLagTimesInWave]);
 		lagTimes.resize(nLagTimesInWave);
 		err = MDGetDPDataFromNumericWave(lagTimesWave, doubleBuffer.get());
 		if (err != 0)

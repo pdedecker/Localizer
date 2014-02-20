@@ -424,7 +424,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	
 	imageSize = pixelSize * xSize * ySize;
 	
-	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
+    std::unique_ptr<char[]> single_image_buffer(new char[imageSize]);
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -499,8 +499,8 @@ void ImageLoaderAndor::parse_header_information() {
 	int frameXSize, frameYSize, nImagesHeader;
 	int xStart, yStart, xEnd, yEnd;
 	int result;
-	boost::scoped_array<char> headerBuffer(new char[500001]);
-	boost::scoped_array<char> singleLineBuffer(new char[4096]);
+    std::unique_ptr<char[]> headerBuffer(new char[500001]);
+    std::unique_ptr<char[]> singleLineBuffer(new char[4096]);
 	std::string singleLine;
 	
 	storage_type = STORAGE_TYPE_FP32;
@@ -593,7 +593,7 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t nBytesInImage = xSize * ySize * sizeof(float);
 	
-	boost::scoped_array<char> single_image_buffer(new char[nBytesInImage]);
+	std::unique_ptr<char[]> single_image_buffer(new char[nBytesInImage]);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -757,7 +757,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
 	
-	boost::scoped_array<char> single_image_buffer(new char[imageSize]);
+	std::unique_ptr<char[]> single_image_buffer(new char[imageSize]);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -866,7 +866,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 			break;
 	}
 	
-	boost::scoped_array<char> buffer(new char[imageSize]);
+	std::unique_ptr<char[]> buffer(new char[imageSize]);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -1345,7 +1345,7 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(int &indexOfImageThatWasRead) {
 std::string ImageLoaderMultiFileTIFF::getFilePathForImageAtIndex(int index) {
 	int imageIndexOnDisk = this->firstImageIndex + index;
 	
-	boost::scoped_array<char> imageIndexStr(new char[this->nDigitsInNumber + 1]);
+	std::unique_ptr<char[]> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
 	sprintf(formatString, "%%0%dd", nDigitsInNumber);
 	sprintf(imageIndexStr.get(), formatString, imageIndexOnDisk);
@@ -1833,7 +1833,7 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	}
 	
 	int nBytesToWrite = nPixels * bytesPerPixel;
-	boost::scoped_array<char> buffer(new char[nBytesToWrite]);
+	std::unique_ptr<char[]> buffer(new char[nBytesToWrite]);
 	
 	switch (this->storageType) {
 		case STORAGE_TYPE_INT8:
@@ -1967,7 +1967,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	// make a scoped_array that will act as a single scanline buffer
 	// make it a buffer of chars equal to the total number of bytes required
-	boost::scoped_array<char> scanLine(new char[xSize * bitsPerSample / 8]);
+	std::unique_ptr<char[]> scanLine(new char[xSize * bitsPerSample / 8]);
 	
 	// make sure that all the image tags have the correct values
 	result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);

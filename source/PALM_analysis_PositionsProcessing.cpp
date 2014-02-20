@@ -58,8 +58,8 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 	}
 	
 	// provide that positions as arrays suitable for the actual calculation
-	boost::scoped_array<double> xPositions(new double[nPositions]);
-	boost::scoped_array<double> yPositions(new double[nPositions]);
+	std::unique_ptr<double[]> xPositions(new double[nPositions]);
+	std::unique_ptr<double[]> yPositions(new double[nPositions]);
 	std::shared_ptr<std::vector<double> > lFunction(new std::vector<double>(nBins));
 	
 	for (size_t i = 0; i < nPositions; ++i) {

@@ -42,7 +42,7 @@ std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPos
 		throw std::runtime_error("The localized positions wave does not contain a wavenote, cannot determine the storage type");
 	}
 	
-	boost::scoped_array<char> CStringWaveNote(new char[waveNoteSize + 1]);
+	std::unique_ptr<char[]> CStringWaveNote(new char[waveNoteSize + 1]);
 	
 	err = GetCStringFromHandle(waveNoteHandle, CStringWaveNote.get(), waveNoteSize);
 	if (err != 0) {
