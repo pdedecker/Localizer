@@ -47,10 +47,15 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
-void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, std::shared_ptr<ProgressReporter> progressReporter, const int order, std::vector<ImagePtr>& sofiOutputImages, bool wantAverageImage, ImagePtr& averageImage) {
+void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
     if (nImages == 0)
         throw std::runtime_error("SOFI without input images");
+    
+    int order = options.order;
+    const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
+    bool wantAverageImage = options.wantAverageImage;
+    ImagePtr& averageImage = options.averageImage;
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > orders;
     orders.push_back(std::pair<int, std::vector<SOFIKernel> >(order, KernelsForOrder(order)));

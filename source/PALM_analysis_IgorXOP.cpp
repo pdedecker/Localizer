@@ -2804,8 +2804,11 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             }
         }
         std::vector<ImagePtr> sofiOutputImages;
-        ImagePtr averageImage;
-        DoNewSOFI(imageLoaderWrapper, frameVerifiers, progressReporter, order, sofiOutputImages, wantAverageImage, averageImage);
+        SOFIOptions sofiOptions;
+        sofiOptions.order = order;
+        sofiOptions.frameVerifiers = frameVerifiers;
+        sofiOptions.wantAverageImage = wantAverageImage;
+        DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), outputWaveParams);
         double offset = 2.0;
         double delta = 1.0 / static_cast<double>(order);
@@ -2816,7 +2819,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             averageOutputWaveParams.dfH = outputWaveParams.dfH;
             strcpy(averageOutputWaveParams.name, outputWaveParams.name);
             strcat(averageOutputWaveParams.name, "_avg");
-            CopyMatrixToIgorDPWave(averageImage, averageOutputWaveParams);
+            CopyMatrixToIgorDPWave(sofiOptions.averageImage, averageOutputWaveParams);
         }
             
     }
