@@ -664,6 +664,11 @@ struct NewSOFIRuntimeParams {
 	double doAverage;						// Optional parameter.
 	int AVGFlagParamsSet[1];
     
+	// Parameters for /PXCR flag group.
+	int PXCRFlagEncountered;
+	double doPixelationCorrection;			// Optional parameter.
+	int PXCRFlagParamsSet[1];
+    
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
@@ -2745,6 +2750,14 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 		}
 	}
     
+    bool doPixelationCorrection = true;
+    if (p->PXCRFlagEncountered) {
+		if (p->PXCRFlagParamsSet[0]) {
+			// Optional parameter: p->doPixelationCorrection
+            doPixelationCorrection = (p->doPixelationCorrection != 0.0);
+		}
+	}
+    
     bool useIgorFunctionForProgress;
     FUNCREF igorProgressReporterFunction;
     if (p->PROGFlagEncountered) {
@@ -2806,6 +2819,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::vector<ImagePtr> sofiOutputImages;
         SOFIOptions sofiOptions;
         sofiOptions.order = order;
+        sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
@@ -2957,7 +2971,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR=number:order /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR=number:order /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

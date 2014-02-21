@@ -110,7 +110,8 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         }
         *mergedImage /= summedContribution;
         
-        PerformPixelationCorrection(mergedImage, order);
+        if (options.doPixelationCorrection)
+            PerformPixelationCorrection(mergedImage, order);
         
         mergedImages.at(j) = mergedImage;
     });
