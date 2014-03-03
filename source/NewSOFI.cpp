@@ -257,7 +257,7 @@ Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<Pix
     Eigen::MatrixXd result(nRows, nCols);
     result.setConstant(1.0);
     for (size_t i = 0; i < partition.size(); ++i) {
-        PixelCombination subset = partition[i];
+        const PixelCombination& subset = partition[i];
         result = result.cwiseProduct(*(pixelMap.at(subset)));
     }
     
