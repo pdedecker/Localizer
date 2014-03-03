@@ -90,7 +90,7 @@ SOFIKernel PixelCombinationToKernel(const SOFIPixelCombination& sofiPixelCombina
 }
 
 void SortPixelCombination(PixelCombination& combination) {
-    std::sort(combination.begin(), combination.end(), [](const std::pair<int,int>& pair1, const std::pair<int,int>& pair2) {
+    std::sort(combination.begin(), combination.end(), [](const std::pair<int,int>& pair1, const std::pair<int,int>& pair2) -> bool {
         if (pair1.first < pair2.first) {
             return true;
         } else if (pair1.first == pair2.first) {
