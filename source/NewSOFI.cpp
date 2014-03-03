@@ -42,8 +42,8 @@
 int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage);
 
 double Prefactor(int nPartitions);
-Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
-Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
+Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
+Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
 
@@ -124,6 +124,34 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     progressReporter->CalculationDone();
 }
 
+void MinMaxDeltas(const PixelCombination& pixelCombination, int& minRowDelta, int& maxRowDelta, int& minColDelta, int& maxColDelta) {
+    minRowDelta = 1000;
+    minColDelta = 1000;
+    maxRowDelta = -1000;
+    maxColDelta = -1000;
+    
+    for (size_t i = 0; i < pixelCombination.size(); ++i) {
+        const std::pair<int,int>& pixel = pixelCombination[i];
+        if (pixel.first < minRowDelta)
+            minRowDelta = pixel.first;
+        if (pixel.first > maxRowDelta)
+            maxRowDelta = pixel.first;
+        if (pixel.second < minColDelta)
+            minColDelta = pixel.second;
+        if (pixel.second > maxColDelta)
+            maxColDelta = pixel.second;
+    }
+}
+
+PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination, const int rowDelta, const int colDelta) {
+    PixelCombination offsetCombination(pixelCombination);
+    for (size_t i = 0; i < offsetCombination.size(); ++i) {
+        offsetCombination[i].first += rowDelta;
+        offsetCombination[i].second += colDelta;
+    }
+    return offsetCombination;
+}
+
 int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
@@ -140,20 +168,27 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
                 const std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
                 for (auto partitionsSetIt = GroupOfPartitions.cbegin(); partitionsSetIt != GroupOfPartitions.cend(); ++partitionsSetIt) {
                     for (auto partitionsIt = partitionsSetIt->cbegin(); partitionsIt != partitionsSetIt->cend(); ++partitionsIt) {
-                        for (auto subsetIt = partitionsIt->cbegin(); subsetIt != partitionsIt->cend(); ++subsetIt) {
+                        for (auto pixelCombinationIt = partitionsIt->cbegin(); pixelCombinationIt != partitionsIt->cend(); ++pixelCombinationIt) {
                             allCombinations += 1;
-                            if (!pixelMap.count(*subsetIt)) {
-                                ImagePtr matrix(new Image(nRows - 4, nCols - 4));
-                                pixelMap.insert(std::pair<PixelCombination, ImagePtr>(*subsetIt, matrix));
+                            int minRowDelta, maxRowDelta, minColDelta, maxColDelta;
+                            MinMaxDeltas(*pixelCombinationIt, minRowDelta, maxRowDelta, minColDelta, maxColDelta);
+                            PixelCombination offsetCombination = OffsetPixelCombination(*pixelCombinationIt, -1 * (2 + minRowDelta), -1 * (2 + minColDelta));
+                            if (!pixelMap.count(offsetCombination)) {
+                                maxRowDelta -= 2 + minRowDelta;
+                                maxColDelta -= 2 + minColDelta;
+                                int nRowsToCalculate = nRows - maxRowDelta;
+                                int nColsToCalculate = nCols - maxColDelta;
+                                ImagePtr matrix(new Image(nRowsToCalculate, nColsToCalculate));
+                                pixelMap.insert(std::pair<PixelCombination, ImagePtr>(offsetCombination, matrix));
                             }
                         }
                     }
                 }
             }
         }
-        //std::ostringstream ostream;
-        //ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
-        //XOPNotice(ostream.str().c_str());
+        std::ostringstream ostream;
+        ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
+        XOPNotice(ostream.str().c_str());
     }
     
     // clear all accumulated pixel combinations
@@ -190,8 +225,10 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
-            for (int col = 2; col < nCols - 2; ++col) {
-                for (int row = 2; row < nRows - 2; ++row) {
+            int nRowsToCalculate = matrix->rows();
+            int nColsToCalculate = matrix->cols();
+            for (int col = 2; col < nColsToCalculate; ++col) {
+                for (int row = 2; row < nRowsToCalculate; ++row) {
                     double product = 1.0;
                     for (size_t i = 0; i < currentCombination.size(); ++i) {
                         product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
@@ -219,7 +256,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
             Eigen::MatrixXd evaluated(nRows - 4, nCols - 4);
             evaluated.setConstant(0.0);
             for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
-                evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap);
+                evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap, nRows - 4, nCols - 4);
             }
             if (kernel.combinations.size() > 1)
                 evaluated /= static_cast<double>(kernel.combinations.size());
@@ -238,27 +275,31 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
     return nImagesIncluded;
 }
 
-Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap) {
-    int nRows = pixelMap.cbegin()->second->rows();
-    int nCols = pixelMap.cbegin()->second->cols();
-    Eigen::MatrixXd accumulated(nRows, nCols);
+Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols) {
+    Eigen::MatrixXd accumulated(nOutputRows, nOutputCols);
     accumulated.setConstant(0.0);
     for (auto it = groupOfPartitions.cbegin(); it != groupOfPartitions.cend(); ++it) {
         int nSetsInPartition = it->size();
-        accumulated += Prefactor(nSetsInPartition) * EvaluatePartition(*it, pixelMap);
+        accumulated += Prefactor(nSetsInPartition) * EvaluatePartition(*it, pixelMap, nOutputRows, nOutputCols);
     }
     
     return accumulated;
 }
 
-Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap) {
-    int nRows = pixelMap.cbegin()->second->rows();
-    int nCols = pixelMap.cbegin()->second->cols();
-    Eigen::MatrixXd result(nRows, nCols);
+Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols) {
+    Eigen::MatrixXd result(nOutputRows, nOutputCols);
     result.setConstant(1.0);
+    int minRowDelta, maxRowDelta, minColDelta, maxColDelta;
     for (size_t i = 0; i < partition.size(); ++i) {
         const PixelCombination& subset = partition[i];
-        result = result.cwiseProduct(*(pixelMap.at(subset)));
+        MinMaxDeltas(subset, minRowDelta, maxRowDelta, minColDelta, maxColDelta);
+        PixelCombination offsetCombination = OffsetPixelCombination(subset, -1 * (2 + minRowDelta), -1 * (2 + minColDelta));
+        const Image& productMatrix = *(pixelMap.at(offsetCombination));
+        for (int col = 0; col < nOutputCols; ++col) {
+            for (int row = 0; row < nOutputRows; ++row) {
+                result(row, col) *= productMatrix(row + minRowDelta + 2, col + minColDelta + 2);
+            }
+        }
     }
     
     return result;
