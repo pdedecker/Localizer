@@ -33,6 +33,7 @@
 #include <sstream>
 
 std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination);
+void SortPixelCombination(PixelCombination& combination);
 
 std::vector<SOFIKernel> KernelsForOrder(const int order) {
     std::vector<SOFIKernel> kernels;
@@ -49,6 +50,17 @@ std::vector<SOFIKernel> KernelsForOrder(const int order) {
         kernels = PixelCombinationsToKernels(sofiPixelCombinations6());
     } else {
         throw std::runtime_error("unsupported order");
+    }
+    
+    for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
+        std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
+        for (auto partitionsSetIt = GroupOfPartitions.begin(); partitionsSetIt != GroupOfPartitions.end(); ++partitionsSetIt) {
+            for (auto partitionsIt = partitionsSetIt->begin(); partitionsIt != partitionsSetIt->end(); ++partitionsIt) {
+                for (auto pixelCombinationIt = partitionsIt->begin(); pixelCombinationIt != partitionsIt->end(); ++pixelCombinationIt) {
+                    SortPixelCombination(*pixelCombinationIt);
+                }
+            }
+        }
     }
     
     return kernels;
@@ -75,6 +87,17 @@ SOFIKernel PixelCombinationToKernel(const SOFIPixelCombination& sofiPixelCombina
         kernel.combinations.push_back(AllPartitions(*it));
     }
     return kernel;
+}
+
+void SortPixelCombination(PixelCombination& combination) {
+    std::sort(combination.begin(), combination.end(), [](const std::pair<int,int>& pair1, const std::pair<int,int>& pair2) {
+        if (pair1.first < pair2.first) {
+            return true;
+        } else if (pair1.first == pair2.first) {
+            return (pair1.second < pair2.second);
+        }
+        return false;
+    });
 }
 
 bool ComparePixelCombinations::operator() (const PixelCombination& comb1, const PixelCombination& comb2) const {
