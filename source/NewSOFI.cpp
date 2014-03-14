@@ -56,6 +56,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
     bool wantAverageImage = options.wantAverageImage;
     ImagePtr& averageImage = options.averageImage;
+    ImagePtr batchAverageImage;
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > orders;
     orders.push_back(std::pair<int, std::vector<SOFIKernel> >(order, KernelsForOrder(order)));
@@ -66,16 +67,18 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     int totalNumberOfImagesToProcess = nImages;
     std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
     std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
-    std::vector<int> nImagesInSubCalculation;
+    double summedContributions = 0.0;
     int totalNumberOfImagesIncluded = 0;
     if (wantAverageImage) {
         averageImage = ImagePtr(new Image(imageLoader->getXSize(), imageLoader->getYSize()));
         averageImage->setConstant(0.0);
+        batchAverageImage = ImagePtr(new Image(*averageImage));
     }
     
     progressReporter->CalculationStarted();
     
     // calculate a SOFI image for every batch of images
+    std::vector<ImagePtr> mergedImages(nOrders);
     int batchSize = 100;
     int nBatches;
     if (nImages % batchSize == 0) {
@@ -87,39 +90,34 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages, wantAverageImage, averageImage);
-        nImagesInSubCalculation.push_back(nImagesIncluded);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages, wantAverageImage, batchAverageImage);
         totalNumberOfImagesIncluded += nImagesIncluded;
+        double contribution = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
+        summedContributions += contribution;
         for (size_t j = 0; j < nOrders; ++j) {
-            allSubImages[j].push_back(subImages[j]);
+            if (mergedImages[j].get() == NULL) {
+                mergedImages[j] = ImagePtr(new Image(subImages[j]->rows(), subImages[j]->cols()));
+                mergedImages[j]->setConstant(0.0);
+            }
+            *mergedImages[j] += *subImages[j] * contribution;
+        }
+        if (wantAverageImage) {
+            *averageImage += *batchAverageImage * contribution;
         }
     }
     
-    // combine the batches into a single average image per order and perform pixelation correction
-    std::vector<ImagePtr> mergedImages(nOrders);
+    // create output images and perform pixelation correction
     tbb::parallel_for<size_t>(0, nOrders, [&](size_t j) {
-        int order = orders.at(j).first;
-        const std::vector<ImagePtr>& theseSubImages = allSubImages.at(j);
-        ImagePtr mergedImage(new Image(theseSubImages.at(0)->rows(), theseSubImages.at(0)->cols()));
-        mergedImage->setConstant(0.0);
-        double summedContribution = 0.0;
-        for (int batch = 0; batch < nBatches; ++batch) {
-            double contribution = static_cast<double>(nImagesInSubCalculation.at(batch)) / static_cast<double>(batchSize);
-            *mergedImage += contribution * *(theseSubImages.at(batch));
-            summedContribution += contribution;
-        }
-        *mergedImage /= summedContribution;
+        *mergedImages[j] /= summedContributions;
         
         if (options.doPixelationCorrection)
-            PerformPixelationCorrection(mergedImage, order);
-        
-        mergedImages.at(j) = mergedImage;
+            PerformPixelationCorrection(mergedImages[j], order);
     });
     
     sofiOutputImages = mergedImages;
     
     if (wantAverageImage)
-        *averageImage /= static_cast<double>(totalNumberOfImagesIncluded);
+        *averageImage /= summedContributions;
     
     progressReporter->CalculationDone();
 }
@@ -197,6 +195,13 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         matrix->setConstant(0.0);
     });
     
+    if (wantAverageImage) {
+        if ((averageImage.get() == NULL) || (averageImage->rows() != nRows) || (averageImage->cols() != nCols)) {
+            averageImage = ImagePtr(new Image(nRows, nCols));
+        }
+        averageImage->setConstant(0.0);
+    }
+    
     // calculate all products over the images
     for (int n = firstImageToProcess; n <= lastImageToProcess; ++n) {
         // update progress and check for abort
@@ -244,6 +249,9 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         ImagePtr matrix = item.second;
         (*matrix) /= static_cast<double>(nImagesToInclude);
     });
+    if (wantAverageImage) {
+        *averageImage /= static_cast<double>(nImagesToInclude);
+    }
     
     // and make the SOFI images
     sofiImages.clear();
