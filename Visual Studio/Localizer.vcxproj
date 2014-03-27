@@ -595,7 +595,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\resources\PALMAnalysisXOP.rc" />
+    <ResourceCompile Include="..\resources\PALMAnalysisXOP.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">true</ExcludedFromBuild>
+    </ResourceCompile>
     <ResourceCompile Include="..\resources\PALMAnalysisXOPWinCustom.rc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">true</ExcludedFromBuild>

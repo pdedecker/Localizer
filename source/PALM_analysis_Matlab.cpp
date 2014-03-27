@@ -33,6 +33,7 @@
 #include "PALM_analysis_ParticleFinding.h"
 #include "PALM_analysis_FileIO.h"
 #include "PALM_analysis_SOFI.h"
+#include "NewSOFI.h"
 
 /**
  The Matlab interface exports just a single 'gateway' function, mexFunction. This is the only
@@ -43,11 +44,11 @@
 void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	
 	if (nrhs < 1)
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"localize\", \"testsegmentation\", or \"sofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 	
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"localize\", \"testsegmentation\", or \"sofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 
 	std::string selector = GetMatlabString(inputArray);
 	if (boost::iequals(selector, "localize")) {
@@ -56,10 +57,12 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		MatlabTestSegmentation(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "sofi")) {
 		MatlabSOFI(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "newsofi")) {
+		MatlabNewSOFI(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "readccdimages")) {
 		MatlabReadCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
-		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"localize\", \"testsegmentation\", or \"sofi\")");
+		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 	}
 }
 
@@ -505,10 +508,109 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		// no frame verifiers for now
 		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
 		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, -1, sofiOutputImages, averageOutputImages);
+		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 0, sofiOutputImages, averageOutputImages);
 
 		plhs[0] = ConvertImagesToArray(sofiOutputImages);   // was saving only the first image. Noticed by Matthieu Dumont, who also created a fix.
 		plhs[1] = ConvertImagesToArray(averageOutputImages);
+	}
+	catch (std::bad_alloc) {
+        mexErrMsgTxt("Insufficient memory");
+    }
+    catch (int e) {
+        mexErrMsgTxt("Int error");
+    }
+    catch (USER_ABORTED e) {
+        mexErrMsgTxt("User abort");
+    }
+    catch (std::runtime_error e) {
+        mexErrMsgTxt(e.what());
+    }
+    catch (...) {
+        mexErrMsgTxt("Unknown error");
+    }
+}
+
+/**
+ Function that will handle SOFI calculations using the "new" algorithm. The input arguments must be of the form
+ 0 - the string "newsofi"
+ 1 - the desired order
+ 2 - single number: 0 for autocorrelation, 1 for crosscorrelation
+ 3 - file path or a matrix containing numeric data
+ */
+void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	// input validation
+	if (nrhs != 5)
+		mexErrMsgTxt("Must have exactly 5 input arguments for sofi\n\
+					 1. the string \"newsofi\"\n\
+					 2. the desired order (up to 6)\n\
+					 3. single number: 0 for no pixelation correction, 1 for pixelation correction\n\
+					 4. single number: 0 for no average image calculation, 1 for average image calculation\n\
+					 5. file path to a data file, or a 2D or 3D matrix containing numeric data");
+	
+	if (nlhs != 2)
+		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
+	
+	mxArray* array;
+	// the mxArray at index 0 (the string "newsofi") will have been checked already by mexFunction
+	
+	// index 1 - must be a single number (order)
+	array = const_cast<mxArray*>(prhs[1]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
+	int order = *(mxGetPr(array));
+	if ((order < 1) || (order > 6))
+		mexErrMsgTxt("Expected between 1 and 6 for the SOFI order");
+	
+	// index 2 - must be a boolean (do pixelation correction)
+	bool doPixelationCorrection;
+	array = const_cast<mxArray*>(prhs[2]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("3rd argument must be a double scalar (zero for no pixelation correction, non-zero for pixelation correction)");
+	doPixelationCorrection = (*(mxGetPr(array)) != 0.0);
+
+	// index 3 - must be a boolean (do average image calculation)
+	bool wantAverageImage;
+	array = const_cast<mxArray*>(prhs[3]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("4th argument must be a double scalar (zero for no average image calculation, 1 for average image calculation)");
+	wantAverageImage = (*(mxGetPr(array)) != 0.0);
+	
+	// index 4 - must be the data
+	std::string filePath;
+	mxArray* dataArray = NULL;
+	array = const_cast<mxArray*>(prhs[4]);
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		filePath = GetMatlabString(array);
+		if (filePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
+	} else {
+		// assume that this is a valid data array
+		// if it isn't then the image loader will throw an error
+		dataArray = array;
+	}
+	
+	try {
+		std::shared_ptr<ImageLoader> imageLoader;
+		if (!filePath.empty()) {
+			imageLoader = GetImageLoader(filePath);
+		} else {
+			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+		}
+		
+		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
+		
+		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers; // no frame verifiers for now
+		std::vector<ImagePtr> sofiOutputImages;
+		// set SOFI calculation options
+		SOFIOptions sofiOptions;
+        sofiOptions.order = order;
+        sofiOptions.doPixelationCorrection = doPixelationCorrection;
+        sofiOptions.frameVerifiers = frameVerifiers;
+        sofiOptions.wantAverageImage = wantAverageImage;
+        DoNewSOFI(imageLoader, sofiOptions, progressReporter, sofiOutputImages);
+
+		plhs[0] = ConvertImagesToArray(sofiOutputImages);
+		plhs[1] = ConvertImageToArray(sofiOptions.averageImage);
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
@@ -791,7 +893,7 @@ mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int first
 		nImagesToRead = nImages - firstImage;
 
 	mwSize ndim = 3;
-	mwSize dims[3] = {xSize, ySize, static_cast<mwSize>(nImagesToRead)};
+	mwSize dims[3] = {static_cast<mwSize>(xSize), static_cast<mwSize>(ySize), static_cast<mwSize>(nImagesToRead)};
 	mxArray* outputMatrix = mxCreateNumericArray(ndim, dims, classID, mxREAL);
 	if (outputMatrix == NULL)
 		throw std::bad_alloc();

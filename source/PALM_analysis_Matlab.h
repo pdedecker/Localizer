@@ -40,6 +40,7 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
+void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 
 std::string GetMatlabString(const mxArray* array);

@@ -35,7 +35,9 @@
 #include <eigen3/Eigen/Eigen>
 #include "tbb/tbb.h"
 #include "tbb/spin_mutex.h"
+#ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
+#endif
 
 #include "NewSOFIKernels.h"
 
