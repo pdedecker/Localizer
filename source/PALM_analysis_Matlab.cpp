@@ -539,13 +539,12 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
  */
 void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 5)
-		mexErrMsgTxt("Must have exactly 5 input arguments for sofi\n\
+	if (nrhs != 4)
+		mexErrMsgTxt("Must have exactly 4 input arguments for new sofi\n\
 					 1. the string \"newsofi\"\n\
 					 2. the desired order (up to 6)\n\
 					 3. single number: 0 for no pixelation correction, 1 for pixelation correction\n\
-					 4. single number: 0 for no average image calculation, 1 for average image calculation\n\
-					 5. file path to a data file, or a 2D or 3D matrix containing numeric data");
+					 4. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
 	if (nlhs != 2)
 		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
@@ -565,20 +564,13 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	bool doPixelationCorrection;
 	array = const_cast<mxArray*>(prhs[2]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("3rd argument must be a double scalar (zero for no pixelation correction, non-zero for pixelation correction)");
+		mexErrMsgTxt("2nd argument must be a double scalar (zero for no pixelation correction, non-zero for pixelation correction)");
 	doPixelationCorrection = (*(mxGetPr(array)) != 0.0);
 
-	// index 3 - must be a boolean (do average image calculation)
-	bool wantAverageImage;
-	array = const_cast<mxArray*>(prhs[3]);
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("4th argument must be a double scalar (zero for no average image calculation, 1 for average image calculation)");
-	wantAverageImage = (*(mxGetPr(array)) != 0.0);
-	
-	// index 4 - must be the data
+	// index 3 - must be the data
 	std::string filePath;
 	mxArray* dataArray = NULL;
-	array = const_cast<mxArray*>(prhs[4]);
+	array = const_cast<mxArray*>(prhs[3]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 		if (filePath.empty())
@@ -606,7 +598,7 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
         sofiOptions.order = order;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.frameVerifiers = frameVerifiers;
-        sofiOptions.wantAverageImage = wantAverageImage;
+        sofiOptions.wantAverageImage = true;
         DoNewSOFI(imageLoader, sofiOptions, progressReporter, sofiOutputImages);
 
 		plhs[0] = ConvertImagesToArray(sofiOutputImages);
