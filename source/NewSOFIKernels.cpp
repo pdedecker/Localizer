@@ -308,30 +308,23 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 1;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -342,9 +335,23 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -374,13 +381,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -394,27 +394,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
             subset.push_back(std::pair<int, int>(1, 0));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -423,29 +402,8 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -457,9 +415,23 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -470,30 +442,9 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 1;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -504,30 +455,9 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations3()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -581,34 +511,10 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 1;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -619,10 +525,18 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -633,34 +547,10 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -675,30 +565,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -717,25 +583,9 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -747,34 +597,18 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -793,26 +627,10 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -823,10 +641,18 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -851,22 +677,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -875,34 +685,10 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -913,22 +699,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
@@ -938,8 +708,8 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
@@ -955,30 +725,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -999,15 +745,21 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 3;
+        pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
@@ -1015,7 +767,7 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -1024,75 +776,21 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4()
     {
         SOFIPixelCombination pixelCombination;
         pixelCombination.outputDeltaX = 3;
-        pixelCombination.outputDeltaY = 2;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 3;
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1133,15 +831,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
@@ -1157,38 +846,20 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1199,37 +870,19 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -1241,17 +894,8 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
@@ -1259,20 +903,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1299,15 +934,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-2, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -1326,16 +952,16 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 1));
@@ -1343,9 +969,9 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
@@ -1358,38 +984,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1400,38 +999,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1442,37 +1014,37 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 2));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -1484,11 +1056,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
@@ -1498,24 +1070,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1531,33 +1085,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1577,29 +1104,29 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1619,15 +1146,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
@@ -1638,10 +1156,19 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1659,33 +1186,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -1695,37 +1195,19 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1743,27 +1225,42 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 3;
+        pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 1));
@@ -1775,48 +1272,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
     {
         SOFIPixelCombination pixelCombination;
         pixelCombination.outputDeltaX = 3;
-        pixelCombination.outputDeltaY = 2;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 3;
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
@@ -1829,27 +1284,27 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
@@ -1860,33 +1315,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         SOFIPixelCombination pixelCombination;
         pixelCombination.outputDeltaX = 3;
         pixelCombination.outputDeltaY = 4;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
@@ -1915,24 +1343,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
@@ -1973,11 +1383,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -1988,38 +1398,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -2030,38 +1413,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -2072,38 +1428,38 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations5()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -2120,42 +1476,42 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
             subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -2166,228 +1522,8 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 1;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 0;
-        pixelCombination.outputDeltaY = 2;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 0;
-        pixelCombination.outputDeltaY = 3;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 0;
-        pixelCombination.outputDeltaY = 4;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 0;
-        pixelCombination.outputDeltaY = 5;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 0;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
@@ -2397,287 +1533,11 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 1;
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 2;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 3;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 4;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 1;
-        pixelCombination.outputDeltaY = 5;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
-        pixelCombination.outputDeltaY = 0;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
@@ -2685,275 +1545,25 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
             subset.push_back(std::pair<int, int>(-1, -1));
             subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-2, 1));
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
     }
     {
         SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
-        pixelCombination.outputDeltaY = 1;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaX = 0;
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
-        pixelCombination.outputDeltaY = 3;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
-        pixelCombination.outputDeltaY = 4;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 2;
-        pixelCombination.outputDeltaY = 5;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        pixelCombinations.push_back(pixelCombination);
-    }
-    {
-        SOFIPixelCombination pixelCombination;
-        pixelCombination.outputDeltaX = 3;
-        pixelCombination.outputDeltaY = 0;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
@@ -2961,19 +1571,415 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
             subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, -1));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 0;
+        pixelCombination.outputDeltaY = 3;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 0;
+        pixelCombination.outputDeltaY = 4;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 0;
+        pixelCombination.outputDeltaY = 5;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 0;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, -1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 1;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 2;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 3;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 2));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 4;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 1;
+        pixelCombination.outputDeltaY = 5;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 0;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 1;
+        {
+            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            subset.push_back(std::pair<int, int>(2, 1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 2;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 3;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 4;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 2;
+        pixelCombination.outputDeltaY = 5;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 3;
+        pixelCombination.outputDeltaY = 0;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -2984,22 +1990,22 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 1;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -2));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 2));
             pixelCombination.combinations.push_back(subset);
         }
         {
@@ -3015,9 +2021,9 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
@@ -3030,42 +2036,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3086,32 +2062,32 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         }
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3122,42 +2098,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3188,22 +2134,22 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(-1, 2));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(-1, 1));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 2));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3214,41 +2160,41 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, -1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
             subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-2, 0));
+            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
@@ -3268,36 +2214,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -2));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -3306,42 +2222,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -2));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3352,42 +2238,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 3;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3398,42 +2254,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3442,36 +2268,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         SOFIPixelCombination pixelCombination;
         pixelCombination.outputDeltaX = 4;
         pixelCombination.outputDeltaY = 5;
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
         {
             std::vector<std::pair<int, int> > subset;
             subset.push_back(std::pair<int, int>(0, 0));
@@ -3490,31 +2286,31 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 0;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
             subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, -1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, -1));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-1, 0));
+            subset.push_back(std::pair<int, int>(0, -1));
             subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, 0));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(-2, 0));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(2, -1));
-            subset.push_back(std::pair<int, int>(2, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
@@ -3534,36 +2330,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
             subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, -1));
-            subset.push_back(std::pair<int, int>(0, 0));
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
-            subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
         pixelCombinations.push_back(pixelCombination);
     }
     {
@@ -3572,42 +2338,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 2;
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
+            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3621,26 +2357,6 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
             subset.push_back(std::pair<int, int>(0, 1));
             subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(2, 0));
@@ -3648,12 +2364,32 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         }
         {
             std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -2));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 0));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(2, 1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
             subset.push_back(std::pair<int, int>(1, 2));
             subset.push_back(std::pair<int, int>(2, -1));
+            pixelCombination.combinations.push_back(subset);
+        }
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            subset.push_back(std::pair<int, int>(0, 1));
+            subset.push_back(std::pair<int, int>(1, -1));
+            subset.push_back(std::pair<int, int>(1, 1));
+            subset.push_back(std::pair<int, int>(1, 2));
+            subset.push_back(std::pair<int, int>(2, 0));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3664,42 +2400,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 4;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -2));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 2));
             subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 1));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
@@ -3710,42 +2416,12 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations6()
         pixelCombination.outputDeltaY = 5;
         {
             std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
             subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
             subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, -1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(1, 2));
-            subset.push_back(std::pair<int, int>(2, 0));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
             subset.push_back(std::pair<int, int>(1, 2));
             subset.push_back(std::pair<int, int>(2, 1));
-            pixelCombination.combinations.push_back(subset);
-        }
-        {
-            std::vector<std::pair<int, int> > subset;
-            subset.push_back(std::pair<int, int>(0, 1));
-            subset.push_back(std::pair<int, int>(0, 2));
-            subset.push_back(std::pair<int, int>(1, -1));
-            subset.push_back(std::pair<int, int>(1, 0));
-            subset.push_back(std::pair<int, int>(1, 1));
-            subset.push_back(std::pair<int, int>(2, 2));
             pixelCombination.combinations.push_back(subset);
         }
         pixelCombinations.push_back(pixelCombination);
