@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_storage.h"
+#include "Storage.h"
 
 #ifdef WITH_IGOR
 

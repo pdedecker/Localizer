@@ -33,7 +33,7 @@
 
 #include "boost/smart_ptr.hpp"
 
-#include "PALM_analysis.h"
+#include "PALMAnalysis.h"
 
 #define EXPORT __attribute__((visibility("default")))
 

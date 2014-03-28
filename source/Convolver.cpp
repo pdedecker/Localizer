@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_Convolver.h"
+#include "Convolver.h"
 
 boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 

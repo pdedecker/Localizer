@@ -26,7 +26,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_IgorXOP.h"
+#include "IgorXOP.h"
 
 #include "NewSOFI.h"
 

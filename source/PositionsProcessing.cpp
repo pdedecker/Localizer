@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_PositionsProcessing.h"
+#include "PositionsProcessing.h"
 
 std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
 																	 double calculationRange, size_t nBins, double lowerX, double upperX,

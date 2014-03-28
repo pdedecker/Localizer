@@ -31,9 +31,9 @@
 #include <vector>
 #include <cmath>
 #include "boost/smart_ptr.hpp"
-#include "PALM_analysis_storage.h"
-#include "PALM_analysis.h"
-#include "PALM_analysis_defines.h"
+#include "Storage.h"
+#include "PALMAnalysis.h"
+#include "Defines.h"
 
 // the visual studio compiler defines min and max preprocessor macros, but gcc doesn't
 // so we have to undefine those for compilation on windows since otherwise the compiler

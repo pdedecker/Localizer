@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_segmentation.h"
+#include "Segmentation.h"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>

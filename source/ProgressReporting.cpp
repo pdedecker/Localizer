@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_ProgressReporting.h"
+#include "ProgressReporting.h"
 #include <math.h>
 
 int ProgressReporter_Silent::UpdateCalculationProgress(double progress, double maxProgress) {

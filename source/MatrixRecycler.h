@@ -33,7 +33,7 @@
 #include <list>
 #include "boost/thread.hpp"
 #include <eigen3/Eigen/Eigen>
-#include "PALM_analysis_storage.h"
+#include "Storage.h"
 
 const size_t kMaxUnusedMatrices = 20;
 

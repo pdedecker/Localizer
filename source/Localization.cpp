@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_Localization.h"
+#include "Localization.h"
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_integration.h>

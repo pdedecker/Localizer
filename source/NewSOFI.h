@@ -33,9 +33,9 @@
 #include <vector>
 #include <memory>
 
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_FileIO.h"
-#include "PALM_analysis_ProgressReporting.h"
+#include "Defines.h"
+#include "FileIO.h"
+#include "ProgressReporting.h"
 #include "SOFIFrameVerifiers.h"
 
 class SOFIOptions {

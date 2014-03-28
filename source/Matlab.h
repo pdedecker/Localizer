@@ -32,7 +32,7 @@
 
 #include "mex.h"
 
-#include "PALM_analysis_defines.h"
+#include "Defines.h"
 
 class ImageLoader;
 

@@ -28,9 +28,9 @@
  */
 
 
-#include "PALM_analysis_Processing.h"
-#include "PALM_analysis_ProgressReporting.h"
-#include "PALM_analysis_FileIO.h"
+#include "Processing.h"
+#include "ProgressReporting.h"
+#include "FileIO.h"
 
 void CCDImagesProcessorAverageSubtraction::convert_images(std::shared_ptr<ImageLoader> image_loader, std::shared_ptr<ImageOutputWriter> output_writer) {
 	// depending on the value of this->n_frames_averaging we either need to subtract the entire movie or just a small part

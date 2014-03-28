@@ -31,8 +31,8 @@
 #define PALM_ANALYSIS_PARTICLEFINDING_H
 
 #include <algorithm>
-#include "PALM_analysis_storage.h"
-#include "PALM_analysis_Localization.h"
+#include "Storage.h"
+#include "Localization.h"
 #include "boost/smart_ptr.hpp"
 #include <list>
 

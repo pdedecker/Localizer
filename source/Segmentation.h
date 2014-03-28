@@ -35,9 +35,9 @@
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
 #include <gsl/gsl_histogram.h>
-#include "PALM_analysis_storage.h"
-#include "PALM_analysis_MatrixRecycler.h"
-#include "PALM_analysis_Convolver.h"
+#include "Storage.h"
+#include "MatrixRecycler.h"
+#include "Convolver.h"
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"

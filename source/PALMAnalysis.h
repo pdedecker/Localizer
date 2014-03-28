@@ -34,9 +34,9 @@
 #include <algorithm>
 #include "boost/thread.hpp"
 #include "boost/bind.hpp"
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_Localization.h"
-#include "PALM_analysis_ProgressReporting.h"
+#include "Defines.h"
+#include "Localization.h"
+#include "ProgressReporting.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 

@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_ParticleFinding.h"
+#include "ParticleFinding.h"
 
 std::shared_ptr<std::list<Particle> > ParticleFinder_radius::findPositions(ImagePtr image, std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > threshold_image) {
 	std::shared_ptr<std::list<Particle> > positions (new std::list<Particle>());

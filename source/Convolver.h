@@ -34,8 +34,8 @@
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/shared_mutex.hpp"
 
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_MatrixRecycler.h"
+#include "Defines.h"
+#include "MatrixRecycler.h"
 
 class ConvolveMatricesWithFFTClass {
 public:

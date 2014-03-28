@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_PALMImages.h"
+#include "PALMImages.h"
 #include <gsl/gsl_cdf.h>
 
 NormalCDFLookupTable::NormalCDFLookupTable() {

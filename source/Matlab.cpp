@@ -26,13 +26,13 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_Matlab.h"
+#include "Matlab.h"
 
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis.h"
-#include "PALM_analysis_ParticleFinding.h"
-#include "PALM_analysis_FileIO.h"
-#include "PALM_analysis_SOFI.h"
+#include "Defines.h"
+#include "PALMAnalysis.h"
+#include "ParticleFinding.h"
+#include "FileIO.h"
+#include "SOFI.h"
 #include "NewSOFI.h"
 
 /**

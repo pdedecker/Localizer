@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_SOFI.h"
+#include "SOFI.h"
 
 #include "tbb/tbb.h"
 #include "tbb/spin_mutex.h"

@@ -38,8 +38,8 @@
 #include <gsl/gsl_matrix.h>
 #include <stdexcept>
 
-#include "PALM_analysis_segmentation.h"
-#include "PALM_analysis_storage.h"
+#include "Segmentation.h"
+#include "Storage.h"
 
 class LocalizedPosition;
 class LocalizedPositionsContainer;

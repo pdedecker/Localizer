@@ -26,7 +26,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_IgorUtilities.h"
+#include "IgorUtilities.h"
 
 void GetFilePathAndCameraType(std::string &inputFilePath, std::string &filePath, size_t &cameraType) {
     int isWavePath = 1;

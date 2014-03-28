@@ -30,7 +30,7 @@
 #ifndef SOFIFRAMEVERIFIERS_H
 #define SOFIFRAMEVERIFIERS_H
 
-#include "PALM_analysis_defines.h"
+#include "Defines.h"
 
 class SOFIFrameVerifier {
 public:

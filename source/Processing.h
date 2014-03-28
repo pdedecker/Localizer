@@ -40,9 +40,9 @@
 #include <algorithm>
 #include <boost/smart_ptr.hpp>
 
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_errors.h"
-#include "PALM_analysis_storage.h"
+#include "Defines.h"
+#include "Errors.h"
+#include "Storage.h"
 
 class ImageLoader;
 class ImageOutputWriter;

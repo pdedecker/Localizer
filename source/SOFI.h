@@ -38,8 +38,8 @@
 #include "boost/smart_ptr.hpp"
 #include <gsl/gsl_min.h>
 
-#include "PALM_analysis_FileIO.h"
-#include "PALM_analysis_ProgressReporting.h"
+#include "FileIO.h"
+#include "ProgressReporting.h"
 #include "SOFIFrameVerifiers.h"
 
 class SingleSOFICalculation;

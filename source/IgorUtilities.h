@@ -36,11 +36,11 @@
 
 #include "XOPStandardHeaders.h"
 #include <eigen3/Eigen/Eigen>
-#include "PALM_analysis.h"
-#include "PALM_analysis_ProgressReporting.h"
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_storage.h"
-#include "PALM_analysis_FileIO.h"
+#include "PALMAnalysis.h"
+#include "ProgressReporting.h"
+#include "Defines.h"
+#include "Storage.h"
+#include "FileIO.h"
 
 class ImageLoader;
 

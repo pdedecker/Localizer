@@ -27,7 +27,7 @@
  to convey the resulting work.
  */
 
-#include "PALM_analysis_MatrixRecycler.h"
+#include "MatrixRecycler.h"
 
 MatrixRecycler::~MatrixRecycler() {
 	// time to clean up unused memory

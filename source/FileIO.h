@@ -38,9 +38,9 @@
 #include <string>
 #include <map>
 #include <utility>
-#include "PALM_analysis_errors.h"
-#include "PALM_analysis_storage.h"
-#include "PALM_analysis_defines.h"
+#include "Errors.h"
+#include "Storage.h"
+#include "Defines.h"
 #include "tiffio.h"
 #include "boost/cstdint.hpp"
 #include "boost/thread.hpp"
@@ -51,7 +51,7 @@
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
-#include "PALM_analysis_IgorUtilities.h"
+#include "IgorUtilities.h"
 #endif
 
 #ifdef WITH_MATLAB

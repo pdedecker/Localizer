@@ -30,11 +30,11 @@
 #ifndef PALM_ANALYSIS_PALMIMAGES_H
 #define PALM_ANALYSIS_PALMIMAGES_H
 
-#include "PALM_analysis.h"
-#include "PALM_analysis_defines.h"
+#include "PALMAnalysis.h"
+#include "Defines.h"
 #include "boost/smart_ptr.hpp"
 #include "boost/thread.hpp"
-#include "PALM_analysis_storage.h"
+#include "Storage.h"
 
 class PALMBitmapImageDeviationCalculator;
 class NormalCDFLookupTable;

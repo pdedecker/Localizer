@@ -36,8 +36,8 @@
 #include <iostream>
 #include <fstream>
 #include "boost/smart_ptr.hpp"
-#include "PALM_analysis_defines.h"
-#include "PALM_analysis_errors.h"
+#include "Defines.h"
+#include "Errors.h"
 
 #ifdef WITH_IGOR
 	#include "XOPStandardHeaders.h"
