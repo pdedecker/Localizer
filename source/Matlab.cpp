@@ -559,6 +559,8 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	int order = *(mxGetPr(array));
 	if ((order < 1) || (order > 6))
 		mexErrMsgTxt("Expected between 1 and 6 for the SOFI order");
+    std::vector<int> orders;
+    orders.push_back(order);
 	
 	// index 2 - must be a boolean (do pixelation correction)
 	bool doPixelationCorrection;
@@ -595,13 +597,13 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		std::vector<ImagePtr> sofiOutputImages;
 		// set SOFI calculation options
 		SOFIOptions sofiOptions;
-        sofiOptions.order = order;
+        sofiOptions.orders = orders;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = true;
         DoNewSOFI(imageLoader, sofiOptions, progressReporter, sofiOutputImages);
 
-		plhs[0] = ConvertImagesToArray(sofiOutputImages);
+		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
 		plhs[1] = ConvertImageToArray(sofiOptions.averageImage);
 	}
 	catch (std::bad_alloc) {

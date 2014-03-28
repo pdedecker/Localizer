@@ -55,15 +55,17 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     if (nImages == 0)
         throw std::runtime_error("SOFI without input images");
     
-    int order = options.order;
+    const std::vector<int> orders = options.orders;
+    int nOrders = orders.size();
     const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
     bool wantAverageImage = options.wantAverageImage;
     ImagePtr& averageImage = options.averageImage;
     ImagePtr batchAverageImage;
     
-    std::vector<std::pair<int, std::vector<SOFIKernel> > > orders;
-    orders.push_back(std::pair<int, std::vector<SOFIKernel> >(order, KernelsForOrder(order)));
-    size_t nOrders = orders.size();
+    std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
+    for (int i = 0; i < nOrders; ++i) {
+        kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i])));
+    }
     int firstImageToProcess = 0;
     int lastImageToProcess = 0;
     int imagesProcessedSoFar = 0;
@@ -93,7 +95,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, orders, pixelMap, subImages, wantAverageImage, batchAverageImage);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, pixelMap, subImages, wantAverageImage, batchAverageImage);
         totalNumberOfImagesIncluded += nImagesIncluded;
         double contribution = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
         summedContributions += contribution;
@@ -114,7 +116,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         *mergedImages[j] /= summedContributions;
         
         if (options.doPixelationCorrection)
-            PerformPixelationCorrection(mergedImages[j], order);
+            PerformPixelationCorrection(mergedImages[j], orders[j]);
     });
     
     sofiOutputImages = mergedImages;

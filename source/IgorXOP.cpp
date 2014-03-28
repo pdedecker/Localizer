@@ -646,7 +646,8 @@ struct NewSOFIRuntimeParams {
 	// Parameters for /ORDR flag group.
 	int ORDRFlagEncountered;
 	double order;
-	int ORDRFlagParamsSet[1];
+	double extraOrders[4];					// Optional parameter.
+	int ORDRFlagParamsSet[5];
     
 	// Parameters for /SUB flag group.
 	int SUBFlagEncountered;
@@ -2710,15 +2711,29 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         cameraType = p->cameraType + 0.5;
 	}
     
-    int order;
+    std::vector<int> orders;
     if (p->ORDRFlagEncountered) {
 		// Parameter: p->order
-        order = static_cast<int>(p->order);
+        int order = static_cast<int>(p->order);
         if (order <= 1) {
             return EXPECT_POS_NUM;
         }
+        orders.push_back(order);
+        
+        // Array-style optional parameter: p->extraOrders
+		int* paramsSet = &p->ORDRFlagParamsSet[1];
+		int extraOrder;
+		for(int i=0; i<4; i++) {
+			if (paramsSet[i] == 0)
+				break;		// No more parameters.
+			extraOrder = p->extraOrders[i];
+            if (extraOrder <= 1) {
+                return EXPECT_POS_NUM;
+            }
+			orders.push_back(extraOrder);
+		}
 	} else {
-        order = 2;
+        orders.push_back(2);
     }
     
     int nFramesToSkip = 0;
@@ -2779,6 +2794,8 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     DataFolderAndName outputWaveParams;
     if (p->DESTFlagEncountered) {
         // Parameter: p->dest
+        if ((orders.size() > 1) && (strlen(p->dest.name) >= MAX_OBJ_NAME))  // must have room to append numeric suffic if multiple orders
+            return NAME_TOO_LONG;
         outputWaveParams = p->dest;
     } else {
         outputWaveParams.dfH = NULL;
@@ -2818,18 +2835,26 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         }
         std::vector<ImagePtr> sofiOutputImages;
         SOFIOptions sofiOptions;
-        sofiOptions.order = order;
+        sofiOptions.orders = orders;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
-        waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(0), outputWaveParams);
-        double offset = 2.0;
-        double delta = 1.0 / static_cast<double>(order);
-        MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
-        MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
+        for (int i = 0; i < orders.size(); ++i) {
+            DataFolderAndName adjustedOutputParams = outputWaveParams;
+            if (orders.size() > 1) {
+                int nameLength = strlen(adjustedOutputParams.name);
+                adjustedOutputParams.name[nameLength] = static_cast<char>(orders[i] + 48);
+                adjustedOutputParams.name[nameLength + 1] = '\0';
+            }
+            waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(i), adjustedOutputParams);
+            double offset = 2.0;
+            double delta = 1.0 / static_cast<double>(orders[i]);
+            MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
+            MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
+        }
         if (wantAverageImage) {
-            DataFolderAndName averageOutputWaveParams;
+            DataFolderAndName averageOutputWaveParams = outputWaveParams;
             averageOutputWaveParams.dfH = outputWaveParams.dfH;
             strcpy(averageOutputWaveParams.name, outputWaveParams.name);
             strcat(averageOutputWaveParams.name, "_avg");
@@ -2971,7 +2996,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR=number:order /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

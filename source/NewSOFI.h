@@ -41,13 +41,14 @@
 class SOFIOptions {
 public:
     SOFIOptions() :
-        order(2),
         doPixelationCorrection(true),
         wantAverageImage(false)
-    {}
+    {
+        orders.push_back(2);
+    }
     
     std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-    int order;
+    std::vector<int> orders;
     bool doPixelationCorrection;
     bool wantAverageImage;
     ImagePtr averageImage;
