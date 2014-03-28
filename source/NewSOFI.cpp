@@ -43,6 +43,7 @@
 
 int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage);
 
+ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap);
 double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
@@ -261,28 +262,35 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         const std::pair<int, std::vector<SOFIKernel> >& calculation = orders[i];
         int order = calculation.first;
         const std::vector<SOFIKernel>& kernels = calculation.second;
-        ImagePtr sofiImage(new Image(order * (nRows - 4), order * (nCols - 4)));
-        tbb::parallel_do(kernels.cbegin(), kernels.cend(), [=,&pixelMap,&sofiImage](const SOFIKernel& kernel) {
-            Eigen::MatrixXd evaluated(nRows - 4, nCols - 4);
-            evaluated.setConstant(0.0);
-            for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
-                evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap, nRows - 4, nCols - 4);
-            }
-            if (kernel.combinations.size() > 1)
-                evaluated /= static_cast<double>(kernel.combinations.size());
-            
-            for (int col = 0; col < nCols - 4; ++col) {
-                for (int row = 0; row < nRows - 4; ++row) {
-                    int baseOutputRow = row * order;
-                    int baseOutputCol = col * order;
-                    (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
-                }
-            }
-        });
+        ImagePtr sofiImage = AssembleSOFIImage(nRows, nCols, order, kernels, pixelMap);
         sofiImages.push_back(sofiImage);
     }
     
     return nImagesIncluded;
+}
+
+ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap) {
+    ImagePtr sofiImage(new Image(order * (nInputRows - 4), order * (nInputCols - 4)));
+    
+    tbb::parallel_do(kernels.cbegin(), kernels.cend(), [=,&pixelMap,&sofiImage](const SOFIKernel& kernel) {
+        Eigen::MatrixXd evaluated(nInputRows - 4, nInputCols - 4);
+        evaluated.setConstant(0.0);
+        for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
+            evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap, nInputRows - 4, nInputCols - 4);
+        }
+        if (kernel.combinations.size() > 1)
+            evaluated /= static_cast<double>(kernel.combinations.size());
+        
+        for (int col = 0; col < nInputCols - 4; ++col) {
+            for (int row = 0; row < nInputRows - 4; ++row) {
+                int baseOutputRow = row * order;
+                int baseOutputCol = col * order;
+                (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
+            }
+        }
+    });
+    
+    return sofiImage;
 }
 
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols) {
