@@ -552,15 +552,20 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	mxArray* array;
 	// the mxArray at index 0 (the string "newsofi") will have been checked already by mexFunction
 	
-	// index 1 - must be a single number (order)
+	// index 1 - must be a vector containing the orders to process
+	std::vector<int> orders;
 	array = const_cast<mxArray*>(prhs[1]);
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
-	int order = *(mxGetPr(array));
-	if ((order < 1) || (order > 6))
-		mexErrMsgTxt("Expected between 1 and 6 for the SOFI order");
-    std::vector<int> orders;
-    orders.push_back(order);
+	if ((mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("1st argument must be a vector of double scalars (the orders to be calculated)");
+	int nOrders = mxGetN(array);
+	if (nOrders < 1)
+		mexErrMsgTxt("at least one order should be specified");
+	for (int i = 0; i < nOrders; ++i) {
+		int thisOrder = static_cast<int>(*(mxGetPr(array) + i));
+		if ((thisOrder < 1) || (thisOrder > 6))
+			mexErrMsgTxt("all orders must be >=2 and <=6");
+		orders.push_back(thisOrder);
+	}
 	
 	// index 2 - must be a boolean (do pixelation correction)
 	bool doPixelationCorrection;
@@ -603,7 +608,12 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
         sofiOptions.wantAverageImage = true;
         DoNewSOFI(imageLoader, sofiOptions, progressReporter, sofiOutputImages);
 
-		plhs[0] = ConvertImageToArray(sofiOutputImages.at(0));
+		mwSize dims[2] = {static_cast<mwSize>(1), static_cast<mwSize>(nOrders)};
+		mxArray * sofiOutputCellArray = mxCreateCellArray(2, dims);
+		for (int i = 0; i < nOrders; ++i) {
+			mxSetCell(sofiOutputCellArray, i, ConvertImageToArray(sofiOutputImages.at(i)));
+		}
+		plhs[0] = sofiOutputCellArray;
 		plhs[1] = ConvertImageToArray(sofiOptions.averageImage);
 	}
 	catch (std::bad_alloc) {
