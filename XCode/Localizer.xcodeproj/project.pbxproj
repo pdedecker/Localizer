@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0128F60151CB06400D683EC /* PALM_analysis_Matlab.h in Headers */ = {isa = PBXBuildFile; fileRef = D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */; };
-		D01D290C136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
+		D0128F60151CB06400D683EC /* Matlab.h in Headers */ = {isa = PBXBuildFile; fileRef = D0128F5C151CB06400D683EC /* Matlab.h */; };
+		D01D290C136CE9710094B975 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
-		D027E937151311CF005B8664 /* PALM_analysis_Convolver.h in Headers */ = {isa = PBXBuildFile; fileRef = D027E935151311CF005B8664 /* PALM_analysis_Convolver.h */; };
-		D027E938151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */; };
-		D027E93A151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */; };
+		D027E937151311CF005B8664 /* Convolver.h in Headers */ = {isa = PBXBuildFile; fileRef = D027E935151311CF005B8664 /* Convolver.h */; };
+		D027E938151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
+		D027E93A151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
 		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */ = {isa = PBXBuildFile; fileRef = D056459E18AA1F72001A22D9 /* NewSOFI.h */; };
@@ -23,35 +23,35 @@
 		D06A631F18B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632118B4CED200C940C5 /* SOFIFrameVerifiers.h in Headers */ = {isa = PBXBuildFile; fileRef = D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */; };
-		D090E533139685610099D837 /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
+		D090E533139685610099D837 /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
 		D0A9C2ED135F4EED00D076AE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
-		D0A9C2EF135F4EED00D076AE /* PALM_analysis_IgorXOP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09576100D30171E00506A92 /* PALM_analysis_IgorXOP.cpp */; };
-		D0A9C2F0135F4EED00D076AE /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
-		D0A9C2F1135F4EED00D076AE /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
-		D0A9C2F2135F4EED00D076AE /* PALM_analysis_FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */; };
-		D0A9C2F3135F4EED00D076AE /* PALM_analysis_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */; };
-		D0A9C2F4135F4EED00D076AE /* PALM_analysis_ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */; };
-		D0A9C2F5135F4EED00D076AE /* PALM_analysis_Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */; };
-		D0A9C2F6135F4EED00D076AE /* PALM_analysis_PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */; };
-		D0A9C2F7135F4EED00D076AE /* PALM_analysis_IgorUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0F0E2CF10EBE26600F9A855 /* PALM_analysis_IgorUtilities.cpp */; };
-		D0A9C2F8135F4EED00D076AE /* PALM_analysis_PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */; };
-		D0A9C2F9135F4EED00D076AE /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
-		D0A9C2FA135F4EED00D076AE /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
+		D0A9C2EF135F4EED00D076AE /* IgorXOP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09576100D30171E00506A92 /* IgorXOP.cpp */; };
+		D0A9C2F0135F4EED00D076AE /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
+		D0A9C2F1135F4EED00D076AE /* Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* Processing.cpp */; };
+		D0A9C2F2135F4EED00D076AE /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
+		D0A9C2F3135F4EED00D076AE /* Segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* Segmentation.cpp */; };
+		D0A9C2F4135F4EED00D076AE /* ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */; };
+		D0A9C2F5135F4EED00D076AE /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* Localization.cpp */; };
+		D0A9C2F6135F4EED00D076AE /* PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALMImages.cpp */; };
+		D0A9C2F7135F4EED00D076AE /* IgorUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0F0E2CF10EBE26600F9A855 /* IgorUtilities.cpp */; };
+		D0A9C2F8135F4EED00D076AE /* PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */; };
+		D0A9C2F9135F4EED00D076AE /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
+		D0A9C2FA135F4EED00D076AE /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
 		D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
 		D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
-		D0C258321746C19A001C2EB1 /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
-		D0C258341746C1A2001C2EB1 /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
-		D0C258361746C1A2001C2EB1 /* PALM_analysis_FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */; };
-		D0C258381746C1A2001C2EB1 /* PALM_analysis_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */; };
-		D0C2583A1746C1A2001C2EB1 /* PALM_analysis_Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */; };
-		D0C2583C1746C1A2001C2EB1 /* PALM_analysis_ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */; };
-		D0C2583E1746C1A2001C2EB1 /* PALM_analysis_Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */; };
-		D0C258401746C1A2001C2EB1 /* PALM_analysis_PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */; };
-		D0C258421746C1A2001C2EB1 /* PALM_analysis_PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */; };
-		D0C258441746C1A2001C2EB1 /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
-		D0C258461746C1A2001C2EB1 /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
-		D0C258481746C1A2001C2EB1 /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
-		D0C2584C1746C1AF001C2EB1 /* PALM_analysis_Matlab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0128F5D151CB06400D683EC /* PALM_analysis_Matlab.cpp */; };
+		D0C258321746C19A001C2EB1 /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
+		D0C258341746C1A2001C2EB1 /* Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* Processing.cpp */; };
+		D0C258361746C1A2001C2EB1 /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
+		D0C258381746C1A2001C2EB1 /* Segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* Segmentation.cpp */; };
+		D0C2583A1746C1A2001C2EB1 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
+		D0C2583C1746C1A2001C2EB1 /* ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */; };
+		D0C2583E1746C1A2001C2EB1 /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* Localization.cpp */; };
+		D0C258401746C1A2001C2EB1 /* PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALMImages.cpp */; };
+		D0C258421746C1A2001C2EB1 /* PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */; };
+		D0C258441746C1A2001C2EB1 /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
+		D0C258461746C1A2001C2EB1 /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
+		D0C258481746C1A2001C2EB1 /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
+		D0C2584C1746C1AF001C2EB1 /* Matlab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0128F5D151CB06400D683EC /* Matlab.cpp */; };
 		D0C2584E1746C1AF001C2EB1 /* WaitMex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D043F47415A712B7006A3D54 /* WaitMex.cpp */; };
 		D0C2584F1746C1DB001C2EB1 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */; };
 		D0C258501746C1DD001C2EB1 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE296170C54680012ED0E /* libboost_system-mt.a */; };
@@ -64,20 +64,20 @@
 		D0C258571746C1EF001C2EB1 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D0C258581746C1F4001C2EB1 /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
 		D0C258591746C51E001C2EB1 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
-		D0C2585A1746C57D001C2EB1 /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
+		D0C2585A1746C57D001C2EB1 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
 		D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
-		D0CCD31F1473C6B6005CD75A /* PALM_analysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALM_analysis.cpp */; };
-		D0CCD3211473C6B6005CD75A /* PALM_analysis_ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */; };
-		D0CCD3231473C6B6005CD75A /* PALM_analysis_Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */; };
-		D0CCD3251473C6B6005CD75A /* PALM_analysis_FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */; };
-		D0CCD3271473C6B6005CD75A /* PALM_analysis_segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */; };
-		D0CCD3291473C6B6005CD75A /* PALM_analysis_ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */; };
-		D0CCD32B1473C6B6005CD75A /* PALM_analysis_Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */; };
-		D0CCD32D1473C6B6005CD75A /* PALM_analysis_PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */; };
-		D0CCD32F1473C6B6005CD75A /* PALM_analysis_PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */; };
-		D0CCD3311473C6B6005CD75A /* PALM_analysis_SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */; };
-		D0CCD3331473C6B6005CD75A /* PALM_analysis_storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */; };
-		D0CCD3351473C6B6005CD75A /* PALM_analysis_MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */; };
+		D0CCD31F1473C6B6005CD75A /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
+		D0CCD3211473C6B6005CD75A /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
+		D0CCD3231473C6B6005CD75A /* Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* Processing.cpp */; };
+		D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
+		D0CCD3271473C6B6005CD75A /* Segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* Segmentation.cpp */; };
+		D0CCD3291473C6B6005CD75A /* ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */; };
+		D0CCD32B1473C6B6005CD75A /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* Localization.cpp */; };
+		D0CCD32D1473C6B6005CD75A /* PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALMImages.cpp */; };
+		D0CCD32F1473C6B6005CD75A /* PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */; };
+		D0CCD3311473C6B6005CD75A /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
+		D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
+		D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
 		D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CCD3381473C700005CD75A /* LocalizerDLL.h */; };
 		D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */; };
 		D0EAE29E170C54680012ED0E /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */; };
@@ -109,16 +109,16 @@
 		08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D01CCD10486CAD60068D4B7 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../resources/Info.plist; sourceTree = SOURCE_ROOT; };
 		D0006D2B12CFD34D00539A8F /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = /System/Library/Frameworks/Accelerate.framework; sourceTree = "<absolute>"; };
-		D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_storage.cpp; path = ../source/PALM_analysis_storage.cpp; sourceTree = SOURCE_ROOT; };
-		D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Matlab.h; path = ../source/PALM_analysis_Matlab.h; sourceTree = SOURCE_ROOT; };
-		D0128F5D151CB06400D683EC /* PALM_analysis_Matlab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Matlab.cpp; path = ../source/PALM_analysis_Matlab.cpp; sourceTree = SOURCE_ROOT; };
-		D01D290A136CE9710094B975 /* PALM_analysis_ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_ProgressReporting.h; path = ../source/PALM_analysis_ProgressReporting.h; sourceTree = SOURCE_ROOT; };
-		D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_ProgressReporting.cpp; path = ../source/PALM_analysis_ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
+		D0069E0C117B764200112C90 /* Storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Storage.cpp; path = ../source/Storage.cpp; sourceTree = SOURCE_ROOT; };
+		D0128F5C151CB06400D683EC /* Matlab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matlab.h; path = ../source/Matlab.h; sourceTree = SOURCE_ROOT; };
+		D0128F5D151CB06400D683EC /* Matlab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matlab.cpp; path = ../source/Matlab.cpp; sourceTree = SOURCE_ROOT; };
+		D01D290A136CE9710094B975 /* ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressReporting.h; path = ../source/ProgressReporting.h; sourceTree = SOURCE_ROOT; };
+		D01D290B136CE9710094B975 /* ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressReporting.cpp; path = ../source/ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
 		D01F3B0A13E0800D00A42472 /* Localizer.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = Localizer.r; path = ../resources/Localizer.r; sourceTree = SOURCE_ROOT; };
-		D027E935151311CF005B8664 /* PALM_analysis_Convolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Convolver.h; path = ../source/PALM_analysis_Convolver.h; sourceTree = SOURCE_ROOT; };
-		D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Convolver.cpp; path = ../source/PALM_analysis_Convolver.cpp; sourceTree = SOURCE_ROOT; };
-		D03321001074B8B80097124C /* PALM_analysis_PALMImages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_PALMImages.h; path = ../source/PALM_analysis_PALMImages.h; sourceTree = SOURCE_ROOT; };
-		D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_PALMImages.cpp; path = ../source/PALM_analysis_PALMImages.cpp; sourceTree = SOURCE_ROOT; };
+		D027E935151311CF005B8664 /* Convolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Convolver.h; path = ../source/Convolver.h; sourceTree = SOURCE_ROOT; };
+		D027E936151311CF005B8664 /* Convolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Convolver.cpp; path = ../source/Convolver.cpp; sourceTree = SOURCE_ROOT; };
+		D03321001074B8B80097124C /* PALMImages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALMImages.h; path = ../source/PALMImages.h; sourceTree = SOURCE_ROOT; };
+		D03321011074B8B80097124C /* PALMImages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMImages.cpp; path = ../source/PALMImages.cpp; sourceTree = SOURCE_ROOT; };
 		D043F47315A712B7006A3D54 /* WaitMex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaitMex.h; path = ../source/WaitMex.h; sourceTree = SOURCE_ROOT; };
 		D043F47415A712B7006A3D54 /* WaitMex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WaitMex.cpp; path = ../source/WaitMex.cpp; sourceTree = SOURCE_ROOT; };
 		D056459D18AA1F72001A22D9 /* NewSOFI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NewSOFI.cpp; path = ../source/NewSOFI.cpp; sourceTree = "<group>"; };
@@ -127,33 +127,33 @@
 		D05645A318AA211F001A22D9 /* NewSOFIKernels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSOFIKernels.h; path = ../source/NewSOFIKernels.h; sourceTree = "<group>"; };
 		D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SOFIFrameVerifiers.cpp; path = ../source/SOFIFrameVerifiers.cpp; sourceTree = "<group>"; };
 		D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SOFIFrameVerifiers.h; path = ../source/SOFIFrameVerifiers.h; sourceTree = "<group>"; };
-		D084B0630F7F7236004E7AE3 /* PALM_analysis_defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_defines.h; path = ../source/PALM_analysis_defines.h; sourceTree = SOURCE_ROOT; };
-		D08B48E30D52381800C99DE3 /* PALM_analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis.h; path = ../source/PALM_analysis.h; sourceTree = SOURCE_ROOT; };
-		D08BADD20F80C59400D08A6C /* PALM_analysis_FileIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_FileIO.h; path = ../source/PALM_analysis_FileIO.h; sourceTree = SOURCE_ROOT; };
-		D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_FileIO.cpp; path = ../source/PALM_analysis_FileIO.cpp; sourceTree = SOURCE_ROOT; };
-		D08BAEBD0F80C8B900D08A6C /* PALM_analysis_storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_storage.h; path = ../source/PALM_analysis_storage.h; sourceTree = SOURCE_ROOT; };
-		D08BAEEF0F80C9F600D08A6C /* PALM_analysis_errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_errors.h; path = ../source/PALM_analysis_errors.h; sourceTree = SOURCE_ROOT; };
-		D090E531139685610099D837 /* PALM_analysis_SOFI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_SOFI.h; path = ../source/PALM_analysis_SOFI.h; sourceTree = SOURCE_ROOT; };
-		D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_SOFI.cpp; path = ../source/PALM_analysis_SOFI.cpp; sourceTree = SOURCE_ROOT; };
-		D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Processing.cpp; path = ../source/PALM_analysis_Processing.cpp; sourceTree = SOURCE_ROOT; };
-		D093BF72106FE0380005ECA3 /* PALM_analysis_segmentation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_segmentation.h; path = ../source/PALM_analysis_segmentation.h; sourceTree = SOURCE_ROOT; };
-		D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_segmentation.cpp; path = ../source/PALM_analysis_segmentation.cpp; sourceTree = SOURCE_ROOT; };
-		D093BF92106FE1910005ECA3 /* PALM_analysis_ParticleFinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_ParticleFinding.h; path = ../source/PALM_analysis_ParticleFinding.h; sourceTree = SOURCE_ROOT; };
-		D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_ParticleFinding.cpp; path = ../source/PALM_analysis_ParticleFinding.cpp; sourceTree = SOURCE_ROOT; };
-		D093BFB7106FE2CE0005ECA3 /* PALM_analysis_Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Localization.h; path = ../source/PALM_analysis_Localization.h; sourceTree = "<group>"; };
-		D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_Localization.cpp; path = ../source/PALM_analysis_Localization.cpp; sourceTree = SOURCE_ROOT; };
-		D09576100D30171E00506A92 /* PALM_analysis_IgorXOP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_IgorXOP.cpp; path = ../source/PALM_analysis_IgorXOP.cpp; sourceTree = SOURCE_ROOT; };
-		D09576110D30171E00506A92 /* PALM_analysis_IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_IgorXOP.h; path = ../source/PALM_analysis_IgorXOP.h; sourceTree = SOURCE_ROOT; };
-		D09810480D5B18B10074692A /* PALM_analysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis.cpp; path = ../source/PALM_analysis.cpp; sourceTree = SOURCE_ROOT; };
-		D09810AF0D5B6E850074692A /* PALM_analysis_Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_Processing.h; path = ../source/PALM_analysis_Processing.h; sourceTree = SOURCE_ROOT; };
+		D084B0630F7F7236004E7AE3 /* Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Defines.h; path = ../source/Defines.h; sourceTree = SOURCE_ROOT; };
+		D08B48E30D52381800C99DE3 /* PALMAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALMAnalysis.h; path = ../source/PALMAnalysis.h; sourceTree = SOURCE_ROOT; };
+		D08BADD20F80C59400D08A6C /* FileIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileIO.h; path = ../source/FileIO.h; sourceTree = SOURCE_ROOT; };
+		D08BADD30F80C59400D08A6C /* FileIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileIO.cpp; path = ../source/FileIO.cpp; sourceTree = SOURCE_ROOT; };
+		D08BAEBD0F80C8B900D08A6C /* Storage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Storage.h; path = ../source/Storage.h; sourceTree = SOURCE_ROOT; };
+		D08BAEEF0F80C9F600D08A6C /* Errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Errors.h; path = ../source/Errors.h; sourceTree = SOURCE_ROOT; };
+		D090E531139685610099D837 /* SOFI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SOFI.h; path = ../source/SOFI.h; sourceTree = SOURCE_ROOT; };
+		D090E532139685610099D837 /* SOFI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SOFI.cpp; path = ../source/SOFI.cpp; sourceTree = SOURCE_ROOT; };
+		D09382490D8173B2008CB7F8 /* Processing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Processing.cpp; path = ../source/Processing.cpp; sourceTree = SOURCE_ROOT; };
+		D093BF72106FE0380005ECA3 /* Segmentation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Segmentation.h; path = ../source/Segmentation.h; sourceTree = SOURCE_ROOT; };
+		D093BF73106FE0380005ECA3 /* Segmentation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Segmentation.cpp; path = ../source/Segmentation.cpp; sourceTree = SOURCE_ROOT; };
+		D093BF92106FE1910005ECA3 /* ParticleFinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParticleFinding.h; path = ../source/ParticleFinding.h; sourceTree = SOURCE_ROOT; };
+		D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleFinding.cpp; path = ../source/ParticleFinding.cpp; sourceTree = SOURCE_ROOT; };
+		D093BFB7106FE2CE0005ECA3 /* Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Localization.h; path = ../source/Localization.h; sourceTree = "<group>"; };
+		D093BFB8106FE2CE0005ECA3 /* Localization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Localization.cpp; path = ../source/Localization.cpp; sourceTree = SOURCE_ROOT; };
+		D09576100D30171E00506A92 /* IgorXOP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IgorXOP.cpp; path = ../source/IgorXOP.cpp; sourceTree = SOURCE_ROOT; };
+		D09576110D30171E00506A92 /* IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorXOP.h; path = ../source/IgorXOP.h; sourceTree = SOURCE_ROOT; };
+		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
+		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = LocalizerMatlab.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
-		D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_MatrixRecycler.h; path = ../source/PALM_analysis_MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
-		D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_MatrixRecycler.cpp; path = ../source/PALM_analysis_MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
+		D0E6FD0F131C546400356DBB /* MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatrixRecycler.h; path = ../source/MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
+		D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatrixRecycler.cpp; path = ../source/MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
 		D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = SOURCE_ROOT; };
 		D0EAE296170C54680012ED0E /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = SOURCE_ROOT; };
 		D0EAE297170C54680012ED0E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = SOURCE_ROOT; };
@@ -164,14 +164,14 @@
 		D0EAE29C170C54680012ED0E /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = SOURCE_ROOT; };
 		D0EAE29D170C54680012ED0E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../lib/mac/libz.a; sourceTree = SOURCE_ROOT; };
 		D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode/libXOPSupport.a; sourceTree = SOURCE_ROOT; };
-		D0F0E2CE10EBE26600F9A855 /* PALM_analysis_IgorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_IgorUtilities.h; path = ../source/PALM_analysis_IgorUtilities.h; sourceTree = SOURCE_ROOT; };
-		D0F0E2CF10EBE26600F9A855 /* PALM_analysis_IgorUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_IgorUtilities.cpp; path = ../source/PALM_analysis_IgorUtilities.cpp; sourceTree = SOURCE_ROOT; };
-		D0F0E35510EBEC6200F9A855 /* PALM_analysis_CommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_CommandLine.h; path = ../source/PALM_analysis_CommandLine.h; sourceTree = "<group>"; };
-		D0F0E35610EBEC6200F9A855 /* PALM_analysis_CommandLine.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PALM_analysis_CommandLine.cpp; path = ../source/PALM_analysis_CommandLine.cpp; sourceTree = "<group>"; };
-		D0F4244411B5A4EC001BCE24 /* PALM_analysis_CommandLineProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_CommandLineProcessing.h; path = ../source/PALM_analysis_CommandLineProcessing.h; sourceTree = "<group>"; };
-		D0F4244511B5A4EC001BCE24 /* PALM_analysis_CommandLineProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_CommandLineProcessing.cpp; path = ../source/PALM_analysis_CommandLineProcessing.cpp; sourceTree = "<group>"; };
-		D0FD27B010F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALM_analysis_PositionsProcessing.h; path = ../source/PALM_analysis_PositionsProcessing.h; sourceTree = SOURCE_ROOT; };
-		D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALM_analysis_PositionsProcessing.cpp; path = ../source/PALM_analysis_PositionsProcessing.cpp; sourceTree = SOURCE_ROOT; };
+		D0F0E2CE10EBE26600F9A855 /* IgorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorUtilities.h; path = ../source/IgorUtilities.h; sourceTree = SOURCE_ROOT; };
+		D0F0E2CF10EBE26600F9A855 /* IgorUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IgorUtilities.cpp; path = ../source/IgorUtilities.cpp; sourceTree = SOURCE_ROOT; };
+		D0F0E35510EBEC6200F9A855 /* CommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandLine.h; path = ../source/CommandLine.h; sourceTree = "<group>"; };
+		D0F0E35610EBEC6200F9A855 /* CommandLine.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = CommandLine.cpp; path = ../source/CommandLine.cpp; sourceTree = "<group>"; };
+		D0F4244411B5A4EC001BCE24 /* CommandLineProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandLineProcessing.h; path = ../source/CommandLineProcessing.h; sourceTree = "<group>"; };
+		D0F4244511B5A4EC001BCE24 /* CommandLineProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommandLineProcessing.cpp; path = ../source/CommandLineProcessing.cpp; sourceTree = "<group>"; };
+		D0FD27B010F4F41F00C99B9B /* PositionsProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PositionsProcessing.h; path = ../source/PositionsProcessing.h; sourceTree = SOURCE_ROOT; };
+		D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PositionsProcessing.cpp; path = ../source/PositionsProcessing.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -273,40 +273,40 @@
 				D0128F58151CAD2A00D683EC /* Matlab */,
 				D0CCD33A1473C704005CD75A /* LocalizerDLL */,
 				D0F0E35210EBEC3500F9A855 /* Commandline */,
-				D08B48E30D52381800C99DE3 /* PALM_analysis.h */,
-				D09810480D5B18B10074692A /* PALM_analysis.cpp */,
-				D01D290A136CE9710094B975 /* PALM_analysis_ProgressReporting.h */,
-				D01D290B136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp */,
-				D09810AF0D5B6E850074692A /* PALM_analysis_Processing.h */,
-				D09382490D8173B2008CB7F8 /* PALM_analysis_Processing.cpp */,
-				D08BADD20F80C59400D08A6C /* PALM_analysis_FileIO.h */,
-				D08BADD30F80C59400D08A6C /* PALM_analysis_FileIO.cpp */,
-				D093BF72106FE0380005ECA3 /* PALM_analysis_segmentation.h */,
-				D093BF73106FE0380005ECA3 /* PALM_analysis_segmentation.cpp */,
-				D027E935151311CF005B8664 /* PALM_analysis_Convolver.h */,
-				D027E936151311CF005B8664 /* PALM_analysis_Convolver.cpp */,
-				D093BF92106FE1910005ECA3 /* PALM_analysis_ParticleFinding.h */,
-				D093BF93106FE1910005ECA3 /* PALM_analysis_ParticleFinding.cpp */,
-				D093BFB7106FE2CE0005ECA3 /* PALM_analysis_Localization.h */,
-				D093BFB8106FE2CE0005ECA3 /* PALM_analysis_Localization.cpp */,
-				D03321001074B8B80097124C /* PALM_analysis_PALMImages.h */,
-				D03321011074B8B80097124C /* PALM_analysis_PALMImages.cpp */,
-				D0FD27B010F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.h */,
-				D0FD27B110F4F41F00C99B9B /* PALM_analysis_PositionsProcessing.cpp */,
-				D090E531139685610099D837 /* PALM_analysis_SOFI.h */,
-				D090E532139685610099D837 /* PALM_analysis_SOFI.cpp */,
+				D08B48E30D52381800C99DE3 /* PALMAnalysis.h */,
+				D09810480D5B18B10074692A /* PALMAnalysis.cpp */,
+				D01D290A136CE9710094B975 /* ProgressReporting.h */,
+				D01D290B136CE9710094B975 /* ProgressReporting.cpp */,
+				D09810AF0D5B6E850074692A /* Processing.h */,
+				D09382490D8173B2008CB7F8 /* Processing.cpp */,
+				D08BADD20F80C59400D08A6C /* FileIO.h */,
+				D08BADD30F80C59400D08A6C /* FileIO.cpp */,
+				D093BF72106FE0380005ECA3 /* Segmentation.h */,
+				D093BF73106FE0380005ECA3 /* Segmentation.cpp */,
+				D027E935151311CF005B8664 /* Convolver.h */,
+				D027E936151311CF005B8664 /* Convolver.cpp */,
+				D093BF92106FE1910005ECA3 /* ParticleFinding.h */,
+				D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */,
+				D093BFB7106FE2CE0005ECA3 /* Localization.h */,
+				D093BFB8106FE2CE0005ECA3 /* Localization.cpp */,
+				D03321001074B8B80097124C /* PALMImages.h */,
+				D03321011074B8B80097124C /* PALMImages.cpp */,
+				D0FD27B010F4F41F00C99B9B /* PositionsProcessing.h */,
+				D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */,
+				D090E531139685610099D837 /* SOFI.h */,
+				D090E532139685610099D837 /* SOFI.cpp */,
 				D056459E18AA1F72001A22D9 /* NewSOFI.h */,
 				D056459D18AA1F72001A22D9 /* NewSOFI.cpp */,
 				D05645A318AA211F001A22D9 /* NewSOFIKernels.h */,
 				D05645A218AA211F001A22D9 /* NewSOFIKernels.cpp */,
 				D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */,
 				D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */,
-				D08BAEBD0F80C8B900D08A6C /* PALM_analysis_storage.h */,
-				D0069E0C117B764200112C90 /* PALM_analysis_storage.cpp */,
-				D0E6FD0F131C546400356DBB /* PALM_analysis_MatrixRecycler.h */,
-				D0E6FD10131C546400356DBB /* PALM_analysis_MatrixRecycler.cpp */,
-				D084B0630F7F7236004E7AE3 /* PALM_analysis_defines.h */,
-				D08BAEEF0F80C9F600D08A6C /* PALM_analysis_errors.h */,
+				D08BAEBD0F80C8B900D08A6C /* Storage.h */,
+				D0069E0C117B764200112C90 /* Storage.cpp */,
+				D0E6FD0F131C546400356DBB /* MatrixRecycler.h */,
+				D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */,
+				D084B0630F7F7236004E7AE3 /* Defines.h */,
+				D08BAEEF0F80C9F600D08A6C /* Errors.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -324,8 +324,8 @@
 		D0128F58151CAD2A00D683EC /* Matlab */ = {
 			isa = PBXGroup;
 			children = (
-				D0128F5C151CB06400D683EC /* PALM_analysis_Matlab.h */,
-				D0128F5D151CB06400D683EC /* PALM_analysis_Matlab.cpp */,
+				D0128F5C151CB06400D683EC /* Matlab.h */,
+				D0128F5D151CB06400D683EC /* Matlab.cpp */,
 				D043F47315A712B7006A3D54 /* WaitMex.h */,
 				D043F47415A712B7006A3D54 /* WaitMex.cpp */,
 			);
@@ -351,10 +351,10 @@
 		D0F0E35110EBEC2900F9A855 /* Igor */ = {
 			isa = PBXGroup;
 			children = (
-				D09576110D30171E00506A92 /* PALM_analysis_IgorXOP.h */,
-				D09576100D30171E00506A92 /* PALM_analysis_IgorXOP.cpp */,
-				D0F0E2CE10EBE26600F9A855 /* PALM_analysis_IgorUtilities.h */,
-				D0F0E2CF10EBE26600F9A855 /* PALM_analysis_IgorUtilities.cpp */,
+				D09576110D30171E00506A92 /* IgorXOP.h */,
+				D09576100D30171E00506A92 /* IgorXOP.cpp */,
+				D0F0E2CE10EBE26600F9A855 /* IgorUtilities.h */,
+				D0F0E2CF10EBE26600F9A855 /* IgorUtilities.cpp */,
 			);
 			name = Igor;
 			sourceTree = "<group>";
@@ -362,10 +362,10 @@
 		D0F0E35210EBEC3500F9A855 /* Commandline */ = {
 			isa = PBXGroup;
 			children = (
-				D0F0E35510EBEC6200F9A855 /* PALM_analysis_CommandLine.h */,
-				D0F0E35610EBEC6200F9A855 /* PALM_analysis_CommandLine.cpp */,
-				D0F4244411B5A4EC001BCE24 /* PALM_analysis_CommandLineProcessing.h */,
-				D0F4244511B5A4EC001BCE24 /* PALM_analysis_CommandLineProcessing.cpp */,
+				D0F0E35510EBEC6200F9A855 /* CommandLine.h */,
+				D0F0E35610EBEC6200F9A855 /* CommandLine.cpp */,
+				D0F4244411B5A4EC001BCE24 /* CommandLineProcessing.h */,
+				D0F4244511B5A4EC001BCE24 /* CommandLineProcessing.cpp */,
 			);
 			name = Commandline;
 			sourceTree = "<group>";
@@ -388,8 +388,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */,
-				D027E937151311CF005B8664 /* PALM_analysis_Convolver.h in Headers */,
-				D0128F60151CB06400D683EC /* PALM_analysis_Matlab.h in Headers */,
+				D027E937151311CF005B8664 /* Convolver.h in Headers */,
+				D0128F60151CB06400D683EC /* Matlab.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,22 +523,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0A9C2EF135F4EED00D076AE /* PALM_analysis_IgorXOP.cpp in Sources */,
-				D0A9C2F0135F4EED00D076AE /* PALM_analysis.cpp in Sources */,
-				D0A9C2F1135F4EED00D076AE /* PALM_analysis_Processing.cpp in Sources */,
-				D0A9C2F2135F4EED00D076AE /* PALM_analysis_FileIO.cpp in Sources */,
-				D0A9C2F3135F4EED00D076AE /* PALM_analysis_segmentation.cpp in Sources */,
-				D0A9C2F4135F4EED00D076AE /* PALM_analysis_ParticleFinding.cpp in Sources */,
-				D0A9C2F5135F4EED00D076AE /* PALM_analysis_Localization.cpp in Sources */,
-				D0A9C2F6135F4EED00D076AE /* PALM_analysis_PALMImages.cpp in Sources */,
-				D0A9C2F7135F4EED00D076AE /* PALM_analysis_IgorUtilities.cpp in Sources */,
-				D0A9C2F8135F4EED00D076AE /* PALM_analysis_PositionsProcessing.cpp in Sources */,
-				D0A9C2F9135F4EED00D076AE /* PALM_analysis_storage.cpp in Sources */,
-				D0A9C2FA135F4EED00D076AE /* PALM_analysis_MatrixRecycler.cpp in Sources */,
-				D01D290C136CE9710094B975 /* PALM_analysis_ProgressReporting.cpp in Sources */,
-				D090E533139685610099D837 /* PALM_analysis_SOFI.cpp in Sources */,
+				D0A9C2EF135F4EED00D076AE /* IgorXOP.cpp in Sources */,
+				D0A9C2F0135F4EED00D076AE /* PALMAnalysis.cpp in Sources */,
+				D0A9C2F1135F4EED00D076AE /* Processing.cpp in Sources */,
+				D0A9C2F2135F4EED00D076AE /* FileIO.cpp in Sources */,
+				D0A9C2F3135F4EED00D076AE /* Segmentation.cpp in Sources */,
+				D0A9C2F4135F4EED00D076AE /* ParticleFinding.cpp in Sources */,
+				D0A9C2F5135F4EED00D076AE /* Localization.cpp in Sources */,
+				D0A9C2F6135F4EED00D076AE /* PALMImages.cpp in Sources */,
+				D0A9C2F7135F4EED00D076AE /* IgorUtilities.cpp in Sources */,
+				D0A9C2F8135F4EED00D076AE /* PositionsProcessing.cpp in Sources */,
+				D0A9C2F9135F4EED00D076AE /* Storage.cpp in Sources */,
+				D0A9C2FA135F4EED00D076AE /* MatrixRecycler.cpp in Sources */,
+				D01D290C136CE9710094B975 /* ProgressReporting.cpp in Sources */,
+				D090E533139685610099D837 /* SOFI.cpp in Sources */,
 				D06A631F18B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */,
-				D027E93A151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */,
+				D027E93A151311CF005B8664 /* Convolver.cpp in Sources */,
 				D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
 				D05645A418AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
@@ -548,22 +548,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0C2584C1746C1AF001C2EB1 /* PALM_analysis_Matlab.cpp in Sources */,
+				D0C2584C1746C1AF001C2EB1 /* Matlab.cpp in Sources */,
 				D0C2584E1746C1AF001C2EB1 /* WaitMex.cpp in Sources */,
-				D0C258321746C19A001C2EB1 /* PALM_analysis.cpp in Sources */,
-				D0C2585A1746C57D001C2EB1 /* PALM_analysis_ProgressReporting.cpp in Sources */,
-				D0C258341746C1A2001C2EB1 /* PALM_analysis_Processing.cpp in Sources */,
-				D0C258361746C1A2001C2EB1 /* PALM_analysis_FileIO.cpp in Sources */,
-				D0C258381746C1A2001C2EB1 /* PALM_analysis_segmentation.cpp in Sources */,
-				D0C2583A1746C1A2001C2EB1 /* PALM_analysis_Convolver.cpp in Sources */,
-				D0C2583C1746C1A2001C2EB1 /* PALM_analysis_ParticleFinding.cpp in Sources */,
-				D0C2583E1746C1A2001C2EB1 /* PALM_analysis_Localization.cpp in Sources */,
-				D0C258401746C1A2001C2EB1 /* PALM_analysis_PALMImages.cpp in Sources */,
-				D0C258421746C1A2001C2EB1 /* PALM_analysis_PositionsProcessing.cpp in Sources */,
-				D0C258441746C1A2001C2EB1 /* PALM_analysis_SOFI.cpp in Sources */,
-				D0C258461746C1A2001C2EB1 /* PALM_analysis_storage.cpp in Sources */,
+				D0C258321746C19A001C2EB1 /* PALMAnalysis.cpp in Sources */,
+				D0C2585A1746C57D001C2EB1 /* ProgressReporting.cpp in Sources */,
+				D0C258341746C1A2001C2EB1 /* Processing.cpp in Sources */,
+				D0C258361746C1A2001C2EB1 /* FileIO.cpp in Sources */,
+				D0C258381746C1A2001C2EB1 /* Segmentation.cpp in Sources */,
+				D0C2583A1746C1A2001C2EB1 /* Convolver.cpp in Sources */,
+				D0C2583C1746C1A2001C2EB1 /* ParticleFinding.cpp in Sources */,
+				D0C2583E1746C1A2001C2EB1 /* Localization.cpp in Sources */,
+				D0C258401746C1A2001C2EB1 /* PALMImages.cpp in Sources */,
+				D0C258421746C1A2001C2EB1 /* PositionsProcessing.cpp in Sources */,
+				D0C258441746C1A2001C2EB1 /* SOFI.cpp in Sources */,
+				D0C258461746C1A2001C2EB1 /* Storage.cpp in Sources */,
 				D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */,
-				D0C258481746C1A2001C2EB1 /* PALM_analysis_MatrixRecycler.cpp in Sources */,
+				D0C258481746C1A2001C2EB1 /* MatrixRecycler.cpp in Sources */,
 				D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
 				D05645A518AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
@@ -574,19 +574,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */,
-				D0CCD31F1473C6B6005CD75A /* PALM_analysis.cpp in Sources */,
-				D0CCD3211473C6B6005CD75A /* PALM_analysis_ProgressReporting.cpp in Sources */,
-				D0CCD3231473C6B6005CD75A /* PALM_analysis_Processing.cpp in Sources */,
-				D0CCD3251473C6B6005CD75A /* PALM_analysis_FileIO.cpp in Sources */,
-				D0CCD3271473C6B6005CD75A /* PALM_analysis_segmentation.cpp in Sources */,
-				D0CCD3291473C6B6005CD75A /* PALM_analysis_ParticleFinding.cpp in Sources */,
-				D0CCD32B1473C6B6005CD75A /* PALM_analysis_Localization.cpp in Sources */,
-				D0CCD32D1473C6B6005CD75A /* PALM_analysis_PALMImages.cpp in Sources */,
-				D0CCD32F1473C6B6005CD75A /* PALM_analysis_PositionsProcessing.cpp in Sources */,
-				D0CCD3311473C6B6005CD75A /* PALM_analysis_SOFI.cpp in Sources */,
-				D0CCD3331473C6B6005CD75A /* PALM_analysis_storage.cpp in Sources */,
-				D0CCD3351473C6B6005CD75A /* PALM_analysis_MatrixRecycler.cpp in Sources */,
-				D027E938151311CF005B8664 /* PALM_analysis_Convolver.cpp in Sources */,
+				D0CCD31F1473C6B6005CD75A /* PALMAnalysis.cpp in Sources */,
+				D0CCD3211473C6B6005CD75A /* ProgressReporting.cpp in Sources */,
+				D0CCD3231473C6B6005CD75A /* Processing.cpp in Sources */,
+				D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */,
+				D0CCD3271473C6B6005CD75A /* Segmentation.cpp in Sources */,
+				D0CCD3291473C6B6005CD75A /* ParticleFinding.cpp in Sources */,
+				D0CCD32B1473C6B6005CD75A /* Localization.cpp in Sources */,
+				D0CCD32D1473C6B6005CD75A /* PALMImages.cpp in Sources */,
+				D0CCD32F1473C6B6005CD75A /* PositionsProcessing.cpp in Sources */,
+				D0CCD3311473C6B6005CD75A /* SOFI.cpp in Sources */,
+				D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */,
+				D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */,
+				D027E938151311CF005B8664 /* Convolver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

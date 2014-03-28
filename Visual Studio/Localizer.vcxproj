@@ -503,23 +503,23 @@
   <ItemGroup>
     <ClCompile Include="..\source\NewSOFI.cpp" />
     <ClCompile Include="..\source\NewSOFIKernels.cpp" />
-    <ClCompile Include="..\source\PALM_analysis.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_Convolver.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_FileIO.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_IgorUtilities.cpp">
+    <ClCompile Include="..\source\PALMAnalysis.cpp" />
+    <ClCompile Include="..\source\Convolver.cpp" />
+    <ClCompile Include="..\source\FileIO.cpp" />
+    <ClCompile Include="..\source\IgorUtilities.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\source\PALM_analysis_IgorXOP.cpp">
+    <ClCompile Include="..\source\IgorXOP.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\source\PALM_analysis_Localization.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_Matlab.cpp">
+    <ClCompile Include="..\source\Localization.cpp" />
+    <ClCompile Include="..\source\Matlab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Igor-MKL|Win32'">true</ExcludedFromBuild>
@@ -527,15 +527,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Igor-MKL|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\source\PALM_analysis_MatrixRecycler.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_PALMImages.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_ParticleFinding.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_PositionsProcessing.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_Processing.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_ProgressReporting.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_segmentation.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_SOFI.cpp" />
-    <ClCompile Include="..\source\PALM_analysis_storage.cpp" />
+    <ClCompile Include="..\source\MatrixRecycler.cpp" />
+    <ClCompile Include="..\source\PALMImages.cpp" />
+    <ClCompile Include="..\source\ParticleFinding.cpp" />
+    <ClCompile Include="..\source\PositionsProcessing.cpp" />
+    <ClCompile Include="..\source\Processing.cpp" />
+    <ClCompile Include="..\source\ProgressReporting.cpp" />
+    <ClCompile Include="..\source\Segmentation.cpp" />
+    <ClCompile Include="..\source\SOFI.cpp" />
+    <ClCompile Include="..\source\Storage.cpp" />
     <ClCompile Include="..\source\SOFIFrameVerifiers.cpp" />
     <ClCompile Include="..\source\WaitMex.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -549,25 +549,25 @@
   <ItemGroup>
     <ClInclude Include="..\source\NewSOFI.h" />
     <ClInclude Include="..\source\NewSOFIKernels.h" />
-    <ClInclude Include="..\source\PALM_analysis.h" />
-    <ClInclude Include="..\source\PALM_analysis_Convolver.h" />
-    <ClInclude Include="..\source\PALM_analysis_defines.h" />
-    <ClInclude Include="..\source\PALM_analysis_errors.h" />
-    <ClInclude Include="..\source\PALM_analysis_FileIO.h" />
-    <ClInclude Include="..\source\PALM_analysis_IgorUtilities.h">
+    <ClInclude Include="..\source\PALMAnalysis.h" />
+    <ClInclude Include="..\source\Convolver.h" />
+    <ClInclude Include="..\source\Defines.h" />
+    <ClInclude Include="..\source\Errors.h" />
+    <ClInclude Include="..\source\FileIO.h" />
+    <ClInclude Include="..\source\IgorUtilities.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\source\PALM_analysis_IgorXOP.h">
+    <ClInclude Include="..\source\IgorXOP.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\source\PALM_analysis_Localization.h" />
-    <ClInclude Include="..\source\PALM_analysis_Matlab.h">
+    <ClInclude Include="..\source\Localization.h" />
+    <ClInclude Include="..\source\Matlab.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Igor-MKL|Win32'">true</ExcludedFromBuild>
@@ -575,15 +575,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-Igor-MKL|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="..\source\PALM_analysis_MatrixRecycler.h" />
-    <ClInclude Include="..\source\PALM_analysis_PALMImages.h" />
-    <ClInclude Include="..\source\PALM_analysis_ParticleFinding.h" />
-    <ClInclude Include="..\source\PALM_analysis_PositionsProcessing.h" />
-    <ClInclude Include="..\source\PALM_analysis_Processing.h" />
-    <ClInclude Include="..\source\PALM_analysis_ProgressReporting.h" />
-    <ClInclude Include="..\source\PALM_analysis_segmentation.h" />
-    <ClInclude Include="..\source\PALM_analysis_SOFI.h" />
-    <ClInclude Include="..\source\PALM_analysis_storage.h" />
+    <ClInclude Include="..\source\MatrixRecycler.h" />
+    <ClInclude Include="..\source\PALMImages.h" />
+    <ClInclude Include="..\source\ParticleFinding.h" />
+    <ClInclude Include="..\source\PositionsProcessing.h" />
+    <ClInclude Include="..\source\Processing.h" />
+    <ClInclude Include="..\source\ProgressReporting.h" />
+    <ClInclude Include="..\source\Segmentation.h" />
+    <ClInclude Include="..\source\SOFI.h" />
+    <ClInclude Include="..\source\Storage.h" />
     <ClInclude Include="..\source\SOFIFrameVerifiers.h" />
     <ClInclude Include="..\source\WaitMex.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
