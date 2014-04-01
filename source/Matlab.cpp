@@ -758,7 +758,7 @@ std::shared_ptr<ImageLoader> GetImageLoader(std::string& data_file_path) {
 
 int GetFileStorageType(std::string &filePath) {
     size_t startOfExtension = filePath.rfind('.');
-    if (startOfExtension == size_t(-1)) {
+    if (startOfExtension == std::string::npos) {
         // the filepath does not appear to contain an extension
         throw std::runtime_error("Unable to deduce the file type");
     }
