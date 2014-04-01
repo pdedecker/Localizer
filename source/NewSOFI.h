@@ -42,7 +42,8 @@ class SOFIOptions {
 public:
     SOFIOptions() :
         doPixelationCorrection(true),
-        wantAverageImage(false)
+        wantAverageImage(false),
+        wantJackKnife(false)
     {
         orders.push_back(2);
     }
@@ -52,6 +53,8 @@ public:
     bool doPixelationCorrection;
     bool wantAverageImage;
     ImagePtr averageImage;
+    bool wantJackKnife;
+    std::vector<std::vector<ImagePtr> > jackKnifeImages;
 };
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages);

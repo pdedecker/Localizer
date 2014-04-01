@@ -482,6 +482,7 @@ public:
 	~IgorImageOutputWriter() {;}
 	
 	void write_image(ImagePtr new_image);
+    waveHndl getWave() const {return outputWave;}
 	
 protected:
 	int GetIgorStorageType();

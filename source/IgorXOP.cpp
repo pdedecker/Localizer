@@ -670,6 +670,11 @@ struct NewSOFIRuntimeParams {
 	double doPixelationCorrection;			// Optional parameter.
 	int PXCRFlagParamsSet[1];
     
+	// Parameters for /JACK flag group.
+	int JACKFlagEncountered;
+	double doJackKnife;						// Optional parameter.
+	int JACKFlagParamsSet[1];
+    
 	// Parameters for /PROG flag group.
 	int PROGFlagEncountered;
 	LocalizerProgStruct* progStruct;
@@ -2773,6 +2778,14 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 		}
 	}
     
+    bool wantJackKnife = false;
+    if (p->JACKFlagEncountered) {
+        wantJackKnife = true;
+		if (p->JACKFlagParamsSet[0]) {
+            wantJackKnife = (p->doJackKnife != 0.0);
+		}
+	}
+    
     bool useIgorFunctionForProgress;
     FUNCREF igorProgressReporterFunction;
     if (p->PROGFlagEncountered) {
@@ -2794,7 +2807,11 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     DataFolderAndName outputWaveParams;
     if (p->DESTFlagEncountered) {
         // Parameter: p->dest
-        if ((orders.size() > 1) && (strlen(p->dest.name) >= MAX_OBJ_NAME))  // must have room to append numeric suffic if multiple orders
+        if ((orders.size() > 1) && (strlen(p->dest.name) > MAX_OBJ_NAME - 1))   // must have room to append numeric suffic if multiple orders
+            return NAME_TOO_LONG;
+        if (wantAverageImage && (strlen(p->dest.name) > MAX_OBJ_NAME - 4))      // room for "_avg" suffix
+            return NAME_TOO_LONG;
+        if (wantJackKnife && (strlen(p->dest.name) > MAX_OBJ_NAME - 6))         // room for "_jack<digit>" suffix
             return NAME_TOO_LONG;
         outputWaveParams = p->dest;
     } else {
@@ -2839,6 +2856,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
+        sofiOptions.wantJackKnife = wantJackKnife;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         for (int i = 0; i < orders.size(); ++i) {
             DataFolderAndName adjustedOutputParams = outputWaveParams;
@@ -2855,10 +2873,24 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         }
         if (wantAverageImage) {
             DataFolderAndName averageOutputWaveParams = outputWaveParams;
-            averageOutputWaveParams.dfH = outputWaveParams.dfH;
-            strcpy(averageOutputWaveParams.name, outputWaveParams.name);
             strcat(averageOutputWaveParams.name, "_avg");
             CopyMatrixToIgorDPWave(sofiOptions.averageImage, averageOutputWaveParams);
+        }
+        if (wantJackKnife) {
+            for (int i = 0; i < orders.size(); ++i) {
+                DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
+                strcat(jackKnifeOutputWaveParams.name, "_jack");
+                if (orders.size() > 1) {
+                    int nameLength = strlen(jackKnifeOutputWaveParams.name);
+                    jackKnifeOutputWaveParams.name[nameLength] = static_cast<char>(orders[i] + 48);
+                    jackKnifeOutputWaveParams.name[nameLength + 1] = '\0';
+                }
+                waveHndl jackWave = CopyStackToIgorDPWave(sofiOptions.jackKnifeImages.at(i), jackKnifeOutputWaveParams);
+                double offset = 2.0;
+                double delta = 1.0 / static_cast<double>(orders[i]);
+                MDSetWaveScaling(jackWave, ROWS, &delta, &offset);
+                MDSetWaveScaling(jackWave, COLUMNS, &delta, &offset);
+            }
         }
             
     }
@@ -2996,7 +3028,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

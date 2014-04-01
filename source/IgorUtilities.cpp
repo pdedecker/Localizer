@@ -701,4 +701,13 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAnd
 	return outputWave;
 }
 
+waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName dataFolderAndName) {
+    IgorImageOutputWriter outputWriter(dataFolderAndName, stack.size(), 1, STORAGE_TYPE_FP64);
+    for (auto it = stack.cbegin(); it != stack.cend(); ++it) {
+        outputWriter.write_image(*it);
+    }
+    
+    return outputWriter.getWave();
+}
+
 
