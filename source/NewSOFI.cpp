@@ -143,6 +143,14 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     if (wantJackKnife) {
         AssembleJackKnifeImages(jackKnifeBatchSOFIImages, imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
+        if (options.doPixelationCorrection) {
+            for (int orderIndex = 0; orderIndex < nOrders; ++orderIndex) {
+                std::vector<ImagePtr>& imagesForThisOrder = jackKnifeOutputImages.at(orderIndex);
+                tbb::parallel_for<size_t>(0, imagesForThisOrder.size(), [&](size_t i) {
+                    PerformPixelationCorrection(imagesForThisOrder[i], orders.at(orderIndex));
+                });
+            }
+        }
     }
     
     progressReporter->CalculationDone();
