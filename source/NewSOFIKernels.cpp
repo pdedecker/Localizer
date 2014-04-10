@@ -34,22 +34,38 @@
 
 std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination);
 void SortPixelCombination(PixelCombination& combination);
+std::vector<SOFIPixelCombination> sofiPixelCombinations1();
+std::vector<SOFIPixelCombination> sofiPixelCombinations2();
+std::vector<SOFIPixelCombination> sofiPixelCombinations3();
+std::vector<SOFIPixelCombination> sofiPixelCombinations4();
+std::vector<SOFIPixelCombination> sofiPixelCombinations5();
+std::vector<SOFIPixelCombination> sofiPixelCombinations6();
 
 std::vector<SOFIKernel> KernelsForOrder(const int order) {
     std::vector<SOFIKernel> kernels;
     
-    if (order == 2) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations2());
-    } else if (order == 3) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations3());
-    } else if (order == 4) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations4());
-    } else if (order == 5) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations5());
-    } else if (order == 6) {
-        kernels = PixelCombinationsToKernels(sofiPixelCombinations6());
-    } else {
-        throw std::runtime_error("unsupported order");
+    switch (order) {
+        case 1:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations1());
+            break;
+        case 2:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations2());
+            break;
+        case 3:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations3());
+            break;
+        case 4:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations4());
+            break;
+        case 5:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations5());
+            break;
+        case 6:
+            kernels = PixelCombinationsToKernels(sofiPixelCombinations6());
+            break;
+        default:
+            throw std::runtime_error("unsupported order");
+            break;
     }
     
     for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
@@ -212,6 +228,23 @@ std::string PrintPartition(const Partition& partition) {
     }
     ss << "\r";
     return ss.str();
+}
+
+std::vector<SOFIPixelCombination> sofiPixelCombinations1()
+{
+    std::vector<SOFIPixelCombination> pixelCombinations;
+    {
+        SOFIPixelCombination pixelCombination;
+        pixelCombination.outputDeltaX = 0;
+        pixelCombination.outputDeltaY = 0;
+        {
+            std::vector<std::pair<int, int> > subset;
+            subset.push_back(std::pair<int, int>(0, 0));
+            pixelCombination.combinations.push_back(subset);
+        }
+        pixelCombinations.push_back(pixelCombination);
+    }
+    return pixelCombinations;
 }
 
 std::vector<SOFIPixelCombination> sofiPixelCombinations2()

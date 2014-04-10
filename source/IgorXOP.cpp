@@ -2720,7 +2720,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     if (p->ORDRFlagEncountered) {
 		// Parameter: p->order
         int order = static_cast<int>(p->order);
-        if (order <= 1) {
+        if (order < 1) {
             return EXPECT_POS_NUM;
         }
         orders.push_back(order);
@@ -2732,7 +2732,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 			if (paramsSet[i] == 0)
 				break;		// No more parameters.
 			extraOrder = p->extraOrders[i];
-            if (extraOrder <= 1) {
+            if (extraOrder < 1) {
                 return EXPECT_POS_NUM;
             }
 			orders.push_back(extraOrder);

@@ -423,6 +423,9 @@ double Prefactor(int nPartitions) {
 }
 
 void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order) {
+    if (order == 1)
+        return; // no virtual pixels for 1st order cumulant
+    
     int nRows = imageToCorrect->rows();
     int nCols = imageToCorrect->cols();
     

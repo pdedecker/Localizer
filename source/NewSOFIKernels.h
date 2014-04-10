@@ -67,10 +67,4 @@ GroupOfPartitions AllPartitions(PixelCombination pixelCombination);
 std::string PrintPartition(const Partition& partition);
 std::string ParititionTest();
 
-std::vector<SOFIPixelCombination> sofiPixelCombinations2();
-std::vector<SOFIPixelCombination> sofiPixelCombinations3();
-std::vector<SOFIPixelCombination> sofiPixelCombinations4();
-std::vector<SOFIPixelCombination> sofiPixelCombinations5();
-std::vector<SOFIPixelCombination> sofiPixelCombinations6();
-
 #endif
