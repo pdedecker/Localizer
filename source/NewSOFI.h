@@ -42,6 +42,7 @@ class SOFIOptions {
 public:
     SOFIOptions() :
         doPixelationCorrection(true),
+        alsoCorrectVariance(true),
         wantAverageImage(false),
         wantJackKnife(false)
     {
@@ -51,6 +52,7 @@ public:
     std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
     std::vector<int> orders;
     bool doPixelationCorrection;
+    bool alsoCorrectVariance;
     bool wantAverageImage;
     ImagePtr averageImage;
     bool wantJackKnife;

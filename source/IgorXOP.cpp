@@ -2771,10 +2771,13 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 	}
     
     bool doPixelationCorrection = true;
+    bool alsoCorrectVariance = true;
     if (p->PXCRFlagEncountered) {
 		if (p->PXCRFlagParamsSet[0]) {
 			// Optional parameter: p->doPixelationCorrection
             doPixelationCorrection = (p->doPixelationCorrection != 0.0);
+            if (p->doPixelationCorrection == 2.0)
+                alsoCorrectVariance = false;
 		}
 	}
     
@@ -2854,6 +2857,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
+        sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;

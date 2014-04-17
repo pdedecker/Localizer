@@ -48,7 +48,7 @@ double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 
-void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order);
+void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
 void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages);
 
 void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int order, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
@@ -133,7 +133,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         *mergedImages[j] /= summedContributions;
         
         if (options.doPixelationCorrection)
-            PerformPixelationCorrection(mergedImages[j], orders[j]);
+            PerformPixelationCorrection(mergedImages[j], options.alsoCorrectVariance, orders[j]);
     });
     
     sofiOutputImages = mergedImages;
@@ -147,7 +147,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
             for (int orderIndex = 0; orderIndex < nOrders; ++orderIndex) {
                 std::vector<ImagePtr>& imagesForThisOrder = jackKnifeOutputImages.at(orderIndex);
                 tbb::parallel_for<size_t>(0, imagesForThisOrder.size(), [&](size_t i) {
-                    PerformPixelationCorrection(imagesForThisOrder[i], orders.at(orderIndex));
+                    PerformPixelationCorrection(imagesForThisOrder[i], options.alsoCorrectVariance, orders.at(orderIndex));
                 });
             }
         }
@@ -422,7 +422,7 @@ double Prefactor(int nPartitions) {
     }
 }
 
-void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order) {
+void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order) {
     if (order == 1)
         return; // no virtual pixels for 1st order cumulant
     
@@ -446,17 +446,19 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order) {
     }
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
     
-    // calculate variances
     Eigen::ArrayXXd pixelVariances(order, order);
-    pixelVariances.setConstant(0.0);
-    for (int col = 0; col < nCols; ++col) {
-        for (int row = 0; row < nRows; ++row) {
-            kindOfRow = row % nKernelRows;
-            kindOfCol = col % nKernelCols;
-            pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(row, col) - pixelAverages(kindOfRow, kindOfCol));
+    if (alsoCorrectVariance) {
+        // calculate variances
+        pixelVariances.setConstant(0.0);
+        for (int col = 0; col < nCols; ++col) {
+            for (int row = 0; row < nRows; ++row) {
+                kindOfRow = row % nKernelRows;
+                kindOfCol = col % nKernelCols;
+                pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(row, col) - pixelAverages(kindOfRow, kindOfCol));
+            }
         }
+        pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
     }
-    pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
     
     // now determine correction factors, arbitrary to the first element
     for (int col = 0; col < nKernelCols; ++col) {
@@ -466,8 +468,13 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, const int order) {
                 bTerm(row, col) = 0.0;
                 continue;
             }
-            aFactor(row, col) = std::sqrt(pixelVariances(0, 0) / pixelVariances(row, col));
-            bTerm(row, col) = pixelAverages(0, 0) - aFactor(row, col) * pixelAverages(row, col);
+            if (alsoCorrectVariance) {
+                aFactor(row, col) = std::sqrt(pixelVariances(0, 0) / pixelVariances(row, col));
+                bTerm(row, col) = pixelAverages(0, 0) - aFactor(row, col) * pixelAverages(row, col);
+            } else {
+                aFactor(row, col) = pixelAverages(0, 0) / pixelAverages(row, col);
+                bTerm(row, col) = 0.0;
+            }
         }
     }
     
