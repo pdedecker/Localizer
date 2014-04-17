@@ -2746,8 +2746,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     if (p->SUBFlagEncountered) {
 		// Parameter: p->framesToSkip
         // Parameter: p->nFramesToInclude
-        if ((p->framesToSkip < 0) || (p->nFramesToInclude <= 0))
-            return EXPECT_POS_NUM;
         nFramesToSkip = p->framesToSkip + 0.5;
         nFramesToInclude = p->nFramesToInclude + 0.5;
 	}
@@ -2836,7 +2834,11 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
-        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);
+        if (nFramesToInclude > 0) {
+            dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);
+        } else {
+            dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, -1);
+        }
         
         std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
         if (removeSaturatedPixels) {
