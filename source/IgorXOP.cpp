@@ -670,6 +670,11 @@ struct NewSOFIRuntimeParams {
 	double doPixelationCorrection;			// Optional parameter.
 	int PXCRFlagParamsSet[1];
     
+	// Parameters for /BAT flag group.
+	int BATFlagEncountered;
+	double batchSize;
+	int BATFlagParamsSet[1];
+    
 	// Parameters for /JACK flag group.
 	int JACKFlagEncountered;
 	double doJackKnife;						// Optional parameter.
@@ -2779,6 +2784,15 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 		}
 	}
     
+    int batchSize = 0;
+    if (p->BATFlagEncountered) {
+		// Parameter: p->batchSize
+        batchSize = p->batchSize + 0.5;
+        if ((p->batchSize < 0.0) || (batchSize < 0)) {
+            return EXPECT_POS_NUM;
+        }
+	}
+    
     bool wantJackKnife = false;
     if (p->JACKFlagEncountered) {
         wantJackKnife = true;
@@ -2858,6 +2872,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::vector<ImagePtr> sofiOutputImages;
         SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
+        sofiOptions.batchSize = batchSize;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
         sofiOptions.frameVerifiers = frameVerifiers;
@@ -3034,7 +3049,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
 	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
 	runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

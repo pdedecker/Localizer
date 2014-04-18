@@ -60,6 +60,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     const std::vector<int> orders = options.orders;
     int nOrders = orders.size();
+    int requestedBatchSize = options.batchSize;
     const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
     bool wantAverageImage = options.wantAverageImage;
     ImagePtr& averageImage = options.averageImage;
@@ -94,7 +95,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     // calculate a SOFI image for every batch of images
     std::vector<ImagePtr> mergedImages(nOrders);
-    int batchSize = 100;
+    int batchSize = (requestedBatchSize > 0) ? requestedBatchSize : 100;
     int nBatches;
     if (nImages % batchSize <= 2) {
         nBatches = nImages / batchSize;
@@ -102,7 +103,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         nBatches = nImages / batchSize + 1;
     }
     jackKnifeBatchSOFIImages.resize(nBatches);
-    for (int n = 0; n < nBatches; ++n) {
+    for (unsigned int n = 0; n < nBatches; ++n) {
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
         std::vector<ImagePtr> subImages;
