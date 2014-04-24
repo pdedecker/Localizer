@@ -2194,8 +2194,7 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
     gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     int method, emitterWeighing;
-    double scaleFactor, upperLimit, PSFWidth;
-    size_t imageWidth, imageHeight, xSize, ySize;
+    double upperLimit, PSFWidth;
 
     waveHndl positionsWave;
     int useIgorFunctionForProgress = 0;
@@ -2219,13 +2218,12 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
         method = PALMBITMAP_DEVIATION_SAME;
     }
 
+    double scaleFactor = 1.0;
     if (p->SFlagEncountered) {
         // Parameter: p->scaleFactor
         if (p->scaleFactor <= 0)
             return EXPECT_POS_NUM;
         scaleFactor = p->scaleFactor;
-    } else {
-        scaleFactor = 1.0;
     }
 
     if (p->LFlagEncountered) {
@@ -2238,6 +2236,8 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
         // the net result is no limitation
     }
 
+    size_t xSize, ySize;
+    double outputScaleFactor;
     if (p->WFlagEncountered) {
         // Parameter: p->CCDXSize
         // Parameter: p->CCDYSize
@@ -2246,8 +2246,7 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
             return EXPECT_POS_NUM;
         xSize = (size_t)(p->CCDXSize + 0.5);
         ySize = (size_t)(p->CCDYSize + 0.5);
-        imageWidth = (size_t)(p->outputImageScaleFactor * p->CCDXSize + 0.5);
-        imageHeight = (size_t)(p->outputImageScaleFactor * p->CCDYSize + 0.5);
+        outputScaleFactor = (p->outputImageScaleFactor);
     } else {
         return TOO_FEW_PARAMETERS;
     }
@@ -2342,8 +2341,13 @@ int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
         // do the actual calculation
         imageCalculator = std::shared_ptr<PALMBitmapImageCalculator>(new PALMBitmapImageCalculator(deviationCalculator, emitterWeighing, progressReporter));
         std::shared_ptr<LocalizedPositionsContainer> positions(LocalizedPositionsContainer::GetPositionsFromWave(positionsWave));
-        image = imageCalculator->CalculateImage(positions, xSize, ySize, imageWidth, imageHeight);
-        CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
+        image = imageCalculator->CalculateImage(positions, xSize, ySize, outputScaleFactor);
+        waveHndl outputWave = CopyMatrixToIgorDPWave(image, std::string("M_LocalizationBitmap"));
+        double offset = 0.0;
+        double rowDelta = static_cast<double>(xSize - 1) / static_cast<double>(image->rows() - 1);
+        double colDelta = static_cast<double>(ySize - 1) / static_cast<double>(image->cols() - 1);
+        MDSetWaveScaling(outputWave, ROWS, &rowDelta, &offset);
+        MDSetWaveScaling(outputWave, COLUMNS, &colDelta, &offset);
     }
     catch (std::bad_alloc) {
         return NOMEM;
@@ -2882,7 +2886,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
-        for (int i = 0; i < orders.size(); ++i) {
+        for (size_t i = 0; i < orders.size(); ++i) {
             DataFolderAndName adjustedOutputParams = outputWaveParams;
             if (orders.size() > 1) {
                 int nameLength = strlen(adjustedOutputParams.name);
@@ -2901,7 +2905,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             CopyMatrixToIgorDPWave(sofiOptions.averageImage, averageOutputWaveParams);
         }
         if (wantJackKnife) {
-            for (int i = 0; i < orders.size(); ++i) {
+            for (size_t i = 0; i < orders.size(); ++i) {
                 DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
                 strcat(jackKnifeOutputWaveParams.name, "_jack");
                 if (orders.size() > 1) {

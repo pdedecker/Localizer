@@ -30,6 +30,8 @@
 #ifndef PALM_ANALYSIS_PALMIMAGES_H
 #define PALM_ANALYSIS_PALMIMAGES_H
 
+#include <vector>
+
 #include "PALMAnalysis.h"
 #include "Defines.h"
 #include "boost/smart_ptr.hpp"
@@ -44,17 +46,17 @@ class NormalCDFLookupTable;
  * with standard deviation sigma and mean equal to zero
  *
  */
-class NormalCDFLookupTable {
+class ERFLookupTable {
 public:
-	NormalCDFLookupTable();
-	~NormalCDFLookupTable() {;}
+	ERFLookupTable();
+	~ERFLookupTable();
 	
-	double getNormalCDF(double x, double sigma);
+	double erf(double x) const;
 	
 protected:
     double lowerLimit, upperLimit;
     double stride;
-	boost::shared_array<double> cdfTable;
+    std::vector<double> erfTable;
 };
 
 /**
@@ -75,13 +77,13 @@ public:
 	~PALMBitmapImageCalculator() {;}
 	
 	ImagePtr CalculateImage(std::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
-														 size_t ySize, size_t imageWidth, size_t imageHeight);
+														 size_t ySize, double outputScaleFactor);
 	
 	
 protected:
 	std::shared_ptr<PALMBitmapImageDeviationCalculator> devationCalculator;
 	std::shared_ptr<ProgressReporter> progressReporter;
-	NormalCDFLookupTable cdfTable;
+	ERFLookupTable erfTable;
 	int emitterWeighingMethod;
 };
 

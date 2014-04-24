@@ -28,73 +28,74 @@
  */
 
 #include "PALMImages.h"
-#include <gsl/gsl_cdf.h>
+#include <gsl/gsl_sf.h>
+#include <tbb/tbb.h>
 
-NormalCDFLookupTable::NormalCDFLookupTable() {
-	// allocate an array of 1001 doubles containing the CDF of a normal distribution
-    this->lowerLimit = -10.0;
-    this->upperLimit = 10.0;
-    this->stride = 0.01;
+ERFLookupTable::ERFLookupTable() {
+    this->lowerLimit = -4.0;
+    this->upperLimit = 4.0;
+    this->stride = 0.0001;
     
     size_t nValues = (upperLimit - lowerLimit) / stride + 1;
     
-	this->cdfTable = boost::shared_array<double> (new double[nValues]);
-	for (size_t i = 0; i < nValues; ++i) {
-		this->cdfTable[i] = gsl_cdf_gaussian_P(this->lowerLimit + static_cast<double>(i) * stride, 1.0);
-	}
+	this->erfTable.resize(nValues);
+    
+    tbb::parallel_for(tbb::blocked_range<int>(0, nValues), [=](const tbb::blocked_range<int>& r) {
+        for (int i = r.begin(); i < r.end(); ++i) {
+            this->erfTable[i] = gsl_sf_erf(this->lowerLimit + static_cast<double>(i) * stride);
+        }
+	});
 }
 
-double NormalCDFLookupTable::getNormalCDF(double x, double sigma) {
-    double rescaledX;
+ERFLookupTable::~ERFLookupTable() {
     
-    // rescale the requested x to a distribution with stddev 1
-    rescaledX = x / sigma;
-    
-    if (rescaledX < this->lowerLimit)
-        return 0.0;
-    if (rescaledX > this->upperLimit)
+}
+
+double ERFLookupTable::erf(double x) const {
+    if (x < this->lowerLimit)
+        return -1.0;
+    if (x > this->upperLimit)
         return 1.0;
     
     // perform linear interpolation using a weighted average
-    double fractionalIndex = (rescaledX - this->lowerLimit) / stride;
-    size_t lowerIndex = std::floor(fractionalIndex);
-    return cdfTable[lowerIndex] * (fractionalIndex - static_cast<double>(lowerIndex)) + cdfTable[lowerIndex + 1] * (static_cast<double>(lowerIndex + 1) - fractionalIndex);
+    double fractionalIndex = (x - this->lowerLimit) / stride;
+    int index = std::floor(fractionalIndex);
+    double fraction = fractionalIndex - static_cast<double>(index);
+    double erf = erfTable[index] * (1.0 - fraction) + erfTable[index + 1] * fraction;
+    return erf;
 }
 
 ImagePtr PALMBitmapImageCalculator::CalculateImage(std::shared_ptr<LocalizedPositionsContainer> positions, size_t xSize, 
-																				size_t ySize, size_t imageWidth, size_t imageHeight) {
-	int progressStatus;
-	double fittedXPos, fittedYPos, fittedIntegral;
-	double centerX, centerY, calculatedIntegral, calculatedDeviation;
-	long startX, endX, startY, endY;
-	double integralX, integralY;
-    double halfPixelSizeX = 0.5, halfPixelSizeY = 0.5, shiftOfThisPixelX, shiftOfThisPixelY;
-	
+																				size_t ySize, double outputScaleFactor) {
+    if (outputScaleFactor <= 0.0) {
+        throw std::runtime_error("found negative or zero outputScaleFactor");
+    }
+    
+    int imageWidth = static_cast<double>(xSize) * outputScaleFactor;
+    int imageHeight = static_cast<double>(ySize) * outputScaleFactor;
 	size_t nPositions = positions->getNPositions();
 	ImagePtr outputImage(new Image((int)imageWidth, (int)imageHeight));
 	outputImage->setConstant(0.0);
 	
-	double imageWidthScaleFactor = static_cast<double>(imageWidth - 1) / static_cast<double>(xSize - 1);
-	double imageHeightScaleFactor = static_cast<double>(imageHeight - 1) / static_cast<double>(ySize - 1);
+	double scaleFactor = static_cast<double>(imageWidth - 1) / static_cast<double>(xSize - 1);
+    double scaledPixelSize = 1.0 / scaleFactor;
+    double halfPixelSize = 0.5 * scaledPixelSize;
 	
 	// update the progress reporter
 	this->progressReporter->CalculationStarted();
 	
 	for (size_t n = 0; n < nPositions; ++n) {
-		fittedIntegral = positions->getIntegral(n);
-		fittedXPos = positions->getXPosition(n);
-		fittedYPos = positions->getYPosition(n);
-		
-		if ((fittedXPos < 0) || (fittedXPos >= xSize) || (fittedYPos < 0) || (fittedYPos >= ySize)) {
-			continue;
-		}
-		if (fittedIntegral == 0.0) {
+		double fittedIntegral = positions->getIntegral(n);
+		double fittedXPos = positions->getXPosition(n);
+		double fittedYPos = positions->getYPosition(n);
+
+		if ((fittedIntegral == 0.0) && (this->emitterWeighingMethod == PALMBITMAP_EMITTERWEIGHING_INTEGRAL)) {
 			continue;
 		}
 		
 		if (n%100 == 0) {
-			// every 100 iterations provide a progress update
-			progressStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0, 100.0);
+			// progress update
+			int progressStatus = this->progressReporter->UpdateCalculationProgress((double)n / (double)nPositions * 100.0, 100.0);
 			if (progressStatus != 0) {
 				// abort the calculation
 				// just return the image that has been calculated now
@@ -103,12 +104,14 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(std::shared_ptr<LocalizedPosi
 			}
 		}
 		
-		calculatedDeviation = (this->devationCalculator->getDeviation(positions, n) * imageWidthScaleFactor);
+		double calculatedDeviation = (this->devationCalculator->getDeviation(positions, n));
+        double s = std::sqrt(2 * calculatedDeviation * calculatedDeviation);
 		
 		// the amplitude to use when constructing the bitmap depends on the chosen weighing method
+        double calculatedIntegral = 1.0;
 		switch (this->emitterWeighingMethod) {
 			case PALMBITMAP_EMITTERWEIGHING_SAME:
-				calculatedIntegral = 1;
+				calculatedIntegral = 1.0;
 				break;
 			case PALMBITMAP_EMITTERWEIGHING_INTEGRAL:
 				calculatedIntegral = fittedIntegral;
@@ -117,38 +120,41 @@ ImagePtr PALMBitmapImageCalculator::CalculateImage(std::shared_ptr<LocalizedPosi
 				throw (std::runtime_error("Unrecognized emitter weighing method while calculating a PALM bitmap"));
 		}
 		
-		centerX = fittedXPos * imageWidthScaleFactor;
-		centerY = fittedYPos * imageHeightScaleFactor;
+		double centerRow = fittedXPos * scaleFactor;
+		double centerCol = fittedYPos * scaleFactor;
 		
-		startX = floor((double)centerX - 4.0 * calculatedDeviation);	// only run the calculation over a subset of the image surrounding the position
-		startY = floor((double)centerY - 4.0 * calculatedDeviation);
-		endX = ceil((double)centerX + 4.0 * calculatedDeviation);
-		endY = ceil((double)centerY + 4.0 * calculatedDeviation);
+		int startRow = floor((double)centerRow - 4.0 * calculatedDeviation * scaleFactor);	// only run the calculation over a subset of the image surrounding the position
+		int startCol = floor((double)centerCol - 4.0 * calculatedDeviation * scaleFactor);
+		int endRow = ceil((double)centerRow + 4.0 * calculatedDeviation * scaleFactor);
+		int endCol = ceil((double)centerCol + 4.0 * calculatedDeviation * scaleFactor);
 		
-		if (startX < 0)
-			startX = 0;
-		if (endX >= imageWidth)
-			endX = imageWidth - 1;
-		if (startY < 0)
-			startY = 0;
-		if (endY >= imageHeight)
-			endY = imageHeight - 1;
+		if (startRow < 0)
+			startRow = 0;
+		if (endRow >= imageWidth)
+			endRow = imageWidth - 1;
+		if (startCol < 0)
+			startCol = 0;
+		if (endCol >= imageHeight)
+			endCol = imageHeight - 1;
 		
-		for (int j = startY; j <= endY; ++j) {
-			for (int i = startX; i <= endX; ++i) {
-				// take into account that each pixel really should contain the integral of the Gaussian
-				// how much is this pixel shifted with respect to the center of the emitter?
-                shiftOfThisPixelX = static_cast<double>(i) - centerX;
-                shiftOfThisPixelY = static_cast<double>(j) - centerY;
+        for (int j = startCol; j <= endCol; ++j) {
+            for (int i = startRow; i <= endRow; ++i) {
+                double minX = static_cast<double>(i) * scaledPixelSize - halfPixelSize;
+                double maxX = minX + scaledPixelSize;
+                double minY = static_cast<double>(j) * scaledPixelSize - halfPixelSize;
+                double maxY = minY + scaledPixelSize;
+                double x0 = fittedXPos;
+                double y0 = fittedYPos;
                 
-                integralX = this->cdfTable.getNormalCDF(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
-                integralY = this->cdfTable.getNormalCDF(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - this->cdfTable.getNormalCDF(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
-                //integralX = gsl_cdf_gaussian_P(shiftOfThisPixelX + halfPixelSizeX, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelX - halfPixelSizeX, calculatedDeviation);
-                //integralY = gsl_cdf_gaussian_P(shiftOfThisPixelY + halfPixelSizeY, calculatedDeviation) - gsl_cdf_gaussian_P(shiftOfThisPixelY - halfPixelSizeY, calculatedDeviation);
-				
-				(*outputImage)(i, j) += integralX * integralY * calculatedIntegral;
-			}
-		}
+                double erfMinX = erfTable.erf((minX - x0) / s);
+                double erfMaxX = erfTable.erf((maxX - x0) / s);
+                double erfMinY = erfTable.erf((minY - y0) / s);
+                double erfMaxY = erfTable.erf((maxY - y0) / s);
+                double integral = 0.25 * (erfMinX * erfMinY - erfMaxX * erfMinY - erfMinX * erfMaxY + erfMaxX * erfMaxY);
+                
+                (*outputImage)(i, j) += integral * calculatedIntegral;
+            }
+        }
 	}
 	
 	this->progressReporter->CalculationDone();
