@@ -2791,6 +2791,9 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         if ((p->batchSize < 0.0) || (batchSize < 0)) {
             return EXPECT_POS_NUM;
         }
+        if (batchSize > 0) {
+            batchSize = std::max(10, batchSize);
+        }
 	}
     
     bool wantJackKnife = false;
