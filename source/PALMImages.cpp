@@ -36,7 +36,7 @@ ERFLookupTable::ERFLookupTable() {
     this->upperLimit = 4.0;
     this->stride = 0.0001;
     
-    size_t nValues = (upperLimit - lowerLimit) / stride + 1;
+    int nValues = (upperLimit - lowerLimit) / stride + 1;
     
 	this->erfTable.resize(nValues);
     

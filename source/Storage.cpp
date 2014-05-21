@@ -97,6 +97,11 @@ std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPos
 	if (findPosition != (size_t)-1) {
 		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_MLEwG(positionsWave));
 	}
+    
+    findPosition = waveNote.find("LOCALIZATION METHOD:-1");
+	if (findPosition != (size_t)-1) {
+		return std::shared_ptr<LocalizedPositionsContainer> (new LocalizedPositionsContainer_Simulation(positionsWave));
+	}
 	
 	// if we are still here then we don't recognize the type of localization used
 	throw std::runtime_error("Unknown localization method (check the wave note of the wave containing the positions)");
@@ -1130,6 +1135,73 @@ void LocalizedPositionsContainer_MLEwG::addPositions(std::shared_ptr<LocalizedPo
 	std::shared_ptr<LocalizedPositionsContainer_MLEwG> newPositionsContainer_MLEwG(std::static_pointer_cast<LocalizedPositionsContainer_MLEwG> (newPositionsContainer));
 	
 	for (std::vector<LocalizedPosition_MLEwG>::iterator it = newPositionsContainer_MLEwG->positionsVector.begin(); it != newPositionsContainer_MLEwG->positionsVector.end(); ++it) {
+		this->positionsVector.push_back(*it);
+	}
+}
+
+#ifdef WITH_IGOR
+LocalizedPositionsContainer_Simulation::LocalizedPositionsContainer_Simulation(waveHndl positionsWave) {
+	// initialize a new PositionsContainer from a wave that contains positions of the correct type
+	int numDimensions;
+	CountInt dimensionSizes[MAX_DIMENSIONS+1];
+	int err;
+	
+	err = MDGetWaveDimensions(positionsWave, &numDimensions, dimensionSizes);
+	
+	if ((numDimensions != 2) || (dimensionSizes[1] != 3)) {	// invalid dimensions (warning: magic numbers)
+		throw (std::runtime_error("Invalid positions wave"));
+	}
+	
+	LocalizedPosition_Simulation singlePosition;
+	size_t nPositions = dimensionSizes[0];
+	this->positionsVector.reserve(nPositions);
+	CountInt indices[MAX_DIMENSIONS];
+	double value[2];
+	
+	for (size_t i = 0; i < nPositions; ++i) {
+		// get all the relevant data out of the wave and into a position object
+		indices[0] = i;
+		indices[1] = 0;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.integral = value[0];
+		indices[1] = 1;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.xPosition = value[0];
+		indices[1] = 2;
+		err = MDGetNumericWavePointValue(positionsWave, indices, value);
+		singlePosition.yPosition = value[0];
+		
+		this->positionsVector.push_back(singlePosition);
+	}
+}
+#endif // #ifdef WITH_IGOR
+
+void LocalizedPositionsContainer_Simulation::addPosition(std::shared_ptr<LocalizedPosition> newPosition) {
+	// check if the type of positions that we are adding is suitable
+	if (newPosition->getPositionType() != this->getPositionsType())
+		throw std::runtime_error("Trying to append a position of a different type to a LocalizedPositionsContainer_Multiplication");
+	
+	// cast the pointer to the more specific type
+	std::shared_ptr<LocalizedPosition_Simulation> newPosition_Simulation(std::static_pointer_cast<LocalizedPosition_Simulation> (newPosition));
+	
+	this->positionsVector.push_back(*newPosition_Simulation);
+}
+
+void LocalizedPositionsContainer_Simulation::addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer) {
+	// are we trying to add the same container to itself?
+	if (this == newPositionsContainer.get()) {
+		throw std::runtime_error("Trying to append a LocalizedPositionsContainer_Simulation to itself");
+	}
+	
+	// check if the positions container is of the right type
+	if (newPositionsContainer->getPositionsType() != LOCALIZED_POSITIONS_TYPE_SIMULATION) {
+		throw std::runtime_error("Trying to append a container of a different type to a LocalizedPositionsContainer_Simulation");
+	}
+	
+	// cast the pointer to the more specific type
+	std::shared_ptr<LocalizedPositionsContainer_Simulation> newPositionsContainer_Simulation(std::static_pointer_cast<LocalizedPositionsContainer_Simulation> (newPositionsContainer));
+	
+	for (std::vector<LocalizedPosition_Simulation>::iterator it = newPositionsContainer_Simulation->positionsVector.begin(); it != newPositionsContainer_Simulation->positionsVector.end(); ++it) {
 		this->positionsVector.push_back(*it);
 	}
 }

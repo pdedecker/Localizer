@@ -2757,6 +2757,10 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         // Parameter: p->nFramesToInclude
         nFramesToSkip = p->framesToSkip + 0.5;
         nFramesToInclude = p->nFramesToInclude + 0.5;
+        if (nFramesToSkip < 0)
+            return EXPECT_POS_NUM;
+        if (nFramesToInclude < -1)
+            return EXPECT_POS_NUM;
 	}
     
     bool removeSaturatedPixels = false;

@@ -218,6 +218,18 @@ public:
 	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_MLEWG;}
 };
 
+class LocalizedPosition_Simulation : public LocalizedPosition {
+public:
+	LocalizedPosition_Simulation() {;}
+	~LocalizedPosition_Simulation() {;}
+	
+	double integral;
+	double xPosition;
+	double yPosition;
+	
+	size_t getPositionType() const {return LOCALIZED_POSITIONS_TYPE_SIMULATION;}
+};
+
 /**
  * @brief An abstract base class that holds localized positions. Has derived classes that handle specific types of positions.
  * Can import positions from waves or files, and write to them. The base class contains accessor methods for every data possible,
@@ -607,6 +619,41 @@ public:
 	
 protected:
 	std::vector<LocalizedPosition_MLEwG> positionsVector;
+};
+
+// Special-purpose LocalizedPositionsContainer that supports only a subset of the functionality.
+class LocalizedPositionsContainer_Simulation : public LocalizedPositionsContainer {
+public:
+	LocalizedPositionsContainer_Simulation() {;}
+#ifdef WITH_IGOR
+	LocalizedPositionsContainer_Simulation(waveHndl wave);
+#endif
+	
+	~LocalizedPositionsContainer_Simulation() {;}
+	
+	// accessor methods
+	size_t getNPositions() const {return positionsVector.size();}
+	size_t getFrameNumber(size_t index) const {return 0;}
+	double getIntegral(size_t index) const {return positionsVector.at(index).integral;}
+	double getXPosition(size_t index) const {return positionsVector.at(index).xPosition;}
+	double getYPosition(size_t index) const {return positionsVector.at(index).yPosition;}
+	
+	// adding new positions
+	void addPosition(std::shared_ptr<LocalizedPosition> newPosition);
+	void addPositions(std::shared_ptr<LocalizedPositionsContainer> newPositionsContainer);
+	
+	// set the frame numbers for all positions
+	void setFrameNumbers(size_t frameNumber) {;}
+	
+	ImagePtr getLocalizedPositionsAsMatrix() const {return ImagePtr();}
+    void writePositionsToFile(std::string filePath, std::string header) const {;}
+	
+	void sortPositionsByFrameNumber() {;}
+	
+	size_t getPositionsType() const {return LOCALIZED_POSITIONS_TYPE_SIMULATION;}
+	
+protected:
+	std::vector<LocalizedPosition_Simulation> positionsVector;
 };
 
 #endif
