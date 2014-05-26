@@ -941,7 +941,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 
             data_file_path = ConvertHandleToString(p->experiment_file);
 
-            image_loader = GetImageLoader(camera_type, data_file_path);
+            image_loader = GetImageLoader(data_file_path, camera_type);
 
             analysisOptionsStream << "ORIGINAL FILE PATH:" << data_file_path << ';';
             analysisOptionsStream << "CAMERA TYPE:" << camera_type << ';';
@@ -1315,7 +1315,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         if (err != 0)
             return err;
         
-        image_loader = GetImageLoader(camera_type, dataFilePath);
+        image_loader = GetImageLoader(dataFilePath, camera_type);
 
         if (header_only == 0) {
             err = LoadPartialCCDImage(image_loader.get(), firstImage, nImagesToRead, overwrite, dataFolderAndName, progressReporter);
@@ -1494,7 +1494,7 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 
     try {
         input_file_path = ConvertHandleToString(p->input_file);
-        image_loader = GetImageLoader(camera_type, input_file_path);
+        image_loader = GetImageLoader(input_file_path, camera_type);
 
         output_file_path = ConvertHandleToString(p->output_file);
         if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
@@ -1706,7 +1706,7 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 
     try {
         input_file_path = ConvertHandleToString(p->input_file);
-        image_loader = GetImageLoader(camera_type, input_file_path);
+        image_loader = GetImageLoader(input_file_path, camera_type);
         std::shared_ptr<ImageLoader> croppedImageLoader(new ImageLoaderWrapper(image_loader));
         dynamic_cast<ImageLoaderWrapper*>(croppedImageLoader.get())->setROI(startX, endX, startY, endY);
 
@@ -2631,7 +2631,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 
     try {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
-        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
 
         if (nFramesToSkip >= imageLoader->getNImages())
             return ORN_OFFSET_OUT_OT_RANGE;
@@ -2857,7 +2857,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     
     try {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
-        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(cameraType, inputFilePath);
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
         if (nFramesToInclude > 0) {
             dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);

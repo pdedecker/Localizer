@@ -67,6 +67,9 @@ using boost::int16_t;
 using boost::uint8_t;
 using boost::int8_t;
 
+class ImageLoader;
+std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, int cameraType = -1);
+
 /**
  Returns last modification time of the file pointed to by path, in some non-portable
  but internally consistent int format.

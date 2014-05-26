@@ -32,6 +32,128 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <boost/algorithm/string.hpp>
+
+int GetFileStorageType(const std::string &filePath) {
+    size_t startOfExtension = filePath.rfind('.');
+    if (startOfExtension == size_t(-1)) {
+        // the filepath does not appear to contain an extension
+        throw std::runtime_error("Unable to deduce the file type");
+    }
+    
+    std::string extension = filePath.substr(startOfExtension + 1);
+    if ((extension.length() < 3) || (extension.length() > 4)) {
+        throw std::runtime_error("Unable to deduce the file type");
+    }
+    
+    if (boost::algorithm::iequals(extension, "spe"))
+        return CAMERA_TYPE_WINSPEC;
+    if (boost::algorithm::iequals(extension, "sif"))
+        return CAMERA_TYPE_ANDOR;
+    if (boost::algorithm::iequals(extension, "his"))
+        return CAMERA_TYPE_HAMAMATSU;
+    if (boost::algorithm::iequals(extension, "pde"))
+        return CAMERA_TYPE_PDE;
+    if (boost::algorithm::iequals(extension, "tif"))
+        return CAMERA_TYPE_TIFF;
+    if (boost::algorithm::iequals(extension, "tiff"))
+        return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "btf"))
+        return CAMERA_TYPE_TIFF;
+	if (boost::algorithm::iequals(extension, "tf8"))
+        return CAMERA_TYPE_TIFF;
+    if (boost::algorithm::iequals(extension, "lsm"))
+        return CAMERA_TYPE_TIFF;
+    
+    // if we're still here then the extension was not recognized
+    throw std::runtime_error("Unable to deduce the file type");
+}
+
+void GetFilePathAndCameraType(const std::string &inputFilePath, std::string &filePath, size_t &cameraType) {
+    std::string possiblyConvertedPath = inputFilePath;
+    
+#ifdef WITH_IGOR
+    int isWavePath = 1;
+    
+    try {
+        FetchWaveUsingFullPath(inputFilePath);
+    }
+    // if the wave pointed to by the path does not the exist
+    // (as would be the case if it was a file path)
+    // then FetchWaveUsingFullPath will throw exceptions
+    catch (...) {
+        isWavePath = 0;
+    }
+    
+    if (isWavePath == 1) {
+        filePath = inputFilePath;
+        cameraType = CAMERA_TYPE_IGOR_WAVE;
+        return;
+    }
+    
+    // if we're still here then it's a path to a file
+    // first we need to try to convert the path to the
+    // appropriate format, if required
+    possiblyConvertedPath = ConvertPathToNativePath(inputFilePath);
+#endif
+    
+    filePath = possiblyConvertedPath;
+    cameraType = GetFileStorageType(filePath);
+    return;
+}
+
+std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, int cameraType) {
+    std::shared_ptr<ImageLoader> image_loader;
+    size_t estimatedCameraType;
+    std::string convertedFilePath = data_file_path;
+    
+    // the camera type might be unknown
+    if (cameraType == -1) {
+        GetFilePathAndCameraType(data_file_path, convertedFilePath, estimatedCameraType);
+    } else {
+        estimatedCameraType = cameraType;
+#ifdef WITH_IGOR
+        if (estimatedCameraType != CAMERA_TYPE_IGOR_WAVE) {
+            convertedFilePath = ConvertPathToNativePath(data_file_path);
+        }
+#endif
+    }
+    
+    switch (estimatedCameraType) {
+		case CAMERA_TYPE_WINSPEC:	// spe files
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderSPE(convertedFilePath));
+			break;
+		case CAMERA_TYPE_ANDOR:
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderAndor(convertedFilePath));
+			break;
+		case CAMERA_TYPE_HAMAMATSU:
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(convertedFilePath));
+			break;
+		case CAMERA_TYPE_TIFF:
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			break;
+		case CAMERA_TYPE_PDE:
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderPDE(convertedFilePath));
+			break;
+		case CAMERA_TYPE_ZEISS:	// Zeiss lsm files
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(convertedFilePath));
+			break;
+#ifdef WITH_IGOR
+		case CAMERA_TYPE_IGOR_WAVE: // Matrix wave in Igor
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderIgor(convertedFilePath));
+			break;
+#endif
+		case CAMERA_TYPE_MULTIFILE_TIFF:
+			image_loader = std::shared_ptr<ImageLoader>(new ImageLoaderMultiFileTIFF(convertedFilePath));
+			break;
+		default:
+			throw std::runtime_error("Unsupported CCD file type (/Y flag)");
+			break;
+    }
+    
+    return image_loader;
+    
+}
 
 int64_t GetLastModificationTime(const std::string& path) {
 	int64_t modTime = 1;

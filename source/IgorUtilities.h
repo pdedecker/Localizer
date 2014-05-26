@@ -30,33 +30,15 @@
 #define PALM_ANALYSIS_IGORUTILITIES
 
 #include <string>
-#include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include "boost/smart_ptr.hpp"
 
 #include "XOPStandardHeaders.h"
 #include <eigen3/Eigen/Eigen>
 #include "PALMAnalysis.h"
-#include "ProgressReporting.h"
 #include "Defines.h"
 #include "Storage.h"
-#include "FileIO.h"
 
 class ImageLoader;
-
-/**
- * Igor passes strings as a handle, which needs special conversion
- * also try to determine the camera type.
- * The difficulty here is in trying to distinguish between a file path
- * and a path to an Igor wave. So do the following: first try to treat the
- * the string as a path to a wave. If that wave doesn't exist then assume it's a
- * file path.
- */
-void GetFilePathAndCameraType(std::string& inputFilePath, std::string &filePath, size_t &cameraType);
-
-int GetFileStorageType(std::string &filePath);
-
-std::shared_ptr<ImageLoader> GetImageLoader(size_t camera_type, std::string& data_file_path);
 
 // Routines that return information on CCD files and image frames to Igor
 int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRequested, int overwrite, DataFolderAndName destination, 
