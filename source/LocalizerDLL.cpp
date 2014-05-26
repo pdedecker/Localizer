@@ -1,5 +1,5 @@
 /*
- Copyright 2008-2011 Peter Dedecker.
+ Copyright 2008-2014 Peter Dedecker.
  
  This file is part of Localizer.
  
@@ -28,28 +28,21 @@
 
 #include "LocalizerDLL.h"
 
-EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file on disk
-                                  double pfa,               // pfa for GLRT
-                                  double psfWidth,          // width of the psf
-                                  double** positionsArray,  // pointer to pointer to double that will be set to 2D array with results
-                                  int* nPositions,          // number of positions in result
-                                  int* nColumns) {          // number of columns in the array
+#include <memory>
+
+#include "FileIO.h"
+
+int LocalizerFileInfo(char* filePath,            // in: path to the file on disk
+                      int* nImagesInFile,        // out: number of images
+                      int* nRows,                // out: number of rows
+                      int* nCols,                // out: number of cols
+                      int* storageType) {        // out: pixel storage type
     try {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
-        std::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
-        std::shared_ptr<ThresholdImage> thresholder(new ThresholdImage_GLRT_FFT(pfa, psfWidth));
-        std::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
-        std::shared_ptr<ParticleFinder> particleFinder(new ParticleFinder_adjacent4());
-        std::shared_ptr<FitPositions> fitPositions(new FitPositions_SymmetricGaussian(psfWidth, 1.0));
-        std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
-        
-        std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_Silent);
-        
-        std::shared_ptr<PALMAnalysisController> analysisController(new PALMAnalysisController(thresholder, preprocessor,
-                                                                                                postprocessor, particleFinder, particleVerifiers,
-                                                                                                fitPositions,
-                                                                                                progressReporter, -1, -1));
-        std::shared_ptr<LocalizedPositionsContainer> localizedPositions = analysisController->doPALMAnalysis(imageLoader);
+        *nImagesInFile = imageLoader->getNImages();
+        *nRows = imageLoader->getXSize();
+        *nCols = imageLoader->getYSize();
+        *storageType = imageLoader->getStorageType();
     }
     catch (...) {
         return -1;
@@ -58,31 +51,32 @@ EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file 
     return 0;
 }
 
-std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath) {
-    std::string fileExtension = filePath.substr(filePath.length() - 3, 3);
-	
-	// convert the extension to lowercase for easy comparison
-	std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
-	
-	if (fileExtension == std::string("spe"))
-		return std::shared_ptr<ImageLoader>(new ImageLoaderSPE(filePath));
-	
-	if (fileExtension == std::string("sif"))
-		return std::shared_ptr<ImageLoader>(new ImageLoaderAndor(filePath));
-	
-	if (fileExtension == std::string("his"))
-		return std::shared_ptr<ImageLoader>(new ImageLoaderHamamatsu(filePath));
-	
-	if (fileExtension == std::string("tif"))
-		return std::shared_ptr<ImageLoader>(new ImageLoaderTIFF(filePath));
-	
-	if (fileExtension == std::string("pde"))
-		return std::shared_ptr<ImageLoader>(new ImageLoaderPDE(filePath));
-	
-	// if we get here then we don't recognize the file type
-	throw (std::runtime_error("Unknown data file type with extension " + fileExtension));
-}
-
-EXPORT void LocalizerFreeArray(double *arrayPtr) {
-    delete[] arrayPtr;
+EXPORT int LocalizerLoadImages(char* filePath,          // in: path to the file on disk
+                               int nImagesToSkip,       // in: number of images to skip
+                               int nImagesToLoad,       // in: number of images to load -- -1 to load up to end
+                               double* imageData) {     // in: pointer to allocate buffer -- must contain at least (nRows * nCols * nImages) doubles
+    try {
+        std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
+        ImageLoaderWrapper imageLoaderWrapper(imageLoader);
+        imageLoaderWrapper.setImageRange(nImagesToSkip, nImagesToSkip + nImagesToLoad - 1);
+        int nRows = imageLoaderWrapper.getXSize();
+        int nCols = imageLoaderWrapper.getYSize();
+        int nImagesTotal = imageLoaderWrapper.getNImages();
+        int nPixelsPerImage = nRows * nCols;
+        int nBytesPerImage = nPixelsPerImage * sizeof(double);
+        if (nImagesToLoad < 0) {
+            nImagesToLoad = nImagesTotal - nImagesToSkip;
+        }
+        
+        for (int n = 0; n < nImagesToLoad; ++n) {
+            ImagePtr image = imageLoaderWrapper.readImage(n);
+            memcpy(imageData, image->data(), nBytesPerImage);
+            imageData += nPixelsPerImage;
+        }
+    }
+    catch (...) {
+        return -1;
+    }
+    
+    return nImagesToLoad;
 }

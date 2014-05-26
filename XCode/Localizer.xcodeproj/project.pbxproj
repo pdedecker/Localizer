@@ -7,12 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0128F60151CB06400D683EC /* Matlab.h in Headers */ = {isa = PBXBuildFile; fileRef = D0128F5C151CB06400D683EC /* Matlab.h */; };
 		D01D290C136CE9710094B975 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
-		D027E937151311CF005B8664 /* Convolver.h in Headers */ = {isa = PBXBuildFile; fileRef = D027E935151311CF005B8664 /* Convolver.h */; };
-		D027E938151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
 		D027E93A151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
 		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
@@ -53,43 +50,40 @@
 		D0C258481746C1A2001C2EB1 /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
 		D0C2584C1746C1AF001C2EB1 /* Matlab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0128F5D151CB06400D683EC /* Matlab.cpp */; };
 		D0C2584E1746C1AF001C2EB1 /* WaitMex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D043F47415A712B7006A3D54 /* WaitMex.cpp */; };
-		D0C2584F1746C1DB001C2EB1 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */; };
-		D0C258501746C1DD001C2EB1 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE296170C54680012ED0E /* libboost_system-mt.a */; };
-		D0C258511746C1DF001C2EB1 /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE297170C54680012ED0E /* libboost_thread-mt.a */; };
 		D0C258521746C1E2001C2EB1 /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE298170C54680012ED0E /* libfftw3.a */; };
 		D0C258531746C1E4001C2EB1 /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE299170C54680012ED0E /* libgsl.a */; };
 		D0C258541746C1E7001C2EB1 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
 		D0C258551746C1EA001C2EB1 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
-		D0C258561746C1ED001C2EB1 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29C170C54680012ED0E /* libtiff.a */; };
 		D0C258571746C1EF001C2EB1 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D0C258581746C1F4001C2EB1 /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
 		D0C258591746C51E001C2EB1 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D0C2585A1746C57D001C2EB1 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
 		D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
-		D0CCD31F1473C6B6005CD75A /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
-		D0CCD3211473C6B6005CD75A /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
-		D0CCD3231473C6B6005CD75A /* Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* Processing.cpp */; };
 		D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
-		D0CCD3271473C6B6005CD75A /* Segmentation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF73106FE0380005ECA3 /* Segmentation.cpp */; };
-		D0CCD3291473C6B6005CD75A /* ParticleFinding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BF93106FE1910005ECA3 /* ParticleFinding.cpp */; };
-		D0CCD32B1473C6B6005CD75A /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D093BFB8106FE2CE0005ECA3 /* Localization.cpp */; };
-		D0CCD32D1473C6B6005CD75A /* PALMImages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D03321011074B8B80097124C /* PALMImages.cpp */; };
-		D0CCD32F1473C6B6005CD75A /* PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */; };
-		D0CCD3311473C6B6005CD75A /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
 		D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
 		D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
-		D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */ = {isa = PBXBuildFile; fileRef = D0CCD3381473C700005CD75A /* LocalizerDLL.h */; };
 		D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */; };
-		D0EAE29E170C54680012ED0E /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */; };
-		D0EAE29F170C54680012ED0E /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE296170C54680012ED0E /* libboost_system-mt.a */; };
-		D0EAE2A0170C54680012ED0E /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE297170C54680012ED0E /* libboost_thread-mt.a */; };
+		D0D8ABB7195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
+		D0D8ABB8195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
+		D0D8ABB9195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
+		D0D8ABBD195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
+		D0D8ABBE195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
+		D0D8ABBF195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
+		D0D8ABC0195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
+		D0D8ABC1195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
+		D0D8ABC2195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
+		D0D8ABC3195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
+		D0D8ABC4195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
+		D0D8ABC5195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
+		D0D8ABC7195C1E0300D5987C /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */; };
 		D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE298170C54680012ED0E /* libfftw3.a */; };
 		D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE299170C54680012ED0E /* libgsl.a */; };
 		D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
 		D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
-		D0EAE2A5170C54680012ED0E /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29C170C54680012ED0E /* libtiff.a */; };
 		D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
-		D0EAE2B0170C54AF0012ED0E /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */; };
+		D0FB9905193344E00024B6A7 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
+		D0FB9906193344E50024B6A7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
+		D0FB9907193344E70024B6A7 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -152,18 +146,18 @@
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
+		D0D8ABB6195C1D2500D5987C /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = "<group>"; };
+		D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = "<group>"; };
+		D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = "<group>"; };
+		D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = "<group>"; };
+		D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode4/libXOPSupport.a; sourceTree = "<group>"; };
 		D0E6FD0F131C546400356DBB /* MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatrixRecycler.h; path = ../source/MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
 		D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatrixRecycler.cpp; path = ../source/MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
-		D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = SOURCE_ROOT; };
-		D0EAE296170C54680012ED0E /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = SOURCE_ROOT; };
-		D0EAE297170C54680012ED0E /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = SOURCE_ROOT; };
 		D0EAE298170C54680012ED0E /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = ../lib/mac/libfftw3.a; sourceTree = SOURCE_ROOT; };
 		D0EAE299170C54680012ED0E /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = ../lib/mac/libgsl.a; sourceTree = SOURCE_ROOT; };
 		D0EAE29A170C54680012ED0E /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../lib/mac/libjpeg.a; sourceTree = SOURCE_ROOT; };
 		D0EAE29B170C54680012ED0E /* liblzma.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblzma.a; path = ../lib/mac/liblzma.a; sourceTree = SOURCE_ROOT; };
-		D0EAE29C170C54680012ED0E /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = SOURCE_ROOT; };
 		D0EAE29D170C54680012ED0E /* libz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libz.a; path = ../lib/mac/libz.a; sourceTree = SOURCE_ROOT; };
-		D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode/libXOPSupport.a; sourceTree = SOURCE_ROOT; };
 		D0F0E2CE10EBE26600F9A855 /* IgorUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorUtilities.h; path = ../source/IgorUtilities.h; sourceTree = SOURCE_ROOT; };
 		D0F0E2CF10EBE26600F9A855 /* IgorUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IgorUtilities.cpp; path = ../source/IgorUtilities.cpp; sourceTree = SOURCE_ROOT; };
 		D0F0E35510EBEC6200F9A855 /* CommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CommandLine.h; path = ../source/CommandLine.h; sourceTree = "<group>"; };
@@ -181,17 +175,17 @@
 			files = (
 				D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */,
 				D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */,
-				D0EAE29E170C54680012ED0E /* libboost_date_time-mt.a in Frameworks */,
-				D0EAE29F170C54680012ED0E /* libboost_system-mt.a in Frameworks */,
-				D0EAE2A0170C54680012ED0E /* libboost_thread-mt.a in Frameworks */,
+				D0D8ABBD195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */,
 				D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */,
 				D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */,
 				D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */,
 				D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */,
-				D0EAE2A5170C54680012ED0E /* libtiff.a in Frameworks */,
 				D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */,
-				D0EAE2B0170C54AF0012ED0E /* libXOPSupport.a in Frameworks */,
 				D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */,
+				D0D8ABC3195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */,
+				D0D8ABB7195C1D2500D5987C /* libtiff.a in Frameworks */,
+				D0D8ABC0195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */,
+				D0D8ABC7195C1E0300D5987C /* libXOPSupport.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,17 +193,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0C2584F1746C1DB001C2EB1 /* libboost_date_time-mt.a in Frameworks */,
-				D0C258501746C1DD001C2EB1 /* libboost_system-mt.a in Frameworks */,
-				D0C258511746C1DF001C2EB1 /* libboost_thread-mt.a in Frameworks */,
 				D0C258521746C1E2001C2EB1 /* libfftw3.a in Frameworks */,
 				D0C258531746C1E4001C2EB1 /* libgsl.a in Frameworks */,
+				D0D8ABBF195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */,
 				D0C258541746C1E7001C2EB1 /* libjpeg.a in Frameworks */,
 				D0C258551746C1EA001C2EB1 /* liblzma.a in Frameworks */,
-				D0C258561746C1ED001C2EB1 /* libtiff.a in Frameworks */,
+				D0D8ABC5195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */,
 				D0C258571746C1EF001C2EB1 /* libz.a in Frameworks */,
 				D0C258581746C1F4001C2EB1 /* libtbb.dylib in Frameworks */,
 				D0C258591746C51E001C2EB1 /* Accelerate.framework in Frameworks */,
+				D0D8ABB9195C1D2500D5987C /* libtiff.a in Frameworks */,
+				D0D8ABC2195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,6 +212,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */,
+				D0FB9905193344E00024B6A7 /* libz.a in Frameworks */,
+				D0D8ABB8195C1D2500D5987C /* libtiff.a in Frameworks */,
+				D0FB9906193344E50024B6A7 /* liblzma.a in Frameworks */,
+				D0D8ABC1195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */,
+				D0FB9907193344E70024B6A7 /* libjpeg.a in Frameworks */,
+				D0D8ABC4195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */,
+				D0D8ABBE195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,17 +240,17 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				D0EAE295170C54680012ED0E /* libboost_date_time-mt.a */,
-				D0EAE296170C54680012ED0E /* libboost_system-mt.a */,
-				D0EAE297170C54680012ED0E /* libboost_thread-mt.a */,
+				D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */,
+				D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */,
+				D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */,
 				D0EAE298170C54680012ED0E /* libfftw3.a */,
 				D0EAE299170C54680012ED0E /* libgsl.a */,
+				D0D8ABB6195C1D2500D5987C /* libtiff.a */,
 				D0EAE29A170C54680012ED0E /* libjpeg.a */,
 				D0EAE29B170C54680012ED0E /* liblzma.a */,
-				D0EAE29C170C54680012ED0E /* libtiff.a */,
 				D0EAE29D170C54680012ED0E /* libz.a */,
-				D0EAE2AF170C54AF0012ED0E /* libXOPSupport.a */,
 				D0C7D190172E77CD0048356A /* libtbb.dylib */,
+				D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */,
 				D0006D2B12CFD34D00539A8F /* Accelerate.framework */,
 				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
 			);
@@ -387,9 +388,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0CCD3391473C700005CD75A /* LocalizerDLL.h in Headers */,
-				D027E937151311CF005B8664 /* Convolver.h in Headers */,
-				D0128F60151CB06400D683EC /* Matlab.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -574,19 +572,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */,
-				D0CCD31F1473C6B6005CD75A /* PALMAnalysis.cpp in Sources */,
-				D0CCD3211473C6B6005CD75A /* ProgressReporting.cpp in Sources */,
-				D0CCD3231473C6B6005CD75A /* Processing.cpp in Sources */,
 				D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */,
-				D0CCD3271473C6B6005CD75A /* Segmentation.cpp in Sources */,
-				D0CCD3291473C6B6005CD75A /* ParticleFinding.cpp in Sources */,
-				D0CCD32B1473C6B6005CD75A /* Localization.cpp in Sources */,
-				D0CCD32D1473C6B6005CD75A /* PALMImages.cpp in Sources */,
-				D0CCD32F1473C6B6005CD75A /* PositionsProcessing.cpp in Sources */,
-				D0CCD3311473C6B6005CD75A /* SOFI.cpp in Sources */,
 				D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */,
 				D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */,
-				D027E938151311CF005B8664 /* Convolver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -613,7 +601,6 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				EXPORTED_SYMBOLS_FILE = "";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = NO;
 				GCC_MODEL_PPC64 = YES;
@@ -624,9 +611,11 @@
 					"__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0",
 				);
 				GCC_VERSION = "";
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = NO;
 				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
@@ -634,8 +623,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
-				LIBRARY_SEARCH_PATHS = "";
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -652,7 +640,6 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				EXPORTED_SYMBOLS_FILE = "";
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
@@ -683,9 +670,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
-				LIBRARY_SEARCH_PATHS = "";
 				LLVM_LTO = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -719,11 +705,6 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../lib/mac\"",
-					"\"$(SRCROOT)/../../XOPSupport/Xcode\"",
-				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					../../XOPSupport/XCode4/libXOPSupport.a,
@@ -757,11 +738,6 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../lib/mac\"",
-					"\"$(SRCROOT)/../../XOPSupport/Xcode\"",
-				);
 				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -807,6 +783,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					/Applications/MATLAB_R2012b.app/bin/maci64,
 					"\"$(SRCROOT)/../lib/mac\"",
+					"/Users/peter/Documents/C++/XOP",
+					Toolkit,
+					6/IgorXOPs6/Localizer,
+					XOP/lib/mac,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -851,6 +831,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					/Applications/MATLAB_R2012b.app/bin/maci64,
 					"\"$(SRCROOT)/../lib/mac\"",
+					"/Users/peter/Documents/C++/XOP",
+					Toolkit,
+					6/IgorXOPs6/Localizer,
+					XOP/lib/mac,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -868,8 +852,11 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				EXECUTABLE_EXTENSION = dylib;
 				EXECUTABLE_PREFIX = lib;
+				EXPORTED_SYMBOLS_FILE = ../resources/DLLExports.txt;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -879,13 +866,18 @@
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				ONLY_ACTIVE_ARCH = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/peter/Documents/C++/XOP",
+					Toolkit,
+					6/IgorXOPs6/Localizer,
+					XOP/lib/mac,
+				);
 				PRODUCT_NAME = localizer;
-				SDKROOT = macosx10.6;
+				STRIPFLAGS = "-x";
+				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -897,18 +889,25 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				EXECUTABLE_EXTENSION = dylib;
 				EXECUTABLE_PREFIX = lib;
+				EXPORTED_SYMBOLS_FILE = ../resources/DLLExports.txt;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				ONLY_ACTIVE_ARCH = NO;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Users/peter/Documents/C++/XOP",
+					Toolkit,
+					6/IgorXOPs6/Localizer,
+					XOP/lib/mac,
+				);
 				PRODUCT_NAME = localizer;
-				SDKROOT = macosx10.6;
+				STRIPFLAGS = "-x";
+				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;

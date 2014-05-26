@@ -1,5 +1,5 @@
 /*
- Copyright 2008-2011 Peter Dedecker.
+ Copyright 2008-2014 Peter Dedecker.
  
  This file is part of Localizer.
  
@@ -29,23 +29,26 @@
 #ifndef Localizer_LocalizerDLL_h
 #define Localizer_LocalizerDLL_h
 
-#include <string>
+#ifdef _WIN32
+    #define EXPORT __declspec( dllexport )
+#else
+    #define EXPORT __attribute__((visibility("default")))
+#endif
 
-#include "boost/smart_ptr.hpp"
-
-#include "PALMAnalysis.h"
-
-#define EXPORT __attribute__((visibility("default")))
-
-EXPORT int DoLocalizationAnalysis(char *filePath,           // path to the file on disk
-                                  double pfa,               // pfa for GLRT
-                                  double psfWidth,          // width of the psf
-                                  double** positionsArray,  // pointer to pointer to double that will be set to 2D array with results
-                                  int* nPositions,          // number of positions in result
-                                  int* nColumns);           // number of columns in the array
-
-std::shared_ptr<ImageLoader> GetImageLoader(std::string filePath);
-
-EXPORT void LocalizerFreeArray(double *arrayPtr);           // function to clean up arrays allocated by this program
-
+extern "C" {
+    
+    // returns non-zero for error
+    EXPORT int LocalizerFileInfo(char* filePath,            // in: path to the file on disk
+                                 int* nImagesInFile,        // out: number of images
+                                 int* nRows,                // out: number of rows
+                                 int* nCols,                // out: number of cols
+                                 int* storageType);         // out: pixel storage type (data will always be loaded as doubles)
+    
+    // return number of images loaded, or negative value for error.
+    EXPORT int LocalizerLoadImages(char* filePath,          // in: path to the file on disk
+                                   int nImagesToSkip,       // in: number of images to skip
+                                   int nImagesToLoad,       // in: number of images to load -- -1 to load up to end
+                                   double* imageData);      // in: pointer to allocate buffer -- must contain at least (nRows * nCols * nImages) doubles
+    
+}
 #endif
