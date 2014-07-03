@@ -1467,12 +1467,10 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(int &indexOfImageThatWasRead) {
 }
 
 std::string ImageLoaderMultiFileTIFF::getFilePathForImageAtIndex(int index) {
-	int imageIndexOnDisk = this->firstImageIndex + index;
-	
 	std::unique_ptr<char[]> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
 	sprintf(formatString, "%%0%dd", nDigitsInNumber);
-	sprintf(imageIndexStr.get(), formatString, imageIndexOnDisk);
+	sprintf(imageIndexStr.get(), formatString, index);
 	
 	std::string filePath = this->baseFilePath;
 	filePath += imageIndexStr.get();
