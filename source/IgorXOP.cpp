@@ -710,7 +710,6 @@ typedef struct NewSOFIRuntimeParams* NewSOFIRuntimeParamsPtr;
 #pragma pack()	// Reset structure alignment to default.
 
 int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
     DataFolderAndName outputWaveParams;
@@ -1150,7 +1149,6 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 }
 
 int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     int returnErrors = 1;
     int overwrite = 0;
@@ -1353,7 +1351,6 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
 }
 
 int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     size_t camera_type;
     int method;
@@ -1612,7 +1609,6 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
 }
 
 int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     size_t camera_type;
     int method;
@@ -1773,7 +1769,6 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
 }
 
 int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     size_t preprocessing_method, postprocessing_method;
     size_t offset;
@@ -2111,7 +2106,6 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 }
 
 int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     ImagePtr firstImage;
     ImagePtr secondImage;
@@ -2191,7 +2185,6 @@ int ExecuteConvolveImages(ConvolveImagesRuntimeParamsPtr p) {
 }
 
 int ExecuteLocalizationBitmap(LocalizationBitmapRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();	// we will handle errors ourselves
     int err = 0;
     int method, emitterWeighing;
     double upperLimit, PSFWidth;
@@ -2444,7 +2437,6 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
 }
 
 int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
-    gsl_set_error_handler_off();
     int err = 0;
 
     // Flag parameters.
@@ -3128,6 +3120,9 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle) {
         SetXOPResult(IGOR_OBSOLETE);
         return EXIT_FAILURE;
     }
+    
+    gsl_set_error_handler_off();	// we will handle GSL errors ourselves
+    TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
 
     if ((result = RegisterOperations())) {
         SetXOPResult(result);
