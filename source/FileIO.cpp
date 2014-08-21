@@ -289,6 +289,10 @@ void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imag
 	}
 }
 
+size_t NBytesInImage(ImagePtr image, int nRows, int nCols, int format) {
+    
+}
+
 #ifdef _WIN32
 WindowsFileStream::~WindowsFileStream() {
     if (this->fileRef != NULL) {
@@ -1065,8 +1069,6 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	size_t nPixels = this->xSize * this->ySize;
 	uint64_t offset, imageSize;
 	
-	ImagePtr image(GetRecycledMatrix((int)this->xSize, (int)this->ySize), FreeRecycledMatrix);
-	
 	switch (this->storage_type) {
 		case STORAGE_TYPE_INT8:
 		case STORAGE_TYPE_UINT8:
@@ -1111,40 +1113,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	}
 	
 	
-	switch (this->storage_type) {
-        case STORAGE_TYPE_INT8:
-            CopyBufferToImage<int8_t>(imageBuffer, image, 1);
-            break;
-            
-        case STORAGE_TYPE_UINT8:
-            CopyBufferToImage<uint8_t>(imageBuffer, image, 1);
-            break;
-            
-        case STORAGE_TYPE_INT16:
-            CopyBufferToImage<int16_t>(imageBuffer, image, 1);
-            break;
-            
-        case STORAGE_TYPE_UINT16:
-            CopyBufferToImage<uint16_t>(imageBuffer, image, 1);
-            break;
-            
-		case STORAGE_TYPE_UINT32:
-            CopyBufferToImage<uint32_t>(imageBuffer, image, 1);
-            break;
-            
-		case STORAGE_TYPE_FP32:
-            CopyBufferToImage<float>(imageBuffer, image, 1);
-            break;
-            
-		case STORAGE_TYPE_FP64:
-            CopyBufferToImage<double>(imageBuffer, image, 1);
-            break;
-            
-		default:
-			throw std::runtime_error("The data file does not appear to contain a recognized storage type");
-			break;
-	}
-	
+	ImagePtr image = BufferWithFormatToImage(imageBuffer, this->xSize, this->ySize, this->storage_type, 1);
 	return image;
 }
 
@@ -2053,34 +2022,8 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	}
 	
 	int nBytesToWrite = nPixels * bytesPerPixel;
-    std::vector<char> imageBuffer(nBytesToWrite);
-	
-	switch (this->storageType) {
-		case STORAGE_TYPE_INT8:
-			CopyImageToBuffer<int8_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_UINT8:
-			CopyImageToBuffer<uint8_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_INT16:
-			CopyImageToBuffer<int16_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_UINT16:
-			CopyImageToBuffer<uint16_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_INT32:
-			CopyImageToBuffer<int32_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_UINT32:
-			CopyImageToBuffer<uint32_t>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_FP32:
-			CopyImageToBuffer<float>(imageToWrite, imageBuffer, 1);
-			break;
-		case STORAGE_TYPE_FP64:
-			CopyImageToBuffer<double>(imageToWrite, imageBuffer, 1);
-			break;
-	}
+    std::vector<char> imageBuffer;
+    ImageToBufferWithFormat(imageToWrite, this->storageType, imageBuffer, 1);
 	
 	this->file.write(imageBuffer.data(), nBytesToWrite);
 	++this->nImagesWritten;
