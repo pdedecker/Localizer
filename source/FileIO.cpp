@@ -548,7 +548,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	
 	imageSize = pixelSize * xSize * ySize;
 	
-    std::unique_ptr<char[]> single_image_buffer(new char[imageSize]);
+    std::vector<char> imageBuffer(imageSize);
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -559,7 +559,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 		offset = this->header_length + this->nextImageToRead * imageSize;
 		
 		file.seekg(offset);
-		file.read((char *)single_image_buffer.get(), imageSize);
+		file.read(imageBuffer.data(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
@@ -573,19 +573,19 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	
 	switch(storage_type) {
 		case STORAGE_TYPE_FP32:	// 4-byte float
-            CopyBufferToImage<float>(single_image_buffer.get(), image);
+            CopyBufferToImage<float>(imageBuffer, image);
 			break;
             
 		case STORAGE_TYPE_UINT32:	// 4-byte long
-			CopyBufferToImage<uint32_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<uint32_t>(imageBuffer, image);
 			break;
             
 		case STORAGE_TYPE_INT16:	// 2-byte signed short
-			CopyBufferToImage<int16_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<int16_t>(imageBuffer, image);
 			break;
 			
 		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
-			CopyBufferToImage<uint16_t>(single_image_buffer.get(), image);
+			CopyBufferToImage<uint16_t>(imageBuffer, image);
 			break;
             
 		default:
@@ -717,7 +717,7 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t nBytesInImage = xSize * ySize * sizeof(float);
 	
-	std::unique_ptr<char[]> single_image_buffer(new char[nBytesInImage]);
+    std::vector<char> imageBuffer(nBytesInImage);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -728,7 +728,7 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 		offset = this->header_length + this->nextImageToRead * nBytesInImage;
 		
 		file.seekg(offset);
-		file.read((char *)single_image_buffer.get(), nBytesInImage);
+		file.read(imageBuffer.data(), nBytesInImage);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
@@ -740,7 +740,7 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 		this->nextImageToRead += 1;
 	}
 	
-	CopyBufferToImage<float>(single_image_buffer.get(), image);
+	CopyBufferToImage<float>(imageBuffer, image);
 	
 	return image;
 }
@@ -880,8 +880,8 @@ void ImageLoaderHamamatsu::parse_header_information() {
 ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
-	
-	std::unique_ptr<char[]> single_image_buffer(new char[imageSize]);
+    
+    std::vector<char> imageBuffer(imageSize);
 	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
@@ -892,7 +892,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 		offset = _offsets.at(nextImageToRead);
 		
 		file.seekg(offset);
-		file.read(single_image_buffer.get(), imageSize);
+		file.read(imageBuffer.data(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
@@ -904,7 +904,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 		this->nextImageToRead += 1;
 	}
 	
-	CopyBufferToImage<uint16_t>(single_image_buffer.get(), image);
+	CopyBufferToImage<uint16_t>(imageBuffer, image);
 	
 	return image;
 }
@@ -990,8 +990,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 			break;
 	}
 	
-	std::unique_ptr<char[]> buffer(new char[imageSize]);
-	
+    std::vector<char> imageBuffer(imageSize);
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= this->nImages)
@@ -1000,7 +999,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 		offset = this->header_length + this->nextImageToRead * imageSize;
 		
 		file.seekg(offset);
-		file.read(buffer.get(), imageSize);
+		file.read(imageBuffer.data(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
@@ -1015,31 +1014,31 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	
 	switch (this->storage_type) {
         case STORAGE_TYPE_INT8:
-            CopyBufferToImage<int8_t>(buffer.get(), image, 1);
+            CopyBufferToImage<int8_t>(imageBuffer, image, 1);
             break;
             
         case STORAGE_TYPE_UINT8:
-            CopyBufferToImage<uint8_t>(buffer.get(), image, 1);
+            CopyBufferToImage<uint8_t>(imageBuffer, image, 1);
             break;
             
         case STORAGE_TYPE_INT16:
-            CopyBufferToImage<int16_t>(buffer.get(), image, 1);
+            CopyBufferToImage<int16_t>(imageBuffer, image, 1);
             break;
             
         case STORAGE_TYPE_UINT16:
-            CopyBufferToImage<uint16_t>(buffer.get(), image, 1);
+            CopyBufferToImage<uint16_t>(imageBuffer, image, 1);
             break;
             
 		case STORAGE_TYPE_UINT32:
-            CopyBufferToImage<uint32_t>(buffer.get(), image, 1);
+            CopyBufferToImage<uint32_t>(imageBuffer, image, 1);
             break;
             
 		case STORAGE_TYPE_FP32:
-            CopyBufferToImage<float>(buffer.get(), image, 1);
+            CopyBufferToImage<float>(imageBuffer, image, 1);
             break;
             
 		case STORAGE_TYPE_FP64:
-            CopyBufferToImage<double>(buffer.get(), image, 1);
+            CopyBufferToImage<double>(imageBuffer, image, 1);
             break;
             
 		default:
@@ -1955,36 +1954,36 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	}
 	
 	int nBytesToWrite = nPixels * bytesPerPixel;
-	std::unique_ptr<char[]> buffer(new char[nBytesToWrite]);
+    std::vector<char> imageBuffer(nBytesToWrite);
 	
 	switch (this->storageType) {
 		case STORAGE_TYPE_INT8:
-			CopyImageToBuffer<int8_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<int8_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_UINT8:
-			CopyImageToBuffer<uint8_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<uint8_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_INT16:
-			CopyImageToBuffer<int16_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<int16_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_UINT16:
-			CopyImageToBuffer<uint16_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<uint16_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_INT32:
-			CopyImageToBuffer<int32_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<int32_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_UINT32:
-			CopyImageToBuffer<uint32_t>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<uint32_t>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_FP32:
-			CopyImageToBuffer<float>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<float>(imageToWrite, imageBuffer, 1);
 			break;
 		case STORAGE_TYPE_FP64:
-			CopyImageToBuffer<double>(imageToWrite, buffer.get(), 1);
+			CopyImageToBuffer<double>(imageToWrite, imageBuffer, 1);
 			break;
 	}
 	
-	this->file.write(buffer.get(), nBytesToWrite);
+	this->file.write(imageBuffer.data(), nBytesToWrite);
 	++this->nImagesWritten;
 }
 

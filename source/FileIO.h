@@ -38,6 +38,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <cassert>
 #include "Errors.h"
 #include "Storage.h"
 #include "Defines.h"
@@ -81,10 +82,12 @@ int64_t GetLastModificationTime(const std::string& path);
  (i.e. as read from a file) to an Image.
  */
 template <typename T>
-void CopyBufferToImage(char *buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
-    T *bufferPtr = reinterpret_cast<T *>(buffer);
+void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
+    const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
+    size_t nBytesRequired = nRows * nCols * sizeof(T);
+    assert(nBytesRequired == buffer.size());
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
@@ -105,13 +108,17 @@ void CopyBufferToImage(char *buffer, ImagePtr imagePtr, int treatAsRowMajor = 0)
 
 /**
  Function that writes the contents of a single image to a char * buffer,
- while converting to the requested number type
+ while converting to the requested number type. Buffer will be resized to
+ fit the data if needed.
  */
 template <typename T>
-void CopyImageToBuffer(ImagePtr imagePtr, char *buffer, int treatAsRowMajor = 0) {
-	T* bufferPtr = reinterpret_cast<T *>(buffer);
+void CopyImageToBuffer(ImagePtr imagePtr, std::vector<char>& buffer, int treatAsRowMajor = 0) {
+	T* bufferPtr = reinterpret_cast<T*>(buffer.data());
 	size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
+    size_t nBytesRequired = nRows * nCols * sizeof(T);
+    if (buffer.size() != nBytesRequired)
+        buffer.resize(nBytesRequired);
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
