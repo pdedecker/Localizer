@@ -194,31 +194,9 @@ ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows
     
     size_t nPixels = nRows * nCols;
 	ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
-    size_t bytesInBuffer = 0;
-	
-	switch (format) {
-		case STORAGE_TYPE_INT8:
-		case STORAGE_TYPE_UINT8:
-			bytesInBuffer = nPixels;
-			break;
-		case STORAGE_TYPE_INT16:
-		case STORAGE_TYPE_UINT16:
-			bytesInBuffer = nPixels * 2;
-			break;
-		case STORAGE_TYPE_INT32:
-		case STORAGE_TYPE_UINT32:
-		case STORAGE_TYPE_FP32:
-			bytesInBuffer = nPixels * 4;
-			break;
-		case STORAGE_TYPE_FP64:
-			bytesInBuffer = nPixels * 8;
-			break;
-		default:
-			throw std::runtime_error("unknown format in BufferWithFormatToImage()");
-			break;
-	}
+    size_t nBytesInBuffer = NBytesInImage(nRows, nCols, format);
     
-    assert(imageBuffer.size() == bytesInBuffer);
+    assert(imageBuffer.size() == nBytesInBuffer);
     
 	switch (format) {
         case STORAGE_TYPE_INT8:
@@ -289,8 +267,32 @@ void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imag
 	}
 }
 
-size_t NBytesInImage(ImagePtr image, int nRows, int nCols, int format) {
+size_t NBytesInImage(int nRows, int nCols, int format) {
+    size_t nPixels = nRows * nCols;
+    size_t nBytesInImage;
+    switch (format) {
+		case STORAGE_TYPE_INT8:
+		case STORAGE_TYPE_UINT8:
+			nBytesInImage = nPixels;
+			break;
+		case STORAGE_TYPE_INT16:
+		case STORAGE_TYPE_UINT16:
+			nBytesInImage = nPixels * 2;
+			break;
+		case STORAGE_TYPE_INT32:
+		case STORAGE_TYPE_UINT32:
+		case STORAGE_TYPE_FP32:
+			nBytesInImage = nPixels * 4;
+			break;
+		case STORAGE_TYPE_FP64:
+			nBytesInImage = nPixels * 8;
+			break;
+		default:
+			throw std::runtime_error("Unknown format in NBytesInImage()");
+			break;
+	}
     
+    return nBytesInImage;
 }
 
 #ifdef _WIN32
@@ -1067,29 +1069,9 @@ void ImageLoaderPDE::parse_header_information() {
 
 ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	size_t nPixels = this->xSize * this->ySize;
-	uint64_t offset, imageSize;
+	uint64_t offset;
 	
-	switch (this->storage_type) {
-		case STORAGE_TYPE_INT8:
-		case STORAGE_TYPE_UINT8:
-			imageSize = nPixels;
-			break;
-		case STORAGE_TYPE_INT16:
-		case STORAGE_TYPE_UINT16:
-			imageSize = nPixels * 2;
-			break;
-		case STORAGE_TYPE_INT32:
-		case STORAGE_TYPE_UINT32:
-		case STORAGE_TYPE_FP32:
-			imageSize = nPixels * 4;
-			break;
-		case STORAGE_TYPE_FP64:
-			imageSize = nPixels * 8;
-			break;
-		default:
-			throw std::runtime_error("The data file does not appear to contain a recognized storage type");
-			break;
-	}
+	size_t imageSize = NBytesInImage(this->xSize, this->ySize, this->storage_type);
 	
     std::vector<char> imageBuffer(imageSize);
 	{
@@ -1999,29 +1981,7 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		}
 	}
 	
-	int bytesPerPixel;
-	switch (this->storageType) {
-		case STORAGE_TYPE_INT8:
-		case STORAGE_TYPE_UINT8:
-			bytesPerPixel = 1;
-			break;
-		case STORAGE_TYPE_INT16:
-		case STORAGE_TYPE_UINT16:
-			bytesPerPixel = 2;
-			break;
-		case STORAGE_TYPE_INT32:
-		case STORAGE_TYPE_UINT32:
-		case STORAGE_TYPE_FP32:
-			bytesPerPixel = 4;
-			break;
-		case STORAGE_TYPE_FP64:
-			bytesPerPixel = 8;
-			break;
-		default:
-			throw std::runtime_error("Unsupport file type requested in the PDE output format");
-	}
-	
-	int nBytesToWrite = nPixels * bytesPerPixel;
+    size_t nBytesToWrite = NBytesInImage(this->xSize, this->ySize, this->storageType);
     std::vector<char> imageBuffer;
     ImageToBufferWithFormat(imageToWrite, this->storageType, imageBuffer, 1);
 	
