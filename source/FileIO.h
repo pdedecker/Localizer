@@ -77,8 +77,11 @@ std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, i
 */
 int64_t GetLastModificationTime(const std::string& path);
 
+ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
+void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& buffer, int treatAsRowMajor = 0);
+
 /**
- Function that writes the contents of a char* buffer containing a single image
+ Function that writes the contents of a std::vector<char> containing a single image
  (i.e. as read from a file) to an Image.
  */
 template <typename T>

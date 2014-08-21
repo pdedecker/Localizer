@@ -190,6 +190,105 @@ int64_t GetLastModificationTime(const std::string& path) {
 	return modTime;
 }
 
+ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
+    
+    size_t nPixels = nRows * nCols;
+	ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
+    size_t bytesInBuffer = 0;
+	
+	switch (format) {
+		case STORAGE_TYPE_INT8:
+		case STORAGE_TYPE_UINT8:
+			bytesInBuffer = nPixels;
+			break;
+		case STORAGE_TYPE_INT16:
+		case STORAGE_TYPE_UINT16:
+			bytesInBuffer = nPixels * 2;
+			break;
+		case STORAGE_TYPE_INT32:
+		case STORAGE_TYPE_UINT32:
+		case STORAGE_TYPE_FP32:
+			bytesInBuffer = nPixels * 4;
+			break;
+		case STORAGE_TYPE_FP64:
+			bytesInBuffer = nPixels * 8;
+			break;
+		default:
+			throw std::runtime_error("unknown format in BufferWithFormatToImage()");
+			break;
+	}
+    
+    assert(imageBuffer.size() == bytesInBuffer);
+    
+	switch (format) {
+        case STORAGE_TYPE_INT8:
+            CopyBufferToImage<int8_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+        case STORAGE_TYPE_UINT8:
+            CopyBufferToImage<uint8_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+        case STORAGE_TYPE_INT16:
+            CopyBufferToImage<int16_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+        case STORAGE_TYPE_UINT16:
+            CopyBufferToImage<uint16_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+		case STORAGE_TYPE_UINT32:
+            CopyBufferToImage<uint32_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+		case STORAGE_TYPE_FP32:
+            CopyBufferToImage<float>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+		case STORAGE_TYPE_FP64:
+            CopyBufferToImage<double>(imageBuffer, image, treatAsRowMajor);
+            break;
+            
+		default:
+			throw std::runtime_error("unknown format in BufferWithFormatToImage()");
+			break;
+	}
+	
+	return image;
+}
+
+void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor) {
+	switch (format) {
+		case STORAGE_TYPE_INT8:
+			CopyImageToBuffer<int8_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_UINT8:
+			CopyImageToBuffer<uint8_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_INT16:
+			CopyImageToBuffer<int16_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_UINT16:
+			CopyImageToBuffer<uint16_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_INT32:
+			CopyImageToBuffer<int32_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_UINT32:
+			CopyImageToBuffer<uint32_t>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_FP32:
+			CopyImageToBuffer<float>(image, imageBuffer, treatAsRowMajor);
+			break;
+		case STORAGE_TYPE_FP64:
+			CopyImageToBuffer<double>(image, imageBuffer, treatAsRowMajor);
+			break;
+        default:
+            throw std::runtime_error("unknown format in ImageToBufferWithFormat()");
+			break;
+	}
+}
+
 #ifdef _WIN32
 WindowsFileStream::~WindowsFileStream() {
     if (this->fileRef != NULL) {
