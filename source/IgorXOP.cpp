@@ -1356,7 +1356,7 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
     int method;
     int overwrite = 0;	// if non-zero then we overwrite the output file if it exists
     int nFramesAveraging;
-    int outputType, compression;
+    int outputType;
     size_t startX, endX, startY, endY;
     double cameraOffset, cameraMultiplicationFactor;
     int useIgorFunctionForProgress;
@@ -1498,13 +1498,14 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
             output_file_path = ConvertPathToNativePath(output_file_path);
 
         // set up compression for those files that use it
+        bool compress = false;
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
 		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
-            compression = COMPRESSION_NONE;
+            compress = false;
             break;
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-            compression = COMPRESSION_DEFLATE;
+            compress = true;
             break;
         }
 		
@@ -1526,11 +1527,10 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-            output_writer = std::shared_ptr<ImageOutputWriter>(new LocalizerTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
-            //output_writer = std::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+            output_writer = std::shared_ptr<ImageOutputWriter>(new LocalizerTIFFImageOutputWriter(output_file_path, overwrite, compress, storageType));
             break;
 		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
-			output_writer = std::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+			output_writer = std::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compress, storageType));
 			break;
         case IMAGE_OUTPUT_TYPE_IGOR:
 			if (method == PROCESSING_DIFFERENCEIMAGE) {

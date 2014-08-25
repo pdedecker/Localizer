@@ -147,6 +147,8 @@ void CopyImageToBuffer(ImagePtr imagePtr, std::vector<char>& buffer, int treatAs
 	}
 }
 
+std::vector<char> Deflate(std::vector<char>& data);
+
 /**
  Provides a replacement for an fstream class, since the standard fstream classes
  in win32 do not handle file offsets larger than 2 GB.
@@ -481,7 +483,7 @@ protected:
 
 class MultiFileTIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, int compression_rhs, int storageType_rhs);
+	MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, int storageType_rhs);
 	// baseOutputFilePath must be the full path to the output base name
 	// so if we want files such as /folder/base0000.tif then baseOutputFilePath is /folder/base
 	
@@ -489,7 +491,7 @@ public:
 protected:
 	std::string baseOutputFilePath;
 	int overwrite;
-	int compression;	// if 1 then don't compress the data, otherwise compress
+	bool _compress;
 	int storageType;
 };
 
@@ -501,10 +503,11 @@ public:
         int nRows;
         int nCols;
         uint64_t dataOffset;
+        uint64_t dataLength;
         uint64_t nextIFDFieldOffset;
     };
     
-    LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression, int storageType);
+    LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, int storageType);
 	~LocalizerTIFFImageOutputWriter();
 	
 	void write_image(ImagePtr imageToWrite);
@@ -524,6 +527,7 @@ private:
     
     std::vector<TIFFIFDOnDisk> _writtenIFDs;
     int _storageType;
+    bool _compress;
     bool _isBigTiff;
 };
 

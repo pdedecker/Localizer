@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <boost/algorithm/string.hpp>
 #include <limits>
+#include <zlib.h>
 
 int GetFileStorageType(const std::string &filePath) {
     size_t startOfExtension = filePath.rfind('.');
@@ -293,6 +294,37 @@ size_t NBytesInImage(int nRows, int nCols, int format) {
 	}
     
     return nBytesInImage;
+}
+
+std::vector<char> Deflate(std::vector<char>& data) {
+    int err;
+    
+    // allocate zlib machinery
+    z_stream stream;
+    stream.zalloc = Z_NULL;
+    stream.zfree = Z_NULL;
+    stream.opaque = Z_NULL;
+    err = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+    if (err != Z_OK)
+        throw std::runtime_error("unable to compress");
+    
+    // allocate output space. We take a bit of margin to be on the safe side
+    size_t nBytesInOutput = std::max(static_cast<size_t>(static_cast<double>(data.size()) * 1.1), static_cast<size_t>(1024)); // min 1024 because I'm paranoid. See http://www.zlib.net/zlib_tech.html for a discussion of worst-case compression.
+    std::vector<char> output(nBytesInOutput);
+    
+    stream.next_in = reinterpret_cast<unsigned char*>(data.data());
+    stream.next_out = reinterpret_cast<unsigned char*>(output.data());
+    stream.avail_in = data.size();
+    stream.avail_out = output.size();
+    err = deflate(&stream, Z_FINISH);
+    deflateEnd(&stream);
+    if (err != Z_STREAM_END) {
+        throw std::runtime_error("unable to compress");
+    }
+    
+    size_t nBytesUsed = output.size() - stream.avail_out;
+    output.resize(nBytesUsed);
+    return output;
 }
 
 #ifdef _WIN32
@@ -2292,11 +2324,12 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
-MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, int compression_rhs, int storageType_rhs) {
+MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, int storageType_rhs) :
+    overwrite(overwrite_rhs),
+    _compress(compress),
+    storageType(storageType_rhs)
+{
 	baseOutputFilePath = baseOutputFilePath_rhs;
-	overwrite = overwrite_rhs;
-	compression = compression_rhs;
-	storageType = storageType_rhs;
 }
 
 void MultiFileTIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
@@ -2305,15 +2338,17 @@ void MultiFileTIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	std::string thisFileName = this->baseOutputFilePath + std::string(imageIndexStr) + std::string(".tif");
 	
-	TIFFImageOutputWriter singleFileOutputWriter(thisFileName, this->overwrite, this->compression, this->storageType);
+    LocalizerTIFFImageOutputWriter singleFileOutputWriter(thisFileName, this->overwrite, _compress, this->storageType);
+	//TIFFImageOutputWriter singleFileOutputWriter(thisFileName, this->overwrite, this->compression, this->storageType);
 	singleFileOutputWriter.write_image(imageToWrite);
 	
 	++this->nImagesWritten;
 }
 
-LocalizerTIFFImageOutputWriter::LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression, int storageType) :
+LocalizerTIFFImageOutputWriter::LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, int storageType) :
     _isBigTiff(false),
-    _storageType(storageType)
+    _storageType(storageType),
+    _compress(compress)
 {
     outputFilePath = rhs;
     
@@ -2380,13 +2415,28 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
         nRows = image->rows();
         nCols = image->cols();
     }
+    
+    // determine how much storage we need.
     int sampleFormat, bitsPerSample;
     TIFFSampleFormatAndBitsPerSampleForFormat(_storageType, sampleFormat, bitsPerSample);
+    uint64_t dataLength;
+    std::vector<char> imageBuffer;
+    if (!reuseExistingData) {
+        if (!_compress) {
+            ImageToBufferWithFormat(image, _storageType, imageBuffer);
+        } else {
+            std::vector<char> uncompressedData;
+            ImageToBufferWithFormat(image, _storageType, uncompressedData);
+            imageBuffer = Deflate(uncompressedData);
+        }
+        dataLength = imageBuffer.size();
+    } else {
+        dataLength = existingIFDOnDisk.dataLength;
+    }
     
     int nTIFFTags = 9;
     uint64_t IFDLength = (isBigTiff) ? (8 + nTIFFTags * 20 + 8) : (2 + nTIFFTags * 12 + 4);
-    uint64_t imageDataLength = NBytesInImage(nRows, nCols, _storageType);
-    uint64_t fullIFDLength = (reuseExistingData) ? IFDLength : (IFDLength + imageDataLength);
+    uint64_t fullIFDLength = (reuseExistingData) ? IFDLength : (IFDLength + dataLength);
     uint64_t nextIFDFieldOffset = ifdWillBeAtThisOffset + IFDLength - ((isBigTiff) ? 8 : 4);
     std::vector<char> outputBuffer(fullIFDLength);
     char* bufferPtr = outputBuffer.data();
@@ -2408,11 +2458,11 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     _writeTag(bufferPtr, TIFFTAG_IMAGEWIDTH, 1, nRows, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_IMAGELENGTH, 1, nCols, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_BITSPERSAMPLE, 1, bitsPerSample, isBigTiff);
-    _writeTag(bufferPtr, TIFFTAG_COMPRESSION, 1, COMPRESSION_NONE, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_COMPRESSION, 1, (_compress ? COMPRESSION_DEFLATE : COMPRESSION_NONE), isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_PHOTOMETRIC, 1, PHOTOMETRIC_MINISBLACK, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, dataOffset, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_ROWSPERSTRIP, 1, nRows * nCols, isBigTiff);
-    _writeTag(bufferPtr, TIFFTAG_STRIPBYTECOUNTS, 1, (nRows * nCols * bitsPerSample) / 8, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_STRIPBYTECOUNTS, 1, dataLength, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_SAMPLEFORMAT, 1, sampleFormat, isBigTiff);
     
     // offset to next IFD (0 for now)
@@ -2427,10 +2477,8 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
         throw std::logic_error("buffer length mismatch");
     }
     
-    // now we write new data if needed
+    // store actual image data if needed
     if (!reuseExistingData) {
-        std::vector<char> imageBuffer;
-        ImageToBufferWithFormat(image, _storageType, imageBuffer);
         memcpy(bufferPtr, imageBuffer.data(),imageBuffer.size());
         bufferPtr += imageBuffer.size();
     }
@@ -2446,6 +2494,7 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     ifdOnDisk.nRows = nRows;
     ifdOnDisk.nCols = nCols;
     ifdOnDisk.dataOffset = dataOffset;
+    ifdOnDisk.dataLength = dataLength;
     ifdOnDisk.nextIFDFieldOffset = nextIFDFieldOffset;
     
     // safety check
