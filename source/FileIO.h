@@ -160,8 +160,7 @@ public:
     WindowsFileStream() {fileRef = NULL;}
     ~WindowsFileStream();
     
-    void open(const char *path_rhs);
-    void open(const char *path_rhs, std::ios_base::openmode mode) {open (path_rhs);}    // for compatibility with the standard library
+    void open(const char *path_rhs, std::ios_base::openmode mode);
     
     void close();
 	
@@ -174,7 +173,7 @@ public:
     void read(char *buffer, size_t nBytes);
     void getline(char *buffer, size_t nMax);
     
-    void write(char *buffer, size_t nBytes);
+    void write(const char *buffer, size_t nBytes);
     
     uint64_t tellg();
     uint64_t tellp();

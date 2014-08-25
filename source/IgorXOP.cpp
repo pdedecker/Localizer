@@ -1596,7 +1596,7 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         XOPNotice(e.what());
         err = USER_ABORT;
     }
-    catch (std::runtime_error e) {
+    catch (std::exception e) {
         XOPNotice(e.what());
         XOPNotice("\r");
         return SYNERR;

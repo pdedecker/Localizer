@@ -303,22 +303,23 @@ WindowsFileStream::~WindowsFileStream() {
     }
 }
 
-void WindowsFileStream::open(const char* path_rhs) {
-    int err;
-    
+void WindowsFileStream::open(const char *path_rhs, std::ios_base::openmode mode) {
 	if (this->fileRef != NULL) {
 		fclose(this->fileRef);
 		this->fileRef = NULL;
 	}
-    err = fopen_s(&fileRef, path_rhs, "rb");
-    if (err != 0) {
-		std::string error;
-		std::stringstream ss;
-        ss << "Error " << err << " returned using open() on the image file at \"" << path_rhs << "\"";
-		error = ss.str();
-        throw ERROR_READING_FILE_DATA(error);
-    }
-    
+
+	std::string modeStr;
+	if (mode & std::ios_base::in) {
+		modeStr += "r";
+	}
+	if (mode & std::ios_base::out) {
+		modeStr += "w";
+	}
+	if (mode & std::ios_base::binary) {
+		modeStr += "b";
+	}
+    int err = fopen_s(&fileRef, path_rhs, modeStr.c_str());
     path = path_rhs;
 }
 
@@ -370,7 +371,7 @@ void WindowsFileStream::getline(char *buffer, size_t nMax) {
     }
 }
 
-void WindowsFileStream::write(char *buffer, size_t nBytes) {
+void WindowsFileStream::write(const char *buffer, size_t nBytes) {
     assert (this->fileRef != NULL);
     
     int err = fwrite(buffer, nBytes, 1, this->fileRef);
@@ -2387,9 +2388,14 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     uint64_t imageDataLength = NBytesInImage(nRows, nCols, _storageType);
     uint64_t fullIFDLength = (reuseExistingData) ? IFDLength : (IFDLength + imageDataLength);
     uint64_t nextIFDFieldOffset = ifdWillBeAtThisOffset + IFDLength - ((isBigTiff) ? 8 : 4);
-    uint64_t dataOffset = ifdWillBeAtThisOffset + IFDLength;
     std::vector<char> outputBuffer(fullIFDLength);
     char* bufferPtr = outputBuffer.data();
+	uint64_t dataOffset;
+	if (!reuseExistingData) {
+		dataOffset = ifdWillBeAtThisOffset + IFDLength;
+	} else {
+		dataOffset = existingIFDOnDisk.dataOffset;
+	}
     
     // write all of the TIFF tags
     // number of entries
@@ -2404,11 +2410,7 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     _writeTag(bufferPtr, TIFFTAG_BITSPERSAMPLE, 1, bitsPerSample, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_COMPRESSION, 1, COMPRESSION_NONE, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_PHOTOMETRIC, 1, PHOTOMETRIC_MINISBLACK, isBigTiff);
-    if (!reuseExistingData) {
-        _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, dataOffset, isBigTiff);
-    } else {
-        _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, existingIFDOnDisk.dataOffset, isBigTiff);
-    }
+    _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, dataOffset, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_ROWSPERSTRIP, 1, nRows * nCols, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_STRIPBYTECOUNTS, 1, (nRows * nCols * bitsPerSample) / 8, isBigTiff);
     _writeTag(bufferPtr, TIFFTAG_SAMPLEFORMAT, 1, sampleFormat, isBigTiff);
@@ -2425,7 +2427,7 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
         throw std::logic_error("buffer length mismatch");
     }
     
-    // now we either write new data or we touch up the structure to it points at the existing data in the file
+    // now we write new data if needed
     if (!reuseExistingData) {
         std::vector<char> imageBuffer;
         ImageToBufferWithFormat(image, _storageType, imageBuffer);
@@ -2435,7 +2437,7 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     
     // safety check
     if ((uint64_t)(bufferPtr - outputBuffer.data()) != fullIFDLength) {
-        throw std::logic_error("buffer length mismatch");
+        throw std::logic_error("buffer full length mismatch");
     }
     
     // we should be all done. compile the necessary info to piece this together
