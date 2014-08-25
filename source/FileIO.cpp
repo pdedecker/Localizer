@@ -1989,6 +1989,57 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
+void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sampleFormat, int& bitsPerSample) {
+    // determine the output storage type
+	switch (dataFormat) {
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_INT8:
+			bitsPerSample = 8;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT8:
+			bitsPerSample = 8;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT16:
+			bitsPerSample = 16;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT16:
+			bitsPerSample = 16;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_INT64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+		case STORAGE_TYPE_UINT64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_UINT;
+			break;
+		case STORAGE_TYPE_FP32:
+			bitsPerSample = 32;
+			sampleFormat = SAMPLEFORMAT_IEEEFP;
+			break;
+		case STORAGE_TYPE_FP64:
+			bitsPerSample = 64;
+			sampleFormat = SAMPLEFORMAT_IEEEFP;
+			break;
+		default:
+			throw std::runtime_error("Unknown storage type requested for TIFF output");
+			break;
+	}
+}
+
 TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
@@ -2040,53 +2091,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	uint32_t current_uint32;
 	
 	// determine the output storage type
-	switch (this->storageType) {
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_INT8:
-			bitsPerSample = 8;
-			sampleFormat = SAMPLEFORMAT_INT;
-			break;
-		case STORAGE_TYPE_UINT8:
-			bitsPerSample = 8;
-			sampleFormat = SAMPLEFORMAT_UINT;
-			break;
-		case STORAGE_TYPE_INT16:
-			bitsPerSample = 16;
-			sampleFormat = SAMPLEFORMAT_INT;
-			break;
-		case STORAGE_TYPE_UINT16:
-			bitsPerSample = 16;
-			sampleFormat = SAMPLEFORMAT_UINT;
-			break;
-		case STORAGE_TYPE_INT32:
-			bitsPerSample = 32;
-			sampleFormat = SAMPLEFORMAT_INT;
-			break;
-		case STORAGE_TYPE_UINT32:
-			bitsPerSample = 32;
-			sampleFormat = SAMPLEFORMAT_UINT;
-			break;
-		case STORAGE_TYPE_INT64:
-			bitsPerSample = 64;
-			sampleFormat = SAMPLEFORMAT_INT;
-			break;
-		case STORAGE_TYPE_UINT64:
-			bitsPerSample = 64;
-			sampleFormat = SAMPLEFORMAT_UINT;
-			break;
-		case STORAGE_TYPE_FP32:
-			bitsPerSample = 32;
-			sampleFormat = SAMPLEFORMAT_IEEEFP;
-			break;
-		case STORAGE_TYPE_FP64:
-			bitsPerSample = 64;
-			sampleFormat = SAMPLEFORMAT_IEEEFP;
-			break;
-		default:
-			throw std::runtime_error("Unknown storage type requested for TIFF output");
-			break;
-	}
+    TIFFSampleFormatAndBitsPerSampleForFormat(this->storageType, sampleFormat, bitsPerSample);
 	
 	// make a scoped_array that will act as a single scanline buffer
 	// make it a buffer of chars equal to the total number of bytes required
@@ -2297,6 +2302,237 @@ void MultiFileTIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	singleFileOutputWriter.write_image(imageToWrite);
 	
 	++this->nImagesWritten;
+}
+
+LocalizerTIFFImageOutputWriter::LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression, int storageType) :
+    _isBigTiff(false),
+    _storageType(storageType)
+{
+    outputFilePath = rhs;
+    
+    if (overwrite == 0) {
+        std::ifstream input_test;
+        input_test.open(outputFilePath.c_str(), std::ios::in | std::ios::binary);
+        if (input_test.good() == 1) {
+            std::string error("The output file at ");
+            error += this->outputFilePath;
+            error += " already exists.";
+            throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
+        }
+    }
+    
+    file.open(outputFilePath.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);	// DANGER: OVERWRITING THE FILE
+    if (file.fail() != 0) {
+        std::string error("Cannot create an output file at ");
+        error += this->outputFilePath;
+        throw CANNOT_OPEN_OUTPUT_FILE(error);
+    }
+    
+    _writeTiffHeader();
+}
+
+LocalizerTIFFImageOutputWriter::~LocalizerTIFFImageOutputWriter() {
+    if (file.is_open()) {
+        _touchupOffsets();
+        if (file.fail())
+            throw std::runtime_error("Error trying to write to the TIFF file");
+    }
+}
+
+void LocalizerTIFFImageOutputWriter::write_image(ImagePtr image) {
+    if ((file.tellp() % 2) != 0) {
+        // ensure file starts on word boundary
+        file << (uint8_t)0;
+    }
+    
+    uint64_t currentOffset = file.tellp();
+    std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > newIFDParams;
+    newIFDParams = _constructIFD(image, currentOffset, _isBigTiff);
+    const std::vector<char>& ifdData = newIFDParams.second;
+    
+    // is this a regular tiff, and would the new IFD push us over the edge?
+    if (!_isBigTiff && (currentOffset + (uint64_t)ifdData.size() > (uint64_t)4294967295)) {
+        _convertToBigTiff();
+        write_image(image);
+        return;
+    }
+    
+    file.write(ifdData.data(), ifdData.size());
+    if (file.fail())
+        throw std::runtime_error("Error trying to write to the TIFF file");
+    _writtenIFDs.push_back(newIFDParams.first);
+}
+
+std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > LocalizerTIFFImageOutputWriter::_constructIFD(ImagePtr image, uint64_t ifdWillBeAtThisOffset, bool isBigTiff, bool reuseExistingData, LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk existingIFDOnDisk) const {
+    
+    int nRows, nCols;
+    if (reuseExistingData) {
+        nRows = existingIFDOnDisk.nRows;
+        nCols = existingIFDOnDisk.nCols;
+    } else {
+        nRows = image->rows();
+        nCols = image->cols();
+    }
+    int sampleFormat, bitsPerSample;
+    TIFFSampleFormatAndBitsPerSampleForFormat(_storageType, sampleFormat, bitsPerSample);
+    
+    int nTIFFTags = 12; // 11 mandated by spec for grayscale, and one more tag for sample format
+    uint64_t IFDLength = (isBigTiff) ? (8 + nTIFFTags * 20 + 8) : (4 + nTIFFTags * 12 + 4);
+    uint64_t imageDataLength = NBytesInImage(nRows, nCols, _storageType);
+    uint64_t fullIFDLength = (reuseExistingData) ? IFDLength : (IFDLength + imageDataLength);
+    uint64_t nextIFDFieldOffset = ifdWillBeAtThisOffset + IFDLength - ((isBigTiff) ? 8 : 4);
+    uint64_t dataOffset = ifdWillBeAtThisOffset + IFDLength;
+    std::vector<char> outputBuffer(fullIFDLength);
+    char* bufferPtr = outputBuffer.data();
+    
+    // write all of the TIFF tags
+    uint64_t stripOffset = 0;
+    // number of entries
+    if (isBigTiff) {
+        _storeInBuffer<uint64_t>(bufferPtr, nTIFFTags);
+    } else {
+        _storeInBuffer<uint16_t>(bufferPtr, nTIFFTags);
+    }
+    
+    _writeTag(bufferPtr, TIFFTAG_IMAGEWIDTH, 1, nRows, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_IMAGELENGTH, 1, nCols, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_BITSPERSAMPLE, 1, bitsPerSample, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_COMPRESSION, 1, COMPRESSION_NONE, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_PHOTOMETRIC, 1, PHOTOMETRIC_MINISBLACK, isBigTiff);
+    if (!reuseExistingData) {
+        _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, dataOffset, isBigTiff);
+    } else {
+        _writeTag(bufferPtr, TIFFTAG_STRIPOFFSETS, 1, existingIFDOnDisk.dataOffset, isBigTiff);
+    }
+    _writeTag(bufferPtr, TIFFTAG_ROWSPERSTRIP, 1, nRows * nCols, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_STRIPBYTECOUNTS, 1, nRows * nCols * bitsPerSample, isBigTiff);
+    _writeTag(bufferPtr, TIFFTAG_SAMPLEFORMAT, 1, sampleFormat, isBigTiff);
+    
+    // offset to next IFD (0 for now)
+    if (isBigTiff) {
+        _storeInBuffer<uint64_t>(bufferPtr, 0);
+    } else {
+        _storeInBuffer<uint32_t>(bufferPtr, 0);
+    }
+    
+    // now we either write new data or we touch up the structure to it points at the existing data in the file
+    if (!reuseExistingData) {
+        std::vector<char> imageBuffer;
+        ImageToBufferWithFormat(image, _storageType, imageBuffer);
+        memcpy(bufferPtr, imageBuffer.data(),imageBuffer.size());
+        bufferPtr += imageBuffer.size();
+    }
+    
+    // safety check
+    if ((uint64_t)(bufferPtr - outputBuffer.data()) != fullIFDLength) {
+        throw std::logic_error("buffer length mismatch");
+    }
+    
+    // we should be all done. compile the necessary info to piece this together
+    LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk ifdOnDisk;
+    ifdOnDisk.ifdOffset = ifdWillBeAtThisOffset;
+    ifdOnDisk.nRows = nRows;
+    ifdOnDisk.nCols = nCols;
+    ifdOnDisk.dataOffset = dataOffset;
+    ifdOnDisk.nextIFDFieldOffset = nextIFDFieldOffset;
+    
+    // safety check
+    if (reuseExistingData && (ifdOnDisk.dataOffset != existingIFDOnDisk.dataOffset)) {
+        throw std::logic_error("existing offset and new offset mismatch");
+    }
+    
+    return std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> >(ifdOnDisk, outputBuffer);
+}
+
+// all tags are written with TIFF_LONG as the type for a regular TIFF and TIFF_LONG8 for BigTIFF
+void LocalizerTIFFImageOutputWriter::_writeTag(char*& bufferPtr, int tagID, uint64_t count, uint64_t value, bool isBigTiff) const {
+    _storeInBuffer<uint16_t>(bufferPtr, tagID);
+    _storeInBuffer<uint16_t>(bufferPtr, (isBigTiff) ? TIFF_LONG8 : TIFF_LONG);
+    if (isBigTiff) {
+        _storeInBuffer<uint64_t>(bufferPtr, count);
+        _storeInBuffer<uint64_t>(bufferPtr, value);
+    } else {
+        _storeInBuffer<uint32_t>(bufferPtr, count);
+        _storeInBuffer<uint64_t>(bufferPtr, value);
+    }
+    
+}
+
+void LocalizerTIFFImageOutputWriter::_convertToBigTiff() {
+    if (_isBigTiff)
+        throw std::logic_error("converting tiff that is already bigtiff");
+    _isBigTiff = true;
+    
+    _writeBigTiffHeader();
+    
+    // we need to loop over all of the IFDs that have been written thus far, and create new BigTIFF IFDs for all of them
+    // we don't change the existing file contents - we simply write a bunch of new ones
+    std::vector<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk> newIFDs;
+    file.seekp(0, std::ios_base::end);
+    for (auto it = _writtenIFDs.cbegin(); it != _writtenIFDs.cend(); ++it) {
+        if ((file.tellp() % 2) != 0) {
+            // enforce word boundary
+            file << (uint8_t)0;
+        }
+        std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > newIFDParams;
+        newIFDParams = _constructIFD(ImagePtr(), file.tellp(), _isBigTiff, true, *it);
+        file.write(newIFDParams.second.data(), newIFDParams.second.size());
+        newIFDs.push_back(newIFDParams.first);
+    }
+    
+    _writtenIFDs = newIFDs;
+}
+
+void LocalizerTIFFImageOutputWriter::_writeTiffHeader() {
+    file.seekp(0);
+    file << (uint16_t)0x4D4D;
+    file << (uint16_t)0x002A;
+    file << (uint32_t)0x0000;
+    file << (uint64_t)0x0000;
+    if (file.fail())
+        throw std::runtime_error("Error trying to write to the TIFF file");
+}
+
+void LocalizerTIFFImageOutputWriter::_writeBigTiffHeader() {
+    file.seekp(0);
+    file << (uint16_t)0x4D4D;
+    file << (uint16_t)0x002B;
+    file << (uint16_t)0x0008;
+    file << (uint16_t)0x0000;
+    file << (uint64_t)0x0000;
+    if (file.fail())
+        throw std::runtime_error("Error trying to write to the TIFF file");
+}
+
+void LocalizerTIFFImageOutputWriter::_touchupOffsets() {
+    if (!_writtenIFDs.empty()) {
+        // first IFD is special since it needs to be referred to in the header
+        uint64_t firstIFDOffset = _writtenIFDs.at(0).ifdOffset;
+        if (_isBigTiff) {
+            file.seekp(8);
+            file << firstIFDOffset;
+        } else {
+            file.seekp(4);
+            file << (uint32_t)firstIFDOffset;
+        }
+    }
+    
+    for (size_t i = 1; i < _writtenIFDs.size(); ++i) {
+        uint64_t previousIFDOffsetOffset = _writtenIFDs.at(i - 1).nextIFDFieldOffset;
+        uint64_t thisIFDOffset = _writtenIFDs.at(i).ifdOffset;
+        file.seekp(previousIFDOffsetOffset);
+        if (_isBigTiff) {
+            file << thisIFDOffset;
+        } else {
+            file << (uint32_t)thisIFDOffset;
+        }
+    }
+    
+    if (file.fail())
+        throw std::runtime_error("Error trying to write to the TIFF file");
+    
+    file.seekp(0, std::ios_base::end);
+    
 }
 
 #ifdef WITH_IGOR

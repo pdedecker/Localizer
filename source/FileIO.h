@@ -457,6 +457,7 @@ struct PDEFormatHeader {
 };
 typedef struct PDEFormatHeader PDEFormatHeader;
 
+void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sampleFormat, int& bitsPerSample);
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
@@ -483,6 +484,40 @@ protected:
 	int overwrite;
 	int compression;	// if 1 then don't compress the data, otherwise compress
 	int storageType;
+};
+
+class LocalizerTIFFImageOutputWriter : public ImageOutputWriter {
+public:
+    class TIFFIFDOnDisk {
+    public:
+        uint64_t ifdOffset;
+        int nRows;
+        int nCols;
+        uint64_t dataOffset;
+        uint64_t nextIFDFieldOffset;
+    };
+    
+    LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression, int storageType);
+	~LocalizerTIFFImageOutputWriter();
+	
+	void write_image(ImagePtr imageToWrite);
+    
+private:
+    std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > _constructIFD(ImagePtr image, uint64_t ifdWillBeAtThisOffset, bool isBigTiff, bool reuseExistingData = false, LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk existingIFDOnDisk = LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk()) const;
+    void _writeTag(char*& bufferPtr, int tagID, uint64_t count, uint64_t value, bool isBigTiff) const;
+    void _convertToBigTiff();
+    template <typename T> void _storeInBuffer(char*& bufferPtr, T value) const {
+        void *valuePtr = reinterpret_cast<void*>(&value);
+        memcpy(bufferPtr, valuePtr, sizeof(T));
+        bufferPtr += sizeof(T);
+    }
+    void _writeTiffHeader();
+    void _writeBigTiffHeader();
+    void _touchupOffsets();
+    
+    std::vector<TIFFIFDOnDisk> _writtenIFDs;
+    int _storageType;
+    bool _isBigTiff;
 };
 
 #ifdef WITH_IGOR
