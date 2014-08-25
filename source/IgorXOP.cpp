@@ -1526,7 +1526,8 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         switch (outputType) {
         case IMAGE_OUTPUT_TYPE_TIFF:
         case IMAGE_OUTPUT_TYPE_COMPRESSED_TIFF:
-			output_writer = std::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+            output_writer = std::shared_ptr<ImageOutputWriter>(new LocalizerTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
+            //output_writer = std::shared_ptr<ImageOutputWriter>(new TIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));
             break;
 		case IMAGE_OUTPUT_TYPE_MULTIFILE_TIFF:
 			output_writer = std::shared_ptr<ImageOutputWriter>(new MultiFileTIFFImageOutputWriter(output_file_path, overwrite, compression, storageType));

@@ -59,6 +59,12 @@
 #include "mex.h"
 #endif
 
+#ifdef _WIN32
+#define OFSTREAM_T WindowsFileStream
+#else
+#define OFSTREAM_T std::ofstream
+#endif
+
 using boost::uint64_t;
 using boost::int64_t;
 using boost::uint32_t;
@@ -87,11 +93,11 @@ size_t NBytesInImage(int nRows, int nCols, int format);
  */
 template <typename T>
 void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
-    const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
     size_t nBytesRequired = nRows * nCols * sizeof(T);
     assert(nBytesRequired == buffer.size());
+    const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
@@ -117,12 +123,12 @@ void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int t
  */
 template <typename T>
 void CopyImageToBuffer(ImagePtr imagePtr, std::vector<char>& buffer, int treatAsRowMajor = 0) {
-	T* bufferPtr = reinterpret_cast<T*>(buffer.data());
 	size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
     size_t nBytesRequired = nRows * nCols * sizeof(T);
     if (buffer.size() != nBytesRequired)
         buffer.resize(nBytesRequired);
+    T* bufferPtr = reinterpret_cast<T*>(buffer.data());
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
@@ -171,8 +177,9 @@ public:
     void write(char *buffer, size_t nBytes);
     
     uint64_t tellg();
-    void seekg(uint64_t pos);
-    void seekp(uint64_t pos, std::ios_base::seekdir dir);
+    uint64_t tellp();
+    void seekg(uint64_t pos, std::ios_base::seekdir dir = std::ios_base::beg);
+    void seekp(uint64_t pos, std::ios_base::seekdir dir = std::ios_base::beg);
     
     
 private:
@@ -180,6 +187,11 @@ private:
 	std::string path;
 };
 #endif // _WIN32
+
+template <typename T> void WriteBinaryValue(OFSTREAM_T& file, T value) {
+    char* valPtr = reinterpret_cast<char*>(&value);
+    file.write(valPtr, sizeof(T));
+}
 
 class ImageLoader {
 public:
@@ -423,11 +435,7 @@ public:
 protected:
 	
 	std::string outputFilePath;
-#ifdef _WIN32
-	WindowsFileStream file;
-#else
-	std::ofstream file;
-#endif
+	OFSTREAM_T file;
 	
 	size_t nImagesWritten;
 };
