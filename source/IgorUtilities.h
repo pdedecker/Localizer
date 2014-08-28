@@ -39,12 +39,13 @@
 #include "Storage.h"
 
 class ImageLoader;
+class ImageOutputWriter;
 
 // Routines that return information on CCD files and image frames to Igor
 int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRequested, int overwrite, DataFolderAndName destination, 
                         std::shared_ptr<ProgressReporter> progressReporter);
-
 int ParseCCDHeaders(ImageLoader *image_loader);
+void WriteImagesToDisk(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ImageOutputWriter> outputWriter, std::shared_ptr<ProgressReporter> progressReporter, int firstImage, int nImagesToWrite);
 
 // Routines that process CCD files and return data to Igor
 std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, bool doAverage);

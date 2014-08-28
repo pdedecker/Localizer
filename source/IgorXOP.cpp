@@ -709,6 +709,61 @@ typedef struct NewSOFIRuntimeParams NewSOFIRuntimeParams;
 typedef struct NewSOFIRuntimeParams* NewSOFIRuntimeParamsPtr;
 #pragma pack()	// Reset structure alignment to default.
 
+// Runtime param structure for WriteCCDImages operation.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+struct WriteCCDImagesRuntimeParams {
+	// Flag parameters.
+    
+	// Parameters for /CMPR flag group.
+	int CMPRFlagEncountered;
+	double compress;						// Optional parameter.
+	int CMPRFlagParamsSet[1];
+    
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double framesToSkip;
+	int SFlagParamsSet[1];
+    
+	// Parameters for /C flag group.
+	int CFlagEncountered;
+	double framesToInclude;
+	int CFlagParamsSet[1];
+    
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	double overwrite;						// Optional parameter.
+	int OFlagParamsSet[1];
+    
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
+    
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
+    
+	// Main parameters.
+    
+	// Parameters for simple main group #0.
+	int imagesWaveEncountered;
+	waveHndl imagesWave;
+	int imagesWaveParamsSet[1];
+    
+	// Parameters for simple main group #1.
+	int outputPathEncountered;
+	Handle outputPath;						// Optional parameter.
+	int outputPathParamsSet[1];
+    
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+};
+typedef struct WriteCCDImagesRuntimeParams WriteCCDImagesRuntimeParams;
+typedef struct WriteCCDImagesRuntimeParams* WriteCCDImagesRuntimeParamsPtr;
+#pragma pack()	// Reset structure alignment to default.
+
 int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     int err = 0;
     double directThreshold, PFA, radiusBetweenParticles, initial_width, sigma;
@@ -2938,6 +2993,126 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 	return err;
 }
 
+static int ExecuteWriteCCDImages(WriteCCDImagesRuntimeParamsPtr p) {
+	int err = 0;
+    
+	// Flag parameters.
+    
+    bool compress = false;
+	if (p->CMPRFlagEncountered) {
+        compress = true;
+		if (p->CMPRFlagParamsSet[0]) {
+			// Optional parameter: p->compress
+            compress = (p->compress != 0.0);
+		}
+	}
+    
+    int nFramesToSkip = 0;
+	if (p->SFlagEncountered) {
+		// Parameter: p->framesToSkip
+        nFramesToSkip = p->framesToSkip + 0.5;
+        if (nFramesToSkip < 0)
+            return EXPECT_POS_NUM;
+	}
+    
+    int nFramesToInclude = -1;
+	if (p->CFlagEncountered) {
+		// Parameter: p->framesToInclude
+        nFramesToInclude = p->framesToInclude + 0.5;
+	}
+    
+    bool overwrite = false;
+    if (p->OFlagEncountered) {
+        overwrite = true;
+		if (p->OFlagParamsSet[0]) {
+			// Optional parameter: p->overwrite
+            overwrite = (p->overwrite != 0.0);
+		}
+	}
+    
+    bool quiet = false;
+	if (p->QFlagEncountered) {
+        quiet = true;
+	} else {
+        if (!RunningInMainThread())
+            quiet = true;	// no progress reporting if running in an Igor-preemptive thread
+    }
+    
+    bool useIgorFunctionForProgress;
+    FUNCREF igorProgressReporterFunction;
+    if (p->PROGFlagEncountered) {
+        // Parameter: p->progStruct
+        useIgorFunctionForProgress = true;
+        igorProgressReporterFunction = p->progStruct->funcRef;
+    } else {
+        useIgorFunctionForProgress = false;
+    }
+    
+	// Main parameters.
+    waveHndl imageWave = NULL;
+	if (p->imagesWaveEncountered) {
+		// Parameter: p->imagesWave (test for NULL handle before using)
+        imageWave = p->imagesWave;
+        if (imageWave == NULL)
+            return NOWAV;
+	} else {
+        return NOWAV;
+    }
+    
+    std::string outputPath;
+    bool haveOutputPath = false;
+	if (p->outputPathEncountered) {
+		if (p->outputPathParamsSet[0]) {
+			// Optional parameter: p->outputPath (test for NULL handle before using)
+            if (p->outputPath == NULL) {
+                return EXPECTED_STRING;
+            }
+            outputPath = ConvertHandleToString(p->outputPath);
+            haveOutputPath = true;
+		}
+	}
+    
+    try {
+        if (!haveOutputPath) {
+            // prompt user for a location to save the data
+            char outputPathBuf[MAX_PATH_LEN + 1];
+            outputPathBuf[0] = 0;
+#ifdef MACIGOR
+            const char *fileFilterStr = "TIFF File::.tif;";
+#else
+            const char *fileFilterStr = "TIFF File (*.tif)\0*.tif\0\0";
+#endif
+            err = XOPSaveFileDialog("Choose file location", fileFilterStr, NULL, "", "", outputPathBuf);
+            if (err)
+                return err;
+            if (strlen(outputPathBuf) == 0)
+                return 0;   // user cancelled the dialog
+            outputPath = outputPathBuf;
+            overwrite = true;   // the dialog will have asked the user if they want to overwrite
+        }
+        outputPath = ConvertPathToNativePath(outputPath);
+        
+        std::shared_ptr<ImageLoader> imageLoader(new ImageLoaderIgor(imageWave));
+        std::shared_ptr<ImageOutputWriter> outputWriter(new LocalizerTIFFImageOutputWriter(outputPath, overwrite, compress, imageLoader->getStorageType()));
+        std::shared_ptr<ProgressReporter> progressReporter;
+        if (quiet == 1) {
+            progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_Silent);
+        } else {
+            if (useIgorFunctionForProgress != 0) {
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
+            } else {
+                progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
+            }
+        }
+        WriteImagesToDisk(imageLoader, outputWriter, progressReporter, nFramesToSkip, nFramesToInclude);
+    }
+    catch (...) {
+        
+    }
+    
+	return err;
+}
+
 static int RegisterLocalizationAnalysis(void) {
     const char* cmdTemplate;
     const char* runtimeNumVarList;
@@ -3059,6 +3234,19 @@ static int RegisterNewSOFI(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
 }
 
+static int RegisterWriteCCDImages(void)
+{
+	const char* cmdTemplate;
+	const char* runtimeNumVarList;
+	const char* runtimeStrVarList;
+    
+	// NOTE: If you change this template, you must change the WriteCCDImagesRuntimeParams structure as well.
+	cmdTemplate = "WriteCCDImages /CMPR[=number:compress] /S=number:framesToSkip /C=number:framesToInclude /O[=number:overwrite] /Q /PROG=structure:{progStruct, LocalizerProgStruct} wave:imagesWave [as string:outputPath]";
+	runtimeNumVarList = "";
+	runtimeStrVarList = "";
+	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(WriteCCDImagesRuntimeParams), (void*)ExecuteWriteCCDImages, kOperationIsThreadSafe);
+}
+
 /*	XOPEntry()
 
  This is the entry point from the host application to the XOP for all
@@ -3096,6 +3284,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
     if ((result = RegisterSOFIAnalysis()))
         return result;
     if ((result = RegisterNewSOFI()))
+        return result;
+    if ((result = RegisterWriteCCDImages()))
         return result;
 
     // There are no more operations added by this XOP.

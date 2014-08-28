@@ -50,7 +50,7 @@ T square(T val) {
 }
 
 template<typename T>
-T clip (T a, T b, T c) {
+T Clip (T a, T b, T c) {
     return std::max(b, std::min(a, c));
 }
 

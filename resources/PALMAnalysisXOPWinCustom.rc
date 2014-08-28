@@ -50,6 +50,9 @@ BEGIN
 
 	"NewSOFI\0",
 	XOPOp | utilOp | compilableOp,
+	
+	"WriteCCDImages\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
 
 	"\0"							// NOTE: NULL required to terminate the resource.
 END

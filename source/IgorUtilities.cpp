@@ -156,6 +156,26 @@ int ParseCCDHeaders(ImageLoader *image_loader) {
     return 0;
 }
 
+void WriteImagesToDisk(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ImageOutputWriter> outputWriter, std::shared_ptr<ProgressReporter> progressReporter, int firstImage, int nImagesToWrite) {
+    
+    int nImages = imageLoader->getNImages();
+    firstImage = Clip(firstImage, 0, nImages - 1);
+    nImagesToWrite = (nImagesToWrite > 0) ? (std::min(nImages - firstImage, nImagesToWrite)) : nImages;
+    
+    progressReporter->CalculationStarted();
+    imageLoader->spoolTo(firstImage);
+    for (int n = 0; n < nImagesToWrite; ++n) {
+        if ((n % 20) == 0) {
+            int doAbort = progressReporter->UpdateCalculationProgress(n + 1, nImagesToWrite);
+            if (doAbort)
+                throw USER_ABORTED("user abort");
+        }
+        ImagePtr image = imageLoader->readNextImage();
+        outputWriter->write_image(image);
+    }
+    progressReporter->CalculationDone();
+}
+
 std::vector<double> ConstructIntensityTrace(std::shared_ptr<ImageLoader> imageLoader, std::shared_ptr<ProgressReporter> progressReporter, bool doAverage) {
     int nImages = imageLoader->getNImages();
     int xSize = imageLoader->getXSize();
