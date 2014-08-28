@@ -218,7 +218,7 @@ public:
 	 * in the argument. The non-reentrant version below does not require this argument.
 	 */
 	virtual ImagePtr readNextImage(int &indexOfImageThatWasRead) = 0;
-	ImagePtr readNextImage();
+	virtual ImagePtr readNextImage();
 	/*
 	 * Get the next image in the file and loop to the begin after the last image.
 	 * Not reentrant.
@@ -234,19 +234,13 @@ public:
 	void rewind() {this->spoolTo(0);}
 	
 protected:
-	/**
-	 * Check if the values parsed from the header (xSize etc)
-	 * are reasonable. If not throw an std::runtime error
-	 */
-	void checkForReasonableValues();
-	
-	std::string filePath;
+    void checkForReasonableValues() const;
+    
 #ifdef _WIN32
 	WindowsFileStream file;
 #else
 	std::ifstream file;
 #endif
-	uint64_t header_length;
 	int nImages;
 	int xSize;
 	int ySize;
@@ -288,7 +282,7 @@ private:
 
 class ImageLoaderSPE : public ImageLoader {
 public:
-	ImageLoaderSPE(std::string rhs);
+	ImageLoaderSPE(const std::string& filePath);
 	~ImageLoaderSPE();
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -297,11 +291,14 @@ public:
 	
 private:
 	void parse_header_information();
+    
+    std::string _filePath;
+    uint64_t _headerLength;
 };
 
 class ImageLoaderAndor : public ImageLoader {
 public:
-	ImageLoaderAndor(std::string rhs);
+	ImageLoaderAndor(const std::string& filePath);
 	~ImageLoaderAndor();
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -310,6 +307,9 @@ public:
 	
 private:
 	void parse_header_information();
+    
+    std::string _filePath;
+    uint64_t _headerLength;
 };
 
 class ImageLoaderHamamatsu : public ImageLoader {
@@ -322,7 +322,7 @@ public:
 		uint64_t ySize;
 	};
 	
-	ImageLoaderHamamatsu(std::string rhs);
+	ImageLoaderHamamatsu(const std::string& filePath);
 	~ImageLoaderHamamatsu();
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -332,13 +332,14 @@ public:
 private:
 	void parse_header_information();
 	
+    std::string _filePath;
 	static std::map<std::string, ImageLoaderHamamatsu::ImageOffsets> _offsetsMap;
 	std::vector<uint64_t> _offsets;
 };
 
 class ImageLoaderPDE : public ImageLoader {
 public:
-	ImageLoaderPDE(std::string rhs);
+	ImageLoaderPDE(const std::string& filePath);
 	~ImageLoaderPDE();
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -347,6 +348,9 @@ public:
 	
 private:
 	void parse_header_information();
+    
+    std::string _filePath;
+    uint64_t _headerLength;
 };
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -357,7 +361,7 @@ public:
 		int64_t modificationTime;
     };
     
-	ImageLoaderTIFF(std::string rhs);
+	ImageLoaderTIFF(const std::string& filePath);
 	~ImageLoaderTIFF();
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -368,14 +372,15 @@ private:
 	void parse_header_information();
     void _extractSampleFormat();
 	
-	TIFF* tiff_file;
+	TIFF* _tiffFile;
+    std::string _filePath;
     static std::map<std::string, ImageLoaderTIFF::ImageOffsets> _offsetsMap;
 	std::vector<uint64_t> _directoryOffsets;
 };
 
 class ImageLoaderMultiFileTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
-	ImageLoaderMultiFileTIFF(std::string rhs);
+	ImageLoaderMultiFileTIFF(const std::string& rhs);
 	~ImageLoaderMultiFileTIFF() {;}
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -397,6 +402,7 @@ private:
 class ImageLoaderIgor : public ImageLoader {
 public:
 	ImageLoaderIgor(std::string waveName);
+    ImageLoaderIgor(waveHndl dataWave);
 	~ImageLoaderIgor() {;}
 	
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -404,7 +410,9 @@ public:
 	int getFileType() const {return CAMERA_TYPE_IGOR_WAVE;}
 	
 private:
-    waveHndl igor_data_wave;
+    void _initFromWave(waveHndl dataWave);
+    
+    waveHndl _dataWave;
 };
 #endif // WITH_IGOR
 

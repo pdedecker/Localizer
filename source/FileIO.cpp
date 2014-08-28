@@ -466,7 +466,6 @@ ImageLoader::ImageLoader() {
 	this->nImages = 0;
 	this->xSize = 0;
 	this->ySize = 0;
-	this->header_length = 0;
 	this->nextImageToRead = 0;
 }
 
@@ -475,7 +474,7 @@ ImageLoader::~ImageLoader() {
 		file.close();
 }
 
-void ImageLoader::checkForReasonableValues() {
+void ImageLoader::checkForReasonableValues() const {
 	if ((this->xSize > kMaxImageDimension) || (this->ySize > kMaxImageDimension)) {
 		throw std::runtime_error("the reported frame size is unreasonably large");
 	}
@@ -585,10 +584,10 @@ void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {
     if (maxY == -1)
         maxY = _baseImageLoader->getYSize() - 1;
     
-    _minX = clip(minX, 0, _baseImageLoader->getXSize() - 1);
-    _maxX = clip(maxX, 0, _baseImageLoader->getXSize() - 1);
-    _minY = clip(minY, 0, _baseImageLoader->getYSize() - 1);
-    _maxY = clip(maxY, 0, _baseImageLoader->getYSize() - 1);
+    _minX = Clip(minX, 0, _baseImageLoader->getXSize() - 1);
+    _maxX = Clip(maxX, 0, _baseImageLoader->getXSize() - 1);
+    _minY = Clip(minY, 0, _baseImageLoader->getYSize() - 1);
+    _maxY = Clip(maxY, 0, _baseImageLoader->getYSize() - 1);
     
     if ((_minX != 0) || (_minY != 0) || (_maxX != _baseImageLoader->getXSize() - 1) || (_maxY != _baseImageLoader->getYSize() - 1)) {
         _haveCustomROI = true;
@@ -597,15 +596,14 @@ void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {
     }
 }
 
-ImageLoaderSPE::ImageLoaderSPE(std::string rhs) {
-	this->filePath = rhs;
-	
-	header_length = 4100;
-	
-	file.open(this->filePath.c_str(), std::ios::binary | std::ios::in);
+ImageLoaderSPE::ImageLoaderSPE(const std::string& filePath) :
+    _filePath(filePath),
+    _headerLength(4100)
+{
+	file.open(_filePath.c_str(), std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += this->filePath;
+		error += _filePath;
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -652,7 +650,7 @@ void ImageLoaderSPE::parse_header_information() {
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
-			error += this->filePath;
+			error += _filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
@@ -661,7 +659,7 @@ void ImageLoaderSPE::parse_header_information() {
 	if (file.fail() != 0) {
 		std::string error;
 		error = "Error parsing the header information in \"";
-		error += this->filePath;
+		error += _filePath;
 		error += "\" assuming the SPE format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -687,7 +685,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
-			error += this->filePath;
+			error += _filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
@@ -702,14 +700,14 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 		if (this->nextImageToRead >= this->nImages)
 			throw std::runtime_error("requested more images than there are in the file");
 		
-		offset = this->header_length + this->nextImageToRead * imageSize;
+		offset = _headerLength + this->nextImageToRead * imageSize;
 		
 		file.seekg(offset);
 		file.read(imageBuffer.data(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\" assuming the SPE format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -736,7 +734,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
             
 		default:
 			std::string error("Unable to determine the storage type used in ");
-			error += this->filePath;
+			error += _filePath;
 			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
 			break;
 	}
@@ -744,13 +742,14 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	return image;
 }
 
-ImageLoaderAndor::ImageLoaderAndor(std::string rhs) {
-	this->filePath = rhs;
-	
-	file.open(this->filePath.c_str(), std::ios::binary | std::ios::in);
+ImageLoaderAndor::ImageLoaderAndor(const std::string& filePath) :
+    _filePath(filePath),
+    _headerLength(0)
+{
+	file.open(_filePath.c_str(), std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Error opening the file at ");
-		error += this->filePath;
+		error += _filePath;
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -777,7 +776,7 @@ void ImageLoaderAndor::parse_header_information() {
 	
 	this->file.read(headerBuffer.get(), 500000);
 	if (this->file.good() != 1)
-		throw std::runtime_error(std::string("Error encountered assuming the Andor format on the file at ") + this->filePath);
+		throw std::runtime_error(std::string("Error encountered assuming the Andor format on the file at ") + _filePath);
 	
 	headerBuffer[500000] = '\0';
 	// look for and replace any intermediate nul characters
@@ -792,14 +791,14 @@ void ImageLoaderAndor::parse_header_information() {
 	singleLine = singleLineBuffer.get();
 	
 	if (singleLine.find("Andor Technology Multi-Channel File") == std::string::npos) {
-		throw std::runtime_error(std::string("the file at ") + this->filePath + "does not appear to be an Andor data file");
+		throw std::runtime_error(std::string("the file at ") + _filePath + "does not appear to be an Andor data file");
 	}
 	
 	for (size_t i = 0;; ++i) {
 		ss.getline(singleLineBuffer.get(), 4096);
 		singleLine = singleLineBuffer.get();
 		if ((ss.eof() == 1) || (ss.fail() == 1))
-			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + _filePath);
 		if (singleLine.find("Pixel number65") != std::string::npos) {
 			// this is the first line containing info required to read the data
 			break;
@@ -827,7 +826,7 @@ void ImageLoaderAndor::parse_header_information() {
     for (;;) {
         ss.getline(singleLineBuffer.get(), 4096);
         if ((ss.eof() == 1) || (ss.fail() == 1))
-			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + this->filePath);
+			throw std::runtime_error(std::string("premature end-of-file encountered assuming the Andor format on the file at ") + _filePath);
         singleLine = singleLineBuffer.get();
         if (singleLine.find('0') != std::string::npos)
             break;
@@ -848,12 +847,12 @@ void ImageLoaderAndor::parse_header_information() {
         char firstNonWhite = singleLine[firstNonWhiteSpace];
         if ((firstNonWhite < '0') || (firstNonWhite > '9'))
             break;
-        this->header_length = ss.tellg();
+        _headerLength = ss.tellg();
     }
 	
 	// did some error happen while reading the file?
 	if (ss.bad() == 1) {
-		throw ERROR_READING_FILE_DATA(std::string("Error parsing the header information in \"") + this->filePath + "\" assuming the Andor format");
+		throw ERROR_READING_FILE_DATA(std::string("Error parsing the header information in \"") + _filePath + "\" assuming the Andor format");
 	}
 	
 	this->checkForReasonableValues();
@@ -871,14 +870,14 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
-		offset = this->header_length + this->nextImageToRead * nBytesInImage;
+		offset = _headerLength + this->nextImageToRead * nBytesInImage;
 		
 		file.seekg(offset);
 		file.read(imageBuffer.data(), nBytesInImage);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error trying to read image data from \"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\" assuming the Andor format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -893,13 +892,13 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 
 std::map<std::string, ImageLoaderHamamatsu::ImageOffsets> ImageLoaderHamamatsu::_offsetsMap;
 
-ImageLoaderHamamatsu::ImageLoaderHamamatsu(std::string rhs) {
-	this->filePath = rhs;
-	
-	file.open(this->filePath.c_str(), std::ios::binary | std::ios::in);
+ImageLoaderHamamatsu::ImageLoaderHamamatsu(const std::string& filePath) :
+    _filePath(filePath)
+{
+	file.open(_filePath.c_str(), std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += this->filePath;
+		error += _filePath;
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -931,17 +930,17 @@ public:
 void ImageLoaderHamamatsu::parse_header_information() {
 	
 	// do we already have information on the offsets of the images for this file?
-	if (_offsetsMap.count(this->filePath) != 0) {
+	if (_offsetsMap.count(_filePath) != 0) {
 		// we have information, now check if the timestamp is still okay
-		if (GetLastModificationTime(this->filePath) != _offsetsMap[this->filePath].modificationTime) {
+		if (GetLastModificationTime(_filePath) != _offsetsMap[_filePath].modificationTime) {
 			// looks like the file was modified
 			// delete the offset information, it will be recreated below
-			_offsetsMap.erase(this->filePath);
+			_offsetsMap.erase(_filePath);
 		}
 	}
 	
 	// now create the offsets map if needed (if it did not exist or was deleted above)
-	if (_offsetsMap.count(this->filePath) == 0) {
+	if (_offsetsMap.count(_filePath) == 0) {
 		ImageLoaderHamamatsu::ImageOffsets imageOffsets;
 		ImageLoaderHamamatsu_HeaderStructure header;
 		
@@ -976,7 +975,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 			if (header.storageFormat != 2) {	// not UINT16
 				std::string error;
 				error = "The file at \"";
-				error += this->filePath;
+				error += _filePath;
 				error += "\" specifies that it doesn't use UINT16 for storage. This usually means that the manufacturer's software corrupted the file.";
 				throw ERROR_READING_FILE_DATA(error);
 			}
@@ -985,7 +984,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 			if (file.fail() != 0) {
 				std::string error;
 				error = "Error parsing the header information in \"";
-				error += this->filePath;
+				error += _filePath;
 				error += "\" assuming the Hamamatsu format";
 				throw ERROR_READING_FILE_DATA(error);
 			}
@@ -1007,17 +1006,17 @@ void ImageLoaderHamamatsu::parse_header_information() {
 		// store the obtained offsets and information
 		imageOffsets.xSize = thisImageXSize;
 		imageOffsets.ySize = thisImageYSize;
-		imageOffsets.modificationTime = GetLastModificationTime(this->filePath);
+		imageOffsets.modificationTime = GetLastModificationTime(_filePath);
 		
-		_offsetsMap[this->filePath] = imageOffsets;
+		_offsetsMap[_filePath] = imageOffsets;
 		
 		file.seekg(0);
 	}
 	
-	this->nImages = _offsetsMap[this->filePath].offsets.size();
-	this->xSize = _offsetsMap[this->filePath].xSize;
-	this->ySize = _offsetsMap[this->filePath].ySize;
-	this->_offsets = _offsetsMap[this->filePath].offsets;
+	this->nImages = _offsetsMap[_filePath].offsets.size();
+	this->xSize = _offsetsMap[_filePath].xSize;
+	this->ySize = _offsetsMap[_filePath].ySize;
+	this->_offsets = _offsetsMap[_filePath].offsets;
 	this->storage_type = STORAGE_TYPE_UINT16;
 	
 	this->checkForReasonableValues();
@@ -1042,7 +1041,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\" assuming the Hamamatsu format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -1055,13 +1054,14 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 	return image;
 }
 
-ImageLoaderPDE::ImageLoaderPDE(std::string rhs) {
-	this->filePath = rhs;
-	
-	file.open(this->filePath.c_str(), std::ios::binary | std::ios::in);
+ImageLoaderPDE::ImageLoaderPDE(const std::string& filePath) :
+    _filePath(filePath),
+    _headerLength(0)
+{
+	file.open(_filePath.c_str(), std::ios::binary | std::ios::in);
 	if (file.fail() == 1) {
 		std::string error ("Unable to open the file at ");
-		error += this->filePath;
+		error += _filePath;
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -1089,7 +1089,7 @@ void ImageLoaderPDE::parse_header_information() {
 	if (file.fail() != 0) {
 		std::string error;
 		error = "Error parsing the header information in \"";
-		error += this->filePath;
+		error += _filePath;
 		error += "\" assuming the simple image format";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -1103,7 +1103,7 @@ void ImageLoaderPDE::parse_header_information() {
 	this->xSize = header.xSize;
 	this->ySize = header.ySize;
 	this->storage_type = header.storageFormat;
-	this->header_length = 24;
+	_headerLength = 24;
 	
 	this->checkForReasonableValues();
 }
@@ -1119,14 +1119,14 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 		if (this->nextImageToRead >= this->nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
-		offset = this->header_length + this->nextImageToRead * imageSize;
+		offset = _headerLength + this->nextImageToRead * imageSize;
 		
 		file.seekg(offset);
 		file.read(imageBuffer.data(), imageSize);
 		if (file.fail() != 0) {
 			std::string error;
 			error = "Error reading image data from \"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\" assuming the simple image format";
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -1141,15 +1141,16 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 
 std::map<std::string, ImageLoaderTIFF::ImageOffsets> ImageLoaderTIFF::_offsetsMap;
 
-ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
+ImageLoaderTIFF::ImageLoaderTIFF(const std::string& filePath) :
+    _filePath(filePath),
+    _tiffFile(NULL)
+{
 	TIFFSetWarningHandler(NULL);
-	this->filePath = rhs;
 	
-	tiff_file = NULL;
-	tiff_file = TIFFOpen(this->filePath.c_str(), "rm");
-	if (tiff_file == NULL) {
+	_tiffFile = TIFFOpen(_filePath.c_str(), "rm");
+	if (_tiffFile == NULL) {
 		std::string error ("Unable to open the file at ");
-		error += this->filePath;
+		error += _filePath;
 		throw CANNOT_OPEN_FILE(error);
 	}
 	
@@ -1159,8 +1160,8 @@ ImageLoaderTIFF::ImageLoaderTIFF(std::string rhs) {
 
 ImageLoaderTIFF::~ImageLoaderTIFF() {
 	
-	if (tiff_file != NULL) {
-		TIFFClose(tiff_file);
+	if (_tiffFile != NULL) {
+		TIFFClose(_tiffFile);
 	}
 	
 }
@@ -1170,44 +1171,44 @@ void ImageLoaderTIFF::parse_header_information() {
 	int result;
 	uint32_t result_uint32;
     
-    result = TIFFSetDirectory(tiff_file, 0);
+    result = TIFFSetDirectory(_tiffFile, 0);
     if (result != 1)
         throw std::runtime_error("Error reading from the file");
     
     _extractSampleFormat();
     
     // do we already have information on the offsets of the images for this file?
-	if (_offsetsMap.count(this->filePath) != 0) {
+	if (_offsetsMap.count(_filePath) != 0) {
 		// we have information, now check if the timestamp is still okay
-		if (GetLastModificationTime(this->filePath) != _offsetsMap[this->filePath].modificationTime) {
+		if (GetLastModificationTime(_filePath) != _offsetsMap[_filePath].modificationTime) {
 			// looks like the file was modified
 			// delete the offset information, it will be recreated below
-			_offsetsMap.erase(this->filePath);
+			_offsetsMap.erase(_filePath);
 		} else {
             // we still have valid offsets
-            _directoryOffsets = _offsetsMap[this->filePath].offsets;
+            _directoryOffsets = _offsetsMap[_filePath].offsets;
         }
 	}
     
     // now create the offsets map if needed (if it did not exist or was deleted above)
-	if (_offsetsMap.count(this->filePath) == 0) {
+	if (_offsetsMap.count(_filePath) == 0) {
 		ImageLoaderTIFF::ImageOffsets imageOffsets;
         
         // how many images are there in the file?
         // because there is a possibility of a file with different
         // subfile types (e.g. Zeiss LSM files), we need to go over all of them
         // and look at which subfiles are the ones we're interested in
-        imageOffsets.modificationTime = GetLastModificationTime(this->filePath);
+        imageOffsets.modificationTime = GetLastModificationTime(_filePath);
         int nImagesChecked = 0;
         do {
-            result = TIFFGetField(tiff_file, TIFFTAG_SUBFILETYPE, &result_uint32);
+            result = TIFFGetField(_tiffFile, TIFFTAG_SUBFILETYPE, &result_uint32);
 
             if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
                 // this is one of the subtypes that we don't support
                 // do nothing with it
             } else {
                 // if we're here then the image is appropriate, store the offset to its IFD
-                int64_t ifdOffset = TIFFCurrentDirOffset(tiff_file);
+                int64_t ifdOffset = TIFFCurrentDirOffset(_tiffFile);
                 _directoryOffsets.push_back(ifdOffset);
             }
             
@@ -1220,11 +1221,11 @@ void ImageLoaderTIFF::parse_header_information() {
 			}
             #endif
             
-        } while (TIFFReadDirectory(tiff_file) == 1);
+        } while (TIFFReadDirectory(_tiffFile) == 1);
         
         imageOffsets.offsets = _directoryOffsets;
         
-        _offsetsMap[this->filePath] = imageOffsets;
+        _offsetsMap[_filePath] = imageOffsets;
     }
 	
 	this->nImages = _directoryOffsets.size();
@@ -1240,42 +1241,42 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	size_t bitsPerPixel;
     
     // is the image in grayscale format?
-    result = TIFFGetField(tiff_file, TIFFTAG_PHOTOMETRIC, &result_uint16);
+    result = TIFFGetField(_tiffFile, TIFFTAG_PHOTOMETRIC, &result_uint16);
     if (result != 1) {
         std::string error;
         error = "The image at\"";
-        error += this->filePath;
+        error += _filePath;
         error += "\" is not a grayscale image";
         throw ERROR_READING_FILE_DATA(error);
     }
     if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
         std::string error;
         error = "The image at\"";
-        error += this->filePath;
+        error += _filePath;
         error += "\" is not a grayscale image";
         throw ERROR_READING_FILE_DATA(error);
     }
     
     // is it a binary image?
-    result = TIFFGetField(tiff_file, TIFFTAG_BITSPERSAMPLE, &result_uint16);
+    result = TIFFGetField(_tiffFile, TIFFTAG_BITSPERSAMPLE, &result_uint16);
     if (result != 1) {
         std::string error;
         error = "The image at\"";
-        error += this->filePath;
+        error += _filePath;
         error += "\" is not a grayscale image";
         throw ERROR_READING_FILE_DATA(error);
     }
     if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
         std::string error;
         error = "The image at\"";
-        error += this->filePath;
+        error += _filePath;
         error += "\" is not a grayscale image";
         throw ERROR_READING_FILE_DATA(error);
     }
     bitsPerPixel = (unsigned int)result_uint16;
 	
 	// is the data in unsigned integer or floating point format?
-	result = TIFFGetField(tiff_file, TIFFTAG_SAMPLEFORMAT, &result_uint16);
+	result = TIFFGetField(_tiffFile, TIFFTAG_SAMPLEFORMAT, &result_uint16);
 	if (result != 1) {	// if the field does not exist then we assume that it is integer format
 		result_uint16 = 1;
 	}
@@ -1289,7 +1290,7 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 		default:
 			std::string error;
 			error = "The SampleFormat of the image at\"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\" is unknown";
 			throw ERROR_READING_FILE_DATA(error);
 			break;
@@ -1312,7 +1313,7 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 			default:
 				std::string error;
 				error = "The SampleFormat of the image at\"";
-				error += this->filePath;
+				error += _filePath;
 				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
@@ -1328,7 +1329,7 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 			default:
 				std::string error;
 				error = "The SampleFormat of the image at\"";
-				error += this->filePath;
+				error += _filePath;
 				error += "\" is unknown";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
@@ -1336,22 +1337,22 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	}
 	
 	// what is the x size?
-	result = TIFFGetField(tiff_file, TIFFTAG_IMAGEWIDTH, &result_uint32);
+	result = TIFFGetField(_tiffFile, TIFFTAG_IMAGEWIDTH, &result_uint32);
 	if (result != 1) {
 		std::string error;
 		error = "The image at\"";
-		error += this->filePath;
+		error += _filePath;
 		error += "\" does not specify a width";
 		throw ERROR_READING_FILE_DATA(error);
 	}
 	xSize = (size_t)(result_uint32);
 	
 	// what is the y size?
-	result = TIFFGetField(tiff_file, TIFFTAG_IMAGELENGTH, &result_uint32);
+	result = TIFFGetField(_tiffFile, TIFFTAG_IMAGELENGTH, &result_uint32);
 	if (result != 1) {
 		std::string error;
 		error = "The image at\"";
-		error += this->filePath;
+		error += _filePath;
 		error += "\" does not specify a height";
 		throw ERROR_READING_FILE_DATA(error);
 	}
@@ -1363,7 +1364,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	
 	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
 	
-	std::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(tiff_file)), _TIFFfree);
+	std::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(_tiffFile)), _TIFFfree);
 	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}
@@ -1372,11 +1373,11 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
 	// advance the active TIFF directory to that needed to read the next image
-    result = TIFFSetSubDirectory(tiff_file, _directoryOffsets.at(this->nextImageToRead));
+    result = TIFFSetSubDirectory(_tiffFile, _directoryOffsets.at(this->nextImageToRead));
     if (result != 1) {
         std::string error;
         error = "Unable to set the directory for the image at\"";
-        error += this->filePath;
+        error += _filePath;
         error += "\"";
         throw ERROR_READING_FILE_DATA(error);
     }
@@ -1384,11 +1385,11 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	for (int j = 0; j < ySize; ++j) {
-		result = TIFFReadScanline(tiff_file, single_scanline_buffer.get(), j, 0);	// sample is ignored
+		result = TIFFReadScanline(_tiffFile, single_scanline_buffer.get(), j, 0);	// sample is ignored
 		if (result != 1) {
 			std::string error;
 			error = "Unable to read a scanline from the image at\"";
-			error += this->filePath;
+			error += _filePath;
 			error += "\"";
 			throw ERROR_READING_FILE_DATA(error);
 		}
@@ -1452,7 +1453,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 			default:
 				std::string error;
 				error = "Invalid floating point data size for the image at\"";
-				error += this->filePath;
+				error += _filePath;
 				error += "\"";
 				throw ERROR_READING_FILE_DATA(error);
 				break;
@@ -1466,7 +1467,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 }
 
 
-ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(std::string filePath) {
+ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(const std::string& filePath) {
 	// assume that filePath consists of something such as the following
 	// /path/to/folder/XXXX123.YYY where X is character (but the last one is not a number)
 	// and Y is the extension. "/path/to/folder/XXXX" is the base file path, YYY is the
@@ -1652,17 +1653,91 @@ std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(
 
 #ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
-	int waveType;
+	_dataWave = FetchWaveUsingFullPath(waveName);
+	_initFromWave(_dataWave);
+}
+
+ImageLoaderIgor::ImageLoaderIgor(waveHndl dataWave) :
+    _dataWave(dataWave)
+{
+    _initFromWave(_dataWave);
+}
+
+template <typename T> void CopyDataToImage(T* buffer, ImagePtr image) {
+    size_t nRows = image->rows();
+    size_t nCols = image->cols();
+    size_t nElements = nRows * nCols;
+    double* imageData = image->data();
+    for (size_t i = 0; i < nElements; ++i) {
+        imageData[i] = static_cast<double>(buffer[i]);
+    }
+}
+
+ImagePtr ImageLoaderIgor::readNextImage(int &index) {
+	int err;
+	int waveType = WaveType(this->_dataWave);
+	size_t waveDataOffset;
+	char* startOfWaveData;
+	size_t nPixels = this->xSize * this->ySize;
 	
-	// try to get images from an Igor wave
+	// allocate a new image
+	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
-	this->igor_data_wave = FetchWaveUsingFullPath(waveName);
+	// get a pointer to the data in the wave
+	err = MDAccessNumericWaveData(this->_dataWave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
+	if (err != 0) {
+		throw err;
+	}
+	startOfWaveData = ((char*)(*this->_dataWave) + waveDataOffset);
 	
-	size_t DimensionSizes[MAX_DIMENSIONS + 1];
+	{
+		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		if (this->nextImageToRead >= nImages)
+			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+		
+		index = this->nextImageToRead;
+		this->nextImageToRead += 1;
+	}
+    
+	switch (waveType) {
+		case NT_FP32:
+            CopyDataToImage(reinterpret_cast<float*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_FP64:
+            CopyDataToImage(reinterpret_cast<double*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I8:
+            CopyDataToImage(reinterpret_cast<int8_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I16:
+            CopyDataToImage(reinterpret_cast<int16_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I32:
+            CopyDataToImage(reinterpret_cast<int32_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I8 | NT_UNSIGNED:
+            CopyDataToImage(reinterpret_cast<uint8_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I16 | NT_UNSIGNED:
+            CopyDataToImage(reinterpret_cast<uint16_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		case NT_I32 | NT_UNSIGNED:
+            CopyDataToImage(reinterpret_cast<uint32_t*>(startOfWaveData) + nPixels * index, image);
+			break;
+		default:
+			throw std::runtime_error("Unknown or unsupported wavetype");
+			break;
+	}
+	
+	return image;
+}
+
+void ImageLoaderIgor::_initFromWave(waveHndl dataWave) {
+    size_t DimensionSizes[MAX_DIMENSIONS + 1];
 	int numDimensions;
 	int result;
 	
-	result = MDGetWaveDimensions(igor_data_wave, &numDimensions, (CountInt *)DimensionSizes);
+	result = MDGetWaveDimensions(dataWave, &numDimensions, (CountInt *)DimensionSizes);
 	if (result != 0) {
 		throw result;
 	}
@@ -1681,10 +1756,10 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 		nImages = 1;
 	}
 	
-	waveType = WaveType(igor_data_wave);
-    // do not handle complex waves
-    if (waveType & NT_CMPLX)
-        throw NO_COMPLEX_WAVE;
+	int waveType = WaveType(dataWave);
+    // do not handle complex or non-numeric waves
+    if ((waveType & TEXT_WAVE_TYPE) || (waveType & WAVE_TYPE) || (waveType & DATAFOLDER_TYPE) || (waveType & NT_CMPLX))
+        throw int(WAVE_TYPE_MISMATCH);
     
 	switch (waveType) {
 		case NT_I8:
@@ -1718,113 +1793,6 @@ ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	this->checkForReasonableValues();
 }
 
-ImagePtr ImageLoaderIgor::readNextImage(int &index) {
-	int err;
-	int waveType = WaveType(this->igor_data_wave);
-	size_t waveDataOffset;
-	char* startOfWaveData;
-	size_t nPixels = this->xSize * this->ySize;
-	
-	// allocate a new image
-	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
-	// get a pointer to the data in the wave
-	err = MDAccessNumericWaveData(this->igor_data_wave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
-	if (err != 0) {
-		throw err;
-	}
-	startOfWaveData = ((char*)(*this->igor_data_wave) + waveDataOffset);
-	
-	{
-		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
-		if (this->nextImageToRead >= nImages)
-			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-		
-		index = this->nextImageToRead;
-		this->nextImageToRead += 1;
-	}
-	
-	// get a pointer to the image
-	double* imagePtr = image->data();
-	
-	switch (waveType) {
-		case NT_FP32:
-		{
-			float* floatPtr = (float*)startOfWaveData;
-			floatPtr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = floatPtr[i];
-			}
-			break;
-		}
-		case NT_FP64:
-		{
-			double* doublePtr = (double*)startOfWaveData;
-			doublePtr += nPixels * index;
-			memcpy(imagePtr, doublePtr, nPixels * sizeof(double));
-			break;
-		}
-		case NT_I8:
-		{
-			int8_t* int8Ptr = (int8_t*)startOfWaveData;
-			int8Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = int8Ptr[i];
-			}
-			break;
-		}
-		case NT_I16:
-		{
-			int16_t* int16Ptr = (int16_t*)startOfWaveData;
-			int16Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = int16Ptr[i];
-			}
-			break;
-		}
-		case NT_I32:
-		{
-			int32_t* int32Ptr = (int32_t*)startOfWaveData;
-			int32Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = int32Ptr[i];
-			}
-			break;
-		}
-		case NT_I8 | NT_UNSIGNED:
-		{
-			uint8_t* uint8Ptr = (uint8_t*)startOfWaveData;
-			uint8Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = uint8Ptr[i];
-			}
-			break;
-		}
-		case NT_I16 | NT_UNSIGNED:
-		{
-			uint16_t* uint16Ptr = (uint16_t*)startOfWaveData;
-			uint16Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = uint16Ptr[i];
-			}
-			break;
-		}
-		case NT_I32 | NT_UNSIGNED:
-		{
-			uint32_t* uint32Ptr = (uint32_t*)startOfWaveData;
-			uint32Ptr += nPixels * index;
-			for (size_t i = 0; i < nPixels; ++i) {
-				imagePtr[i] = uint32Ptr[i];
-			}
-			break;
-		}
-		default:
-			throw std::runtime_error("Unknown or unsupported wavetype");
-			break;
-	}
-	
-	return image;
-}
 #endif // WITH_IGOR
 
 #ifdef WITH_MATLAB
