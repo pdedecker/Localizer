@@ -1651,6 +1651,26 @@ std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(
 	return firstAndLastIndices;
 }
 
+template <typename T> void CopyDataToImage(T* buffer, ImagePtr image) {
+    size_t nRows = image->rows();
+    size_t nCols = image->cols();
+    size_t nElements = nRows * nCols;
+    double* imageData = image->data();
+    for (size_t i = 0; i < nElements; ++i) {
+        imageData[i] = static_cast<double>(buffer[i]);
+    }
+}
+
+template <typename T> void CopyImageToData(ImagePtr image, T* buffer) {
+    size_t nRows = image->rows();
+    size_t nCols = image->cols();
+    size_t nElements = nRows * nCols;
+    double* imageData = image->data();
+    for (size_t i = 0; i < nElements; ++i) {
+        buffer[i] = static_cast<T>(imageData[i]);
+    }
+}
+
 #ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	_dataWave = FetchWaveUsingFullPath(waveName);
@@ -1661,16 +1681,6 @@ ImageLoaderIgor::ImageLoaderIgor(waveHndl dataWave) :
     _dataWave(dataWave)
 {
     _initFromWave(_dataWave);
-}
-
-template <typename T> void CopyDataToImage(T* buffer, ImagePtr image) {
-    size_t nRows = image->rows();
-    size_t nCols = image->cols();
-    size_t nElements = nRows * nCols;
-    double* imageData = image->data();
-    for (size_t i = 0; i < nElements; ++i) {
-        imageData[i] = static_cast<double>(buffer[i]);
-    }
 }
 
 ImagePtr ImageLoaderIgor::readNextImage(int &index) {
@@ -1834,65 +1844,35 @@ ImagePtr ImageLoaderMatlab::readNextImage(int &index) {
 	
 	switch (mxGetClassID(_matlabArray)) {
 		case mxINT8_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(int8_t);
-			CopyBufferToImage<int8_t>(dataPtr + offset, image);
+			CopyDataToImage(reinterpret_cast<int8_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxUINT8_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(uint8_t);
-			CopyBufferToImage<uint8_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<uint8_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxINT16_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(int16_t);
-			CopyBufferToImage<int16_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<int16_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxUINT16_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(uint16_t);
-			CopyBufferToImage<uint16_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<uint16_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxINT32_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(int32_t);
-			CopyBufferToImage<int32_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<int32_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxUINT32_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(uint32_t);
-			CopyBufferToImage<uint32_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<uint32_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxINT64_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(int64_t);
-			CopyBufferToImage<int64_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<int64_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxUINT64_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(uint64_t);
-			CopyBufferToImage<uint64_t>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<uint64_t*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxSINGLE_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(float);
-			CopyBufferToImage<float>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<float*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		case mxDOUBLE_CLASS:
-		{
-			size_t offset = index * nPixels * sizeof(double);
-			CopyBufferToImage<double>(dataPtr + offset, image);
+            CopyDataToImage(reinterpret_cast<double*>(dataPtr) + index * nPixels, image);
 			break;
-		}
 		default:
 			throw std::runtime_error("Unknown or unsupported matrix class ID");
 			break;
@@ -2671,75 +2651,29 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
 	switch (storage) {
 		case NT_I8:
-		{
-			int8_t* int8Ptr = (int8_t*)waveDataPtr;
-			int8Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				int8Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<int8_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_I16:
-		{
-			int16_t* int16Ptr = (int16_t*)waveDataPtr;
-			int16Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				int16Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<int16_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_I32:
-		{
-			int32_t* int32Ptr = (int32_t*)waveDataPtr;
-			int32Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				int32Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<int32_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_I8 | NT_UNSIGNED:
-		{
-			uint8_t* uint8Ptr = (uint8_t*)waveDataPtr;
-			uint8Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				uint8Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<uint8_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_I16 | NT_UNSIGNED:
-		{
-			uint16_t* uint16Ptr = (uint16_t*)waveDataPtr;
-			uint16Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				uint16Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<uint16_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_I32 | NT_UNSIGNED:
-		{
-			uint32_t* uint32Ptr = (uint32_t*)waveDataPtr;
-			uint32Ptr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				uint32Ptr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<uint32_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_FP32:
-		{
-			float* floatPtr = (float*)waveDataPtr;
-			floatPtr += nPixels * this->nImagesWritten;
-			for (size_t i = 0; i < nPixels; ++i) {
-				floatPtr[i] = imagePtr[i];
-			}
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<float*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 		case NT_FP64:
-		{
-			double* doublePtr = (double*)waveDataPtr;
-			doublePtr += nPixels * this->nImagesWritten;
-			memcpy(doublePtr, imagePtr, nPixels * sizeof(double));
-			break;
-		}
+            CopyImageToData(imagePtr, reinterpret_cast<double*>(waveDataPtr) + nPixels * nImagesWritten);
+            break;
 	}
 	
 	++nImagesWritten;

@@ -95,7 +95,6 @@ template <typename T>
 void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    size_t nBytesRequired = nRows * nCols * sizeof(T);
     assert(nBytesRequired == buffer.size());
     const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
 	
