@@ -663,13 +663,12 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 		mexErrMsgTxt("2nd argument must be a double scalar: the index of the first image to read (starting from 0)");
 	int firstImageToRead = *(mxGetPr(array));
 	if (firstImageToRead < 0)
-		firstImageToRead = -1;
+		firstImageToRead = 0;
 	
 	// index 2 - must be a single number - the number of images to read
-	bool doCrossCorrelation;
 	array = const_cast<mxArray*>(prhs[2]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("3nd argument must be a double scalar: the number of images to read (or -1)");
+		mexErrMsgTxt("3nd argument must be a double scalar: the number of images to read (or -1 for all images)");
 	int nImagesToRead = *(mxGetPr(array));
 	if (nImagesToRead < 0)
 		nImagesToRead = -1;
@@ -770,115 +769,15 @@ mxArray* ConvertImagesToArray(const std::vector<ImagePtr>& images) {
 }
 
 mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead) {
-	int nImages = imageLoader->getNImages();
-	int xSize = imageLoader->getXSize();
-	int ySize = imageLoader->getYSize();
-
-	// allocate the output matrix
-	// try to match the required storage type
-	int storageType = imageLoader->getStorageType();
-	mxClassID classID;
-	size_t bytesPixel;
-	switch (storageType) {
-		case STORAGE_TYPE_INT8:
-			classID = mxINT8_CLASS;
-			bytesPixel = 1;
-			break;
-		case STORAGE_TYPE_UINT8:
-			classID = mxUINT8_CLASS;
-			bytesPixel = 1;
-			break;
-		case STORAGE_TYPE_INT16:
-			classID = mxINT16_CLASS;
-			bytesPixel = 2;
-			break;
-		case STORAGE_TYPE_UINT16:
-			classID = mxUINT16_CLASS;
-			bytesPixel = 2;
-			break;
-		case STORAGE_TYPE_INT32:
-			classID = mxINT32_CLASS;
-			bytesPixel = 4;
-			break;
-		case STORAGE_TYPE_UINT32:
-			classID = mxUINT32_CLASS;
-			bytesPixel = 4;
-			break;
-		case STORAGE_TYPE_INT64:
-			classID = mxINT8_CLASS;
-			bytesPixel = 8;
-			break;
-		case STORAGE_TYPE_UINT64:
-			classID = mxUINT8_CLASS;
-			bytesPixel = 8;
-			break;
-			case STORAGE_TYPE_FP32:
-			classID = mxSINGLE_CLASS;
-			bytesPixel = 4;
-			break;
-		case STORAGE_TYPE_FP64:
-			classID = mxDOUBLE_CLASS;
-			bytesPixel = 8;
-			break;
-		default:
-			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
-			break;
-	}
-
-	if (firstImage < 0)
-		firstImage = 0;
-	if ((nImagesToRead < 0) || (nImagesToRead > nImages - firstImage))
-		nImagesToRead = nImages - firstImage;
-
-	mwSize ndim = 3;
-	mwSize dims[3] = {static_cast<mwSize>(xSize), static_cast<mwSize>(ySize), static_cast<mwSize>(nImagesToRead)};
-	mxArray* outputMatrix = mxCreateNumericArray(ndim, dims, classID, mxREAL);
-	if (outputMatrix == NULL)
-		throw std::bad_alloc();
-
-	size_t bytesPerImage = xSize * ySize * bytesPixel;
-	char* arrayPtr = reinterpret_cast<char*>(mxGetPr(outputMatrix));
-
-	imageLoader->spoolTo(firstImage);
-	for (int i = 0; i < nImagesToRead; ++i) {
-		ImagePtr thisImage = imageLoader->readNextImage();
-		char* bufferPtr = arrayPtr + i * bytesPerImage;
-		switch (storageType) {
-			case STORAGE_TYPE_INT8:
-				CopyImageToBuffer<int8_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_UINT8:
-				CopyImageToBuffer<uint8_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_INT16:
-				CopyImageToBuffer<int16_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_UINT16:
-				CopyImageToBuffer<uint16_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_INT32:
-				CopyImageToBuffer<int32_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_UINT32:
-				CopyImageToBuffer<uint32_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_INT64:
-				CopyImageToBuffer<int64_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_UINT64:
-				CopyImageToBuffer<uint64_t>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_FP32:
-				CopyImageToBuffer<float>(thisImage, bufferPtr);
-				break;
-			case STORAGE_TYPE_FP64:
-				CopyImageToBuffer<double>(thisImage, bufferPtr);
-			break;
-		default:
-			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
-			break;
-		}
-	}
-
-	return outputMatrix;
+    if ((firstImage < 0) || (firstImage > imageLoader->getNImages() - 1))
+        throw std::runtime_error("invalid first image to read");
+    if (nImagesToRead < 0)
+        nImagesToRead = imageLoader->getNImages();
+    nImagesToRead = Clip(nImagesToRead, 0, imageLoader->getNImages() - firstImage);
+    MatlabImageOutputWriter outputWriter(nImagesToRead, imageLoader->getStorageType());
+    imageLoader->spoolTo(firstImage);
+    for (int i = 0; i < nImagesToRead; ++i) {
+        outputWriter.write_image(imageLoader->readNextImage());
+    }
+    return outputWriter.getArray();
 }

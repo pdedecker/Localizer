@@ -2907,11 +2907,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
-        if (nFramesToInclude > 0) {
-            dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToSkip + nFramesToInclude - 1);
-        } else {
-            dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, -1);
-        }
+        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToInclude);
         
         std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
         if (removeSaturatedPixels) {

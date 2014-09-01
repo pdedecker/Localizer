@@ -63,7 +63,7 @@ EXPORT int LocalizerLoadImages(char* filePath,          // in: path to the file 
     try {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
         ImageLoaderWrapper imageLoaderWrapper(imageLoader);
-        imageLoaderWrapper.setImageRange(nImagesToSkip, nImagesToSkip + nImagesToLoad - 1);
+        imageLoaderWrapper.setImageRange(nImagesToSkip, nImagesToLoad);
         int nRows = imageLoaderWrapper.getXSize();
         int nCols = imageLoaderWrapper.getYSize();
         int nImagesTotal = imageLoaderWrapper.getNImages();

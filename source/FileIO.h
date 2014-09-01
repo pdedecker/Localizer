@@ -95,7 +95,7 @@ template <typename T>
 void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    assert(nBytesRequired == buffer.size());
+    assert(nRows * nCols * sizeof(T) == buffer.size());
     const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
 	
 	if (treatAsRowMajor == 0) {
@@ -267,7 +267,7 @@ public:
     virtual ImagePtr readNextImage(int &indexOfImageThatWasRead);
     virtual void spoolTo(int index);
     
-    void setImageRange(int firstImageToInclude, int lastImageToInclude);
+    void setImageRange(int nFramesToSkip, int nFramesToInclude);
     void setROI(int minX, int maxX, int minY, int maxY);
     
 private:
@@ -562,5 +562,25 @@ protected:
 	int storageType;
 };
 #endif // WITH_IGOR
+
+#ifdef WITH_MATLAB
+class MatlabImageOutputWriter : public ImageOutputWriter {
+public:
+    MatlabImageOutputWriter(size_t nImagesTotal, int storageType);
+    ~MatlabImageOutputWriter() {;}
+    
+    void write_image(ImagePtr newImage);
+    mxArray* getArray() const {return _outputArray;}
+    
+private:
+    mxArray* _allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const;
+    mxClassID _getClassID(int storageType) const;
+    
+    mxArray* _outputArray;
+    int _storageType;
+    size_t _nImagesTotal;
+    size_t _nImagesWritten;
+};
+#endif // WITH_MATLAB
 
 #endif

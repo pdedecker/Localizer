@@ -563,15 +563,16 @@ void ImageLoaderWrapper::spoolTo(int index) {
     _baseImageLoader->spoolTo(index + _firstImageToInclude);
 }
 
-void ImageLoaderWrapper::setImageRange(int firstImageToInclude, int lastImageToInclude) {
-    if (lastImageToInclude < 0)
-        lastImageToInclude = _baseImageLoader->getNImages() - 1;
-    if ((firstImageToInclude < 0) || (lastImageToInclude >= _baseImageLoader->getNImages()) || (firstImageToInclude > lastImageToInclude))
+void ImageLoaderWrapper::setImageRange(int nFramesToSkip, int nFramesToInclude) {
+    if ((nFramesToSkip < 0) || (nFramesToSkip >= _baseImageLoader->getNImages()))
         throw std::runtime_error("invalid setImageRange()");
+    if (nFramesToInclude < 0)
+        nFramesToInclude = _baseImageLoader->getNImages() - nFramesToSkip;
+    nFramesToInclude = Clip(nFramesToInclude, 0, _baseImageLoader->getNImages() - nFramesToSkip);
     
-    _firstImageToInclude = firstImageToInclude;
-    _lastImageToInclude = lastImageToInclude;
-    _baseImageLoader->spoolTo(firstImageToInclude);
+    _firstImageToInclude = nFramesToSkip;
+    _lastImageToInclude = _firstImageToInclude + nFramesToInclude - 1;
+    _baseImageLoader->spoolTo(nFramesToSkip);
 }
 
 void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {
@@ -2647,32 +2648,31 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		throw result;
 	
 	waveDataPtr = (char *)((char*)(*this->outputWave) + waveDataOffset);
-	double* imagePtr = imageToWrite->data();
 	
 	switch (storage) {
 		case NT_I8:
-            CopyImageToData(imagePtr, reinterpret_cast<int8_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<int8_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_I16:
-            CopyImageToData(imagePtr, reinterpret_cast<int16_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<int16_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_I32:
-            CopyImageToData(imagePtr, reinterpret_cast<int32_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<int32_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_I8 | NT_UNSIGNED:
-            CopyImageToData(imagePtr, reinterpret_cast<uint8_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<uint8_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_I16 | NT_UNSIGNED:
-            CopyImageToData(imagePtr, reinterpret_cast<uint16_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<uint16_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_I32 | NT_UNSIGNED:
-            CopyImageToData(imagePtr, reinterpret_cast<uint32_t*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<uint32_t*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_FP32:
-            CopyImageToData(imagePtr, reinterpret_cast<float*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<float*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 		case NT_FP64:
-            CopyImageToData(imagePtr, reinterpret_cast<double*>(waveDataPtr) + nPixels * nImagesWritten);
+            CopyImageToData(imageToWrite, reinterpret_cast<double*>(waveDataPtr) + nPixels * nImagesWritten);
             break;
 	}
 	
@@ -2721,3 +2721,110 @@ int IgorImageOutputWriter::GetIgorStorageType() {
 }
 
 #endif // WITH_IGOR
+
+#ifdef WITH_MATLAB
+MatlabImageOutputWriter::MatlabImageOutputWriter(size_t nImagesTotal, int storageType) :
+    _nImagesTotal(nImagesTotal),
+    _storageType(storageType),
+    _nImagesWritten(0)
+{
+    
+}
+
+void MatlabImageOutputWriter::write_image(ImagePtr image) {
+    if (_nImagesWritten >= _nImagesTotal) {
+        throw std::logic_error("too many images in MatlabImageOutputWriter");
+    }
+    if (_outputArray == NULL) {
+        _outputArray = _allocateArray(image->rows(), image->cols(), _nImagesTotal, _storageType);
+    }
+    
+    size_t nPixels = image->rows() * image->cols();
+    char* arrayPtr = reinterpret_cast<char*>(mxGetPr(_outputArray));
+    
+    switch (_storageType) {
+		case STORAGE_TYPE_INT8:
+            CopyImageToData(image, reinterpret_cast<int8_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_UINT8:
+            CopyImageToData(image, reinterpret_cast<uint8_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_INT16:
+            CopyImageToData(image, reinterpret_cast<int16_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_UINT16:
+            CopyImageToData(image, reinterpret_cast<uint16_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_INT32:
+            CopyImageToData(image, reinterpret_cast<int32_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_UINT32:
+            CopyImageToData(image, reinterpret_cast<uint32_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+        case STORAGE_TYPE_INT64:
+            CopyImageToData(image, reinterpret_cast<int64_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_UINT64:
+            CopyImageToData(image, reinterpret_cast<uint64_t*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_FP32:
+            CopyImageToData(image, reinterpret_cast<float*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+		case STORAGE_TYPE_FP64:
+            CopyImageToData(image, reinterpret_cast<double*>(arrayPtr) + nPixels * _nImagesWritten);
+            break;
+	}
+    ++_nImagesWritten;
+}
+
+mxArray* MatlabImageOutputWriter::_allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const {
+    mxClassID classID = _getClassID(storageType);
+    mwSize ndim = 3;
+	mwSize dims[3] = {static_cast<mwSize>(nRows), static_cast<mwSize>(nCols), static_cast<mwSize>(nLayers)};
+	mxArray* array = mxCreateNumericArray(ndim, dims, classID, mxREAL);
+	if (array == NULL)
+		throw std::bad_alloc();
+    return array;
+}
+
+mxClassID MatlabImageOutputWriter::_getClassID(int storageType) const {
+    mxClassID classID;
+    switch (storageType) {
+		case STORAGE_TYPE_INT8:
+			classID = mxINT8_CLASS;
+			break;
+		case STORAGE_TYPE_UINT8:
+			classID = mxUINT8_CLASS;
+			break;
+		case STORAGE_TYPE_INT16:
+			classID = mxINT16_CLASS;
+			break;
+		case STORAGE_TYPE_UINT16:
+			classID = mxUINT16_CLASS;
+			break;
+		case STORAGE_TYPE_INT32:
+			classID = mxINT32_CLASS;
+			break;
+		case STORAGE_TYPE_UINT32:
+			classID = mxUINT32_CLASS;
+			break;
+		case STORAGE_TYPE_INT64:
+			classID = mxINT8_CLASS;
+			break;
+		case STORAGE_TYPE_UINT64:
+			classID = mxUINT8_CLASS;
+			break;
+        case STORAGE_TYPE_FP32:
+			classID = mxSINGLE_CLASS;
+			break;
+		case STORAGE_TYPE_FP64:
+			classID = mxDOUBLE_CLASS;
+			break;
+		default:
+			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
+			break;
+	}
+    
+    return classID;
+}
+#endif // WITH_MATLAB
