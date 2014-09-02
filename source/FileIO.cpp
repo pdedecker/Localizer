@@ -2724,6 +2724,7 @@ int IgorImageOutputWriter::GetIgorStorageType() {
 
 #ifdef WITH_MATLAB
 MatlabImageOutputWriter::MatlabImageOutputWriter(size_t nImagesTotal, int storageType) :
+    _outputArray(NULL),
     _nImagesTotal(nImagesTotal),
     _storageType(storageType),
     _nImagesWritten(0)

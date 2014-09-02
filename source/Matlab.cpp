@@ -648,7 +648,7 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 		mexErrMsgTxt("Must have exactly 4 input arguments for readccdimages\n\
 					 1. the string \"readccdimages\"\n\
 					 2. the index of the first image to read (starting from 0)\n\
-					 3. the number of images to read\n\
+					 3. the number of images to read (or -1 for all images)\n\
 					 4. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
 	if (nlhs != 1)
