@@ -83,8 +83,10 @@ std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, i
 */
 int64_t GetLastModificationTime(const std::string& path);
 
-ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
-void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor = 0);
+ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
+ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
+void ImageToBufferWithFormat(ImagePtr image, int format, char* imageBuffer, int treatAsRowMajor = 0);
+void ImageToVectorWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor = 0);
 size_t NBytesInImage(int nRows, int nCols, int format);
 
 /**
@@ -92,11 +94,10 @@ size_t NBytesInImage(int nRows, int nCols, int format);
  (i.e. as read from a file) to an Image.
  */
 template <typename T>
-void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
+void CopyBufferToImage(const char* buffer, ImagePtr imagePtr, int treatAsRowMajor = 0) {
     size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    assert(nRows * nCols * sizeof(T) == buffer.size());
-    const T* bufferPtr = reinterpret_cast<const T*>(buffer.data());
+    const T* bufferPtr = reinterpret_cast<const T*>(buffer);
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
@@ -121,13 +122,10 @@ void CopyBufferToImage(const std::vector<char>& buffer, ImagePtr imagePtr, int t
  fit the data if needed.
  */
 template <typename T>
-void CopyImageToBuffer(ImagePtr imagePtr, std::vector<char>& buffer, int treatAsRowMajor = 0) {
+void CopyImageToBuffer(ImagePtr imagePtr, char* buffer, int treatAsRowMajor = 0) {
 	size_t nRows = imagePtr->rows();
     size_t nCols = imagePtr->cols();
-    size_t nBytesRequired = nRows * nCols * sizeof(T);
-    if (buffer.size() != nBytesRequired)
-        buffer.resize(nBytesRequired);
-    T* bufferPtr = reinterpret_cast<T*>(buffer.data());
+    T* bufferPtr = reinterpret_cast<T*>(buffer);
 	
 	if (treatAsRowMajor == 0) {
 		for (size_t j  = 0; j < nCols; j++) {
@@ -192,6 +190,16 @@ template <typename T> void WriteBinaryValue(OFSTREAM_T& file, T value) {
     char* valPtr = reinterpret_cast<char*>(&value);
     file.write(valPtr, sizeof(T));
 }
+
+#ifdef WITH_IGOR
+int IgorTypeToLocalizerType(int igorType);
+int LocalizerTypeToIgorType(int localizerType);
+#endif
+
+#ifdef WITH_MATLAB
+int MatlabTypeToLocalizerType(mxClassID igorType);
+mxClassID LocalizerTypeToMatlabType(int localizerType);
+#endif
 
 class ImageLoader {
 public:
@@ -552,9 +560,7 @@ public:
     waveHndl getWave() const {return outputWave;}
 	
 protected:
-	int GetIgorStorageType();
-	
-	size_t nImagesTotal;
+    size_t nImagesTotal;
 	std::string fullPathToWave;
 	DataFolderAndName waveDataFolderAndName;
 	waveHndl outputWave;
@@ -574,7 +580,6 @@ public:
     
 private:
     mxArray* _allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const;
-    mxClassID _getClassID(int storageType) const;
     
     mxArray* _outputArray;
     int _storageType;

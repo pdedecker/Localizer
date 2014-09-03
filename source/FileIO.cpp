@@ -192,42 +192,37 @@ int64_t GetLastModificationTime(const std::string& path) {
 	return modTime;
 }
 
-ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
-    
-	ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
-    size_t nBytesInBuffer = NBytesInImage(nRows, nCols, format);
-    
-    assert(imageBuffer.size() == nBytesInBuffer);
+ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
+    ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
     
 	switch (format) {
         case STORAGE_TYPE_INT8:
             CopyBufferToImage<int8_t>(imageBuffer, image, treatAsRowMajor);
             break;
-            
         case STORAGE_TYPE_UINT8:
             CopyBufferToImage<uint8_t>(imageBuffer, image, treatAsRowMajor);
             break;
-            
         case STORAGE_TYPE_INT16:
             CopyBufferToImage<int16_t>(imageBuffer, image, treatAsRowMajor);
             break;
-            
         case STORAGE_TYPE_UINT16:
             CopyBufferToImage<uint16_t>(imageBuffer, image, treatAsRowMajor);
             break;
-            
 		case STORAGE_TYPE_UINT32:
             CopyBufferToImage<uint32_t>(imageBuffer, image, treatAsRowMajor);
             break;
-            
+        case STORAGE_TYPE_INT64:
+            CopyBufferToImage<int64_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+        case STORAGE_TYPE_UINT64:
+            CopyBufferToImage<uint64_t>(imageBuffer, image, treatAsRowMajor);
+            break;
 		case STORAGE_TYPE_FP32:
             CopyBufferToImage<float>(imageBuffer, image, treatAsRowMajor);
             break;
-            
 		case STORAGE_TYPE_FP64:
             CopyBufferToImage<double>(imageBuffer, image, treatAsRowMajor);
             break;
-            
 		default:
 			throw std::runtime_error("unknown format in BufferWithFormatToImage()");
 			break;
@@ -236,8 +231,19 @@ ImagePtr BufferWithFormatToImage(const std::vector<char>& imageBuffer, int nRows
 	return image;
 }
 
-void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor) {
-	switch (format) {
+ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
+    
+	ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
+    size_t nBytesInBuffer = NBytesInImage(nRows, nCols, format);
+    
+    if (imageBuffer.size() != nBytesInBuffer) {
+        throw std::logic_error("invalid buffer size");
+    }
+    return BufferWithFormatToImage(imageBuffer.data(), nRows, nCols, format, treatAsRowMajor);
+}
+
+void ImageToBufferWithFormat(ImagePtr image, int format, char* imageBuffer, int treatAsRowMajor) {
+    switch (format) {
 		case STORAGE_TYPE_INT8:
 			CopyImageToBuffer<int8_t>(image, imageBuffer, treatAsRowMajor);
 			break;
@@ -256,6 +262,12 @@ void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imag
 		case STORAGE_TYPE_UINT32:
 			CopyImageToBuffer<uint32_t>(image, imageBuffer, treatAsRowMajor);
 			break;
+        case STORAGE_TYPE_INT64:
+            CopyImageToBuffer<int64_t>(image, imageBuffer, treatAsRowMajor);
+            break;
+        case STORAGE_TYPE_UINT64:
+            CopyImageToBuffer<uint64_t>(image, imageBuffer, treatAsRowMajor);
+            break;
 		case STORAGE_TYPE_FP32:
 			CopyImageToBuffer<float>(image, imageBuffer, treatAsRowMajor);
 			break;
@@ -266,6 +278,13 @@ void ImageToBufferWithFormat(ImagePtr image, int format, std::vector<char>& imag
             throw std::runtime_error("unknown format in ImageToBufferWithFormat()");
 			break;
 	}
+}
+
+void ImageToVectorWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor) {
+	size_t nBytesInImage = NBytesInImage(image->rows(), image->cols(), format);
+    if (imageBuffer.size() != nBytesInImage)
+        imageBuffer.resize(nBytesInImage);
+    ImageToBufferWithFormat(image, format, imageBuffer.data(), treatAsRowMajor);
 }
 
 size_t NBytesInImage(int nRows, int nCols, int format) {
@@ -461,6 +480,167 @@ void WindowsFileStream::seekp(uint64_t pos, std::ios_base::seekdir dir) {
 }
 #endif // _WIN32
 
+#ifdef WITH_IGOR
+int IgorTypeToLocalizerType(int igorType) {
+    int localizerType;
+    switch (igorType) {
+        case NT_I8:
+            localizerType = STORAGE_TYPE_INT8;
+            break;
+        case NT_I16:
+            localizerType = STORAGE_TYPE_INT16;
+            break;
+        case NT_I32:
+            localizerType = STORAGE_TYPE_INT32;
+            break;
+        case (NT_I8 | NT_UNSIGNED):
+            localizerType = STORAGE_TYPE_UINT8;
+            break;
+        case (NT_I16 | NT_UNSIGNED):
+            localizerType = STORAGE_TYPE_UINT16;
+            break;
+        case (NT_I32 | NT_UNSIGNED):
+            localizerType = STORAGE_TYPE_UINT32;
+            break;
+        case NT_FP32:
+            localizerType = STORAGE_TYPE_FP32;
+            break;
+        case NT_FP64:
+            localizerType = STORAGE_TYPE_FP64;
+            break;
+        default:
+            throw std::runtime_error("unknown Igor storage type");
+            break;
+    }
+    return localizerType;
+}
+
+int LocalizerTypeToIgorType(int localizerType) {
+    int igorType;
+    switch (localizerType) {
+		case STORAGE_TYPE_INT4:
+		case STORAGE_TYPE_UINT4:
+		case STORAGE_TYPE_INT8:
+			igorType = NT_I8;
+			break;
+		case STORAGE_TYPE_UINT8:
+			igorType = NT_I8 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT16:
+			igorType = NT_I16;
+			break;
+		case STORAGE_TYPE_UINT16:
+			igorType = NT_I16 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_INT32:
+			igorType = NT_I32;
+			break;
+		case STORAGE_TYPE_UINT32:
+			igorType = NT_I32 | NT_UNSIGNED;
+			break;
+        case STORAGE_TYPE_INT64:
+            igorType = NT_I32;
+			break;
+		case STORAGE_TYPE_UINT64:
+			igorType = NT_I32 | NT_UNSIGNED;
+			break;
+		case STORAGE_TYPE_FP32:
+			igorType = NT_FP32;
+			break;
+		case STORAGE_TYPE_FP64:
+			igorType = NT_FP64;
+			break;
+        default:
+            throw std::runtime_error("unknown Localizer storage type");
+            break;
+	}
+    
+    return igorType;
+}
+#endif  // WITH_IGOR
+
+#ifdef WITH_MATLAB
+int MatlabTypeToLocalizerType(mxClassID matlabType) {
+    int localizerType;
+    switch (matlabType) {
+        case mxINT8_CLASS:
+			localizerType = STORAGE_TYPE_INT8;
+			break;
+		case mxUINT8_CLASS:
+            localizerType = STORAGE_TYPE_UINT8;
+			break;
+		case mxINT16_CLASS:
+            localizerType = STORAGE_TYPE_INT16;
+			break;
+		case mxUINT16_CLASS:
+            localizerType = STORAGE_TYPE_UINT16;
+			break;
+		case mxINT32_CLASS:
+            localizerType = STORAGE_TYPE_INT32;
+			break;
+		case mxUINT32_CLASS:
+            localizerType = STORAGE_TYPE_UINT32;
+			break;
+		case mxINT64_CLASS:
+            localizerType = STORAGE_TYPE_INT64;
+			break;
+		case mxUINT64_CLASS:
+            localizerType = STORAGE_TYPE_UINT64;
+			break;
+		case mxSINGLE_CLASS:
+            localizerType = STORAGE_TYPE_FP32;
+			break;
+		case mxDOUBLE_CLASS:
+            localizerType = STORAGE_TYPE_FP64;
+			break;
+		default:
+			throw std::runtime_error("Unknown or unsupported matrix class ID");
+			break;
+    }
+    return localizerType;
+}
+
+mxClassID LocalizerTypeToMatlabType(int localizerType) {
+    mxClassID matlabType;
+    switch (localizerType) {
+		case STORAGE_TYPE_INT8:
+			matlabType = mxINT8_CLASS;
+			break;
+		case STORAGE_TYPE_UINT8:
+			matlabType = mxUINT8_CLASS;
+			break;
+		case STORAGE_TYPE_INT16:
+			matlabType = mxINT16_CLASS;
+			break;
+		case STORAGE_TYPE_UINT16:
+			matlabType = mxUINT16_CLASS;
+			break;
+		case STORAGE_TYPE_INT32:
+			matlabType = mxINT32_CLASS;
+			break;
+		case STORAGE_TYPE_UINT32:
+			matlabType = mxUINT32_CLASS;
+			break;
+		case STORAGE_TYPE_INT64:
+			matlabType = mxINT8_CLASS;
+			break;
+		case STORAGE_TYPE_UINT64:
+			matlabType = mxUINT8_CLASS;
+			break;
+        case STORAGE_TYPE_FP32:
+			matlabType = mxSINGLE_CLASS;
+			break;
+		case STORAGE_TYPE_FP64:
+			matlabType = mxDOUBLE_CLASS;
+			break;
+		default:
+			throw std::runtime_error("unsupported storage type in LocalizerTypeToMatlabType()");
+			break;
+	}
+    
+    return matlabType;
+}
+#endif  // WITH_MATLAB
 
 ImageLoader::ImageLoader() {
 	this->nImages = 0;
@@ -672,29 +852,8 @@ void ImageLoaderSPE::parse_header_information() {
 ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t offset;
 	
-	uint64_t imageSize, pixelSize;
-	
-	// determine how big we have to make the single image buffer and the offset
-	switch(storage_type) {
-		case STORAGE_TYPE_FP32:	// 4 byte float
-		case STORAGE_TYPE_UINT32:	// 4-byte long
-			pixelSize = 4;
-			break;
-		case STORAGE_TYPE_INT16:	// 2 byte signed short
-		case STORAGE_TYPE_UINT16:	// 2 byte unsigned short
-			pixelSize = 2;
-			break;
-		default:
-			std::string error("Unable to determine the storage type used in ");
-			error += _filePath;
-			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
-			break;
-	}
-	
-	imageSize = pixelSize * xSize * ySize;
-	
+	size_t imageSize = NBytesInImage(xSize, ySize, storage_type);
     std::vector<char> imageBuffer(imageSize);
-	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -716,31 +875,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
 		this->nextImageToRead += 1;
 	}
 	
-	switch(storage_type) {
-		case STORAGE_TYPE_FP32:	// 4-byte float
-            CopyBufferToImage<float>(imageBuffer, image);
-			break;
-            
-		case STORAGE_TYPE_UINT32:	// 4-byte long
-			CopyBufferToImage<uint32_t>(imageBuffer, image);
-			break;
-            
-		case STORAGE_TYPE_INT16:	// 2-byte signed short
-			CopyBufferToImage<int16_t>(imageBuffer, image);
-			break;
-			
-		case STORAGE_TYPE_UINT16: // 2-byte unsigned short
-			CopyBufferToImage<uint16_t>(imageBuffer, image);
-			break;
-            
-		default:
-			std::string error("Unable to determine the storage type used in ");
-			error += _filePath;
-			throw CANNOT_DETERMINE_SPE_STORAGE_TYPE(error);
-			break;
-	}
-	
-	return image;
+    return VectorWithFormatToImage(imageBuffer, xSize, ySize, storage_type);
 }
 
 ImageLoaderAndor::ImageLoaderAndor(const std::string& filePath) :
@@ -864,7 +999,6 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t nBytesInImage = xSize * ySize * sizeof(float);
 	
     std::vector<char> imageBuffer(nBytesInImage);
-	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
@@ -886,7 +1020,8 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
 		this->nextImageToRead += 1;
 	}
 	
-	CopyBufferToImage<float>(imageBuffer, image);
+    ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	CopyBufferToImage<float>(imageBuffer.data(), image);
 	
 	return image;
 }
@@ -1028,8 +1163,6 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 	uint64_t imageSize = xSize * ySize * 2; // assume a 16-bit format
     
     std::vector<char> imageBuffer(imageSize);
-	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
 	{
 		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
@@ -1050,7 +1183,8 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
 		this->nextImageToRead += 1;
 	}
 	
-	CopyBufferToImage<uint16_t>(imageBuffer, image);
+    ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+	CopyBufferToImage<uint16_t>(imageBuffer.data(), image);
 	
 	return image;
 }
@@ -1136,7 +1270,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	}
 	
 	
-	ImagePtr image = BufferWithFormatToImage(imageBuffer, this->xSize, this->ySize, this->storage_type, 1);
+	ImagePtr image = VectorWithFormatToImage(imageBuffer, this->xSize, this->ySize, this->storage_type, 1);
 	return image;
 }
 
@@ -1652,26 +1786,6 @@ std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(
 	return firstAndLastIndices;
 }
 
-template <typename T> void CopyDataToImage(T* buffer, ImagePtr image) {
-    size_t nRows = image->rows();
-    size_t nCols = image->cols();
-    size_t nElements = nRows * nCols;
-    double* imageData = image->data();
-    for (size_t i = 0; i < nElements; ++i) {
-        imageData[i] = static_cast<double>(buffer[i]);
-    }
-}
-
-template <typename T> void CopyImageToData(ImagePtr image, T* buffer) {
-    size_t nRows = image->rows();
-    size_t nCols = image->cols();
-    size_t nElements = nRows * nCols;
-    double* imageData = image->data();
-    for (size_t i = 0; i < nElements; ++i) {
-        buffer[i] = static_cast<T>(imageData[i]);
-    }
-}
-
 #ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	_dataWave = FetchWaveUsingFullPath(waveName);
@@ -1686,20 +1800,14 @@ ImageLoaderIgor::ImageLoaderIgor(waveHndl dataWave) :
 
 ImagePtr ImageLoaderIgor::readNextImage(int &index) {
 	int err;
-	int waveType = WaveType(this->_dataWave);
-	size_t waveDataOffset;
-	char* startOfWaveData;
-	size_t nPixels = this->xSize * this->ySize;
-	
-	// allocate a new image
-	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
 	
 	// get a pointer to the data in the wave
+    size_t waveDataOffset;
 	err = MDAccessNumericWaveData(this->_dataWave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
 	if (err != 0) {
 		throw err;
 	}
-	startOfWaveData = ((char*)(*this->_dataWave) + waveDataOffset);
+	char *startOfWaveData = ((char*)(*this->_dataWave) + waveDataOffset);
 	
 	{
 		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
@@ -1710,37 +1818,9 @@ ImagePtr ImageLoaderIgor::readNextImage(int &index) {
 		this->nextImageToRead += 1;
 	}
     
-	switch (waveType) {
-		case NT_FP32:
-            CopyDataToImage(reinterpret_cast<float*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_FP64:
-            CopyDataToImage(reinterpret_cast<double*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I8:
-            CopyDataToImage(reinterpret_cast<int8_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I16:
-            CopyDataToImage(reinterpret_cast<int16_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I32:
-            CopyDataToImage(reinterpret_cast<int32_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I8 | NT_UNSIGNED:
-            CopyDataToImage(reinterpret_cast<uint8_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I16 | NT_UNSIGNED:
-            CopyDataToImage(reinterpret_cast<uint16_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		case NT_I32 | NT_UNSIGNED:
-            CopyDataToImage(reinterpret_cast<uint32_t*>(startOfWaveData) + nPixels * index, image);
-			break;
-		default:
-			throw std::runtime_error("Unknown or unsupported wavetype");
-			break;
-	}
-	
-	return image;
+    size_t nBytesInImage = NBytesInImage(xSize, ySize, storage_type);
+    char* bufferPtr = startOfWaveData + nBytesInImage * index;
+    return BufferWithFormatToImage(bufferPtr, xSize, ySize, storage_type);
 }
 
 void ImageLoaderIgor::_initFromWave(waveHndl dataWave) {
@@ -1772,34 +1852,7 @@ void ImageLoaderIgor::_initFromWave(waveHndl dataWave) {
     if ((waveType & TEXT_WAVE_TYPE) || (waveType & WAVE_TYPE) || (waveType & DATAFOLDER_TYPE) || (waveType & NT_CMPLX))
         throw int(WAVE_TYPE_MISMATCH);
     
-	switch (waveType) {
-		case NT_I8:
-			storage_type = STORAGE_TYPE_INT8;
-			break;
-		case NT_I16:
-			storage_type = STORAGE_TYPE_INT16;
-			break;
-		case NT_I32:
-			storage_type = STORAGE_TYPE_INT32;
-			break;
-		case (NT_I8 | NT_UNSIGNED):
-			storage_type = STORAGE_TYPE_UINT8;
-			break;
-		case (NT_I16 | NT_UNSIGNED):
-			storage_type = STORAGE_TYPE_UINT16;
-			break;
-		case (NT_I32 | NT_UNSIGNED):
-			storage_type = STORAGE_TYPE_UINT32;
-			break;
-		case NT_FP32:
-			storage_type = STORAGE_TYPE_FP32;
-			break;
-		case NT_FP64:
-			storage_type = STORAGE_TYPE_FP64;
-			break;
-		default:
-			storage_type = STORAGE_TYPE_FP64;
-	}
+	this->storage_type = IgorTypeToLocalizerType(waveType);
 	
 	this->checkForReasonableValues();
 }
@@ -1822,13 +1875,11 @@ ImageLoaderMatlab::ImageLoaderMatlab(mxArray* matlabArray) {
 	else
 		nImages = 1;
 	
-	this->storage_type = static_cast<int>(mxGetClassID(matlabArray));
+	this->storage_type = MatlabTypeToLocalizerType(mxGetClassID(matlabArray));
 	this->checkForReasonableValues();
 }
 
 ImagePtr ImageLoaderMatlab::readNextImage(int &index) {
-	size_t nPixels = this->xSize * this->ySize;
-	
 	{
 		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
@@ -1838,48 +1889,9 @@ ImagePtr ImageLoaderMatlab::readNextImage(int &index) {
 		this->nextImageToRead += 1;
 	}
 	
-	// allocate a new image
-	ImagePtr image (GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
 	char* dataPtr = reinterpret_cast<char*>(mxGetData(_matlabArray));
-	
-	switch (mxGetClassID(_matlabArray)) {
-		case mxINT8_CLASS:
-			CopyDataToImage(reinterpret_cast<int8_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxUINT8_CLASS:
-            CopyDataToImage(reinterpret_cast<uint8_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxINT16_CLASS:
-            CopyDataToImage(reinterpret_cast<int16_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxUINT16_CLASS:
-            CopyDataToImage(reinterpret_cast<uint16_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxINT32_CLASS:
-            CopyDataToImage(reinterpret_cast<int32_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxUINT32_CLASS:
-            CopyDataToImage(reinterpret_cast<uint32_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxINT64_CLASS:
-            CopyDataToImage(reinterpret_cast<int64_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxUINT64_CLASS:
-            CopyDataToImage(reinterpret_cast<uint64_t*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxSINGLE_CLASS:
-            CopyDataToImage(reinterpret_cast<float*>(dataPtr) + index * nPixels, image);
-			break;
-		case mxDOUBLE_CLASS:
-            CopyDataToImage(reinterpret_cast<double*>(dataPtr) + index * nPixels, image);
-			break;
-		default:
-			throw std::runtime_error("Unknown or unsupported matrix class ID");
-			break;
-	}
-	
-	return image;
+    size_t nBytesInImage = NBytesInImage(xSize, ySize, storage_type);
+    return BufferWithFormatToImage(dataPtr + nBytesInImage * index, xSize, ySize, storage_type);
 }
 #endif // WITH_MATLAB
 
@@ -1971,7 +1983,7 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
     size_t nBytesToWrite = NBytesInImage(this->xSize, this->ySize, this->storageType);
     std::vector<char> imageBuffer;
-    ImageToBufferWithFormat(imageToWrite, this->storageType, imageBuffer, 1);
+    ImageToVectorWithFormat(imageToWrite, this->storageType, imageBuffer, 1);
 	
 	this->file.write(imageBuffer.data(), nBytesToWrite);
 	++this->nImagesWritten;
@@ -2372,10 +2384,10 @@ std::pair<LocalizerTIFFImageOutputWriter::TIFFIFDOnDisk, std::vector<char> > Loc
     std::vector<char> imageBuffer;
     if (!reuseExistingData) {
         if (!_compress) {
-            ImageToBufferWithFormat(image, _storageType, imageBuffer);
+            ImageToVectorWithFormat(image, _storageType, imageBuffer);
         } else {
             std::vector<char> uncompressedData;
-            ImageToBufferWithFormat(image, _storageType, uncompressedData);
+            ImageToVectorWithFormat(image, _storageType, uncompressedData);
             imageBuffer = Deflate(uncompressedData);
         }
         dataLength = imageBuffer.size();
@@ -2606,8 +2618,6 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	int result;
 	size_t xSize = imageToWrite->rows();
 	size_t ySize = imageToWrite->cols();
-	size_t nPixels = xSize * ySize;
-	int storage = this->GetIgorStorageType();
 	
 	if (this->outputWave == NULL) {
 		// the outputwave has not been created yet, do it now
@@ -2621,105 +2631,35 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
             dimensionSizes[2] = this->nImagesTotal;
         }
 		dimensionSizes[3] = 0;
+        
+        int igorStorageType = LocalizerTypeToIgorType(storageType);
 		
 		// the way to make the wave depends on whether this object was constructed with a full path
 		// or with a DataFolderAndName argument
 		if (this->fullPathToWave.length() != 0) {
-			this->outputWave = MakeWaveUsingFullPath(this->fullPathToWave, dimensionSizes, storage, this->overwrite);
+			this->outputWave = MakeWaveUsingFullPath(this->fullPathToWave, dimensionSizes, igorStorageType, this->overwrite);
 		} else {
-			result = MDMakeWave(&(this->outputWave), this->waveDataFolderAndName.name, this->waveDataFolderAndName.dfH, dimensionSizes, storage, this->overwrite);
+			result = MDMakeWave(&(this->outputWave), this->waveDataFolderAndName.name, this->waveDataFolderAndName.dfH, dimensionSizes, igorStorageType, this->overwrite);
 			if (result != 0)
 				throw result;
 		}
 	}
 	
 	// check that we are not trying to write too many images
-	// which would otherwise trigger an out-of-bounds memory
-	// access
     if (this->nImagesWritten >= this->nImagesTotal)
 		throw std::runtime_error("Writing too many images to the IgorImageOutputWriter");
 	
 	// the strategy for writing the data depends on the storage type
 	size_t waveDataOffset;
-	char *waveDataPtr;
-	
 	result = MDAccessNumericWaveData(this->outputWave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
 	if (result != 0)
 		throw result;
-	
-	waveDataPtr = (char *)((char*)(*this->outputWave) + waveDataOffset);
-	
-	switch (storage) {
-		case NT_I8:
-            CopyImageToData(imageToWrite, reinterpret_cast<int8_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_I16:
-            CopyImageToData(imageToWrite, reinterpret_cast<int16_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_I32:
-            CopyImageToData(imageToWrite, reinterpret_cast<int32_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_I8 | NT_UNSIGNED:
-            CopyImageToData(imageToWrite, reinterpret_cast<uint8_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_I16 | NT_UNSIGNED:
-            CopyImageToData(imageToWrite, reinterpret_cast<uint16_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_I32 | NT_UNSIGNED:
-            CopyImageToData(imageToWrite, reinterpret_cast<uint32_t*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_FP32:
-            CopyImageToData(imageToWrite, reinterpret_cast<float*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-		case NT_FP64:
-            CopyImageToData(imageToWrite, reinterpret_cast<double*>(waveDataPtr) + nPixels * nImagesWritten);
-            break;
-	}
-	
-	++nImagesWritten;
+	char* waveDataPtr = (char *)((char*)(*this->outputWave) + waveDataOffset);
+    
+    size_t nBytesInImage = NBytesInImage(xSize, ySize, this->storageType);
+    ImageToBufferWithFormat(imageToWrite, this->storageType, waveDataPtr + nBytesInImage * nImagesWritten);
+    ++nImagesWritten;
 }
-
-int IgorImageOutputWriter::GetIgorStorageType() {
-	int storage;
-	
-	switch (this->storageType) {
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_INT8:
-			storage = NT_I8;
-			break;
-		case STORAGE_TYPE_UINT8:
-			storage = NT_I8 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_INT16:
-			storage = NT_I16;
-			break;
-		case STORAGE_TYPE_UINT16:
-			storage = NT_I16 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_INT32:
-			storage = NT_I32;
-			break;
-		case STORAGE_TYPE_UINT32:
-			storage = NT_I32 | NT_UNSIGNED;
-			break;
-        case STORAGE_TYPE_INT64:
-            storage = NT_I32;
-			break;
-		case STORAGE_TYPE_UINT64:
-			storage = NT_I32 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_FP32:
-			storage = NT_FP32;
-			break;
-		case STORAGE_TYPE_FP64:
-			storage = NT_FP64;
-			break;
-	}
-	
-	return storage;
-}
-
 #endif // WITH_IGOR
 
 #ifdef WITH_MATLAB
@@ -2740,92 +2680,20 @@ void MatlabImageOutputWriter::write_image(ImagePtr image) {
         _outputArray = _allocateArray(image->rows(), image->cols(), _nImagesTotal, _storageType);
     }
     
-    size_t nPixels = image->rows() * image->cols();
     char* arrayPtr = reinterpret_cast<char*>(mxGetPr(_outputArray));
+    size_t nBytesInImage = NBytesInImage(image->rows(), image->cols(), _storageType);
+    ImageToBufferWithFormat(image, _storageType, arrayPtr + nBytesInImage * _nImagesWritten);
     
-    switch (_storageType) {
-		case STORAGE_TYPE_INT8:
-            CopyImageToData(image, reinterpret_cast<int8_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_UINT8:
-            CopyImageToData(image, reinterpret_cast<uint8_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_INT16:
-            CopyImageToData(image, reinterpret_cast<int16_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_UINT16:
-            CopyImageToData(image, reinterpret_cast<uint16_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_INT32:
-            CopyImageToData(image, reinterpret_cast<int32_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_UINT32:
-            CopyImageToData(image, reinterpret_cast<uint32_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-        case STORAGE_TYPE_INT64:
-            CopyImageToData(image, reinterpret_cast<int64_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_UINT64:
-            CopyImageToData(image, reinterpret_cast<uint64_t*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_FP32:
-            CopyImageToData(image, reinterpret_cast<float*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-		case STORAGE_TYPE_FP64:
-            CopyImageToData(image, reinterpret_cast<double*>(arrayPtr) + nPixels * _nImagesWritten);
-            break;
-	}
     ++_nImagesWritten;
 }
 
 mxArray* MatlabImageOutputWriter::_allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const {
-    mxClassID classID = _getClassID(storageType);
+    mxClassID classID = LocalizerTypeToMatlabType(storageType);
     mwSize ndim = 3;
 	mwSize dims[3] = {static_cast<mwSize>(nRows), static_cast<mwSize>(nCols), static_cast<mwSize>(nLayers)};
 	mxArray* array = mxCreateNumericArray(ndim, dims, classID, mxREAL);
 	if (array == NULL)
 		throw std::bad_alloc();
     return array;
-}
-
-mxClassID MatlabImageOutputWriter::_getClassID(int storageType) const {
-    mxClassID classID;
-    switch (storageType) {
-		case STORAGE_TYPE_INT8:
-			classID = mxINT8_CLASS;
-			break;
-		case STORAGE_TYPE_UINT8:
-			classID = mxUINT8_CLASS;
-			break;
-		case STORAGE_TYPE_INT16:
-			classID = mxINT16_CLASS;
-			break;
-		case STORAGE_TYPE_UINT16:
-			classID = mxUINT16_CLASS;
-			break;
-		case STORAGE_TYPE_INT32:
-			classID = mxINT32_CLASS;
-			break;
-		case STORAGE_TYPE_UINT32:
-			classID = mxUINT32_CLASS;
-			break;
-		case STORAGE_TYPE_INT64:
-			classID = mxINT8_CLASS;
-			break;
-		case STORAGE_TYPE_UINT64:
-			classID = mxUINT8_CLASS;
-			break;
-        case STORAGE_TYPE_FP32:
-			classID = mxSINGLE_CLASS;
-			break;
-		case STORAGE_TYPE_FP64:
-			classID = mxDOUBLE_CLASS;
-			break;
-		default:
-			throw std::runtime_error("unsupported storage type in ConvertImagesToArray()");
-			break;
-	}
-    
-    return classID;
 }
 #endif // WITH_MATLAB
