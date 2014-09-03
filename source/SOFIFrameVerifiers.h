@@ -42,7 +42,7 @@ public:
 
 class SOFIFrameVerifier_NoSaturation : public SOFIFrameVerifier {
 public:
-	SOFIFrameVerifier_NoSaturation(int storageType_rhs);
+	SOFIFrameVerifier_NoSaturation(LocalizerStorageType storageType_rhs);
 	~SOFIFrameVerifier_NoSaturation() {;}
 	
 	bool isValidFrame(ImagePtr frame) const;

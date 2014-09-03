@@ -29,35 +29,35 @@
 
 #include "SOFIFrameVerifiers.h"
 
-SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(int storageType_rhs) {
+SOFIFrameVerifier_NoSaturation::SOFIFrameVerifier_NoSaturation(LocalizerStorageType storageType_rhs) {
 	
 	validLimitsSet = true;
 	switch (storageType_rhs) {
             // some systems (e.g. the Nikon TIRF) never report absolutely saturated pixel
             // values, but instead report a different value close to it
             // so add in some arbitrary margin for the saturation detection
-		case STORAGE_TYPE_INT8:
+		case kInt8:
 			this->saturationValue = 127.0 - 1.0;
 			break;
-		case STORAGE_TYPE_UINT8:
+		case kUInt8:
 			this->saturationValue = 255.0 - 2.0;
 			break;
-		case STORAGE_TYPE_INT16:
+		case kInt16:
 			this->saturationValue = 32767.0 - 200.0;
 			break;
-		case STORAGE_TYPE_UINT16:
+		case kUInt16:
 			this->saturationValue = 65535.0 - 200.0;
 			break;
-		case STORAGE_TYPE_INT32:
+		case kInt32:
 			this->saturationValue = 2147483647.0 - 500.0;
 			break;
-		case STORAGE_TYPE_UINT32:
+		case kUInt32:
 			this->saturationValue = 4294967295.0 - 500.0;
 			break;
-		case STORAGE_TYPE_INT64:
+		case kInt64:
 			this->saturationValue = 9223372036854775807.0 - 1000.0;
 			break;
-		case STORAGE_TYPE_UINT64:
+		case kUInt64:
 			this->saturationValue = 18446744073709551615.0 - 1000.0;
 			break;
 		default:

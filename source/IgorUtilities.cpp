@@ -39,7 +39,6 @@ int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRe
     int nImages = image_loader->getNImages();
     int maxNImagesToLoad, nImagesToLoad;
     int x_size, y_size;
-    int storage_type;
 
     int result;
     ImagePtr current_image;
@@ -70,7 +69,7 @@ int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRe
 
     x_size = image_loader->getXSize();
     y_size = image_loader->getYSize();
-    storage_type = image_loader->getStorageType();
+    LocalizerStorageType storageType = image_loader->getStorageType();
 
     result = SetOperationNumVar("V_numberOfImages", nImages);
     if (result != 0)
@@ -81,7 +80,7 @@ int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRe
     result = SetOperationNumVar("V_ySize", y_size);
     if (result != 0)
         throw int(result);
-    result = SetOperationNumVar("V_storageType", storage_type);
+    result = SetOperationNumVar("V_storageType", static_cast<int>(storageType));
     if (result != 0)
         throw int(result);
     result = SetOperationNumVar("V_firstImageLoaded", firstImage);
@@ -95,7 +94,7 @@ int LoadPartialCCDImage(ImageLoader *image_loader, int firstImage, int nImagesRe
 		throw int(result);
 
     // allocate the object that will write the data to Igor
-    IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storage_type);
+    IgorImageOutputWriter waveWriter(destination, nImagesToLoad, overwrite, storageType);
 
     // load the data and write it to Igor
     int nextFrameRead;
@@ -613,7 +612,7 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAnd
 }
 
 waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName dataFolderAndName) {
-    IgorImageOutputWriter outputWriter(dataFolderAndName, stack.size(), 1, STORAGE_TYPE_FP64);
+    IgorImageOutputWriter outputWriter(dataFolderAndName, stack.size(), 1, kFP64);
     for (auto it = stack.cbegin(); it != stack.cend(); ++it) {
         outputWriter.write_image(*it);
     }

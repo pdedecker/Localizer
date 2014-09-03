@@ -192,35 +192,38 @@ int64_t GetLastModificationTime(const std::string& path) {
 	return modTime;
 }
 
-ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
+ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, LocalizerStorageType format, int treatAsRowMajor) {
     ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
     
 	switch (format) {
-        case STORAGE_TYPE_INT8:
+        case kInt8:
             CopyBufferToImage<int8_t>(imageBuffer, image, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_UINT8:
+        case kUInt8:
             CopyBufferToImage<uint8_t>(imageBuffer, image, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_INT16:
+        case kInt16:
             CopyBufferToImage<int16_t>(imageBuffer, image, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_UINT16:
+        case kUInt16:
             CopyBufferToImage<uint16_t>(imageBuffer, image, treatAsRowMajor);
             break;
-		case STORAGE_TYPE_UINT32:
+        case kInt32:
+            CopyBufferToImage<int32_t>(imageBuffer, image, treatAsRowMajor);
+            break;
+		case kUInt32:
             CopyBufferToImage<uint32_t>(imageBuffer, image, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_INT64:
+        case kInt64:
             CopyBufferToImage<int64_t>(imageBuffer, image, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_UINT64:
+        case kUInt64:
             CopyBufferToImage<uint64_t>(imageBuffer, image, treatAsRowMajor);
             break;
-		case STORAGE_TYPE_FP32:
+		case kFP32:
             CopyBufferToImage<float>(imageBuffer, image, treatAsRowMajor);
             break;
-		case STORAGE_TYPE_FP64:
+		case kFP64:
             CopyBufferToImage<double>(imageBuffer, image, treatAsRowMajor);
             break;
 		default:
@@ -231,7 +234,7 @@ ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, 
 	return image;
 }
 
-ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor) {
+ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, LocalizerStorageType format, int treatAsRowMajor) {
     
 	ImagePtr image(GetRecycledMatrix(nRows, nCols), FreeRecycledMatrix);
     size_t nBytesInBuffer = NBytesInImage(nRows, nCols, format);
@@ -242,36 +245,36 @@ ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows
     return BufferWithFormatToImage(imageBuffer.data(), nRows, nCols, format, treatAsRowMajor);
 }
 
-void ImageToBufferWithFormat(ImagePtr image, int format, char* imageBuffer, int treatAsRowMajor) {
+void ImageToBufferWithFormat(ImagePtr image, LocalizerStorageType format, char* imageBuffer, int treatAsRowMajor) {
     switch (format) {
-		case STORAGE_TYPE_INT8:
+		case kInt8:
 			CopyImageToBuffer<int8_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_UINT8:
+		case kUInt8:
 			CopyImageToBuffer<uint8_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_INT16:
+		case kInt16:
 			CopyImageToBuffer<int16_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_UINT16:
+		case kUInt16:
 			CopyImageToBuffer<uint16_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_INT32:
+		case kInt32:
 			CopyImageToBuffer<int32_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_UINT32:
+		case kUInt32:
 			CopyImageToBuffer<uint32_t>(image, imageBuffer, treatAsRowMajor);
 			break;
-        case STORAGE_TYPE_INT64:
+        case kInt64:
             CopyImageToBuffer<int64_t>(image, imageBuffer, treatAsRowMajor);
             break;
-        case STORAGE_TYPE_UINT64:
+        case kUInt64:
             CopyImageToBuffer<uint64_t>(image, imageBuffer, treatAsRowMajor);
             break;
-		case STORAGE_TYPE_FP32:
+		case kFP32:
 			CopyImageToBuffer<float>(image, imageBuffer, treatAsRowMajor);
 			break;
-		case STORAGE_TYPE_FP64:
+		case kFP64:
 			CopyImageToBuffer<double>(image, imageBuffer, treatAsRowMajor);
 			break;
         default:
@@ -280,31 +283,33 @@ void ImageToBufferWithFormat(ImagePtr image, int format, char* imageBuffer, int 
 	}
 }
 
-void ImageToVectorWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor) {
+void ImageToVectorWithFormat(ImagePtr image, LocalizerStorageType format, std::vector<char>& imageBuffer, int treatAsRowMajor) {
 	size_t nBytesInImage = NBytesInImage(image->rows(), image->cols(), format);
     if (imageBuffer.size() != nBytesInImage)
         imageBuffer.resize(nBytesInImage);
     ImageToBufferWithFormat(image, format, imageBuffer.data(), treatAsRowMajor);
 }
 
-size_t NBytesInImage(int nRows, int nCols, int format) {
+size_t NBytesInImage(int nRows, int nCols, LocalizerStorageType format) {
     size_t nPixels = nRows * nCols;
     size_t nBytesInImage;
     switch (format) {
-		case STORAGE_TYPE_INT8:
-		case STORAGE_TYPE_UINT8:
+		case kInt8:
+		case kUInt8:
 			nBytesInImage = nPixels;
 			break;
-		case STORAGE_TYPE_INT16:
-		case STORAGE_TYPE_UINT16:
+		case kInt16:
+		case kUInt16:
 			nBytesInImage = nPixels * 2;
 			break;
-		case STORAGE_TYPE_INT32:
-		case STORAGE_TYPE_UINT32:
-		case STORAGE_TYPE_FP32:
+		case kInt32:
+		case kUInt32:
+		case kFP32:
 			nBytesInImage = nPixels * 4;
 			break;
-		case STORAGE_TYPE_FP64:
+		case kInt64:
+        case kUInt64:
+        case kFP64:
 			nBytesInImage = nPixels * 8;
 			break;
 		default:
@@ -481,32 +486,32 @@ void WindowsFileStream::seekp(uint64_t pos, std::ios_base::seekdir dir) {
 #endif // _WIN32
 
 #ifdef WITH_IGOR
-int IgorTypeToLocalizerType(int igorType) {
-    int localizerType;
+LocalizerStorageType IgorTypeToLocalizerType(int igorType) {
+    LocalizerStorageType localizerType;
     switch (igorType) {
         case NT_I8:
-            localizerType = STORAGE_TYPE_INT8;
+            localizerType = kInt8;
             break;
         case NT_I16:
-            localizerType = STORAGE_TYPE_INT16;
+            localizerType = kInt16;
             break;
         case NT_I32:
-            localizerType = STORAGE_TYPE_INT32;
+            localizerType = kInt32;
             break;
         case (NT_I8 | NT_UNSIGNED):
-            localizerType = STORAGE_TYPE_UINT8;
+            localizerType = kUInt8;
             break;
         case (NT_I16 | NT_UNSIGNED):
-            localizerType = STORAGE_TYPE_UINT16;
+            localizerType = kUInt16;
             break;
         case (NT_I32 | NT_UNSIGNED):
-            localizerType = STORAGE_TYPE_UINT32;
+            localizerType = kUInt32;
             break;
         case NT_FP32:
-            localizerType = STORAGE_TYPE_FP32;
+            localizerType = kFP32;
             break;
         case NT_FP64:
-            localizerType = STORAGE_TYPE_FP64;
+            localizerType = kFP64;
             break;
         default:
             throw std::runtime_error("unknown Igor storage type");
@@ -515,39 +520,31 @@ int IgorTypeToLocalizerType(int igorType) {
     return localizerType;
 }
 
-int LocalizerTypeToIgorType(int localizerType) {
+int LocalizerTypeToIgorType(LocalizerStorageType localizerType) {
     int igorType;
     switch (localizerType) {
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_INT8:
+		case kInt8:
 			igorType = NT_I8;
 			break;
-		case STORAGE_TYPE_UINT8:
+		case kUInt8:
 			igorType = NT_I8 | NT_UNSIGNED;
 			break;
-		case STORAGE_TYPE_INT16:
+		case kInt16:
 			igorType = NT_I16;
 			break;
-		case STORAGE_TYPE_UINT16:
+		case kUInt16:
 			igorType = NT_I16 | NT_UNSIGNED;
 			break;
-		case STORAGE_TYPE_INT32:
+		case kInt32:
 			igorType = NT_I32;
 			break;
-		case STORAGE_TYPE_UINT32:
+		case kUInt32:
 			igorType = NT_I32 | NT_UNSIGNED;
 			break;
-        case STORAGE_TYPE_INT64:
-            igorType = NT_I32;
-			break;
-		case STORAGE_TYPE_UINT64:
-			igorType = NT_I32 | NT_UNSIGNED;
-			break;
-		case STORAGE_TYPE_FP32:
+		case kFP32:
 			igorType = NT_FP32;
 			break;
-		case STORAGE_TYPE_FP64:
+		case kFP64:
 			igorType = NT_FP64;
 			break;
         default:
@@ -560,38 +557,38 @@ int LocalizerTypeToIgorType(int localizerType) {
 #endif  // WITH_IGOR
 
 #ifdef WITH_MATLAB
-int MatlabTypeToLocalizerType(mxClassID matlabType) {
-    int localizerType;
+LocalizerStorageType MatlabTypeToLocalizerType(mxClassID matlabType) {
+    LocalizerStorageType localizerType;
     switch (matlabType) {
         case mxINT8_CLASS:
-			localizerType = STORAGE_TYPE_INT8;
+			localizerType = kInt8;
 			break;
 		case mxUINT8_CLASS:
-            localizerType = STORAGE_TYPE_UINT8;
+            localizerType = kUInt8;
 			break;
 		case mxINT16_CLASS:
-            localizerType = STORAGE_TYPE_INT16;
+            localizerType = kInt16;
 			break;
 		case mxUINT16_CLASS:
-            localizerType = STORAGE_TYPE_UINT16;
+            localizerType = kUInt16;
 			break;
 		case mxINT32_CLASS:
-            localizerType = STORAGE_TYPE_INT32;
+            localizerType = kInt32;
 			break;
 		case mxUINT32_CLASS:
-            localizerType = STORAGE_TYPE_UINT32;
+            localizerType = kUInt32;
 			break;
 		case mxINT64_CLASS:
-            localizerType = STORAGE_TYPE_INT64;
+            localizerType = kInt64;
 			break;
 		case mxUINT64_CLASS:
-            localizerType = STORAGE_TYPE_UINT64;
+            localizerType = kUInt64;
 			break;
 		case mxSINGLE_CLASS:
-            localizerType = STORAGE_TYPE_FP32;
+            localizerType = kFP32;
 			break;
 		case mxDOUBLE_CLASS:
-            localizerType = STORAGE_TYPE_FP64;
+            localizerType = kFP64;
 			break;
 		default:
 			throw std::runtime_error("Unknown or unsupported matrix class ID");
@@ -600,37 +597,37 @@ int MatlabTypeToLocalizerType(mxClassID matlabType) {
     return localizerType;
 }
 
-mxClassID LocalizerTypeToMatlabType(int localizerType) {
+mxClassID LocalizerTypeToMatlabType(LocalizerStorageType localizerType) {
     mxClassID matlabType;
     switch (localizerType) {
-		case STORAGE_TYPE_INT8:
+		case kInt8:
 			matlabType = mxINT8_CLASS;
 			break;
-		case STORAGE_TYPE_UINT8:
+		case kUInt8:
 			matlabType = mxUINT8_CLASS;
 			break;
-		case STORAGE_TYPE_INT16:
+		case kInt16:
 			matlabType = mxINT16_CLASS;
 			break;
-		case STORAGE_TYPE_UINT16:
+		case kUInt16:
 			matlabType = mxUINT16_CLASS;
 			break;
-		case STORAGE_TYPE_INT32:
+		case kInt32:
 			matlabType = mxINT32_CLASS;
 			break;
-		case STORAGE_TYPE_UINT32:
+		case kUInt32:
 			matlabType = mxUINT32_CLASS;
 			break;
-		case STORAGE_TYPE_INT64:
-			matlabType = mxINT8_CLASS;
+		case kInt64:
+			matlabType = mxINT64_CLASS;
 			break;
-		case STORAGE_TYPE_UINT64:
-			matlabType = mxUINT8_CLASS;
+		case kUInt64:
+			matlabType = mxUINT64_CLASS;
 			break;
-        case STORAGE_TYPE_FP32:
+        case kFP32:
 			matlabType = mxSINGLE_CLASS;
 			break;
-		case STORAGE_TYPE_FP64:
+		case kFP64:
 			matlabType = mxDOUBLE_CLASS;
 			break;
 		default:
@@ -713,7 +710,7 @@ int ImageLoaderWrapper::getYSize() const {
     return (_maxY - _minY + 1);
 }
 
-int ImageLoaderWrapper::getStorageType() const {
+LocalizerStorageType ImageLoaderWrapper::getStorageType() const {
     return _baseImageLoader->getStorageType();
 }
 
@@ -802,7 +799,6 @@ void ImageLoaderSPE::parse_header_information() {
 	this->xSize = 0;
 	this->ySize = 0;
 	this->nImages = 0;
-	this->storage_type = 0;
 	
 	file.seekg(42);
 	file.read((char *)&(this->xSize), 2);
@@ -818,16 +814,16 @@ void ImageLoaderSPE::parse_header_information() {
 	
 	switch (storage_type) {
 		case 0:
-			storage_type = STORAGE_TYPE_FP32;
+			storage_type = kFP32;
 			break;
 		case 1:
-			storage_type = STORAGE_TYPE_UINT32;
+			storage_type = kUInt32;
 			break;
 		case 2:
-			storage_type = STORAGE_TYPE_INT16;
+			storage_type = kInt16;
 			break;
 		case 3:
-			storage_type = STORAGE_TYPE_UINT16;
+			storage_type = kUInt16;
 			break;
 		default:
 			std::string error("Unable to determine the storage type used in ");
@@ -908,7 +904,7 @@ void ImageLoaderAndor::parse_header_information() {
     std::unique_ptr<char[]> singleLineBuffer(new char[4096]);
 	std::string singleLine;
 	
-	storage_type = STORAGE_TYPE_FP32;
+	storage_type = kFP32;
 	
 	this->file.read(headerBuffer.get(), 500000);
 	if (this->file.good() != 1)
@@ -1153,7 +1149,7 @@ void ImageLoaderHamamatsu::parse_header_information() {
 	this->xSize = _offsetsMap[_filePath].xSize;
 	this->ySize = _offsetsMap[_filePath].ySize;
 	this->_offsets = _offsetsMap[_filePath].offsets;
-	this->storage_type = STORAGE_TYPE_UINT16;
+	this->storage_type = kUInt16;
 	
 	this->checkForReasonableValues();
 }
@@ -1237,7 +1233,7 @@ void ImageLoaderPDE::parse_header_information() {
 	this->nImages = header.nImages;
 	this->xSize = header.xSize;
 	this->ySize = header.ySize;
-	this->storage_type = header.storageFormat;
+	this->storage_type = static_cast<LocalizerStorageType>(header.storageFormat);
 	_headerLength = 24;
 	
 	this->checkForReasonableValues();
@@ -1434,16 +1430,16 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	if (isInt == 1) {
 		switch (bitsPerPixel) {
 			case 4:
-				storage_type = STORAGE_TYPE_UINT4;
+				storage_type = kUInt4;
 				break;
 			case 8:
-				storage_type = STORAGE_TYPE_UINT8;
+				storage_type = kUInt8;
 				break;
 			case 16:
-				storage_type = STORAGE_TYPE_UINT16;
+				storage_type = kUInt16;
 				break;
 			case 32:
-				storage_type = STORAGE_TYPE_UINT32;
+				storage_type = kUInt32;
 				break;
 			default:
 				std::string error;
@@ -1456,10 +1452,10 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	} else {	// the image is not in integer format but is a floating point
 		switch (bitsPerPixel) {
 			case 32:
-				storage_type = STORAGE_TYPE_FP32;
+				storage_type = kFP32;
 				break;
 			case 64:
-				storage_type = STORAGE_TYPE_FP64;
+				storage_type = kFP64;
 				break;
 			default:
 				std::string error;
@@ -1530,7 +1526,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 		}
 		
 		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
-			case STORAGE_TYPE_UINT4:
+			case kUInt4:
 			{
 				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; k+=2) {
@@ -1540,7 +1536,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT8:
+			case kUInt8:
 			{
 				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; ++k) {
@@ -1549,7 +1545,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT16:
+			case kUInt16:
 			{
 				uint16_t *uint16tPtr = (uint16_t *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; ++k) {
@@ -1558,7 +1554,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT32:
+			case kUInt32:
 			{
 				uint32_t *uint32tPtr = (uint32_t *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; ++k) {
@@ -1567,7 +1563,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_FP32:
+			case kFP32:
 			{
 				float *floatPtr = (float *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; ++k) {
@@ -1576,7 +1572,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_FP64:
+			case kFP64:
 			{
 				double *doublePtr = (double *)single_scanline_buffer.get();
 				for (int k = 0; k < xSize; ++k) {
@@ -1900,7 +1896,7 @@ ImageOutputWriter::ImageOutputWriter() {
 	nImagesWritten = 0;
 }
 
-PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite, uint32_t storageType_rhs) {
+PDEImageOutputWriter::PDEImageOutputWriter(const std::string &rhs,int overwrite, LocalizerStorageType storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	outputFilePath = rhs;
@@ -1989,48 +1985,48 @@ void PDEImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
-void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sampleFormat, int& bitsPerSample) {
+void TIFFSampleFormatAndBitsPerSampleForFormat(const LocalizerStorageType dataFormat, int& sampleFormat, int& bitsPerSample) {
     // determine the output storage type
 	switch (dataFormat) {
-		case STORAGE_TYPE_INT4:
-		case STORAGE_TYPE_UINT4:
-		case STORAGE_TYPE_INT8:
+		case kInt4:
+		case kUInt4:
+		case kInt8:
 			bitsPerSample = 8;
 			sampleFormat = SAMPLEFORMAT_INT;
 			break;
-		case STORAGE_TYPE_UINT8:
+		case kUInt8:
 			bitsPerSample = 8;
 			sampleFormat = SAMPLEFORMAT_UINT;
 			break;
-		case STORAGE_TYPE_INT16:
+		case kInt16:
 			bitsPerSample = 16;
 			sampleFormat = SAMPLEFORMAT_INT;
 			break;
-		case STORAGE_TYPE_UINT16:
+		case kUInt16:
 			bitsPerSample = 16;
 			sampleFormat = SAMPLEFORMAT_UINT;
 			break;
-		case STORAGE_TYPE_INT32:
+		case kInt32:
 			bitsPerSample = 32;
 			sampleFormat = SAMPLEFORMAT_INT;
 			break;
-		case STORAGE_TYPE_UINT32:
+		case kUInt32:
 			bitsPerSample = 32;
 			sampleFormat = SAMPLEFORMAT_UINT;
 			break;
-		case STORAGE_TYPE_INT64:
+		case kInt64:
 			bitsPerSample = 64;
 			sampleFormat = SAMPLEFORMAT_INT;
 			break;
-		case STORAGE_TYPE_UINT64:
+		case kUInt64:
 			bitsPerSample = 64;
 			sampleFormat = SAMPLEFORMAT_UINT;
 			break;
-		case STORAGE_TYPE_FP32:
+		case kFP32:
 			bitsPerSample = 32;
 			sampleFormat = SAMPLEFORMAT_IEEEFP;
 			break;
-		case STORAGE_TYPE_FP64:
+		case kFP64:
 			bitsPerSample = 64;
 			sampleFormat = SAMPLEFORMAT_IEEEFP;
 			break;
@@ -2040,7 +2036,7 @@ void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sample
 	}
 }
 
-TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, int storageType_rhs) {
+TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, LocalizerStorageType storageType_rhs) {
 	// if overwrite is non-zero then we overwrite any file that exists at the output path
 	// if it is set to zero then we throw an error and abort instead of overwriting
 	
@@ -2178,9 +2174,9 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		offset = 0;
 		
 		switch (this->storageType) {
-			case STORAGE_TYPE_INT4:
-			case STORAGE_TYPE_UINT4:
-			case STORAGE_TYPE_INT8:
+			case kInt4:
+			case kUInt4:
+			case kInt8:
 			{
 				int8_t* charPtr = (int8_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2188,7 +2184,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT8:
+			case kUInt8:
 			{
 				uint8_t* uCharPtr = (uint8_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2196,7 +2192,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_INT16:
+			case kInt16:
 			{
 				int16_t* int16Ptr = (int16_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2204,7 +2200,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT16:
+			case kUInt16:
 			{
 				uint16_t* uInt16Ptr = (uint16_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2212,7 +2208,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_INT32:
+			case kInt32:
 			{
 				int32_t* int32Ptr = (int32_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2220,7 +2216,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT32:
+			case kUInt32:
 			{
 				uint32_t* uInt32Ptr = (uint32_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2228,7 +2224,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			};
-			case STORAGE_TYPE_INT64:
+			case kInt64:
 			{
 				int64_t* int64Ptr = (int64_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2236,7 +2232,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_UINT64:
+			case kUInt64:
 			{
 				uint64_t* uInt64Ptr = (uint64_t *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2244,7 +2240,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_FP32:
+			case kFP32:
 			{
 				float* floatPtr = (float *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2252,7 +2248,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 				}
 				break;
 			}
-			case STORAGE_TYPE_FP64:
+			case kFP64:
 			{
 				double* doublePtr = (double *)scanLine.get();
 				for (size_t i = 0; i < xSize; i++) {
@@ -2285,7 +2281,7 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
-MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, int storageType_rhs) :
+MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, LocalizerStorageType storageType_rhs) :
     overwrite(overwrite_rhs),
     _compress(compress),
     storageType(storageType_rhs)
@@ -2306,7 +2302,7 @@ void MultiFileTIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	++this->nImagesWritten;
 }
 
-LocalizerTIFFImageOutputWriter::LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, int storageType) :
+LocalizerTIFFImageOutputWriter::LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, LocalizerStorageType storageType) :
     _isBigTiff(false),
     _storageType(storageType),
     _compress(compress)
@@ -2558,30 +2554,14 @@ void LocalizerTIFFImageOutputWriter::_touchupOffsets() {
 }
 
 #ifdef WITH_IGOR
-IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nImages_rhs, int overwrite_rhs, int storageType_rhs) {
+IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nImages_rhs, int overwrite_rhs, LocalizerStorageType storageType_rhs) {
 	
 	this->overwrite = overwrite_rhs;
 	this->outputWave = NULL;
 	this->fullPathToWave = waveName_rhs;
 	this->nImagesTotal = nImages_rhs;
 	this->nImagesWritten = 0;
-    
-    // not all storage types are supported in Igor
-    // silently replace these with supported types
-    switch (storageType_rhs) {
-        case STORAGE_TYPE_INT4:
-        case STORAGE_TYPE_UINT4:
-            this->storageType = STORAGE_TYPE_INT8;
-            break;
-        case STORAGE_TYPE_INT64:
-            this->storageType = STORAGE_TYPE_INT32;
-            break;
-        case STORAGE_TYPE_UINT64:
-            this->storageType = STORAGE_TYPE_UINT32;
-            break;
-        default:
-            this->storageType = storageType_rhs;
-    }
+    this->storageType = storageType_rhs;
 	
 	// check if the output wave already exists
 	if (this->overwrite != 1) {
@@ -2594,7 +2574,7 @@ IgorImageOutputWriter::IgorImageOutputWriter(std::string waveName_rhs, size_t nI
 	}
 }
 
-IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName_rhs, size_t nImages_rhs, int overwrite_rhs, int storageType_rhs) {
+IgorImageOutputWriter::IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName_rhs, size_t nImages_rhs, int overwrite_rhs, LocalizerStorageType storageType_rhs) {
 	
 	this->overwrite = overwrite_rhs;
 	this->outputWave = NULL;
@@ -2663,7 +2643,7 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 #endif // WITH_IGOR
 
 #ifdef WITH_MATLAB
-MatlabImageOutputWriter::MatlabImageOutputWriter(size_t nImagesTotal, int storageType) :
+MatlabImageOutputWriter::MatlabImageOutputWriter(size_t nImagesTotal, LocalizerStorageType storageType) :
     _outputArray(NULL),
     _nImagesTotal(nImagesTotal),
     _storageType(storageType),
@@ -2687,7 +2667,7 @@ void MatlabImageOutputWriter::write_image(ImagePtr image) {
     ++_nImagesWritten;
 }
 
-mxArray* MatlabImageOutputWriter::_allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const {
+mxArray* MatlabImageOutputWriter::_allocateArray(size_t nRows, size_t nCols, size_t nLayers, LocalizerStorageType storageType) const {
     mxClassID classID = LocalizerTypeToMatlabType(storageType);
     mwSize ndim = 3;
 	mwSize dims[3] = {static_cast<mwSize>(nRows), static_cast<mwSize>(nCols), static_cast<mwSize>(nLayers)};

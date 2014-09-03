@@ -83,11 +83,11 @@ std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, i
 */
 int64_t GetLastModificationTime(const std::string& path);
 
-ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
-ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, int format, int treatAsRowMajor = 0);
-void ImageToBufferWithFormat(ImagePtr image, int format, char* imageBuffer, int treatAsRowMajor = 0);
-void ImageToVectorWithFormat(ImagePtr image, int format, std::vector<char>& imageBuffer, int treatAsRowMajor = 0);
-size_t NBytesInImage(int nRows, int nCols, int format);
+ImagePtr BufferWithFormatToImage(const char* imageBuffer, int nRows, int nCols, LocalizerStorageType format, int treatAsRowMajor = 0);
+ImagePtr VectorWithFormatToImage(const std::vector<char>& imageBuffer, int nRows, int nCols, LocalizerStorageType format, int treatAsRowMajor = 0);
+void ImageToBufferWithFormat(ImagePtr image, LocalizerStorageType format, char* imageBuffer, int treatAsRowMajor = 0);
+void ImageToVectorWithFormat(ImagePtr image, LocalizerStorageType format, std::vector<char>& imageBuffer, int treatAsRowMajor = 0);
+size_t NBytesInImage(int nRows, int nCols, LocalizerStorageType format);
 
 /**
  Function that writes the contents of a std::vector<char> containing a single image
@@ -192,13 +192,13 @@ template <typename T> void WriteBinaryValue(OFSTREAM_T& file, T value) {
 }
 
 #ifdef WITH_IGOR
-int IgorTypeToLocalizerType(int igorType);
-int LocalizerTypeToIgorType(int localizerType);
+LocalizerStorageType IgorTypeToLocalizerType(int igorType);
+int LocalizerTypeToIgorType(LocalizerStorageType localizerType);
 #endif
 
 #ifdef WITH_MATLAB
-int MatlabTypeToLocalizerType(mxClassID igorType);
-mxClassID LocalizerTypeToMatlabType(int localizerType);
+LocalizerStorageType MatlabTypeToLocalizerType(mxClassID igorType);
+mxClassID LocalizerTypeToMatlabType(LocalizerStorageType localizerType);
 #endif
 
 class ImageLoader {
@@ -209,7 +209,7 @@ public:
 	virtual int getNImages() const {return nImages;}
 	virtual int getXSize() const {return xSize;}
 	virtual int getYSize() const {return ySize;}
-	virtual int getStorageType() const {return storage_type;}
+	virtual LocalizerStorageType getStorageType() const {return storage_type;}
 	virtual int getFileType() const = 0;
 	
 	/**
@@ -251,7 +251,7 @@ protected:
 	int nImages;
 	int xSize;
 	int ySize;
-	int storage_type;
+	LocalizerStorageType storage_type;
 	int nextImageToRead;
 	
 	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
@@ -269,7 +269,7 @@ public:
     virtual int getNImages() const;
     virtual int getXSize() const;
     virtual int getYSize() const;
-    virtual int getStorageType() const;
+    virtual LocalizerStorageType getStorageType() const;
 	virtual int getFileType() const;
     
     virtual ImagePtr readNextImage(int &indexOfImageThatWasRead);
@@ -459,7 +459,7 @@ protected:
 
 class PDEImageOutputWriter : public ImageOutputWriter {
 public:
-	PDEImageOutputWriter(const std::string &rhs, int overwrite, uint32_t storageType);
+	PDEImageOutputWriter(const std::string &rhs, int overwrite, LocalizerStorageType storageType);
 	~PDEImageOutputWriter();
 	
 	void write_image(ImagePtr imageToWrite);
@@ -468,7 +468,7 @@ protected:
 	void WriteHeader();
 	
 	uint32_t xSize, ySize;
-	uint32_t storageType;
+	LocalizerStorageType storageType;
 };
 
 struct PDEFormatHeader {
@@ -485,20 +485,20 @@ void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sample
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, int storageType);
+	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, LocalizerStorageType storageType);
 	~TIFFImageOutputWriter();
 	
 	void write_image(ImagePtr imageToWrite);
 protected:
 	int compression;	// if 1 then don't compress the data, otherwise compress
-	int storageType;
+	LocalizerStorageType storageType;
 	
 	TIFF *tiff_file;
 };
 
 class MultiFileTIFFImageOutputWriter : public ImageOutputWriter {
 public:
-	MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, int storageType_rhs);
+	MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, LocalizerStorageType storageType_rhs);
 	// baseOutputFilePath must be the full path to the output base name
 	// so if we want files such as /folder/base0000.tif then baseOutputFilePath is /folder/base
 	
@@ -507,7 +507,7 @@ protected:
 	std::string baseOutputFilePath;
 	int overwrite;
 	bool _compress;
-	int storageType;
+	LocalizerStorageType storageType;
 };
 
 class LocalizerTIFFImageOutputWriter : public ImageOutputWriter {
@@ -522,7 +522,7 @@ public:
         uint64_t nextIFDFieldOffset;
     };
     
-    LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, int storageType);
+    LocalizerTIFFImageOutputWriter(const std::string &rhs, int overwrite, bool compress, LocalizerStorageType storageType);
 	~LocalizerTIFFImageOutputWriter();
 	
 	void write_image(ImagePtr imageToWrite);
@@ -541,7 +541,7 @@ private:
     void _touchupOffsets();
     
     std::vector<TIFFIFDOnDisk> _writtenIFDs;
-    int _storageType;
+    LocalizerStorageType _storageType;
     bool _compress;
     bool _isBigTiff;
 };
@@ -550,9 +550,9 @@ private:
 class IgorImageOutputWriter : public ImageOutputWriter {
 public:
 	// constructor when the wave is specified using a fully qualified path or just a single name
-	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite, int storageType);
+	IgorImageOutputWriter(std::string waveName, size_t nImagesTotal, int overwrite, LocalizerStorageType storageType);
 	// constructor when using the DataFolderAndName type provided by the XOP toolkit
-	IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName, size_t nImagesTotal, int overwrite, int storageType);
+	IgorImageOutputWriter(DataFolderAndName outputDataFolderAndName, size_t nImagesTotal, int overwrite, LocalizerStorageType storageType);
 	
 	~IgorImageOutputWriter() {;}
 	
@@ -565,24 +565,24 @@ protected:
 	DataFolderAndName waveDataFolderAndName;
 	waveHndl outputWave;
 	int overwrite;
-	int storageType;
+	LocalizerStorageType storageType;
 };
 #endif // WITH_IGOR
 
 #ifdef WITH_MATLAB
 class MatlabImageOutputWriter : public ImageOutputWriter {
 public:
-    MatlabImageOutputWriter(size_t nImagesTotal, int storageType);
+    MatlabImageOutputWriter(size_t nImagesTotal, LocalizerStorageType storageType);
     ~MatlabImageOutputWriter() {;}
     
     void write_image(ImagePtr newImage);
     mxArray* getArray() const {return _outputArray;}
     
 private:
-    mxArray* _allocateArray(size_t nRows, size_t nCols, size_t nLayers, int storageType) const;
+    mxArray* _allocateArray(size_t nRows, size_t nCols, size_t nLayers, LocalizerStorageType storageType) const;
     
     mxArray* _outputArray;
-    int _storageType;
+    LocalizerStorageType _storageType;
     size_t _nImagesTotal;
     size_t _nImagesWritten;
 };

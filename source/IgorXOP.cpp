@@ -1565,14 +1565,14 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         }
 		
 		// determine the output storage type
-		int storageType;
+		LocalizerStorageType storageType;
 		switch (method) {
 			case PROCESSING_AVERAGESUBTRACTION:
             case PROCESSING_DIFFERENCEIMAGE:
-				storageType = STORAGE_TYPE_FP32;
+				storageType = kFP32;
 				break;
 			case PROCESSING_CONVERTTOPHOTONS:
-				storageType = STORAGE_TYPE_UINT32;
+				storageType = kUInt32;
 				break;
 			default:
 				storageType = image_loader->getStorageType();
@@ -2710,7 +2710,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             frameVerifiers.push_back(sofiFrameVerifier);
         }
 
-        std::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+        std::shared_ptr<ImageOutputWriter> outputWriter(new IgorImageOutputWriter(outputWaveParams, nGroups, 1, kFP64));
         std::shared_ptr<ImageOutputWriter> averageOutputWriter;
         DataFolderAndName averageOutputWaveParams;
         
@@ -2722,7 +2722,7 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
             averageOutputWaveParams.dfH = outputWaveParams.dfH;
             strcpy(averageOutputWaveParams.name, outputWaveParams.name);
             strcat(averageOutputWaveParams.name, "_avg");
-            averageOutputWriter = std::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(averageOutputWaveParams, nGroups, 1, STORAGE_TYPE_FP64));
+            averageOutputWriter = std::shared_ptr<ImageOutputWriter>(new IgorImageOutputWriter(averageOutputWaveParams, nGroups, 1, kFP64));
         }
 
         std::shared_ptr<ProgressReporter> progressReporter;

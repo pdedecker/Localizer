@@ -59,18 +59,20 @@ T Clip (T a, T b, T c) {
 const int kMaxImageDimension = 50000;
 const int kMaxNFrames = 10000000;
 
-const int STORAGE_TYPE_INT4 = 0;
-const int STORAGE_TYPE_UINT4 = 1;
-const int STORAGE_TYPE_INT8 = 2;
-const int STORAGE_TYPE_UINT8 = 3;
-const int STORAGE_TYPE_INT16 = 4;
-const int STORAGE_TYPE_UINT16 = 5;
-const int STORAGE_TYPE_INT32 = 6;
-const int STORAGE_TYPE_UINT32 = 7;
-const int STORAGE_TYPE_INT64 = 8;
-const int STORAGE_TYPE_UINT64 = 9;
-const int STORAGE_TYPE_FP32 = 10;
-const int STORAGE_TYPE_FP64 = 11;
+enum LocalizerStorageType {
+    kInt4 = 0,
+    kUInt4,
+    kInt8,
+    kUInt8,
+    kInt16,
+    kUInt16,
+    kInt32,
+    kUInt32,
+    kInt64,
+    kUInt64,
+    kFP32,
+    kFP64
+};
 
 const double PI = 3.1415926535897932384626433;
 const double SQRT2 = 1.4142135623730950488;
