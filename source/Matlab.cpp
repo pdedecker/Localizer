@@ -46,11 +46,11 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
 	
 	if (nrhs < 1)
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 	
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 
 	std::string selector = GetMatlabString(inputArray);
 	if (boost::iequals(selector, "localize")) {
@@ -63,8 +63,10 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		MatlabNewSOFI(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "readccdimages")) {
 		MatlabReadCCDImages(nlhs, plhs, nrhs, prhs);
+    } else if (boost::iequals(selector, "writeccdimages")) {
+        MatlabWriteCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
-		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
 	}
 }
 
@@ -696,6 +698,107 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 		}
 
 		plhs[0] = LoadImagesIntoArray(imageLoader, firstImageToRead, nImagesToRead);
+	}
+	catch (std::bad_alloc) {
+        mexErrMsgTxt("Insufficient memory");
+    }
+    catch (int e) {
+        mexErrMsgTxt("Int error");
+    }
+    catch (USER_ABORTED e) {
+        mexErrMsgTxt("User abort");
+    }
+    catch (std::runtime_error e) {
+        mexErrMsgTxt(e.what());
+    }
+    catch (...) {
+        mexErrMsgTxt("Unknown error");
+    }
+}
+
+/**
+ Function that will write images to disk as a TIFF file. The numerical precision will be preserved.
+ Any existing file will be overwritten.
+ The input arguments must be of the form
+ 0 - the string "writeccdimages"
+ 1 - 3D matrix or string containing the full path to the file to read the data from.
+ 2 - the index of the first image to write (starting from 0)
+ 3 - the number of images to write (-1 for all images)
+ 4 - string containing the full path to the TIFF file to write
+ */
+void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	// input validation
+	if (nrhs != 5)
+		mexErrMsgTxt("Must have exactly 5 input arguments for writeccdimages\n\
+					 1. the string \"writeccdimages\"\n\
+                     2. 2D or 3D matrix or string containing the full path to the file to read the data from.\n\
+					 3. the index of the first image to write (starting from 0)\n\
+					 4. the number of images to write (or -1 for all images)\n\
+					 5. path to the TIFF file to write. Existing files will be overwritten");
+	
+	if (nlhs != 0)
+		mexErrMsgTxt("no return argument for writeccdimages");
+    
+	mxArray* array;
+	// the mxArray at index 0 will have been checked already by mexFunction
+	
+    // index 1 - must be a 2D or 3D matrix, or a string with a filepath.
+    std::string inputFilePath;
+	mxArray* dataArray = NULL;
+	array = const_cast<mxArray*>(prhs[1]);
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		inputFilePath = GetMatlabString(array);
+		if (inputFilePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
+	} else {
+		// assume that this is a valid data array
+		// if it isn't then the image loader will throw an error
+		dataArray = array;
+	}
+    
+	// index 2 - must be a single number - the index of the first image to write
+	array = const_cast<mxArray*>(prhs[2]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("3rd argument must be a double scalar: the index of the first image to write (starting from 0)");
+	int firstImageToWrite = *(mxGetPr(array));
+	if (firstImageToWrite < 0)
+		firstImageToWrite = 0;
+	
+	// index 3 - must be a single number - the number of images to write
+	array = const_cast<mxArray*>(prhs[3]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("4th argument must be a double scalar: the number of images to write (or -1 for all images)");
+	int nImagesToWrite = *(mxGetPr(array));
+	if (nImagesToWrite < 0)
+		nImagesToWrite = -1;
+    
+	// index 4 - must be the output path
+	std::string outputFilePath;
+	array = const_cast<mxArray*>(prhs[4]);
+	if (mxGetClassID(array) == mxCHAR_CLASS) {
+		outputFilePath = GetMatlabString(array);
+		if (outputFilePath.empty())
+			mexErrMsgTxt("Need a non-empty filepath to the data");
+	} else {
+		mexErrMsgTxt("5th argument must be a string: the path to the output TIFF file)");
+	}
+    
+	try {
+		std::shared_ptr<ImageLoader> imageLoader;
+		if (!inputFilePath.empty()) {
+			imageLoader = GetImageLoader(inputFilePath);
+		} else {
+			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
+		}
+        LocalizerTIFFImageOutputWriter imageWriter(outputFilePath, true, false, imageLoader->getStorageType());
+        Clip(firstImageToWrite, 0, imageLoader->getNImages() - 1);
+        if (nImagesToWrite <= 0)
+            nImagesToWrite = imageLoader->getNImages();
+        Clip(nImagesToWrite, 1, imageLoader->getNImages() - firstImageToWrite);
+        imageLoader->spoolTo(firstImageToWrite);
+        for (int i = 0; i < nImagesToWrite; ++i) {
+            imageWriter.write_image(imageLoader->readNextImage());
+        }
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
