@@ -481,7 +481,7 @@ struct PDEFormatHeader {
 };
 typedef struct PDEFormatHeader PDEFormatHeader;
 
-void TIFFSampleFormatAndBitsPerSampleForFormat(const int dataFormat, int& sampleFormat, int& bitsPerSample);
+void TIFFSampleFormatAndBitsPerSampleForFormat(const LocalizerStorageType dataFormat, int& sampleFormat, int& bitsPerSample);
 
 class TIFFImageOutputWriter : public ImageOutputWriter {
 public:

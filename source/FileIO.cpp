@@ -1368,7 +1368,6 @@ void ImageLoaderTIFF::_extractSampleFormat() {
     int result;
     uint16_t result_uint16;
 	uint32_t result_uint32;
-	int isInt;
 	size_t bitsPerPixel;
     
     // is the image in grayscale format?
@@ -1407,16 +1406,21 @@ void ImageLoaderTIFF::_extractSampleFormat() {
     bitsPerPixel = (unsigned int)result_uint16;
 	
 	// is the data in unsigned integer or floating point format?
+    bool isInt = false;
+    bool isUInt = false;
+    bool isFP = false;
 	result = TIFFGetField(_tiffFile, TIFFTAG_SAMPLEFORMAT, &result_uint16);
 	if (result != 1) {	// if the field does not exist then we assume that it is integer format
 		result_uint16 = 1;
 	}
 	switch (result_uint16) {
 		case 1:
-			isInt = 1;
+			isUInt = true;
 			break;
+        case 2:
+            isInt = true;
 		case 3:
-			isInt = 0;
+			isFP = true;
 			break;
 		default:
 			std::string error;
@@ -1427,20 +1431,19 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 			break;
 	}
 	
-	if (isInt == 1) {
+	if (isInt || isUInt) {
 		switch (bitsPerPixel) {
-			case 4:
-				storage_type = kUInt4;
-				break;
 			case 8:
-				storage_type = kUInt8;
+				storage_type = (isUInt) ? kUInt8 : kInt8;
 				break;
 			case 16:
-				storage_type = kUInt16;
+				storage_type = (isUInt) ? kUInt16 : kInt16;
 				break;
 			case 32:
-				storage_type = kUInt32;
+				storage_type = (isUInt) ? kUInt32 : kInt32;
 				break;
+            case 64:
+                storage_type = (isUInt) ? kUInt64 : kInt32;
 			default:
 				std::string error;
 				error = "The SampleFormat of the image at\"";
@@ -1449,7 +1452,7 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 				throw ERROR_READING_FILE_DATA(error);
 				break;
 		}
-	} else {	// the image is not in integer format but is a floating point
+	} else if (isFP) {	// the image is not in integer format but is a floating point
 		switch (bitsPerPixel) {
 			case 32:
 				storage_type = kFP32;
@@ -1490,6 +1493,14 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 	ySize = (size_t)(result_uint32);
 }
 
+template <typename T> void StoreTIFFScanLineInImage(T* scanLineBuffer, int colToFill, ImagePtr image) {
+    int nRows = image->rows();
+    for (int i = 0; i < nRows; ++i) {
+        (*image)(i, colToFill) = *scanLineBuffer;
+        ++scanLineBuffer;
+    }
+}
+
 ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	int result;
 	
@@ -1499,6 +1510,7 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	if (single_scanline_buffer.get() == NULL) {
 		throw std::bad_alloc();
 	}
+    char* scanLineBuffer = static_cast<char*>(single_scanline_buffer.get());
 	
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
@@ -1526,61 +1538,30 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 		}
 		
 		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
-			case kUInt4:
-			{
-				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; k+=2) {
-					(*image)(k, j) = (double)(0x0000000F & (*uint8Ptr));
-					(*image)(k + 1, j) = (double)((0x000000F0 & (*uint8Ptr)) / 16);			  
-					++uint8Ptr;
-				}
-				break;
-			}
 			case kUInt8:
-			{
-				uint8_t *uint8Ptr = (uint8_t *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*uint8Ptr);
-					++uint8Ptr;
-				}
-				break;
-			}
+                StoreTIFFScanLineInImage(reinterpret_cast<uint8_t*>(scanLineBuffer), j, image);
+                break;
 			case kUInt16:
-			{
-				uint16_t *uint16tPtr = (uint16_t *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*uint16tPtr);
-					++uint16tPtr;
-				}
-				break;
-			}
+                StoreTIFFScanLineInImage(reinterpret_cast<uint16_t*>(scanLineBuffer), j, image);
+                break;
 			case kUInt32:
-			{
-				uint32_t *uint32tPtr = (uint32_t *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*uint32tPtr);
-					++uint32tPtr;
-				}
-				break;
-			}
+                StoreTIFFScanLineInImage(reinterpret_cast<uint32_t*>(scanLineBuffer), j, image);
+                break;
+            case kInt8:
+                StoreTIFFScanLineInImage(reinterpret_cast<int8_t*>(scanLineBuffer), j, image);
+                break;
+			case kInt16:
+                StoreTIFFScanLineInImage(reinterpret_cast<int16_t*>(scanLineBuffer), j, image);
+                break;
+			case kInt32:
+                StoreTIFFScanLineInImage(reinterpret_cast<int32_t*>(scanLineBuffer), j, image);
+                break;
 			case kFP32:
-			{
-				float *floatPtr = (float *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*floatPtr);
-					++floatPtr;
-				}
-				break;
-			}
+                StoreTIFFScanLineInImage(reinterpret_cast<float*>(scanLineBuffer), j, image);
+                break;
 			case kFP64:
-			{
-				double *doublePtr = (double *)single_scanline_buffer.get();
-				for (int k = 0; k < xSize; ++k) {
-					(*image)(k, j) = (double)(*doublePtr);
-					++doublePtr;
-				}
-				break;
-			}
+                StoreTIFFScanLineInImage(reinterpret_cast<double*>(scanLineBuffer), j, image);
+                break;
 			default:
 				std::string error;
 				error = "Invalid floating point data size for the image at\"";
@@ -2075,7 +2056,13 @@ TIFFImageOutputWriter::~TIFFImageOutputWriter() {
 	}
 }
 
-
+template <typename T> void StoreImageRowInScanLine(ImagePtr image, int colToStore, T* scanLineBuffer) {
+    int nRows = image->rows();
+    for (int i = 0; i < nRows; ++i) {
+        *scanLineBuffer = (*image)(i, colToStore);
+        ++scanLineBuffer;
+    }
+}
 
 void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 	
@@ -2174,88 +2161,39 @@ void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		offset = 0;
 		
 		switch (this->storageType) {
-			case kInt4:
-			case kUInt4:
 			case kInt8:
-			{
-				int8_t* charPtr = (int8_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					charPtr[i] = (int8_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int8_t*>(scanLine.get()));
 				break;
-			}
 			case kUInt8:
-			{
-				uint8_t* uCharPtr = (uint8_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					uCharPtr[i] = (uint8_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint8_t*>(scanLine.get()));
 				break;
-			}
 			case kInt16:
-			{
-				int16_t* int16Ptr = (int16_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					int16Ptr[i] = (int16_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int16_t*>(scanLine.get()));
 				break;
-			}
 			case kUInt16:
-			{
-				uint16_t* uInt16Ptr = (uint16_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					uInt16Ptr[i] = (uint16_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint16_t*>(scanLine.get()));
 				break;
-			}
 			case kInt32:
-			{
-				int32_t* int32Ptr = (int32_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					int32Ptr[i] = (int32_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int32_t*>(scanLine.get()));
 				break;
-			}
 			case kUInt32:
-			{
-				uint32_t* uInt32Ptr = (uint32_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					uInt32Ptr[i] = (uint32_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint32_t*>(scanLine.get()));
 				break;
-			};
 			case kInt64:
-			{
-				int64_t* int64Ptr = (int64_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					int64Ptr[i] = (int64_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int64_t*>(scanLine.get()));
 				break;
-			}
 			case kUInt64:
-			{
-				uint64_t* uInt64Ptr = (uint64_t *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					uInt64Ptr[i] = (uint64_t)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint64_t*>(scanLine.get()));
 				break;
-			}
 			case kFP32:
-			{
-				float* floatPtr = (float *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					floatPtr[i] = (float)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<float*>(scanLine.get()));
 				break;
-			}
 			case kFP64:
-			{
-				double* doublePtr = (double *)scanLine.get();
-				for (size_t i = 0; i < xSize; i++) {
-					doublePtr[i] = (double)(*imageToWrite)(i, j);
-				}
+                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<double*>(scanLine.get()));
 				break;
-			}
+            default:
+                throw std::runtime_error("unsupport TIFF storage type");
+                break;
 		}
 		
 		result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
