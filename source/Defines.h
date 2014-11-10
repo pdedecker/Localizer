@@ -103,6 +103,7 @@ const int CAMERA_TYPE_ZEISS = 5;	// Zeiss .lsm files. Not working currently
 const int CAMERA_TYPE_IGOR_WAVE = 6;
 const int CAMERA_TYPE_MATLAB_MATRIX = 7;
 const int CAMERA_TYPE_MULTIFILE_TIFF = 8;
+const int CAMERA_TYPE_RAW_POINTER = 8;
 
 const int PREPROCESSOR_NONE = 0;
 const int PREPROCESSOR_3X3MEDIAN = 1;

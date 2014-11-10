@@ -1763,6 +1763,31 @@ std::pair<int, int> ImageLoaderMultiFileTIFF::findFirstAndLastValidImageIndices(
 	return firstAndLastIndices;
 }
 
+ImageLoaderRawPointer::ImageLoaderRawPointer(char* dataPointer, LocalizerStorageType storageType, int nRows, int nCols, int nImages, bool isRowMajor) :
+    _dataPointer(dataPointer),
+    _storageType(storageType),
+    _nRows(nRows),
+    _nCols(nCols),
+    _nImages(nImages),
+    _isRowMajor(isRowMajor)
+{
+    
+}
+
+ImagePtr ImageLoaderRawPointer::readNextImage(int &index) {
+    {
+        boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+        if (this->nextImageToRead >= nImages)
+            throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
+        
+        index = this->nextImageToRead;
+        this->nextImageToRead += 1;
+    }
+
+    size_t nBytesInImage = NBytesInImage(_nRows, _nCols, _storageType);
+    return BufferWithFormatToImage(_dataPointer + nBytesInImage * index, _nRows, _nCols, _storageType, _isRowMajor);
+}
+
 #ifdef WITH_IGOR
 ImageLoaderIgor::ImageLoaderIgor(std::string waveName) {
 	_dataWave = FetchWaveUsingFullPath(waveName);

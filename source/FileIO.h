@@ -405,6 +405,24 @@ private:
 	int firstImageIndex;
 };
 
+class ImageLoaderRawPointer : public ImageLoader {
+public:
+    ImageLoaderRawPointer(char* dataPointer, LocalizerStorageType storageType, int nRows, int nCols, int nImages, bool isRowMajor = false);
+    ~ImageLoaderRawPointer() {;}
+    
+    ImagePtr readNextImage(int &indexOfImageThatWasRead);
+    
+    int getFileType() const {return CAMERA_TYPE_RAW_POINTER;}
+    
+private:
+    char* _dataPointer;
+    LocalizerStorageType _storageType;
+    int _nRows;
+    int _nCols;
+    int _nImages;
+    bool _isRowMajor;
+};
+
 #ifdef WITH_IGOR
 class ImageLoaderIgor : public ImageLoader {
 public:
