@@ -623,10 +623,11 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
+				LIBRARY_SEARCH_PATHS = ../lib/mac;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx10.9;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -669,11 +670,12 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
+				LIBRARY_SEARCH_PATHS = ../lib/mac;
 				LLVM_LTO = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.8;
+				SDKROOT = macosx10.9;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
@@ -854,13 +856,6 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/peter/Documents/C++/XOP",
-					Toolkit,
-					6/IgorXOPs6/Localizer,
-					XOP/lib/mac,
-				);
 				PRODUCT_NAME = localizer;
 				STRIPFLAGS = "-x";
 				STRIP_STYLE = all;
@@ -884,13 +879,6 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"/Users/peter/Documents/C++/XOP",
-					Toolkit,
-					6/IgorXOPs6/Localizer,
-					XOP/lib/mac,
-				);
 				PRODUCT_NAME = localizer;
 				STRIPFLAGS = "-x";
 				STRIP_STYLE = all;
