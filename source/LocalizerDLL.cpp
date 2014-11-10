@@ -32,6 +32,8 @@
 #include <gsl/gsl_errno.h>
 
 #include "FileIO.h"
+#include "PALMAnalysis.h"
+#include "ParticleFinding.h"
 
 int LocalizerFileInfo(char* filePath,            // in: path to the file on disk
                       int* nImagesInFile,        // out: number of images
@@ -54,7 +56,7 @@ int LocalizerFileInfo(char* filePath,            // in: path to the file on disk
     return 0;
 }
 
-EXPORT int LocalizerLoadImages(char* filePath,          // in: path to the file on disk
+int LocalizerLoadImages(char* filePath,          // in: path to the file on disk
                                int nImagesToSkip,       // in: number of images to skip
                                int nImagesToLoad,       // in: number of images to load -- -1 to load up to end
                                double* imageData) {     // in: pointer to allocate buffer -- must contain at least (nRows * nCols * nImages) doubles
@@ -84,4 +86,50 @@ EXPORT int LocalizerLoadImages(char* filePath,          // in: path to the file 
     }
     
     return nImagesToLoad;
+}
+
+int LocalizerFitEmitters(unsigned short* imageData, int nRows, int nCols, int nImages, double psfWidth, double glrtInsensitivity,
+                                int* nEmitters, double** emitterCoordinates) {
+    // assumes that the imagedata is provided as uint16_t
+    LocalizerStorageType storageType = kUInt16;
+    
+    try {
+        std::shared_ptr<ImageLoader> imageLoader(new ImageLoaderRawPointer(reinterpret_cast<char*>(imageData), storageType, nRows, nCols, nImages));
+        
+        std::shared_ptr<ThresholdImage_Preprocessor> preprocessor(new ThresholdImage_Preprocessor_DoNothing());
+        
+        std::shared_ptr<ThresholdImage> thresholder(new ThresholdImage_GLRT_FFT(glrtInsensitivity, psfWidth));
+        
+        std::shared_ptr<ThresholdImage_Postprocessor> postprocessor(new ThresholdImage_Postprocessor_DoNothing());
+        
+        std::shared_ptr<ParticleFinder> particle_finder(new ParticleFinder_adjacent8());
+        
+        std::vector<std::shared_ptr<ParticleVerifier> > particleVerifiers;
+        
+        std::shared_ptr<FitPositions> positions_fitter(new FitPositions_EllipsoidalGaussian(psfWidth, 1.0));
+        
+        std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_Silent());
+        
+        PALMAnalysisController analysisController(thresholder, preprocessor, postprocessor, particle_finder, particleVerifiers,
+                                                  positions_fitter, progressReporter, -1, -1);
+        std::shared_ptr<LocalizedPositionsContainer> localizedPositions = analysisController.DoPALMAnalysis(imageLoader);
+        ImagePtr localizedPositionsMatrix = localizedPositions->getLocalizedPositionsAsMatrix();
+        *nEmitters = localizedPositionsMatrix->rows();
+        int nPositionCols = localizedPositionsMatrix->cols();
+        
+        *emitterCoordinates = new double[*nEmitters * nPositionCols];
+        if (*emitterCoordinates == NULL) {
+            return -1;
+        }
+        memcpy(*emitterCoordinates, localizedPositionsMatrix->data(), *nEmitters * nPositionCols * sizeof(double));
+    }
+    catch (...) {
+        return -1;
+    }
+    
+    return 0;
+}
+
+void LocalizerFree(double* ptrToFree) {
+    delete[] ptrToFree;
 }

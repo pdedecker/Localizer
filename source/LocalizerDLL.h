@@ -50,5 +50,10 @@ extern "C" {
                                    int nImagesToLoad,       // in: number of images to load -- -1 to load up to end
                                    double* imageData);      // in: pointer to allocate buffer -- must contain at least (nRows * nCols * nImages) doubles
     
+    EXPORT int LocalizerFitEmitters(unsigned short* imageData, int nRows, int nCols, int nImages, double psfWidth, double glrtInsensitivity,
+                                    int* nEmitters, double** emitterCoordinates);
+    
+    EXPORT void LocalizerFree(double* ptrToFree);
+    
 }
 #endif
