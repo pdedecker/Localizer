@@ -7,12 +7,14 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug-Igor|Win32 = Debug-Igor|Win32
 		Debug-Igor|x64 = Debug-Igor|x64
+		Debug-LocalizerDLL|Win32 = Debug-LocalizerDLL|Win32
+		Debug-LocalizerDLL|x64 = Debug-LocalizerDLL|x64
 		Debug-Matlab|Win32 = Debug-Matlab|Win32
 		Debug-Matlab|x64 = Debug-Matlab|x64
 		Release-Igor|Win32 = Release-Igor|Win32
 		Release-Igor|x64 = Release-Igor|x64
-		Release-Igor-MKL|Win32 = Release-Igor-MKL|Win32
-		Release-Igor-MKL|x64 = Release-Igor-MKL|x64
+		Release-LocalizerDLL|Win32 = Release-LocalizerDLL|Win32
+		Release-LocalizerDLL|x64 = Release-LocalizerDLL|x64
 		Release-Matlab|Win32 = Release-Matlab|Win32
 		Release-Matlab|x64 = Release-Matlab|x64
 	EndGlobalSection
@@ -21,6 +23,10 @@ Global
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|Win32.Build.0 = Debug|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|x64.ActiveCfg = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Igor|x64.Build.0 = Debug|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|Win32.ActiveCfg = Debug-LocalizerDLL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|Win32.Build.0 = Debug-LocalizerDLL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.ActiveCfg = Debug-LocalizerDLL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.Build.0 = Debug-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|Win32.ActiveCfg = Debug-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|Win32.Build.0 = Debug-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.ActiveCfg = Debug-Matlab|x64
@@ -29,10 +35,10 @@ Global
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|Win32.Build.0 = Release|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|x64.ActiveCfg = Release|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor|x64.Build.0 = Release|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|Win32.ActiveCfg = Release-Igor-MKL|Win32
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|Win32.Build.0 = Release-Igor-MKL|Win32
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|x64.ActiveCfg = Release-Igor-MKL|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Igor-MKL|x64.Build.0 = Release-Igor-MKL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|Win32.ActiveCfg = Release-LocalizerDLL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|Win32.Build.0 = Release-LocalizerDLL|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.ActiveCfg = Release-LocalizerDLL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.Build.0 = Release-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|Win32.ActiveCfg = Release-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|Win32.Build.0 = Release-Matlab|Win32
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.ActiveCfg = Release-Matlab|x64
