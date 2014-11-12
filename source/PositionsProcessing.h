@@ -50,8 +50,9 @@
  */
 
 std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
-																	 double calculationRange, size_t nBins, double lowerX, double upperX,
-																	 double lowerY, double upperY);
+                                                                   double calculationRange, size_t nBins, double lowerX, double upperX,
+                                                                   double lowerY, double upperY,
+                                                                   std::shared_ptr<LocalizedPositionsContainer> positions2 = std::shared_ptr<LocalizedPositionsContainer>());
 
 /**
  * The code to calculate the L function, copied with small modifications from the R spatial package by Ripley et al
@@ -67,3 +68,10 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 void VR_sp_pp2(const double *xCoordinates, const double *yCoordinates, size_t nPoints, size_t *nBins,
 			   double *outputArray, double calculationRange, double upperX, double lowerX,
 			   double upperY, double lowerY);
+
+void VR_sp_pp2_bivariate(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
+                         size_t nPoints1, size_t nPoints2, size_t *nBins,
+                         double *outputArray, double calculationRange, double upperX, double lowerX,
+                         double upperY, double lowerY);
+
+

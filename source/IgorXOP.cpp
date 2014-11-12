@@ -513,13 +513,13 @@ typedef struct LocalizationBitmapRuntimeParams* LocalizationBitmapRuntimeParamsP
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct RipleyLFunctionClusteringRuntimeParams {
     // Flag parameters.
-
+    
     // Parameters for /RNGE flag group.
     int RNGEFlagEncountered;
     double calculationRange;
     double nBins;
     int RNGEFlagParamsSet[2];
-
+    
     // Parameters for /REGN flag group.
     int REGNFlagEncountered;
     double lowerX;
@@ -527,21 +527,26 @@ struct RipleyLFunctionClusteringRuntimeParams {
     double lowerY;
     double upperY;
     int REGNFlagParamsSet[4];
-
+    
     // Main parameters.
-
+    
     // Parameters for simple main group #0.
     int positionsWaveEncountered;
     waveHndl positionsWave;
     int positionsWaveParamsSet[1];
-
+    
+    // Parameters for simple main group #1.
+    int positionsWave2Encountered;
+    waveHndl positionsWave2;				// Optional parameter.
+    int positionsWave2ParamsSet[1];
+    
     // These are postamble fields that Igor sets.
     int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
     int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct RipleyLFunctionClusteringRuntimeParams RipleyLFunctionClusteringRuntimeParams;
 typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClusteringRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()	// Reset structure alignment to default.
 
 // Runtime param structure for SOFIAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -2459,12 +2464,25 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
         if (p->positionsWave == NULL)
             return NOWAV;
     }
-
+    
+    bool isBivariate = false;
+    if (p->positionsWave2Encountered) {
+        if (p->positionsWave2ParamsSet[0]) {
+            // Optional parameter: p->positionsWave2 (test for NULL handle before using)
+            if (p->positionsWave2 == NULL)
+                return NOWAV;
+            isBivariate = true;
+        }
+    }
 
 
     try {
         std::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
-        std::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY);
+        std::shared_ptr<LocalizedPositionsContainer> positions2;
+        if (isBivariate) {
+            positions2 = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave2);
+        }
+        std::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
 
         binWidth = calculationRange / (double)nBins;
         double dimOffset = binWidth;
@@ -3200,7 +3218,7 @@ static int RegisterRipleyLFunctionClustering(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the RipleyLFunctionClusteringRuntimeParams structure as well.
-    cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave";
+    cmdTemplate = "RipleyLFunctionClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave [, wave:positionsWave2]";
     runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);

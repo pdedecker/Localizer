@@ -54,6 +54,16 @@ T Clip (T a, T b, T c) {
     return std::max(b, std::min(a, c));
 }
 
+template<typename T>
+void MinAndMax(const T* vals, size_t nVals, T& minVal, T& maxVal) {
+    minVal = vals[0];
+    maxVal = vals[0];
+    for (size_t i = 1; i < nVals; i++) {
+        minVal = std::min(minVal, vals[i]);
+        maxVal = std::max(maxVal, vals[i]);
+    }
+}
+
 // some 'reasonable' upper limits for various quantities
 // values over these limits will be considered as errors
 const int kMaxImageDimension = 50000;
