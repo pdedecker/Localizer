@@ -54,7 +54,7 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 																	 double lowerY, double upperY);
 
 /**
- * The code to calculate the L function, verbatim from the R spatial package by Ripley et al
+ * The code to calculate the L function, copied with small modifications from the R spatial package by Ripley et al
  *
  *	x	double array containing the x coordinates
  *	y	double array containing the y coordinates
@@ -64,12 +64,6 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
  *	fs	the scale of the plot, that is, the range of the x coordinates of the l function
  *	xu0	the coordinates of the rectangle bounding the points
  */
-void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_t *nBins,
+void VR_sp_pp2(const double *xCoordinates, const double *yCoordinates, size_t nPoints, size_t *nBins,
 			   double *outputArray, double calculationRange, double upperX, double lowerX,
 			   double upperY, double lowerY);
-
-/**
- * Function that corrects for edge effects in the calculated L function, verbatim from Ripley et al
- */
-double VR_edge(double x, double y, double a, double xu0, double xl0,
-			double yu0, double yl0);

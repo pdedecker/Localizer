@@ -29,6 +29,12 @@
 
 #include "PositionsProcessing.h"
 
+/**
+ * Function that corrects for edge effects in the calculated L function, copied with small modifications from Ripley et al
+ */
+double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,
+               double yu0, double yl0);
+
 std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
 																	 double calculationRange, size_t nBins, double lowerX, double upperX,
 																	 double lowerY, double upperY) {
@@ -88,19 +94,18 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 	
 }
 
-void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_t *nBins,
+void VR_sp_pp2(const double *xCoordinates, const double *yCoordinates, size_t nPoints, size_t *nBins,
 			   double *outputArray, double calculationRange, double upperX, double lowerX,
 			   double upperY, double lowerY) {
     size_t nIncludedBins;
-    int   ib;
-    double xSize, ySize, xi, yi, sqrtArea, g, dm, alm;
-    double sqDistance, x1, y1, sqMaxDistance, effectiveCalculationRange, binsPerDistance;
+    size_t ib;
+    double xSize, ySize, xi, yi, sqrtArea, g;
+    double sqDistance, sqMaxDistance, effectiveCalculationRange, binsPerDistance;
 	
     // testinit();
     xSize = upperX - lowerX;
     ySize = upperY - lowerY;
     sqrtArea = sqrt(xSize * ySize);
-    dm = calculationRange;
     g = 2.0 / (nPoints * nPoints);
     effectiveCalculationRange = std::min(calculationRange, 0.5 * sqrt(xSize * xSize + ySize * ySize));
     binsPerDistance = *nBins / calculationRange;
@@ -114,42 +119,36 @@ void VR_sp_pp2(double *xCoordinates, double *yCoordinates, size_t nPoints, size_
 		xi = xCoordinates[i];
 		yi = yCoordinates[i];
 		for (size_t j = 0; j < i; j++) {
-			x1 = xCoordinates[j] - xi;
-			y1 = yCoordinates[j] - yi;
-			sqDistance = x1 * x1 + y1 * y1;
+			double dx = xCoordinates[j] - xi;
+			double dy = yCoordinates[j] - yi;
+			sqDistance = dx * dx + dy * dy;
 			if (sqDistance < sqMaxDistance) {
-				sqDistance = sqrt(sqDistance);
-				dm = std::min(sqDistance, dm);
-				ib = floor(binsPerDistance * sqDistance);
+				double distance = sqrt(sqDistance);
+				ib = floor(binsPerDistance * distance);
 				if (ib < nIncludedBins)
-					outputArray[ib] += g * (VR_edge(xi, yi, sqDistance, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates[j], yCoordinates[j], sqDistance, upperX, lowerX, upperY, lowerY));
+					outputArray[ib] += g * (VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates[j], yCoordinates[j], distance, upperX, lowerX, upperY, lowerY));
 			}
 		}
     }
-    sqDistance = 0.0;
-    alm = 0.0;
+    double accum = 0.0;
     for (size_t i = 0; i < nIncludedBins; i++) {
-		sqDistance += outputArray[i];
-		outputArray[i] = sqrt(sqDistance / M_PI) * sqrtArea;
+		accum += outputArray[i];
+		outputArray[i] = sqrt(accum / M_PI) * sqrtArea;
     }
 }
 
-double VR_edge(double x, double y, double a, double xu0, double xl0,
+double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,
 			double yu0, double yl0) {
-    double b, c, c1, c2, r[6], w;
-    int   i;
+    double b, c, c1, c2, r[6];
 	
 	// set w to the distance from the point to
 	// the closest edge
-    w = x - xl0;
-    if (w > y - yl0) w = y - yl0;
-    if (w > xu0 - x) w = xu0 - x;
-    if (w > yu0 - y) w = yu0 - y;
+    double w = std::min(std::min(x - xl0, y - yl0), std::min(xu0 - x, yu0 - y));
 	
 	// if the distance between the points
 	// is less than the distance to the closest edge
 	// then the entire circle is within the sample region
-    if (a <= w) return (0.5);
+    if (pointDistance <= w) return (0.5);
 	
 	
     r[4] = r[0] = x - xl0;
@@ -157,14 +156,14 @@ double VR_edge(double x, double y, double a, double xu0, double xl0,
     r[2] = xu0 - x;
     r[3] = y - yl0;
     b = 0.0;
-    for (i = 1; i <= 4; i++)
-		if (r[i] < a) {	// the distance from this point to the edge
+    for (int i = 1; i <= 4; i++)
+		if (r[i] < pointDistance) {	// the distance from this point to the edge
 						// is closer than the radius of the circle
 						// so some part of it is outside the region
 			if (r[i] == 0.0)
 				b += M_PI;
 			else {
-				c = acos(r[i] / a);
+				c = acos(r[i] / pointDistance);
 				c1 = atan(r[i - 1] / r[i]);
 				c2 = atan(r[i + 1] / r[i]);
 				b += std::min(c, c1);
