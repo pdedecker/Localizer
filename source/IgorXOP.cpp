@@ -2522,10 +2522,9 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
         if (isBivariate) {
             positions2 = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave2);
         }
-        std::shared_ptr<std::vector<double> > kFunction = CalculateClustering(true, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
-
+        std::vector<double> kFunction = CalculateClustering(true, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
         binWidth = calculationRange / (double)nBins;
-        double dimOffset = binWidth;
+        double dimOffset = binWidth / 2.0;
         double dimDelta = binWidth;
         waveHndl outputWave = CopyVectorToIgorDPWave(kFunction, std::string("W_LFunction"));
         err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
@@ -2607,10 +2606,9 @@ static int ExecutePairwiseCorrelationClustering(PairwiseCorrelationClusteringRun
         if (isBivariate) {
             positions2 = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave2);
         }
-        std::shared_ptr<std::vector<double> > pairwiseCorrelation = CalculateClustering(false, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
-        
+        std::vector<double> pairwiseCorrelation = CalculateClustering(false, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
         binWidth = calculationRange / (double)nBins;
-        double dimOffset = binWidth;
+        double dimOffset = binWidth / 2.0;
         double dimDelta = binWidth;
         waveHndl outputWave = CopyVectorToIgorDPWave(pairwiseCorrelation, std::string("W_PairwiseCorrelation"));
         err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);

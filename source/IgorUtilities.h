@@ -68,7 +68,7 @@ std::string ConvertHandleToString(Handle handle);
 std::string ConvertPathToNativePath(std::string filePath);
 
 // routines to convert data from and to Igor format
-waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::string waveName);
+waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, std::string waveName);
 waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, DataFolderAndName outputWaveParams);
 
 ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave);

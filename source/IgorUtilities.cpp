@@ -462,7 +462,7 @@ std::string ConvertPathToNativePath(std::string filePath) {
 
 }
 
-waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::string waveName) {
+waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, std::string waveName) {
     waveHndl DPWave;
 
     int err;
@@ -471,7 +471,7 @@ waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::
     double value[2];
 
 
-    size_t nElements = vec->size();
+    size_t nElements = vec.size();
 
     dimensionSizes[0] = nElements;
     dimensionSizes[1] = 0;
@@ -483,7 +483,7 @@ waveHndl CopyVectorToIgorDPWave(std::shared_ptr<std::vector<double> > vec, std::
     for (size_t i = 0; i < nElements; ++i) {
         indices[0] = i;
 
-        value[0] = (*vec)[i];
+        value[0] = vec[i];
 
         err = MDSetNumericWavePointValue(DPWave, indices, value);
         if (err != 0) {

@@ -49,10 +49,10 @@
  * Their code is provided below with only very minor changes (make xl0 etc. nonglobal).
  */
 
-std::shared_ptr<std::vector<double> > CalculateClustering(bool useKFunction, std::shared_ptr<LocalizedPositionsContainer> positions,
-                                                                   double calculationRange, size_t nBins, double lowerX, double upperX,
-                                                                   double lowerY, double upperY,
-                                                                   std::shared_ptr<LocalizedPositionsContainer> positions2 = std::shared_ptr<LocalizedPositionsContainer>());
+std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<LocalizedPositionsContainer> positions,
+                                        double calculationRange, size_t nBins, double lowerX, double upperX,
+                                        double lowerY, double upperY,
+                                        std::shared_ptr<LocalizedPositionsContainer> positions2 = std::shared_ptr<LocalizedPositionsContainer>());
 
 /**
  * The code to calculate the L function, copied with small modifications from the R spatial package by Ripley et al
