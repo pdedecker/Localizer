@@ -57,19 +57,22 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 /**
  * The code to calculate the L function, copied with small modifications from the R spatial package by Ripley et al
  *
- *	x	double array containing the x coordinates
- *	y	double array containing the y coordinates
- *	npt	the number of positions
- *	k	the number of points in the output (bins)
- *	h	double array that will be filled with the l function (allocated to k values)
- *	fs	the scale of the plot, that is, the range of the x coordinates of the l function
- *	xu0	the coordinates of the rectangle bounding the points
+ *	xCoordinates1       array containing the x coordinates of probe 1
+ *	yCoordinates1       array containing the y coordinates of probe 1
+ *  xCoordinates2       array containing the x coordinates of probe 2   (pass xCoordinates1 for non-bivariate)
+ *	yCoordinates2       array containing the y coordinates of probe 2   (pass yCoordinates1 for non-bivariate)
+ *	nPoints1            number of coordinates in 1
+ *	nPoints2            number of coordinates in 2
+ *  nBins               actually used number of output bins
+ *  outputArray         output goes here
+ *  calculationRange    maximum distance between points considered
+ *  lowerX
+ *  upperX              coordinates of bounding rectangle
+ *  lowerY
+ *  upperY
  */
-void VR_sp_pp2(const double *xCoordinates, const double *yCoordinates, size_t nPoints, size_t *nBins,
-			   double *outputArray, double calculationRange, double upperX, double lowerX,
-			   double upperY, double lowerY);
 
-void VR_sp_pp2_bivariate(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
+void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
                          size_t nPoints1, size_t nPoints2, size_t *nBins,
                          double *outputArray, double calculationRange, double upperX, double lowerX,
                          double upperY, double lowerY);
