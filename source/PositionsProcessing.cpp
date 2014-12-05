@@ -39,7 +39,8 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
                                                                    double calculationRange, size_t nBins, double lowerX, double upperX,
                                                                    double lowerY, double upperY,
                                                                    std::shared_ptr<LocalizedPositionsContainer> positions2) {
-	size_t nPositions = positions->getNPositions();
+    bool haveExplicitRegion = !((lowerX == 0) && (upperX == 0) && (lowerY == 0) && (lowerX == 0));
+    size_t nPositions = positions->getNPositions();
     bool isBivariate = positions2.get() != NULL;
     
 	// provide that positions as arrays suitable for the actual calculation
@@ -53,7 +54,7 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 	}
     
     // get the x and y boundaries for the positions if they have not been provided
-    if ((lowerX == 0) && (upperX == 0) && (lowerY == 0) && (lowerX == 0)) {
+    if (!haveExplicitRegion) {
         MinAndMax(xPositions.get(), nPositions, lowerX, upperX);
         MinAndMax(yPositions.get(), nPositions, lowerY, upperY);
     }
@@ -71,13 +72,15 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
             xPositions2[i] = positions2->getXPosition(i);
             yPositions2[i] = positions2->getYPosition(i);
         }
-        double lowerX2, upperX2, lowerY2, upperY2;
-        MinAndMax(xPositions2.get(), nPositions, lowerX2, upperX2);
-        MinAndMax(yPositions2.get(), nPositions, lowerY2, upperY2);
-        lowerX = std::min(lowerX, lowerX2);
-        lowerY = std::min(lowerY, lowerY2);
-        upperX = std::max(upperX, upperX2);
-        upperY = std::max(upperY, upperY2);
+        if (!haveExplicitRegion) {
+            double lowerX2, upperX2, lowerY2, upperY2;
+            MinAndMax(xPositions2.get(), nPositions, lowerX2, upperX2);
+            MinAndMax(yPositions2.get(), nPositions, lowerY2, upperY2);
+            lowerX = std::min(lowerX, lowerX2);
+            lowerY = std::min(lowerY, lowerY2);
+            upperX = std::max(upperX, upperX2);
+            upperY = std::max(upperY, upperY2);
+        }
         VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions2.get(), yPositions2.get(),
                             nPositions, nPositions2, &nBins,
                             &((*lFunction)[0]), calculationRange, upperX, lowerX,
