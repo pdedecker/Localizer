@@ -70,11 +70,12 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
  *  upperX              coordinates of bounding rectangle
  *  lowerY
  *  upperY
+ *  isKFunction         calculates K function is true, pairwise correlation otherwise
  */
 
 void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
                          size_t nPoints1, size_t nPoints2, size_t *nBins,
                          double *outputArray, double calculationRange, double upperX, double lowerX,
-                         double upperY, double lowerY);
+                         double upperY, double lowerY, bool isKFunction);
 
 
