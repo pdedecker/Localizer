@@ -63,7 +63,7 @@ std::shared_ptr<std::vector<double> > CalculateClustering(bool useKFunction, std
     if (!isBivariate) {
         VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions.get(), yPositions.get(),
                   nPositions, nPositions, &nBins, &((*calculatedFunction)[0]), calculationRange, upperX, lowerX,
-                  upperY, lowerY, true);
+                  upperY, lowerY, useKFunction);
     } else {
         size_t nPositions2 = positions2->getNPositions();
         std::unique_ptr<double[]> xPositions2(new double[nPositions2]);
@@ -101,7 +101,7 @@ void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const d
                double *outputArray, double calculationRange, double upperX, double lowerX,
                double upperY, double lowerY, bool isKFunction) {
     
-    const bool isBivariate = ((xCoordinates1 == xCoordinates2) && (yCoordinates1 == yCoordinates2));
+    const bool isBivariate = !((xCoordinates1 == xCoordinates2) && (yCoordinates1 == yCoordinates2));
     
     double xSize = upperX - lowerX;
     double ySize = upperY - lowerY;
@@ -146,10 +146,10 @@ void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const d
             outputArray[i] = sqrt(accum / (M_PI * nPoints1 * nPoints2)) * sqrtArea;
         }
     } else {    // pairwise correlation
-        double probeDensity1 = (double)nPoints1 / (xSize * ySize);
         double probeDensity2 = (double)nPoints2 / (xSize * ySize);
         for (size_t i = 0; i < nIncludedBins; i++) {
-            outputArray[i] = outputArray[i] / (probeDensity1 * probeDensity2 * 2 * M_PI * i * binWidth * binWidth);
+            double r = i * binWidth;
+            outputArray[i] = outputArray[i] / (M_PI * ((r + binWidth) * (r + binWidth) - (r * r)) * probeDensity2 * nPoints1);
         }
     }
 }
