@@ -29,6 +29,8 @@
 
 #include "PositionsProcessing.h"
 
+#include "tbb/tbb.h"
+
 /**
  * Function that corrects for edge effects in the calculated L function, copied with small modifications from Ripley et al
  */
@@ -46,7 +48,7 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
 	// provide that positions as arrays suitable for the actual calculation
 	std::unique_ptr<double[]> xPositions(new double[nPositions]);
 	std::unique_ptr<double[]> yPositions(new double[nPositions]);
-	std::vector<double> calculatedFunction(nBins);
+	std::vector<double> calculatedFunction;
 	
 	for (size_t i = 0; i < nPositions; ++i) {
 		xPositions[i] = positions->getXPosition(i);
@@ -61,8 +63,8 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
 	
 	// run the actual calculation
     if (!isBivariate) {
-        VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions.get(), yPositions.get(),
-                  nPositions, nPositions, &nBins, &(calculatedFunction[0]), calculationRange, upperX, lowerX,
+        calculatedFunction = VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions.get(), yPositions.get(),
+                  nPositions, nPositions, nBins, calculationRange, upperX, lowerX,
                   upperY, lowerY, useKFunction);
     } else {
         size_t nPositions2 = positions2->getNPositions();
@@ -81,77 +83,82 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
             upperX = std::max(upperX, upperX2);
             upperY = std::max(upperY, upperY2);
         }
-        VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions2.get(), yPositions2.get(),
-                            nPositions, nPositions2, &nBins,
-                            &(calculatedFunction[0]), calculationRange, upperX, lowerX,
-                            upperY, lowerY, useKFunction);
+        calculatedFunction = VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions2.get(), yPositions2.get(),
+                  nPositions, nPositions2, nBins, calculationRange, upperX, lowerX,
+                  upperY, lowerY, useKFunction);
     }
-    
-    // if the requested calculation range is too high then VR_sp_pp2 will
-    // have automatically reduced it. It reports the correct number of points
-    // in nBins.
-    calculatedFunction.resize(nBins);
 	
     // return the calculated function
 	return calculatedFunction;
 	
 }
-void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
-                         size_t nPoints1, size_t nPoints2, size_t *nBins,
-               double *outputArray, double calculationRange, double upperX, double lowerX,
-               double upperY, double lowerY, bool isKFunction) {
+std::vector<double> VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
+                             size_t nPoints1, size_t nPoints2, size_t nBins,
+                             double calculationRange, double upperX, double lowerX,
+                             double upperY, double lowerY, bool isKFunction) {
     
     const bool isBivariate = !((xCoordinates1 == xCoordinates2) && (yCoordinates1 == yCoordinates2));
     
     double xSize = upperX - lowerX;
     double ySize = upperY - lowerY;
     double g = 2.0;
-    double effectiveCalculationRange = std::min(calculationRange, 0.5 * sqrt(xSize * xSize + ySize * ySize));
-    double binsPerDistance = *nBins / calculationRange;
-    double binWidth = 1.0 / binsPerDistance;
-    size_t nIncludedBins = floor(binsPerDistance * effectiveCalculationRange + 1.0e-3);
-    *nBins = nIncludedBins;
-    double sqMaxDistance = effectiveCalculationRange * effectiveCalculationRange;
+    double binWidth = calculationRange / static_cast<double>(nBins);
+    double actualCalculationRange = std::min(calculationRange, 0.5 * sqrt(xSize * xSize + ySize * ySize));
+    size_t actualNBins = ceil(actualCalculationRange / binWidth);
+    double binsPerDistance = static_cast<double>(actualNBins) / actualCalculationRange;
+    double sqMaxDistance = actualCalculationRange * actualCalculationRange;
     
-    for (size_t i = 0; i < *nBins; i++)
-        outputArray[i] = 0.0;
-    
-    for (size_t i = 0; i < nPoints1; i++) {
-        double xi = xCoordinates1[i];
-        double yi = yCoordinates1[i];
-        size_t upperIndex = (isBivariate) ? nPoints2 : i;
-        for (size_t j = 0; j < upperIndex; j++) {
-            double dx = xCoordinates2[j] - xi;
-            double dy = yCoordinates2[j] - yi;
-            double sqDistance = dx * dx + dy * dy;
-            if (sqDistance < sqMaxDistance) {
-                double distance = sqrt(sqDistance);
-                size_t ib = floor(binsPerDistance * distance);
-                if (ib < nIncludedBins) {
-                    if (isBivariate) {
-                        outputArray[ib] += g * VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY);
-                    } else {
-                        outputArray[ib] += g * (VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates1[j], yCoordinates1[j], distance, upperX, lowerX, upperY, lowerY));
-                    }
-                }
-            }
-        }
-    }
+    std::vector<double> result;
+    result = tbb::parallel_reduce(tbb::blocked_range<size_t>(0, nPoints1), std::vector<double>(actualNBins, 0.0),
+                                  [=](const tbb::blocked_range<size_t>& r, const std::vector<double>& initialValue) -> std::vector<double> {
+                                      std::vector<double> accum(initialValue);
+                                      for (size_t i = r.begin(); i != r.end(); i++) {
+                                          double xi = xCoordinates1[i];
+                                          double yi = yCoordinates1[i];
+                                          size_t upperIndex = (isBivariate) ? nPoints2 : i;
+                                          for (size_t j = 0; j < upperIndex; j++) {
+                                              double dx = xCoordinates2[j] - xi;
+                                              double dy = yCoordinates2[j] - yi;
+                                              double sqDistance = dx * dx + dy * dy;
+                                              if (sqDistance < sqMaxDistance) {
+                                                  double distance = sqrt(sqDistance);
+                                                  size_t ib = floor(binsPerDistance * distance);
+                                                  if (ib < actualNBins) {
+                                                      if (isBivariate) {
+                                                          accum[ib] += g * VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY);
+                                                      } else {
+                                                          accum[ib] += g * (VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY) + VR_edge(xCoordinates1[j], yCoordinates1[j], distance, upperX, lowerX, upperY, lowerY));
+                                                      }
+                                                  }
+                                              }
+                                          }
+                                      }
+                                      return accum;
+                                  },
+                                  [=](const std::vector<double>& result1, const std::vector<double>& result2) -> std::vector<double> {
+                                      std::vector<double> accumulated(result1);
+                                      for (size_t i = 0; i < accumulated.size(); i++) {
+                                          accumulated[i] += result2[i];
+                                      }
+                                      return accumulated;
+                                  });
     
     if (isKFunction) {
         double sqrtArea = sqrt(xSize * ySize);
         double accum = 0.0;
-        for (size_t i = 0; i < nIncludedBins; i++) {
-            accum += outputArray[i];
-            outputArray[i] = sqrt(accum / (M_PI * nPoints1 * nPoints2)) * sqrtArea;
+        for (size_t i = 0; i < result.size(); i++) {
+            accum += result[i];
+            result[i] = sqrt(accum / (M_PI * nPoints1 * nPoints2)) * sqrtArea;
         }
     } else {    // pairwise correlation
         double probeDensity2 = (double)nPoints2 / (xSize * ySize);
-        for (size_t i = 0; i < nIncludedBins; i++) {
+        for (size_t i = 0; i < result.size(); i++) {
             double r = i * binWidth;
-            outputArray[i] = outputArray[i] / (M_PI * ((r + binWidth) * (r + binWidth) - (r * r)) * probeDensity2 * nPoints1);
+            result[i] = result[i] / (M_PI * ((r + binWidth) * (r + binWidth) - (r * r)) * probeDensity2 * nPoints1);
         }
     }
+    
+    return result;
 }
 
 double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,

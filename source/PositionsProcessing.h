@@ -63,8 +63,7 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
  *	yCoordinates2       array containing the y coordinates of probe 2   (pass yCoordinates1 for non-bivariate)
  *	nPoints1            number of coordinates in 1
  *	nPoints2            number of coordinates in 2
- *  nBins               actually used number of output bins
- *  outputArray         output goes here
+ *  nBins               requested number of output bins
  *  calculationRange    maximum distance between points considered
  *  lowerX
  *  upperX              coordinates of bounding rectangle
@@ -73,9 +72,9 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
  *  isKFunction         calculates K function is true, pairwise correlation otherwise
  */
 
-void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
-                         size_t nPoints1, size_t nPoints2, size_t *nBins,
-                         double *outputArray, double calculationRange, double upperX, double lowerX,
-                         double upperY, double lowerY, bool isKFunction);
+std::vector<double> VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,
+                              size_t nPoints1, size_t nPoints2, size_t nBins,
+                              double calculationRange, double upperX, double lowerX,
+                              double upperY, double lowerY, bool isKFunction);
 
 
