@@ -35,7 +35,7 @@
 double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,
                double yu0, double yl0);
 
-std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
+std::shared_ptr<std::vector<double> > CalculateClustering(bool useKFunction, std::shared_ptr<LocalizedPositionsContainer> positions,
                                                                    double calculationRange, size_t nBins, double lowerX, double upperX,
                                                                    double lowerY, double upperY,
                                                                    std::shared_ptr<LocalizedPositionsContainer> positions2) {
@@ -46,7 +46,7 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 	// provide that positions as arrays suitable for the actual calculation
 	std::unique_ptr<double[]> xPositions(new double[nPositions]);
 	std::unique_ptr<double[]> yPositions(new double[nPositions]);
-	std::shared_ptr<std::vector<double> > lFunction(new std::vector<double>(nBins));
+	std::shared_ptr<std::vector<double> > calculatedFunction(new std::vector<double>(nBins));
 	
 	for (size_t i = 0; i < nPositions; ++i) {
 		xPositions[i] = positions->getXPosition(i);
@@ -62,7 +62,7 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
 	// run the actual calculation
     if (!isBivariate) {
         VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions.get(), yPositions.get(),
-                  nPositions, nPositions, &nBins, &((*lFunction)[0]), calculationRange, upperX, lowerX,
+                  nPositions, nPositions, &nBins, &((*calculatedFunction)[0]), calculationRange, upperX, lowerX,
                   upperY, lowerY, true);
     } else {
         size_t nPositions2 = positions2->getNPositions();
@@ -83,23 +83,17 @@ std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_p
         }
         VR_sp_pp2(xPositions.get(), yPositions.get(), xPositions2.get(), yPositions2.get(),
                             nPositions, nPositions2, &nBins,
-                            &((*lFunction)[0]), calculationRange, upperX, lowerX,
-                            upperY, lowerY, true);
+                            &((*calculatedFunction)[0]), calculationRange, upperX, lowerX,
+                            upperY, lowerY, useKFunction);
     }
     
     // if the requested calculation range is too high then VR_sp_pp2 will
     // have automatically reduced it. It reports the correct number of points
-    // in nBins
-    if (nBins != lFunction->size()) {
-        std::shared_ptr<std::vector<double> > resizedLFunction(new std::vector<double>(nBins));
-        for (size_t i = 0; i < nBins; i+=1) {
-            (*resizedLFunction)[i] = (*lFunction)[i];
-        }
-        lFunction = resizedLFunction;
-    }
+    // in nBins.
+    calculatedFunction->resize(nBins);
 	
     // return the calculated function
-	return lFunction;
+	return calculatedFunction;
 	
 }
 void VR_sp_pp2(const double *xCoordinates1, const double *yCoordinates1, const double* xCoordinates2, const double* yCoordinates2,

@@ -44,6 +44,9 @@ BEGIN
 
 	"RipleyLFunctionClustering\0",
 	XOPOp | utilOp | compilableOp,
+	
+	"PairwiseCorrelationClustering\0",
+	XOPOp | utilOp | compilableOp | threadSafeOp,
 
 	"SOFIAnalysis\0",
 	XOPOp | utilOp | compilableOp,

@@ -548,6 +548,46 @@ typedef struct RipleyLFunctionClusteringRuntimeParams RipleyLFunctionClusteringR
 typedef struct RipleyLFunctionClusteringRuntimeParams* RipleyLFunctionClusteringRuntimeParamsPtr;
 #pragma pack()	// Reset structure alignment to default.
 
+// Runtime param structure for PairwiseCorrelationClustering operation.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+struct PairwiseCorrelationClusteringRuntimeParams {
+    // Flag parameters.
+    
+    // Parameters for /RNGE flag group.
+    int RNGEFlagEncountered;
+    double calculationRange;
+    double nBins;
+    int RNGEFlagParamsSet[2];
+    
+    // Parameters for /REGN flag group.
+    int REGNFlagEncountered;
+    double lowerX;
+    double upperX;
+    double lowerY;
+    double upperY;
+    int REGNFlagParamsSet[4];
+    
+    // Main parameters.
+    
+    // Parameters for simple main group #0.
+    int positionsWaveEncountered;
+    waveHndl positionsWave;
+    int positionsWaveParamsSet[1];
+    
+    // Parameters for simple main group #1.
+    int positionsWave2Encountered;
+    waveHndl positionsWave2;				// Optional parameter.
+    int positionsWave2ParamsSet[1];
+    
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+};
+typedef struct PairwiseCorrelationClusteringRuntimeParams PairwiseCorrelationClusteringRuntimeParams;
+typedef struct PairwiseCorrelationClusteringRuntimeParams* PairwiseCorrelationClusteringRuntimeParamsPtr;
+#pragma pack()	// Reset structure alignment to default.
+
 // Runtime param structure for SOFIAnalysis operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct SOFIAnalysisRuntimeParams {
@@ -2482,7 +2522,7 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
         if (isBivariate) {
             positions2 = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave2);
         }
-        std::shared_ptr<std::vector<double> > kFunction = CalculateLFunctionClustering(positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
+        std::shared_ptr<std::vector<double> > kFunction = CalculateClustering(true, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
 
         binWidth = calculationRange / (double)nBins;
         double dimOffset = binWidth;
@@ -2507,6 +2547,91 @@ int ExecuteRipleyLFunctionClustering(RipleyLFunctionClusteringRuntimeParamsPtr p
         return WM_UNKNOWN_ERROR;
     }
 
+    return err;
+}
+
+static int ExecutePairwiseCorrelationClustering(PairwiseCorrelationClusteringRuntimeParamsPtr p) {
+    int err = 0;
+    size_t nBins;
+    double binWidth, calculationRange;
+    
+    // Flag parameters.
+    
+    if (p->RNGEFlagEncountered) {
+        // Parameter: p->calculationRange
+        // Parameter: p->nBins
+        if ((p->calculationRange <= 0) || (p->nBins <= 0))
+            return EXPECT_POS_NUM;
+        
+        calculationRange = p->calculationRange;
+        nBins = (size_t)(p->nBins + 0.5);
+        
+    } else {
+        return EXPECT_POS_NUM;
+    }
+    
+    double lowerX = 0, upperX = 0, lowerY = 0, upperY = 0;
+    if (p->REGNFlagEncountered) {
+        // Parameter: p->lowerX
+        // Parameter: p->upperX
+        // Parameter: p->lowerY
+        // Parameter: p->upperY
+        lowerX = p->lowerX;
+        upperX = p->upperX;
+        lowerY = p->lowerY;
+        upperY = p->upperY;
+    }
+    
+    // Main parameters.
+    
+    if (p->positionsWaveEncountered) {
+        // Parameter: p->positionsWave (test for NULL handle before using)
+        if (p->positionsWave == NULL)
+            return NOWAV;
+    }
+    
+    bool isBivariate = false;
+    if (p->positionsWave2Encountered) {
+        if (p->positionsWave2ParamsSet[0]) {
+            // Optional parameter: p->positionsWave2 (test for NULL handle before using)
+            if (p->positionsWave2 == NULL)
+                return NOWAV;
+            isBivariate = true;
+        }
+    }
+    
+    
+    try {
+        std::shared_ptr<LocalizedPositionsContainer> positions = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave);
+        std::shared_ptr<LocalizedPositionsContainer> positions2;
+        if (isBivariate) {
+            positions2 = LocalizedPositionsContainer::GetPositionsFromWave(p->positionsWave2);
+        }
+        std::shared_ptr<std::vector<double> > pairwiseCorrelation = CalculateClustering(false, positions, calculationRange, nBins, lowerX, upperX, lowerY, upperY, positions2);
+        
+        binWidth = calculationRange / (double)nBins;
+        double dimOffset = binWidth;
+        double dimDelta = binWidth;
+        waveHndl outputWave = CopyVectorToIgorDPWave(pairwiseCorrelation, std::string("W_PairwiseCorrelation"));
+        err = MDSetWaveScaling(outputWave, 0, &dimDelta, &dimOffset);
+    }
+    catch (USER_ABORTED e) {
+        XOPNotice(e.what());
+        err = USER_ABORT;
+    }
+    catch (std::runtime_error e) {
+        XOPNotice(e.what());
+        XOPNotice("\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    catch (int e) {
+        return e;
+    }
+    catch (...) {
+        XOPNotice("An unknown error occurred\r");
+        return WM_UNKNOWN_ERROR;
+    }
+    
     return err;
 }
 
@@ -3224,6 +3349,18 @@ static int RegisterRipleyLFunctionClustering(void) {
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(RipleyLFunctionClusteringRuntimeParams), (void*)ExecuteRipleyLFunctionClustering, 0);
 }
 
+static int RegisterPairwiseCorrelationClustering(void) {
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+    
+    // NOTE: If you change this template, you must change the PairwiseCorrelationClusteringRuntimeParams structure as well.
+    cmdTemplate = "PairwiseCorrelationClustering /RNGE={number:calculationRange, number:nBins} /REGN={number:lowerX, number:upperX, number:lowerY, number:upperY} wave:positionsWave [, wave:positionsWave2]";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(PairwiseCorrelationClusteringRuntimeParams), (void*)ExecutePairwiseCorrelationClustering, kOperationIsThreadSafe);
+}
+
 static int RegisterSOFIAnalysis(void) {
 	const char* cmdTemplate;
 	const char* runtimeNumVarList;
@@ -3294,6 +3431,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
     if ((result = RegisterLocalizationBitmap()))
         return result;
     if ((result = RegisterRipleyLFunctionClustering()))
+        return result;
+    if ((result = RegisterPairwiseCorrelationClustering()))
         return result;
     if ((result = RegisterSOFIAnalysis()))
         return result;

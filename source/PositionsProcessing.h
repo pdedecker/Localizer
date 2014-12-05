@@ -42,14 +42,14 @@
 #undef max
 
 /**
- * Given a set of input positions, calculate the L-function to analyze clustering
+ * Given a set of input positions, calculate the K-function or pairwise correlation to analyze clustering
  *
- * This function is a wrapper around the implementation provided in the 'spatial' package for R,
+ * The K-function code is adapted from the implementation provided in the 'spatial' package for R,
  * based on Venables, W. N. and Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth edition. Springer.
  * Their code is provided below with only very minor changes (make xl0 etc. nonglobal).
  */
 
-std::shared_ptr<std::vector<double> > CalculateLFunctionClustering(std::shared_ptr<LocalizedPositionsContainer> positions,
+std::shared_ptr<std::vector<double> > CalculateClustering(bool useKFunction, std::shared_ptr<LocalizedPositionsContainer> positions,
                                                                    double calculationRange, size_t nBins, double lowerX, double upperX,
                                                                    double lowerY, double upperY,
                                                                    std::shared_ptr<LocalizedPositionsContainer> positions2 = std::shared_ptr<LocalizedPositionsContainer>());
