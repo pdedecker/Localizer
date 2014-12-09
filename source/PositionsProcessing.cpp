@@ -76,8 +76,8 @@ std::vector<double> CalculateClustering(bool useKFunction, std::shared_ptr<Local
         }
         if (!haveExplicitRegion) {
             double lowerX2, upperX2, lowerY2, upperY2;
-            MinAndMax(xPositions2.get(), nPositions, lowerX2, upperX2);
-            MinAndMax(yPositions2.get(), nPositions, lowerY2, upperY2);
+            MinAndMax(xPositions2.get(), nPositions2, lowerX2, upperX2);
+            MinAndMax(yPositions2.get(), nPositions2, lowerY2, upperY2);
             lowerX = std::min(lowerX, lowerX2);
             lowerY = std::min(lowerY, lowerY2);
             upperX = std::max(upperX, upperX2);
