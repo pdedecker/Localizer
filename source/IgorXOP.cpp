@@ -681,74 +681,74 @@ typedef struct SOFIAnalysisRuntimeParams* SOFIAnalysisRuntimeParamsPtr;
 // Runtime param structure for NewSOFI operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct NewSOFIRuntimeParams {
-	// Flag parameters.
+    // Flag parameters.
     
-	// Parameters for /Y flag group.
-	int YFlagEncountered;
-	double cameraType;
-	int YFlagParamsSet[1];
+    // Parameters for /Y flag group.
+    int YFlagEncountered;
+    double cameraType;
+    int YFlagParamsSet[1];
     
-	// Parameters for /ORDR flag group.
-	int ORDRFlagEncountered;
-	double order;
-	double extraOrders[4];					// Optional parameter.
-	int ORDRFlagParamsSet[5];
+    // Parameters for /ORDR flag group.
+    int ORDRFlagEncountered;
+    double order;
+    double extraOrders[5];					// Optional parameter.
+    int ORDRFlagParamsSet[6];
     
-	// Parameters for /SUB flag group.
-	int SUBFlagEncountered;
-	double framesToSkip;
-	double nFramesToInclude;
-	int SUBFlagParamsSet[2];
+    // Parameters for /SUB flag group.
+    int SUBFlagEncountered;
+    double framesToSkip;
+    double nFramesToInclude;
+    int SUBFlagParamsSet[2];
     
-	// Parameters for /NSAT flag group.
-	int NSATFlagEncountered;
-	double noSaturatedPixels;				// Optional parameter.
-	int NSATFlagParamsSet[1];
+    // Parameters for /NSAT flag group.
+    int NSATFlagEncountered;
+    double noSaturatedPixels;				// Optional parameter.
+    int NSATFlagParamsSet[1];
     
-	// Parameters for /AVG flag group.
-	int AVGFlagEncountered;
-	double doAverage;						// Optional parameter.
-	int AVGFlagParamsSet[1];
+    // Parameters for /AVG flag group.
+    int AVGFlagEncountered;
+    double doAverage;						// Optional parameter.
+    int AVGFlagParamsSet[1];
     
-	// Parameters for /PXCR flag group.
-	int PXCRFlagEncountered;
-	double doPixelationCorrection;			// Optional parameter.
-	int PXCRFlagParamsSet[1];
+    // Parameters for /PXCR flag group.
+    int PXCRFlagEncountered;
+    double doPixelationCorrection;			// Optional parameter.
+    int PXCRFlagParamsSet[1];
     
-	// Parameters for /BAT flag group.
-	int BATFlagEncountered;
-	double batchSize;
-	int BATFlagParamsSet[1];
+    // Parameters for /BAT flag group.
+    int BATFlagEncountered;
+    double batchSize;
+    int BATFlagParamsSet[1];
     
-	// Parameters for /JACK flag group.
-	int JACKFlagEncountered;
-	double doJackKnife;						// Optional parameter.
-	int JACKFlagParamsSet[1];
+    // Parameters for /JACK flag group.
+    int JACKFlagEncountered;
+    double doJackKnife;						// Optional parameter.
+    int JACKFlagParamsSet[1];
     
-	// Parameters for /PROG flag group.
-	int PROGFlagEncountered;
-	LocalizerProgStruct* progStruct;
-	int PROGFlagParamsSet[1];
+    // Parameters for /PROG flag group.
+    int PROGFlagEncountered;
+    LocalizerProgStruct* progStruct;
+    int PROGFlagParamsSet[1];
     
-	// Parameters for /Q flag group.
-	int QFlagEncountered;
-	// There are no fields for this group because it has no parameters.
+    // Parameters for /Q flag group.
+    int QFlagEncountered;
+    // There are no fields for this group because it has no parameters.
     
-	// Parameters for /DEST flag group.
-	int DESTFlagEncountered;
-	DataFolderAndName dest;
-	int DESTFlagParamsSet[1];
+    // Parameters for /DEST flag group.
+    int DESTFlagEncountered;
+    DataFolderAndName dest;
+    int DESTFlagParamsSet[1];
     
-	// Main parameters.
+    // Main parameters.
     
-	// Parameters for simple main group #0.
-	int inputFilePathEncountered;
-	Handle inputFilePath;
-	int inputFilePathParamsSet[1];
+    // Parameters for simple main group #0.
+    int inputFilePathEncountered;
+    Handle inputFilePath;
+    int inputFilePathParamsSet[1];
     
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
 };
 typedef struct NewSOFIRuntimeParams NewSOFIRuntimeParams;
 typedef struct NewSOFIRuntimeParams* NewSOFIRuntimeParamsPtr;
@@ -2926,7 +2926,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         // Array-style optional parameter: p->extraOrders
 		int* paramsSet = &p->ORDRFlagParamsSet[1];
 		int extraOrder;
-		for(int i=0; i<4; i++) {
+		for(int i=0; i<5; i++) {
 			if (paramsSet[i] == 0)
 				break;		// No more parameters.
 			extraOrder = p->extraOrders[i];
@@ -3376,9 +3376,9 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeNumVarList;
 	const char* runtimeStrVarList;
     
-	// NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-	cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[4]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
-	runtimeNumVarList = "";
+    // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
 }
