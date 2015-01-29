@@ -53,7 +53,13 @@ std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualP
 std::vector<SOFIKernel> KernelsForOrder(const int order) {
     std::vector<SOFIVirtualPixel> virtualPixels = SOFIVirtualPixelsForOrder(order);
 #ifdef WITH_IGOR
-    XOPNotice(PrintSOFIVirtualPixels(virtualPixels).c_str());
+    std::string debugStr = PrintSOFIVirtualPixels(virtualPixels);
+    int offset = 0;
+    while (offset < debugStr.size()) {
+        std::string subStr = debugStr.substr(offset, MAXCMDLEN - 2);
+        XOPNotice(subStr.c_str());
+        offset += subStr.size();
+    }
     XOPNotice("\r");
 #endif
     
