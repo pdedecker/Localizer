@@ -47,20 +47,22 @@ std::vector<SOFIVirtualPixel> sofiPixelCombinations4();
 std::vector<SOFIVirtualPixel> sofiPixelCombinations5();
 std::vector<SOFIVirtualPixel> sofiPixelCombinations6();
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order);
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff);
 std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
-std::vector<SOFIKernel> KernelsForOrder(const int order) {
-    std::vector<SOFIVirtualPixel> virtualPixels = SOFIVirtualPixelsForOrder(order);
+std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff, bool wantDebugMessages) {
+    std::vector<SOFIVirtualPixel> virtualPixels = SOFIVirtualPixelsForOrder(order, pixelCombinationCutoff);
 #ifdef WITH_IGOR
-    std::string debugStr = PrintSOFIVirtualPixels(virtualPixels);
-    int offset = 0;
-    while (offset < debugStr.size()) {
-        std::string subStr = debugStr.substr(offset, MAXCMDLEN - 2);
-        XOPNotice(subStr.c_str());
-        offset += subStr.size();
+    if (wantDebugMessages) {
+        std::string debugStr = PrintSOFIVirtualPixels(virtualPixels);
+        int offset = 0;
+        while (offset < debugStr.size()) {
+            std::string subStr = debugStr.substr(offset, MAXCMDLEN - 2);
+            XOPNotice(subStr.c_str());
+            offset += subStr.size();
+        }
+        XOPNotice("\r");
     }
-    XOPNotice("\r");
 #endif
     
     std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(virtualPixels);
@@ -282,7 +284,7 @@ public:
     }
     
     void addCombination(const std::vector<std::pair<int, int>>& combination);
-    SOFIVirtualPixel getCombination() const;
+    SOFIVirtualPixel getCombination(double pixelCombinationCutoff) const;
     int getOutputDeltaX() const {return _outputDeltaX;}
     int getOutputDeltaY() const {return _outputDeltaY;}
     
@@ -328,7 +330,7 @@ void PixelCombinationAccumulator::addCombination(const std::vector<std::pair<int
     }
 }
 
-SOFIVirtualPixel PixelCombinationAccumulator::getCombination() const {
+SOFIVirtualPixel PixelCombinationAccumulator::getCombination(double pixelCombinationCutoff) const {
     std::vector<int> sortIndex(_pixelCombinations.size());
     for (int i = 0; i < sortIndex.size(); i++)
         sortIndex[i] = i;
@@ -338,7 +340,11 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination() const {
     SOFIVirtualPixel result;
     result.outputDeltaX = _outputDeltaX;
     result.outputDeltaY = _outputDeltaY;
+    double bestCombinationScore = _scores.at(sortIndex.at(0));
+    double scoreLimit = pixelCombinationCutoff * bestCombinationScore;
     for (int i = 0; i < _pixelCombinations.size(); i++) {
+        if (_scores.at(sortIndex.at(i)) > scoreLimit)
+            break;
         result.combinations.push_back(_pixelCombinations.at(sortIndex.at(i)));
         result.scores.push_back(_scores.at(sortIndex.at(i)));
     }
@@ -346,11 +352,11 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination() const {
     return result;
 }
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order) {
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff) {
     if (Clip(order, 1, 6) != order)
         throw std::logic_error("unsupported order");
     
-    int maxNCombinations = 10;
+    int maxNCombinations = 32;
     int neighborhoodSize = 5;
     
     int nSubPixels = order * order;
@@ -401,7 +407,7 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order) {
     
     std::vector<SOFIVirtualPixel> sofiPixelCombinations(accumulators.size());
     for (int i = 0; i < accumulators.size(); i++) {
-        sofiPixelCombinations[i] = accumulators[i].getCombination();
+        sofiPixelCombinations[i] = accumulators[i].getCombination(pixelCombinationCutoff);
     }
     
     return sofiPixelCombinations;

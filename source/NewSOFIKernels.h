@@ -57,7 +57,7 @@ public:
     std::vector<GroupOfPartitions> combinations;
 };
 
-std::vector<SOFIKernel> KernelsForOrder(const int order);
+std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff, bool wantDebugMessages);
 
 class ComparePixelCombinations {
 public:

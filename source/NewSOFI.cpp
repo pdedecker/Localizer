@@ -75,7 +75,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
     for (int i = 0; i < nOrders; ++i) {
-        kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i])));
+        kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i], options.pixelCombinationCutoff, options.wantDebugMessages)));
     }
     int firstImageToProcess = 0;
     int lastImageToProcess = 0;
