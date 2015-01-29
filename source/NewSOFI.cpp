@@ -349,11 +349,16 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
     tbb::parallel_do(kernels.cbegin(), kernels.cend(), [=,&pixelMap,&sofiImage](const SOFIKernel& kernel) {
         Eigen::MatrixXd evaluated(nInputRows - 4, nInputCols - 4);
         evaluated.setConstant(0.0);
+        double accumulatedWeights = 0.0;
         for (auto partitionsSetIt = kernel.combinations.cbegin(); partitionsSetIt != kernel.combinations.cend(); ++partitionsSetIt) {
-            evaluated += EvaluatePartitionsSet(*partitionsSetIt, pixelMap, nInputRows - 4, nInputCols - 4);
+            Eigen::MatrixXd evaluatedPartitionsSet = EvaluatePartitionsSet(*partitionsSetIt, pixelMap, nInputRows - 4, nInputCols - 4);
+            double weight = evaluatedPartitionsSet.mean();
+            accumulatedWeights += std::abs(weight);
+            evaluated += evaluatedPartitionsSet * weight;
         }
-        if (kernel.combinations.size() > 1)
-            evaluated /= static_cast<double>(kernel.combinations.size());
+        if (accumulatedWeights != 0.0) {
+            evaluated /= accumulatedWeights;
+        }
         
         for (int col = 0; col < nInputCols - 4; ++col) {
             for (int row = 0; row < nInputRows - 4; ++row) {
