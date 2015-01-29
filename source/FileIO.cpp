@@ -810,9 +810,10 @@ void ImageLoaderSPE::parse_header_information() {
 	file.read((char *)&(this->nImages), 4);
 	
 	file.seekg(108);
-	file.read((char *)&(this->storage_type), 2);
+    uint16_t storage = 0;
+	file.read((char *)&(storage), 2);
 	
-	switch (storage_type) {
+	switch (storage) {
 		case 0:
 			storage_type = kFP32;
 			break;
