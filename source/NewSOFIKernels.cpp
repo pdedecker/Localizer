@@ -32,6 +32,12 @@
 #include <algorithm>
 #include <sstream>
 
+#ifdef WITH_IGOR
+#include "XOPStandardHeaders.h"
+#endif
+
+#include "Defines.h"
+
 std::vector<SOFIKernel> PixelCombinationsToKernels(const std::vector<SOFIPixelCombination>& sofiPixelCombination);
 void SortPixelCombination(PixelCombination& combination);
 std::vector<SOFIPixelCombination> sofiPixelCombinations1();
@@ -41,8 +47,16 @@ std::vector<SOFIPixelCombination> sofiPixelCombinations4();
 std::vector<SOFIPixelCombination> sofiPixelCombinations5();
 std::vector<SOFIPixelCombination> sofiPixelCombinations6();
 
+std::vector<SOFIPixelCombination> SOFIPixelCombinationsForOrder(int order);
+std::string PrintSOFIPixelCombination(const std::vector<SOFIPixelCombination>& sofiPixelCombinations);
+
 std::vector<SOFIKernel> KernelsForOrder(const int order) {
     std::vector<SOFIKernel> kernels;
+    
+#ifdef WITH_IGOR
+    XOPNotice(PrintSOFIPixelCombination(SOFIPixelCombinationsForOrder(2)).c_str());
+    XOPNotice("\r");
+#endif
     
     switch (order) {
         case 1:
@@ -228,6 +242,162 @@ std::string PrintPartition(const Partition& partition) {
     }
     ss << "\r";
     return ss.str();
+}
+
+std::string PrintSOFIPixelCombination(const std::vector<SOFIPixelCombination>& sofiPixelCombinations) {
+    std::ostringstream ss;
+    
+    for (int i = 0; i < sofiPixelCombinations.size(); i++) {
+        const SOFIPixelCombination& singleVirtualPixel = sofiPixelCombinations[i];
+        ss << "(" << singleVirtualPixel.outputDeltaX << "," << singleVirtualPixel.outputDeltaY << ")\r";
+        for (int pixelIndex = 0; pixelIndex < singleVirtualPixel.combinations.size(); pixelIndex++) {
+            ss << "\t" << singleVirtualPixel.scores[pixelIndex] << "\t";
+            ss << "{";
+            for (auto pixelPairIt = singleVirtualPixel.combinations[pixelIndex].cbegin(); pixelPairIt != singleVirtualPixel.combinations[pixelIndex].cend(); pixelPairIt++) {
+                ss << "(" << pixelPairIt->first << "," << pixelPairIt->second << ")";
+            }
+            ss << "}\r";
+        }
+    }
+    
+    return ss.str();
+}
+
+class PixelCombinationAccumulator {
+public:
+    PixelCombinationAccumulator(int maxNCombinations, int outputDeltaX, int outputDeltaY) :
+        _maxNCombinations(maxNCombinations),
+        _outputDeltaX(outputDeltaX),
+        _outputDeltaY(outputDeltaY),
+        _worstScore(std::numeric_limits<double>::infinity()),
+        _worstScoreIndex(-10)
+    {
+    }
+    
+    void addCombination(const std::vector<std::pair<int, int>>& combination);
+    SOFIPixelCombination getCombination() const;
+    int getOutputDeltaX() const {return _outputDeltaX;}
+    int getOutputDeltaY() const {return _outputDeltaY;}
+    
+private:
+    int _outputDeltaX, _outputDeltaY;
+    int _maxNCombinations;
+    
+    double _worstScore;
+    int _worstScoreIndex;
+    
+    std::vector<std::vector<std::pair<int, int>>> _pixelCombinations;
+    std::vector<double> _scores;
+    
+};
+
+void PixelCombinationAccumulator::addCombination(const std::vector<std::pair<int, int>>& combination) {
+    // calculate product of all pairwise distances in the combination. This will be the metric for determining
+    // which pixel combinations are good. The lower the distance, the better.
+    double score = 1.0;
+    for (size_t j = 0; j < combination.size(); j++) {
+        for (size_t i = j + 1; i < combination.size(); i++) {
+            double sqDistance = square((double)combination[i].first - (double)combination[j].first) + square((double)combination[i].second - (double)combination[j].second);
+            score *= sqDistance;
+        }
+    }
+    
+    if (_pixelCombinations.size() < _maxNCombinations) {
+        // still building up the vector
+        _pixelCombinations.push_back(combination);
+        _scores.push_back(score);
+        if (_pixelCombinations.size() == _maxNCombinations) {
+            auto it = std::max_element(_scores.cbegin(), _scores.cend());
+            _worstScore = *it;
+            _worstScoreIndex = it - _scores.cbegin();
+        }
+    } else {
+        if (score < _worstScore) {
+            _pixelCombinations[_worstScoreIndex] = combination;
+            auto it = std::max_element(_scores.cbegin(), _scores.cend());
+            _worstScore = *it;
+            _worstScoreIndex = it - _scores.cbegin();
+        }
+    }
+}
+
+SOFIPixelCombination PixelCombinationAccumulator::getCombination() const {
+    std::vector<int> sortIndex(_pixelCombinations.size());
+    for (int i = 0; i < sortIndex.size(); i++)
+        sortIndex[i] = i;
+    
+    std::sort(sortIndex.begin(), sortIndex.end(), [=](int i, int j) -> bool {return _scores[i] < _scores[j];});
+    
+    SOFIPixelCombination result;
+    result.outputDeltaX = _outputDeltaX;
+    result.outputDeltaY = _outputDeltaY;
+    for (int i = 0; i < _pixelCombinations.size(); i++) {
+        result.combinations.push_back(_pixelCombinations.at(sortIndex.at(i)));
+        result.scores.push_back(_scores.at(sortIndex.at(i)));
+    }
+    
+    return result;
+}
+
+std::vector<SOFIPixelCombination> SOFIPixelCombinationsForOrder(int order) {
+    if (Clip(order, 1, 6) != order)
+        throw std::logic_error("unsupported order");
+    
+    int maxNCombinations = 10;
+    int neighborhoodSize = 5;
+    
+    int nSubPixels = order * order;
+    std::vector<PixelCombinationAccumulator> accumulators;
+    for (int i = 0; i < nSubPixels; i++) {
+        accumulators.push_back(PixelCombinationAccumulator(maxNCombinations, i / order, i % order));
+    }
+    
+    std::vector<std::pair<int, int>> inputPixels;
+    for (int i = -neighborhoodSize / 2; i <= neighborhoodSize / 2; i++) {
+        for (int j = -neighborhoodSize / 2; j <= neighborhoodSize / 2; j++) {
+            inputPixels.push_back(std::pair<int, int>(i, j));
+        }
+    }
+    
+    std::vector<std::pair<int, int>> pixelCombination(order);
+    // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
+    unsigned int v = (1 << order) - 1; // starting permutation of bits
+    unsigned int lastPermutation = 1 << inputPixels.size();
+    for ( ; ; ) {
+        unsigned int t = (v | (v - 1)) + 1;
+        unsigned int w = t | ((((t & -t) / (v & -v)) >> 1) - 1);  // next permutation of bits
+        v = w;
+        if (w > lastPermutation)
+            break;
+        
+        int offset = 0;
+        for (int j = 0; j < inputPixels.size(); j++) {
+            if ((w >> j) & 1) {
+                pixelCombination.at(offset) = inputPixels.at(j);
+                offset++;
+            }
+        }
+        
+        int outputDeltaX = 0, outputDeltaY = 0;
+        for (int j = 0; j < pixelCombination.size(); j++) {
+            outputDeltaX += pixelCombination[j].first;
+            outputDeltaY += pixelCombination[j].second;
+        }
+        
+        if (!Within(outputDeltaX, 0, order - 1) || !Within(outputDeltaY, 0, order - 1))
+            continue;
+        
+        assert(accumulators.at(outputDeltaX * order + outputDeltaY).getOutputDeltaX() == outputDeltaX);
+        assert(accumulators.at(outputDeltaX * order + outputDeltaY).getOutputDeltaY() == outputDeltaY);
+        accumulators.at(outputDeltaX * order + outputDeltaY).addCombination(pixelCombination);
+    }
+    
+    std::vector<SOFIPixelCombination> sofiPixelCombinations(accumulators.size());
+    for (int i = 0; i < accumulators.size(); i++) {
+        sofiPixelCombinations[i] = accumulators[i].getCombination();
+    }
+    
+    return sofiPixelCombinations;
 }
 
 std::vector<SOFIPixelCombination> sofiPixelCombinations1()

@@ -54,6 +54,11 @@ T Clip (T a, T b, T c) {
     return std::max(b, std::min(a, c));
 }
 
+template <typename T>
+bool Within(T a, T b, T c) {
+    return (Clip(a, b, c) == a);
+}
+
 template<typename T>
 void MinAndMax(const T* vals, size_t nVals, T& minVal, T& maxVal) {
     minVal = vals[0];

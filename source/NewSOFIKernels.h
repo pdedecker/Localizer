@@ -47,6 +47,7 @@ public:
     int outputDeltaX;
     int outputDeltaY;
     std::vector<PixelCombination> combinations;
+    std::vector<double> scores;
 };
 
 class SOFIKernel {
