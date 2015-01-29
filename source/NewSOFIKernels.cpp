@@ -51,14 +51,15 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order);
 std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
 std::vector<SOFIKernel> KernelsForOrder(const int order) {
-    std::vector<SOFIKernel> kernels;
-    
+    std::vector<SOFIVirtualPixel> virtualPixels = SOFIVirtualPixelsForOrder(order);
 #ifdef WITH_IGOR
-    XOPNotice(PrintSOFIVirtualPixels(SOFIVirtualPixelsForOrder(2)).c_str());
+    XOPNotice(PrintSOFIVirtualPixels(virtualPixels).c_str());
     XOPNotice("\r");
 #endif
     
-    switch (order) {
+    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(virtualPixels);
+    
+    /*switch (order) {
         case 1:
             kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations1());
             break;
@@ -80,7 +81,7 @@ std::vector<SOFIKernel> KernelsForOrder(const int order) {
         default:
             throw std::runtime_error("unsupported order");
             break;
-    }
+    }*/
     
     for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
         std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
