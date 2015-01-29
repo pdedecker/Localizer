@@ -694,6 +694,11 @@ struct NewSOFIRuntimeParams {
     double extraOrders[5];					// Optional parameter.
     int ORDRFlagParamsSet[6];
     
+    // Parameters for /COMB flag group.
+    int COMBFlagEncountered;
+    double combinationSelection;
+    int COMBFlagParamsSet[1];
+    
     // Parameters for /SUB flag group.
     int SUBFlagEncountered;
     double framesToSkip;
@@ -724,6 +729,11 @@ struct NewSOFIRuntimeParams {
     int JACKFlagEncountered;
     double doJackKnife;						// Optional parameter.
     int JACKFlagParamsSet[1];
+    
+    // Parameters for /DEBG flag group.
+    int DEBGFlagEncountered;
+    double printDebugInfo;					// Optional parameter.
+    int DEBGFlagParamsSet[1];
     
     // Parameters for /PROG flag group.
     int PROGFlagEncountered;
@@ -2939,6 +2949,14 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         orders.push_back(2);
     }
     
+    double pixelCombinationCutoff = 10.0;
+    if (p->COMBFlagEncountered) {
+        // Parameter: p->combinationSelection
+        if (p->combinationSelection < 1.0)
+            return EXPECT_POS_NUM;
+        pixelCombinationCutoff = p->combinationSelection;
+    }
+    
     int nFramesToSkip = 0;
     int nFramesToInclude = -1;
     if (p->SUBFlagEncountered) {
@@ -3000,6 +3018,15 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             wantJackKnife = (p->doJackKnife != 0.0);
 		}
 	}
+    
+    bool wantDebugMessages = false;
+    if (p->DEBGFlagEncountered) {
+        wantDebugMessages = true;
+        if (p->DEBGFlagParamsSet[0]) {
+            // Optional parameter: p->printDebugInfo
+            wantDebugMessages = (p->printDebugInfo != 0.0);
+        }
+    }
     
     bool useIgorFunctionForProgress;
     FUNCREF igorProgressReporterFunction;
@@ -3074,6 +3101,8 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;
+        sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
+        sofiOptions.wantDebugMessages = wantDebugMessages;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         for (size_t i = 0; i < orders.size(); ++i) {
             DataFolderAndName adjustedOutputParams = outputWaveParams;
@@ -3377,7 +3406,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
