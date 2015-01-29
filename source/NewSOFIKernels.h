@@ -42,7 +42,7 @@ typedef std::vector<std::pair<int, int> > PixelCombination;
 typedef std::vector<PixelCombination> Partition;
 typedef std::vector<Partition> GroupOfPartitions;
 
-class SOFIPixelCombination {
+class SOFIVirtualPixel {
 public:
     int outputDeltaX;
     int outputDeltaY;
