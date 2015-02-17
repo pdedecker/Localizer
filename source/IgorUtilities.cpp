@@ -543,40 +543,39 @@ ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave) {
 }
 
 waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName) {
-
-    waveHndl DPWave;
-
-    int err;
-    CountInt dimensionSizes[MAX_DIMENSIONS+1];
-
     // special case:
     // if the matrix is NULL (such as when there are no positions found)
     // then we return an empty wave
     if (matrix.get() == NULL) {
+        CountInt dimensionSizes[MAX_DIMENSIONS+1];
         dimensionSizes[0] = 0;
         dimensionSizes[1] = 0;
         dimensionSizes[2] = 0;
-
-        DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
-
-        return DPWave;
-
+        
+        return MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
     }
+    
+    return CopyMatrixToIgorDPWave(*matrix, waveName);
+}
 
-
-    size_t x_size = (size_t)matrix->rows();
-    size_t y_size = (size_t)matrix->cols();
-
+waveHndl CopyMatrixToIgorDPWave(const Eigen::MatrixXd& matrix, std::string waveName) {
+    waveHndl DPWave;
+    
+    int err;
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
+    size_t x_size = (size_t)matrix.rows();
+    size_t y_size = (size_t)matrix.cols();
+    
     dimensionSizes[0] = x_size;
     dimensionSizes[1] = y_size;
     dimensionSizes[2] = 0;
-
+    
     DPWave = MakeWaveUsingFullPath(waveName, dimensionSizes, NT_FP64, 1);
-
-    err = MDStoreDPDataInNumericWave(DPWave, matrix->data());
+    
+    err = MDStoreDPDataInNumericWave(DPWave, matrix.data());
     if (err != 0)
         throw err;
-
+    
     return DPWave;
 }
 

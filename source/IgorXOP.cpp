@@ -764,6 +764,31 @@ typedef struct NewSOFIRuntimeParams NewSOFIRuntimeParams;
 typedef struct NewSOFIRuntimeParams* NewSOFIRuntimeParamsPtr;
 #pragma pack()	// Reset structure alignment to default.
 
+// Runtime param structure for SOFIPixelCombinations operation.
+#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+struct SOFIPixelCombinationsRuntimeParams {
+    // Flag parameters.
+    
+    // Parameters for /COMB flag group.
+    int COMBFlagEncountered;
+    double combinationSelection;
+    int COMBFlagParamsSet[1];
+    
+    // Main parameters.
+    
+    // Parameters for simple main group #0.
+    int orderEncountered;
+    double order;
+    int orderParamsSet[1];
+    
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+};
+typedef struct SOFIPixelCombinationsRuntimeParams SOFIPixelCombinationsRuntimeParams;
+typedef struct SOFIPixelCombinationsRuntimeParams* SOFIPixelCombinationsRuntimeParamsPtr;
+#pragma pack()	// Reset structure alignment to default.
+
 // Runtime param structure for WriteCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct WriteCCDImagesRuntimeParams {
@@ -3159,6 +3184,37 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 	return err;
 }
 
+static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
+{
+    int err = 0;
+    
+    // Flag parameters.
+    
+    double pixelCombinationCutoff = 10.0;
+    if (p->COMBFlagEncountered) {
+        // Parameter: p->combinationSelection
+        if (p->combinationSelection < 1.0)
+            return EXPECT_POS_NUM;
+        pixelCombinationCutoff = p->combinationSelection;
+    }
+    
+    // Main parameters.
+    
+    int order = 2;
+    if (p->orderEncountered) {
+        // Parameter: p->order
+        order = p->order + 0.5;
+        if (!Within(order, 2, 6))
+            return EXPECT_POS_NUM;
+    } else {
+        return EXPECT_POS_NUM;
+    }
+    
+    waveHndl output = CopyMatrixToIgorDPWave(PixelCombinationsForOrderAsMatrix(order, pixelCombinationCutoff), "M_SOFIPixelCombinations");
+    
+    return ((output == NULL) ? NOMEM : 0);
+}
+
 static int ExecuteWriteCCDImages(WriteCCDImagesRuntimeParamsPtr p) {
 	int err = 0;
     
@@ -3412,6 +3468,18 @@ static int RegisterNewSOFI(void) {
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
 }
 
+static int RegisterSOFIPixelCombinations(void) {
+    const char* cmdTemplate;
+    const char* runtimeNumVarList;
+    const char* runtimeStrVarList;
+    
+    // NOTE: If you change this template, you must change the SOFIPixelCombinationsRuntimeParams structure as well.
+    cmdTemplate = "SOFIPixelCombinations /COMB=number:combinationSelection number:order";
+    runtimeNumVarList = "";
+    runtimeStrVarList = "";
+    return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIPixelCombinationsRuntimeParams), (void*)ExecuteSOFIPixelCombinations, 0);
+}
+
 static int RegisterWriteCCDImages(void)
 {
 	const char* cmdTemplate;
@@ -3464,6 +3532,8 @@ static int RegisterOperations(void)		// Register any operations with Igor.
     if ((result = RegisterSOFIAnalysis()))
         return result;
     if ((result = RegisterNewSOFI()))
+        return result;
+    if ((result = RegisterSOFIPixelCombinations()))
         return result;
     if ((result = RegisterWriteCCDImages()))
         return result;

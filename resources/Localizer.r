@@ -92,6 +92,9 @@ resource 'XOPC' (1100) {
         "NewSOFI",
         XOPOp+utilOp+compilableOp,
         
+        "SOFIPixelCombinations",
+        XOPOp+utilOp+compilableOp,
+        
         "WriteCCDImages",
         XOPOp+utilOp+compilableOp+threadSafeOp,
 	}

@@ -608,3 +608,33 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
     PrintToHistory(ss.str());
 #endif
 }
+
+Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombinationCutoff) {
+    std::vector<SOFIKernel> kernels = KernelsForOrder(order, pixelCombinationCutoff);
+    int nVirtualPixels = kernels.size();
+    
+    // count number of pixel combinations
+    int nCombinations = 0;
+    for (int kernelIndex = 0; kernelIndex < nVirtualPixels; kernelIndex++) {
+        nCombinations += kernels.at(kernelIndex).pixelCombinations.size();
+    }
+    
+    Eigen::MatrixXd combinations(nCombinations, 2 * order + 2);
+    combinations.setConstant(99);
+    int offset = 0;
+    for (int kernelIndex = 0; kernelIndex < nVirtualPixels; kernelIndex++) {
+        const SOFIKernel& kernel = kernels.at(kernelIndex);
+        for (int combinationIndex = 0; combinationIndex < kernel.pixelCombinations.size(); combinationIndex++) {
+            const PixelCombination& pixelCombination = kernel.pixelCombinations.at(combinationIndex);
+            combinations(offset, 0) = kernel.outputDeltaX;
+            combinations(offset, 1) = kernel.outputDeltaY;
+            for (int pixelsInCombinationIndex = 0; pixelsInCombinationIndex < pixelCombination.size(); pixelsInCombinationIndex++) {
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex) = pixelCombination[pixelsInCombinationIndex].first;
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex + 1) = pixelCombination[pixelsInCombinationIndex].second;
+            }
+            offset++;
+        }
+    }
+    
+    return combinations;
+}

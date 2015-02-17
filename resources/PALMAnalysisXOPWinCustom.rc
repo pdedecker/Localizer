@@ -54,6 +54,9 @@ BEGIN
 	"NewSOFI\0",
 	XOPOp | utilOp | compilableOp,
 	
+	"SOFIPixelCombinations\0",
+	XOPOp | utilOp | compilableOp,
+	
 	"WriteCCDImages\0",
 	XOPOp | utilOp | compilableOp | threadSafeOp,
 
