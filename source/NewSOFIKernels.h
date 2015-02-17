@@ -55,9 +55,11 @@ public:
     int outputDeltaX;
     int outputDeltaY;
     std::vector<GroupOfPartitions> combinations;
+    std::vector<PixelCombination> pixelCombinations;
+    std::vector<double> scores;
 };
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff, bool wantDebugMessages);
+std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff);
 
 class ComparePixelCombinations {
 public:

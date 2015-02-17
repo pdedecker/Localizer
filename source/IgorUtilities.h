@@ -77,4 +77,6 @@ waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, std::string waveName);
 waveHndl CopyMatrixToIgorDPWave(ImagePtr matrix, DataFolderAndName dataFolderAndName);
 waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName dataFolderAndName);
 
+void PrintToHistory(const std::string& str);
+
 #endif

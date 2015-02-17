@@ -620,4 +620,12 @@ waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName da
     return outputWriter.getWave();
 }
 
-
+void PrintToHistory(const std::string& str) {
+    size_t offset = 0;
+    while (offset < str.size()) {
+        std::string subStr = str.substr(offset, MAXCMDLEN - 2);
+        XOPNotice(subStr.c_str());
+        offset += subStr.size();
+    }
+    XOPNotice("\r");
+}

@@ -42,48 +42,10 @@ std::vector<SOFIKernel> SOFIVirtualPixelsToKernels(const std::vector<SOFIVirtual
 void SortPixelCombination(PixelCombination& combination);
 
 std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff);
-std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
+std::string SummarizeSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff, bool wantDebugMessages) {
-    std::vector<SOFIVirtualPixel> virtualPixels = SOFIVirtualPixelsForOrder(order, pixelCombinationCutoff);
-#ifdef WITH_IGOR
-    if (wantDebugMessages) {
-        std::string debugStr = PrintSOFIVirtualPixels(virtualPixels);
-        int offset = 0;
-        while (offset < debugStr.size()) {
-            std::string subStr = debugStr.substr(offset, MAXCMDLEN - 2);
-            XOPNotice(subStr.c_str());
-            offset += subStr.size();
-        }
-        XOPNotice("\r");
-    }
-#endif
-    
-    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(virtualPixels);
-    
-    /*switch (order) {
-        case 1:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations1());
-            break;
-        case 2:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations2());
-            break;
-        case 3:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations3());
-            break;
-        case 4:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations4());
-            break;
-        case 5:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations5());
-            break;
-        case 6:
-            kernels = SOFIVirtualPixelsToKernels(sofiPixelCombinations6());
-            break;
-        default:
-            throw std::runtime_error("unsupported order");
-            break;
-    }*/
+std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff) {
+    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(SOFIVirtualPixelsForOrder(order, pixelCombinationCutoff));
     
     for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
         std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
@@ -116,6 +78,8 @@ SOFIKernel SOFIVirtualPixelToKernel(const SOFIVirtualPixel& virtualPixel) {
     SOFIKernel kernel;
     kernel.outputDeltaX = virtualPixel.outputDeltaX;
     kernel.outputDeltaY = virtualPixel.outputDeltaY;
+    kernel.pixelCombinations = virtualPixel.combinations;
+    kernel.scores = virtualPixel.scores;
     for (auto it = virtualPixel.combinations.cbegin(); it != virtualPixel.combinations.cend(); ++it) {
         kernel.combinations.push_back(AllPartitions(*it));
     }
