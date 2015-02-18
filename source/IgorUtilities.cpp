@@ -512,6 +512,29 @@ waveHndl CopyVectorToIgorDPWave(const std::vector<double>& vec, DataFolderAndNam
     return wave;
 }
 
+std::vector<double> IgorWaveToVector(waveHndl wav) {
+    int err;
+    int numDimensions;
+    CountInt dimensionSizes[MAX_DIMENSIONS+1];
+    
+    err = MDGetWaveDimensions(wav, &numDimensions, dimensionSizes);
+    if (err != 0)
+        throw err;
+    
+    IndexInt indices[MAX_DIMENSIONS];
+    memset(indices, 0, sizeof(indices));
+    double value[2];
+    IndexInt nRows = dimensionSizes[ROWS];
+    std::vector<double> vec(nRows);
+    for (indices[ROWS] = 0; indices[ROWS] < nRows; indices[ROWS]++) {
+        err = MDGetNumericWavePointValue(wav, indices, value);
+        if (err)
+            throw err;
+        vec[indices[ROWS]] = value[0];
+    }
+    
+    return vec;
+}
 
 ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave) {
     // copy a Igor wave into a new gsl_matrix
@@ -519,9 +542,6 @@ ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave) {
     int err;
     int numDimensions;
     CountInt dimensionSizes[MAX_DIMENSIONS+1];
-    size_t x_size, y_size;
-
-
     err = MDGetWaveDimensions(wave, &numDimensions, dimensionSizes);
     if (err != 0) {
         throw err;
@@ -530,8 +550,8 @@ ImagePtr CopyIgorDPWaveToMatrix(waveHndl wave) {
         throw INCOMPATIBLE_DIMENSIONING;
     }
 
-    x_size = dimensionSizes[0];
-    y_size = dimensionSizes[1];
+    size_t x_size = dimensionSizes[0];
+    size_t y_size = dimensionSizes[1];
 
     ImagePtr matrix(new Image((int)x_size, (int)y_size));
 

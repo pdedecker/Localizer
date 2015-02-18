@@ -699,6 +699,11 @@ struct NewSOFIRuntimeParams {
     double combinationSelection;
     int COMBFlagParamsSet[1];
     
+    // Parameters for /WGHT flag group.
+    int WGHTFlagEncountered;
+    waveHndl pixelCombinationWeights;
+    int WGHTFlagParamsSet[1];
+    
     // Parameters for /SUB flag group.
     int SUBFlagEncountered;
     double framesToSkip;
@@ -2982,6 +2987,28 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         pixelCombinationCutoff = p->combinationSelection;
     }
     
+    std::vector<double> pixelCombinationWeights;
+    bool havePixelCombinationWeights = false;
+    if (p->WGHTFlagEncountered) {
+        // Parameter: p->pixelCombinationWeights (test for NULL handle before using)
+        if (p->pixelCombinationWeights == NULL)
+            return NOWAV;
+        if ((WaveType(p->pixelCombinationWeights) & (NT_FP64 | NT_FP32)) == 0)
+            return WAVE_TYPE_MISMATCH;
+        int numDimensions;
+        CountInt dimensionSizes[MAX_DIMENSIONS+1];
+        err = MDGetWaveDimensions(p->pixelCombinationWeights, &numDimensions, dimensionSizes);
+        if (err != 0)
+            return err;
+        if (numDimensions != 1)
+            return INCOMPATIBLE_DIMENSIONING;
+        if (dimensionSizes[ROWS] == 0)
+            return INCOMPATIBLE_DIMENSIONING;
+        
+        pixelCombinationWeights = IgorWaveToVector(p->pixelCombinationWeights);
+        havePixelCombinationWeights = true;
+    }
+    
     int nFramesToSkip = 0;
     int nFramesToInclude = -1;
     if (p->SUBFlagEncountered) {
@@ -3127,6 +3154,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
+        sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
         sofiOptions.wantDebugMessages = wantDebugMessages;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         for (size_t i = 0; i < orders.size(); ++i) {
@@ -3462,7 +3490,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

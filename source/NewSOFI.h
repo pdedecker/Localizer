@@ -62,6 +62,7 @@ public:
     bool wantJackKnife;
     std::vector<std::vector<ImagePtr> > jackKnifeImages;
     double pixelCombinationCutoff;
+    std::vector<double> pixelCombinationWeights;
     bool wantDebugMessages;
 };
 
