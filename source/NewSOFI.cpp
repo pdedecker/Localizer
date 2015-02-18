@@ -61,6 +61,8 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     int nImages = imageLoader->getNImages();
     if (nImages <= 2)
         throw std::runtime_error("too few input images");
+    if ((imageLoader->getXSize() < 5) || (imageLoader->getYSize() < 5))
+        throw std::runtime_error("images too small");
     
     const std::vector<int> orders = options.orders;
     int nOrders = orders.size();
