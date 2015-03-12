@@ -342,8 +342,8 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
     
     // and make the SOFI images
     sofiImages.resize(orders.size());
-    std::vector<std::vector<double>> combinationWeights;
     tbb::parallel_for<int>(0, orders.size(), [&](int i) {
+        std::vector<std::vector<double>> combinationWeights;
         const std::pair<int, std::vector<SOFIKernel> >& calculation = orders[i];
         int order = calculation.first;
         const std::vector<SOFIKernel>& kernels = calculation.second;
