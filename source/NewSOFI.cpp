@@ -566,7 +566,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     for (int i = 0; i < nImagesToInclude; ++i) {
         ImagePtr currentImage = imageLoader->readNextImage();
         
-        // subtract the contribution of the current image from the pixelMap
+        // subtract the contribution of the current image from the pixelMap and normalize
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
@@ -581,11 +581,8 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                     (*matrix)(row - 2, col - 2) -= product;
                 }
             }
-        });
-        
-        // normalize the pixelMap
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
-            ImagePtr matrix = item.second;
+            
+            // normalize the pixelMap
             (*matrix) /= static_cast<double>(nImagesToInclude - 1);
         });
         
@@ -593,16 +590,15 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         std::vector<std::vector<double>> usedCombinationWeights;
         ImagePtr partialSOFI = AssembleSOFIImage(nInputRows, nInputCols, order, kernels, pixelMap, pixelCombinationWeights, usedCombinationWeights);
         
-        // undo the pixelMap normalization
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
-            ImagePtr matrix = item.second;
-            (*matrix) *= static_cast<double>(nImagesToInclude - 1);
-        });
-        
-        // add the contribution of the current image back in
+        // undo the normalization and add the contribution of the current image back in
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
+            
+            // undo normalization
+            (*matrix) *= static_cast<double>(nImagesToInclude - 1);
+            
+            // add the contribution of the current image back in
             int nRowsToCalculate = matrix->rows();
             int nColsToCalculate = matrix->cols();
             for (int col = 2; col < nColsToCalculate; ++col) {
