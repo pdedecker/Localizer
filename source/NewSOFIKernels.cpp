@@ -42,6 +42,7 @@ std::vector<SOFIKernel> SOFIVirtualPixelsToKernels(const std::vector<SOFIVirtual
 void SortPixelCombination(PixelCombination& combination);
 
 std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff);
+std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order);
 std::string SummarizeSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
 std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff) {
@@ -59,6 +60,10 @@ std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombi
     }
     
     return kernels;
+}
+
+std::vector<SOFIKernel> AutoKernelsForOrder(const int order) {
+    return SOFIVirtualPixelsToKernels(SOFIAutoCumulantPixelsForOrder(order));
 }
 
 SOFIKernel SOFIVirtualPixelToKernel(const SOFIVirtualPixel& virtualPixel);
@@ -369,4 +374,17 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
     }
     
     return sofiPixelCombinations;
+}
+
+std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order) {
+    std::vector<SOFIVirtualPixel> result(1);
+    SOFIVirtualPixel& pixel = result.at(0);
+    pixel.outputDeltaX = 0;
+    pixel.outputDeltaY = 0;
+    pixel.scores.resize(1, 0.0);
+    pixel.combinations.resize(1);
+    for (int i = 0; i < order; i+=1) {
+        pixel.combinations.at(0).push_back(std::pair<int, int>(0,0));
+    }
+    return result;
 }

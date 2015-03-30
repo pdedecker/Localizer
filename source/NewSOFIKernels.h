@@ -60,6 +60,7 @@ public:
 };
 
 std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff);
+std::vector<SOFIKernel> AutoKernelsForOrder(const int order);
 
 class ComparePixelCombinations {
 public:

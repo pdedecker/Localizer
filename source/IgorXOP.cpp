@@ -715,6 +715,11 @@ struct NewSOFIRuntimeParams {
     double noSaturatedPixels;				// Optional parameter.
     int NSATFlagParamsSet[1];
     
+    // Parameters for /XC flag group.
+    int XCFlagEncountered;
+    double wantCrossCumulant;				// Optional parameter.
+    int XCFlagParamsSet[1];
+    
     // Parameters for /AVG flag group.
     int AVGFlagEncountered;
     double doAverage;						// Optional parameter.
@@ -3031,6 +3036,14 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 		}
 	}
     
+    bool wantCrossCumulant = true;
+    if (p->XCFlagEncountered) {
+        if (p->XCFlagParamsSet[0]) {
+            // Optional parameter: p->wantCrossCumulant
+            wantCrossCumulant = (p->wantCrossCumulant != 0.0);
+        }
+    }
+    
     bool wantAverageImage = false;
     if (p->AVGFlagEncountered) {
         wantAverageImage = true;
@@ -3147,6 +3160,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::vector<ImagePtr> sofiOutputImages;
         SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
+        sofiOptions.wantCrossCumulant = wantCrossCumulant;
         sofiOptions.batchSize = batchSize;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
@@ -3166,7 +3180,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             }
             waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(i), adjustedOutputParams);
             double offset = 2.0;
-            double delta = 1.0 / static_cast<double>(orders[i]);
+            double delta = (wantCrossCumulant) ? 1.0 / static_cast<double>(orders[i]) : 1.0;
             MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
             MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
         }
@@ -3186,7 +3200,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
                 }
                 waveHndl jackWave = CopyStackToIgorDPWave(sofiOptions.jackKnifeImages.at(i), jackKnifeOutputWaveParams);
                 double offset = 2.0;
-                double delta = 1.0 / static_cast<double>(orders[i]);
+                double delta = (wantCrossCumulant) ? 1.0 / static_cast<double>(orders[i]) : 1.0;
                 MDSetWaveScaling(jackWave, ROWS, &delta, &offset);
                 MDSetWaveScaling(jackWave, COLUMNS, &delta, &offset);
             }
@@ -3490,7 +3504,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

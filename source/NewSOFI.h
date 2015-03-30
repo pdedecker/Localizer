@@ -42,6 +42,7 @@ class SOFIOptions {
 public:
     SOFIOptions() :
         batchSize(0),
+        wantCrossCumulant(true),
         doPixelationCorrection(true),
         alsoCorrectVariance(true),
         wantAverageImage(false),
@@ -55,6 +56,7 @@ public:
     std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
     std::vector<int> orders;
     int batchSize;
+    bool wantCrossCumulant;
     bool doPixelationCorrection;
     bool alsoCorrectVariance;
     bool wantAverageImage;
