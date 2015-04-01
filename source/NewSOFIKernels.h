@@ -32,13 +32,9 @@
 
 #include <vector>
 #include <utility>
+#include <tuple>
 
-//typedef std::vector<std::pair<int, int> > PixelCombination;
-//typedef std::vector<PixelCombination> Subset;
-//typedef std::vector<Subset> Partition;
-//typedef std::vector<Partition> GroupOfPartitions;
-
-typedef std::vector<std::pair<int, int> > PixelCombination;
+typedef std::vector<std::tuple<int, int, int> > PixelCombination;
 typedef std::vector<PixelCombination> Partition;
 typedef std::vector<Partition> GroupOfPartitions;
 

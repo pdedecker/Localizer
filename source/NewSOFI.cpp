@@ -188,23 +188,23 @@ void MinMaxDeltas(const PixelCombination& pixelCombination, int& minRowDelta, in
     maxColDelta = -1000;
     
     for (size_t i = 0; i < pixelCombination.size(); ++i) {
-        const std::pair<int,int>& pixel = pixelCombination[i];
-        if (pixel.first < minRowDelta)
-            minRowDelta = pixel.first;
-        if (pixel.first > maxRowDelta)
-            maxRowDelta = pixel.first;
-        if (pixel.second < minColDelta)
-            minColDelta = pixel.second;
-        if (pixel.second > maxColDelta)
-            maxColDelta = pixel.second;
+        const std::tuple<int,int, int>& pixel = pixelCombination[i];
+        if (std::get<0>(pixel) < minRowDelta)
+            minRowDelta = std::get<0>(pixel);
+        if (std::get<0>(pixel) > maxRowDelta)
+            maxRowDelta = std::get<0>(pixel);
+        if (std::get<1>(pixel) < minColDelta)
+            minColDelta = std::get<1>(pixel);
+        if (std::get<1>(pixel) > maxColDelta)
+            maxColDelta = std::get<1>(pixel);
     }
 }
 
 PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination, const int rowDelta, const int colDelta) {
     PixelCombination offsetCombination(pixelCombination);
     for (size_t i = 0; i < offsetCombination.size(); ++i) {
-        offsetCombination[i].first += rowDelta;
-        offsetCombination[i].second += colDelta;
+        std::get<0>(offsetCombination[i]) += rowDelta;
+        std::get<1>(offsetCombination[i]) += colDelta;
     }
     return offsetCombination;
 }
@@ -328,7 +328,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
                 for (int row = 2; row < nRowsToCalculate; ++row) {
                     double product = 1.0;
                     for (size_t i = 0; i < currentCombination.size(); ++i) {
-                        product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
+                        product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
                     }
                     (*matrix)(row - 2, col - 2) += product;
                 }
@@ -582,7 +582,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                 for (int row = 2; row < nRowsToCalculate; ++row) {
                     double product = 1.0;
                     for (size_t i = 0; i < currentCombination.size(); ++i) {
-                        product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
+                        product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
                     }
                     (*matrix)(row - 2, col - 2) -= product;
                 }
@@ -611,7 +611,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                 for (int row = 2; row < nRowsToCalculate; ++row) {
                     double product = 1.0;
                     for (size_t i = 0; i < currentCombination.size(); ++i) {
-                        product *= (*currentImage)(row + currentCombination[i].first, col + currentCombination[i].second);
+                        product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<0>(currentCombination[i]));
                     }
                     (*matrix)(row - 2, col - 2) += product;
                 }
@@ -650,7 +650,7 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
             ss << "\t" << singleKernel.scores[pixelIndex] << "\t" << combinationWeights.at(i).at(pixelIndex) << "\t";
             ss << "{";
             for (auto pixelPairIt = singleKernel.pixelCombinations[pixelIndex].cbegin(); pixelPairIt != singleKernel.pixelCombinations[pixelIndex].cend(); pixelPairIt++) {
-                ss << "(" << pixelPairIt->first << "," << pixelPairIt->second << ")";
+                ss << "(" << std::get<0>(*pixelPairIt) << "," << std::get<1>(*pixelPairIt) << "," << std::get<1>(*pixelPairIt) << ")";
             }
             ss << "}\r";
         }
@@ -677,8 +677,8 @@ Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombina
             combinations(offset, 0) = kernel.outputDeltaX;
             combinations(offset, 1) = kernel.outputDeltaY;
             for (int pixelsInCombinationIndex = 0; pixelsInCombinationIndex < pixelCombination.size(); pixelsInCombinationIndex++) {
-                combinations(offset, 2 + 2 * pixelsInCombinationIndex) = pixelCombination[pixelsInCombinationIndex].first;
-                combinations(offset, 2 + 2 * pixelsInCombinationIndex + 1) = pixelCombination[pixelsInCombinationIndex].second;
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex) = std::get<0>(pixelCombination[pixelsInCombinationIndex]);
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex + 1) = std::get<1>(pixelCombination[pixelsInCombinationIndex]);
             }
             offset++;
         }

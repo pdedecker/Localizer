@@ -92,13 +92,20 @@ SOFIKernel SOFIVirtualPixelToKernel(const SOFIVirtualPixel& virtualPixel) {
 }
 
 void SortPixelCombination(PixelCombination& combination) {
-    std::sort(combination.begin(), combination.end(), [](const std::pair<int,int>& pair1, const std::pair<int,int>& pair2) -> bool {
-        if (pair1.first < pair2.first) {
-            return true;
-        } else if (pair1.first == pair2.first) {
-            return (pair1.second < pair2.second);
+    std::sort(combination.begin(), combination.end(), [](const std::tuple<int,int,int>& pos1, const std::tuple<int,int,int>& pos2) -> bool {
+        int xLoc1, xLoc2, yLoc1, yLoc2, tau1, tau2;
+        std::tie(xLoc1, yLoc1, tau1) = pos1;
+        std::tie(xLoc2, yLoc2, tau2) = pos2;
+        
+        if (xLoc1 == xLoc2) {
+            if (yLoc1 == yLoc2) {
+                return (tau1 < tau2);
+            } else {
+                return yLoc1 < yLoc2;
+            }
+        } else {
+            return (xLoc1 < xLoc2);
         }
-        return false;
     });
 }
 
@@ -186,7 +193,7 @@ void NextPartition(std::vector<int>& kk, std::vector<int>& MM) {
 std::string ParititionTest() {
     PixelCombination pixelCombination;
     for (int i = 0; i < 3; ++i) {
-        pixelCombination.push_back(std::pair<int, int>(i, i));
+        pixelCombination.push_back(std::tuple<int, int, int>(i, i, 0));
     }
     
     std::ostringstream ss;
@@ -208,7 +215,7 @@ std::string PrintPartition(const Partition& partition) {
     for (int j = 0; j < nSubsets; ++j) {
         ss << "{";
         for (auto pixelIt = partition[j].cbegin(); pixelIt != partition[j].cend(); ++pixelIt) {
-            ss << "(" << pixelIt->first << "," << pixelIt->second << ") ";
+            ss << "(" << std::get<0>(*pixelIt) << "," << std::get<1>(*pixelIt) << ", " << std::get<2>(*pixelIt) << ")";
         }
         ss << "} ";
     }
@@ -226,7 +233,7 @@ std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualP
             ss << "\t" << singleVirtualPixel.scores[pixelIndex] << "\t";
             ss << "{";
             for (auto pixelPairIt = singleVirtualPixel.combinations[pixelIndex].cbegin(); pixelPairIt != singleVirtualPixel.combinations[pixelIndex].cend(); pixelPairIt++) {
-                ss << "(" << pixelPairIt->first << "," << pixelPairIt->second << ")";
+                ss << "(" << std::get<0>(*pixelPairIt) << "," << std::get<1>(*pixelPairIt) << ", " << std::get<2>(*pixelPairIt) << ")";
             }
             ss << "}\r";
         }
@@ -246,7 +253,7 @@ public:
     {
     }
     
-    void addCombination(const std::vector<std::pair<int, int>>& combination);
+    void addCombination(const std::vector<std::tuple<int, int, int>>& combination);
     SOFIVirtualPixel getCombination(double pixelCombinationCutoff) const;
     int getOutputDeltaX() const {return _outputDeltaX;}
     int getOutputDeltaY() const {return _outputDeltaY;}
@@ -258,18 +265,18 @@ private:
     double _worstScore;
     int _worstScoreIndex;
     
-    std::vector<std::vector<std::pair<int, int>>> _pixelCombinations;
+    std::vector<std::vector<std::tuple<int, int, int>>> _pixelCombinations;
     std::vector<double> _scores;
     
 };
 
-void PixelCombinationAccumulator::addCombination(const std::vector<std::pair<int, int>>& combination) {
+void PixelCombinationAccumulator::addCombination(const std::vector<std::tuple<int, int, int>>& combination) {
     // calculate product of all pairwise distances in the combination. This will be the metric for determining
     // which pixel combinations are good. The lower the distance, the better.
     double score = 1.0;
     for (size_t j = 0; j < combination.size(); j++) {
         for (size_t i = j + 1; i < combination.size(); i++) {
-            double sqDistance = square((double)combination[i].first - (double)combination[j].first) + square((double)combination[i].second - (double)combination[j].second);
+            double sqDistance = square((double)std::get<0>(combination[i]) - (double)std::get<0>(combination[j])) + square((double)std::get<1>(combination[i]) - (double)std::get<1>(combination[j]));
             score *= sqDistance;
         }
     }
@@ -328,14 +335,14 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
         accumulators.push_back(PixelCombinationAccumulator(maxNCombinations, i / order, i % order));
     }
     
-    std::vector<std::pair<int, int>> inputPixels;
+    std::vector<std::tuple<int, int, int>> inputPixels;
     for (int i = -neighborhoodSize / 2; i <= neighborhoodSize / 2; i++) {
         for (int j = -neighborhoodSize / 2; j <= neighborhoodSize / 2; j++) {
-            inputPixels.push_back(std::pair<int, int>(i, j));
+            inputPixels.push_back(std::tuple<int, int, int>(i, j, 0));
         }
     }
     
-    std::vector<std::pair<int, int>> pixelCombination(order);
+    std::vector<std::tuple<int, int, int>> pixelCombination(order);
     // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
     unsigned int v = (1 << order) - 1; // starting permutation of bits
     unsigned int lastPermutation = 1 << inputPixels.size();
@@ -356,8 +363,8 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
         
         int outputDeltaX = 0, outputDeltaY = 0;
         for (int j = 0; j < pixelCombination.size(); j++) {
-            outputDeltaX += pixelCombination[j].first;
-            outputDeltaY += pixelCombination[j].second;
+            outputDeltaX += std::get<0>(pixelCombination[j]);
+            outputDeltaY += std::get<1>(pixelCombination[j]);
         }
         
         if (!Within(outputDeltaX, 0, order - 1) || !Within(outputDeltaY, 0, order - 1))
@@ -384,7 +391,7 @@ std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order) {
     pixel.scores.resize(1, 0.0);
     pixel.combinations.resize(1);
     for (int i = 0; i < order; i+=1) {
-        pixel.combinations.at(0).push_back(std::pair<int, int>(0,0));
+        pixel.combinations.at(0).push_back(std::tuple<int, int, int>(0,0,0));
     }
     return result;
 }
