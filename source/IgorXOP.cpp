@@ -735,6 +735,16 @@ struct NewSOFIRuntimeParams {
     double batchSize;
     int BATFlagParamsSet[1];
     
+    // Parameters for /LAG flag group.
+    int LAGFlagEncountered;
+    double lagTimes[100];					// Optional parameter.
+    int LAGFlagParamsSet[100];
+    
+    // Parameters for /LAGW flag group.
+    int LAGWFlagEncountered;
+    waveHndl lagTimesWave;
+    int LAGWFlagParamsSet[1];
+    
     // Parameters for /JACK flag group.
     int JACKFlagEncountered;
     double doJackKnife;						// Optional parameter.
@@ -3076,6 +3086,61 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         }
 	}
     
+    if (p->LAGFlagEncountered && p->LAGWFlagEncountered) {
+        XOPNotice("Only one of the \"LAG\" or \"LAGW\" flags can be set\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    if ((p->LAGFlagEncountered || p->LAGWFlagEncountered) && (orders.size() > 1)) {
+        XOPNotice("Only a single order can be calculated when lag times are specified\r");
+        return PALM_ANALYSIS_XOP_ERROR;
+    }
+    
+    std::vector<int> lagTimes;
+    if (p->LAGFlagEncountered) {
+        // Array-style optional parameter: p->lagTimes
+        int* paramsSet = &p->LAGFlagParamsSet[0];
+        int nLagTimesSpecified = 0;
+        double d1;
+        for(int i=0; i<100; i++) {
+            if (paramsSet[i] == 0)
+                break;		// No more parameters.
+            d1 = p->lagTimes[i];
+            if (d1 < 0)
+                return EXPECT_POS_NUM;
+            int lagTime = static_cast<int>(d1 + 0.5);
+            lagTimes.push_back(lagTime);
+            nLagTimesSpecified += 1;
+        }
+        if (nLagTimesSpecified != orders.at(0) - 1) {
+            XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
+            return PALM_ANALYSIS_XOP_ERROR;
+        }
+    }
+    if (p->LAGWFlagEncountered) {
+        // Parameter: p->lagTimesWave (test for NULL handle before using)
+        waveHndl lagTimesWave = p->lagTimesWave;
+        if (lagTimesWave == NULL)
+            return NOWAV;
+        int waveType = WaveType(lagTimesWave);
+        if ((waveType == TEXT_WAVE_TYPE) || (waveType == WAVE_TYPE) || (waveType == DATAFOLDER_TYPE) || (waveType & NT_CMPLX))
+            return NT_INCOMPATIBLE;
+        int nLagTimesInWave = WavePoints(lagTimesWave);
+        if (nLagTimesInWave < orders.at(0) - 1) {
+            XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
+            return PALM_ANALYSIS_XOP_ERROR;
+        }
+        std::unique_ptr<double[]> doubleBuffer(new double[nLagTimesInWave]);
+        lagTimes.resize(nLagTimesInWave);
+        err = MDGetDPDataFromNumericWave(lagTimesWave, doubleBuffer.get());
+        if (err != 0)
+            return err;
+        for (int i = 0; i < nLagTimesInWave; ++i) {
+            lagTimes[i] = doubleBuffer[i];
+        }
+        // drop any lag times that may be unnecessary
+        lagTimes.resize(orders.at(0) - 1);
+    }
+    
     bool wantJackKnife = false;
     if (p->JACKFlagEncountered) {
         wantJackKnife = true;
@@ -3161,6 +3226,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
         sofiOptions.wantCrossCumulant = wantCrossCumulant;
+        sofiOptions.lagTimes = lagTimes;
         sofiOptions.batchSize = batchSize;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
@@ -3228,8 +3294,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 
 static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
 {
-    int err = 0;
-    
     // Flag parameters.
     
     double pixelCombinationCutoff = 10.0;
@@ -3504,7 +3568,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);

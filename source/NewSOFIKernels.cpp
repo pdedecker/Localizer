@@ -41,12 +41,12 @@
 std::vector<SOFIKernel> SOFIVirtualPixelsToKernels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 void SortPixelCombination(PixelCombination& combination);
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff);
-std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order);
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, double pixelCombinationCutoff);
+std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order, const std::vector<int>& timeLags);
 std::string SummarizeSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff) {
-    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(SOFIVirtualPixelsForOrder(order, pixelCombinationCutoff));
+std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const double pixelCombinationCutoff) {
+    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(SOFIVirtualPixelsForOrder(order, timeLags, pixelCombinationCutoff));
     
     for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
         std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
@@ -62,8 +62,8 @@ std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombi
     return kernels;
 }
 
-std::vector<SOFIKernel> AutoKernelsForOrder(const int order) {
-    return SOFIVirtualPixelsToKernels(SOFIAutoCumulantPixelsForOrder(order));
+std::vector<SOFIKernel> AutoKernelsForOrder(const int order, const std::vector<int>& timeLags) {
+    return SOFIVirtualPixelsToKernels(SOFIAutoCumulantPixelsForOrder(order, timeLags));
 }
 
 SOFIKernel SOFIVirtualPixelToKernel(const SOFIVirtualPixel& virtualPixel);
@@ -322,9 +322,11 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination(double pixelCombina
     return result;
 }
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelCombinationCutoff) {
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, double pixelCombinationCutoff) {
     if (Clip(order, 1, 6) != order)
         throw std::logic_error("unsupported order");
+    if (timeLags.size() != order)
+        throw std::logic_error("too few or too many time lags");
     
     int maxNCombinations = 32;
     int neighborhoodSize = 5;
@@ -354,7 +356,7 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
             break;
         
         int offset = 0;
-        for (int j = 0; j < inputPixels.size(); j++) {
+        for (size_t j = 0; j < inputPixels.size(); j++) {
             if ((w >> j) & 1) {
                 pixelCombination.at(offset) = inputPixels.at(j);
                 offset++;
@@ -362,7 +364,7 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
         }
         
         int outputDeltaX = 0, outputDeltaY = 0;
-        for (int j = 0; j < pixelCombination.size(); j++) {
+        for (size_t j = 0; j < pixelCombination.size(); j++) {
             outputDeltaX += std::get<0>(pixelCombination[j]);
             outputDeltaY += std::get<1>(pixelCombination[j]);
         }
@@ -370,20 +372,26 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, double pixelC
         if (!Within(outputDeltaX, 0, order - 1) || !Within(outputDeltaY, 0, order - 1))
             continue;
         
+        for (size_t j = 0; j < pixelCombination.size(); j++) {
+            std::get<2>(pixelCombination[j]) = timeLags[j];
+        }
+        
         assert(accumulators.at(outputDeltaX * order + outputDeltaY).getOutputDeltaX() == outputDeltaX);
         assert(accumulators.at(outputDeltaX * order + outputDeltaY).getOutputDeltaY() == outputDeltaY);
         accumulators.at(outputDeltaX * order + outputDeltaY).addCombination(pixelCombination);
     }
     
     std::vector<SOFIVirtualPixel> sofiPixelCombinations(accumulators.size());
-    for (int i = 0; i < accumulators.size(); i++) {
+    for (size_t i = 0; i < accumulators.size(); i++) {
         sofiPixelCombinations[i] = accumulators[i].getCombination(pixelCombinationCutoff);
     }
     
     return sofiPixelCombinations;
 }
 
-std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order) {
+std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order, const std::vector<int>& timeLags) {
+    if (timeLags.size() != order)
+        throw std::logic_error("too few or too many time lags");
     std::vector<SOFIVirtualPixel> result(1);
     SOFIVirtualPixel& pixel = result.at(0);
     pixel.outputDeltaX = 0;
@@ -391,7 +399,7 @@ std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order) {
     pixel.scores.resize(1, 0.0);
     pixel.combinations.resize(1);
     for (int i = 0; i < order; i+=1) {
-        pixel.combinations.at(0).push_back(std::tuple<int, int, int>(0,0,0));
+        pixel.combinations.at(0).push_back(std::tuple<int, int, int>(0,0,timeLags[i]));
     }
     return result;
 }

@@ -57,6 +57,7 @@ public:
     std::vector<int> orders;
     int batchSize;
     bool wantCrossCumulant;
+    std::vector<int> lagTimes;
     bool doPixelationCorrection;
     bool alsoCorrectVariance;
     bool wantAverageImage;

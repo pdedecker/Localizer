@@ -55,8 +55,8 @@ public:
     std::vector<double> scores;
 };
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const double pixelCombinationCutoff);
-std::vector<SOFIKernel> AutoKernelsForOrder(const int order);
+std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const double pixelCombinationCutoff);
+std::vector<SOFIKernel> AutoKernelsForOrder(const int order, const std::vector<int>& timeLags);
 
 class ComparePixelCombinations {
 public:
