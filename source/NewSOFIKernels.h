@@ -34,9 +34,36 @@
 #include <utility>
 #include <tuple>
 
-typedef std::vector<std::tuple<int, int, int> > PixelCombination;
+class PixelCoordinate;
+typedef std::vector<PixelCoordinate> PixelCombination;
 typedef std::vector<PixelCombination> Partition;
 typedef std::vector<Partition> GroupOfPartitions;
+
+class PixelCoordinate {
+public:
+    PixelCoordinate() : dx(-10), dy(-10), dt(-10) {}
+    PixelCoordinate(int xx, int yy, int tt) : dx(xx), dy(yy), dt(tt) {}
+    
+    int dx;
+    int dy;
+    int dt;
+};
+
+inline bool operator<(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
+    if (lhs.dx == rhs.dx) {
+        if (lhs.dy == rhs.dy) {
+            return (lhs.dt < rhs.dt);
+        } else {
+            return (lhs.dy < rhs.dy);
+        }
+    } else {
+        return (lhs.dx < rhs.dx);
+    }
+}
+
+inline bool operator==(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
+    return ((lhs.dx == rhs.dx) && (lhs.dy == rhs.dy) && (lhs.dt == rhs.dt));
+}
 
 class SOFIVirtualPixel {
 public:

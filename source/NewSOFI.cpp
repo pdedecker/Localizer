@@ -144,7 +144,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         nBatches = nImages / batchSize + 1;
     }
     jackKnifeBatchSOFIImages.resize(nBatches);
-    for (unsigned int n = 0; n < nBatches; ++n) {
+    for (int n = 0; n < nBatches; ++n) {
         firstImageToProcess = lastImageToProcess;
         lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
         std::vector<ImagePtr> subImages;
@@ -152,7 +152,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         totalNumberOfImagesIncluded += nImagesIncluded;
         double contribution = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
         summedContributions += contribution;
-        for (size_t j = 0; j < nOrders; ++j) {
+        for (int j = 0; j < nOrders; ++j) {
             if (mergedImages[j].get() == NULL) {
                 mergedImages[j] = ImagePtr(new Image(subImages[j]->rows(), subImages[j]->cols()));
                 mergedImages[j]->setConstant(0.0);
@@ -205,23 +205,23 @@ void MinMaxDeltas(const PixelCombination& pixelCombination, int& minRowDelta, in
     maxColDelta = -1000;
     
     for (size_t i = 0; i < pixelCombination.size(); ++i) {
-        const std::tuple<int,int, int>& pixel = pixelCombination[i];
-        if (std::get<0>(pixel) < minRowDelta)
-            minRowDelta = std::get<0>(pixel);
-        if (std::get<0>(pixel) > maxRowDelta)
-            maxRowDelta = std::get<0>(pixel);
-        if (std::get<1>(pixel) < minColDelta)
-            minColDelta = std::get<1>(pixel);
-        if (std::get<1>(pixel) > maxColDelta)
-            maxColDelta = std::get<1>(pixel);
+        const PixelCoordinate& pixel = pixelCombination[i];
+        if (pixel.dx < minRowDelta)
+            minRowDelta = pixel.dx;
+        if (pixel.dx > maxRowDelta)
+            maxRowDelta = pixel.dx;
+        if (pixel.dy < minColDelta)
+            minColDelta = pixel.dy;
+        if (pixel.dy > maxColDelta)
+            maxColDelta = pixel.dy;
     }
 }
 
 PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination, const int rowDelta, const int colDelta) {
     PixelCombination offsetCombination(pixelCombination);
     for (size_t i = 0; i < offsetCombination.size(); ++i) {
-        std::get<0>(offsetCombination[i]) += rowDelta;
-        std::get<1>(offsetCombination[i]) += colDelta;
+        offsetCombination[i].dx += rowDelta;
+        offsetCombination[i].dy += colDelta;
     }
     return offsetCombination;
 }
@@ -370,12 +370,12 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer.at(std::get<2>(currentCombination[i]));
-                            product *= (*imageAtTimeLag)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     }
                     (*matrix)(row - 2, col - 2) += product;
@@ -653,12 +653,12 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer.at(std::get<2>(currentCombination[i]));
-                            product *= (*imageAtTimeLag)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     }
                     (*matrix)(row - 2, col - 2) -= product;
@@ -689,12 +689,12 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer.at(std::get<2>(currentCombination[i]));
-                            product *= (*imageAtTimeLag)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + std::get<0>(currentCombination[i]), col + std::get<1>(currentCombination[i]));
+                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     }
                     (*matrix)(row - 2, col - 2) += product;
@@ -732,7 +732,7 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
             ss << "\t" << singleKernel.scores[pixelIndex] << "\t" << combinationWeights.at(i).at(pixelIndex) << "\t";
             ss << "{";
             for (auto pixelPairIt = singleKernel.pixelCombinations[pixelIndex].cbegin(); pixelPairIt != singleKernel.pixelCombinations[pixelIndex].cend(); pixelPairIt++) {
-                ss << "(" << std::get<0>(*pixelPairIt) << "," << std::get<1>(*pixelPairIt) << "," << std::get<2>(*pixelPairIt) << ")";
+                ss << "(" << pixelPairIt->dx << "," << pixelPairIt->dy << "," << pixelPairIt->dt << ")";
             }
             ss << "}\r";
         }
@@ -760,8 +760,8 @@ Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombina
             combinations(offset, 0) = kernel.outputDeltaX;
             combinations(offset, 1) = kernel.outputDeltaY;
             for (size_t pixelsInCombinationIndex = 0; pixelsInCombinationIndex < pixelCombination.size(); pixelsInCombinationIndex++) {
-                combinations(offset, 2 + 2 * pixelsInCombinationIndex) = std::get<0>(pixelCombination[pixelsInCombinationIndex]);
-                combinations(offset, 2 + 2 * pixelsInCombinationIndex + 1) = std::get<1>(pixelCombination[pixelsInCombinationIndex]);
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex) = pixelCombination[pixelsInCombinationIndex].dx;
+                combinations(offset, 2 + 2 * pixelsInCombinationIndex + 1) = pixelCombination[pixelsInCombinationIndex].dy;
             }
             offset++;
         }
