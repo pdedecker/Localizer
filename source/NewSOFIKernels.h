@@ -80,6 +80,7 @@ public:
     std::vector<GroupOfPartitions> combinations;
     std::vector<PixelCombination> pixelCombinations;
     std::vector<double> scores;
+    std::vector<double> requestedCombinationWeights;
 };
 
 std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const double pixelCombinationCutoff);
