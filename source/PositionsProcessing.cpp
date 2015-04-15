@@ -103,13 +103,11 @@ std::vector<double> VR_sp_pp2(const double *xCoordinates1, const double *yCoordi
     double ySize = upperY - lowerY;
     double g = 2.0;
     double binWidth = calculationRange / static_cast<double>(nBins);
-    double actualCalculationRange = std::min(calculationRange, 0.5 * sqrt(xSize * xSize + ySize * ySize));
-    size_t actualNBins = ceil(actualCalculationRange / binWidth);
-    double binsPerDistance = static_cast<double>(actualNBins) / actualCalculationRange;
-    double sqMaxDistance = actualCalculationRange * actualCalculationRange;
+    double binsPerDistance = 1.0 / binWidth;
+    double sqMaxDistance = calculationRange * calculationRange;
     
     std::vector<double> result;
-    result = tbb::parallel_reduce(tbb::blocked_range<size_t>(0, nPoints1), std::vector<double>(actualNBins, 0.0),
+    result = tbb::parallel_reduce(tbb::blocked_range<size_t>(0, nPoints1), std::vector<double>(nBins, 0.0),
                                   [=](const tbb::blocked_range<size_t>& r, const std::vector<double>& initialValue) -> std::vector<double> {
                                       std::vector<double> accum(initialValue);
                                       for (size_t i = r.begin(); i != r.end(); i++) {
@@ -123,7 +121,7 @@ std::vector<double> VR_sp_pp2(const double *xCoordinates1, const double *yCoordi
                                               if (sqDistance < sqMaxDistance) {
                                                   double distance = sqrt(sqDistance);
                                                   size_t ib = floor(binsPerDistance * distance);
-                                                  if (ib < actualNBins) {
+                                                  if (ib < nBins) {
                                                       if (isBivariate) {
                                                           accum[ib] += g * VR_edge(xi, yi, distance, upperX, lowerX, upperY, lowerY);
                                                       } else {
