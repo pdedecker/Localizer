@@ -1350,7 +1350,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
         if (p->nImagesToRead < 0) {
             nImagesToRead = (size_t)-1;
         } else {
-            nImagesToRead = (size_t)(p->nImagesToRead + 0.5);
+            nImagesToRead = (size_t)(p->nImagesToRead);
             if (nImagesToRead == 0)
                 return kBadMultipleImageCount;
         }
@@ -3030,7 +3030,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 		// Parameter: p->framesToSkip
         // Parameter: p->nFramesToInclude
         nFramesToSkip = p->framesToSkip + 0.5;
-        nFramesToInclude = p->nFramesToInclude + 0.5;
+        nFramesToInclude = p->nFramesToInclude;
         if (nFramesToSkip < 0)
             return EXPECT_POS_NUM;
         if (nFramesToInclude < -1)
