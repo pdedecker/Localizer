@@ -36,15 +36,23 @@ std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPos
 	size_t findPosition;
 	
 	// determine the type of positions being passed
-	Handle waveNoteHandle = WaveNote(positionsWave);
-	size_t waveNoteSize = GetHandleSize(waveNoteHandle);
-	if (waveNoteSize == 0) {	// no wavenote
+#if defined(XOP_TOOLKIT_VERSION) && (XOP_TOOLKIT_VERSION >= 700)
+    Handle waveNoteCopy = WaveNoteCopy(positionsWave);
+#else
+	Handle waveNoteCopy = WaveNote(positionsWave);
+    if (HandToHand(&waveNoteCopy) != 0);
+        waveNoteCopy = NULL;
+#endif
+    if ((waveNoteCopy == NULL) || (GetHandleSize(waveNoteCopy)) == 0) {	// no wavenote
+        DisposeHandle(waveNoteCopy);
 		throw std::runtime_error("The localized positions wave does not contain a wavenote, cannot determine the storage type");
 	}
 	
+    size_t waveNoteSize = GetHandleSize(waveNoteCopy);
 	std::unique_ptr<char[]> CStringWaveNote(new char[waveNoteSize + 1]);
 	
-	err = GetCStringFromHandle(waveNoteHandle, CStringWaveNote.get(), waveNoteSize);
+	err = GetCStringFromHandle(waveNoteCopy, CStringWaveNote.get(), waveNoteSize);
+    DisposeHandle(waveNoteCopy);
 	if (err != 0) {
 		if (err == USING_NULL_STRVAR) {
 			throw std::runtime_error("No wavenote found. Did you make or load these positions with this software?");
