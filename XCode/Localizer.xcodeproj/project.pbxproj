@@ -11,6 +11,7 @@
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D027E93A151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
+		D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02F86331BB58CF900CF5E68 /* Cocoa.framework */; settings = {ASSET_TAGS = (); }; };
 		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */ = {isa = PBXBuildFile; fileRef = D056459E18AA1F72001A22D9 /* NewSOFI.h */; };
@@ -21,6 +22,19 @@
 		D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632118B4CED200C940C5 /* SOFIFrameVerifiers.h in Headers */ = {isa = PBXBuildFile; fileRef = D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */; };
 		D090E533139685610099D837 /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
+		D099CE661B8E4E7A00E23C07 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
+		D099CE671B8E4E8000E23C07 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
+		D099CE681B8E4E9300E23C07 /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
+		D099CE691B8E4E9700E23C07 /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE298170C54680012ED0E /* libfftw3.a */; };
+		D099CE6A1B8E4E9A00E23C07 /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE299170C54680012ED0E /* libgsl.a */; };
+		D099CE6B1B8E4E9E00E23C07 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
+		D099CE6C1B8E4EA100E23C07 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
+		D099CE6D1B8E4EA400E23C07 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
+		D099CE6E1B8E4EA700E23C07 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
+		D099CE6F1B8E4EAE00E23C07 /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
+		D099CE701B8E4EB100E23C07 /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D01677061B8D97A5007685B9 /* libXOPSupport.a */; settings = {ATTRIBUTES = (Required, ); }; };
+		D099CE711B8E4EC300E23C07 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
+		D099CE721B8E4EC500E23C07 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
 		D0A9C2ED135F4EED00D076AE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		D0A9C2EF135F4EED00D076AE /* IgorXOP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09576100D30171E00506A92 /* IgorXOP.cpp */; };
 		D0A9C2F0135F4EED00D076AE /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
@@ -34,8 +48,6 @@
 		D0A9C2F8135F4EED00D076AE /* PositionsProcessing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */; };
 		D0A9C2F9135F4EED00D076AE /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
 		D0A9C2FA135F4EED00D076AE /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
-		D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
-		D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D0C258321746C19A001C2EB1 /* PALMAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09810480D5B18B10074692A /* PALMAnalysis.cpp */; };
 		D0C258341746C1A2001C2EB1 /* Processing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D09382490D8173B2008CB7F8 /* Processing.cpp */; };
 		D0C258361746C1A2001C2EB1 /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
@@ -58,16 +70,10 @@
 		D0C258581746C1F4001C2EB1 /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
 		D0C258591746C51E001C2EB1 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D0C2585A1746C57D001C2EB1 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
-		D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
 		D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D08BADD30F80C59400D08A6C /* FileIO.cpp */; };
 		D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0069E0C117B764200112C90 /* Storage.cpp */; };
 		D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */; };
 		D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */; };
-		D0D3F85319654671000E4052 /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */; };
-		D0D3F85419655607000E4052 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
-		D0D3F85519655609000E4052 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
-		D0D3F8561965560B000E4052 /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
-		D0D8ABB7195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
 		D0D8ABB8195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
 		D0D8ABB9195C1D2500D5987C /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABB6195C1D2500D5987C /* libtiff.a */; };
 		D0D8ABBE195C1DAB00D5987C /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
@@ -76,11 +82,6 @@
 		D0D8ABC2195C1DAB00D5987C /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
 		D0D8ABC4195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
 		D0D8ABC5195C1DAB00D5987C /* libboost_thread-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */; };
-		D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE298170C54680012ED0E /* libfftw3.a */; };
-		D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE299170C54680012ED0E /* libgsl.a */; };
-		D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
-		D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
-		D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D0FB9905193344E00024B6A7 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D0FB9906193344E50024B6A7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
 		D0FB9907193344E70024B6A7 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
@@ -106,11 +107,13 @@
 		D0069E0C117B764200112C90 /* Storage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Storage.cpp; path = ../source/Storage.cpp; sourceTree = SOURCE_ROOT; };
 		D0128F5C151CB06400D683EC /* Matlab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matlab.h; path = ../source/Matlab.h; sourceTree = SOURCE_ROOT; };
 		D0128F5D151CB06400D683EC /* Matlab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matlab.cpp; path = ../source/Matlab.cpp; sourceTree = SOURCE_ROOT; };
+		D01677061B8D97A5007685B9 /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode/libXOPSupport.a; sourceTree = SOURCE_ROOT; };
 		D01D290A136CE9710094B975 /* ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressReporting.h; path = ../source/ProgressReporting.h; sourceTree = SOURCE_ROOT; };
 		D01D290B136CE9710094B975 /* ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressReporting.cpp; path = ../source/ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
 		D01F3B0A13E0800D00A42472 /* Localizer.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = Localizer.r; path = ../resources/Localizer.r; sourceTree = SOURCE_ROOT; };
 		D027E935151311CF005B8664 /* Convolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Convolver.h; path = ../source/Convolver.h; sourceTree = SOURCE_ROOT; };
 		D027E936151311CF005B8664 /* Convolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Convolver.cpp; path = ../source/Convolver.cpp; sourceTree = SOURCE_ROOT; };
+		D02F86331BB58CF900CF5E68 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		D03321001074B8B80097124C /* PALMImages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALMImages.h; path = ../source/PALMImages.h; sourceTree = SOURCE_ROOT; };
 		D03321011074B8B80097124C /* PALMImages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMImages.cpp; path = ../source/PALMImages.cpp; sourceTree = SOURCE_ROOT; };
 		D043F47315A712B7006A3D54 /* WaitMex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WaitMex.h; path = ../source/WaitMex.h; sourceTree = SOURCE_ROOT; };
@@ -140,17 +143,17 @@
 		D09576110D30171E00506A92 /* IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorXOP.h; path = ../source/IgorXOP.h; sourceTree = SOURCE_ROOT; };
 		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
+		D0986AA21BC25D6F00ED90CF /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = ../../../../../../../../System/Library/Frameworks/CoreAudio.framework; sourceTree = "<group>"; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = LocalizerMatlab.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
 		D0CCD33B1473C7E0005CD75A /* LocalizerDLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LocalizerDLL.cpp; path = ../source/LocalizerDLL.cpp; sourceTree = SOURCE_ROOT; };
-		D0D8ABB6195C1D2500D5987C /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = "<group>"; };
-		D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = "<group>"; };
-		D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = "<group>"; };
-		D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = "<group>"; };
-		D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport.a; path = ../../XOPSupport/Xcode4/libXOPSupport.a; sourceTree = "<group>"; };
+		D0D8ABB6195C1D2500D5987C /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = ../lib/mac/libtiff.a; sourceTree = SOURCE_ROOT; };
+		D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_date_time-mt.a"; path = "../lib/mac/libboost_date_time-mt.a"; sourceTree = SOURCE_ROOT; };
+		D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../lib/mac/libboost_system-mt.a"; sourceTree = SOURCE_ROOT; };
+		D0D8ABBC195C1DAB00D5987C /* libboost_thread-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_thread-mt.a"; path = "../lib/mac/libboost_thread-mt.a"; sourceTree = SOURCE_ROOT; };
 		D0E6FD0F131C546400356DBB /* MatrixRecycler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MatrixRecycler.h; path = ../source/MatrixRecycler.h; sourceTree = SOURCE_ROOT; };
 		D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MatrixRecycler.cpp; path = ../source/MatrixRecycler.cpp; sourceTree = SOURCE_ROOT; };
 		D0EAE298170C54680012ED0E /* libfftw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfftw3.a; path = ../lib/mac/libfftw3.a; sourceTree = SOURCE_ROOT; };
@@ -173,19 +176,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0A9C2FC135F4EED00D076AE /* Carbon.framework in Frameworks */,
-				D0A9C2FD135F4EED00D076AE /* Accelerate.framework in Frameworks */,
-				D0D3F85419655607000E4052 /* libboost_date_time-mt.a in Frameworks */,
-				D0D3F85519655609000E4052 /* libboost_system-mt.a in Frameworks */,
-				D0D3F8561965560B000E4052 /* libboost_thread-mt.a in Frameworks */,
-				D0EAE2A1170C54680012ED0E /* libfftw3.a in Frameworks */,
-				D0EAE2A2170C54680012ED0E /* libgsl.a in Frameworks */,
-				D0EAE2A3170C54680012ED0E /* libjpeg.a in Frameworks */,
-				D0EAE2A4170C54680012ED0E /* liblzma.a in Frameworks */,
-				D0EAE2A6170C54680012ED0E /* libz.a in Frameworks */,
-				D0C7D191172E77CD0048356A /* libtbb.dylib in Frameworks */,
-				D0D8ABB7195C1D2500D5987C /* libtiff.a in Frameworks */,
-				D0D3F85319654671000E4052 /* libXOPSupport.a in Frameworks */,
+				D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */,
+				D099CE661B8E4E7A00E23C07 /* libboost_date_time-mt.a in Frameworks */,
+				D099CE671B8E4E8000E23C07 /* libboost_system-mt.a in Frameworks */,
+				D099CE681B8E4E9300E23C07 /* libboost_thread-mt.a in Frameworks */,
+				D099CE691B8E4E9700E23C07 /* libfftw3.a in Frameworks */,
+				D099CE6A1B8E4E9A00E23C07 /* libgsl.a in Frameworks */,
+				D099CE6B1B8E4E9E00E23C07 /* libtiff.a in Frameworks */,
+				D099CE6C1B8E4EA100E23C07 /* libjpeg.a in Frameworks */,
+				D099CE6D1B8E4EA400E23C07 /* liblzma.a in Frameworks */,
+				D099CE6E1B8E4EA700E23C07 /* libz.a in Frameworks */,
+				D099CE6F1B8E4EAE00E23C07 /* libtbb.dylib in Frameworks */,
+				D099CE701B8E4EB100E23C07 /* libXOPSupport.a in Frameworks */,
+				D099CE711B8E4EC300E23C07 /* Accelerate.framework in Frameworks */,
+				D099CE721B8E4EC500E23C07 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,6 +232,7 @@
 		089C166AFE841209C02AAC07 /* PALM analysis XOP */ = {
 			isa = PBXGroup;
 			children = (
+				D0986AA21BC25D6F00ED90CF /* CoreAudio.framework */,
 				D018444510E370D800277419 /* Design documents */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -250,12 +255,13 @@
 				D0EAE29B170C54680012ED0E /* liblzma.a */,
 				D0EAE29D170C54680012ED0E /* libz.a */,
 				D0C7D190172E77CD0048356A /* libtbb.dylib */,
-				D0D8ABC6195C1E0300D5987C /* libXOPSupport.a */,
+				D01677061B8D97A5007685B9 /* libXOPSupport.a */,
+				D02F86331BB58CF900CF5E68 /* Cocoa.framework */,
 				D0006D2B12CFD34D00539A8F /* Accelerate.framework */,
 				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
 			);
 			name = "External Frameworks and Libraries";
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
@@ -596,7 +602,6 @@
 		4FADC23808B4156C00ABE55E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
@@ -624,7 +629,6 @@
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
 				LIBRARY_SEARCH_PATHS = ../lib/mac;
-				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.9;
@@ -635,7 +639,6 @@
 		4FADC23908B4156C00ABE55E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				ENABLE_OPENMP_SUPPORT = NO;
@@ -672,7 +675,6 @@
 				INFOPLIST_FILE = "";
 				LIBRARY_SEARCH_PATHS = ../lib/mac;
 				LLVM_LTO = YES;
-				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_REZFLAGS = "";
 				SDKROOT = macosx10.9;
@@ -700,9 +702,10 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
-					../lib/mac,
-					../../XOPSupport/Xcode4,
+					"$(inherited)",
+					../../XOPSupport/Xcode,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
 				WRAPPER_EXTENSION = xop;
@@ -727,9 +730,10 @@
 				);
 				INFOPLIST_FILE = ../resources/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
-					../lib/mac,
-					../../XOPSupport/Xcode4,
+					"$(inherited)",
+					../../XOPSupport/Xcode,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
