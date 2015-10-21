@@ -445,6 +445,7 @@ std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdIm
 	// by allocating the threshold_image first we make sure that the it will have
 	// the correct (original) size
 	std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > thresholdedImage(new Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>(xSize, ySize));
+    thresholdedImage->setConstant(0);
 	int imageNeedsResizing = 0;
 	if (xSize % 2 != 0) {
 		xSize -= 1;
