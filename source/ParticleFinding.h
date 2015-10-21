@@ -147,6 +147,23 @@ protected:
 };
 
 /**
+ * Verify the particles by seeing if they pass the fitting of a FitPositions_SymmetricGaussian class
+ */
+class ParticleVerifier_FixedWidthGaussian : public ParticleVerifier {
+public:
+    ParticleVerifier_FixedWidthGaussian(double initialPSFWidth_rhs, double sigma_rhs) :
+        verifier(FitPositions_FixedWidthGaussian(initialPSFWidth_rhs, sigma_rhs)) {}
+    ~ParticleVerifier_FixedWidthGaussian() {;}
+    
+    
+    void VerifyParticles(ImagePtr image, std::shared_ptr<std::list<Particle> > positions) {
+        verifier.fit_positions(image, positions);
+    }
+protected:
+    FitPositions_FixedWidthGaussian verifier;
+};
+
+/**
  * Verify the particles by seeing if they pass the fitting of a FitPositions_EllipsoidalGaussian class
  */
 class ParticleVerifier_EllipsoidalGaussian : public ParticleVerifier {

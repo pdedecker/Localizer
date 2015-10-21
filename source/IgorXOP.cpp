@@ -1196,6 +1196,9 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
             case PARTICLEVERIFIER_SYMMETRICGAUSS:
                 particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(initial_width, sigma)));
                 break;
+            case PARTICLEVERIFIER_FIXEDWIDTHGAUSS:
+                particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_FixedWidthGaussian(initial_width, 1.0)));
+                break;
             case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
                 particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(initial_width, sigma)));
                 break;
@@ -2159,6 +2162,9 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
 					case PARTICLEVERIFIER_SYMMETRICGAUSS:
 						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_SymmetricGaussian(PSFWidth, 1.0)));
 						break;
+                    case PARTICLEVERIFIER_FIXEDWIDTHGAUSS:
+                        particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_FixedWidthGaussian(PSFWidth, 1.0)));
+                        break;
 					case PARTICLEVERIFIER_ELLIPSOIDALGAUSS_SYMM:
 						particleVerifiers.push_back(std::shared_ptr<ParticleVerifier> (new ParticleVerifier_EllipsoidalGaussian_SymmetricPSF(PSFWidth, 1.0)));
 						break;
