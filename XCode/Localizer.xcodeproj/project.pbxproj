@@ -21,6 +21,7 @@
 		D06A631F18B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632118B4CED200C940C5 /* SOFIFrameVerifiers.h in Headers */ = {isa = PBXBuildFile; fileRef = D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */; };
+		D08859561BD7AD7B00310040 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D08859551BD7AD7B00310040 /* AudioToolbox.framework */; settings = {ASSET_TAGS = (); }; };
 		D090E533139685610099D837 /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
 		D099CE661B8E4E7A00E23C07 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
 		D099CE671B8E4E8000E23C07 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
@@ -125,6 +126,7 @@
 		D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SOFIFrameVerifiers.cpp; path = ../source/SOFIFrameVerifiers.cpp; sourceTree = "<group>"; };
 		D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SOFIFrameVerifiers.h; path = ../source/SOFIFrameVerifiers.h; sourceTree = "<group>"; };
 		D084B0630F7F7236004E7AE3 /* Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Defines.h; path = ../source/Defines.h; sourceTree = SOURCE_ROOT; };
+		D08859551BD7AD7B00310040 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = ../../../../../../../../System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<group>"; };
 		D08B48E30D52381800C99DE3 /* PALMAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PALMAnalysis.h; path = ../source/PALMAnalysis.h; sourceTree = SOURCE_ROOT; };
 		D08BADD20F80C59400D08A6C /* FileIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileIO.h; path = ../source/FileIO.h; sourceTree = SOURCE_ROOT; };
 		D08BADD30F80C59400D08A6C /* FileIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileIO.cpp; path = ../source/FileIO.cpp; sourceTree = SOURCE_ROOT; };
@@ -143,7 +145,6 @@
 		D09576110D30171E00506A92 /* IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorXOP.h; path = ../source/IgorXOP.h; sourceTree = SOURCE_ROOT; };
 		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
-		D0986AA21BC25D6F00ED90CF /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = ../../../../../../../../System/Library/Frameworks/CoreAudio.framework; sourceTree = "<group>"; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = LocalizerMatlab.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
@@ -178,6 +179,7 @@
 			files = (
 				D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */,
 				D099CE661B8E4E7A00E23C07 /* libboost_date_time-mt.a in Frameworks */,
+				D08859561BD7AD7B00310040 /* AudioToolbox.framework in Frameworks */,
 				D099CE671B8E4E8000E23C07 /* libboost_system-mt.a in Frameworks */,
 				D099CE681B8E4E9300E23C07 /* libboost_thread-mt.a in Frameworks */,
 				D099CE691B8E4E9700E23C07 /* libfftw3.a in Frameworks */,
@@ -232,7 +234,6 @@
 		089C166AFE841209C02AAC07 /* PALM analysis XOP */ = {
 			isa = PBXGroup;
 			children = (
-				D0986AA21BC25D6F00ED90CF /* CoreAudio.framework */,
 				D018444510E370D800277419 /* Design documents */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -256,6 +257,7 @@
 				D0EAE29D170C54680012ED0E /* libz.a */,
 				D0C7D190172E77CD0048356A /* libtbb.dylib */,
 				D01677061B8D97A5007685B9 /* libXOPSupport.a */,
+				D08859551BD7AD7B00310040 /* AudioToolbox.framework */,
 				D02F86331BB58CF900CF5E68 /* Cocoa.framework */,
 				D0006D2B12CFD34D00539A8F /* Accelerate.framework */,
 				08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */,
@@ -685,7 +687,7 @@
 		D0A9C303135F4EED00D076AE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -705,7 +707,7 @@
 					"$(inherited)",
 					../../XOPSupport/Xcode,
 				);
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
 				WRAPPER_EXTENSION = xop;
@@ -716,7 +718,7 @@
 		D0A9C304135F4EED00D076AE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -733,7 +735,7 @@
 					"$(inherited)",
 					../../XOPSupport/Xcode,
 				);
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
 				PRODUCT_NAME = Localizer;
