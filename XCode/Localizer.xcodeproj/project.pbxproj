@@ -412,6 +412,7 @@
 				D0A9C2FF135F4EED00D076AE /* Rez */,
 				D0A9C301135F4EED00D076AE /* CopyFiles */,
 				D0118575172EA410001F165A /* ShellScript */,
+				D0095B231BDBFB16006A86E7 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -509,6 +510,20 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		D0095B231BDBFB16006A86E7 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$TARGET_BUILD_DIR/\"\n\nL32=\"$WRAPPER_NAME\"\nTARGET_NAME_64=\"${TARGET_NAME}64\"\nL64=\"${TARGET_NAME_64}${WRAPPER_SUFFIX}\"\n\nLIPO_OUTPUT=`lipo -info \"${L32}/Contents/MacOS/${TARGET_NAME}\"`\nGREP_OUTPUT=`echo \"${LIPO_OUTPUT}\" | grep \"Non-fat file\"`\nif [ \"${GREP_OUTPUT}\" ]; then\n    echo \"already non-universal binary\"\n    exit 0\nfi\n\necho \"creating thinned 32 and 64 bit versions\"\n\n# create 64-bit variant by copying\nrm -rf \"$L64\"\ncp -R \"$L32\" \"$L64\"\n\n# rename executable inside 64 bit version\nmv \"${L64}/Contents/MacOS/${TARGET_NAME}\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\n# rename executable inside the info.plist\ncat \"${L64}/Contents/Info.plist\" | sed \"s/\\<string\\>${TARGET_NAME}\\<\\/string\\>/\\<string\\>${TARGET_NAME_64}\\<\\/string\\>/\" > \"${L64}/Contents/Info2.plist\"\nrm \"${L64}/Contents/Info.plist\"\nmv \"${L64}/Contents/Info2.plist\" \"${L64}/Contents/Info.plist\"\n# rename resources file\nmv \"${L64}/Contents/Resources/Localizer.rsrc\" \"${L64}/Contents/Resources/Localizer64.rsrc\"\n\n# trim 64-bit code from 32 bit XOP\nlipo -thin i386 -output \"${L32}/Contents/MacOS/${TARGET_NAME}2\" \"${L32}/Contents/MacOS/${TARGET_NAME}\"\nrm \"${L32}/Contents/MacOS/${TARGET_NAME}\"\nmv \"${L32}/Contents/MacOS/${TARGET_NAME}2\" \"${L32}/Contents/MacOS/${TARGET_NAME}\"\n\n#trim 32-bit code from 64 bit XOP\nlipo -thin x86_64 -output \"${L64}/Contents/MacOS/${TARGET_NAME_64}2\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\nrm \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\nmv \"${L64}/Contents/MacOS/${TARGET_NAME_64}2\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\n\nexit 0";
+			showEnvVarsInLog = 0;
+		};
 		D0118575172EA410001F165A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -521,6 +536,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cd \"$TARGET_BUILD_DIR/$WRAPPER_NAME/Contents\"\nrm -R -f Frameworks\t# remove the old folder if it exists\nmkdir Frameworks\t\t# create a new one\ncd Frameworks\ncp \"$PROJECT_DIR/../lib/mac/libtbb.dylib\" .\n#cp \"$PROJECT_DIR/../lib/mac/libtbbmalloc.dylib\" .\n# now the otool part:\ninstall_name_tool -change libtbb.dylib @loader_path/../Frameworks/libtbb.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n#install_name_tool -change libtbbmalloc.dylib @loader_path/../Frameworks/libtbbmalloc.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
