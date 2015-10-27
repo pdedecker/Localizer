@@ -40,7 +40,7 @@ std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPos
     Handle waveNoteCopy = WaveNoteCopy(positionsWave);
 #else
 	Handle waveNoteCopy = WaveNote(positionsWave);
-    if (HandToHand(&waveNoteCopy) != 0);
+    if (HandToHand(&waveNoteCopy) != 0)
         waveNoteCopy = NULL;
 #endif
     if ((waveNoteCopy == NULL) || (GetHandleSize(waveNoteCopy)) == 0) {	// no wavenote
