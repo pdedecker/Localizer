@@ -73,7 +73,6 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
     bool wantAverageImage = options.wantAverageImage;
     ImagePtr& averageImage = options.averageImage;
-    ImagePtr batchAverageImage;
     bool wantJackKnife = options.wantJackKnife;
     bool wantDebugMessages = options.wantDebugMessages;
     std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages = options.jackKnifeImages;
@@ -82,7 +81,6 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     jackKnifeOutputImages.clear();
     std::vector<std::vector<ImagePtr> > batchSOFIImages;    // SOFI image of each batch, 1 vector per order. Only used for jackknife.
     batchSOFIImages.resize(nOrders);
-    std::vector<std::vector<std::vector<ImagePtr> > > jackKnifeBatchSOFIImages;  // jackknife SOFI images. batch / order / images
     std::vector<int> imagesIncludedInBatch;
     
     if (!lagTimes.empty()) {
@@ -100,6 +98,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
         lagTimes = std::vector<int>(largestOrder, 0);
     }
+    int largestLagTime = *std::max_element(lagTimes.cbegin(), lagTimes.cend());
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
     for (int i = 0; i < nOrders; ++i) {
@@ -130,14 +129,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         }
     }
     
-    int firstImageToProcess = 0;
-    int lastImageToProcess = 0;
-    int imagesProcessedSoFar = 0;
-    int totalNumberOfImagesToProcess = nImages;
     std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
     std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
-    double summedContributions = 0.0;
-    int totalNumberOfImagesIncluded = 0;
+    ImagePtr batchAverageImage;
     if (wantAverageImage) {
         averageImage = ImagePtr(new Image(imageLoader->getXSize(), imageLoader->getYSize()));
         averageImage->setConstant(0.0);
@@ -145,33 +139,43 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     }
     
     progressReporter->CalculationStarted();
-    // calculate a SOFI image for every batch of images
-    std::vector<ImagePtr> mergedImages(nOrders);
+    // determine how many batches to use
     int batchSize = (requestedBatchSize > 0) ? requestedBatchSize : 100;
     int nBatches;
-    if (nImages % batchSize <= 2) {
+    if ((nImages % batchSize) <= largestLagTime + 2) {
         nBatches = nImages / batchSize;
     } else {
         nBatches = nImages / batchSize + 1;
     }
-    jackKnifeBatchSOFIImages.resize(nBatches);
+    
+    std::vector<std::vector<std::vector<ImagePtr> > > jackKnifeBatchSOFIImages(nBatches);  // jackknife SOFI images. batch / order / images
+    
+    int imagesProcessedSoFar = 0;                   // number of images that has been processed, for progress reporting
+    int totalNumberOfImagesToProcess = nImages;     // total number of images that will be processed
+    int firstImageToProcessInBatch = 0;             // first image index to include in current batch
+    int lastImageToProcessInBatch = -1;             // last image index to include in current batch
+    std::vector<ImagePtr> mergedImages(nOrders);    // accumulates all batch images calculated thus far. One image for every order.
+    int totalNumberOfImagesIncluded = 0;            // total number of images that have been included in a batch calculation
+    double summedBatchWeights = 0.0;                // sum of the weights of all batch images
     for (int n = 0; n < nBatches; ++n) {
-        firstImageToProcess = lastImageToProcess;
-        lastImageToProcess = std::min(firstImageToProcess + batchSize - 1, nImages - 1);
+        firstImageToProcessInBatch = lastImageToProcessInBatch + 1;
+        lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, nImages - 1);
+        
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
         totalNumberOfImagesIncluded += nImagesIncluded;
-        double contribution = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
-        summedContributions += contribution;
+        
+        double batchWeight = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
+        summedBatchWeights += batchWeight;
         for (int j = 0; j < nOrders; ++j) {
             if (mergedImages[j].get() == NULL) {
                 mergedImages[j] = ImagePtr(new Image(subImages[j]->rows(), subImages[j]->cols()));
                 mergedImages[j]->setConstant(0.0);
             }
-            *mergedImages[j] += *subImages[j] * contribution;
+            *mergedImages[j] += *subImages[j] * batchWeight;
         }
         if (wantAverageImage) {
-            *averageImage += *batchAverageImage * contribution;
+            *averageImage += *batchAverageImage * batchWeight;
         }
         if (wantJackKnife) {
             for (int j = 0; j < nOrders; ++j) {
@@ -183,7 +187,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     // create output images and perform pixelation correction
     tbb::parallel_for<int>(0, nOrders, [&](int j) {
-        *mergedImages[j] /= summedContributions;
+        *mergedImages[j] /= summedBatchWeights;
         
         if (options.doPixelationCorrection)
             PerformPixelationCorrection(mergedImages[j], options.alsoCorrectVariance, orders[j]);
@@ -192,7 +196,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     sofiOutputImages = mergedImages;
     
     if (wantAverageImage)
-        *averageImage /= summedContributions;
+        *averageImage /= summedBatchWeights;
     
     if (wantJackKnife) {
         AssembleJackKnifeImages(jackKnifeBatchSOFIImages, imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
