@@ -409,9 +409,10 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 /**
  Function that will handle SOFI calculations. The input arguments must be of the form
  0 - the string "sofi"
- 1 - the desired order
- 2 - single number: 0 for autocorrelation, 1 for crosscorrelation
- 3 - file path or a matrix containing numeric data
+ 1 - file path to a data file, or a 2D or 3D matrix containing numeric data
+ 2 - 1D array containing the orders to calculate
+ all other arguments must be keyword-value pairs, meaning that each consists of
+ two arguments: a string containing the keyword, followed by the keyword's value.
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
@@ -531,6 +532,49 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     }
     catch (...) {
         mexErrMsgTxt("Unknown error");
+    }
+}
+
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
+    int firstKeywordIndex = 3;
+    
+    // check that we have an even number of arguments remaining
+    if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
+        char buf[128];
+        sprintf(buf, "all arguments after the first %d must be keyword-value pairs", firstKeywordIndex);
+        mexErrMsgTxt(buf);
+    }
+    
+    // check that all remaining arguments are string - value pairs
+    for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+        const mxArray* array = prhs[i];
+        if ((mxGetClassID(array) != mxCHAR_CLASS) || (mxGetM(array) > 1)) {
+            char buf[128];
+            sprintf(buf, "all arguments after the first %d must be keyword (string) - value (double) pairs", firstKeywordIndex);
+            mexErrMsgTxt(buf);
+        }
+        if (!mxIsDouble(prhs[i + 1])) {
+            mexErrMsgTxt("all keyword arguments (not the keywords themselves) must be of numeric type double");
+        }
+    }
+    
+    // check all keyword arguments
+    for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+        const std::string keyword = GetMatlabString(prhs[i]);
+        const mxArray* argument = prhs[i + 1];
+        
+        if (boost::iequals(keyword, "pixelationCorrection")) {
+            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
+                mexErrMsgTxt("\"pixelationCorrection\" argument requires a 1x1 matrix");
+            }
+            sofiOptions.doPixelationCorrection = (*mxGetPr(argument) != 0.0);
+        } else if (boost::iequals(keyword, "batchSize")) {
+            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
+                mexErrMsgTxt("\"batchSize\" argument requires a 1x1 matrix");
+            }
+            if (*mxGetPr(argument) != )
+        }
+        
     }
 }
 
