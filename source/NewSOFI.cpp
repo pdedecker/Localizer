@@ -152,14 +152,14 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     int imagesProcessedSoFar = 0;                   // number of images that has been processed, for progress reporting
     int totalNumberOfImagesToProcess = nImages;     // total number of images that will be processed
-    int firstImageToProcessInBatch = 0;             // first image index to include in current batch
+    int firstImageToProcessInBatch = -batchSize;    // first image index to include in current batch
     int lastImageToProcessInBatch = -1;             // last image index to include in current batch
     std::vector<ImagePtr> mergedImages(nOrders);    // accumulates all batch images calculated thus far. One image for every order.
     int totalNumberOfImagesIncluded = 0;            // total number of images that have been included in a batch calculation
     double summedBatchWeights = 0.0;                // sum of the weights of all batch images
     for (int n = 0; n < nBatches; ++n) {
-        firstImageToProcessInBatch = lastImageToProcessInBatch + 1;
-        lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, nImages - 1);
+        firstImageToProcessInBatch += batchSize;
+        lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize + largestLagTime - 1, nImages - 1);
         
         std::vector<ImagePtr> subImages;
         int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
@@ -276,12 +276,10 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
     jackKnifeImages.clear();
     
     // find min and max time lag
-    int minTimeLag = 0, maxTimeLag = 0;
-    for (size_t i = 0; i < timeLags.size(); i++) {
-        minTimeLag = std::min(minTimeLag, timeLags[i]);
-        maxTimeLag = std::max(maxTimeLag, timeLags[i]);
-    }
-    // required: lowest time lag is zero, all others are zero or postive
+    int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
+    int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.cend());
+    
+    // required: lowest time lag is zero, all others are zero or positive
     if (minTimeLag != 0)
         throw std::runtime_error("at least one time lag must be zero, and all time lags must be zero or positive");
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
