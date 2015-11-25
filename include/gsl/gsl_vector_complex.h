@@ -1,6 +1,16 @@
 #ifndef __GSL_VECTOR_COMPLEX_H__
 #define __GSL_VECTOR_COMPLEX_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #define  GSL_VECTOR_REAL(z, i)  ((z)->data[2*(i)*(z)->stride])
 #define  GSL_VECTOR_IMAG(z, i)  ((z)->data[2*(i)*(z)->stride + 1])
 

@@ -19,6 +19,16 @@
 
 #ifndef __GSL_MINMAX_H__
 #define __GSL_MINMAX_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <gsl/gsl_inline.h>
 
 #undef __BEGIN_DECLS
@@ -40,8 +50,8 @@ __BEGIN_DECLS
 #define GSL_MIN(a,b) ((a) < (b) ? (a) : (b))
 
 /* function versions of the above, in case they are needed */
-double gsl_max (double a, double b);
-double gsl_min (double a, double b);
+GSL_FUN double gsl_max (double a, double b);
+GSL_FUN double gsl_min (double a, double b);
 
 /* inline-friendly strongly typed versions */
 #ifdef HAVE_INLINE

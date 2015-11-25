@@ -81,8 +81,10 @@ namespace boost
 
                     do
                     {
-                        BOOST_VERIFY(win32::WaitForSingleObject(
-                                         sem,::boost::detail::win32::infinite)==0);
+                        unsigned const retval(win32::WaitForSingleObjectEx(sem, ::boost::detail::win32::infinite,0));
+                        BOOST_VERIFY(0 == retval || ::boost::detail::win32::wait_abandoned == retval);
+//                        BOOST_VERIFY(win32::WaitForSingleObject(
+//                                         sem,::boost::detail::win32::infinite)==0);
                         clear_waiting_and_try_lock(old_count);
                         lock_acquired=!(old_count&lock_flag_value);
                     }
@@ -93,10 +95,13 @@ namespace boost
             {
                 for(;;)
                 {
-                    long const new_count=(old_count&lock_flag_value)?(old_count+1):(old_count|lock_flag_value);
+                    bool const was_locked=(old_count&lock_flag_value) ? true : false;
+                    long const new_count=was_locked?(old_count+1):(old_count|lock_flag_value);
                     long const current=BOOST_INTERLOCKED_COMPARE_EXCHANGE(&active_count,new_count,old_count);
                     if(current==old_count)
                     {
+                        if(was_locked)
+                            old_count=new_count;
                         break;
                     }
                     old_count=current;
@@ -137,7 +142,7 @@ namespace boost
 
                     do
                     {
-                        if(win32::WaitForSingleObject(sem,::boost::detail::get_milliseconds_until(wait_until))!=0)
+                        if(win32::WaitForSingleObjectEx(sem,::boost::detail::get_milliseconds_until(wait_until),0)!=0)
                         {
                             BOOST_INTERLOCKED_DECREMENT(&active_count);
                             return false;
@@ -198,9 +203,14 @@ namespace boost
 
                   do
                   {
-                      chrono::milliseconds rel_time= chrono::ceil<chrono::milliseconds>(tp-chrono::system_clock::now());
+                      chrono::time_point<chrono::system_clock, chrono::system_clock::duration> now = chrono::system_clock::now();
+                      if (tp<=now) {
+                        BOOST_INTERLOCKED_DECREMENT(&active_count);
+                        return false;
+                      }
+                      chrono::milliseconds rel_time= chrono::ceil<chrono::milliseconds>(tp-now);
 
-                      if(win32::WaitForSingleObject(sem,static_cast<unsigned long>(rel_time.count()))!=0)
+                      if(win32::WaitForSingleObjectEx(sem,static_cast<unsigned long>(rel_time.count()),0)!=0)
                       {
                           BOOST_INTERLOCKED_DECREMENT(&active_count);
                           return false;

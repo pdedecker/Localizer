@@ -433,10 +433,14 @@ namespace chrono {
         rep rep_;
     public:
 
-        BOOST_CONSTEXPR
+#if  defined   BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
+        BOOST_FORCEINLINE BOOST_CONSTEXPR
         duration() : rep_(duration_values<rep>::zero()) { }
+#else
+        BOOST_CONSTEXPR duration() BOOST_NOEXCEPT {};
+#endif
         template <class Rep2>
-        BOOST_SYMBOL_VISIBLE inline  BOOST_CONSTEXPR
+        BOOST_SYMBOL_VISIBLE BOOST_FORCEINLINE BOOST_CONSTEXPR
         explicit duration(const Rep2& r
         , typename boost::enable_if <
                     mpl::and_ <
@@ -451,17 +455,18 @@ namespace chrono {
                     >
                 >::type* = 0
             ) : rep_(r) { }
-        //~duration() {} //= default;
-//        BOOST_CONSTEXPR        duration(const duration& rhs) : rep_(rhs.rep_) {} // = default;
-        duration& operator=(const duration& rhs) // = default;
+#if  defined   BOOST_NO_CXX11_DEFAULTED_FUNCTIONS
+        duration& operator=(const duration& rhs)
         {
             if (&rhs != this) rep_= rhs.rep_;
             return *this;
         }
-
+#else
+        duration& operator=(const duration& rhs) = default;
+#endif
         // conversions
         template <class Rep2, class Period2>
-        BOOST_CONSTEXPR
+        BOOST_FORCEINLINE BOOST_CONSTEXPR
         duration(const duration<Rep2, Period2>& d
         , typename boost::enable_if <
                     mpl::or_ <
@@ -663,7 +668,7 @@ namespace detail
     template <class LhsDuration, class RhsDuration>
     struct duration_eq
     {
-      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs) const
         {
             typedef typename common_type<LhsDuration, RhsDuration>::type CD;
             return CD(lhs).count() == CD(rhs).count();
@@ -673,7 +678,7 @@ namespace detail
     template <class LhsDuration>
     struct duration_eq<LhsDuration, LhsDuration>
     {
-      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs) const
         {
             return lhs.count() == rhs.count();
         }
@@ -682,7 +687,7 @@ namespace detail
     template <class LhsDuration, class RhsDuration>
     struct duration_lt
     {
-      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const RhsDuration& rhs) const
         {
             typedef typename common_type<LhsDuration, RhsDuration>::type CD;
             return CD(lhs).count() < CD(rhs).count();
@@ -692,7 +697,7 @@ namespace detail
     template <class LhsDuration>
     struct duration_lt<LhsDuration, LhsDuration>
     {
-      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs)
+      BOOST_CONSTEXPR bool operator()(const LhsDuration& lhs, const LhsDuration& rhs) const
         {
             return lhs.count() < rhs.count();
         }

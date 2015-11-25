@@ -20,6 +20,16 @@
 #ifndef __GSL_HISTOGRAM_H__
 #define __GSL_HISTOGRAM_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -47,87 +57,87 @@ typedef struct {
   double * sum ;
 } gsl_histogram_pdf ;
 
-gsl_histogram * gsl_histogram_alloc (size_t n);
+GSL_FUN gsl_histogram * gsl_histogram_alloc (size_t n);
 
-gsl_histogram * gsl_histogram_calloc (size_t n);
-gsl_histogram * gsl_histogram_calloc_uniform (const size_t n, const double xmin, const double xmax);
-void gsl_histogram_free (gsl_histogram * h);
-int gsl_histogram_increment (gsl_histogram * h, double x);
-int gsl_histogram_accumulate (gsl_histogram * h, double x, double weight);
-int gsl_histogram_find (const gsl_histogram * h, 
+GSL_FUN gsl_histogram * gsl_histogram_calloc (size_t n);
+GSL_FUN gsl_histogram * gsl_histogram_calloc_uniform (const size_t n, const double xmin, const double xmax);
+GSL_FUN void gsl_histogram_free (gsl_histogram * h);
+GSL_FUN int gsl_histogram_increment (gsl_histogram * h, double x);
+GSL_FUN int gsl_histogram_accumulate (gsl_histogram * h, double x, double weight);
+GSL_FUN int gsl_histogram_find (const gsl_histogram * h, 
                         const double x, size_t * i);
 
-double gsl_histogram_get (const gsl_histogram * h, size_t i);
-int gsl_histogram_get_range (const gsl_histogram * h, size_t i, 
+GSL_FUN double gsl_histogram_get (const gsl_histogram * h, size_t i);
+GSL_FUN int gsl_histogram_get_range (const gsl_histogram * h, size_t i, 
                              double * lower, double * upper);
                                      
-double gsl_histogram_max (const gsl_histogram * h);
-double gsl_histogram_min (const gsl_histogram * h);
-size_t gsl_histogram_bins (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_max (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_min (const gsl_histogram * h);
+GSL_FUN size_t gsl_histogram_bins (const gsl_histogram * h);
 
-void gsl_histogram_reset (gsl_histogram * h);
+GSL_FUN void gsl_histogram_reset (gsl_histogram * h);
 
-gsl_histogram * gsl_histogram_calloc_range(size_t n, double * range);
+GSL_FUN gsl_histogram * gsl_histogram_calloc_range(size_t n, double * range);
 
-int 
+GSL_FUN int 
 gsl_histogram_set_ranges (gsl_histogram * h, const double range[], size_t size);
-int 
+GSL_FUN int 
 gsl_histogram_set_ranges_uniform (gsl_histogram * h, double xmin, double xmax);
 
 
 
-int
+GSL_FUN int
 gsl_histogram_memcpy(gsl_histogram * dest, const gsl_histogram * source);
 
-gsl_histogram *
+GSL_FUN gsl_histogram *
 gsl_histogram_clone(const gsl_histogram * source);
 
-double gsl_histogram_max_val (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_max_val (const gsl_histogram * h);
 
-size_t gsl_histogram_max_bin (const gsl_histogram * h);
+GSL_FUN size_t gsl_histogram_max_bin (const gsl_histogram * h);
 
-double gsl_histogram_min_val (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_min_val (const gsl_histogram * h);
 
-size_t gsl_histogram_min_bin (const gsl_histogram * h);
+GSL_FUN size_t gsl_histogram_min_bin (const gsl_histogram * h);
 
-int 
+GSL_FUN int 
 gsl_histogram_equal_bins_p(const gsl_histogram *h1, const gsl_histogram *h2);
 
-int 
+GSL_FUN int 
 gsl_histogram_add(gsl_histogram *h1, const gsl_histogram *h2);
 
-int 
+GSL_FUN int 
 gsl_histogram_sub(gsl_histogram *h1, const gsl_histogram *h2);
 
-int 
+GSL_FUN int 
 gsl_histogram_mul(gsl_histogram *h1, const gsl_histogram *h2);
  
-int 
+GSL_FUN int 
 gsl_histogram_div(gsl_histogram *h1, const gsl_histogram *h2);
 
-int 
+GSL_FUN int 
 gsl_histogram_scale(gsl_histogram *h, double scale);
 
-int 
+GSL_FUN int 
 gsl_histogram_shift (gsl_histogram * h, double shift);
 
 
-double gsl_histogram_sigma (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_sigma (const gsl_histogram * h);
 
-double gsl_histogram_mean (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_mean (const gsl_histogram * h);
 
-double gsl_histogram_sum (const gsl_histogram * h);
+GSL_FUN double gsl_histogram_sum (const gsl_histogram * h);
 
-int gsl_histogram_fwrite (FILE * stream, const gsl_histogram * h) ;
-int gsl_histogram_fread (FILE * stream, gsl_histogram * h);
-int gsl_histogram_fprintf (FILE * stream, const gsl_histogram * h, 
+GSL_FUN int gsl_histogram_fwrite (FILE * stream, const gsl_histogram * h) ;
+GSL_FUN int gsl_histogram_fread (FILE * stream, gsl_histogram * h);
+GSL_FUN int gsl_histogram_fprintf (FILE * stream, const gsl_histogram * h, 
                            const char * range_format, const char * bin_format);
-int gsl_histogram_fscanf (FILE * stream, gsl_histogram * h);
+GSL_FUN int gsl_histogram_fscanf (FILE * stream, gsl_histogram * h);
 
-gsl_histogram_pdf * gsl_histogram_pdf_alloc (const size_t n);
-int gsl_histogram_pdf_init (gsl_histogram_pdf * p, const gsl_histogram * h);
-void gsl_histogram_pdf_free (gsl_histogram_pdf * p);
-double gsl_histogram_pdf_sample (const gsl_histogram_pdf * p, double r);
+GSL_FUN gsl_histogram_pdf * gsl_histogram_pdf_alloc (const size_t n);
+GSL_FUN int gsl_histogram_pdf_init (gsl_histogram_pdf * p, const gsl_histogram * h);
+GSL_FUN void gsl_histogram_pdf_free (gsl_histogram_pdf * p);
+GSL_FUN double gsl_histogram_pdf_sample (const gsl_histogram_pdf * p, double r);
 
 __END_DECLS
 

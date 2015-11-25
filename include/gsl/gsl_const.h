@@ -20,6 +20,16 @@
 #ifndef __GSL_CONST__
 #define __GSL_CONST__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_const_num.h>
 
 #include <gsl/gsl_const_cgs.h>

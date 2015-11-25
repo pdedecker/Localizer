@@ -21,6 +21,16 @@
 #ifndef __GSL_CONST_NUM__
 #define __GSL_CONST_NUM__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #define GSL_CONST_NUM_FINE_STRUCTURE (7.297352533e-3) /* 1 */
 #define GSL_CONST_NUM_AVOGADRO (6.02214199e23) /* 1 / mol */
 #define GSL_CONST_NUM_YOTTA (1e24) /* 1 */

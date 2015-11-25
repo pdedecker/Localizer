@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_GEGENBAUER_H__
 #define __GSL_SF_GEGENBAUER_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -42,12 +52,12 @@ __BEGIN_DECLS
  *
  * exceptions: none
  */
-int gsl_sf_gegenpoly_1_e(double lambda, double x, gsl_sf_result * result);
-int gsl_sf_gegenpoly_2_e(double lambda, double x, gsl_sf_result * result);
-int gsl_sf_gegenpoly_3_e(double lambda, double x, gsl_sf_result * result);
-double gsl_sf_gegenpoly_1(double lambda, double x);
-double gsl_sf_gegenpoly_2(double lambda, double x);
-double gsl_sf_gegenpoly_3(double lambda, double x);
+GSL_FUN int gsl_sf_gegenpoly_1_e(double lambda, double x, gsl_sf_result * result);
+GSL_FUN int gsl_sf_gegenpoly_2_e(double lambda, double x, gsl_sf_result * result);
+GSL_FUN int gsl_sf_gegenpoly_3_e(double lambda, double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gegenpoly_1(double lambda, double x);
+GSL_FUN double gsl_sf_gegenpoly_2(double lambda, double x);
+GSL_FUN double gsl_sf_gegenpoly_3(double lambda, double x);
 
 
 /* Evaluate Gegenbauer polynomials.
@@ -55,8 +65,8 @@ double gsl_sf_gegenpoly_3(double lambda, double x);
  * lambda > -1/2, n >= 0
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gegenpoly_n_e(int n, double lambda, double x, gsl_sf_result * result);
-double gsl_sf_gegenpoly_n(int n, double lambda, double x);
+GSL_FUN int gsl_sf_gegenpoly_n_e(int n, double lambda, double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gegenpoly_n(int n, double lambda, double x);
 
 
 /* Calculate array of Gegenbauer polynomials
@@ -65,7 +75,7 @@ double gsl_sf_gegenpoly_n(int n, double lambda, double x);
  * lambda > -1/2, nmax >= 0
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gegenpoly_array(int nmax, double lambda, double x, double * result_array);
+GSL_FUN int gsl_sf_gegenpoly_array(int nmax, double lambda, double x, double * result_array);
 
 
 __END_DECLS

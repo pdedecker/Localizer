@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_EXP_H__
 #define __GSL_SF_EXP_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 #include <gsl/gsl_precision.h>
 
@@ -42,54 +52,54 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_e(const double x, gsl_sf_result * result);
-double gsl_sf_exp(const double x);
+GSL_FUN int gsl_sf_exp_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_exp(const double x);
 
 
 /* Exp(x)
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_e10_e(const double x, gsl_sf_result_e10 * result);
+GSL_FUN int gsl_sf_exp_e10_e(const double x, gsl_sf_result_e10 * result);
 
 
 /* Exponentiate and multiply by a given factor:  y * Exp(x)
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_mult_e(const double x, const double y, gsl_sf_result * result);
-double gsl_sf_exp_mult(const double x, const double y);
+GSL_FUN int gsl_sf_exp_mult_e(const double x, const double y, gsl_sf_result * result);
+GSL_FUN double gsl_sf_exp_mult(const double x, const double y);
 
 
 /* Exponentiate and multiply by a given factor:  y * Exp(x)
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_mult_e10_e(const double x, const double y, gsl_sf_result_e10 * result);
+GSL_FUN int gsl_sf_exp_mult_e10_e(const double x, const double y, gsl_sf_result_e10 * result);
 
 
 /* exp(x)-1
  *
  * exceptions: GSL_EOVRFLW
  */
-int gsl_sf_expm1_e(const double x, gsl_sf_result * result);
-double gsl_sf_expm1(const double x);
+GSL_FUN int gsl_sf_expm1_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_expm1(const double x);
 
 
 /* (exp(x)-1)/x = 1 + x/2 + x^2/(2*3) + x^3/(2*3*4) + ...
  *
  * exceptions: GSL_EOVRFLW
  */
-int gsl_sf_exprel_e(const double x, gsl_sf_result * result);
-double gsl_sf_exprel(const double x);
+GSL_FUN int gsl_sf_exprel_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_exprel(const double x);
 
 
 /* 2(exp(x)-1-x)/x^2 = 1 + x/3 + x^2/(3*4) + x^3/(3*4*5) + ...
  *
  * exceptions: GSL_EOVRFLW
  */
-int gsl_sf_exprel_2_e(double x, gsl_sf_result * result);
-double gsl_sf_exprel_2(const double x);
+GSL_FUN int gsl_sf_exprel_2_e(double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_exprel_2(const double x);
 
 
 /* Similarly for the N-th generalization of
@@ -99,19 +109,19 @@ double gsl_sf_exprel_2(const double x);
  *             = 1 + x/(N+1) + x^2/((N+1)(N+2)) + ...
  *             = 1F1(1,1+N,x)
  */
-int gsl_sf_exprel_n_e(const int n, const double x, gsl_sf_result * result);
-double gsl_sf_exprel_n(const int n, const double x);
+GSL_FUN int gsl_sf_exprel_n_e(const int n, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_exprel_n(const int n, const double x);
 
-int gsl_sf_exprel_n_CF_e(const double n, const double x, gsl_sf_result * result);
+GSL_FUN int gsl_sf_exprel_n_CF_e(const double n, const double x, gsl_sf_result * result);
 
-
-/* Exponentiate a quantity with an associated error.
- */
-int gsl_sf_exp_err_e(const double x, const double dx, gsl_sf_result * result);
 
 /* Exponentiate a quantity with an associated error.
  */
-int gsl_sf_exp_err_e10_e(const double x, const double dx, gsl_sf_result_e10 * result);
+GSL_FUN int gsl_sf_exp_err_e(const double x, const double dx, gsl_sf_result * result);
+
+/* Exponentiate a quantity with an associated error.
+ */
+GSL_FUN int gsl_sf_exp_err_e10_e(const double x, const double dx, gsl_sf_result_e10 * result);
 
 
 /* Exponentiate and multiply by a given factor:  y * Exp(x),
@@ -119,7 +129,7 @@ int gsl_sf_exp_err_e10_e(const double x, const double dx, gsl_sf_result_e10 * re
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_mult_err_e(const double x, const double dx, const double y, const double dy, gsl_sf_result * result);
+GSL_FUN int gsl_sf_exp_mult_err_e(const double x, const double dx, const double y, const double dy, gsl_sf_result * result);
 
 
 /* Exponentiate and multiply by a given factor:  y * Exp(x),
@@ -127,7 +137,7 @@ int gsl_sf_exp_mult_err_e(const double x, const double dx, const double y, const
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_exp_mult_err_e10_e(const double x, const double dx, const double y, const double dy, gsl_sf_result_e10 * result);
+GSL_FUN int gsl_sf_exp_mult_err_e10_e(const double x, const double dx, const double y, const double dy, gsl_sf_result_e10 * result);
 
 __END_DECLS
 

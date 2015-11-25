@@ -20,6 +20,16 @@
 #ifndef __GSL_SORT_SHORT_H__
 #define __GSL_SORT_SHORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_permutation.h>
@@ -36,14 +46,15 @@
 
 __BEGIN_DECLS
 
-void gsl_sort_short (short * data, const size_t stride, const size_t n);
-void gsl_sort_short_index (size_t * p, const short * data, const size_t stride, const size_t n);
+GSL_FUN void gsl_sort_short (short * data, const size_t stride, const size_t n);
+GSL_FUN void gsl_sort2_short (short * data1, const size_t stride1, short * data2, const size_t stride2, const size_t n);
+GSL_FUN void gsl_sort_short_index (size_t * p, const short * data, const size_t stride, const size_t n);
 
-int gsl_sort_short_smallest (short * dest, const size_t k, const short * src, const size_t stride, const size_t n);
-int gsl_sort_short_smallest_index (size_t * p, const size_t k, const short * src, const size_t stride, const size_t n);
+GSL_FUN int gsl_sort_short_smallest (short * dest, const size_t k, const short * src, const size_t stride, const size_t n);
+GSL_FUN int gsl_sort_short_smallest_index (size_t * p, const size_t k, const short * src, const size_t stride, const size_t n);
 
-int gsl_sort_short_largest (short * dest, const size_t k, const short * src, const size_t stride, const size_t n);
-int gsl_sort_short_largest_index (size_t * p, const size_t k, const short * src, const size_t stride, const size_t n);
+GSL_FUN int gsl_sort_short_largest (short * dest, const size_t k, const short * src, const size_t stride, const size_t n);
+GSL_FUN int gsl_sort_short_largest_index (size_t * p, const size_t k, const short * src, const size_t stride, const size_t n);
 
 __END_DECLS
 

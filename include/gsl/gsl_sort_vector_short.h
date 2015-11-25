@@ -20,6 +20,16 @@
 #ifndef __GSL_SORT_VECTOR_SHORT_H__
 #define __GSL_SORT_VECTOR_SHORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_permutation.h>
@@ -37,14 +47,15 @@
 
 __BEGIN_DECLS
 
-void gsl_sort_vector_short (gsl_vector_short * v);
-int gsl_sort_vector_short_index (gsl_permutation * p, const gsl_vector_short * v);
+GSL_FUN void gsl_sort_vector_short (gsl_vector_short * v);
+GSL_FUN void gsl_sort_vector2_short (gsl_vector_short * v1, gsl_vector_short * v2);
+GSL_FUN int gsl_sort_vector_short_index (gsl_permutation * p, const gsl_vector_short * v);
 
-int gsl_sort_vector_short_smallest (short * dest, const size_t k, const gsl_vector_short * v);
-int gsl_sort_vector_short_largest (short * dest, const size_t k, const gsl_vector_short * v);
+GSL_FUN int gsl_sort_vector_short_smallest (short * dest, const size_t k, const gsl_vector_short * v);
+GSL_FUN int gsl_sort_vector_short_largest (short * dest, const size_t k, const gsl_vector_short * v);
 
-int gsl_sort_vector_short_smallest_index (size_t * p, const size_t k, const gsl_vector_short * v);
-int gsl_sort_vector_short_largest_index (size_t * p, const size_t k, const gsl_vector_short * v);
+GSL_FUN int gsl_sort_vector_short_smallest_index (size_t * p, const size_t k, const gsl_vector_short * v);
+GSL_FUN int gsl_sort_vector_short_largest_index (size_t * p, const size_t k, const gsl_vector_short * v);
 
 __END_DECLS
 

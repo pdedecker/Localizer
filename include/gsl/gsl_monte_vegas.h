@@ -23,6 +23,16 @@
 #ifndef __GSL_MONTE_VEGAS_H__
 #define __GSL_MONTE_VEGAS_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_monte.h>
@@ -88,21 +98,21 @@ typedef struct {
 
 } gsl_monte_vegas_state;
 
-int gsl_monte_vegas_integrate(gsl_monte_function * f, 
+GSL_FUN int gsl_monte_vegas_integrate(gsl_monte_function * f, 
                               double xl[], double xu[], 
                               size_t dim, size_t calls,
                               gsl_rng * r,
                               gsl_monte_vegas_state *state,
                               double* result, double* abserr);
 
-gsl_monte_vegas_state* gsl_monte_vegas_alloc(size_t dim);
+GSL_FUN gsl_monte_vegas_state* gsl_monte_vegas_alloc(size_t dim);
 
-int gsl_monte_vegas_init(gsl_monte_vegas_state* state);
+GSL_FUN int gsl_monte_vegas_init(gsl_monte_vegas_state* state);
 
-void gsl_monte_vegas_free (gsl_monte_vegas_state* state);
+GSL_FUN void gsl_monte_vegas_free (gsl_monte_vegas_state* state);
 
-double gsl_monte_vegas_chisq (const gsl_monte_vegas_state* state);
-void gsl_monte_vegas_runval (const gsl_monte_vegas_state* state, double * result, double * sigma);
+GSL_FUN double gsl_monte_vegas_chisq (const gsl_monte_vegas_state* state);
+GSL_FUN void gsl_monte_vegas_runval (const gsl_monte_vegas_state* state, double * result, double * sigma);
 
 typedef struct {
   double alpha;
@@ -113,10 +123,10 @@ typedef struct {
   FILE * ostream;
 } gsl_monte_vegas_params;
 
-void gsl_monte_vegas_params_get (const gsl_monte_vegas_state * state,
+GSL_FUN void gsl_monte_vegas_params_get (const gsl_monte_vegas_state * state,
 				 gsl_monte_vegas_params * params);
 
-void gsl_monte_vegas_params_set (gsl_monte_vegas_state * state,
+GSL_FUN void gsl_monte_vegas_params_set (gsl_monte_vegas_state * state,
 				 const gsl_monte_vegas_params * params);
 
 __END_DECLS

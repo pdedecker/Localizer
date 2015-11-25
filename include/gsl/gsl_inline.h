@@ -20,6 +20,16 @@
 #ifndef __GSL_INLINE_H__
 #define __GSL_INLINE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 /* In recent versiions of GCC, the inline keyword has two different
    forms: GNU and C99.
 

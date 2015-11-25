@@ -20,6 +20,16 @@
 #ifndef __GSL_POLY_H__
 #define __GSL_POLY_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_inline.h>
 #include <gsl/gsl_complex.h>
@@ -45,15 +55,15 @@ __BEGIN_DECLS
  */
 
 /* real polynomial, real x */
-INLINE_DECL double gsl_poly_eval(const double c[], const int len, const double x);
+GSL_FUN INLINE_DECL double gsl_poly_eval(const double c[], const int len, const double x);
 
 /* real polynomial, complex x */
-INLINE_DECL gsl_complex gsl_poly_complex_eval (const double c [], const int len, const gsl_complex z);
+GSL_FUN INLINE_DECL gsl_complex gsl_poly_complex_eval (const double c [], const int len, const gsl_complex z);
 
 /* complex polynomial, complex x */
-INLINE_DECL gsl_complex gsl_complex_poly_complex_eval (const gsl_complex c [], const int len, const gsl_complex z);
+GSL_FUN INLINE_DECL gsl_complex gsl_complex_poly_complex_eval (const gsl_complex c [], const int len, const gsl_complex z);
 
-int gsl_poly_eval_derivs(const double c[], const size_t lenc, const double x, double res[], const size_t lenres);
+GSL_FUN int gsl_poly_eval_derivs(const double c[], const size_t lenc, const double x, double res[], const size_t lenres);
 
 #ifdef HAVE_INLINE
 INLINE_FUN
@@ -104,11 +114,11 @@ gsl_complex_poly_complex_eval(const gsl_complex c[], const int len, const gsl_co
 
 /* Work with divided-difference polynomials, Abramowitz & Stegun 25.2.26 */
 
-int
+GSL_FUN int
 gsl_poly_dd_init (double dd[], const double x[], const double y[],
                   size_t size);
 
-INLINE_DECL double
+GSL_FUN INLINE_DECL double
 gsl_poly_dd_eval (const double dd[], const double xa[], const size_t size, const double x);
 
 #ifdef HAVE_INLINE
@@ -124,20 +134,24 @@ gsl_poly_dd_eval(const double dd[], const double xa[], const size_t size, const 
 #endif /* HAVE_INLINE */
 
 
-int
+GSL_FUN int
 gsl_poly_dd_taylor (double c[], double xp,
                     const double dd[], const double x[], size_t size,
                     double w[]);
+
+GSL_FUN int
+gsl_poly_dd_hermite_init (double dd[], double z[], const double xa[], const double ya[],
+                          const double dya[], const size_t size);
 
 /* Solve for real or complex roots of the standard quadratic equation,
  * returning the number of real roots.
  *
  * Roots are returned ordered.
  */
-int gsl_poly_solve_quadratic (double a, double b, double c, 
+GSL_FUN int gsl_poly_solve_quadratic (double a, double b, double c, 
                               double * x0, double * x1);
 
-int 
+GSL_FUN int 
 gsl_poly_complex_solve_quadratic (double a, double b, double c, 
                                   gsl_complex * z0, gsl_complex * z1);
 
@@ -148,10 +162,10 @@ gsl_poly_complex_solve_quadratic (double a, double b, double c,
  *
  * Roots are returned ordered.
  */
-int gsl_poly_solve_cubic (double a, double b, double c, 
+GSL_FUN int gsl_poly_solve_cubic (double a, double b, double c, 
                           double * x0, double * x1, double * x2);
 
-int 
+GSL_FUN int 
 gsl_poly_complex_solve_cubic (double a, double b, double c, 
                               gsl_complex * z0, gsl_complex * z1, 
                               gsl_complex * z2);
@@ -166,10 +180,10 @@ typedef struct
 } 
 gsl_poly_complex_workspace ;
 
-gsl_poly_complex_workspace * gsl_poly_complex_workspace_alloc (size_t n);
-void gsl_poly_complex_workspace_free (gsl_poly_complex_workspace * w);
+GSL_FUN gsl_poly_complex_workspace * gsl_poly_complex_workspace_alloc (size_t n);
+GSL_FUN void gsl_poly_complex_workspace_free (gsl_poly_complex_workspace * w);
 
-int
+GSL_FUN int
 gsl_poly_complex_solve (const double * a, size_t n, 
                         gsl_poly_complex_workspace * w,
                         gsl_complex_packed_ptr z);

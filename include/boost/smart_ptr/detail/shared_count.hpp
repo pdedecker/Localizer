@@ -40,12 +40,17 @@
 # include <new>              // std::bad_alloc
 #endif
 
-#if !defined( BOOST_NO_CXX11_SMART_PTR )
-# include <boost/utility/addressof.hpp>
-#endif
+#include <boost/core/addressof.hpp>
 
 namespace boost
 {
+
+namespace movelib
+{
+
+    template< class T, class D > class unique_ptr;
+
+} // namespace movelib
 
 namespace detail
 {
@@ -62,8 +67,6 @@ struct sp_nothrow_tag {};
 template< class D > struct sp_inplace_tag
 {
 };
-
-#if !defined( BOOST_NO_CXX11_SMART_PTR )
 
 template< class T > class sp_reference_wrapper
 { 
@@ -92,8 +95,6 @@ template< class D > struct sp_convert_reference< D& >
 {
     typedef sp_reference_wrapper< D > type;
 };
-
-#endif
 
 class weak_count;
 
@@ -200,7 +201,7 @@ public:
         }
         catch( ... )
         {
-            D()( p ); // delete p
+            D::operator_fn( p ); // delete p
             throw;
         }
 
@@ -210,7 +211,7 @@ public:
 
         if( pi_ == 0 )
         {
-            D()( p ); // delete p
+            D::operator_fn( p ); // delete p
             boost::throw_exception( std::bad_alloc() );
         }
 
@@ -225,7 +226,16 @@ public:
 #endif
     {
         typedef sp_counted_impl_pda<P, D, A> impl_type;
+
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        typedef typename std::allocator_traits<A>::template rebind_alloc< impl_type > A2;
+
+#else
+
         typedef typename A::template rebind< impl_type >::other A2;
+
+#endif
 
         A2 a2( a );
 
@@ -233,8 +243,18 @@ public:
 
         try
         {
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+            impl_type * pi = std::allocator_traits<A2>::allocate( a2, 1 );
+            pi_ = pi;
+            std::allocator_traits<A2>::construct( a2, pi, p, d, a );
+
+#else
+
             pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
-            new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+
+#endif
         }
         catch(...)
         {
@@ -250,11 +270,28 @@ public:
 
 #else
 
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        impl_type * pi = std::allocator_traits<A2>::allocate( a2, 1 );
+        pi_ = pi;
+
+#else
+
         pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
+
+#endif
 
         if( pi_ != 0 )
         {
-            new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+            std::allocator_traits<A2>::construct( a2, pi, p, d, a );
+
+#else
+
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+
+#endif
         }
         else
         {
@@ -273,7 +310,16 @@ public:
 #endif
     {
         typedef sp_counted_impl_pda< P, D, A > impl_type;
+
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        typedef typename std::allocator_traits<A>::template rebind_alloc< impl_type > A2;
+
+#else
+
         typedef typename A::template rebind< impl_type >::other A2;
+
+#endif
 
         A2 a2( a );
 
@@ -281,12 +327,22 @@ public:
 
         try
         {
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+            impl_type * pi = std::allocator_traits<A2>::allocate( a2, 1 );
+            pi_ = pi;
+            std::allocator_traits<A2>::construct( a2, pi, p, a );
+
+#else
+
             pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
-            new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+
+#endif
         }
         catch(...)
         {
-            D()( p );
+            D::operator_fn( p );
 
             if( pi_ != 0 )
             {
@@ -298,15 +354,32 @@ public:
 
 #else
 
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        impl_type * pi = std::allocator_traits<A2>::allocate( a2, 1 );
+        pi_ = pi;
+
+#else
+
         pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
+
+#endif
 
         if( pi_ != 0 )
         {
-            new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+            std::allocator_traits<A2>::construct( a2, pi, p, a );
+
+#else
+
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+
+#endif
         }
         else
         {
-            D()( p );
+            D::operator_fn( p );
             boost::throw_exception( std::bad_alloc() );
         }
 
@@ -365,6 +438,29 @@ public:
     }
 
 #endif
+
+    template<class Y, class D>
+    explicit shared_count( boost::movelib::unique_ptr<Y, D> & r ): pi_( 0 )
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+        typedef typename sp_convert_reference<D>::type D2;
+
+        D2 d2( r.get_deleter() );
+        pi_ = new sp_counted_impl_pd< typename boost::movelib::unique_ptr<Y, D>::pointer, D2 >( r.get(), d2 );
+
+#ifdef BOOST_NO_EXCEPTIONS
+
+        if( pi_ == 0 )
+        {
+            boost::throw_exception( std::bad_alloc() );
+        }
+
+#endif
+
+        r.release();
+    }
 
     ~shared_count() // nothrow
     {

@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_COUPLING_H__
 #define __GSL_SF_COUPLING_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -42,11 +52,11 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_coupling_3j_e(int two_ja, int two_jb, int two_jc,
+GSL_FUN int gsl_sf_coupling_3j_e(int two_ja, int two_jb, int two_jc,
                             int two_ma, int two_mb, int two_mc,
                             gsl_sf_result * result
                             );
-double gsl_sf_coupling_3j(int two_ja, int two_jb, int two_jc,
+GSL_FUN double gsl_sf_coupling_3j(int two_ja, int two_jb, int two_jc,
                           int two_ma, int two_mb, int two_mc
                           );
 
@@ -56,11 +66,11 @@ double gsl_sf_coupling_3j(int two_ja, int two_jb, int two_jc,
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_coupling_6j_e(int two_ja, int two_jb, int two_jc,
+GSL_FUN int gsl_sf_coupling_6j_e(int two_ja, int two_jb, int two_jc,
                          int two_jd, int two_je, int two_jf,
                          gsl_sf_result * result
                          );
-double gsl_sf_coupling_6j(int two_ja, int two_jb, int two_jc,
+GSL_FUN double gsl_sf_coupling_6j(int two_ja, int two_jb, int two_jc,
                           int two_jd, int two_je, int two_jf
                           );
 
@@ -71,11 +81,11 @@ double gsl_sf_coupling_6j(int two_ja, int two_jb, int two_jc,
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_coupling_RacahW_e(int two_ja, int two_jb, int two_jc,
+GSL_FUN int gsl_sf_coupling_RacahW_e(int two_ja, int two_jb, int two_jc,
                              int two_jd, int two_je, int two_jf,
                              gsl_sf_result * result
                              );
-double gsl_sf_coupling_RacahW(int two_ja, int two_jb, int two_jc,
+GSL_FUN double gsl_sf_coupling_RacahW(int two_ja, int two_jb, int two_jc,
                               int two_jd, int two_je, int two_jf
                               );
 
@@ -86,12 +96,12 @@ double gsl_sf_coupling_RacahW(int two_ja, int two_jb, int two_jc,
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_coupling_9j_e(int two_ja, int two_jb, int two_jc,
+GSL_FUN int gsl_sf_coupling_9j_e(int two_ja, int two_jb, int two_jc,
                          int two_jd, int two_je, int two_jf,
                          int two_jg, int two_jh, int two_ji,
                          gsl_sf_result * result
                          );
-double gsl_sf_coupling_9j(int two_ja, int two_jb, int two_jc,
+GSL_FUN double gsl_sf_coupling_9j(int two_ja, int two_jb, int two_jc,
                           int two_jd, int two_je, int two_jf,
                           int two_jg, int two_jh, int two_ji
                           );
@@ -110,11 +120,11 @@ double gsl_sf_coupling_9j(int two_ja, int two_jb, int two_jc,
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
 #ifndef GSL_DISABLE_DEPRECATED
-int gsl_sf_coupling_6j_INCORRECT_e(int two_ja, int two_jb, int two_jc,
+GSL_FUN int gsl_sf_coupling_6j_INCORRECT_e(int two_ja, int two_jb, int two_jc,
                                    int two_jd, int two_je, int two_jf,
                                    gsl_sf_result * result
                                    );
-double gsl_sf_coupling_6j_INCORRECT(int two_ja, int two_jb, int two_jc,
+GSL_FUN double gsl_sf_coupling_6j_INCORRECT(int two_ja, int two_jb, int two_jc,
                                     int two_jd, int two_je, int two_jf
                                     );
 #endif /* !GSL_DISABLE_DEPRECATED */

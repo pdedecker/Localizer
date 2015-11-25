@@ -20,6 +20,16 @@
 #ifndef __GSL_PERMUTATION_H__
 #define __GSL_PERMUTATION_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -46,37 +56,37 @@ struct gsl_permutation_struct
 
 typedef struct gsl_permutation_struct gsl_permutation;
 
-gsl_permutation *gsl_permutation_alloc (const size_t n);
-gsl_permutation *gsl_permutation_calloc (const size_t n);
-void gsl_permutation_init (gsl_permutation * p);
-void gsl_permutation_free (gsl_permutation * p);
-int gsl_permutation_memcpy (gsl_permutation * dest, const gsl_permutation * src);
+GSL_FUN gsl_permutation *gsl_permutation_alloc (const size_t n);
+GSL_FUN gsl_permutation *gsl_permutation_calloc (const size_t n);
+GSL_FUN void gsl_permutation_init (gsl_permutation * p);
+GSL_FUN void gsl_permutation_free (gsl_permutation * p);
+GSL_FUN int gsl_permutation_memcpy (gsl_permutation * dest, const gsl_permutation * src);
 
-int gsl_permutation_fread (FILE * stream, gsl_permutation * p);
-int gsl_permutation_fwrite (FILE * stream, const gsl_permutation * p);
-int gsl_permutation_fscanf (FILE * stream, gsl_permutation * p);
-int gsl_permutation_fprintf (FILE * stream, const gsl_permutation * p, const char *format);
+GSL_FUN int gsl_permutation_fread (FILE * stream, gsl_permutation * p);
+GSL_FUN int gsl_permutation_fwrite (FILE * stream, const gsl_permutation * p);
+GSL_FUN int gsl_permutation_fscanf (FILE * stream, gsl_permutation * p);
+GSL_FUN int gsl_permutation_fprintf (FILE * stream, const gsl_permutation * p, const char *format);
 
-size_t gsl_permutation_size (const gsl_permutation * p);
-size_t * gsl_permutation_data (const gsl_permutation * p);
+GSL_FUN size_t gsl_permutation_size (const gsl_permutation * p);
+GSL_FUN size_t * gsl_permutation_data (const gsl_permutation * p);
 
-int gsl_permutation_swap (gsl_permutation * p, const size_t i, const size_t j);
+GSL_FUN int gsl_permutation_swap (gsl_permutation * p, const size_t i, const size_t j);
 
-int gsl_permutation_valid (const gsl_permutation * p);
-void gsl_permutation_reverse (gsl_permutation * p);
-int gsl_permutation_inverse (gsl_permutation * inv, const gsl_permutation * p);
-int gsl_permutation_next (gsl_permutation * p);
-int gsl_permutation_prev (gsl_permutation * p);
-int gsl_permutation_mul (gsl_permutation * p, const gsl_permutation * pa, const gsl_permutation * pb);
+GSL_FUN int gsl_permutation_valid (const gsl_permutation * p);
+GSL_FUN void gsl_permutation_reverse (gsl_permutation * p);
+GSL_FUN int gsl_permutation_inverse (gsl_permutation * inv, const gsl_permutation * p);
+GSL_FUN int gsl_permutation_next (gsl_permutation * p);
+GSL_FUN int gsl_permutation_prev (gsl_permutation * p);
+GSL_FUN int gsl_permutation_mul (gsl_permutation * p, const gsl_permutation * pa, const gsl_permutation * pb);
 
-int gsl_permutation_linear_to_canonical (gsl_permutation * q, const gsl_permutation * p);
-int gsl_permutation_canonical_to_linear (gsl_permutation * p, const gsl_permutation * q);
+GSL_FUN int gsl_permutation_linear_to_canonical (gsl_permutation * q, const gsl_permutation * p);
+GSL_FUN int gsl_permutation_canonical_to_linear (gsl_permutation * p, const gsl_permutation * q);
 
-size_t gsl_permutation_inversions (const gsl_permutation * p);
-size_t gsl_permutation_linear_cycles (const gsl_permutation * p);
-size_t gsl_permutation_canonical_cycles (const gsl_permutation * q);
+GSL_FUN size_t gsl_permutation_inversions (const gsl_permutation * p);
+GSL_FUN size_t gsl_permutation_linear_cycles (const gsl_permutation * p);
+GSL_FUN size_t gsl_permutation_canonical_cycles (const gsl_permutation * q);
 
-INLINE_DECL size_t gsl_permutation_get (const gsl_permutation * p, const size_t i);
+GSL_FUN INLINE_DECL size_t gsl_permutation_get (const gsl_permutation * p, const size_t i);
 
 #ifdef HAVE_INLINE
 

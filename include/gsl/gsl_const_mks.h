@@ -21,6 +21,16 @@
 #ifndef __GSL_CONST_MKS__
 #define __GSL_CONST_MKS__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #define GSL_CONST_MKS_SPEED_OF_LIGHT (2.99792458e8) /* m / s */
 #define GSL_CONST_MKS_GRAVITATIONAL_CONSTANT (6.673e-11) /* m^3 / kg s^2 */
 #define GSL_CONST_MKS_PLANCKS_CONSTANT_H (6.62606896e-34) /* kg m^2 / s */

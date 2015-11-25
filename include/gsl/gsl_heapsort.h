@@ -20,6 +20,16 @@
 #ifndef __GSL_HEAPSORT_H__
 #define __GSL_HEAPSORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_permutation.h>
 
 #undef __BEGIN_DECLS
@@ -36,8 +46,8 @@ __BEGIN_DECLS
 
 typedef int (*gsl_comparison_fn_t) (const void *, const void *);
 
-void gsl_heapsort (void * array, size_t count, size_t size, gsl_comparison_fn_t compare);
-int gsl_heapsort_index (size_t * p, const void * array, size_t count, size_t size, gsl_comparison_fn_t compare);
+GSL_FUN void gsl_heapsort (void * array, size_t count, size_t size, gsl_comparison_fn_t compare);
+GSL_FUN int gsl_heapsort_index (size_t * p, const void * array, size_t count, size_t size, gsl_comparison_fn_t compare);
 
 __END_DECLS
 

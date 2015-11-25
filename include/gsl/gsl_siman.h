@@ -19,6 +19,16 @@
 
 #ifndef __GSL_SIMAN_H__
 #define __GSL_SIMAN_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <stdlib.h>
 #include <gsl/gsl_rng.h>
 
@@ -58,7 +68,7 @@ typedef struct {
 
 /* prototype for the workhorse function */
 
-void gsl_siman_solve(const gsl_rng * r, 
+GSL_FUN void gsl_siman_solve(const gsl_rng * r, 
                      void *x0_p, gsl_siman_Efunc_t Ef,
                      gsl_siman_step_t take_step,
                      gsl_siman_metric_t distance,
@@ -69,7 +79,7 @@ void gsl_siman_solve(const gsl_rng * r,
                      size_t element_size,
                      gsl_siman_params_t params);
 
-void 
+GSL_FUN void 
 gsl_siman_solve_many (const gsl_rng * r, void *x0_p, gsl_siman_Efunc_t Ef,
                       gsl_siman_step_t take_step,
                       gsl_siman_metric_t distance,

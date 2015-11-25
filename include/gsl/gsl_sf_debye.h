@@ -23,6 +23,16 @@
 #ifndef __GSL_SF_DEBYE_H__
 #define __GSL_SF_DEBYE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -44,46 +54,46 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EDOM
  */
-int     gsl_sf_debye_1_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_1(const double x);
+GSL_FUN int     gsl_sf_debye_1_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_1(const double x);
 
 
 /* D_2(x)
  *
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int     gsl_sf_debye_2_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_2(const double x);
+GSL_FUN int     gsl_sf_debye_2_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_2(const double x);
 
 
 /* D_3(x)
  *
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int     gsl_sf_debye_3_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_3(const double x);
+GSL_FUN int     gsl_sf_debye_3_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_3(const double x);
 
 
 /* D_4(x)
  *
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int     gsl_sf_debye_4_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_4(const double x);
+GSL_FUN int     gsl_sf_debye_4_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_4(const double x);
 
 /* D_5(x)
  *
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int     gsl_sf_debye_5_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_5(const double x);
+GSL_FUN int     gsl_sf_debye_5_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_5(const double x);
 
 /* D_6(x)
  *
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int     gsl_sf_debye_6_e(const double x, gsl_sf_result * result);
-double     gsl_sf_debye_6(const double x);
+GSL_FUN int     gsl_sf_debye_6_e(const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_debye_6(const double x);
 
 
 __END_DECLS

@@ -20,6 +20,16 @@
 #ifndef __GSL_ROOTS_H__
 #define __GSL_ROOTS_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_math.h>
@@ -74,45 +84,45 @@ typedef struct
   }
 gsl_root_fdfsolver;
 
-gsl_root_fsolver *
+GSL_FUN gsl_root_fsolver *
 gsl_root_fsolver_alloc (const gsl_root_fsolver_type * T);
-void gsl_root_fsolver_free (gsl_root_fsolver * s);
+GSL_FUN void gsl_root_fsolver_free (gsl_root_fsolver * s);
 
-int gsl_root_fsolver_set (gsl_root_fsolver * s,
+GSL_FUN int gsl_root_fsolver_set (gsl_root_fsolver * s,
                           gsl_function * f, 
                           double x_lower, double x_upper);
 
-int gsl_root_fsolver_iterate (gsl_root_fsolver * s);
+GSL_FUN int gsl_root_fsolver_iterate (gsl_root_fsolver * s);
 
-const char * gsl_root_fsolver_name (const gsl_root_fsolver * s);
-double gsl_root_fsolver_root (const gsl_root_fsolver * s);
-double gsl_root_fsolver_x_lower (const gsl_root_fsolver * s);
-double gsl_root_fsolver_x_upper (const gsl_root_fsolver * s);
+GSL_FUN const char * gsl_root_fsolver_name (const gsl_root_fsolver * s);
+GSL_FUN double gsl_root_fsolver_root (const gsl_root_fsolver * s);
+GSL_FUN double gsl_root_fsolver_x_lower (const gsl_root_fsolver * s);
+GSL_FUN double gsl_root_fsolver_x_upper (const gsl_root_fsolver * s);
 
 
-gsl_root_fdfsolver *
+GSL_FUN gsl_root_fdfsolver *
 gsl_root_fdfsolver_alloc (const gsl_root_fdfsolver_type * T);
 
-int
+GSL_FUN int
 gsl_root_fdfsolver_set (gsl_root_fdfsolver * s, 
                          gsl_function_fdf * fdf, double root);
 
-int
+GSL_FUN int
 gsl_root_fdfsolver_iterate (gsl_root_fdfsolver * s);
 
-void
+GSL_FUN void
 gsl_root_fdfsolver_free (gsl_root_fdfsolver * s);
 
-const char * gsl_root_fdfsolver_name (const gsl_root_fdfsolver * s);
-double gsl_root_fdfsolver_root (const gsl_root_fdfsolver * s);
+GSL_FUN const char * gsl_root_fdfsolver_name (const gsl_root_fdfsolver * s);
+GSL_FUN double gsl_root_fdfsolver_root (const gsl_root_fdfsolver * s);
 
-int
+GSL_FUN int
 gsl_root_test_interval (double x_lower, double x_upper, double epsabs, double epsrel);
 
-int
+GSL_FUN int
 gsl_root_test_residual (double f, double epsabs);
 
-int
+GSL_FUN int
 gsl_root_test_delta (double x1, double x0, double epsabs, double epsrel);
 
 GSL_VAR const gsl_root_fsolver_type  * gsl_root_fsolver_bisection;

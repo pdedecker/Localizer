@@ -20,6 +20,16 @@
 #ifndef __GSL_FFT_REAL_FLOAT_H__
 #define __GSL_FFT_REAL_FLOAT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #include <gsl/gsl_math.h>
@@ -38,7 +48,7 @@
 
 __BEGIN_DECLS
 
-int gsl_fft_real_float_radix2_transform (float data[], const size_t stride, const size_t n) ;
+GSL_FUN int gsl_fft_real_float_radix2_transform (float data[], const size_t stride, const size_t n) ;
 
 typedef struct
   {
@@ -57,20 +67,20 @@ typedef struct
   }
 gsl_fft_real_workspace_float;
 
-gsl_fft_real_wavetable_float * gsl_fft_real_wavetable_float_alloc (size_t n);
+GSL_FUN gsl_fft_real_wavetable_float * gsl_fft_real_wavetable_float_alloc (size_t n);
 
-void  gsl_fft_real_wavetable_float_free (gsl_fft_real_wavetable_float * wavetable);
+GSL_FUN void  gsl_fft_real_wavetable_float_free (gsl_fft_real_wavetable_float * wavetable);
 
-gsl_fft_real_workspace_float * gsl_fft_real_workspace_float_alloc (size_t n);
+GSL_FUN gsl_fft_real_workspace_float * gsl_fft_real_workspace_float_alloc (size_t n);
 
-void  gsl_fft_real_workspace_float_free (gsl_fft_real_workspace_float * workspace);
+GSL_FUN void  gsl_fft_real_workspace_float_free (gsl_fft_real_workspace_float * workspace);
 
-int gsl_fft_real_float_transform (float data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_fft_real_float_transform (float data[], const size_t stride, const size_t n,
                                   const gsl_fft_real_wavetable_float * wavetable,
                                   gsl_fft_real_workspace_float * work);
 
 
-int gsl_fft_real_float_unpack (const float real_float_coefficient[],
+GSL_FUN int gsl_fft_real_float_unpack (const float real_float_coefficient[],
                                float complex_coefficient[],
                                const size_t stride, const size_t n);
 

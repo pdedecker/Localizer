@@ -24,6 +24,16 @@
 #ifndef __GSL_SF_ELEMENTARY_H__
 #define __GSL_SF_ELEMENTARY_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -43,13 +53,13 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_multiply_e(const double x, const double y, gsl_sf_result * result);
-double gsl_sf_multiply(const double x, const double y);
+GSL_FUN int gsl_sf_multiply_e(const double x, const double y, gsl_sf_result * result);
+GSL_FUN double gsl_sf_multiply(const double x, const double y);
 
 
 /* Multiplication of quantities with associated errors.
  */
-int gsl_sf_multiply_err_e(const double x, const double dx, const double y, const double dy, gsl_sf_result * result);
+GSL_FUN int gsl_sf_multiply_err_e(const double x, const double dx, const double y, const double dy, gsl_sf_result * result);
 
 
 __END_DECLS

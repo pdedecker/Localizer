@@ -20,6 +20,16 @@
 #ifndef __GSL_BLOCK_COMPLEX_FLOAT_H__
 #define __GSL_BLOCK_COMPLEX_FLOAT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 
@@ -43,22 +53,22 @@ struct gsl_block_complex_float_struct
 
 typedef struct gsl_block_complex_float_struct gsl_block_complex_float;
 
-gsl_block_complex_float *gsl_block_complex_float_alloc (const size_t n);
-gsl_block_complex_float *gsl_block_complex_float_calloc (const size_t n);
-void gsl_block_complex_float_free (gsl_block_complex_float * b);
+GSL_FUN gsl_block_complex_float *gsl_block_complex_float_alloc (const size_t n);
+GSL_FUN gsl_block_complex_float *gsl_block_complex_float_calloc (const size_t n);
+GSL_FUN void gsl_block_complex_float_free (gsl_block_complex_float * b);
 
-int gsl_block_complex_float_fread (FILE * stream, gsl_block_complex_float * b);
-int gsl_block_complex_float_fwrite (FILE * stream, const gsl_block_complex_float * b);
-int gsl_block_complex_float_fscanf (FILE * stream, gsl_block_complex_float * b);
-int gsl_block_complex_float_fprintf (FILE * stream, const gsl_block_complex_float * b, const char *format);
+GSL_FUN int gsl_block_complex_float_fread (FILE * stream, gsl_block_complex_float * b);
+GSL_FUN int gsl_block_complex_float_fwrite (FILE * stream, const gsl_block_complex_float * b);
+GSL_FUN int gsl_block_complex_float_fscanf (FILE * stream, gsl_block_complex_float * b);
+GSL_FUN int gsl_block_complex_float_fprintf (FILE * stream, const gsl_block_complex_float * b, const char *format);
 
-int gsl_block_complex_float_raw_fread (FILE * stream, float * b, const size_t n, const size_t stride);
-int gsl_block_complex_float_raw_fwrite (FILE * stream, const float * b, const size_t n, const size_t stride);
-int gsl_block_complex_float_raw_fscanf (FILE * stream, float * b, const size_t n, const size_t stride);
-int gsl_block_complex_float_raw_fprintf (FILE * stream, const float * b, const size_t n, const size_t stride, const char *format);
+GSL_FUN int gsl_block_complex_float_raw_fread (FILE * stream, float * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_complex_float_raw_fwrite (FILE * stream, const float * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_complex_float_raw_fscanf (FILE * stream, float * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_complex_float_raw_fprintf (FILE * stream, const float * b, const size_t n, const size_t stride, const char *format);
 
-size_t gsl_block_complex_float_size (const gsl_block_complex_float * b);
-float * gsl_block_complex_float_data (const gsl_block_complex_float * b);
+GSL_FUN size_t gsl_block_complex_float_size (const gsl_block_complex_float * b);
+GSL_FUN float * gsl_block_complex_float_data (const gsl_block_complex_float * b);
 
 __END_DECLS
 

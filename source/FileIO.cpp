@@ -163,8 +163,8 @@ int64_t GetLastModificationTime(const std::string& path) {
 	int64_t modTime = 1;
 	
 #ifdef _WIN32
-	struct _stat buffer;
-	int err = _stat(path.c_str(), &buffer);
+	struct _stat64 buffer;
+	int err = _stati64(path.c_str(), &buffer);
 	if ((err != 0) && (errno != 0)) {
 		// for whatever reason _stat() will return -1 but not set errno,
 		// which leads me to believe that this -1 value does not indicate an error.

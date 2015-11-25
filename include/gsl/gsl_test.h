@@ -20,6 +20,16 @@
 #ifndef __GSL_TEST_H__
 #define __GSL_TEST_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
@@ -32,32 +42,32 @@
 
 __BEGIN_DECLS
 
-void
+GSL_FUN void
   gsl_test (int status, const char *test_description, ...);
 
-void
+GSL_FUN void
 gsl_test_rel (double result, double expected, double relative_error,
               const char *test_description, ...) ;
 
-void
+GSL_FUN void
 gsl_test_abs (double result, double expected, double absolute_error,
               const char *test_description, ...) ;
 
-void
+GSL_FUN void
 gsl_test_factor (double result, double expected, double factor,
                  const char *test_description, ...) ;
 
-void
+GSL_FUN void
 gsl_test_int (int result, int expected, const char *test_description, ...) ;
 
-void
+GSL_FUN void
 gsl_test_str (const char * result, const char * expected, 
               const char *test_description, ...) ;
 
-void
+GSL_FUN void
   gsl_test_verbose (int verbose) ;
 
-int
+GSL_FUN int
   gsl_test_summary (void) ;
 
 

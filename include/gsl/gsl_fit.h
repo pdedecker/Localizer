@@ -20,6 +20,16 @@
 #ifndef __GSL_FIT_H__
 #define __GSL_FIT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_math.h>
 
@@ -35,7 +45,7 @@
 
 __BEGIN_DECLS
 
-int gsl_fit_linear (const double * x, const size_t xstride,
+GSL_FUN int gsl_fit_linear (const double * x, const size_t xstride,
                     const double * y, const size_t ystride,
                     const size_t n,
                     double * c0, double * c1, 
@@ -43,7 +53,7 @@ int gsl_fit_linear (const double * x, const size_t xstride,
                     double * sumsq);
 
 
-int gsl_fit_wlinear (const double * x, const size_t xstride,
+GSL_FUN int gsl_fit_wlinear (const double * x, const size_t xstride,
                      const double * w, const size_t wstride,
                      const double * y, const size_t ystride,
                      const size_t n,
@@ -51,21 +61,21 @@ int gsl_fit_wlinear (const double * x, const size_t xstride,
                      double * cov00, double * cov01, double * cov11, 
                      double * chisq);
 
-int
+GSL_FUN int
 gsl_fit_linear_est (const double x, 
                     const double c0, const double c1, 
                     const double cov00, const double cov01, const double cov11,
                     double *y, double *y_err);
 
 
-int gsl_fit_mul (const double * x, const size_t xstride,
+GSL_FUN int gsl_fit_mul (const double * x, const size_t xstride,
                  const double * y, const size_t ystride,
                  const size_t n,
                  double * c1, 
                  double * cov11, 
                  double * sumsq);
 
-int gsl_fit_wmul (const double * x, const size_t xstride,
+GSL_FUN int gsl_fit_wmul (const double * x, const size_t xstride,
                   const double * w, const size_t wstride,
                   const double * y, const size_t ystride,
                   const size_t n,
@@ -74,7 +84,7 @@ int gsl_fit_wmul (const double * x, const size_t xstride,
                   double * sumsq);
 
 
-int
+GSL_FUN int
 gsl_fit_mul_est (const double x, 
                  const double c1, 
                  const double cov11,

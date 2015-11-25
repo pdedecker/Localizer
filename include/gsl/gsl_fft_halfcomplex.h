@@ -20,6 +20,16 @@
 #ifndef __GSL_FFT_HALFCOMPLEX_H__
 #define __GSL_FFT_HALFCOMPLEX_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #include <gsl/gsl_math.h>
@@ -39,9 +49,9 @@
 
 __BEGIN_DECLS
 
-int gsl_fft_halfcomplex_radix2_backward (double data[], const size_t stride, const size_t n);
-int gsl_fft_halfcomplex_radix2_inverse (double data[], const size_t stride, const size_t n);
-int gsl_fft_halfcomplex_radix2_transform (double data[], const size_t stride, const size_t n);
+GSL_FUN int gsl_fft_halfcomplex_radix2_backward (double data[], const size_t stride, const size_t n);
+GSL_FUN int gsl_fft_halfcomplex_radix2_inverse (double data[], const size_t stride, const size_t n);
+GSL_FUN int gsl_fft_halfcomplex_radix2_transform (double data[], const size_t stride, const size_t n);
 
 typedef struct
   {
@@ -53,30 +63,30 @@ typedef struct
   }
 gsl_fft_halfcomplex_wavetable;
 
-gsl_fft_halfcomplex_wavetable * gsl_fft_halfcomplex_wavetable_alloc (size_t n);
+GSL_FUN gsl_fft_halfcomplex_wavetable * gsl_fft_halfcomplex_wavetable_alloc (size_t n);
 
-void
+GSL_FUN void
 gsl_fft_halfcomplex_wavetable_free (gsl_fft_halfcomplex_wavetable * wavetable);
 
 
-int gsl_fft_halfcomplex_backward (double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_fft_halfcomplex_backward (double data[], const size_t stride, const size_t n,
                                   const gsl_fft_halfcomplex_wavetable * wavetable,
                                   gsl_fft_real_workspace * work);
 
-int gsl_fft_halfcomplex_inverse (double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_fft_halfcomplex_inverse (double data[], const size_t stride, const size_t n,
                                  const gsl_fft_halfcomplex_wavetable * wavetable,
                                  gsl_fft_real_workspace * work);
 
-int gsl_fft_halfcomplex_transform (double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_fft_halfcomplex_transform (double data[], const size_t stride, const size_t n,
                                    const gsl_fft_halfcomplex_wavetable * wavetable,
                                    gsl_fft_real_workspace * work);
 
-int
+GSL_FUN int
 gsl_fft_halfcomplex_unpack (const double halfcomplex_coefficient[],
                             double complex_coefficient[],
                             const size_t stride, const size_t n);
 
-int
+GSL_FUN int
 gsl_fft_halfcomplex_radix2_unpack (const double halfcomplex_coefficient[],
                                    double complex_coefficient[],
                                    const size_t stride, const size_t n);

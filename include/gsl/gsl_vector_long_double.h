@@ -20,6 +20,16 @@
 #ifndef __GSL_VECTOR_LONG_DOUBLE_H__
 #define __GSL_VECTOR_LONG_DOUBLE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -66,56 +76,56 @@ typedef const _gsl_vector_long_double_const_view gsl_vector_long_double_const_vi
 
 /* Allocation */
 
-gsl_vector_long_double *gsl_vector_long_double_alloc (const size_t n);
-gsl_vector_long_double *gsl_vector_long_double_calloc (const size_t n);
+GSL_FUN gsl_vector_long_double *gsl_vector_long_double_alloc (const size_t n);
+GSL_FUN gsl_vector_long_double *gsl_vector_long_double_calloc (const size_t n);
 
-gsl_vector_long_double *gsl_vector_long_double_alloc_from_block (gsl_block_long_double * b,
+GSL_FUN gsl_vector_long_double *gsl_vector_long_double_alloc_from_block (gsl_block_long_double * b,
                                                      const size_t offset, 
                                                      const size_t n, 
                                                      const size_t stride);
 
-gsl_vector_long_double *gsl_vector_long_double_alloc_from_vector (gsl_vector_long_double * v,
+GSL_FUN gsl_vector_long_double *gsl_vector_long_double_alloc_from_vector (gsl_vector_long_double * v,
                                                       const size_t offset, 
                                                       const size_t n, 
                                                       const size_t stride);
 
-void gsl_vector_long_double_free (gsl_vector_long_double * v);
+GSL_FUN void gsl_vector_long_double_free (gsl_vector_long_double * v);
 
 /* Views */
 
-_gsl_vector_long_double_view 
+GSL_FUN _gsl_vector_long_double_view 
 gsl_vector_long_double_view_array (long double *v, size_t n);
 
-_gsl_vector_long_double_view 
+GSL_FUN _gsl_vector_long_double_view 
 gsl_vector_long_double_view_array_with_stride (long double *base,
                                          size_t stride,
                                          size_t n);
 
-_gsl_vector_long_double_const_view 
+GSL_FUN _gsl_vector_long_double_const_view 
 gsl_vector_long_double_const_view_array (const long double *v, size_t n);
 
-_gsl_vector_long_double_const_view 
+GSL_FUN _gsl_vector_long_double_const_view 
 gsl_vector_long_double_const_view_array_with_stride (const long double *base,
                                                size_t stride,
                                                size_t n);
 
-_gsl_vector_long_double_view 
+GSL_FUN _gsl_vector_long_double_view 
 gsl_vector_long_double_subvector (gsl_vector_long_double *v, 
                             size_t i, 
                             size_t n);
 
-_gsl_vector_long_double_view 
+GSL_FUN _gsl_vector_long_double_view 
 gsl_vector_long_double_subvector_with_stride (gsl_vector_long_double *v, 
                                         size_t i,
                                         size_t stride,
                                         size_t n);
 
-_gsl_vector_long_double_const_view 
+GSL_FUN _gsl_vector_long_double_const_view 
 gsl_vector_long_double_const_subvector (const gsl_vector_long_double *v, 
                                   size_t i, 
                                   size_t n);
 
-_gsl_vector_long_double_const_view 
+GSL_FUN _gsl_vector_long_double_const_view 
 gsl_vector_long_double_const_subvector_with_stride (const gsl_vector_long_double *v, 
                                               size_t i, 
                                               size_t stride,
@@ -123,50 +133,50 @@ gsl_vector_long_double_const_subvector_with_stride (const gsl_vector_long_double
 
 /* Operations */
 
-void gsl_vector_long_double_set_zero (gsl_vector_long_double * v);
-void gsl_vector_long_double_set_all (gsl_vector_long_double * v, long double x);
-int gsl_vector_long_double_set_basis (gsl_vector_long_double * v, size_t i);
+GSL_FUN void gsl_vector_long_double_set_zero (gsl_vector_long_double * v);
+GSL_FUN void gsl_vector_long_double_set_all (gsl_vector_long_double * v, long double x);
+GSL_FUN int gsl_vector_long_double_set_basis (gsl_vector_long_double * v, size_t i);
 
-int gsl_vector_long_double_fread (FILE * stream, gsl_vector_long_double * v);
-int gsl_vector_long_double_fwrite (FILE * stream, const gsl_vector_long_double * v);
-int gsl_vector_long_double_fscanf (FILE * stream, gsl_vector_long_double * v);
-int gsl_vector_long_double_fprintf (FILE * stream, const gsl_vector_long_double * v,
+GSL_FUN int gsl_vector_long_double_fread (FILE * stream, gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_fwrite (FILE * stream, const gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_fscanf (FILE * stream, gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_fprintf (FILE * stream, const gsl_vector_long_double * v,
                               const char *format);
 
-int gsl_vector_long_double_memcpy (gsl_vector_long_double * dest, const gsl_vector_long_double * src);
+GSL_FUN int gsl_vector_long_double_memcpy (gsl_vector_long_double * dest, const gsl_vector_long_double * src);
 
-int gsl_vector_long_double_reverse (gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_reverse (gsl_vector_long_double * v);
 
-int gsl_vector_long_double_swap (gsl_vector_long_double * v, gsl_vector_long_double * w);
-int gsl_vector_long_double_swap_elements (gsl_vector_long_double * v, const size_t i, const size_t j);
+GSL_FUN int gsl_vector_long_double_swap (gsl_vector_long_double * v, gsl_vector_long_double * w);
+GSL_FUN int gsl_vector_long_double_swap_elements (gsl_vector_long_double * v, const size_t i, const size_t j);
 
-long double gsl_vector_long_double_max (const gsl_vector_long_double * v);
-long double gsl_vector_long_double_min (const gsl_vector_long_double * v);
-void gsl_vector_long_double_minmax (const gsl_vector_long_double * v, long double * min_out, long double * max_out);
+GSL_FUN long double gsl_vector_long_double_max (const gsl_vector_long_double * v);
+GSL_FUN long double gsl_vector_long_double_min (const gsl_vector_long_double * v);
+GSL_FUN void gsl_vector_long_double_minmax (const gsl_vector_long_double * v, long double * min_out, long double * max_out);
 
-size_t gsl_vector_long_double_max_index (const gsl_vector_long_double * v);
-size_t gsl_vector_long_double_min_index (const gsl_vector_long_double * v);
-void gsl_vector_long_double_minmax_index (const gsl_vector_long_double * v, size_t * imin, size_t * imax);
+GSL_FUN size_t gsl_vector_long_double_max_index (const gsl_vector_long_double * v);
+GSL_FUN size_t gsl_vector_long_double_min_index (const gsl_vector_long_double * v);
+GSL_FUN void gsl_vector_long_double_minmax_index (const gsl_vector_long_double * v, size_t * imin, size_t * imax);
 
-int gsl_vector_long_double_add (gsl_vector_long_double * a, const gsl_vector_long_double * b);
-int gsl_vector_long_double_sub (gsl_vector_long_double * a, const gsl_vector_long_double * b);
-int gsl_vector_long_double_mul (gsl_vector_long_double * a, const gsl_vector_long_double * b);
-int gsl_vector_long_double_div (gsl_vector_long_double * a, const gsl_vector_long_double * b);
-int gsl_vector_long_double_scale (gsl_vector_long_double * a, const double x);
-int gsl_vector_long_double_add_constant (gsl_vector_long_double * a, const double x);
+GSL_FUN int gsl_vector_long_double_add (gsl_vector_long_double * a, const gsl_vector_long_double * b);
+GSL_FUN int gsl_vector_long_double_sub (gsl_vector_long_double * a, const gsl_vector_long_double * b);
+GSL_FUN int gsl_vector_long_double_mul (gsl_vector_long_double * a, const gsl_vector_long_double * b);
+GSL_FUN int gsl_vector_long_double_div (gsl_vector_long_double * a, const gsl_vector_long_double * b);
+GSL_FUN int gsl_vector_long_double_scale (gsl_vector_long_double * a, const double x);
+GSL_FUN int gsl_vector_long_double_add_constant (gsl_vector_long_double * a, const double x);
 
-int gsl_vector_long_double_equal (const gsl_vector_long_double * u, 
+GSL_FUN int gsl_vector_long_double_equal (const gsl_vector_long_double * u, 
                             const gsl_vector_long_double * v);
 
-int gsl_vector_long_double_isnull (const gsl_vector_long_double * v);
-int gsl_vector_long_double_ispos (const gsl_vector_long_double * v);
-int gsl_vector_long_double_isneg (const gsl_vector_long_double * v);
-int gsl_vector_long_double_isnonneg (const gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_isnull (const gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_ispos (const gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_isneg (const gsl_vector_long_double * v);
+GSL_FUN int gsl_vector_long_double_isnonneg (const gsl_vector_long_double * v);
 
-INLINE_DECL long double gsl_vector_long_double_get (const gsl_vector_long_double * v, const size_t i);
-INLINE_DECL void gsl_vector_long_double_set (gsl_vector_long_double * v, const size_t i, long double x);
-INLINE_DECL long double * gsl_vector_long_double_ptr (gsl_vector_long_double * v, const size_t i);
-INLINE_DECL const long double * gsl_vector_long_double_const_ptr (const gsl_vector_long_double * v, const size_t i);
+GSL_FUN INLINE_DECL long double gsl_vector_long_double_get (const gsl_vector_long_double * v, const size_t i);
+GSL_FUN INLINE_DECL void gsl_vector_long_double_set (gsl_vector_long_double * v, const size_t i, long double x);
+GSL_FUN INLINE_DECL long double * gsl_vector_long_double_ptr (gsl_vector_long_double * v, const size_t i);
+GSL_FUN INLINE_DECL const long double * gsl_vector_long_double_const_ptr (const gsl_vector_long_double * v, const size_t i);
 
 #ifdef HAVE_INLINE
 

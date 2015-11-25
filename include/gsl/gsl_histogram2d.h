@@ -20,6 +20,16 @@
 #ifndef __GSL_HISTOGRAM2D_H__
 #define __GSL_HISTOGRAM2D_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -49,120 +59,120 @@ typedef struct {
   double * sum ;
 } gsl_histogram2d_pdf ;
 
-gsl_histogram2d * gsl_histogram2d_alloc (const size_t nx, const size_t ny);
-gsl_histogram2d * gsl_histogram2d_calloc (const size_t nx, const size_t ny);
-gsl_histogram2d * gsl_histogram2d_calloc_uniform (const size_t nx, const size_t ny,
+GSL_FUN gsl_histogram2d * gsl_histogram2d_alloc (const size_t nx, const size_t ny);
+GSL_FUN gsl_histogram2d * gsl_histogram2d_calloc (const size_t nx, const size_t ny);
+GSL_FUN gsl_histogram2d * gsl_histogram2d_calloc_uniform (const size_t nx, const size_t ny,
                                              const double xmin, const double xmax,
                                              const double ymin, const double ymax);
 
-void gsl_histogram2d_free (gsl_histogram2d * h);
+GSL_FUN void gsl_histogram2d_free (gsl_histogram2d * h);
 
-int gsl_histogram2d_increment (gsl_histogram2d * h, double x, double y);
-int gsl_histogram2d_accumulate (gsl_histogram2d * h, 
+GSL_FUN int gsl_histogram2d_increment (gsl_histogram2d * h, double x, double y);
+GSL_FUN int gsl_histogram2d_accumulate (gsl_histogram2d * h, 
                                 double x, double y, double weight);
-int gsl_histogram2d_find (const gsl_histogram2d * h, 
+GSL_FUN int gsl_histogram2d_find (const gsl_histogram2d * h, 
                           const double x, const double y, size_t * i, size_t * j);
 
-double gsl_histogram2d_get (const gsl_histogram2d * h, const size_t i, const size_t j);
-int gsl_histogram2d_get_xrange (const gsl_histogram2d * h, const size_t i,
+GSL_FUN double gsl_histogram2d_get (const gsl_histogram2d * h, const size_t i, const size_t j);
+GSL_FUN int gsl_histogram2d_get_xrange (const gsl_histogram2d * h, const size_t i,
                                 double * xlower, double * xupper);
-int gsl_histogram2d_get_yrange (const gsl_histogram2d * h, const size_t j,
+GSL_FUN int gsl_histogram2d_get_yrange (const gsl_histogram2d * h, const size_t j,
                                 double * ylower, double * yupper);
 
                                      
-double gsl_histogram2d_xmax (const gsl_histogram2d * h);
-double gsl_histogram2d_xmin (const gsl_histogram2d * h);
-size_t gsl_histogram2d_nx (const gsl_histogram2d * h);
+GSL_FUN double gsl_histogram2d_xmax (const gsl_histogram2d * h);
+GSL_FUN double gsl_histogram2d_xmin (const gsl_histogram2d * h);
+GSL_FUN size_t gsl_histogram2d_nx (const gsl_histogram2d * h);
 
-double gsl_histogram2d_ymax (const gsl_histogram2d * h);
-double gsl_histogram2d_ymin (const gsl_histogram2d * h);
-size_t gsl_histogram2d_ny (const gsl_histogram2d * h);
+GSL_FUN double gsl_histogram2d_ymax (const gsl_histogram2d * h);
+GSL_FUN double gsl_histogram2d_ymin (const gsl_histogram2d * h);
+GSL_FUN size_t gsl_histogram2d_ny (const gsl_histogram2d * h);
 
-void gsl_histogram2d_reset (gsl_histogram2d * h);
+GSL_FUN void gsl_histogram2d_reset (gsl_histogram2d * h);
 
-gsl_histogram2d * 
+GSL_FUN gsl_histogram2d * 
 gsl_histogram2d_calloc_range(size_t nx, size_t ny, 
                              double *xrange, double *yrange);
 
-int 
+GSL_FUN int 
 gsl_histogram2d_set_ranges_uniform (gsl_histogram2d * h, 
                                     double xmin, double xmax,
                                     double ymin, double ymax);
 
-int 
+GSL_FUN int 
 gsl_histogram2d_set_ranges (gsl_histogram2d * h, 
                             const double xrange[], size_t xsize,
                             const double yrange[], size_t ysize);
 
-int 
+GSL_FUN int 
 gsl_histogram2d_memcpy(gsl_histogram2d *dest, const gsl_histogram2d *source);
 
-gsl_histogram2d *
+GSL_FUN gsl_histogram2d *
 gsl_histogram2d_clone(const gsl_histogram2d * source);
 
-double
+GSL_FUN double
 gsl_histogram2d_max_val(const gsl_histogram2d *h);
 
-void
+GSL_FUN void
 gsl_histogram2d_max_bin (const gsl_histogram2d *h, size_t *i, size_t *j);
 
-double
+GSL_FUN double
 gsl_histogram2d_min_val(const gsl_histogram2d *h);
 
-void
+GSL_FUN void
 gsl_histogram2d_min_bin (const gsl_histogram2d *h, size_t *i, size_t *j);
 
-double
+GSL_FUN double
 gsl_histogram2d_xmean (const gsl_histogram2d * h);
 
-double
+GSL_FUN double
 gsl_histogram2d_ymean (const gsl_histogram2d * h);
 
-double
+GSL_FUN double
 gsl_histogram2d_xsigma (const gsl_histogram2d * h);
 
-double
+GSL_FUN double
 gsl_histogram2d_ysigma (const gsl_histogram2d * h);
 
-double
+GSL_FUN double
 gsl_histogram2d_cov (const gsl_histogram2d * h);
 
-double
+GSL_FUN double
 gsl_histogram2d_sum (const gsl_histogram2d *h);
 
-int 
+GSL_FUN int 
 gsl_histogram2d_equal_bins_p(const gsl_histogram2d *h1,
                              const gsl_histogram2d *h2) ;
 
-int
+GSL_FUN int
 gsl_histogram2d_add(gsl_histogram2d *h1, const gsl_histogram2d *h2);
 
-int
+GSL_FUN int
 gsl_histogram2d_sub(gsl_histogram2d *h1, const gsl_histogram2d *h2);
 
-int
+GSL_FUN int
 gsl_histogram2d_mul(gsl_histogram2d *h1, const gsl_histogram2d *h2);
 
-int
+GSL_FUN int
 gsl_histogram2d_div(gsl_histogram2d *h1, const gsl_histogram2d *h2);
 
-int
+GSL_FUN int
 gsl_histogram2d_scale(gsl_histogram2d *h, double scale);
 
-int
+GSL_FUN int
 gsl_histogram2d_shift(gsl_histogram2d *h, double shift);
 
-int gsl_histogram2d_fwrite (FILE * stream, const gsl_histogram2d * h) ;
-int gsl_histogram2d_fread (FILE * stream, gsl_histogram2d * h);
-int gsl_histogram2d_fprintf (FILE * stream, const gsl_histogram2d * h, 
+GSL_FUN int gsl_histogram2d_fwrite (FILE * stream, const gsl_histogram2d * h) ;
+GSL_FUN int gsl_histogram2d_fread (FILE * stream, gsl_histogram2d * h);
+GSL_FUN int gsl_histogram2d_fprintf (FILE * stream, const gsl_histogram2d * h, 
                              const char * range_format,
                              const char * bin_format);
-int gsl_histogram2d_fscanf (FILE * stream, gsl_histogram2d * h);
+GSL_FUN int gsl_histogram2d_fscanf (FILE * stream, gsl_histogram2d * h);
 
-gsl_histogram2d_pdf * gsl_histogram2d_pdf_alloc (const size_t nx, const size_t ny);
-int gsl_histogram2d_pdf_init (gsl_histogram2d_pdf * p, const gsl_histogram2d * h);
-void gsl_histogram2d_pdf_free (gsl_histogram2d_pdf * p);
-int gsl_histogram2d_pdf_sample (const gsl_histogram2d_pdf * p, 
+GSL_FUN gsl_histogram2d_pdf * gsl_histogram2d_pdf_alloc (const size_t nx, const size_t ny);
+GSL_FUN int gsl_histogram2d_pdf_init (gsl_histogram2d_pdf * p, const gsl_histogram2d * h);
+GSL_FUN void gsl_histogram2d_pdf_free (gsl_histogram2d_pdf * p);
+GSL_FUN int gsl_histogram2d_pdf_sample (const gsl_histogram2d_pdf * p, 
                                    double r1, double r2, 
                                    double * x, double * y);
 

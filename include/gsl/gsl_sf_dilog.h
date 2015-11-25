@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_DILOG_H__
 #define __GSL_SF_DILOG_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -49,8 +59,8 @@ __BEGIN_DECLS
  * affect the real part and so is not relevant to the
  * interpretation of this implemented function.
  */
-int     gsl_sf_dilog_e(const double x, gsl_sf_result * result);
-double  gsl_sf_dilog(const double x);
+GSL_FUN int     gsl_sf_dilog_e(const double x, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_dilog(const double x);
 
 
 /* DiLogarithm(z), for complex argument z = x + i y.
@@ -70,7 +80,7 @@ double  gsl_sf_dilog(const double x);
  * to know anything about it. This is why GSL chooses to compute
  * only on the principal branch.
  */
-int
+GSL_FUN int
 gsl_sf_complex_dilog_xy_e(
   const double x,
   const double y,
@@ -98,7 +108,7 @@ gsl_sf_complex_dilog_xy_e(
  * Furthermore the handling of values close to the branch
  * cut is subtle. Perhap this interface should be deprecated.
  */
-int
+GSL_FUN int
 gsl_sf_complex_dilog_e(
   const double r,
   const double theta,
@@ -116,7 +126,7 @@ gsl_sf_complex_dilog_e(
  * s approaches the cut from above. In other words,
  * we define spence(x) = spence(x + i 0+).
  */
-int
+GSL_FUN int
 gsl_sf_complex_spence_xy_e(
   const double x,
   const double y,

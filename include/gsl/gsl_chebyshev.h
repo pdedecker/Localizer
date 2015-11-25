@@ -20,6 +20,16 @@
 #ifndef __GSL_CHEBYSHEV_H__
 #define __GSL_CHEBYSHEV_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_mode.h>
 
@@ -68,39 +78,39 @@ typedef struct gsl_cheb_series_struct gsl_cheb_series;
  * a specified interval, for a given function.
  * Return 0 on failure.
  */
-gsl_cheb_series * gsl_cheb_alloc(const size_t order);
+GSL_FUN gsl_cheb_series * gsl_cheb_alloc(const size_t order);
 
 /* Free a Chebyshev series previously calculated with gsl_cheb_alloc().
  */
-void gsl_cheb_free(gsl_cheb_series * cs);
+GSL_FUN void gsl_cheb_free(gsl_cheb_series * cs);
 
 /* Calculate a Chebyshev series using the storage provided.
  * Uses the interval (a,b) and the order with which it
  * was initially created.
  *
  */
-int gsl_cheb_init(gsl_cheb_series * cs, const gsl_function * func,
+GSL_FUN int gsl_cheb_init(gsl_cheb_series * cs, const gsl_function * func,
                   const double a, const double b);
 
 /* Return the order, size of coefficient array and coefficient array ptr */
-size_t gsl_cheb_order (const gsl_cheb_series * cs);
-size_t gsl_cheb_size (const gsl_cheb_series * cs);
-double *gsl_cheb_coeffs (const gsl_cheb_series * cs);
+GSL_FUN size_t gsl_cheb_order (const gsl_cheb_series * cs);
+GSL_FUN size_t gsl_cheb_size (const gsl_cheb_series * cs);
+GSL_FUN double *gsl_cheb_coeffs (const gsl_cheb_series * cs);
 
 /* Evaluate a Chebyshev series at a given point.
  * No errors can occur for a struct obtained from gsl_cheb_new().
  */
-double gsl_cheb_eval(const gsl_cheb_series * cs, const double x);
-int gsl_cheb_eval_err(const gsl_cheb_series * cs, const double x, 
+GSL_FUN double gsl_cheb_eval(const gsl_cheb_series * cs, const double x);
+GSL_FUN int gsl_cheb_eval_err(const gsl_cheb_series * cs, const double x, 
                       double * result, double * abserr);
 
 
 /* Evaluate a Chebyshev series at a given point, to (at most) the given order.
  * No errors can occur for a struct obtained from gsl_cheb_new().
  */
-double gsl_cheb_eval_n(const gsl_cheb_series * cs, const size_t order, 
+GSL_FUN double gsl_cheb_eval_n(const gsl_cheb_series * cs, const size_t order, 
                        const double x);
-int gsl_cheb_eval_n_err(const gsl_cheb_series * cs, const size_t order, 
+GSL_FUN int gsl_cheb_eval_n_err(const gsl_cheb_series * cs, const size_t order, 
                         const double x, double * result, double * abserr);
 
 
@@ -109,21 +119,21 @@ int gsl_cheb_eval_n_err(const gsl_cheb_series * cs, const size_t order,
  * order for other modes.
  * No errors can occur for a struct obtained from gsl_cheb_new().
  */
-double gsl_cheb_eval_mode(const gsl_cheb_series * cs, const double x, gsl_mode_t mode);
-int gsl_cheb_eval_mode_e(const gsl_cheb_series * cs, const double x, gsl_mode_t mode, double * result, double * abserr);
+GSL_FUN double gsl_cheb_eval_mode(const gsl_cheb_series * cs, const double x, gsl_mode_t mode);
+GSL_FUN int gsl_cheb_eval_mode_e(const gsl_cheb_series * cs, const double x, gsl_mode_t mode, double * result, double * abserr);
 
 
 
 /* Compute the derivative of a Chebyshev series.
  */
-int gsl_cheb_calc_deriv(gsl_cheb_series * deriv, const gsl_cheb_series * cs);
+GSL_FUN int gsl_cheb_calc_deriv(gsl_cheb_series * deriv, const gsl_cheb_series * cs);
 
 /* Compute the integral of a Chebyshev series. The
  * integral is fixed by the condition that it equals zero at
  * the left end-point, ie it is precisely
  *       Integrate[cs(t; a,b), {t, a, x}]
  */
-int gsl_cheb_calc_integ(gsl_cheb_series * integ, const gsl_cheb_series * cs);
+GSL_FUN int gsl_cheb_calc_integ(gsl_cheb_series * integ, const gsl_cheb_series * cs);
 
 
 

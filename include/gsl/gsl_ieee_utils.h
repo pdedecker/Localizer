@@ -19,6 +19,16 @@
 
 #ifndef __GSL_IEEE_UTILS_H__
 #define __GSL_IEEE_UTILS_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <stdio.h>
 
 #undef __BEGIN_DECLS
@@ -56,14 +66,14 @@ typedef struct  {
 } gsl_ieee_double_rep ;
 
 
-void gsl_ieee_printf_float (const float * x) ;
-void gsl_ieee_printf_double (const double * x) ;
+GSL_FUN void gsl_ieee_printf_float (const float * x) ;
+GSL_FUN void gsl_ieee_printf_double (const double * x) ;
 
-void gsl_ieee_fprintf_float (FILE * stream, const float * x) ;
-void gsl_ieee_fprintf_double (FILE * stream, const double * x) ;
+GSL_FUN void gsl_ieee_fprintf_float (FILE * stream, const float * x) ;
+GSL_FUN void gsl_ieee_fprintf_double (FILE * stream, const double * x) ;
 
-void gsl_ieee_float_to_rep (const float * x, gsl_ieee_float_rep * r) ;
-void gsl_ieee_double_to_rep (const double * x, gsl_ieee_double_rep * r) ;
+GSL_FUN void gsl_ieee_float_to_rep (const float * x, gsl_ieee_float_rep * r) ;
+GSL_FUN void gsl_ieee_double_to_rep (const double * x, gsl_ieee_double_rep * r) ;
 
 enum {
   GSL_IEEE_SINGLE_PRECISION = 1,
@@ -88,10 +98,10 @@ enum {
   GSL_IEEE_TRAP_INEXACT = 32
 } ;
 
-void gsl_ieee_env_setup (void) ;
-int gsl_ieee_read_mode_string (const char * description, int * precision,
+GSL_FUN void gsl_ieee_env_setup (void) ;
+GSL_FUN int gsl_ieee_read_mode_string (const char * description, int * precision,
                                int * rounding, int * exception_mask) ;
-int gsl_ieee_set_mode (int precision, int rounding, int exception_mask) ;
+GSL_FUN int gsl_ieee_set_mode (int precision, int rounding, int exception_mask) ;
 
 __END_DECLS
 

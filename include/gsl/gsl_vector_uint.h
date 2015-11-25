@@ -20,6 +20,16 @@
 #ifndef __GSL_VECTOR_UINT_H__
 #define __GSL_VECTOR_UINT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -66,56 +76,56 @@ typedef const _gsl_vector_uint_const_view gsl_vector_uint_const_view;
 
 /* Allocation */
 
-gsl_vector_uint *gsl_vector_uint_alloc (const size_t n);
-gsl_vector_uint *gsl_vector_uint_calloc (const size_t n);
+GSL_FUN gsl_vector_uint *gsl_vector_uint_alloc (const size_t n);
+GSL_FUN gsl_vector_uint *gsl_vector_uint_calloc (const size_t n);
 
-gsl_vector_uint *gsl_vector_uint_alloc_from_block (gsl_block_uint * b,
+GSL_FUN gsl_vector_uint *gsl_vector_uint_alloc_from_block (gsl_block_uint * b,
                                                      const size_t offset, 
                                                      const size_t n, 
                                                      const size_t stride);
 
-gsl_vector_uint *gsl_vector_uint_alloc_from_vector (gsl_vector_uint * v,
+GSL_FUN gsl_vector_uint *gsl_vector_uint_alloc_from_vector (gsl_vector_uint * v,
                                                       const size_t offset, 
                                                       const size_t n, 
                                                       const size_t stride);
 
-void gsl_vector_uint_free (gsl_vector_uint * v);
+GSL_FUN void gsl_vector_uint_free (gsl_vector_uint * v);
 
 /* Views */
 
-_gsl_vector_uint_view 
+GSL_FUN _gsl_vector_uint_view 
 gsl_vector_uint_view_array (unsigned int *v, size_t n);
 
-_gsl_vector_uint_view 
+GSL_FUN _gsl_vector_uint_view 
 gsl_vector_uint_view_array_with_stride (unsigned int *base,
                                          size_t stride,
                                          size_t n);
 
-_gsl_vector_uint_const_view 
+GSL_FUN _gsl_vector_uint_const_view 
 gsl_vector_uint_const_view_array (const unsigned int *v, size_t n);
 
-_gsl_vector_uint_const_view 
+GSL_FUN _gsl_vector_uint_const_view 
 gsl_vector_uint_const_view_array_with_stride (const unsigned int *base,
                                                size_t stride,
                                                size_t n);
 
-_gsl_vector_uint_view 
+GSL_FUN _gsl_vector_uint_view 
 gsl_vector_uint_subvector (gsl_vector_uint *v, 
                             size_t i, 
                             size_t n);
 
-_gsl_vector_uint_view 
+GSL_FUN _gsl_vector_uint_view 
 gsl_vector_uint_subvector_with_stride (gsl_vector_uint *v, 
                                         size_t i,
                                         size_t stride,
                                         size_t n);
 
-_gsl_vector_uint_const_view 
+GSL_FUN _gsl_vector_uint_const_view 
 gsl_vector_uint_const_subvector (const gsl_vector_uint *v, 
                                   size_t i, 
                                   size_t n);
 
-_gsl_vector_uint_const_view 
+GSL_FUN _gsl_vector_uint_const_view 
 gsl_vector_uint_const_subvector_with_stride (const gsl_vector_uint *v, 
                                               size_t i, 
                                               size_t stride,
@@ -123,50 +133,50 @@ gsl_vector_uint_const_subvector_with_stride (const gsl_vector_uint *v,
 
 /* Operations */
 
-void gsl_vector_uint_set_zero (gsl_vector_uint * v);
-void gsl_vector_uint_set_all (gsl_vector_uint * v, unsigned int x);
-int gsl_vector_uint_set_basis (gsl_vector_uint * v, size_t i);
+GSL_FUN void gsl_vector_uint_set_zero (gsl_vector_uint * v);
+GSL_FUN void gsl_vector_uint_set_all (gsl_vector_uint * v, unsigned int x);
+GSL_FUN int gsl_vector_uint_set_basis (gsl_vector_uint * v, size_t i);
 
-int gsl_vector_uint_fread (FILE * stream, gsl_vector_uint * v);
-int gsl_vector_uint_fwrite (FILE * stream, const gsl_vector_uint * v);
-int gsl_vector_uint_fscanf (FILE * stream, gsl_vector_uint * v);
-int gsl_vector_uint_fprintf (FILE * stream, const gsl_vector_uint * v,
+GSL_FUN int gsl_vector_uint_fread (FILE * stream, gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_fwrite (FILE * stream, const gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_fscanf (FILE * stream, gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_fprintf (FILE * stream, const gsl_vector_uint * v,
                               const char *format);
 
-int gsl_vector_uint_memcpy (gsl_vector_uint * dest, const gsl_vector_uint * src);
+GSL_FUN int gsl_vector_uint_memcpy (gsl_vector_uint * dest, const gsl_vector_uint * src);
 
-int gsl_vector_uint_reverse (gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_reverse (gsl_vector_uint * v);
 
-int gsl_vector_uint_swap (gsl_vector_uint * v, gsl_vector_uint * w);
-int gsl_vector_uint_swap_elements (gsl_vector_uint * v, const size_t i, const size_t j);
+GSL_FUN int gsl_vector_uint_swap (gsl_vector_uint * v, gsl_vector_uint * w);
+GSL_FUN int gsl_vector_uint_swap_elements (gsl_vector_uint * v, const size_t i, const size_t j);
 
-unsigned int gsl_vector_uint_max (const gsl_vector_uint * v);
-unsigned int gsl_vector_uint_min (const gsl_vector_uint * v);
-void gsl_vector_uint_minmax (const gsl_vector_uint * v, unsigned int * min_out, unsigned int * max_out);
+GSL_FUN unsigned int gsl_vector_uint_max (const gsl_vector_uint * v);
+GSL_FUN unsigned int gsl_vector_uint_min (const gsl_vector_uint * v);
+GSL_FUN void gsl_vector_uint_minmax (const gsl_vector_uint * v, unsigned int * min_out, unsigned int * max_out);
 
-size_t gsl_vector_uint_max_index (const gsl_vector_uint * v);
-size_t gsl_vector_uint_min_index (const gsl_vector_uint * v);
-void gsl_vector_uint_minmax_index (const gsl_vector_uint * v, size_t * imin, size_t * imax);
+GSL_FUN size_t gsl_vector_uint_max_index (const gsl_vector_uint * v);
+GSL_FUN size_t gsl_vector_uint_min_index (const gsl_vector_uint * v);
+GSL_FUN void gsl_vector_uint_minmax_index (const gsl_vector_uint * v, size_t * imin, size_t * imax);
 
-int gsl_vector_uint_add (gsl_vector_uint * a, const gsl_vector_uint * b);
-int gsl_vector_uint_sub (gsl_vector_uint * a, const gsl_vector_uint * b);
-int gsl_vector_uint_mul (gsl_vector_uint * a, const gsl_vector_uint * b);
-int gsl_vector_uint_div (gsl_vector_uint * a, const gsl_vector_uint * b);
-int gsl_vector_uint_scale (gsl_vector_uint * a, const double x);
-int gsl_vector_uint_add_constant (gsl_vector_uint * a, const double x);
+GSL_FUN int gsl_vector_uint_add (gsl_vector_uint * a, const gsl_vector_uint * b);
+GSL_FUN int gsl_vector_uint_sub (gsl_vector_uint * a, const gsl_vector_uint * b);
+GSL_FUN int gsl_vector_uint_mul (gsl_vector_uint * a, const gsl_vector_uint * b);
+GSL_FUN int gsl_vector_uint_div (gsl_vector_uint * a, const gsl_vector_uint * b);
+GSL_FUN int gsl_vector_uint_scale (gsl_vector_uint * a, const double x);
+GSL_FUN int gsl_vector_uint_add_constant (gsl_vector_uint * a, const double x);
 
-int gsl_vector_uint_equal (const gsl_vector_uint * u, 
+GSL_FUN int gsl_vector_uint_equal (const gsl_vector_uint * u, 
                             const gsl_vector_uint * v);
 
-int gsl_vector_uint_isnull (const gsl_vector_uint * v);
-int gsl_vector_uint_ispos (const gsl_vector_uint * v);
-int gsl_vector_uint_isneg (const gsl_vector_uint * v);
-int gsl_vector_uint_isnonneg (const gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_isnull (const gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_ispos (const gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_isneg (const gsl_vector_uint * v);
+GSL_FUN int gsl_vector_uint_isnonneg (const gsl_vector_uint * v);
 
-INLINE_DECL unsigned int gsl_vector_uint_get (const gsl_vector_uint * v, const size_t i);
-INLINE_DECL void gsl_vector_uint_set (gsl_vector_uint * v, const size_t i, unsigned int x);
-INLINE_DECL unsigned int * gsl_vector_uint_ptr (gsl_vector_uint * v, const size_t i);
-INLINE_DECL const unsigned int * gsl_vector_uint_const_ptr (const gsl_vector_uint * v, const size_t i);
+GSL_FUN INLINE_DECL unsigned int gsl_vector_uint_get (const gsl_vector_uint * v, const size_t i);
+GSL_FUN INLINE_DECL void gsl_vector_uint_set (gsl_vector_uint * v, const size_t i, unsigned int x);
+GSL_FUN INLINE_DECL unsigned int * gsl_vector_uint_ptr (gsl_vector_uint * v, const size_t i);
+GSL_FUN INLINE_DECL const unsigned int * gsl_vector_uint_const_ptr (const gsl_vector_uint * v, const size_t i);
 
 #ifdef HAVE_INLINE
 

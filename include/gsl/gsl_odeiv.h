@@ -22,6 +22,16 @@
 #ifndef __GSL_ODEIV_H__
 #define __GSL_ODEIV_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
@@ -123,16 +133,16 @@ GSL_VAR const gsl_odeiv_step_type *gsl_odeiv_step_gear2;
 
 /* Constructor for specialized stepper objects.
  */
-gsl_odeiv_step * gsl_odeiv_step_alloc(const gsl_odeiv_step_type * T, size_t dim);
-int  gsl_odeiv_step_reset(gsl_odeiv_step * s);
-void gsl_odeiv_step_free(gsl_odeiv_step * s);
+GSL_FUN gsl_odeiv_step * gsl_odeiv_step_alloc(const gsl_odeiv_step_type * T, size_t dim);
+GSL_FUN int  gsl_odeiv_step_reset(gsl_odeiv_step * s);
+GSL_FUN void gsl_odeiv_step_free(gsl_odeiv_step * s);
 
 /* General stepper object methods.
  */
-const char * gsl_odeiv_step_name(const gsl_odeiv_step * s);
-unsigned int gsl_odeiv_step_order(const gsl_odeiv_step * s);
+GSL_FUN const char * gsl_odeiv_step_name(const gsl_odeiv_step * s);
+GSL_FUN unsigned int gsl_odeiv_step_order(const gsl_odeiv_step * s);
 
-int  gsl_odeiv_step_apply(gsl_odeiv_step * s, double t, double h, double y[], double yerr[], const double dydt_in[], double dydt_out[], const gsl_odeiv_system * dydt);
+GSL_FUN int  gsl_odeiv_step_apply(gsl_odeiv_step * s, double t, double h, double y[], double yerr[], const double dydt_in[], double dydt_out[], const gsl_odeiv_system * dydt);
 
 /* General step size control object.
  *
@@ -167,11 +177,11 @@ gsl_odeiv_control;
 #define GSL_ODEIV_HADJ_NIL   0  /* step unchanged     */
 #define GSL_ODEIV_HADJ_DEC (-1) /* step decreased     */
 
-gsl_odeiv_control * gsl_odeiv_control_alloc(const gsl_odeiv_control_type * T);
-int gsl_odeiv_control_init(gsl_odeiv_control * c, double eps_abs, double eps_rel, double a_y, double a_dydt);
-void gsl_odeiv_control_free(gsl_odeiv_control * c);
-int gsl_odeiv_control_hadjust (gsl_odeiv_control * c, gsl_odeiv_step * s, const double y[], const double yerr[], const double dydt[], double * h);
-const char * gsl_odeiv_control_name(const gsl_odeiv_control * c);
+GSL_FUN gsl_odeiv_control * gsl_odeiv_control_alloc(const gsl_odeiv_control_type * T);
+GSL_FUN int gsl_odeiv_control_init(gsl_odeiv_control * c, double eps_abs, double eps_rel, double a_y, double a_dydt);
+GSL_FUN void gsl_odeiv_control_free(gsl_odeiv_control * c);
+GSL_FUN int gsl_odeiv_control_hadjust (gsl_odeiv_control * c, gsl_odeiv_step * s, const double y[], const double yerr[], const double dydt[], double * h);
+GSL_FUN const char * gsl_odeiv_control_name(const gsl_odeiv_control * c);
 
 /* Available control object constructors.
  *
@@ -192,16 +202,16 @@ const char * gsl_odeiv_control_name(const gsl_odeiv_control * c);
  * The yp method is the standard method with a_y=0, a_dydt=1.
  */
 
-gsl_odeiv_control * gsl_odeiv_control_standard_new(double eps_abs, double eps_rel, double a_y, double a_dydt);
-gsl_odeiv_control * gsl_odeiv_control_y_new(double eps_abs, double eps_rel);
-gsl_odeiv_control * gsl_odeiv_control_yp_new(double eps_abs, double eps_rel);
+GSL_FUN gsl_odeiv_control * gsl_odeiv_control_standard_new(double eps_abs, double eps_rel, double a_y, double a_dydt);
+GSL_FUN gsl_odeiv_control * gsl_odeiv_control_y_new(double eps_abs, double eps_rel);
+GSL_FUN gsl_odeiv_control * gsl_odeiv_control_yp_new(double eps_abs, double eps_rel);
 
 /* This controller computes errors using different absolute errors for
  * each component
  *
  *    D0 = eps_abs * scale_abs[i] + eps_rel * (a_y |y| + a_dydt h |y'|)
  */
-gsl_odeiv_control * gsl_odeiv_control_scaled_new(double eps_abs, double eps_rel, double a_y, double a_dydt, const double scale_abs[], size_t dim);
+GSL_FUN gsl_odeiv_control * gsl_odeiv_control_scaled_new(double eps_abs, double eps_rel, double a_y, double a_dydt, const double scale_abs[], size_t dim);
 
 /* General evolution object.
  */
@@ -219,10 +229,10 @@ gsl_odeiv_evolve;
 
 /* Evolution object methods.
  */
-gsl_odeiv_evolve * gsl_odeiv_evolve_alloc(size_t dim);
-int gsl_odeiv_evolve_apply(gsl_odeiv_evolve * e, gsl_odeiv_control * con, gsl_odeiv_step * step, const gsl_odeiv_system * dydt, double * t, double t1, double * h, double y[]);
-int gsl_odeiv_evolve_reset(gsl_odeiv_evolve * e);
-void gsl_odeiv_evolve_free(gsl_odeiv_evolve * e);
+GSL_FUN gsl_odeiv_evolve * gsl_odeiv_evolve_alloc(size_t dim);
+GSL_FUN int gsl_odeiv_evolve_apply(gsl_odeiv_evolve * e, gsl_odeiv_control * con, gsl_odeiv_step * step, const gsl_odeiv_system * dydt, double * t, double t1, double * h, double y[]);
+GSL_FUN int gsl_odeiv_evolve_reset(gsl_odeiv_evolve * e);
+GSL_FUN void gsl_odeiv_evolve_free(gsl_odeiv_evolve * e);
 
 
 __END_DECLS

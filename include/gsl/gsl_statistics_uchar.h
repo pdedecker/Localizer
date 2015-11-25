@@ -20,6 +20,16 @@
 #ifndef __GSL_STATISTICS_UCHAR_H__
 #define __GSL_STATISTICS_UCHAR_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #undef __BEGIN_DECLS
@@ -34,45 +44,46 @@
 
 __BEGIN_DECLS
 
-double gsl_stats_uchar_mean (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_variance (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_sd (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_variance_with_fixed_mean (const unsigned char data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_uchar_sd_with_fixed_mean (const unsigned char data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_uchar_tss (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_tss_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_mean (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_variance (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_sd (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_variance_with_fixed_mean (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_sd_with_fixed_mean (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_tss (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_tss_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_uchar_absdev (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_skew (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_kurtosis (const unsigned char data[], const size_t stride, const size_t n);
-double gsl_stats_uchar_lag1_autocorrelation (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_absdev (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_skew (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_kurtosis (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_uchar_lag1_autocorrelation (const unsigned char data[], const size_t stride, const size_t n);
 
-double gsl_stats_uchar_covariance (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n);
-double gsl_stats_uchar_correlation (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_uchar_covariance (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_uchar_correlation (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_uchar_spearman (const unsigned char data1[], const size_t stride1, const unsigned char data2[], const size_t stride2, const size_t n, double work[]);
 
-double gsl_stats_uchar_variance_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_uchar_sd_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_uchar_absdev_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_uchar_skew_m_sd (const unsigned char data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_uchar_kurtosis_m_sd (const unsigned char data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_uchar_lag1_autocorrelation_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_variance_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_sd_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_absdev_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_uchar_skew_m_sd (const unsigned char data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_uchar_kurtosis_m_sd (const unsigned char data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_uchar_lag1_autocorrelation_m (const unsigned char data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_uchar_covariance_m (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
+GSL_FUN double gsl_stats_uchar_covariance_m (const unsigned char data1[], const size_t stride1,const unsigned char data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
 
 
-double gsl_stats_uchar_pvariance (const unsigned char data1[], const size_t stride1, const size_t n1, const unsigned char data2[], const size_t stride2, const size_t n2);
-double gsl_stats_uchar_ttest (const unsigned char data1[], const size_t stride1, const size_t n1, const unsigned char data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_uchar_pvariance (const unsigned char data1[], const size_t stride1, const size_t n1, const unsigned char data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_uchar_ttest (const unsigned char data1[], const size_t stride1, const size_t n1, const unsigned char data2[], const size_t stride2, const size_t n2);
 
-unsigned char gsl_stats_uchar_max (const unsigned char data[], const size_t stride, const size_t n);
-unsigned char gsl_stats_uchar_min (const unsigned char data[], const size_t stride, const size_t n);
-void gsl_stats_uchar_minmax (unsigned char * min, unsigned char * max, const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN unsigned char gsl_stats_uchar_max (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN unsigned char gsl_stats_uchar_min (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_uchar_minmax (unsigned char * min, unsigned char * max, const unsigned char data[], const size_t stride, const size_t n);
 
-size_t gsl_stats_uchar_max_index (const unsigned char data[], const size_t stride, const size_t n);
-size_t gsl_stats_uchar_min_index (const unsigned char data[], const size_t stride, const size_t n);
-void gsl_stats_uchar_minmax_index (size_t * min_index, size_t * max_index, const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_uchar_max_index (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_uchar_min_index (const unsigned char data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_uchar_minmax_index (size_t * min_index, size_t * max_index, const unsigned char data[], const size_t stride, const size_t n);
 
-double gsl_stats_uchar_median_from_sorted_data (const unsigned char sorted_data[], const size_t stride, const size_t n) ;
-double gsl_stats_uchar_quantile_from_sorted_data (const unsigned char sorted_data[], const size_t stride, const size_t n, const double f) ;
+GSL_FUN double gsl_stats_uchar_median_from_sorted_data (const unsigned char sorted_data[], const size_t stride, const size_t n) ;
+GSL_FUN double gsl_stats_uchar_quantile_from_sorted_data (const unsigned char sorted_data[], const size_t stride, const size_t n, const double f) ;
 
 __END_DECLS
 

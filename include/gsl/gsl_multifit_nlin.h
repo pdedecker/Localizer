@@ -20,6 +20,16 @@
 #ifndef __GSL_MULTIFIT_NLIN_H__
 #define __GSL_MULTIFIT_NLIN_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_math.h>
@@ -38,10 +48,10 @@
 
 __BEGIN_DECLS
 
-int gsl_multifit_gradient (const gsl_matrix * J, const gsl_vector * f,
+GSL_FUN int gsl_multifit_gradient (const gsl_matrix * J, const gsl_vector * f,
                            gsl_vector * g);
 
-int gsl_multifit_covar (const gsl_matrix * J, double epsrel, gsl_matrix * covar);
+GSL_FUN int gsl_multifit_covar (const gsl_matrix * J, double epsrel, gsl_matrix * covar);
 
 
 /* Definition of vector-valued functions with parameters based on gsl_vector */
@@ -80,20 +90,24 @@ typedef struct
   }
 gsl_multifit_fsolver;
 
-gsl_multifit_fsolver *
+GSL_FUN gsl_multifit_fsolver *
 gsl_multifit_fsolver_alloc (const gsl_multifit_fsolver_type * T, 
                             size_t n, size_t p);
 
-void gsl_multifit_fsolver_free (gsl_multifit_fsolver * s);
+GSL_FUN void gsl_multifit_fsolver_free (gsl_multifit_fsolver * s);
 
-int gsl_multifit_fsolver_set (gsl_multifit_fsolver * s, 
+GSL_FUN int gsl_multifit_fsolver_set (gsl_multifit_fsolver * s, 
                                    gsl_multifit_function * f, 
                                    const gsl_vector * x);
 
-int gsl_multifit_fsolver_iterate (gsl_multifit_fsolver * s);
+GSL_FUN int gsl_multifit_fsolver_iterate (gsl_multifit_fsolver * s);
 
-const char * gsl_multifit_fsolver_name (const gsl_multifit_fsolver * s);
-gsl_vector * gsl_multifit_fsolver_position (const gsl_multifit_fsolver * s);
+GSL_FUN int gsl_multifit_fsolver_driver (gsl_multifit_fsolver * s,
+                                 const size_t maxiter,
+                                 const double epsabs, const double epsrel);
+
+GSL_FUN const char * gsl_multifit_fsolver_name (const gsl_multifit_fsolver * s);
+GSL_FUN gsl_vector * gsl_multifit_fsolver_position (const gsl_multifit_fsolver * s);
 
 /* Definition of vector-valued functions and gradient with parameters
    based on gsl_vector */
@@ -138,28 +152,38 @@ typedef struct
 gsl_multifit_fdfsolver;
 
 
-gsl_multifit_fdfsolver *
+GSL_FUN gsl_multifit_fdfsolver *
 gsl_multifit_fdfsolver_alloc (const gsl_multifit_fdfsolver_type * T, 
                               size_t n, size_t p);
 
-int
+GSL_FUN int
 gsl_multifit_fdfsolver_set (gsl_multifit_fdfsolver * s, 
                                  gsl_multifit_function_fdf * fdf,
                                  const gsl_vector * x);
 
-int
+GSL_FUN int
 gsl_multifit_fdfsolver_iterate (gsl_multifit_fdfsolver * s);
 
-void
+GSL_FUN int
+gsl_multifit_fdfsolver_driver (gsl_multifit_fdfsolver * s,
+                               const size_t maxiter,
+                               const double epsabs, const double epsrel);
+
+GSL_FUN void
 gsl_multifit_fdfsolver_free (gsl_multifit_fdfsolver * s);
 
-const char * gsl_multifit_fdfsolver_name (const gsl_multifit_fdfsolver * s);
-gsl_vector * gsl_multifit_fdfsolver_position (const gsl_multifit_fdfsolver * s);
+GSL_FUN const char * gsl_multifit_fdfsolver_name (const gsl_multifit_fdfsolver * s);
+GSL_FUN gsl_vector * gsl_multifit_fdfsolver_position (const gsl_multifit_fdfsolver * s);
 
-int gsl_multifit_test_delta (const gsl_vector * dx, const gsl_vector * x, 
+GSL_FUN int gsl_multifit_test_delta (const gsl_vector * dx, const gsl_vector * x, 
                              double epsabs, double epsrel);
 
-int gsl_multifit_test_gradient (const gsl_vector * g, double epsabs);
+GSL_FUN int gsl_multifit_test_gradient (const gsl_vector * g, double epsabs);
+
+GSL_FUN int gsl_multifit_fdfsolver_dif_df(const gsl_vector *x, gsl_multifit_function_fdf *fdf,
+                                  const gsl_vector *f, gsl_matrix *J);
+GSL_FUN int gsl_multifit_fdfsolver_dif_fdf(const gsl_vector *x, gsl_multifit_function_fdf *fdf,
+                                   gsl_vector *f, gsl_matrix *J);
 
 /* extern const gsl_multifit_fsolver_type * gsl_multifit_fsolver_gradient; */
 

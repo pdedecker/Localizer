@@ -23,6 +23,16 @@
 #ifndef __GSL_MONTE_MISER_H__
 #define __GSL_MONTE_MISER_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_plain.h>
@@ -65,18 +75,18 @@ typedef struct {
   size_t * hits_r;
 } gsl_monte_miser_state; 
 
-int gsl_monte_miser_integrate(gsl_monte_function * f, 
+GSL_FUN int gsl_monte_miser_integrate(gsl_monte_function * f, 
                               const double xl[], const double xh[], 
                               size_t dim, size_t calls, 
                               gsl_rng *r, 
                               gsl_monte_miser_state* state,
                               double *result, double *abserr);
 
-gsl_monte_miser_state* gsl_monte_miser_alloc(size_t dim);
+GSL_FUN gsl_monte_miser_state* gsl_monte_miser_alloc(size_t dim);
 
-int gsl_monte_miser_init(gsl_monte_miser_state* state);
+GSL_FUN int gsl_monte_miser_init(gsl_monte_miser_state* state);
 
-void gsl_monte_miser_free(gsl_monte_miser_state* state);
+GSL_FUN void gsl_monte_miser_free(gsl_monte_miser_state* state);
 
 typedef struct {
   double estimate_frac;
@@ -86,10 +96,10 @@ typedef struct {
   double dither;
 } gsl_monte_miser_params;
 
-void gsl_monte_miser_params_get (const gsl_monte_miser_state * state,
+GSL_FUN void gsl_monte_miser_params_get (const gsl_monte_miser_state * state,
 				 gsl_monte_miser_params * params);
 
-void gsl_monte_miser_params_set (gsl_monte_miser_state * state,
+GSL_FUN void gsl_monte_miser_params_set (gsl_monte_miser_state * state,
 				 const gsl_monte_miser_params * params);
 
 __END_DECLS

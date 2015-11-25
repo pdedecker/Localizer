@@ -20,6 +20,16 @@
 #ifndef __GSL_BLOCK_SHORT_H__
 #define __GSL_BLOCK_SHORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 
@@ -43,22 +53,22 @@ struct gsl_block_short_struct
 
 typedef struct gsl_block_short_struct gsl_block_short;
 
-gsl_block_short *gsl_block_short_alloc (const size_t n);
-gsl_block_short *gsl_block_short_calloc (const size_t n);
-void gsl_block_short_free (gsl_block_short * b);
+GSL_FUN gsl_block_short *gsl_block_short_alloc (const size_t n);
+GSL_FUN gsl_block_short *gsl_block_short_calloc (const size_t n);
+GSL_FUN void gsl_block_short_free (gsl_block_short * b);
 
-int gsl_block_short_fread (FILE * stream, gsl_block_short * b);
-int gsl_block_short_fwrite (FILE * stream, const gsl_block_short * b);
-int gsl_block_short_fscanf (FILE * stream, gsl_block_short * b);
-int gsl_block_short_fprintf (FILE * stream, const gsl_block_short * b, const char *format);
+GSL_FUN int gsl_block_short_fread (FILE * stream, gsl_block_short * b);
+GSL_FUN int gsl_block_short_fwrite (FILE * stream, const gsl_block_short * b);
+GSL_FUN int gsl_block_short_fscanf (FILE * stream, gsl_block_short * b);
+GSL_FUN int gsl_block_short_fprintf (FILE * stream, const gsl_block_short * b, const char *format);
 
-int gsl_block_short_raw_fread (FILE * stream, short * b, const size_t n, const size_t stride);
-int gsl_block_short_raw_fwrite (FILE * stream, const short * b, const size_t n, const size_t stride);
-int gsl_block_short_raw_fscanf (FILE * stream, short * b, const size_t n, const size_t stride);
-int gsl_block_short_raw_fprintf (FILE * stream, const short * b, const size_t n, const size_t stride, const char *format);
+GSL_FUN int gsl_block_short_raw_fread (FILE * stream, short * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_short_raw_fwrite (FILE * stream, const short * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_short_raw_fscanf (FILE * stream, short * b, const size_t n, const size_t stride);
+GSL_FUN int gsl_block_short_raw_fprintf (FILE * stream, const short * b, const size_t n, const size_t stride, const char *format);
 
-size_t gsl_block_short_size (const gsl_block_short * b);
-short * gsl_block_short_data (const gsl_block_short * b);
+GSL_FUN size_t gsl_block_short_size (const gsl_block_short * b);
+GSL_FUN short * gsl_block_short_data (const gsl_block_short * b);
 
 __END_DECLS
 

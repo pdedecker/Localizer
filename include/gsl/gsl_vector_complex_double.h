@@ -20,6 +20,16 @@
 #ifndef __GSL_VECTOR_COMPLEX_DOUBLE_H__
 #define __GSL_VECTOR_COMPLEX_DOUBLE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -66,123 +76,123 @@ typedef const _gsl_vector_complex_const_view gsl_vector_complex_const_view;
 
 /* Allocation */
 
-gsl_vector_complex *gsl_vector_complex_alloc (const size_t n);
-gsl_vector_complex *gsl_vector_complex_calloc (const size_t n);
+GSL_FUN gsl_vector_complex *gsl_vector_complex_alloc (const size_t n);
+GSL_FUN gsl_vector_complex *gsl_vector_complex_calloc (const size_t n);
 
-gsl_vector_complex *
+GSL_FUN gsl_vector_complex *
 gsl_vector_complex_alloc_from_block (gsl_block_complex * b, 
                                            const size_t offset, 
                                            const size_t n, 
                                            const size_t stride);
 
-gsl_vector_complex *
+GSL_FUN gsl_vector_complex *
 gsl_vector_complex_alloc_from_vector (gsl_vector_complex * v, 
                                              const size_t offset, 
                                              const size_t n, 
                                              const size_t stride);
 
-void gsl_vector_complex_free (gsl_vector_complex * v);
+GSL_FUN void gsl_vector_complex_free (gsl_vector_complex * v);
 
 /* Views */
 
-_gsl_vector_complex_view
+GSL_FUN _gsl_vector_complex_view
 gsl_vector_complex_view_array (double *base,
                                      size_t n);
 
-_gsl_vector_complex_view
+GSL_FUN _gsl_vector_complex_view
 gsl_vector_complex_view_array_with_stride (double *base,
                                                  size_t stride,
                                                  size_t n);
 
-_gsl_vector_complex_const_view
+GSL_FUN _gsl_vector_complex_const_view
 gsl_vector_complex_const_view_array (const double *base,
                                            size_t n);
 
-_gsl_vector_complex_const_view
+GSL_FUN _gsl_vector_complex_const_view
 gsl_vector_complex_const_view_array_with_stride (const double *base,
                                                        size_t stride,
                                                        size_t n);
 
-_gsl_vector_complex_view
+GSL_FUN _gsl_vector_complex_view
 gsl_vector_complex_subvector (gsl_vector_complex *base,
                                          size_t i, 
                                          size_t n);
 
 
-_gsl_vector_complex_view 
+GSL_FUN _gsl_vector_complex_view 
 gsl_vector_complex_subvector_with_stride (gsl_vector_complex *v, 
                                                 size_t i, 
                                                 size_t stride, 
                                                 size_t n);
 
-_gsl_vector_complex_const_view
+GSL_FUN _gsl_vector_complex_const_view
 gsl_vector_complex_const_subvector (const gsl_vector_complex *base,
                                                size_t i, 
                                                size_t n);
 
 
-_gsl_vector_complex_const_view 
+GSL_FUN _gsl_vector_complex_const_view 
 gsl_vector_complex_const_subvector_with_stride (const gsl_vector_complex *v, 
                                                       size_t i, 
                                                       size_t stride, 
                                                       size_t n);
 
-_gsl_vector_view
+GSL_FUN _gsl_vector_view
 gsl_vector_complex_real (gsl_vector_complex *v);
 
-_gsl_vector_view 
+GSL_FUN _gsl_vector_view 
 gsl_vector_complex_imag (gsl_vector_complex *v);
 
-_gsl_vector_const_view
+GSL_FUN _gsl_vector_const_view
 gsl_vector_complex_const_real (const gsl_vector_complex *v);
 
-_gsl_vector_const_view 
+GSL_FUN _gsl_vector_const_view 
 gsl_vector_complex_const_imag (const gsl_vector_complex *v);
 
 
 /* Operations */
 
-void gsl_vector_complex_set_zero (gsl_vector_complex * v);
-void gsl_vector_complex_set_all (gsl_vector_complex * v,
+GSL_FUN void gsl_vector_complex_set_zero (gsl_vector_complex * v);
+GSL_FUN void gsl_vector_complex_set_all (gsl_vector_complex * v,
                                        gsl_complex z);
-int gsl_vector_complex_set_basis (gsl_vector_complex * v, size_t i);
+GSL_FUN int gsl_vector_complex_set_basis (gsl_vector_complex * v, size_t i);
 
-int gsl_vector_complex_fread (FILE * stream,
+GSL_FUN int gsl_vector_complex_fread (FILE * stream,
                                     gsl_vector_complex * v);
-int gsl_vector_complex_fwrite (FILE * stream,
+GSL_FUN int gsl_vector_complex_fwrite (FILE * stream,
                                      const gsl_vector_complex * v);
-int gsl_vector_complex_fscanf (FILE * stream,
+GSL_FUN int gsl_vector_complex_fscanf (FILE * stream,
                                      gsl_vector_complex * v);
-int gsl_vector_complex_fprintf (FILE * stream,
+GSL_FUN int gsl_vector_complex_fprintf (FILE * stream,
                                       const gsl_vector_complex * v,
                                       const char *format);
 
-int gsl_vector_complex_memcpy (gsl_vector_complex * dest, const gsl_vector_complex * src);
+GSL_FUN int gsl_vector_complex_memcpy (gsl_vector_complex * dest, const gsl_vector_complex * src);
 
-int gsl_vector_complex_reverse (gsl_vector_complex * v);
+GSL_FUN int gsl_vector_complex_reverse (gsl_vector_complex * v);
 
-int gsl_vector_complex_swap (gsl_vector_complex * v, gsl_vector_complex * w);
-int gsl_vector_complex_swap_elements (gsl_vector_complex * v, const size_t i, const size_t j);
+GSL_FUN int gsl_vector_complex_swap (gsl_vector_complex * v, gsl_vector_complex * w);
+GSL_FUN int gsl_vector_complex_swap_elements (gsl_vector_complex * v, const size_t i, const size_t j);
 
-int gsl_vector_complex_equal (const gsl_vector_complex * u, 
+GSL_FUN int gsl_vector_complex_equal (const gsl_vector_complex * u, 
                                     const gsl_vector_complex * v);
 
-int gsl_vector_complex_isnull (const gsl_vector_complex * v);
-int gsl_vector_complex_ispos (const gsl_vector_complex * v);
-int gsl_vector_complex_isneg (const gsl_vector_complex * v);
-int gsl_vector_complex_isnonneg (const gsl_vector_complex * v);
+GSL_FUN int gsl_vector_complex_isnull (const gsl_vector_complex * v);
+GSL_FUN int gsl_vector_complex_ispos (const gsl_vector_complex * v);
+GSL_FUN int gsl_vector_complex_isneg (const gsl_vector_complex * v);
+GSL_FUN int gsl_vector_complex_isnonneg (const gsl_vector_complex * v);
 
-int gsl_vector_complex_add (gsl_vector_complex * a, const gsl_vector_complex * b);
-int gsl_vector_complex_sub (gsl_vector_complex * a, const gsl_vector_complex * b);
-int gsl_vector_complex_mul (gsl_vector_complex * a, const gsl_vector_complex * b);
-int gsl_vector_complex_div (gsl_vector_complex * a, const gsl_vector_complex * b);
-int gsl_vector_complex_scale (gsl_vector_complex * a, const gsl_complex x);
-int gsl_vector_complex_add_constant (gsl_vector_complex * a, const gsl_complex x);
+GSL_FUN int gsl_vector_complex_add (gsl_vector_complex * a, const gsl_vector_complex * b);
+GSL_FUN int gsl_vector_complex_sub (gsl_vector_complex * a, const gsl_vector_complex * b);
+GSL_FUN int gsl_vector_complex_mul (gsl_vector_complex * a, const gsl_vector_complex * b);
+GSL_FUN int gsl_vector_complex_div (gsl_vector_complex * a, const gsl_vector_complex * b);
+GSL_FUN int gsl_vector_complex_scale (gsl_vector_complex * a, const gsl_complex x);
+GSL_FUN int gsl_vector_complex_add_constant (gsl_vector_complex * a, const gsl_complex x);
 
-INLINE_DECL gsl_complex gsl_vector_complex_get (const gsl_vector_complex * v, const size_t i);
-INLINE_DECL void gsl_vector_complex_set (gsl_vector_complex * v, const size_t i, gsl_complex z);
-INLINE_DECL gsl_complex *gsl_vector_complex_ptr (gsl_vector_complex * v, const size_t i);
-INLINE_DECL const gsl_complex *gsl_vector_complex_const_ptr (const gsl_vector_complex * v, const size_t i);
+GSL_FUN INLINE_DECL gsl_complex gsl_vector_complex_get (const gsl_vector_complex * v, const size_t i);
+GSL_FUN INLINE_DECL void gsl_vector_complex_set (gsl_vector_complex * v, const size_t i, gsl_complex z);
+GSL_FUN INLINE_DECL gsl_complex *gsl_vector_complex_ptr (gsl_vector_complex * v, const size_t i);
+GSL_FUN INLINE_DECL const gsl_complex *gsl_vector_complex_const_ptr (const gsl_vector_complex * v, const size_t i);
 
 #ifdef HAVE_INLINE
 

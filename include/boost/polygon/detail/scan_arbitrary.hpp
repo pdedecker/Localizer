@@ -171,8 +171,9 @@ namespace boost { namespace polygon{
         pts.push_back(he1.second);
         std::set<Point>& segmentpts = intersection_points[(*outer).second];
         for(typename std::set<Point>::iterator itr = segmentpts.begin(); itr != segmentpts.end(); ++itr) {
-          if((*itr).y() > min_y - 1)
+          if ((*itr).y() >= min_y) {
             pts.push_back(*itr);
+          }
         }
         bool have_first_y = he1.first.y() >= min_y && he1.second.y() >= min_y;
         for(typename std::vector<std::pair<half_edge, segment_id> >::iterator inner = outer;
@@ -206,7 +207,7 @@ namespace boost { namespace polygon{
           outer != data.end(); ++outer) {
         const half_edge& he1 = (*outer).first;
         segment_id id1 = (*outer).second;
-        typedef rectangle_data<Unit> Rectangle;
+        //typedef rectangle_data<Unit> Rectangle;
         //Rectangle rect1;
         //set_points(rect1, he1.first, he1.second);
         //typename std::vector<Point>::iterator itr = lower_bound(pts.begin(), newend, (std::min)(he1.first, he1.second));
@@ -1024,7 +1025,7 @@ namespace boost { namespace polygon{
 
     template <typename result_type, typename result_functor, typename iT>
     iT handle_input_events(result_type& result, result_functor rf, iT begin, iT end) {
-      typedef typename high_precision_type<Unit>::type high_precision;
+      //typedef typename high_precision_type<Unit>::type high_precision;
       //for each event
       property_map vertical_properties_above;
       property_map vertical_properties_below;
@@ -1038,7 +1039,8 @@ namespace boost { namespace polygon{
       bool first_iteration = true;
       //we want to return from inside the loop when we hit end or new x
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning( disable: 4127 )
+#pragma warning (push)
+#pragma warning (disable: 4127)
 #endif
       while(true) {
         if(begin == end || (!first_iteration && ((*begin).first.first.get(VERTICAL) != y ||
@@ -1146,7 +1148,7 @@ namespace boost { namespace polygon{
         }
       }
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning( default: 4127 )
+#pragma warning (pop)
 #endif
 
     }
@@ -2292,11 +2294,12 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
             stdcout << polys[j] << "\n";
             stdcout << polys90[j] << "\n";
 #ifdef BOOST_POLYGON_ICC
+#pragma warning (push)
 #pragma warning (disable:1572)
 #endif
             if(area(polys[j]) != area(polys90[j])) {
 #ifdef BOOST_POLYGON_ICC
-#pragma warning (default:1572)
+#pragma warning (pop)
 #endif
               stdcout << "merge failed with area mismatch\n";
               failed = true;
@@ -2539,6 +2542,7 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
         if(edge.second < edge.first) elem.second *= -1;
         if(scanline_base<Unit>::is_vertical(edge)) elem.second *= -1;
 #ifdef BOOST_POLYGON_MSVC
+#pragma warning (push)
 #pragma warning (disable: 4127)
 #endif
         if(op_type == 0) { //OR
@@ -2569,7 +2573,7 @@ pts.push_back(Point(12344171, 6695983 )); pts.push_back(Point(12287208, 6672388 
             }
           }
 #ifdef BOOST_POLYGON_MSVC
-#pragma warning (default: 4127)
+#pragma warning (pop)
 #endif
           if(right.size() == 1) {
             if((*(right.begin())) == 0) {

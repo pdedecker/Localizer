@@ -20,6 +20,16 @@
 #ifndef __GSL_STATISTICS_USHORT_H__
 #define __GSL_STATISTICS_USHORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #undef __BEGIN_DECLS
@@ -34,45 +44,46 @@
 
 __BEGIN_DECLS
 
-double gsl_stats_ushort_mean (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_variance (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_sd (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_variance_with_fixed_mean (const unsigned short data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_ushort_sd_with_fixed_mean (const unsigned short data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_ushort_tss (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_tss_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_mean (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_variance (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_sd (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_variance_with_fixed_mean (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_sd_with_fixed_mean (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_tss (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_tss_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_ushort_absdev (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_skew (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_kurtosis (const unsigned short data[], const size_t stride, const size_t n);
-double gsl_stats_ushort_lag1_autocorrelation (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_absdev (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_skew (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_kurtosis (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_ushort_lag1_autocorrelation (const unsigned short data[], const size_t stride, const size_t n);
 
-double gsl_stats_ushort_covariance (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n);
-double gsl_stats_ushort_correlation (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_ushort_covariance (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_ushort_correlation (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_ushort_spearman (const unsigned short data1[], const size_t stride1, const unsigned short data2[], const size_t stride2, const size_t n, double work[]);
 
-double gsl_stats_ushort_variance_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_ushort_sd_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_ushort_absdev_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_ushort_skew_m_sd (const unsigned short data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_ushort_kurtosis_m_sd (const unsigned short data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_ushort_lag1_autocorrelation_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_variance_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_sd_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_absdev_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_ushort_skew_m_sd (const unsigned short data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_ushort_kurtosis_m_sd (const unsigned short data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_ushort_lag1_autocorrelation_m (const unsigned short data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_ushort_covariance_m (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
+GSL_FUN double gsl_stats_ushort_covariance_m (const unsigned short data1[], const size_t stride1,const unsigned short data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
 
 
-double gsl_stats_ushort_pvariance (const unsigned short data1[], const size_t stride1, const size_t n1, const unsigned short data2[], const size_t stride2, const size_t n2);
-double gsl_stats_ushort_ttest (const unsigned short data1[], const size_t stride1, const size_t n1, const unsigned short data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_ushort_pvariance (const unsigned short data1[], const size_t stride1, const size_t n1, const unsigned short data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_ushort_ttest (const unsigned short data1[], const size_t stride1, const size_t n1, const unsigned short data2[], const size_t stride2, const size_t n2);
 
-unsigned short gsl_stats_ushort_max (const unsigned short data[], const size_t stride, const size_t n);
-unsigned short gsl_stats_ushort_min (const unsigned short data[], const size_t stride, const size_t n);
-void gsl_stats_ushort_minmax (unsigned short * min, unsigned short * max, const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN unsigned short gsl_stats_ushort_max (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN unsigned short gsl_stats_ushort_min (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_ushort_minmax (unsigned short * min, unsigned short * max, const unsigned short data[], const size_t stride, const size_t n);
 
-size_t gsl_stats_ushort_max_index (const unsigned short data[], const size_t stride, const size_t n);
-size_t gsl_stats_ushort_min_index (const unsigned short data[], const size_t stride, const size_t n);
-void gsl_stats_ushort_minmax_index (size_t * min_index, size_t * max_index, const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_ushort_max_index (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_ushort_min_index (const unsigned short data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_ushort_minmax_index (size_t * min_index, size_t * max_index, const unsigned short data[], const size_t stride, const size_t n);
 
-double gsl_stats_ushort_median_from_sorted_data (const unsigned short sorted_data[], const size_t stride, const size_t n) ;
-double gsl_stats_ushort_quantile_from_sorted_data (const unsigned short sorted_data[], const size_t stride, const size_t n, const double f) ;
+GSL_FUN double gsl_stats_ushort_median_from_sorted_data (const unsigned short sorted_data[], const size_t stride, const size_t n) ;
+GSL_FUN double gsl_stats_ushort_quantile_from_sorted_data (const unsigned short sorted_data[], const size_t stride, const size_t n, const double f) ;
 
 __END_DECLS
 

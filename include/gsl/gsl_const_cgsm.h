@@ -21,6 +21,16 @@
 #ifndef __GSL_CONST_CGSM__
 #define __GSL_CONST_CGSM__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #define GSL_CONST_CGSM_SPEED_OF_LIGHT (2.99792458e10) /* cm / s */
 #define GSL_CONST_CGSM_GRAVITATIONAL_CONSTANT (6.673e-8) /* cm^3 / g s^2 */
 #define GSL_CONST_CGSM_PLANCKS_CONSTANT_H (6.62606896e-27) /* g cm^2 / s */

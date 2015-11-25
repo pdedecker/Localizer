@@ -20,6 +20,16 @@
 #ifndef __GSL_MIN_H__
 #define __GSL_MIN_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_math.h>
@@ -57,36 +67,36 @@ typedef struct
   }
 gsl_min_fminimizer;
 
-gsl_min_fminimizer *
+GSL_FUN gsl_min_fminimizer *
 gsl_min_fminimizer_alloc (const gsl_min_fminimizer_type * T) ;
                                       
-void gsl_min_fminimizer_free (gsl_min_fminimizer * s);
+GSL_FUN void gsl_min_fminimizer_free (gsl_min_fminimizer * s);
 
-int gsl_min_fminimizer_set (gsl_min_fminimizer * s, 
+GSL_FUN int gsl_min_fminimizer_set (gsl_min_fminimizer * s, 
                             gsl_function * f, double x_minimum, 
                             double x_lower, double x_upper);
 
-int gsl_min_fminimizer_set_with_values (gsl_min_fminimizer * s, 
+GSL_FUN int gsl_min_fminimizer_set_with_values (gsl_min_fminimizer * s, 
                                         gsl_function * f, 
                                         double x_minimum, double f_minimum,
                                         double x_lower, double f_lower,
                                         double x_upper, double f_upper);
 
-int gsl_min_fminimizer_iterate (gsl_min_fminimizer * s);
+GSL_FUN int gsl_min_fminimizer_iterate (gsl_min_fminimizer * s);
 
-const char * gsl_min_fminimizer_name (const gsl_min_fminimizer * s);
+GSL_FUN const char * gsl_min_fminimizer_name (const gsl_min_fminimizer * s);
 
-double gsl_min_fminimizer_x_minimum (const gsl_min_fminimizer * s);
-double gsl_min_fminimizer_x_lower (const gsl_min_fminimizer * s);
-double gsl_min_fminimizer_x_upper (const gsl_min_fminimizer * s);
-double gsl_min_fminimizer_f_minimum (const gsl_min_fminimizer * s);
-double gsl_min_fminimizer_f_lower (const gsl_min_fminimizer * s);
-double gsl_min_fminimizer_f_upper (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_x_minimum (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_x_lower (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_x_upper (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_f_minimum (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_f_lower (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_f_upper (const gsl_min_fminimizer * s);
 
 /* Deprecated, use x_minimum instead */
-double gsl_min_fminimizer_minimum (const gsl_min_fminimizer * s);
+GSL_FUN double gsl_min_fminimizer_minimum (const gsl_min_fminimizer * s);
 
-int
+GSL_FUN int
 gsl_min_test_interval (double x_lower, double x_upper, double epsabs, double epsrel);
 
 GSL_VAR const gsl_min_fminimizer_type  * gsl_min_fminimizer_goldensection;
@@ -100,7 +110,7 @@ int (*gsl_min_bracketing_function)(gsl_function *f,
                                    double *x_upper, double * f_upper,
                                    size_t eval_max);
 
-int 
+GSL_FUN int 
 gsl_min_find_bracket(gsl_function *f,double *x_minimum,double * f_minimum,
                      double *x_lower, double * f_lower,
                      double *x_upper, double * f_upper,

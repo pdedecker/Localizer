@@ -19,6 +19,16 @@
 
 #ifndef __GSL_DERIV_H__
 #define __GSL_DERIV_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <gsl/gsl_math.h>
 
 #undef __BEGIN_DECLS
@@ -33,15 +43,15 @@
 
 __BEGIN_DECLS
 
-int gsl_deriv_central (const gsl_function *f,
+GSL_FUN int gsl_deriv_central (const gsl_function *f,
                        double x, double h,
                        double *result, double *abserr);
 
-int gsl_deriv_backward (const gsl_function *f,
+GSL_FUN int gsl_deriv_backward (const gsl_function *f,
                         double x, double h,
                         double *result, double *abserr);
 
-int gsl_deriv_forward (const gsl_function *f,
+GSL_FUN int gsl_deriv_forward (const gsl_function *f,
                        double x, double h,
                        double *result, double *abserr);
 

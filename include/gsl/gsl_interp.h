@@ -21,6 +21,16 @@
  */
 #ifndef __GSL_INTERP_H__
 #define __GSL_INTERP_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <stdlib.h>
 #include <gsl/gsl_inline.h>
 #include <gsl/gsl_types.h>
@@ -79,75 +89,75 @@ GSL_VAR const gsl_interp_type * gsl_interp_cspline_periodic;
 GSL_VAR const gsl_interp_type * gsl_interp_akima;
 GSL_VAR const gsl_interp_type * gsl_interp_akima_periodic;
 
-gsl_interp_accel *
+GSL_FUN gsl_interp_accel *
 gsl_interp_accel_alloc(void);
 
-int
+GSL_FUN int
 gsl_interp_accel_reset (gsl_interp_accel * a);
 
-void
+GSL_FUN void
 gsl_interp_accel_free(gsl_interp_accel * a);
 
-gsl_interp *
+GSL_FUN gsl_interp *
 gsl_interp_alloc(const gsl_interp_type * T, size_t n);
      
-int
+GSL_FUN int
 gsl_interp_init(gsl_interp * obj, const double xa[], const double ya[], size_t size);
 
-const char * gsl_interp_name(const gsl_interp * interp);
-unsigned int gsl_interp_min_size(const gsl_interp * interp);
-unsigned int gsl_interp_type_min_size(const gsl_interp_type * T);
+GSL_FUN const char * gsl_interp_name(const gsl_interp * interp);
+GSL_FUN unsigned int gsl_interp_min_size(const gsl_interp * interp);
+GSL_FUN unsigned int gsl_interp_type_min_size(const gsl_interp_type * T);
 
 
-int
+GSL_FUN int
 gsl_interp_eval_e(const gsl_interp * obj,
                   const double xa[], const double ya[], double x,
                   gsl_interp_accel * a, double * y);
 
-double
+GSL_FUN double
 gsl_interp_eval(const gsl_interp * obj,
                 const double xa[], const double ya[], double x,
                 gsl_interp_accel * a);
 
-int
+GSL_FUN int
 gsl_interp_eval_deriv_e(const gsl_interp * obj,
                         const double xa[], const double ya[], double x,
                         gsl_interp_accel * a,
                         double * d);
 
-double
+GSL_FUN double
 gsl_interp_eval_deriv(const gsl_interp * obj,
                       const double xa[], const double ya[], double x,
                       gsl_interp_accel * a);
 
-int
+GSL_FUN int
 gsl_interp_eval_deriv2_e(const gsl_interp * obj,
                          const double xa[], const double ya[], double x,
                          gsl_interp_accel * a,
                          double * d2);
 
-double
+GSL_FUN double
 gsl_interp_eval_deriv2(const gsl_interp * obj,
                        const double xa[], const double ya[], double x,
                        gsl_interp_accel * a);
 
-int
+GSL_FUN int
 gsl_interp_eval_integ_e(const gsl_interp * obj,
                         const double xa[], const double ya[],
                         double a, double b,
                         gsl_interp_accel * acc,
                         double * result);
 
-double
+GSL_FUN double
 gsl_interp_eval_integ(const gsl_interp * obj,
                       const double xa[], const double ya[],
                       double a, double b,
                       gsl_interp_accel * acc);
 
-void
+GSL_FUN void
 gsl_interp_free(gsl_interp * interp);
 
-INLINE_DECL size_t
+GSL_FUN INLINE_DECL size_t
 gsl_interp_bsearch(const double x_array[], double x,
                    size_t index_lo, size_t index_hi);
 
@@ -193,7 +203,7 @@ gsl_interp_bsearch(const double x_array[], double x,
 }
 #endif
 
-INLINE_DECL size_t 
+GSL_FUN INLINE_DECL size_t 
 gsl_interp_accel_find(gsl_interp_accel * a, const double x_array[], size_t size, double x);
 
 #ifdef HAVE_INLINE

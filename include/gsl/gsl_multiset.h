@@ -22,6 +22,16 @@
 #ifndef __GSL_MULTISET_H__
 #define __GSL_MULTISET_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_types.h>
@@ -49,27 +59,27 @@ struct gsl_multiset_struct
 
 typedef struct gsl_multiset_struct gsl_multiset;
 
-gsl_multiset *gsl_multiset_alloc (const size_t n, const size_t k);
-gsl_multiset *gsl_multiset_calloc (const size_t n, const size_t k);
-void gsl_multiset_init_first (gsl_multiset * c);
-void gsl_multiset_init_last (gsl_multiset * c);
-void gsl_multiset_free (gsl_multiset * c);
-int gsl_multiset_memcpy (gsl_multiset * dest, const gsl_multiset * src);
+GSL_FUN gsl_multiset *gsl_multiset_alloc (const size_t n, const size_t k);
+GSL_FUN gsl_multiset *gsl_multiset_calloc (const size_t n, const size_t k);
+GSL_FUN void gsl_multiset_init_first (gsl_multiset * c);
+GSL_FUN void gsl_multiset_init_last (gsl_multiset * c);
+GSL_FUN void gsl_multiset_free (gsl_multiset * c);
+GSL_FUN int gsl_multiset_memcpy (gsl_multiset * dest, const gsl_multiset * src);
 
-int gsl_multiset_fread (FILE * stream, gsl_multiset * c);
-int gsl_multiset_fwrite (FILE * stream, const gsl_multiset * c);
-int gsl_multiset_fscanf (FILE * stream, gsl_multiset * c);
-int gsl_multiset_fprintf (FILE * stream, const gsl_multiset * c, const char *format);
+GSL_FUN int gsl_multiset_fread (FILE * stream, gsl_multiset * c);
+GSL_FUN int gsl_multiset_fwrite (FILE * stream, const gsl_multiset * c);
+GSL_FUN int gsl_multiset_fscanf (FILE * stream, gsl_multiset * c);
+GSL_FUN int gsl_multiset_fprintf (FILE * stream, const gsl_multiset * c, const char *format);
 
-size_t gsl_multiset_n (const gsl_multiset * c);
-size_t gsl_multiset_k (const gsl_multiset * c);
-size_t * gsl_multiset_data (const gsl_multiset * c);
+GSL_FUN size_t gsl_multiset_n (const gsl_multiset * c);
+GSL_FUN size_t gsl_multiset_k (const gsl_multiset * c);
+GSL_FUN size_t * gsl_multiset_data (const gsl_multiset * c);
 
-int gsl_multiset_valid (gsl_multiset * c);
-int gsl_multiset_next (gsl_multiset * c);
-int gsl_multiset_prev (gsl_multiset * c);
+GSL_FUN int gsl_multiset_valid (gsl_multiset * c);
+GSL_FUN int gsl_multiset_next (gsl_multiset * c);
+GSL_FUN int gsl_multiset_prev (gsl_multiset * c);
 
-INLINE_DECL size_t gsl_multiset_get (const gsl_multiset * c, const size_t i);
+GSL_FUN INLINE_DECL size_t gsl_multiset_get (const gsl_multiset * c, const size_t i);
 
 #ifdef HAVE_INLINE
 

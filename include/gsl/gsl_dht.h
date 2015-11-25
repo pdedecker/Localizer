@@ -22,6 +22,16 @@
 #ifndef __GSL_DHT_H__
 #define __GSL_DHT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #undef __BEGIN_DECLS
 #undef __END_DECLS
 #ifdef __cplusplus
@@ -50,36 +60,36 @@ typedef struct gsl_dht_struct gsl_dht;
 /* Create a new transform object for a given size
  * sampling array on the domain [0, xmax].
  */
-gsl_dht * gsl_dht_alloc(size_t size);
-gsl_dht * gsl_dht_new(size_t size, double nu, double xmax);
+GSL_FUN gsl_dht * gsl_dht_alloc(size_t size);
+GSL_FUN gsl_dht * gsl_dht_new(size_t size, double nu, double xmax);
 
 /* Recalculate a transform object for given values of nu, xmax.
  * You cannot change the size of the object since the internal
  * allocation is reused.
  */
-int gsl_dht_init(gsl_dht * t, double nu, double xmax);
+GSL_FUN int gsl_dht_init(gsl_dht * t, double nu, double xmax);
 
 /* The n'th computed x sample point for a given transform.
  * 0 <= n <= size-1
  */
-double gsl_dht_x_sample(const gsl_dht * t, int n);
+GSL_FUN double gsl_dht_x_sample(const gsl_dht * t, int n);
 
 
 /* The n'th computed k sample point for a given transform.
  * 0 <= n <= size-1
  */
-double gsl_dht_k_sample(const gsl_dht * t, int n);
+GSL_FUN double gsl_dht_k_sample(const gsl_dht * t, int n);
 
 
 /* Free a transform object.
  */
-void gsl_dht_free(gsl_dht * t);
+GSL_FUN void gsl_dht_free(gsl_dht * t);
 
 
 /* Perform a transform on a sampled array.
  * f_in[0] ... f_in[size-1] and similarly for f_out[]
  */
-int gsl_dht_apply(const gsl_dht * t, double * f_in, double * f_out);
+GSL_FUN int gsl_dht_apply(const gsl_dht * t, double * f_in, double * f_out);
 
 
 __END_DECLS

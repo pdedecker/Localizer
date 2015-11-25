@@ -20,6 +20,16 @@
 #ifndef __GSL_STATISTICS_INT_H__
 #define __GSL_STATISTICS_INT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #undef __BEGIN_DECLS
@@ -34,45 +44,46 @@
 
 __BEGIN_DECLS
 
-double gsl_stats_int_mean (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_variance (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_sd (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_variance_with_fixed_mean (const int data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_int_sd_with_fixed_mean (const int data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_int_tss (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_tss_m (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_mean (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_variance (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_sd (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_variance_with_fixed_mean (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_sd_with_fixed_mean (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_tss (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_tss_m (const int data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_int_absdev (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_skew (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_kurtosis (const int data[], const size_t stride, const size_t n);
-double gsl_stats_int_lag1_autocorrelation (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_absdev (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_skew (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_kurtosis (const int data[], const size_t stride, const size_t n);
+GSL_FUN double gsl_stats_int_lag1_autocorrelation (const int data[], const size_t stride, const size_t n);
 
-double gsl_stats_int_covariance (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n);
-double gsl_stats_int_correlation (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_int_covariance (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_int_correlation (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n);
+GSL_FUN double gsl_stats_int_spearman (const int data1[], const size_t stride1, const int data2[], const size_t stride2, const size_t n, double work[]);
 
-double gsl_stats_int_variance_m (const int data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_int_sd_m (const int data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_int_absdev_m (const int data[], const size_t stride, const size_t n, const double mean);
-double gsl_stats_int_skew_m_sd (const int data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_int_kurtosis_m_sd (const int data[], const size_t stride, const size_t n, const double mean, const double sd);
-double gsl_stats_int_lag1_autocorrelation_m (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_variance_m (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_sd_m (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_absdev_m (const int data[], const size_t stride, const size_t n, const double mean);
+GSL_FUN double gsl_stats_int_skew_m_sd (const int data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_int_kurtosis_m_sd (const int data[], const size_t stride, const size_t n, const double mean, const double sd);
+GSL_FUN double gsl_stats_int_lag1_autocorrelation_m (const int data[], const size_t stride, const size_t n, const double mean);
 
-double gsl_stats_int_covariance_m (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
+GSL_FUN double gsl_stats_int_covariance_m (const int data1[], const size_t stride1,const int data2[], const size_t stride2, const size_t n, const double mean1, const double mean2);
 
 
-double gsl_stats_int_pvariance (const int data1[], const size_t stride1, const size_t n1, const int data2[], const size_t stride2, const size_t n2);
-double gsl_stats_int_ttest (const int data1[], const size_t stride1, const size_t n1, const int data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_int_pvariance (const int data1[], const size_t stride1, const size_t n1, const int data2[], const size_t stride2, const size_t n2);
+GSL_FUN double gsl_stats_int_ttest (const int data1[], const size_t stride1, const size_t n1, const int data2[], const size_t stride2, const size_t n2);
 
-int gsl_stats_int_max (const int data[], const size_t stride, const size_t n);
-int gsl_stats_int_min (const int data[], const size_t stride, const size_t n);
-void gsl_stats_int_minmax (int * min, int * max, const int data[], const size_t stride, const size_t n);
+GSL_FUN int gsl_stats_int_max (const int data[], const size_t stride, const size_t n);
+GSL_FUN int gsl_stats_int_min (const int data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_int_minmax (int * min, int * max, const int data[], const size_t stride, const size_t n);
 
-size_t gsl_stats_int_max_index (const int data[], const size_t stride, const size_t n);
-size_t gsl_stats_int_min_index (const int data[], const size_t stride, const size_t n);
-void gsl_stats_int_minmax_index (size_t * min_index, size_t * max_index, const int data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_int_max_index (const int data[], const size_t stride, const size_t n);
+GSL_FUN size_t gsl_stats_int_min_index (const int data[], const size_t stride, const size_t n);
+GSL_FUN void gsl_stats_int_minmax_index (size_t * min_index, size_t * max_index, const int data[], const size_t stride, const size_t n);
 
-double gsl_stats_int_median_from_sorted_data (const int sorted_data[], const size_t stride, const size_t n) ;
-double gsl_stats_int_quantile_from_sorted_data (const int sorted_data[], const size_t stride, const size_t n, const double f) ;
+GSL_FUN double gsl_stats_int_median_from_sorted_data (const int sorted_data[], const size_t stride, const size_t n) ;
+GSL_FUN double gsl_stats_int_quantile_from_sorted_data (const int sorted_data[], const size_t stride, const size_t n, const double f) ;
 
 __END_DECLS
 

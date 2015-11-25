@@ -20,6 +20,16 @@
 #ifndef __GSL_TYPES_H__
 #define __GSL_TYPES_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #ifndef GSL_VAR
 
 #ifdef WIN32

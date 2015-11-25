@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_GAMMA_H__
 #define __GSL_SF_GAMMA_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -44,8 +54,8 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EDOM, GSL_EROUND
  */
-int gsl_sf_lngamma_e(double x, gsl_sf_result * result);
-double gsl_sf_lngamma(const double x);
+GSL_FUN int gsl_sf_lngamma_e(double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lngamma(const double x);
 
 
 /* Log[Gamma(x)], x not a negative integer
@@ -55,7 +65,7 @@ double gsl_sf_lngamma(const double x);
  *
  * exceptions: GSL_EDOM, GSL_EROUND
  */
-int gsl_sf_lngamma_sgn_e(double x, gsl_sf_result * result_lg, double *sgn);
+GSL_FUN int gsl_sf_lngamma_sgn_e(double x, gsl_sf_result * result_lg, double *sgn);
 
 
 /* Gamma(x), x not a negative integer
@@ -63,8 +73,8 @@ int gsl_sf_lngamma_sgn_e(double x, gsl_sf_result * result_lg, double *sgn);
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW, GSL_EROUND
  */
-int gsl_sf_gamma_e(const double x, gsl_sf_result * result);
-double gsl_sf_gamma(const double x);
+GSL_FUN int gsl_sf_gamma_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gamma(const double x);
 
 
 /* Regulated Gamma Function, x > 0
@@ -74,8 +84,8 @@ double gsl_sf_gamma(const double x);
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gammastar_e(const double x, gsl_sf_result * result);
-double gsl_sf_gammastar(const double x);
+GSL_FUN int gsl_sf_gammastar_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gammastar(const double x);
 
 
 /* 1/Gamma(x)
@@ -83,8 +93,8 @@ double gsl_sf_gammastar(const double x);
  *
  * exceptions: GSL_EUNDRFLW, GSL_EROUND
  */
-int gsl_sf_gammainv_e(const double x, gsl_sf_result * result);
-double gsl_sf_gammainv(const double x);
+GSL_FUN int gsl_sf_gammainv_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gammainv(const double x);
 
 
 /* Log[Gamma(z)] for z complex, z not a negative integer
@@ -100,7 +110,7 @@ double gsl_sf_gammainv(const double x);
  *
  * exceptions: GSL_EDOM, GSL_ELOSS
  */
-int gsl_sf_lngamma_complex_e(double zr, double zi, gsl_sf_result * lnr, gsl_sf_result * arg);
+GSL_FUN int gsl_sf_lngamma_complex_e(double zr, double zi, gsl_sf_result * lnr, gsl_sf_result * arg);
 
 
 /* x^n / n!
@@ -108,24 +118,24 @@ int gsl_sf_lngamma_complex_e(double zr, double zi, gsl_sf_result * lnr, gsl_sf_r
  * x >= 0.0, n >= 0
  * exceptions: GSL_EDOM, GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_taylorcoeff_e(const int n, const double x, gsl_sf_result * result);
-double gsl_sf_taylorcoeff(const int n, const double x);
+GSL_FUN int gsl_sf_taylorcoeff_e(const int n, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_taylorcoeff(const int n, const double x);
 
 
 /* n!
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_fact_e(const unsigned int n, gsl_sf_result * result);
-double gsl_sf_fact(const unsigned int n);
+GSL_FUN int gsl_sf_fact_e(const unsigned int n, gsl_sf_result * result);
+GSL_FUN double gsl_sf_fact(const unsigned int n);
 
 
 /* n!! = n(n-2)(n-4) ... 
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_doublefact_e(const unsigned int n, gsl_sf_result * result);
-double gsl_sf_doublefact(const unsigned int n);
+GSL_FUN int gsl_sf_doublefact_e(const unsigned int n, gsl_sf_result * result);
+GSL_FUN double gsl_sf_doublefact(const unsigned int n);
 
 
 /* log(n!) 
@@ -133,32 +143,32 @@ double gsl_sf_doublefact(const unsigned int n);
  *
  * exceptions: none
  */
-int gsl_sf_lnfact_e(const unsigned int n, gsl_sf_result * result);
-double gsl_sf_lnfact(const unsigned int n);
+GSL_FUN int gsl_sf_lnfact_e(const unsigned int n, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lnfact(const unsigned int n);
 
 
 /* log(n!!) 
  *
  * exceptions: none
  */
-int gsl_sf_lndoublefact_e(const unsigned int n, gsl_sf_result * result);
-double gsl_sf_lndoublefact(const unsigned int n);
+GSL_FUN int gsl_sf_lndoublefact_e(const unsigned int n, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lndoublefact(const unsigned int n);
 
 
 /* log(n choose m)
  *
  * exceptions: GSL_EDOM 
  */
-int gsl_sf_lnchoose_e(unsigned int n, unsigned int m, gsl_sf_result * result);
-double gsl_sf_lnchoose(unsigned int n, unsigned int m);
+GSL_FUN int gsl_sf_lnchoose_e(unsigned int n, unsigned int m, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lnchoose(unsigned int n, unsigned int m);
 
 
 /* n choose m
  *
  * exceptions: GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_choose_e(unsigned int n, unsigned int m, gsl_sf_result * result);
-double gsl_sf_choose(unsigned int n, unsigned int m);
+GSL_FUN int gsl_sf_choose_e(unsigned int n, unsigned int m, gsl_sf_result * result);
+GSL_FUN double gsl_sf_choose(unsigned int n, unsigned int m);
 
 
 /* Logarithm of Pochhammer (Apell) symbol
@@ -169,8 +179,8 @@ double gsl_sf_choose(unsigned int n, unsigned int m);
  *
  * exceptions:  GSL_EDOM
  */
-int gsl_sf_lnpoch_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_lnpoch(const double a, const double x);
+GSL_FUN int gsl_sf_lnpoch_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lnpoch(const double a, const double x);
 
 
 /* Logarithm of Pochhammer (Apell) symbol, with sign information.
@@ -182,7 +192,7 @@ double gsl_sf_lnpoch(const double a, const double x);
  *
  * exceptions:  GSL_EDOM
  */
-int gsl_sf_lnpoch_sgn_e(const double a, const double x, gsl_sf_result * result, double * sgn);
+GSL_FUN int gsl_sf_lnpoch_sgn_e(const double a, const double x, gsl_sf_result * result, double * sgn);
 
 
 /* Pochhammer (Apell) symbol
@@ -192,8 +202,8 @@ int gsl_sf_lnpoch_sgn_e(const double a, const double x, gsl_sf_result * result, 
  *
  * exceptions:  GSL_EDOM, GSL_EOVRFLW
  */
-int gsl_sf_poch_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_poch(const double a, const double x);
+GSL_FUN int gsl_sf_poch_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_poch(const double a, const double x);
 
 
 /* Relative Pochhammer (Apell) symbol
@@ -202,8 +212,8 @@ double gsl_sf_poch(const double a, const double x);
  *
  * exceptions:  GSL_EDOM
  */
-int gsl_sf_pochrel_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_pochrel(const double a, const double x);
+GSL_FUN int gsl_sf_pochrel_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_pochrel(const double a, const double x);
 
 
 /* Normalized Incomplete Gamma Function
@@ -216,8 +226,8 @@ double gsl_sf_pochrel(const double a, const double x);
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gamma_inc_Q_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_gamma_inc_Q(const double a, const double x);
+GSL_FUN int gsl_sf_gamma_inc_Q_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gamma_inc_Q(const double a, const double x);
 
 
 /* Complementary Normalized Incomplete Gamma Function
@@ -228,8 +238,8 @@ double gsl_sf_gamma_inc_Q(const double a, const double x);
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gamma_inc_P_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_gamma_inc_P(const double a, const double x);
+GSL_FUN int gsl_sf_gamma_inc_P_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gamma_inc_P(const double a, const double x);
 
 
 /* Non-normalized Incomplete Gamma Function
@@ -241,8 +251,8 @@ double gsl_sf_gamma_inc_P(const double a, const double x);
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_gamma_inc_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_gamma_inc(const double a, const double x);
+GSL_FUN int gsl_sf_gamma_inc_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_gamma_inc(const double a, const double x);
 
 
 /* Logarithm of Beta Function
@@ -251,10 +261,10 @@ double gsl_sf_gamma_inc(const double a, const double x);
  * a > 0, b > 0
  * exceptions: GSL_EDOM
  */
-int gsl_sf_lnbeta_e(const double a, const double b, gsl_sf_result * result);
-double gsl_sf_lnbeta(const double a, const double b);
+GSL_FUN int gsl_sf_lnbeta_e(const double a, const double b, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lnbeta(const double a, const double b);
 
-int gsl_sf_lnbeta_sgn_e(const double x, const double y, gsl_sf_result * result, double * sgn);
+GSL_FUN int gsl_sf_lnbeta_sgn_e(const double x, const double y, gsl_sf_result * result, double * sgn);
 
 
 /* Beta Function
@@ -263,8 +273,8 @@ int gsl_sf_lnbeta_sgn_e(const double x, const double y, gsl_sf_result * result, 
  * a > 0, b > 0
  * exceptions: GSL_EDOM, GSL_EOVRFLW, GSL_EUNDRFLW
  */
-int gsl_sf_beta_e(const double a, const double b, gsl_sf_result * result);
-double gsl_sf_beta(const double a, const double b);
+GSL_FUN int gsl_sf_beta_e(const double a, const double b, gsl_sf_result * result);
+GSL_FUN double gsl_sf_beta(const double a, const double b);
 
 
 /* Normalized Incomplete Beta Function
@@ -273,8 +283,8 @@ double gsl_sf_beta(const double a, const double b);
  * a > 0, b > 0, 0 <= x <= 1
  * exceptions: GSL_EDOM, GSL_EUNDRFLW
  */
-int gsl_sf_beta_inc_e(const double a, const double b, const double x, gsl_sf_result * result);
-double gsl_sf_beta_inc(const double a, const double b, const double x);
+GSL_FUN int gsl_sf_beta_inc_e(const double a, const double b, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_beta_inc(const double a, const double b, const double x);
 
 
 /* The maximum x such that gamma(x) is not

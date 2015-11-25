@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_POW_INT_H__
 #define __GSL_SF_POW_INT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -40,8 +50,8 @@ __BEGIN_DECLS
 /* Calculate x^n.
  * Does not check for overflow/underflow.
  */
-int     gsl_sf_pow_int_e(double x, int n, gsl_sf_result * result);
-double  gsl_sf_pow_int(const double x, const int n);
+GSL_FUN int     gsl_sf_pow_int_e(double x, int n, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_pow_int(const double x, const int n);
 
 
 __END_DECLS

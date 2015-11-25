@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_PSI_H__
 #define __GSL_SF_PSI_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -48,8 +58,8 @@ __BEGIN_DECLS
  * n > 0
  * exceptions: GSL_EDOM
  */
-int     gsl_sf_psi_int_e(const int n, gsl_sf_result * result);
-double  gsl_sf_psi_int(const int n);
+GSL_FUN int     gsl_sf_psi_int_e(const int n, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi_int(const int n);
 
 
 /* Di-Gamma Function psi(x) = psi(0, x)
@@ -57,23 +67,23 @@ double  gsl_sf_psi_int(const int n);
  * x != 0.0, -1.0, -2.0, ...
  * exceptions: GSL_EDOM, GSL_ELOSS
  */
-int     gsl_sf_psi_e(const double x, gsl_sf_result * result);
-double  gsl_sf_psi(const double x);
+GSL_FUN int     gsl_sf_psi_e(const double x, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi(const double x);
 
 
 /* Di-Gamma Function Re[psi(1 + I y)]
  *
  * exceptions: none
  */
-int     gsl_sf_psi_1piy_e(const double y, gsl_sf_result * result);
-double  gsl_sf_psi_1piy(const double y);
+GSL_FUN int     gsl_sf_psi_1piy_e(const double y, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi_1piy(const double y);
 
 
 /* Di-Gamma Function psi(z) for general complex argument z = x + iy
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_complex_psi_e(
+GSL_FUN int gsl_sf_complex_psi_e(
   const double x,
   const double y,
   gsl_sf_result * result_re,
@@ -86,8 +96,8 @@ int gsl_sf_complex_psi_e(
  * n > 0
  * exceptions: GSL_EDOM
  */
-int     gsl_sf_psi_1_int_e(const int n, gsl_sf_result * result);
-double  gsl_sf_psi_1_int(const int n);
+GSL_FUN int     gsl_sf_psi_1_int_e(const int n, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi_1_int(const int n);
 
 
 /* Tri-Gamma Function psi^(1)(x)
@@ -95,8 +105,8 @@ double  gsl_sf_psi_1_int(const int n);
  * x != 0.0, -1.0, -2.0, ...
  * exceptions: GSL_EDOM, GSL_ELOSS
  */
-int     gsl_sf_psi_1_e(const double x, gsl_sf_result * result);
-double  gsl_sf_psi_1(const double x);
+GSL_FUN int     gsl_sf_psi_1_e(const double x, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi_1(const double x);
 
 
 /* Poly-Gamma Function psi^(n)(x)
@@ -104,8 +114,8 @@ double  gsl_sf_psi_1(const double x);
  * n >= 0, x > 0.0
  * exceptions: GSL_EDOM
  */
-int     gsl_sf_psi_n_e(const int n, const double x, gsl_sf_result * result);
-double  gsl_sf_psi_n(const int n, const double x);
+GSL_FUN int     gsl_sf_psi_n_e(const int n, const double x, gsl_sf_result * result);
+GSL_FUN double  gsl_sf_psi_n(const int n, const double x);
 
 
 __END_DECLS

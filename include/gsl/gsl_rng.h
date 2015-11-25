@@ -19,6 +19,16 @@
 
 #ifndef __GSL_RNG_H__
 #define __GSL_RNG_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -122,36 +132,36 @@ GSL_VAR const gsl_rng_type *gsl_rng_vax;
 GSL_VAR const gsl_rng_type *gsl_rng_waterman14;
 GSL_VAR const gsl_rng_type *gsl_rng_zuf;
 
-const gsl_rng_type ** gsl_rng_types_setup(void);
+GSL_FUN const gsl_rng_type ** gsl_rng_types_setup(void);
 
 GSL_VAR const gsl_rng_type *gsl_rng_default;
 GSL_VAR unsigned long int gsl_rng_default_seed;
 
-gsl_rng *gsl_rng_alloc (const gsl_rng_type * T);
-int gsl_rng_memcpy (gsl_rng * dest, const gsl_rng * src);
-gsl_rng *gsl_rng_clone (const gsl_rng * r);
+GSL_FUN gsl_rng *gsl_rng_alloc (const gsl_rng_type * T);
+GSL_FUN int gsl_rng_memcpy (gsl_rng * dest, const gsl_rng * src);
+GSL_FUN gsl_rng *gsl_rng_clone (const gsl_rng * r);
 
-void gsl_rng_free (gsl_rng * r);
+GSL_FUN void gsl_rng_free (gsl_rng * r);
 
-void gsl_rng_set (const gsl_rng * r, unsigned long int seed);
-unsigned long int gsl_rng_max (const gsl_rng * r);
-unsigned long int gsl_rng_min (const gsl_rng * r);
-const char *gsl_rng_name (const gsl_rng * r);
+GSL_FUN void gsl_rng_set (const gsl_rng * r, unsigned long int seed);
+GSL_FUN unsigned long int gsl_rng_max (const gsl_rng * r);
+GSL_FUN unsigned long int gsl_rng_min (const gsl_rng * r);
+GSL_FUN const char *gsl_rng_name (const gsl_rng * r);
 
-int gsl_rng_fread (FILE * stream, gsl_rng * r);
-int gsl_rng_fwrite (FILE * stream, const gsl_rng * r);
+GSL_FUN int gsl_rng_fread (FILE * stream, gsl_rng * r);
+GSL_FUN int gsl_rng_fwrite (FILE * stream, const gsl_rng * r);
 
-size_t gsl_rng_size (const gsl_rng * r);
-void * gsl_rng_state (const gsl_rng * r);
+GSL_FUN size_t gsl_rng_size (const gsl_rng * r);
+GSL_FUN void * gsl_rng_state (const gsl_rng * r);
 
-void gsl_rng_print_state (const gsl_rng * r);
+GSL_FUN void gsl_rng_print_state (const gsl_rng * r);
 
-const gsl_rng_type * gsl_rng_env_setup (void);
+GSL_FUN const gsl_rng_type * gsl_rng_env_setup (void);
 
-INLINE_DECL unsigned long int gsl_rng_get (const gsl_rng * r);
-INLINE_DECL double gsl_rng_uniform (const gsl_rng * r);
-INLINE_DECL double gsl_rng_uniform_pos (const gsl_rng * r);
-INLINE_DECL unsigned long int gsl_rng_uniform_int (const gsl_rng * r, unsigned long int n);
+GSL_FUN INLINE_DECL unsigned long int gsl_rng_get (const gsl_rng * r);
+GSL_FUN INLINE_DECL double gsl_rng_uniform (const gsl_rng * r);
+GSL_FUN INLINE_DECL double gsl_rng_uniform_pos (const gsl_rng * r);
+GSL_FUN INLINE_DECL unsigned long int gsl_rng_uniform_int (const gsl_rng * r, unsigned long int n);
 
 #ifdef HAVE_INLINE
 

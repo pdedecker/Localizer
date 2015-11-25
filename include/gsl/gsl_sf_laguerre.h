@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_LAGUERRE_H__
 #define __GSL_SF_LAGUERRE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -45,12 +55,12 @@ __BEGIN_DECLS
  *
  * exceptions: none
  */
-int gsl_sf_laguerre_1_e(const double a, const double x, gsl_sf_result * result);
-int gsl_sf_laguerre_2_e(const double a, const double x, gsl_sf_result * result);
-int gsl_sf_laguerre_3_e(const double a, const double x, gsl_sf_result * result);
-double gsl_sf_laguerre_1(double a, double x);
-double gsl_sf_laguerre_2(double a, double x);
-double gsl_sf_laguerre_3(double a, double x);
+GSL_FUN int gsl_sf_laguerre_1_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN int gsl_sf_laguerre_2_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN int gsl_sf_laguerre_3_e(const double a, const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_laguerre_1(double a, double x);
+GSL_FUN double gsl_sf_laguerre_2(double a, double x);
+GSL_FUN double gsl_sf_laguerre_3(double a, double x);
 
 
 /* Evaluate generalized Laguerre polynomials.
@@ -59,8 +69,8 @@ double gsl_sf_laguerre_3(double a, double x);
  * n >= 0
  * exceptions: GSL_EDOM
  */
-int     gsl_sf_laguerre_n_e(const int n, const double a, const double x, gsl_sf_result * result);
-double     gsl_sf_laguerre_n(int n, double a, double x);
+GSL_FUN int     gsl_sf_laguerre_n_e(const int n, const double a, const double x, gsl_sf_result * result);
+GSL_FUN double     gsl_sf_laguerre_n(int n, double a, double x);
 
 
 __END_DECLS

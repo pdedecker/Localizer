@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_LOG_H__
 #define __GSL_SF_LOG_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -41,16 +51,16 @@ __BEGIN_DECLS
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_log_e(const double x, gsl_sf_result * result);
-double gsl_sf_log(const double x);
+GSL_FUN int gsl_sf_log_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_log(const double x);
 
 
 /* Log(|x|)
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_log_abs_e(const double x, gsl_sf_result * result);
-double gsl_sf_log_abs(const double x);
+GSL_FUN int gsl_sf_log_abs_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_log_abs(const double x);
 
 
 /* Complex Logarithm
@@ -59,23 +69,23 @@ double gsl_sf_log_abs(const double x);
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_complex_log_e(const double zr, const double zi, gsl_sf_result * lnr, gsl_sf_result * theta);
+GSL_FUN int gsl_sf_complex_log_e(const double zr, const double zi, gsl_sf_result * lnr, gsl_sf_result * theta);
 
 
 /* Log(1 + x)
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_log_1plusx_e(const double x, gsl_sf_result * result);
-double gsl_sf_log_1plusx(const double x);
+GSL_FUN int gsl_sf_log_1plusx_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_log_1plusx(const double x);
 
 
 /* Log(1 + x) - x
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_log_1plusx_mx_e(const double x, gsl_sf_result * result);
-double gsl_sf_log_1plusx_mx(const double x);
+GSL_FUN int gsl_sf_log_1plusx_mx_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_log_1plusx_mx(const double x);
 
 __END_DECLS
 

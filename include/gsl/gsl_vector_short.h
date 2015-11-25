@@ -20,6 +20,16 @@
 #ifndef __GSL_VECTOR_SHORT_H__
 #define __GSL_VECTOR_SHORT_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -66,56 +76,56 @@ typedef const _gsl_vector_short_const_view gsl_vector_short_const_view;
 
 /* Allocation */
 
-gsl_vector_short *gsl_vector_short_alloc (const size_t n);
-gsl_vector_short *gsl_vector_short_calloc (const size_t n);
+GSL_FUN gsl_vector_short *gsl_vector_short_alloc (const size_t n);
+GSL_FUN gsl_vector_short *gsl_vector_short_calloc (const size_t n);
 
-gsl_vector_short *gsl_vector_short_alloc_from_block (gsl_block_short * b,
+GSL_FUN gsl_vector_short *gsl_vector_short_alloc_from_block (gsl_block_short * b,
                                                      const size_t offset, 
                                                      const size_t n, 
                                                      const size_t stride);
 
-gsl_vector_short *gsl_vector_short_alloc_from_vector (gsl_vector_short * v,
+GSL_FUN gsl_vector_short *gsl_vector_short_alloc_from_vector (gsl_vector_short * v,
                                                       const size_t offset, 
                                                       const size_t n, 
                                                       const size_t stride);
 
-void gsl_vector_short_free (gsl_vector_short * v);
+GSL_FUN void gsl_vector_short_free (gsl_vector_short * v);
 
 /* Views */
 
-_gsl_vector_short_view 
+GSL_FUN _gsl_vector_short_view 
 gsl_vector_short_view_array (short *v, size_t n);
 
-_gsl_vector_short_view 
+GSL_FUN _gsl_vector_short_view 
 gsl_vector_short_view_array_with_stride (short *base,
                                          size_t stride,
                                          size_t n);
 
-_gsl_vector_short_const_view 
+GSL_FUN _gsl_vector_short_const_view 
 gsl_vector_short_const_view_array (const short *v, size_t n);
 
-_gsl_vector_short_const_view 
+GSL_FUN _gsl_vector_short_const_view 
 gsl_vector_short_const_view_array_with_stride (const short *base,
                                                size_t stride,
                                                size_t n);
 
-_gsl_vector_short_view 
+GSL_FUN _gsl_vector_short_view 
 gsl_vector_short_subvector (gsl_vector_short *v, 
                             size_t i, 
                             size_t n);
 
-_gsl_vector_short_view 
+GSL_FUN _gsl_vector_short_view 
 gsl_vector_short_subvector_with_stride (gsl_vector_short *v, 
                                         size_t i,
                                         size_t stride,
                                         size_t n);
 
-_gsl_vector_short_const_view 
+GSL_FUN _gsl_vector_short_const_view 
 gsl_vector_short_const_subvector (const gsl_vector_short *v, 
                                   size_t i, 
                                   size_t n);
 
-_gsl_vector_short_const_view 
+GSL_FUN _gsl_vector_short_const_view 
 gsl_vector_short_const_subvector_with_stride (const gsl_vector_short *v, 
                                               size_t i, 
                                               size_t stride,
@@ -123,50 +133,50 @@ gsl_vector_short_const_subvector_with_stride (const gsl_vector_short *v,
 
 /* Operations */
 
-void gsl_vector_short_set_zero (gsl_vector_short * v);
-void gsl_vector_short_set_all (gsl_vector_short * v, short x);
-int gsl_vector_short_set_basis (gsl_vector_short * v, size_t i);
+GSL_FUN void gsl_vector_short_set_zero (gsl_vector_short * v);
+GSL_FUN void gsl_vector_short_set_all (gsl_vector_short * v, short x);
+GSL_FUN int gsl_vector_short_set_basis (gsl_vector_short * v, size_t i);
 
-int gsl_vector_short_fread (FILE * stream, gsl_vector_short * v);
-int gsl_vector_short_fwrite (FILE * stream, const gsl_vector_short * v);
-int gsl_vector_short_fscanf (FILE * stream, gsl_vector_short * v);
-int gsl_vector_short_fprintf (FILE * stream, const gsl_vector_short * v,
+GSL_FUN int gsl_vector_short_fread (FILE * stream, gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_fwrite (FILE * stream, const gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_fscanf (FILE * stream, gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_fprintf (FILE * stream, const gsl_vector_short * v,
                               const char *format);
 
-int gsl_vector_short_memcpy (gsl_vector_short * dest, const gsl_vector_short * src);
+GSL_FUN int gsl_vector_short_memcpy (gsl_vector_short * dest, const gsl_vector_short * src);
 
-int gsl_vector_short_reverse (gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_reverse (gsl_vector_short * v);
 
-int gsl_vector_short_swap (gsl_vector_short * v, gsl_vector_short * w);
-int gsl_vector_short_swap_elements (gsl_vector_short * v, const size_t i, const size_t j);
+GSL_FUN int gsl_vector_short_swap (gsl_vector_short * v, gsl_vector_short * w);
+GSL_FUN int gsl_vector_short_swap_elements (gsl_vector_short * v, const size_t i, const size_t j);
 
-short gsl_vector_short_max (const gsl_vector_short * v);
-short gsl_vector_short_min (const gsl_vector_short * v);
-void gsl_vector_short_minmax (const gsl_vector_short * v, short * min_out, short * max_out);
+GSL_FUN short gsl_vector_short_max (const gsl_vector_short * v);
+GSL_FUN short gsl_vector_short_min (const gsl_vector_short * v);
+GSL_FUN void gsl_vector_short_minmax (const gsl_vector_short * v, short * min_out, short * max_out);
 
-size_t gsl_vector_short_max_index (const gsl_vector_short * v);
-size_t gsl_vector_short_min_index (const gsl_vector_short * v);
-void gsl_vector_short_minmax_index (const gsl_vector_short * v, size_t * imin, size_t * imax);
+GSL_FUN size_t gsl_vector_short_max_index (const gsl_vector_short * v);
+GSL_FUN size_t gsl_vector_short_min_index (const gsl_vector_short * v);
+GSL_FUN void gsl_vector_short_minmax_index (const gsl_vector_short * v, size_t * imin, size_t * imax);
 
-int gsl_vector_short_add (gsl_vector_short * a, const gsl_vector_short * b);
-int gsl_vector_short_sub (gsl_vector_short * a, const gsl_vector_short * b);
-int gsl_vector_short_mul (gsl_vector_short * a, const gsl_vector_short * b);
-int gsl_vector_short_div (gsl_vector_short * a, const gsl_vector_short * b);
-int gsl_vector_short_scale (gsl_vector_short * a, const double x);
-int gsl_vector_short_add_constant (gsl_vector_short * a, const double x);
+GSL_FUN int gsl_vector_short_add (gsl_vector_short * a, const gsl_vector_short * b);
+GSL_FUN int gsl_vector_short_sub (gsl_vector_short * a, const gsl_vector_short * b);
+GSL_FUN int gsl_vector_short_mul (gsl_vector_short * a, const gsl_vector_short * b);
+GSL_FUN int gsl_vector_short_div (gsl_vector_short * a, const gsl_vector_short * b);
+GSL_FUN int gsl_vector_short_scale (gsl_vector_short * a, const double x);
+GSL_FUN int gsl_vector_short_add_constant (gsl_vector_short * a, const double x);
 
-int gsl_vector_short_equal (const gsl_vector_short * u, 
+GSL_FUN int gsl_vector_short_equal (const gsl_vector_short * u, 
                             const gsl_vector_short * v);
 
-int gsl_vector_short_isnull (const gsl_vector_short * v);
-int gsl_vector_short_ispos (const gsl_vector_short * v);
-int gsl_vector_short_isneg (const gsl_vector_short * v);
-int gsl_vector_short_isnonneg (const gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_isnull (const gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_ispos (const gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_isneg (const gsl_vector_short * v);
+GSL_FUN int gsl_vector_short_isnonneg (const gsl_vector_short * v);
 
-INLINE_DECL short gsl_vector_short_get (const gsl_vector_short * v, const size_t i);
-INLINE_DECL void gsl_vector_short_set (gsl_vector_short * v, const size_t i, short x);
-INLINE_DECL short * gsl_vector_short_ptr (gsl_vector_short * v, const size_t i);
-INLINE_DECL const short * gsl_vector_short_const_ptr (const gsl_vector_short * v, const size_t i);
+GSL_FUN INLINE_DECL short gsl_vector_short_get (const gsl_vector_short * v, const size_t i);
+GSL_FUN INLINE_DECL void gsl_vector_short_set (gsl_vector_short * v, const size_t i, short x);
+GSL_FUN INLINE_DECL short * gsl_vector_short_ptr (gsl_vector_short * v, const size_t i);
+GSL_FUN INLINE_DECL const short * gsl_vector_short_const_ptr (const gsl_vector_short * v, const size_t i);
 
 #ifdef HAVE_INLINE
 

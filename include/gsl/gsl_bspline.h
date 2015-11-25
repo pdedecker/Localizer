@@ -21,6 +21,16 @@
 #ifndef __GSL_BSPLINE_H__
 #define __GSL_BSPLINE_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_vector.h>
@@ -59,48 +69,53 @@ typedef struct
     gsl_matrix *dB; /* temporary derivative results */
 } gsl_bspline_deriv_workspace;
 
-gsl_bspline_workspace *
+GSL_FUN gsl_bspline_workspace *
 gsl_bspline_alloc(const size_t k, const size_t nbreak);
 
-void gsl_bspline_free(gsl_bspline_workspace *w);
+GSL_FUN void gsl_bspline_free(gsl_bspline_workspace *w);
 
-size_t gsl_bspline_ncoeffs(gsl_bspline_workspace * w);
-size_t gsl_bspline_order(gsl_bspline_workspace * w);
-size_t gsl_bspline_nbreak(gsl_bspline_workspace * w);
-double gsl_bspline_breakpoint(size_t i, gsl_bspline_workspace * w);
-double gsl_bspline_greville_abscissa(size_t i, gsl_bspline_workspace *w);
+GSL_FUN size_t gsl_bspline_ncoeffs(gsl_bspline_workspace * w);
+GSL_FUN size_t gsl_bspline_order(gsl_bspline_workspace * w);
+GSL_FUN size_t gsl_bspline_nbreak(gsl_bspline_workspace * w);
+GSL_FUN double gsl_bspline_breakpoint(size_t i, gsl_bspline_workspace * w);
+GSL_FUN double gsl_bspline_greville_abscissa(size_t i, gsl_bspline_workspace *w);
 
-int
+GSL_FUN int
 gsl_bspline_knots(const gsl_vector *breakpts, gsl_bspline_workspace *w);
 
-int gsl_bspline_knots_uniform(const double a, const double b,
+GSL_FUN int gsl_bspline_knots_uniform(const double a, const double b,
                               gsl_bspline_workspace *w);
 
-int
+GSL_FUN int
+gsl_bspline_knots_greville(const gsl_vector *abscissae,
+                           gsl_bspline_workspace *w,
+                           double *abserr);
+
+GSL_FUN int
 gsl_bspline_eval(const double x, gsl_vector *B, 
                  gsl_bspline_workspace *w);
 
-int
+GSL_FUN int
 gsl_bspline_eval_nonzero(const double x,
                          gsl_vector *Bk,
                          size_t *istart,
                          size_t *iend,
                          gsl_bspline_workspace *w);
 
-gsl_bspline_deriv_workspace *
+GSL_FUN gsl_bspline_deriv_workspace *
 gsl_bspline_deriv_alloc(const size_t k);
 
-void
+GSL_FUN void
 gsl_bspline_deriv_free(gsl_bspline_deriv_workspace *w);
 
-int
+GSL_FUN int
 gsl_bspline_deriv_eval(const double x,
                        const size_t nderiv,
                        gsl_matrix *dB,
                        gsl_bspline_workspace *w,
                        gsl_bspline_deriv_workspace *dw);
 
-int
+GSL_FUN int
 gsl_bspline_deriv_eval_nonzero(const double x,
                                const size_t nderiv,
                                gsl_matrix *dB,

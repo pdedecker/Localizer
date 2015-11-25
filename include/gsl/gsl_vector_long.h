@@ -20,6 +20,16 @@
 #ifndef __GSL_VECTOR_LONG_H__
 #define __GSL_VECTOR_LONG_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -66,56 +76,56 @@ typedef const _gsl_vector_long_const_view gsl_vector_long_const_view;
 
 /* Allocation */
 
-gsl_vector_long *gsl_vector_long_alloc (const size_t n);
-gsl_vector_long *gsl_vector_long_calloc (const size_t n);
+GSL_FUN gsl_vector_long *gsl_vector_long_alloc (const size_t n);
+GSL_FUN gsl_vector_long *gsl_vector_long_calloc (const size_t n);
 
-gsl_vector_long *gsl_vector_long_alloc_from_block (gsl_block_long * b,
+GSL_FUN gsl_vector_long *gsl_vector_long_alloc_from_block (gsl_block_long * b,
                                                      const size_t offset, 
                                                      const size_t n, 
                                                      const size_t stride);
 
-gsl_vector_long *gsl_vector_long_alloc_from_vector (gsl_vector_long * v,
+GSL_FUN gsl_vector_long *gsl_vector_long_alloc_from_vector (gsl_vector_long * v,
                                                       const size_t offset, 
                                                       const size_t n, 
                                                       const size_t stride);
 
-void gsl_vector_long_free (gsl_vector_long * v);
+GSL_FUN void gsl_vector_long_free (gsl_vector_long * v);
 
 /* Views */
 
-_gsl_vector_long_view 
+GSL_FUN _gsl_vector_long_view 
 gsl_vector_long_view_array (long *v, size_t n);
 
-_gsl_vector_long_view 
+GSL_FUN _gsl_vector_long_view 
 gsl_vector_long_view_array_with_stride (long *base,
                                          size_t stride,
                                          size_t n);
 
-_gsl_vector_long_const_view 
+GSL_FUN _gsl_vector_long_const_view 
 gsl_vector_long_const_view_array (const long *v, size_t n);
 
-_gsl_vector_long_const_view 
+GSL_FUN _gsl_vector_long_const_view 
 gsl_vector_long_const_view_array_with_stride (const long *base,
                                                size_t stride,
                                                size_t n);
 
-_gsl_vector_long_view 
+GSL_FUN _gsl_vector_long_view 
 gsl_vector_long_subvector (gsl_vector_long *v, 
                             size_t i, 
                             size_t n);
 
-_gsl_vector_long_view 
+GSL_FUN _gsl_vector_long_view 
 gsl_vector_long_subvector_with_stride (gsl_vector_long *v, 
                                         size_t i,
                                         size_t stride,
                                         size_t n);
 
-_gsl_vector_long_const_view 
+GSL_FUN _gsl_vector_long_const_view 
 gsl_vector_long_const_subvector (const gsl_vector_long *v, 
                                   size_t i, 
                                   size_t n);
 
-_gsl_vector_long_const_view 
+GSL_FUN _gsl_vector_long_const_view 
 gsl_vector_long_const_subvector_with_stride (const gsl_vector_long *v, 
                                               size_t i, 
                                               size_t stride,
@@ -123,50 +133,50 @@ gsl_vector_long_const_subvector_with_stride (const gsl_vector_long *v,
 
 /* Operations */
 
-void gsl_vector_long_set_zero (gsl_vector_long * v);
-void gsl_vector_long_set_all (gsl_vector_long * v, long x);
-int gsl_vector_long_set_basis (gsl_vector_long * v, size_t i);
+GSL_FUN void gsl_vector_long_set_zero (gsl_vector_long * v);
+GSL_FUN void gsl_vector_long_set_all (gsl_vector_long * v, long x);
+GSL_FUN int gsl_vector_long_set_basis (gsl_vector_long * v, size_t i);
 
-int gsl_vector_long_fread (FILE * stream, gsl_vector_long * v);
-int gsl_vector_long_fwrite (FILE * stream, const gsl_vector_long * v);
-int gsl_vector_long_fscanf (FILE * stream, gsl_vector_long * v);
-int gsl_vector_long_fprintf (FILE * stream, const gsl_vector_long * v,
+GSL_FUN int gsl_vector_long_fread (FILE * stream, gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_fwrite (FILE * stream, const gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_fscanf (FILE * stream, gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_fprintf (FILE * stream, const gsl_vector_long * v,
                               const char *format);
 
-int gsl_vector_long_memcpy (gsl_vector_long * dest, const gsl_vector_long * src);
+GSL_FUN int gsl_vector_long_memcpy (gsl_vector_long * dest, const gsl_vector_long * src);
 
-int gsl_vector_long_reverse (gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_reverse (gsl_vector_long * v);
 
-int gsl_vector_long_swap (gsl_vector_long * v, gsl_vector_long * w);
-int gsl_vector_long_swap_elements (gsl_vector_long * v, const size_t i, const size_t j);
+GSL_FUN int gsl_vector_long_swap (gsl_vector_long * v, gsl_vector_long * w);
+GSL_FUN int gsl_vector_long_swap_elements (gsl_vector_long * v, const size_t i, const size_t j);
 
-long gsl_vector_long_max (const gsl_vector_long * v);
-long gsl_vector_long_min (const gsl_vector_long * v);
-void gsl_vector_long_minmax (const gsl_vector_long * v, long * min_out, long * max_out);
+GSL_FUN long gsl_vector_long_max (const gsl_vector_long * v);
+GSL_FUN long gsl_vector_long_min (const gsl_vector_long * v);
+GSL_FUN void gsl_vector_long_minmax (const gsl_vector_long * v, long * min_out, long * max_out);
 
-size_t gsl_vector_long_max_index (const gsl_vector_long * v);
-size_t gsl_vector_long_min_index (const gsl_vector_long * v);
-void gsl_vector_long_minmax_index (const gsl_vector_long * v, size_t * imin, size_t * imax);
+GSL_FUN size_t gsl_vector_long_max_index (const gsl_vector_long * v);
+GSL_FUN size_t gsl_vector_long_min_index (const gsl_vector_long * v);
+GSL_FUN void gsl_vector_long_minmax_index (const gsl_vector_long * v, size_t * imin, size_t * imax);
 
-int gsl_vector_long_add (gsl_vector_long * a, const gsl_vector_long * b);
-int gsl_vector_long_sub (gsl_vector_long * a, const gsl_vector_long * b);
-int gsl_vector_long_mul (gsl_vector_long * a, const gsl_vector_long * b);
-int gsl_vector_long_div (gsl_vector_long * a, const gsl_vector_long * b);
-int gsl_vector_long_scale (gsl_vector_long * a, const double x);
-int gsl_vector_long_add_constant (gsl_vector_long * a, const double x);
+GSL_FUN int gsl_vector_long_add (gsl_vector_long * a, const gsl_vector_long * b);
+GSL_FUN int gsl_vector_long_sub (gsl_vector_long * a, const gsl_vector_long * b);
+GSL_FUN int gsl_vector_long_mul (gsl_vector_long * a, const gsl_vector_long * b);
+GSL_FUN int gsl_vector_long_div (gsl_vector_long * a, const gsl_vector_long * b);
+GSL_FUN int gsl_vector_long_scale (gsl_vector_long * a, const double x);
+GSL_FUN int gsl_vector_long_add_constant (gsl_vector_long * a, const double x);
 
-int gsl_vector_long_equal (const gsl_vector_long * u, 
+GSL_FUN int gsl_vector_long_equal (const gsl_vector_long * u, 
                             const gsl_vector_long * v);
 
-int gsl_vector_long_isnull (const gsl_vector_long * v);
-int gsl_vector_long_ispos (const gsl_vector_long * v);
-int gsl_vector_long_isneg (const gsl_vector_long * v);
-int gsl_vector_long_isnonneg (const gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_isnull (const gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_ispos (const gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_isneg (const gsl_vector_long * v);
+GSL_FUN int gsl_vector_long_isnonneg (const gsl_vector_long * v);
 
-INLINE_DECL long gsl_vector_long_get (const gsl_vector_long * v, const size_t i);
-INLINE_DECL void gsl_vector_long_set (gsl_vector_long * v, const size_t i, long x);
-INLINE_DECL long * gsl_vector_long_ptr (gsl_vector_long * v, const size_t i);
-INLINE_DECL const long * gsl_vector_long_const_ptr (const gsl_vector_long * v, const size_t i);
+GSL_FUN INLINE_DECL long gsl_vector_long_get (const gsl_vector_long * v, const size_t i);
+GSL_FUN INLINE_DECL void gsl_vector_long_set (gsl_vector_long * v, const size_t i, long x);
+GSL_FUN INLINE_DECL long * gsl_vector_long_ptr (gsl_vector_long * v, const size_t i);
+GSL_FUN INLINE_DECL const long * gsl_vector_long_const_ptr (const gsl_vector_long * v, const size_t i);
 
 #ifdef HAVE_INLINE
 

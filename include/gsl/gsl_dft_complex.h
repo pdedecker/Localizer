@@ -20,6 +20,16 @@
 #ifndef __GSL_DFT_COMPLEX_H__
 #define __GSL_DFT_COMPLEX_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stddef.h>
 
 #include <gsl/gsl_math.h>
@@ -38,16 +48,16 @@
 
 __BEGIN_DECLS
 
-int gsl_dft_complex_forward (const double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_dft_complex_forward (const double data[], const size_t stride, const size_t n,
                              double result[]);
 
-int gsl_dft_complex_backward (const double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_dft_complex_backward (const double data[], const size_t stride, const size_t n,
                               double result[]);
 
-int gsl_dft_complex_inverse (const double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_dft_complex_inverse (const double data[], const size_t stride, const size_t n,
                              double result[]);
 
-int gsl_dft_complex_transform (const double data[], const size_t stride, const size_t n,
+GSL_FUN int gsl_dft_complex_transform (const double data[], const size_t stride, const size_t n,
                      double result[], const gsl_fft_direction sign);
 
 __END_DECLS

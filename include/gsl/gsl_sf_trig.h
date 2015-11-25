@@ -22,6 +22,16 @@
 #ifndef __GSL_SF_TRIG_H__
 #define __GSL_SF_TRIG_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <gsl/gsl_sf_result.h>
 
 #undef __BEGIN_DECLS
@@ -42,109 +52,109 @@ __BEGIN_DECLS
  * to guess the error for the standard library implementation
  * every time it is used would be a little goofy.
  */
-int gsl_sf_sin_e(double x, gsl_sf_result * result);
-double gsl_sf_sin(const double x);
+GSL_FUN int gsl_sf_sin_e(double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_sin(const double x);
 
 
 /* Cos(x) with GSL semantics.
  */
-int gsl_sf_cos_e(double x, gsl_sf_result * result);
-double gsl_sf_cos(const double x);
+GSL_FUN int gsl_sf_cos_e(double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_cos(const double x);
 
 
 /* Hypot(x,y) with GSL semantics.
  */
-int gsl_sf_hypot_e(const double x, const double y, gsl_sf_result * result);
-double gsl_sf_hypot(const double x, const double y);
+GSL_FUN int gsl_sf_hypot_e(const double x, const double y, gsl_sf_result * result);
+GSL_FUN double gsl_sf_hypot(const double x, const double y);
 
 
 /* Sin(z) for complex z
  *
  * exceptions: GSL_EOVRFLW
  */
-int gsl_sf_complex_sin_e(const double zr, const double zi, gsl_sf_result * szr, gsl_sf_result * szi);
+GSL_FUN int gsl_sf_complex_sin_e(const double zr, const double zi, gsl_sf_result * szr, gsl_sf_result * szi);
 
 
 /* Cos(z) for complex z
  *
  * exceptions: GSL_EOVRFLW
  */
-int gsl_sf_complex_cos_e(const double zr, const double zi, gsl_sf_result * czr, gsl_sf_result * czi);
+GSL_FUN int gsl_sf_complex_cos_e(const double zr, const double zi, gsl_sf_result * czr, gsl_sf_result * czi);
 
 
 /* Log(Sin(z)) for complex z
  *
  * exceptions: GSL_EDOM, GSL_ELOSS
  */
-int gsl_sf_complex_logsin_e(const double zr, const double zi, gsl_sf_result * lszr, gsl_sf_result * lszi);
+GSL_FUN int gsl_sf_complex_logsin_e(const double zr, const double zi, gsl_sf_result * lszr, gsl_sf_result * lszi);
 
 
 /* Sinc(x) = sin(pi x) / (pi x)
  *
  * exceptions: none
  */
-int gsl_sf_sinc_e(double x, gsl_sf_result * result);
-double gsl_sf_sinc(const double x);
+GSL_FUN int gsl_sf_sinc_e(double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_sinc(const double x);
 
 
 /* Log(Sinh(x)), x > 0
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_lnsinh_e(const double x, gsl_sf_result * result);
-double gsl_sf_lnsinh(const double x);
+GSL_FUN int gsl_sf_lnsinh_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lnsinh(const double x);
 
 
 /* Log(Cosh(x))
  *
  * exceptions: none
  */
-int gsl_sf_lncosh_e(const double x, gsl_sf_result * result);
-double gsl_sf_lncosh(const double x);
+GSL_FUN int gsl_sf_lncosh_e(const double x, gsl_sf_result * result);
+GSL_FUN double gsl_sf_lncosh(const double x);
 
 
 /* Convert polar to rectlinear coordinates.
  *
  * exceptions: GSL_ELOSS
  */
-int gsl_sf_polar_to_rect(const double r, const double theta, gsl_sf_result * x, gsl_sf_result * y);
+GSL_FUN int gsl_sf_polar_to_rect(const double r, const double theta, gsl_sf_result * x, gsl_sf_result * y);
 
 /* Convert rectilinear to polar coordinates.
  * return argument in range [-pi, pi]
  *
  * exceptions: GSL_EDOM
  */
-int gsl_sf_rect_to_polar(const double x, const double y, gsl_sf_result * r, gsl_sf_result * theta);
+GSL_FUN int gsl_sf_rect_to_polar(const double x, const double y, gsl_sf_result * r, gsl_sf_result * theta);
 
 /* Sin(x) for quantity with an associated error.
  */
-int gsl_sf_sin_err_e(const double x, const double dx, gsl_sf_result * result);
+GSL_FUN int gsl_sf_sin_err_e(const double x, const double dx, gsl_sf_result * result);
 
 
 /* Cos(x) for quantity with an associated error.
  */
-int gsl_sf_cos_err_e(const double x, const double dx, gsl_sf_result * result);
+GSL_FUN int gsl_sf_cos_err_e(const double x, const double dx, gsl_sf_result * result);
 
 
 /* Force an angle to lie in the range (-pi,pi].
  *
  * exceptions: GSL_ELOSS
  */
-int gsl_sf_angle_restrict_symm_e(double * theta);
-double gsl_sf_angle_restrict_symm(const double theta);
+GSL_FUN int gsl_sf_angle_restrict_symm_e(double * theta);
+GSL_FUN double gsl_sf_angle_restrict_symm(const double theta);
 
 
 /* Force an angle to lie in the range [0, 2pi)
  *
  * exceptions: GSL_ELOSS
  */
-int gsl_sf_angle_restrict_pos_e(double * theta);
-double gsl_sf_angle_restrict_pos(const double theta);
+GSL_FUN int gsl_sf_angle_restrict_pos_e(double * theta);
+GSL_FUN double gsl_sf_angle_restrict_pos(const double theta);
 
 
-int gsl_sf_angle_restrict_symm_err_e(const double theta, gsl_sf_result * result);
+GSL_FUN int gsl_sf_angle_restrict_symm_err_e(const double theta, gsl_sf_result * result);
 
-int gsl_sf_angle_restrict_pos_err_e(const double theta, gsl_sf_result * result);
+GSL_FUN int gsl_sf_angle_restrict_pos_err_e(const double theta, gsl_sf_result * result);
 
 
 __END_DECLS

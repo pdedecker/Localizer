@@ -24,6 +24,16 @@
 #ifndef __GSL_MONTE_PLAIN_H__
 #define __GSL_MONTE_PLAIN_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdio.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_rng.h>
@@ -45,7 +55,7 @@ typedef struct {
   double *x;
 } gsl_monte_plain_state;
 
-int
+GSL_FUN int
 gsl_monte_plain_integrate (const gsl_monte_function * f,
                            const double xl[], const double xu[],
                            const size_t dim,
@@ -54,11 +64,11 @@ gsl_monte_plain_integrate (const gsl_monte_function * f,
                            gsl_monte_plain_state * state,
                            double *result, double *abserr);
 
-gsl_monte_plain_state* gsl_monte_plain_alloc(size_t dim);
+GSL_FUN gsl_monte_plain_state* gsl_monte_plain_alloc(size_t dim);
 
-int gsl_monte_plain_init(gsl_monte_plain_state* state);
+GSL_FUN int gsl_monte_plain_init(gsl_monte_plain_state* state);
 
-void gsl_monte_plain_free (gsl_monte_plain_state* state);
+GSL_FUN void gsl_monte_plain_free (gsl_monte_plain_state* state);
 
 __END_DECLS
 

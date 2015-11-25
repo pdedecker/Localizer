@@ -20,6 +20,16 @@
 #ifndef __GSL_PERMUTE_VECTOR_CHAR_H__
 #define __GSL_PERMUTE_VECTOR_CHAR_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_permutation.h>
@@ -37,8 +47,8 @@
 
 __BEGIN_DECLS
 
-int gsl_permute_vector_char (const gsl_permutation * p, gsl_vector_char * v);
-int gsl_permute_vector_char_inverse (const gsl_permutation * p, gsl_vector_char * v);
+GSL_FUN int gsl_permute_vector_char (const gsl_permutation * p, gsl_vector_char * v);
+GSL_FUN int gsl_permute_vector_char_inverse (const gsl_permutation * p, gsl_vector_char * v);
 
 __END_DECLS
 

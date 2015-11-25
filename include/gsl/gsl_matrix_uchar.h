@@ -20,6 +20,16 @@
 #ifndef __GSL_MATRIX_UCHAR_H__
 #define __GSL_MATRIX_UCHAR_H__
 
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
+
 #include <stdlib.h>
 #include <gsl/gsl_types.h>
 #include <gsl/gsl_errno.h>
@@ -65,139 +75,139 @@ typedef const _gsl_matrix_uchar_const_view gsl_matrix_uchar_const_view;
 
 /* Allocation */
 
-gsl_matrix_uchar * 
+GSL_FUN gsl_matrix_uchar * 
 gsl_matrix_uchar_alloc (const size_t n1, const size_t n2);
 
-gsl_matrix_uchar * 
+GSL_FUN gsl_matrix_uchar * 
 gsl_matrix_uchar_calloc (const size_t n1, const size_t n2);
 
-gsl_matrix_uchar * 
+GSL_FUN gsl_matrix_uchar * 
 gsl_matrix_uchar_alloc_from_block (gsl_block_uchar * b, 
                                    const size_t offset, 
                                    const size_t n1, 
                                    const size_t n2, 
                                    const size_t d2);
 
-gsl_matrix_uchar * 
+GSL_FUN gsl_matrix_uchar * 
 gsl_matrix_uchar_alloc_from_matrix (gsl_matrix_uchar * m,
                                     const size_t k1, 
                                     const size_t k2,
                                     const size_t n1, 
                                     const size_t n2);
 
-gsl_vector_uchar * 
+GSL_FUN gsl_vector_uchar * 
 gsl_vector_uchar_alloc_row_from_matrix (gsl_matrix_uchar * m,
                                         const size_t i);
 
-gsl_vector_uchar * 
+GSL_FUN gsl_vector_uchar * 
 gsl_vector_uchar_alloc_col_from_matrix (gsl_matrix_uchar * m,
                                         const size_t j);
 
-void gsl_matrix_uchar_free (gsl_matrix_uchar * m);
+GSL_FUN void gsl_matrix_uchar_free (gsl_matrix_uchar * m);
 
 /* Views */
 
-_gsl_matrix_uchar_view 
+GSL_FUN _gsl_matrix_uchar_view 
 gsl_matrix_uchar_submatrix (gsl_matrix_uchar * m, 
                             const size_t i, const size_t j, 
                             const size_t n1, const size_t n2);
 
-_gsl_vector_uchar_view 
+GSL_FUN _gsl_vector_uchar_view 
 gsl_matrix_uchar_row (gsl_matrix_uchar * m, const size_t i);
 
-_gsl_vector_uchar_view 
+GSL_FUN _gsl_vector_uchar_view 
 gsl_matrix_uchar_column (gsl_matrix_uchar * m, const size_t j);
 
-_gsl_vector_uchar_view 
+GSL_FUN _gsl_vector_uchar_view 
 gsl_matrix_uchar_diagonal (gsl_matrix_uchar * m);
 
-_gsl_vector_uchar_view 
+GSL_FUN _gsl_vector_uchar_view 
 gsl_matrix_uchar_subdiagonal (gsl_matrix_uchar * m, const size_t k);
 
-_gsl_vector_uchar_view 
+GSL_FUN _gsl_vector_uchar_view 
 gsl_matrix_uchar_superdiagonal (gsl_matrix_uchar * m, const size_t k);
 
-_gsl_vector_uchar_view
+GSL_FUN _gsl_vector_uchar_view
 gsl_matrix_uchar_subrow (gsl_matrix_uchar * m, const size_t i,
                          const size_t offset, const size_t n);
 
-_gsl_vector_uchar_view
+GSL_FUN _gsl_vector_uchar_view
 gsl_matrix_uchar_subcolumn (gsl_matrix_uchar * m, const size_t j,
                             const size_t offset, const size_t n);
 
-_gsl_matrix_uchar_view
+GSL_FUN _gsl_matrix_uchar_view
 gsl_matrix_uchar_view_array (unsigned char * base,
                              const size_t n1, 
                              const size_t n2);
 
-_gsl_matrix_uchar_view
+GSL_FUN _gsl_matrix_uchar_view
 gsl_matrix_uchar_view_array_with_tda (unsigned char * base, 
                                       const size_t n1, 
                                       const size_t n2,
                                       const size_t tda);
 
 
-_gsl_matrix_uchar_view
+GSL_FUN _gsl_matrix_uchar_view
 gsl_matrix_uchar_view_vector (gsl_vector_uchar * v,
                               const size_t n1, 
                               const size_t n2);
 
-_gsl_matrix_uchar_view
+GSL_FUN _gsl_matrix_uchar_view
 gsl_matrix_uchar_view_vector_with_tda (gsl_vector_uchar * v,
                                        const size_t n1, 
                                        const size_t n2,
                                        const size_t tda);
 
 
-_gsl_matrix_uchar_const_view 
+GSL_FUN _gsl_matrix_uchar_const_view 
 gsl_matrix_uchar_const_submatrix (const gsl_matrix_uchar * m, 
                                   const size_t i, const size_t j, 
                                   const size_t n1, const size_t n2);
 
-_gsl_vector_uchar_const_view 
+GSL_FUN _gsl_vector_uchar_const_view 
 gsl_matrix_uchar_const_row (const gsl_matrix_uchar * m, 
                             const size_t i);
 
-_gsl_vector_uchar_const_view 
+GSL_FUN _gsl_vector_uchar_const_view 
 gsl_matrix_uchar_const_column (const gsl_matrix_uchar * m, 
                                const size_t j);
 
-_gsl_vector_uchar_const_view
+GSL_FUN _gsl_vector_uchar_const_view
 gsl_matrix_uchar_const_diagonal (const gsl_matrix_uchar * m);
 
-_gsl_vector_uchar_const_view 
+GSL_FUN _gsl_vector_uchar_const_view 
 gsl_matrix_uchar_const_subdiagonal (const gsl_matrix_uchar * m, 
                                     const size_t k);
 
-_gsl_vector_uchar_const_view 
+GSL_FUN _gsl_vector_uchar_const_view 
 gsl_matrix_uchar_const_superdiagonal (const gsl_matrix_uchar * m, 
                                       const size_t k);
 
-_gsl_vector_uchar_const_view
+GSL_FUN _gsl_vector_uchar_const_view
 gsl_matrix_uchar_const_subrow (const gsl_matrix_uchar * m, const size_t i,
                                const size_t offset, const size_t n);
 
-_gsl_vector_uchar_const_view
+GSL_FUN _gsl_vector_uchar_const_view
 gsl_matrix_uchar_const_subcolumn (const gsl_matrix_uchar * m, const size_t j,
                                   const size_t offset, const size_t n);
 
-_gsl_matrix_uchar_const_view
+GSL_FUN _gsl_matrix_uchar_const_view
 gsl_matrix_uchar_const_view_array (const unsigned char * base,
                                    const size_t n1, 
                                    const size_t n2);
 
-_gsl_matrix_uchar_const_view
+GSL_FUN _gsl_matrix_uchar_const_view
 gsl_matrix_uchar_const_view_array_with_tda (const unsigned char * base, 
                                             const size_t n1, 
                                             const size_t n2,
                                             const size_t tda);
 
-_gsl_matrix_uchar_const_view
+GSL_FUN _gsl_matrix_uchar_const_view
 gsl_matrix_uchar_const_view_vector (const gsl_vector_uchar * v,
                                     const size_t n1, 
                                     const size_t n2);
 
-_gsl_matrix_uchar_const_view
+GSL_FUN _gsl_matrix_uchar_const_view
 gsl_matrix_uchar_const_view_vector_with_tda (const gsl_vector_uchar * v,
                                              const size_t n1, 
                                              const size_t n2,
@@ -205,62 +215,62 @@ gsl_matrix_uchar_const_view_vector_with_tda (const gsl_vector_uchar * v,
 
 /* Operations */
 
-void gsl_matrix_uchar_set_zero (gsl_matrix_uchar * m);
-void gsl_matrix_uchar_set_identity (gsl_matrix_uchar * m);
-void gsl_matrix_uchar_set_all (gsl_matrix_uchar * m, unsigned char x);
+GSL_FUN void gsl_matrix_uchar_set_zero (gsl_matrix_uchar * m);
+GSL_FUN void gsl_matrix_uchar_set_identity (gsl_matrix_uchar * m);
+GSL_FUN void gsl_matrix_uchar_set_all (gsl_matrix_uchar * m, unsigned char x);
 
-int gsl_matrix_uchar_fread (FILE * stream, gsl_matrix_uchar * m) ;
-int gsl_matrix_uchar_fwrite (FILE * stream, const gsl_matrix_uchar * m) ;
-int gsl_matrix_uchar_fscanf (FILE * stream, gsl_matrix_uchar * m);
-int gsl_matrix_uchar_fprintf (FILE * stream, const gsl_matrix_uchar * m, const char * format);
+GSL_FUN int gsl_matrix_uchar_fread (FILE * stream, gsl_matrix_uchar * m) ;
+GSL_FUN int gsl_matrix_uchar_fwrite (FILE * stream, const gsl_matrix_uchar * m) ;
+GSL_FUN int gsl_matrix_uchar_fscanf (FILE * stream, gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_fprintf (FILE * stream, const gsl_matrix_uchar * m, const char * format);
  
-int gsl_matrix_uchar_memcpy(gsl_matrix_uchar * dest, const gsl_matrix_uchar * src);
-int gsl_matrix_uchar_swap(gsl_matrix_uchar * m1, gsl_matrix_uchar * m2);
+GSL_FUN int gsl_matrix_uchar_memcpy(gsl_matrix_uchar * dest, const gsl_matrix_uchar * src);
+GSL_FUN int gsl_matrix_uchar_swap(gsl_matrix_uchar * m1, gsl_matrix_uchar * m2);
 
-int gsl_matrix_uchar_swap_rows(gsl_matrix_uchar * m, const size_t i, const size_t j);
-int gsl_matrix_uchar_swap_columns(gsl_matrix_uchar * m, const size_t i, const size_t j);
-int gsl_matrix_uchar_swap_rowcol(gsl_matrix_uchar * m, const size_t i, const size_t j);
-int gsl_matrix_uchar_transpose (gsl_matrix_uchar * m);
-int gsl_matrix_uchar_transpose_memcpy (gsl_matrix_uchar * dest, const gsl_matrix_uchar * src);
+GSL_FUN int gsl_matrix_uchar_swap_rows(gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN int gsl_matrix_uchar_swap_columns(gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN int gsl_matrix_uchar_swap_rowcol(gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN int gsl_matrix_uchar_transpose (gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_transpose_memcpy (gsl_matrix_uchar * dest, const gsl_matrix_uchar * src);
 
-unsigned char gsl_matrix_uchar_max (const gsl_matrix_uchar * m);
-unsigned char gsl_matrix_uchar_min (const gsl_matrix_uchar * m);
-void gsl_matrix_uchar_minmax (const gsl_matrix_uchar * m, unsigned char * min_out, unsigned char * max_out);
+GSL_FUN unsigned char gsl_matrix_uchar_max (const gsl_matrix_uchar * m);
+GSL_FUN unsigned char gsl_matrix_uchar_min (const gsl_matrix_uchar * m);
+GSL_FUN void gsl_matrix_uchar_minmax (const gsl_matrix_uchar * m, unsigned char * min_out, unsigned char * max_out);
 
-void gsl_matrix_uchar_max_index (const gsl_matrix_uchar * m, size_t * imax, size_t *jmax);
-void gsl_matrix_uchar_min_index (const gsl_matrix_uchar * m, size_t * imin, size_t *jmin);
-void gsl_matrix_uchar_minmax_index (const gsl_matrix_uchar * m, size_t * imin, size_t * jmin, size_t * imax, size_t * jmax);
+GSL_FUN void gsl_matrix_uchar_max_index (const gsl_matrix_uchar * m, size_t * imax, size_t *jmax);
+GSL_FUN void gsl_matrix_uchar_min_index (const gsl_matrix_uchar * m, size_t * imin, size_t *jmin);
+GSL_FUN void gsl_matrix_uchar_minmax_index (const gsl_matrix_uchar * m, size_t * imin, size_t * jmin, size_t * imax, size_t * jmax);
 
-int gsl_matrix_uchar_equal (const gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
+GSL_FUN int gsl_matrix_uchar_equal (const gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
 
-int gsl_matrix_uchar_isnull (const gsl_matrix_uchar * m);
-int gsl_matrix_uchar_ispos (const gsl_matrix_uchar * m);
-int gsl_matrix_uchar_isneg (const gsl_matrix_uchar * m);
-int gsl_matrix_uchar_isnonneg (const gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_isnull (const gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_ispos (const gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_isneg (const gsl_matrix_uchar * m);
+GSL_FUN int gsl_matrix_uchar_isnonneg (const gsl_matrix_uchar * m);
 
-int gsl_matrix_uchar_add (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
-int gsl_matrix_uchar_sub (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
-int gsl_matrix_uchar_mul_elements (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
-int gsl_matrix_uchar_div_elements (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
-int gsl_matrix_uchar_scale (gsl_matrix_uchar * a, const double x);
-int gsl_matrix_uchar_add_constant (gsl_matrix_uchar * a, const double x);
-int gsl_matrix_uchar_add_diagonal (gsl_matrix_uchar * a, const double x);
+GSL_FUN int gsl_matrix_uchar_add (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
+GSL_FUN int gsl_matrix_uchar_sub (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
+GSL_FUN int gsl_matrix_uchar_mul_elements (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
+GSL_FUN int gsl_matrix_uchar_div_elements (gsl_matrix_uchar * a, const gsl_matrix_uchar * b);
+GSL_FUN int gsl_matrix_uchar_scale (gsl_matrix_uchar * a, const double x);
+GSL_FUN int gsl_matrix_uchar_add_constant (gsl_matrix_uchar * a, const double x);
+GSL_FUN int gsl_matrix_uchar_add_diagonal (gsl_matrix_uchar * a, const double x);
 
 /***********************************************************************/
 /* The functions below are obsolete                                    */
 /***********************************************************************/
-int gsl_matrix_uchar_get_row(gsl_vector_uchar * v, const gsl_matrix_uchar * m, const size_t i);
-int gsl_matrix_uchar_get_col(gsl_vector_uchar * v, const gsl_matrix_uchar * m, const size_t j);
-int gsl_matrix_uchar_set_row(gsl_matrix_uchar * m, const size_t i, const gsl_vector_uchar * v);
-int gsl_matrix_uchar_set_col(gsl_matrix_uchar * m, const size_t j, const gsl_vector_uchar * v);
+GSL_FUN int gsl_matrix_uchar_get_row(gsl_vector_uchar * v, const gsl_matrix_uchar * m, const size_t i);
+GSL_FUN int gsl_matrix_uchar_get_col(gsl_vector_uchar * v, const gsl_matrix_uchar * m, const size_t j);
+GSL_FUN int gsl_matrix_uchar_set_row(gsl_matrix_uchar * m, const size_t i, const gsl_vector_uchar * v);
+GSL_FUN int gsl_matrix_uchar_set_col(gsl_matrix_uchar * m, const size_t j, const gsl_vector_uchar * v);
 /***********************************************************************/
 
 /* inline functions if you are using GCC */
 
-INLINE_DECL unsigned char   gsl_matrix_uchar_get(const gsl_matrix_uchar * m, const size_t i, const size_t j);
-INLINE_DECL void    gsl_matrix_uchar_set(gsl_matrix_uchar * m, const size_t i, const size_t j, const unsigned char x);
-INLINE_DECL unsigned char * gsl_matrix_uchar_ptr(gsl_matrix_uchar * m, const size_t i, const size_t j);
-INLINE_DECL const unsigned char * gsl_matrix_uchar_const_ptr(const gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN INLINE_DECL unsigned char   gsl_matrix_uchar_get(const gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN INLINE_DECL void    gsl_matrix_uchar_set(gsl_matrix_uchar * m, const size_t i, const size_t j, const unsigned char x);
+GSL_FUN INLINE_DECL unsigned char * gsl_matrix_uchar_ptr(gsl_matrix_uchar * m, const size_t i, const size_t j);
+GSL_FUN INLINE_DECL const unsigned char * gsl_matrix_uchar_const_ptr(const gsl_matrix_uchar * m, const size_t i, const size_t j);
 
 #ifdef HAVE_INLINE
 INLINE_FUN 

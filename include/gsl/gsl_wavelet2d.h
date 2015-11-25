@@ -19,6 +19,16 @@
 
 #ifndef __GSL_WAVELET2D_H__
 #define __GSL_WAVELET2D_H__
+
+#if !defined( GSL_FUN )
+#  if !defined( GSL_DLL )
+#    define GSL_FUN extern
+#  elif defined( BUILD_GSL_DLL )
+#    define GSL_FUN extern __declspec(dllexport)
+#  else
+#    define GSL_FUN extern __declspec(dllimport)
+#  endif
+#endif
 #include <stdlib.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_vector_double.h>
@@ -37,67 +47,67 @@
 
 __BEGIN_DECLS
 
-int gsl_wavelet2d_transform (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_transform (const gsl_wavelet * w, 
                              double *data, 
                              size_t tda, size_t size1, size_t size2,
                              gsl_wavelet_direction dir, 
                              gsl_wavelet_workspace * work);
 
-int gsl_wavelet2d_transform_forward (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_transform_forward (const gsl_wavelet * w, 
                                      double *data,
                                      size_t tda, size_t size1, size_t size2, 
                                      gsl_wavelet_workspace * work);
 
-int gsl_wavelet2d_transform_inverse (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_transform_inverse (const gsl_wavelet * w, 
                                      double *data, 
                                      size_t tda, size_t size1, size_t size2, 
                                      gsl_wavelet_workspace * work);
 
-int gsl_wavelet2d_nstransform (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_nstransform (const gsl_wavelet * w, 
                                double *data, 
                                size_t tda, size_t size1, size_t size2, 
                                gsl_wavelet_direction dir,
                                gsl_wavelet_workspace * work);
 
-int gsl_wavelet2d_nstransform_forward (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_nstransform_forward (const gsl_wavelet * w, 
                                        double *data, 
                                        size_t tda, size_t size1, size_t size2,
                                        gsl_wavelet_workspace * work);
 
-int gsl_wavelet2d_nstransform_inverse (const gsl_wavelet * w, 
+GSL_FUN int gsl_wavelet2d_nstransform_inverse (const gsl_wavelet * w, 
                                        double *data, 
                                        size_t tda, size_t size1, size_t size2, 
                                        gsl_wavelet_workspace * work);
 
-int
+GSL_FUN int
 gsl_wavelet2d_transform_matrix (const gsl_wavelet * w, 
                                 gsl_matrix * a, 
                                 gsl_wavelet_direction dir, 
                                 gsl_wavelet_workspace * work);
 
-int
+GSL_FUN int
 gsl_wavelet2d_transform_matrix_forward (const gsl_wavelet * w, 
                                         gsl_matrix * a, 
                                         gsl_wavelet_workspace * work);
 
-int
+GSL_FUN int
 gsl_wavelet2d_transform_matrix_inverse (const gsl_wavelet * w, 
                                         gsl_matrix * a, 
                                         gsl_wavelet_workspace * work);
 
 
-int
+GSL_FUN int
 gsl_wavelet2d_nstransform_matrix (const gsl_wavelet * w, 
                                   gsl_matrix * a, 
                                   gsl_wavelet_direction dir, 
                                   gsl_wavelet_workspace * work);
 
-int
+GSL_FUN int
 gsl_wavelet2d_nstransform_matrix_forward (const gsl_wavelet * w, 
                                           gsl_matrix * a, 
                                           gsl_wavelet_workspace * work);
 
-int
+GSL_FUN int
 gsl_wavelet2d_nstransform_matrix_inverse (const gsl_wavelet * w, 
                                           gsl_matrix * a, 
                                           gsl_wavelet_workspace * work);
