@@ -53,7 +53,7 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
 void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages);
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
 
 int NumberOfPixelCombinationsInKernels(const std::vector<SOFIKernel>& kernels);
 void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights);
@@ -83,11 +83,12 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     batchSOFIImages.resize(nOrders);
     std::vector<int> imagesIncludedInBatch;
     
+    // note: calculation assumes that the first lag time is zero - this must be enforced here
     if (!lagTimes.empty()) {
         // have explicit lag times
         if (nOrders > 1)
             throw std::runtime_error("only a single order can be calculated if time lags are specified");
-        if (orders.at(0) == 1)
+        if (orders.at(0) <= 1)
             throw std::runtime_error("lag times do not make sense for a first order calculation");
         if (lagTimes.size() != (orders.at(0) - 1))
             throw std::runtime_error("SOFI calculation of order n requires specification of exactly (n - 1) lag times");
@@ -99,6 +100,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         lagTimes = std::vector<int>(largestOrder, 0);
     }
     int largestLagTime = *std::max_element(lagTimes.cbegin(), lagTimes.cend());
+    int smallestLagTime = *std::min_element(lagTimes.cbegin(), lagTimes.cend());
     
     std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
     for (int i = 0; i < nOrders; ++i) {
@@ -112,7 +114,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     // if weights are specified then we can only calculate a single order
     // and the number of points needs to match.
     if (haveExplicitPixelCombinationWeights) {
-        if (nOrders > 1)
+        if (nOrders != 1)
             throw std::runtime_error("only a single order can be calculated if weights are specified");
         if (pixelCombinationWeights.size() != NumberOfPixelCombinationsInKernels(kernelPairs.at(0).second))
             throw std::runtime_error("number of weights does not match number of pixel combinations");
@@ -151,15 +153,19 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     std::vector<std::vector<std::vector<ImagePtr> > > jackKnifeBatchSOFIImages(nBatches);  // jackknife SOFI images. batch / order / images
     
     int imagesProcessedSoFar = 0;                   // number of images that has been processed, for progress reporting
-    int totalNumberOfImagesToProcess = nImages;     // total number of images that will be processed
-    int firstImageToProcessInBatch = -batchSize;    // first image index to include in current batch
+    int firstImageForWhichDataCanBeCalculated = std::abs(smallestLagTime);
+    int lastImageForWhichDataCanBeCalculated = nImages - 1 - largestLagTime;
+    if (lastImageForWhichDataCanBeCalculated <= firstImageForWhichDataCanBeCalculated)
+        throw std::runtime_error("not enough images to calculate with the requested lag times");
+    int totalNumberOfImagesToProcess = lastImageForWhichDataCanBeCalculated - firstImageForWhichDataCanBeCalculated + 1;     // total number of images that will be processed
+    int firstImageToProcessInBatch = firstImageForWhichDataCanBeCalculated - batchSize;    // first image index to include in current batch. batchSize will be added back in at the beginning of the for loop
     int lastImageToProcessInBatch = -1;             // last image index to include in current batch
     std::vector<ImagePtr> mergedImages(nOrders);    // accumulates all batch images calculated thus far. One image for every order.
     int totalNumberOfImagesIncluded = 0;            // total number of images that have been included in a batch calculation
     double summedBatchWeights = 0.0;                // sum of the weights of all batch images
     for (int n = 0; n < nBatches; ++n) {
         firstImageToProcessInBatch += batchSize;
-        lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize + largestLagTime - 1, nImages - 1);
+        lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, lastImageForWhichDataCanBeCalculated);
         
         std::vector<ImagePtr> subImages;
         int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
@@ -279,9 +285,6 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.cend());
     
-    // required: lowest time lag is zero, all others are zero or positive
-    if (minTimeLag != 0)
-        throw std::runtime_error("at least one time lag must be zero, and all time lags must be zero or positive");
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
     bool haveNonZeroTimeLag = ((minTimeLag != 0) || (maxTimeLag != 0));
     
@@ -336,16 +339,36 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
     }
     
     // initialize the buffer with the images.
-    imageLoader->spoolTo(firstImageToProcess);
+    int nImagesSkipped = 0;
+    imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
-    for (int i = 0; (i < nImagesInBuffer - 1) && (i <= lastImageToProcess); i++) {
-        imageBuffer.push_back(imageLoader->readNextImage());
+    for (int i = firstImageToProcess - std::abs(minTimeLag); i <= lastImageToProcess; i++) {
+        if (imageBuffer.size() == nImagesInBuffer - 1) {
+            break;
+        }
+        
+        ImagePtr image = imageLoader->readNextImage();
+        
+        // check that the image is valid
+        bool isValidFrame = true;
+        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
+            if (!(*verifierIt)->isValidFrame(image)) {
+                isValidFrame = false;
+                break;
+            }
+        }
+        if (!isValidFrame) {
+            nImagesSkipped += 1;
+            continue;
+        }
+        
+        imageBuffer.push_back(image);
     }
     
     // calculate all products over the images
-    int firstImageWithOutput = firstImageToProcess;
-    int lastImageWithOutput = lastImageToProcess - maxTimeLag;
-    imagesProcessedSoFar += firstImageWithOutput - firstImageToProcess;
+    int firstImageWithOutput = firstImageToProcess + nImagesSkipped;
+    int lastImageWithOutput = lastImageToProcess;
+    imagesProcessedSoFar += nImagesSkipped;
     for (int n = firstImageWithOutput; n <= lastImageWithOutput; ++n) {
         // update progress and check for abort
         int abortStatus = progressReporter->UpdateCalculationProgress(imagesProcessedSoFar, totalNumberOfImagesToProcess);
@@ -383,7 +406,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
                             product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
@@ -429,7 +452,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
             int order = calculation.first;
             const std::vector<SOFIKernel>& kernels = calculation.second;
             std::vector<ImagePtr> jackKnifeImagesForThisOrder;
-            JackKnife(imageLoader, firstImageToProcess, lastImageToProcess, order, timeLags, isAuto, kernels, pixelMap, jackKnifeImagesForThisOrder);
+            JackKnife(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, jackKnifeImagesForThisOrder);
             jackKnifeImages[i] = jackKnifeImagesForThisOrder;
         }
     }
@@ -603,7 +626,7 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
     }
 }
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
     int nInputRows = imageLoader->getXSize();
     int nInputCols = imageLoader->getYSize();
     
@@ -611,39 +634,67 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     // these will inevitably be different when this function returns.
     
     // find min and max time lag
-    int minTimeLag = 0, maxTimeLag = 0;
-    for (size_t i = 0; i < timeLags.size(); i++) {
-        minTimeLag = std::min(minTimeLag, timeLags[i]);
-        maxTimeLag = std::max(maxTimeLag, timeLags[i]);
-    }
-    // required: lowest time lag is zero, all others are zero or postive
-    if (minTimeLag != 0)
-        throw std::runtime_error("at least one time lag must be zero, and all time lags must be zero or positive");
+    int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
+    int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.end());
     bool haveNonZeroTimeLag = ((minTimeLag != 0) || (maxTimeLag != 0));
     
-    int nImagesToInclude = lastImageToInclude - maxTimeLag - firstImageToInclude + 1;
+    int nImagesToInclude = lastImageToInclude - firstImageToInclude + 1;
     jackKnifeImages.clear();
     jackKnifeImages.reserve(nImagesToInclude);
     
     // pixelMap will have been normalized by the number of images
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
-        (*matrix) *= static_cast<double>(nImagesToInclude);
+        (*matrix) *= static_cast<double>(nImagesIncludedInSOFI);
     });
     
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
     int firstImageToProcess = firstImageToInclude;
-    int lastImageToProcess = lastImageToInclude - maxTimeLag;
+    int lastImageToProcess = lastImageToInclude;
     
-    imageLoader->spoolTo(firstImageToInclude);
+    // initialize the buffer with the images.
+    int nImagesSkipped = 0;
+    imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
-    for (int i = firstImageToProcess; (i < nImagesInBuffer - 1) && (i <= lastImageToProcess); i++) {
-        imageBuffer.push_back(imageLoader->readNextImage());
+    for (int i = firstImageToProcess - std::abs(minTimeLag); i <= lastImageToProcess; i++) {
+        if (imageBuffer.size() == nImagesInBuffer - 1) {
+            break;
+        }
+        ImagePtr image = imageLoader->readNextImage();
+        
+        // check that the image is valid
+        bool isValidFrame = true;
+        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
+            if (!(*verifierIt)->isValidFrame(image)) {
+                isValidFrame = false;
+                break;
+            }
+        }
+        if (!isValidFrame) {
+            nImagesSkipped += 1;
+            continue;
+        }
+        
+        imageBuffer.push_back(image);
     }
     
-    for (int i = firstImageToProcess; i <= lastImageToProcess; ++i) {
+    // calculate all products over the images
+    int firstImageWithOutput = firstImageToProcess + nImagesSkipped;
+    int lastImageWithOutput = lastImageToProcess;
+    for (int i = firstImageWithOutput; i <= lastImageWithOutput; ++i) {
         ImagePtr currentImage = imageLoader->readNextImage();
         imageBuffer.push_back(currentImage);
+        
+        // check that the frame is valid
+        bool isValidFrame = true;
+        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
+            if (!(*verifierIt)->isValidFrame(currentImage)) {
+                isValidFrame = false;
+                break;
+            }
+        }
+        if (!isValidFrame)
+            continue;
         
         // subtract the contribution of the current image from the pixelMap and normalize
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
@@ -656,7 +707,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
                             product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
@@ -692,7 +743,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
                     double product = 1.0;
                     if (haveNonZeroTimeLag) {
                         for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[currentCombination[i].dt];
+                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
                             product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
                         }
                     } else {
@@ -712,7 +763,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     // re-normalize the pixel map
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
-        (*matrix) /= static_cast<double>(nImagesToInclude);
+        (*matrix) /= static_cast<double>(nImagesIncludedInSOFI);
     });
 }
 

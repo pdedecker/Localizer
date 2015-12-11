@@ -3111,9 +3111,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             if (paramsSet[i] == 0)
                 break;		// No more parameters.
             d1 = p->lagTimes[i];
-            if (d1 < 0)
-                return EXPECT_POS_NUM;
-            int lagTime = static_cast<int>(d1 + 0.5);
+            int lagTime = static_cast<int>(d1);
             lagTimes.push_back(lagTime);
             nLagTimesSpecified += 1;
         }
