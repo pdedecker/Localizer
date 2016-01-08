@@ -66,7 +66,7 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     } else if (boost::iequals(selector, "writeccdimages")) {
         MatlabWriteCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
-		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\")");
 	}
 }
 
@@ -406,6 +406,8 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
     }
 }
 
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions);
+
 /**
  Function that will handle SOFI calculations. The input arguments must be of the form
  0 - the string "sofi"
@@ -416,22 +418,13 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 7)
-		mexErrMsgTxt("Must have exactly 7 input arguments for sofi\n\
+	if (nrhs != 3)
+		mexErrMsgTxt("Must have exactly 3 input arguments for sofi\n\
 					 1. the string \"sofi\"\n\
 					 2. the desired order (2 or 3)\n\
-					 3. single number: 0 for autocumulants, 1 for crosscumulants\n\
-					 4. 1D matrix containing time lags to use in the calculation. An empty matrix\n\
-						is equivalent to specifying time lags of zero. For a calculation of order N\n\
-						at least (N - 1) values must be specified. Excess values will be ignored.\n\
-					 5. number of frames to skip at the beginning\n\
-					 6. number of frames to include in the calculation (<=0 means all frames up to the end)\n\
-					 7. file path to a data file, or a 2D or 3D matrix containing numeric data");
+					 3. file path to a data file, or a 2D or 3D matrix containing numeric data");
 	
-	if (nlhs != 2)
-		mexErrMsgTxt("Must have exactly two left hand side arguments for sofi (sofi output image and average output image");
-	
-	mxArray* array;
+	mxArray* array = nullptr;
 	// the mxArray at index 0 (the string "sofi") will have been checked already by mexFunction
 	
 	// index 1 - must be a single number (order)
@@ -442,54 +435,10 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	if ((correlationOrder < 2) || (correlationOrder > 3))
 		mexErrMsgTxt("Expected 2 or 3 for the correlation order");
 	
-	// index 2 - must be a boolean (auto or cross)
-	bool doCrossCorrelation;
-	array = const_cast<mxArray*>(prhs[2]);
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("3nd argument must be a double scalar (zero for autocorrelation, non-zero for crosscorrelation)");
-	doCrossCorrelation = (*(mxGetPr(array)) != 0.0);
-
-	// index 3 - must be an empty or 1D matrix containing time lags
-	std::vector<int> lagTimes;
-	array = const_cast<mxArray*>(prhs[3]);
-	if ((mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("3nd argument must be a 1D or empty matrix containing lag times");
-	int nLagTimes = mxGetN(array);
-	if ((nLagTimes > 0) && (nLagTimes < correlationOrder - 1))
-		mexErrMsgTxt("a calculation of order N requires at least (N-1) lag times");
-	for (int i = 0; i < nLagTimes; ++i) {
-		int thisLagTime = static_cast<int>(*(mxGetPr(array) + i));
-		if (thisLagTime < 0)
-			mexErrMsgTxt("all time lags must be >= 0");
-		lagTimes.push_back(thisLagTime);
-	}
-	
-	// index 4 - must be a single number (number of frames to skip)
-	int nFramesToSkip = 0;
-	array = const_cast<mxArray*>(prhs[4]);
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("4th argument must be a double scalar (number of frames to skip)");
-	if (*mxGetPr(array) <= 0) {
-		nFramesToSkip = 0;
-	} else {
-		nFramesToSkip = static_cast<int>(*mxGetPr(array) + 0.5);
-	}
-	
-	// index 5 - must be a single number (number of frames to include)
-	int nFramesToInclude = -1;
-	array = const_cast<mxArray*>(prhs[5]);
-	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("5th argument must be a double scalar (number of frames to include)");
-	if (*mxGetPr(array) <= 0) {
-		nFramesToInclude = -1;
-	} else {
-		nFramesToInclude = static_cast<int>(*mxGetPr(array) + 0.5);
-	}
-	
-	// index 6 - must be the data
+	// index 2 - must be the data
 	std::string filePath;
 	mxArray* dataArray = NULL;
-	array = const_cast<mxArray*>(prhs[6]);
+	array = const_cast<mxArray*>(prhs[2]);
 	if (mxGetClassID(array) == mxCHAR_CLASS) {
 		filePath = GetMatlabString(array);
 		if (filePath.empty())
@@ -499,7 +448,18 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		// if it isn't then the image loader will throw an error
 		dataArray = array;
 	}
-	
+    
+    SOFIOptions sofiOptions;
+    ParseSOFIKeywordArguments(prhs, nrhs, sofiOptions);
+    
+    if (sofiOptions.wantJackKnife) {
+        if (nlhs != 2)
+            mexErrMsgTxt("need two left-hand-side arguments for jackknife");
+    } else {
+        if (nlhs != 1)
+            mexErrMsgTxt("need one left-hand-side argument");
+    }
+    
 	try {
 		std::shared_ptr<ImageLoader> imageLoader;
 		if (!filePath.empty()) {
@@ -507,16 +467,19 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		} else {
 			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
+        std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
+        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(sofiOptions.nFramesToSkip, sofiOptions.nFramesToInclude);
 		
 		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
-		// no frame verifiers for now
-		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-		std::vector<ImagePtr> sofiOutputImages, averageOutputImages;
-		DoSOFIAnalysis(imageLoader, frameVerifiers, progressReporter,nFramesToSkip, nFramesToInclude, lagTimes, correlationOrder, doCrossCorrelation, 0, sofiOutputImages, averageOutputImages);
+		std::vector<ImagePtr> sofiOutputImages;
+		
+        DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
 
 		plhs[0] = ConvertImagesToArray(sofiOutputImages);   // was saving only the first image. Noticed by Matthieu Dumont, who also created a fix.
-		plhs[1] = ConvertImagesToArray(averageOutputImages);
+        if (sofiOptions.wantJackKnife) {
+            plhs[1] = ConvertImagesToArray(sofiOptions.jackKnifeImages.at(0));
+        }
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
@@ -535,8 +498,8 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     }
 }
 
-void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, int lhs, SOFIOptions& sofiOptions, std::vector<int>& lagTimes) {
-    int firstKeywordIndex = 3;
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
+    int firstKeywordIndex = 2;
     
     // check that we have an even number of arguments remaining
     if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
@@ -581,6 +544,15 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, int lhs, SOFIOpti
         const std::string keyword = GetMatlabString(prhs[i]);
         const mxArray* argument = prhs[i + 1];
         
+        if (boost::iequals(keyword, "nFramesToSkip")) {
+            if (*mxGetPr(argument) < 0.0) {
+                mexErrMsgTxt("nFramesToSkip must be positive or zero");
+            }
+            sofiOptions.nFramesToSkip = *mxGetPr(argument);
+        }
+        if (boost::iequals(keyword, "nFramesToInclude")) {
+            sofiOptions.nFramesToSkip = *mxGetPr(argument);
+        }
         if (boost::iequals(keyword, "pixelationCorrection")) {
             sofiOptions.doPixelationCorrection = (*mxGetPr(argument) != 0.0);
         } else if (boost::iequals(keyword, "alsoCorrectVariance")) {
@@ -602,7 +574,7 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, int lhs, SOFIOpti
             }
             double* lagPtr = mxGetPr(argument);
             for (size_t i = 0; i < mxGetN(argument); ++i) {
-                lagTimes.push_back(*lagPtr);
+                sofiOptions.lagTimes.push_back(*lagPtr);
                 lagPtr += 1;
             }
         }
