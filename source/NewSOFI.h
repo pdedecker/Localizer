@@ -41,6 +41,8 @@
 class SOFIOptions {
 public:
     SOFIOptions() :
+        nFramesToSkip(0),
+        nFramesToInclude(-1),
         batchSize(0),
         wantCrossCumulant(true),
         doPixelationCorrection(true),
@@ -55,6 +57,8 @@ public:
     
     std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
     std::vector<int> orders;
+    int nFramesToSkip;
+    int nFramesToInclude;
     int batchSize;
     bool wantCrossCumulant;
     std::vector<int> lagTimes;

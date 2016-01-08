@@ -3206,10 +3206,26 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     }
     
     try {
+        SOFIOptions sofiOptions;
+        sofiOptions.orders = orders;
+        sofiOptions.wantCrossCumulant = wantCrossCumulant;
+        sofiOptions.lagTimes = lagTimes;
+        sofiOptions.nFramesToSkip = nFramesToSkip;
+        sofiOptions.nFramesToInclude = nFramesToInclude;
+        sofiOptions.batchSize = batchSize;
+        sofiOptions.doPixelationCorrection = doPixelationCorrection;
+        sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
+        sofiOptions.frameVerifiers = frameVerifiers;
+        sofiOptions.wantAverageImage = wantAverageImage;
+        sofiOptions.wantJackKnife = wantJackKnife;
+        sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
+        sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
+        sofiOptions.wantDebugMessages = wantDebugMessages;
+        
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
-        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(nFramesToSkip, nFramesToInclude);
+        dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(sofiOptions.nFramesToSkip, sofiOptions.nFramesToInclude);
         
         std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
         if (removeSaturatedPixels) {
@@ -3227,19 +3243,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             }
         }
         std::vector<ImagePtr> sofiOutputImages;
-        SOFIOptions sofiOptions;
-        sofiOptions.orders = orders;
-        sofiOptions.wantCrossCumulant = wantCrossCumulant;
-        sofiOptions.lagTimes = lagTimes;
-        sofiOptions.batchSize = batchSize;
-        sofiOptions.doPixelationCorrection = doPixelationCorrection;
-        sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
-        sofiOptions.frameVerifiers = frameVerifiers;
-        sofiOptions.wantAverageImage = wantAverageImage;
-        sofiOptions.wantJackKnife = wantJackKnife;
-        sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
-        sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
-        sofiOptions.wantDebugMessages = wantDebugMessages;
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         for (size_t i = 0; i < orders.size(); ++i) {
             DataFolderAndName adjustedOutputParams = outputWaveParams;
