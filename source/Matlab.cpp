@@ -535,7 +535,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     }
 }
 
-void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, int lhs, SOFIOptions& sofiOptions, std::vector<int>& lagTimes) {
     int firstKeywordIndex = 3;
     
     // check that we have an even number of arguments remaining
@@ -558,21 +558,53 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
         }
     }
     
-    // check all keyword arguments
+    // most keyword arguments must be 1x1 matrices (scalars) of type double
+    for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+        const std::string keyword = GetMatlabString(prhs[i]);
+        const mxArray* argument = prhs[i + 1];
+        
+        if (!mxIsDouble(argument)) {
+            mexErrMsgTxt("all keyword arguments must be of type 'double'");
+        }
+        
+        if (boost::iequals(keyword, "lagtimes")) {
+            continue;   // not 1x1 in size
+        }
+        
+        if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
+            mexErrMsgTxt("all keyword arguments must be 1x1 matrices (scalar values)");
+        }
+    }
+    
+    // extract the values of the keyword arguments and perform more detailed error checking
     for (int i = firstKeywordIndex; i < nrhs; i += 2) {
         const std::string keyword = GetMatlabString(prhs[i]);
         const mxArray* argument = prhs[i + 1];
         
         if (boost::iequals(keyword, "pixelationCorrection")) {
-            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
-                mexErrMsgTxt("\"pixelationCorrection\" argument requires a 1x1 matrix");
-            }
             sofiOptions.doPixelationCorrection = (*mxGetPr(argument) != 0.0);
+        } else if (boost::iequals(keyword, "alsoCorrectVariance")) {
+            sofiOptions.alsoCorrectVariance = (*mxGetPr(argument) != 0.0);
         } else if (boost::iequals(keyword, "batchSize")) {
-            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
-                mexErrMsgTxt("\"batchSize\" argument requires a 1x1 matrix");
+            if (*mxGetPr(argument) <= 0.0) {
+                mexErrMsgTxt("'batchSize' argument requires a positive non-zero value");
             }
-            if (*mxGetPr(argument) != )
+            sofiOptions.batchSize = *mxGetPr(argument);
+        } else if (boost::iequals(keyword, "pixelcombinations")) {
+            if (*mxGetPr(argument) <= 0.0) {
+                mexErrMsgTxt("'pixelcombinations' argument requires a postive non-zero value");
+            }
+        } else if (boost::iequals(keyword, "jackknife")) {
+            sofiOptions.wantJackKnife = (*mxGetPr(argument) != 0.0);
+        } else if (boost::iequals(keyword, "lagtimes")) {
+            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1)) {
+                mexErrMsgTxt("lag times must be provided as a row vector");
+            }
+            double* lagPtr = mxGetPr(argument);
+            for (size_t i = 0; i < mxGetN(argument); ++i) {
+                lagTimes.push_back(*lagPtr);
+                lagPtr += 1;
+            }
         }
         
     }
