@@ -43,7 +43,7 @@
 
 #include "NewSOFIKernels.h"
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages);
 
 ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<std::vector<double>>& usedCombinationWeights);
 double Prefactor(int nPartitions);
@@ -53,7 +53,7 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
 void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages);
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
 
 int NumberOfPixelCombinationsInKernels(const std::vector<SOFIKernel>& kernels);
 void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights);
@@ -70,7 +70,6 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     std::vector<int> lagTimes = options.lagTimes;
     int nOrders = orders.size();
     int requestedBatchSize = options.batchSize;
-    const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers = options.frameVerifiers;
     bool wantAverageImage = options.wantAverageImage;
     ImagePtr& averageImage = options.averageImage;
     bool wantJackKnife = options.wantJackKnife;
@@ -168,7 +167,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, lastImageForWhichDataCanBeCalculated);
         
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, frameVerifiers, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
         totalNumberOfImagesIncluded += nImagesIncluded;
         
         double batchWeight = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
@@ -274,7 +273,7 @@ void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& 
     });
 }
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesIncluded = 0;
@@ -346,23 +345,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
         if (imageBuffer.size() == nImagesInBuffer - 1) {
             break;
         }
-        
-        ImagePtr image = imageLoader->readNextImage();
-        
-        // check that the image is valid
-        bool isValidFrame = true;
-        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
-            if (!(*verifierIt)->isValidFrame(image)) {
-                isValidFrame = false;
-                break;
-            }
-        }
-        if (!isValidFrame) {
-            nImagesSkipped += 1;
-            continue;
-        }
-        
-        imageBuffer.push_back(image);
+        imageBuffer.push_back(imageLoader->readNextImage());
     }
     
     // calculate all products over the images
@@ -376,20 +359,8 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
             throw USER_ABORTED("user abort");
         
         ImagePtr currentImage = imageLoader->readNextImage();
-        imagesProcessedSoFar += 1;
-        
-        // check that the frame is valid
-        bool isValidFrame = true;
-        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
-            if (!(*verifierIt)->isValidFrame(currentImage)) {
-                isValidFrame = false;
-                break;
-            }
-        }
-        if (!isValidFrame)
-            continue;
-        
         imageBuffer.push_back(currentImage);
+        imagesProcessedSoFar += 1;
         
         nImagesIncluded += 1;
         if (wantAverageImage)
@@ -452,7 +423,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const std::vector<st
             int order = calculation.first;
             const std::vector<SOFIKernel>& kernels = calculation.second;
             std::vector<ImagePtr> jackKnifeImagesForThisOrder;
-            JackKnife(imageLoader, frameVerifiers, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, jackKnifeImagesForThisOrder);
+            JackKnife(imageLoader, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, jackKnifeImagesForThisOrder);
             jackKnifeImages[i] = jackKnifeImagesForThisOrder;
         }
     }
@@ -626,7 +597,7 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
     }
 }
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::shared_ptr<SOFIFrameVerifier> >& frameVerifiers, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
     int nInputRows = imageLoader->getXSize();
     int nInputCols = imageLoader->getYSize();
     
@@ -660,22 +631,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::
         if (imageBuffer.size() == nImagesInBuffer - 1) {
             break;
         }
-        ImagePtr image = imageLoader->readNextImage();
-        
-        // check that the image is valid
-        bool isValidFrame = true;
-        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
-            if (!(*verifierIt)->isValidFrame(image)) {
-                isValidFrame = false;
-                break;
-            }
-        }
-        if (!isValidFrame) {
-            nImagesSkipped += 1;
-            continue;
-        }
-        
-        imageBuffer.push_back(image);
+        imageBuffer.push_back(imageLoader->readNextImage());
     }
     
     // calculate all products over the images
@@ -684,17 +640,6 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const std::vector<std::
     for (int i = firstImageWithOutput; i <= lastImageWithOutput; ++i) {
         ImagePtr currentImage = imageLoader->readNextImage();
         imageBuffer.push_back(currentImage);
-        
-        // check that the frame is valid
-        bool isValidFrame = true;
-        for (auto verifierIt = frameVerifiers.cbegin(); verifierIt != frameVerifiers.cend(); ++verifierIt) {
-            if (!(*verifierIt)->isValidFrame(currentImage)) {
-                isValidFrame = false;
-                break;
-            }
-        }
-        if (!isValidFrame)
-            continue;
         
         // subtract the contribution of the current image from the pixelMap and normalize
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {

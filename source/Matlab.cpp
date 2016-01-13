@@ -666,13 +666,11 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		
 		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
 		
-		std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers; // no frame verifiers for now
 		std::vector<ImagePtr> sofiOutputImages;
 		// set SOFI calculation options
 		SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
-        sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = true;
         DoNewSOFI(imageLoader, sofiOptions, progressReporter, sofiOutputImages);
 

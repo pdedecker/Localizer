@@ -55,7 +55,6 @@ public:
         orders.push_back(2);
     }
     
-    std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
     std::vector<int> orders;
     int nFramesToSkip;
     int nFramesToInclude;

@@ -3215,7 +3215,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.batchSize = batchSize;
         sofiOptions.doPixelationCorrection = doPixelationCorrection;
         sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
-        sofiOptions.frameVerifiers = frameVerifiers;
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
@@ -3226,11 +3225,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
         dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(sofiOptions.nFramesToSkip, sofiOptions.nFramesToInclude);
-        
-        std::vector<std::shared_ptr<SOFIFrameVerifier> > frameVerifiers;
-        if (removeSaturatedPixels) {
-            frameVerifiers.push_back(std::shared_ptr<SOFIFrameVerifier> (new SOFIFrameVerifier_NoSaturation(imageLoader->getStorageType())));
-        }
 
         std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
