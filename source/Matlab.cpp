@@ -418,11 +418,17 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
  */
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 3)
-		mexErrMsgTxt("Must have exactly 3 input arguments for sofi\n\
+	if (nrhs == 1)
+		mexErrMsgTxt("input arguments for sofi\n\
 					 1. the string \"sofi\"\n\
-					 2. the desired order (2 or 3)\n\
-					 3. file path to a data file, or a 2D or 3D matrix containing numeric data");
+					 2. the desired orders (a vector to calculate more than one order at once)\n\
+					 3. file path to a data file, or a 2D or 3D matrix containing numeric data\n\
+                     these arguments can be followed by optional 'keyword', value params.\n\
+                     supported keywords are 'nFramesToSkip', 'nFramesToInclude', 'pixelationCorrection'\n\
+                     'alsoCorrectVariance', 'batchSize', 'pixelCombinations', 'jackknife', and 'lagTimes'.\n\
+                     This function return a single cell containing the calculated SOFI images.\n\
+                     If the jackknife option is set then two cells will be returned, the first\n\
+                     containing the SOFI images, and the second containing the jackknife images.");
 	
 	mxArray* array = nullptr;
 	// the mxArray at index 0 (the string "sofi") will have been checked already by mexFunction
@@ -430,10 +436,11 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// index 1 - must be a single number (order)
 	array = const_cast<mxArray*>(prhs[1]);
 	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
-		mexErrMsgTxt("2nd argument must be a double scalar (the order of the calculation)");
-	int correlationOrder = *(mxGetPr(array));
-	if ((correlationOrder < 2) || (correlationOrder > 3))
-		mexErrMsgTxt("Expected 2 or 3 for the correlation order");
+		mexErrMsgTxt("2nd argument must be a double scalar or vector (the orders to calculate)");
+    std::vector<int> ordersToCalculate;
+    for (size_t i = 0; i < mxGetN(array); ++i) {
+        ordersToCalculate.push_back(mxGetPr(array)[i]);
+    }
 	
 	// index 2 - must be the data
 	std::string filePath;
@@ -450,6 +457,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	}
     
     SOFIOptions sofiOptions;
+    sofiOptions.orders = ordersToCalculate;
     ParseSOFIKeywordArguments(prhs, nrhs, sofiOptions);
     
     if (sofiOptions.wantJackKnife) {
@@ -475,10 +483,18 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		std::vector<ImagePtr> sofiOutputImages;
 		
         DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
-
-		plhs[0] = ConvertImagesToArray(sofiOutputImages);   // was saving only the first image. Noticed by Matthieu Dumont, who also created a fix.
+        
+        mwSize dims[1] = {sofiOutputImages.size()};
+        plhs[0] = mxCreateCellArray(1, dims);
+        for (int i = 0; i < sofiOutputImages.size(); ++i) {
+            mxSetCell(plhs[0], i, ConvertImageToArray(sofiOutputImages.at(i)));
+        }
+        
         if (sofiOptions.wantJackKnife) {
-            plhs[1] = ConvertImagesToArray(sofiOptions.jackKnifeImages.at(0));
+            plhs[1] = mxCreateCellArray(1, dims);
+            for (int i = 0; i < sofiOutputImages.size(); ++i) {
+                mxSetCell(plhs[0], i, ConvertImagesToArray(sofiOptions.jackKnifeImages.at(i)));
+            }
         }
 	}
 	catch (std::bad_alloc) {
@@ -562,9 +578,9 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
                 mexErrMsgTxt("'batchSize' argument requires a positive non-zero value");
             }
             sofiOptions.batchSize = *mxGetPr(argument);
-        } else if (boost::iequals(keyword, "pixelcombinations")) {
+        } else if (boost::iequals(keyword, "pixelCombinations")) {
             if (*mxGetPr(argument) <= 0.0) {
-                mexErrMsgTxt("'pixelcombinations' argument requires a postive non-zero value");
+                mexErrMsgTxt("'pixelCombinations' argument requires a postive non-zero value");
             }
         } else if (boost::iequals(keyword, "jackknife")) {
             sofiOptions.wantJackKnife = (*mxGetPr(argument) != 0.0);
