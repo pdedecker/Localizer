@@ -44,6 +44,36 @@
 #endif
 
 /**
+ * @brief Manages an externally-allocated buffer for images (think SOFI jackknife).
+ */
+class ExternalImageBuffer {
+public:
+    ExternalImageBuffer(double* data, size_t nPixels) :
+        _data(data),
+        _nPixels(nPixels),
+        _nRows(0),
+        _nCols(0),
+        _nImagesWritten(0)
+    {}
+    ~ExternalImageBuffer() {;}
+    
+    void addImage(ImagePtr image);
+    
+    int nRows() const;
+    int nCols() const;
+    int nImages() const;
+    double* imageData(const int imageIndex) const;
+    bool bufferIsFull() const;
+    
+private:
+    double* _data;
+    size_t _nPixels;
+    size_t _nRows;
+    size_t _nCols;
+    size_t _nImagesWritten;
+};
+
+/**
  * @brief A simple container holding the coordinates of a single point in 3D space
  */
 class Point3D {

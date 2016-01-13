@@ -29,6 +29,57 @@
 
 #include "Storage.h"
 
+void ExternalImageBuffer::addImage(ImagePtr image) {
+    if (_nImagesWritten == 0) {
+        _nRows = image->rows();
+        _nCols = image->cols();
+    }
+    
+    size_t requiredPixels = (_nImagesWritten + 1) * _nRows * _nCols;
+    if (requiredPixels > _nPixels) {
+        throw std::logic_error("external buffer too small");
+    }
+    
+    size_t offset = _nImagesWritten * _nRows * _nCols;
+    memcpy(_data + offset, image->data(), _nRows * _nCols * sizeof(double));
+    _nImagesWritten += 1;
+}
+
+int ExternalImageBuffer::nRows() const {
+    if (_nImagesWritten == 0) {
+        throw std::logic_error("size of external image buffer but no images");
+    }
+    return _nRows;
+}
+
+int ExternalImageBuffer::nCols() const {
+    if (_nImagesWritten == 0) {
+        throw std::logic_error("size of external image buffer but no images");
+    }
+    return _nCols;
+}
+
+int ExternalImageBuffer::nImages() const {
+    return _nImagesWritten;
+}
+
+double* ExternalImageBuffer::imageData(const int imageIndex) const {
+    if (_nImagesWritten == 0) {
+        throw std::logic_error("data of external image buffer but no images");
+    }
+    if (imageIndex >= _nImagesWritten) {
+        throw std::logic_error("data of external image buffer but not enough images");
+    }
+    
+    size_t offset = _nRows * _nCols * static_cast<size_t>(imageIndex);
+    return _data + offset;
+}
+
+bool ExternalImageBuffer::bufferIsFull() const {
+    size_t usedPixels = _nImagesWritten * _nRows * _nCols;
+    return (usedPixels == _nPixels);
+}
+
 #ifdef WITH_IGOR
 
 std::shared_ptr<LocalizedPositionsContainer> LocalizedPositionsContainer::GetPositionsFromWave(waveHndl positionsWave) {

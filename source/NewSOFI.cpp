@@ -50,8 +50,9 @@ double Prefactor(int nPartitions);
 Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
 
+void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool alsoCorrectVariance, const int order);
 void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
-void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages);
+void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages);
 
 void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
 
@@ -74,10 +75,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     ImagePtr& averageImage = options.averageImage;
     bool wantJackKnife = options.wantJackKnife;
     bool wantDebugMessages = options.wantDebugMessages;
-    std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages = options.jackKnifeImages;
+    std::vector<ExternalImageBuffer>& jackKnifeOutputImages = options.jackKnifeImages;
     const std::vector<double>& pixelCombinationWeights = options.pixelCombinationWeights;
     bool haveExplicitPixelCombinationWeights = !pixelCombinationWeights.empty();
-    jackKnifeOutputImages.clear();
     std::vector<std::vector<ImagePtr> > batchSOFIImages;    // SOFI image of each batch, 1 vector per order. Only used for jackknife.
     batchSOFIImages.resize(nOrders);
     std::vector<int> imagesIncludedInBatch;
@@ -207,9 +207,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         AssembleJackKnifeImages(jackKnifeBatchSOFIImages, imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
         if (options.doPixelationCorrection) {
             for (int orderIndex = 0; orderIndex < nOrders; ++orderIndex) {
-                std::vector<ImagePtr>& imagesForThisOrder = jackKnifeOutputImages.at(orderIndex);
-                tbb::parallel_for<size_t>(0, imagesForThisOrder.size(), [&](size_t i) {
-                    PerformPixelationCorrection(imagesForThisOrder[i], options.alsoCorrectVariance, orders.at(orderIndex));
+                ExternalImageBuffer& imagesForThisOrder = jackKnifeOutputImages.at(orderIndex);
+                tbb::parallel_for<size_t>(0, imagesForThisOrder.nImages(), [&](size_t i) {
+                    PerformPixelationCorrection(imagesForThisOrder.imageData(i), imagesForThisOrder.nRows(), imagesForThisOrder.nCols(), options.alsoCorrectVariance, orders.at(orderIndex));
                 });
             }
         }
@@ -246,11 +246,9 @@ PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination
     return offsetCombination;
 }
 
-void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<std::vector<ImagePtr> >& jackKnifeOutputImages) {
+void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages) {
     int nBatches = imagesIncludedInBatch.size();
     int nOrders = batchSOFIImages.size();
-    
-    jackKnifeOutputImages.resize(nOrders);
     
     tbb::parallel_for<int>(0, nOrders, [&](int orderIndex) {
         for (int thisBatch = 0; thisBatch < nBatches; ++thisBatch) {
@@ -267,7 +265,7 @@ void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& 
                     summedContribution += otherContribution;
                 }
                 *(jackKnifeImagesInBatch.at(thisImage)) /= summedContribution;
-                jackKnifeOutputImages.at(orderIndex).push_back(jackKnifeImagesInBatch.at(thisImage));
+                jackKnifeOutputImages.at(orderIndex).addImage(jackKnifeImagesInBatch.at(thisImage));
             }
         }
     });
@@ -531,12 +529,11 @@ double Prefactor(int nPartitions) {
     }
 }
 
-void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order) {
+void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool alsoCorrectVariance, const int order) {
     if (order == 1)
         return; // no virtual pixels for 1st order cumulant
     
-    int nRows = imageToCorrect->rows();
-    int nCols = imageToCorrect->cols();
+    Eigen::Map<Eigen::MatrixXd> imageToCorrect(imageData, nRows, nCols);
     
     Eigen::ArrayXXd aFactor(order, order), bTerm(order, order);
     int nKernelRows = order, nKernelCols = order;
@@ -550,7 +547,7 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
         for (int row = 0; row < nRows; ++row) {
             kindOfRow = row % nKernelRows;
             kindOfCol = col % nKernelCols;
-            pixelAverages(kindOfRow, kindOfCol) += (*imageToCorrect)(row, col);
+            pixelAverages(kindOfRow, kindOfCol) += imageToCorrect(row, col);
         }
     }
     pixelAverages /= static_cast<double>(nPixelsOfEachKind);
@@ -563,7 +560,7 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
             for (int row = 0; row < nRows; ++row) {
                 kindOfRow = row % nKernelRows;
                 kindOfCol = col % nKernelCols;
-                pixelVariances(kindOfRow, kindOfCol) += square<double>((*imageToCorrect)(row, col) - pixelAverages(kindOfRow, kindOfCol));
+                pixelVariances(kindOfRow, kindOfCol) += square<double>(imageToCorrect(row, col) - pixelAverages(kindOfRow, kindOfCol));
             }
         }
         pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
@@ -592,9 +589,13 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
         for (int row = 0; row < nRows; ++row) {
             kindOfRow = row % nKernelRows;
             kindOfCol = col % nKernelCols;
-            (*imageToCorrect)(row, col) = (*imageToCorrect)(row, col) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
+            imageToCorrect(row, col) = imageToCorrect(row, col) * aFactor(kindOfRow, kindOfCol) + bTerm(kindOfRow, kindOfCol);
         }
     }
+}
+
+void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order) {
+    PerformPixelationCorrection(imageToCorrect->data(), imageToCorrect->rows(), imageToCorrect->cols(), alsoCorrectVariance, order);
 }
 
 void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
@@ -767,4 +768,22 @@ Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombina
     }
     
     return combinations;
+}
+
+bool RequiredJackknifeDimensions(int order, std::shared_ptr<ImageLoader> imageLoader, const std::vector<int>& lagTimes, int& nRows, int& nCols, int& nImages) {
+    int minLagTime, maxLagTime;
+    if (lagTimes.empty()) {
+        minLagTime = 0;
+        maxLagTime = 0;
+    } else {
+        minLagTime = std::min(0, *std::min_element(lagTimes.begin(), lagTimes.end()));
+        maxLagTime = std::max(0, *std::max_element(lagTimes.begin(), lagTimes.end()));
+    }
+    
+    nRows = (imageLoader->getXSize() - 4) * order;
+    nCols = (imageLoader->getYSize() - 4) * order;
+    nImages = imageLoader->getNImages() - maxLagTime - std::abs(minLagTime);
+    
+    bool canDoCalculation = (nRows > 0) && (nCols > 0) && (nImages > 1);
+    return canDoCalculation;
 }

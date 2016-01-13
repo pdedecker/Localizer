@@ -34,6 +34,7 @@
 #include <memory>
 
 #include "Defines.h"
+#include "Storage.h"
 #include "FileIO.h"
 #include "ProgressReporting.h"
 #include "SOFIFrameVerifiers.h"
@@ -66,7 +67,7 @@ public:
     bool wantAverageImage;
     ImagePtr averageImage;
     bool wantJackKnife;
-    std::vector<std::vector<ImagePtr> > jackKnifeImages;
+    std::vector<ExternalImageBuffer> jackKnifeImages;
     double pixelCombinationCutoff;
     std::vector<double> pixelCombinationWeights;
     bool wantDebugMessages;
@@ -75,5 +76,7 @@ public:
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages);
 
 Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombinationCutoff);
+
+bool RequiredJackknifeDimensions(int order, std::shared_ptr<ImageLoader> imageLoader, const std::vector<int>& lagTimes, int& nRows, int& nCols, int& nImages);
 
 #endif
