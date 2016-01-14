@@ -243,9 +243,10 @@ private:
 };
 
 void PixelCombinationIterator::nextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) {
-    _derivedNextPixelCombination(pixelCombination);
     if (_lagTimes.size() < pixelCombination.size())
         throw std::logic_error("not enough lag times");
+    
+    _derivedNextPixelCombination(pixelCombination);
     
     for (size_t i = 0; i < pixelCombination.size(); ++i) {
         pixelCombination[i].dt = _lagTimes[i];
@@ -307,6 +308,64 @@ bool PixelCombinationIterator_NoRepeats::exhaustedAllCombinations() const {
     return (_v >= _lastPermutation);
 }
 
+class PixelCombinationIterator_Repeats : public PixelCombinationIterator {
+public:
+    PixelCombinationIterator_Repeats(const int order, const std::vector<int>&  lagTimes);
+    ~PixelCombinationIterator_Repeats() override {;}
+    
+    bool exhaustedAllCombinations() const override;
+private:
+    void _derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) override;
+    
+    int _order;
+    std::vector<PixelCoordinate> _inputPixels;
+    unsigned int _nCoordinatesInNeighborhood;
+    unsigned int _currentIndices;
+    unsigned int _lastIndices;
+};
+
+PixelCombinationIterator_Repeats::PixelCombinationIterator_Repeats(const int order, const std::vector<int>&  lagTimes) :
+    PixelCombinationIterator(lagTimes),
+    _order(order),
+    _currentIndices(0),
+    _lastIndices(0)
+{
+    if (!Within(order, 1, 6))
+        throw std::logic_error("unsupported order");
+    
+    int neighborhoodSize = 5;
+    for (int i = -neighborhoodSize / 2; i <= neighborhoodSize / 2; i++) {
+        for (int j = -neighborhoodSize / 2; j <= neighborhoodSize / 2; j++) {
+            _inputPixels.push_back(PixelCoordinate(i, j, 0));
+        }
+    }
+    
+    _nCoordinatesInNeighborhood = _inputPixels.size();
+    
+    
+    _lastIndices = 1;
+    for (int i = 0; i < order ;++i) {
+        _lastIndices *= _nCoordinatesInNeighborhood;
+    }
+    _lastIndices -= 1;
+}
+
+void PixelCombinationIterator_Repeats::_derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) {
+    int currentIndices = _currentIndices;
+    
+    for (int i = 0; i < _order; ++i) {
+        int pixelIndex = (currentIndices % _nCoordinatesInNeighborhood);
+        currentIndices /= _nCoordinatesInNeighborhood;
+        pixelCombination.at(i) = _inputPixels.at(pixelIndex);
+    }
+    
+    _currentIndices += 1;
+}
+
+bool PixelCombinationIterator_Repeats::exhaustedAllCombinations() const {
+    return (_currentIndices > _lastIndices);
+}
+
 class PixelCombinationAccumulator {
 public:
     PixelCombinationAccumulator(int maxNCombinations, int outputDeltaX, int outputDeltaY) :
@@ -345,6 +404,7 @@ void PixelCombinationAccumulator::addCombination(const std::vector<PixelCoordina
             score *= sqDistance;
         }
     }
+    score = std::max(score, 1.0);
     
     if (_pixelCombinations.size() < _maxNCombinations) {
         // still building up the vector
