@@ -41,11 +41,17 @@
 
 class SOFIOptions {
 public:
+    enum AllowablePixelCombinations {
+        NonOverlappingPixels,
+        AllowOverlappingPixels
+    };
+    
     SOFIOptions() :
         nFramesToSkip(0),
         nFramesToInclude(-1),
         batchSize(0),
         wantCrossCumulant(true),
+        allowablePixelCombinations(NonOverlappingPixels),
         doPixelationCorrection(true),
         alsoCorrectVariance(true),
         wantAverageImage(false),
@@ -61,6 +67,7 @@ public:
     int nFramesToInclude;
     int batchSize;
     bool wantCrossCumulant;
+    AllowablePixelCombinations allowablePixelCombinations;
     std::vector<int> lagTimes;
     bool doPixelationCorrection;
     bool alsoCorrectVariance;
@@ -75,7 +82,7 @@ public:
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages);
 
-Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombinationCutoff);
+Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff);
 
 bool RequiredJackknifeDimensions(int order, std::shared_ptr<ImageLoader> imageLoader, const std::vector<int>& lagTimes, int& nRows, int& nCols, int& nImages);
 

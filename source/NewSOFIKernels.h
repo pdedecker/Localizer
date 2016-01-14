@@ -34,6 +34,8 @@
 #include <utility>
 #include <tuple>
 
+#include "NewSOFI.h"
+
 class PixelCoordinate;
 typedef std::vector<PixelCoordinate> PixelCombination;
 typedef std::vector<PixelCombination> Partition;
@@ -83,7 +85,7 @@ public:
     std::vector<double> requestedCombinationWeights;
 };
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const double pixelCombinationCutoff);
+std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff);
 std::vector<SOFIKernel> AutoKernelsForOrder(const int order, const std::vector<int>& timeLags);
 
 class ComparePixelCombinations {

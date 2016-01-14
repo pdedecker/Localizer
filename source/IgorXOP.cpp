@@ -3353,7 +3353,7 @@ static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
         return EXPECT_POS_NUM;
     }
     
-    waveHndl output = CopyMatrixToIgorDPWave(PixelCombinationsForOrderAsMatrix(order, pixelCombinationCutoff), "M_SOFIPixelCombinations");
+    waveHndl output = CopyMatrixToIgorDPWave(PixelCombinationsForOrderAsMatrix(order, SOFIOptions::NonOverlappingPixels, pixelCombinationCutoff), "M_SOFIPixelCombinations");
     
     return ((output == NULL) ? NOMEM : 0);
 }

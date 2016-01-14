@@ -41,12 +41,12 @@
 std::vector<SOFIKernel> SOFIVirtualPixelsToKernels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 void SortPixelCombination(PixelCombination& combination);
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, double pixelCombinationCutoff);
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, double pixelCombinationCutoff);
 std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order, const std::vector<int>& timeLags);
 std::string SummarizeSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualPixels);
 
-std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const double pixelCombinationCutoff) {
-    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(SOFIVirtualPixelsForOrder(order, timeLags, pixelCombinationCutoff));
+std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff) {
+    std::vector<SOFIKernel> kernels = SOFIVirtualPixelsToKernels(SOFIVirtualPixelsForOrder(order, timeLags, allowablePixelCombinations, pixelCombinationCutoff));
     
     for (auto kernelIt = kernels.begin(); kernelIt != kernels.end(); ++kernelIt) {
         std::vector<GroupOfPartitions>& GroupOfPartitions = kernelIt->combinations;
@@ -447,7 +447,7 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination(double pixelCombina
     return result;
 }
 
-std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, double pixelCombinationCutoff) {
+std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, double pixelCombinationCutoff) {
     if (Clip(order, 1, 6) != order)
         throw std::logic_error("unsupported order");
     if (timeLags.size() != order)
@@ -462,10 +462,22 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::ve
         accumulators.push_back(PixelCombinationAccumulator(maxNCombinations, i / order, i % order));
     }
     
-    PixelCombinationIterator_NoRepeats combinationIterator(order, timeLags);
+    std::shared_ptr<PixelCombinationIterator> pixelCombinationIterator;
+    switch (allowablePixelCombinations) {
+        case SOFIOptions::NonOverlappingPixels:
+            pixelCombinationIterator = std::shared_ptr<PixelCombinationIterator>(new PixelCombinationIterator_NoRepeats(order, timeLags));
+            break;
+        case SOFIOptions::AllowOverlappingPixels:
+            pixelCombinationIterator = std::shared_ptr<PixelCombinationIterator>(new PixelCombinationIterator_Repeats(order, timeLags));
+            break;
+        default:
+            throw std::logic_error("unknown allowable pixel combinations");
+            break;
+    }
+    
     std::vector<PixelCoordinate> pixelCombination(order);
-    while (!combinationIterator.exhaustedAllCombinations()) {
-        combinationIterator.nextPixelCombination(pixelCombination);
+    while (!pixelCombinationIterator->exhaustedAllCombinations()) {
+        pixelCombinationIterator->nextPixelCombination(pixelCombination);
         
         int outputDeltaX = 0, outputDeltaY = 0;
         for (size_t j = 0; j < pixelCombination.size(); j++) {

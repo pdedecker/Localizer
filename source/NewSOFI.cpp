@@ -106,7 +106,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         if (isAuto) {
             kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], AutoKernelsForOrder(orders[i], lagTimes)));
         } else {
-            kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i], lagTimes, options.pixelCombinationCutoff)));
+            kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i], lagTimes, options.allowablePixelCombinations, options.pixelCombinationCutoff)));
         }
     }
     
@@ -743,9 +743,9 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
 #endif
 }
 
-Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(int order, double pixelCombinationCutoff) {
+Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff) {
     std::vector<int> dummyLagTimes(order, 0);
-    std::vector<SOFIKernel> kernels = KernelsForOrder(order, dummyLagTimes, pixelCombinationCutoff);
+    std::vector<SOFIKernel> kernels = KernelsForOrder(order, dummyLagTimes, allowablePixelCombinations, pixelCombinationCutoff);
     int nVirtualPixels = kernels.size();
     
     int nCombinations = NumberOfPixelCombinationsInKernels(kernels);
