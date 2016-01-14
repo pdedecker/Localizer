@@ -418,6 +418,7 @@ void PixelCombinationAccumulator::addCombination(const std::vector<PixelCoordina
     } else {
         if (score < _worstScore) {
             _pixelCombinations[_worstScoreIndex] = combination;
+            _scores[_worstScoreIndex] = score;
             auto it = std::max_element(_scores.cbegin(), _scores.cend());
             _worstScore = *it;
             _worstScoreIndex = it - _scores.cbegin();
