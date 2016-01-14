@@ -799,6 +799,11 @@ struct SOFIPixelCombinationsRuntimeParams {
     double combinationSelection;
     int COMBFlagParamsSet[1];
     
+    // Parameters for /SAME flag group.
+    int SAMEFlagEncountered;
+    double allowOverlappingPixels;			// Optional parameter.
+    int SAMEFlagParamsSet[1];
+    
     // Main parameters.
     
     // Parameters for simple main group #0.
@@ -3360,6 +3365,19 @@ static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
         pixelCombinationCutoff = p->combinationSelection;
     }
     
+    SOFIOptions::AllowablePixelCombinations allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
+    if (p->SAMEFlagEncountered) {
+        allowablePixelCombinations = SOFIOptions::AllowOverlappingPixels;
+        if (p->SAMEFlagParamsSet[0]) {
+            // Optional parameter: p->allowOverlappingPixels
+            if (p->allowOverlappingPixels == 0.0) {
+                allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
+            } else {
+                allowablePixelCombinations = SOFIOptions::AllowOverlappingPixels;
+            }
+        }
+    }
+    
     // Main parameters.
     
     int order = 2;
@@ -3372,7 +3390,7 @@ static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
         return EXPECT_POS_NUM;
     }
     
-    waveHndl output = CopyMatrixToIgorDPWave(PixelCombinationsForOrderAsMatrix(order, SOFIOptions::NonOverlappingPixels, pixelCombinationCutoff), "M_SOFIPixelCombinations");
+    waveHndl output = CopyMatrixToIgorDPWave(PixelCombinationsForOrderAsMatrix(order, allowablePixelCombinations, pixelCombinationCutoff), "M_SOFIPixelCombinations");
     
     return ((output == NULL) ? NOMEM : 0);
 }
@@ -3636,7 +3654,7 @@ static int RegisterSOFIPixelCombinations(void) {
     const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the SOFIPixelCombinationsRuntimeParams structure as well.
-    cmdTemplate = "SOFIPixelCombinations /COMB=number:combinationSelection number:order";
+    cmdTemplate = "SOFIPixelCombinations /COMB=number:combinationSelection /SAME[=number:allowOverlappingPixels] number:order";
     runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(SOFIPixelCombinationsRuntimeParams), (void*)ExecuteSOFIPixelCombinations, 0);
