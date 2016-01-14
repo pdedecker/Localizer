@@ -46,11 +46,13 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
 	
 	if (nrhs < 1)
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\",\n\
+					 					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
 	
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
-		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\", or \"newsofi\")");
+		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\",\n\
+					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
 
 	std::string selector = GetMatlabString(inputArray);
 	if (boost::iequals(selector, "localize")) {
@@ -61,12 +63,15 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		MatlabSOFI(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "newsofi")) {
 		MatlabNewSOFI(nlhs, plhs, nrhs, prhs);
+	} else if (boost::iequals(selector, "sofipixelcombinations")) {
+		MatlabSOFIPixelCombinations(nlhs, plhs, nrhs, prhs);
 	} else if (boost::iequals(selector, "readccdimages")) {
 		MatlabReadCCDImages(nlhs, plhs, nrhs, prhs);
     } else if (boost::iequals(selector, "writeccdimages")) {
         MatlabWriteCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
-		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\", \"localize\", \"testsegmentation\", \"sofi\")");
+		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\",\n\
+					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
 	}
 }
 
@@ -425,7 +430,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 					 3. file path to a data file, or a 2D or 3D matrix containing numeric data\n\
                      these arguments can be followed by optional 'keyword', value params.\n\
                      supported keywords are 'nFramesToSkip', 'nFramesToInclude', 'pixelationCorrection'\n\
-                     'alsoCorrectVariance', 'batchSize', 'pixelCombinations', 'jackknife', 'lagTimes',\n\
+                     'alsoCorrectVariance', 'batchSize', 'pixelCombinationCutoff', 'jackknife', 'lagTimes',\n\
 					 and 'allowSamePixels'.\n\
                      This function returns a single cell containing the calculated SOFI images.\n\
                      If the jackknife option is set then two cells will be returned, the first\n\
@@ -597,9 +602,9 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
                 mexErrMsgTxt("'batchSize' argument requires a positive non-zero value");
             }
             sofiOptions.batchSize = *mxGetPr(argument);
-        } else if (boost::iequals(keyword, "pixelCombinations")) {
+        } else if (boost::iequals(keyword, "pixelCombinationCutoff")) {
             if (*mxGetPr(argument) <= 0.0) {
-                mexErrMsgTxt("'pixelCombinations' argument requires a postive non-zero value");
+                mexErrMsgTxt("'pixelCombinationCutoff' argument requires a postive non-zero value");
             }
         } else if (boost::iequals(keyword, "jackknife")) {
             sofiOptions.wantJackKnife = (*mxGetPr(argument) != 0.0);
@@ -724,6 +729,95 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     catch (...) {
         mexErrMsgTxt("Unknown error");
     }
+}
+
+void ParseSOFIPixelCombinationsKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions);
+
+/**
+Function to display the pixel combinations that will be used. The input arguments must be of the form
+0 - the string "sofipixelcombinations"
+1 - the calculation order
+followed by optional keyword-value pairs
+*/
+void MatlabSOFIPixelCombinations(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
+	if (nrhs == 1) {
+		mexErrMsgTxt("input arguments for \"sofipixelcombinations\"\n\
+					  1. the string \"sofipixelcombinations\"\n\
+					  2. the order of the SOFI calculation\n\
+					  followed by optional 'keyword', value params.\n\
+					  Supported keywords are \"pixelCombinationCutoff\" and \"allowSamePixels\"");
+	}
+	
+	if (nlhs != 1)
+		mexErrMsgTxt("\"sofipixelcombinations\" requires 1 left-hand-side argument");
+
+	mxArray* array = nullptr;
+	// the mxArray at index 0 (the string "sofipixelcombinations") will have been checked already by mexFunction
+
+	// index 1 - must be a single number (order)
+	array = const_cast<mxArray*>(prhs[1]);
+	if ((mxGetN(array) != 1) || (mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+		mexErrMsgTxt("2nd argument must be a double scalar (the order to calculate)");
+	int order = *mxGetPr(array);
+
+	SOFIOptions sofiOptions;
+	ParseSOFIPixelCombinationsKeywordArguments(prhs, nrhs, sofiOptions);
+	Eigen::MatrixXd pixelCombinations = PixelCombinationsForOrderAsMatrix(order, sofiOptions.allowablePixelCombinations, sofiOptions.pixelCombinationCutoff);
+
+	plhs[0] = ConvertImageToArray(pixelCombinations);
+}
+
+void ParseSOFIPixelCombinationsKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
+	int firstKeywordIndex = 2;
+
+	// check that we have an even number of arguments remaining
+	if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
+		char buf[128];
+		sprintf(buf, "all arguments after the first %d must be keyword-value pairs", firstKeywordIndex);
+		mexErrMsgTxt(buf);
+	}
+
+	// check that all remaining arguments are string - value pairs
+	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+		const mxArray* array = prhs[i];
+		if ((mxGetClassID(array) != mxCHAR_CLASS) || (mxGetM(array) > 1)) {
+			char buf[128];
+			sprintf(buf, "all arguments after the first %d must be keyword (string) - value (double) pairs", firstKeywordIndex);
+			mexErrMsgTxt(buf);
+		}
+		if (!mxIsDouble(prhs[i + 1])) {
+			mexErrMsgTxt("all keyword arguments (not the keywords themselves) must be of numeric type double");
+		}
+	}
+
+	// all keyword arguments must be 1x1 matrices
+	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+		const std::string keyword = GetMatlabString(prhs[i]);
+		const mxArray* argument = prhs[i + 1];
+
+		if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1) || (mxGetN(argument) != 1)) {
+			mexErrMsgTxt("all keyword arguments must be 1x1 matrices (scalar values)");
+		}
+	}
+
+	// extract the values of the keyword arguments
+	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+		const std::string keyword = GetMatlabString(prhs[i]);
+		const mxArray* argument = prhs[i + 1];
+
+		if (boost::iequals(keyword, "pixelCombinationCutoff")) {
+			sofiOptions.pixelCombinationCutoff = *mxGetPr(argument);
+		} else if (boost::iequals(keyword, "allowSamePixels")) {
+			if (*mxGetPr(argument) != 0.0) {
+				sofiOptions.allowablePixelCombinations = SOFIOptions::AllowOverlappingPixels;
+			}
+			else {
+				sofiOptions.allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
+			}
+		} else {
+			mexPrintf("warning: ignoring unknown keyword \"%s\"", keyword.c_str());
+		}
+	}
 }
 
 /**
@@ -917,16 +1011,19 @@ std::string GetMatlabString(const mxArray* array) {
 }
 
 mxArray* ConvertImageToArray(ImagePtr image) {
+	return ConvertImageToArray(*image);
+}
 
-	mxArray* outputMatrix = mxCreateDoubleMatrix(image->rows(), image->cols(), mxREAL);
+mxArray* ConvertImageToArray(const Image& image) {
+	mxArray* outputMatrix = mxCreateDoubleMatrix(image.rows(), image.cols(), mxREAL);
 	if (outputMatrix == NULL)
 		throw std::bad_alloc();
 
-	int nElements = image->rows() * image->cols();
+	int nElements = image.rows() * image.cols();
 
 	if (nElements > 0) {
 		double *firstOutputElement = mxGetPr(outputMatrix);
-		memcpy(firstOutputElement, image->data(), nElements * sizeof(double));
+		memcpy(firstOutputElement, image.data(), nElements * sizeof(double));
 	}
 
 	return outputMatrix;

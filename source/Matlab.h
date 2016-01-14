@@ -41,10 +41,12 @@ void MatlabLocalization(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs
 void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
+void MatlabSOFIPixelCombinations(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs);
 
 std::string GetMatlabString(const mxArray* array);
 mxArray* ConvertImageToArray(ImagePtr image);
+mxArray* ConvertImageToArray(const Image& image);
 mxArray* ConvertImagesToArray(const std::vector<ImagePtr>& images);
 mxArray* LoadImagesIntoArray(std::shared_ptr<ImageLoader> imageLoader, int firstImage, int nImagesToRead);
