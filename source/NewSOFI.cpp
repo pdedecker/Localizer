@@ -88,6 +88,10 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         throw std::runtime_error("orders must be between 1 and 6");
     }
     
+    if ((options.pixelCombinationCutoff < 1.0) || std::isnan(options.pixelCombinationCutoff)) {
+        throw std::runtime_error("pixel combination cutoff must be larger than 1.0");
+    }
+    
     // note: calculation assumes that the first lag time is zero - this must be enforced here
     if (!lagTimes.empty()) {
         // have explicit lag times
