@@ -401,10 +401,10 @@ void PixelCombinationAccumulator::addCombination(const std::vector<PixelCoordina
     for (size_t j = 0; j < combination.size(); j++) {
         for (size_t i = j + 1; i < combination.size(); i++) {
             double sqDistance = square((double)combination[i].dx - (double)combination[j].dx) + square((double)combination[i].dy - (double)combination[j].dy);
+            sqDistance = std::max(sqDistance, 0.2);
             score *= sqDistance;
         }
     }
-    score = std::max(score, 1.0);
     
     if (_pixelCombinations.size() < _maxNCombinations) {
         // still building up the vector
