@@ -755,6 +755,11 @@ struct NewSOFIRuntimeParams {
     double printDebugInfo;					// Optional parameter.
     int DEBGFlagParamsSet[1];
     
+    // Parameters for /SAME flag group.
+    int SAMEFlagEncountered;
+    double allowOverlappingPixels;			// Optional parameter.
+    int SAMEFlagParamsSet[1];
+    
     // Parameters for /PROG flag group.
     int PROGFlagEncountered;
     LocalizerProgStruct* progStruct;
@@ -3162,6 +3167,19 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         }
     }
     
+    SOFIOptions::AllowablePixelCombinations allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
+    if (p->SAMEFlagEncountered) {
+        allowablePixelCombinations = SOFIOptions::AllowOverlappingPixels;
+        if (p->SAMEFlagParamsSet[0]) {
+            // Optional parameter: p->allowOverlappingPixels
+            if (p->allowOverlappingPixels == 0.0) {
+                allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
+            } else {
+                allowablePixelCombinations = SOFIOptions::AllowOverlappingPixels;
+            }
+        }
+    }
+    
     bool useIgorFunctionForProgress;
     FUNCREF igorProgressReporterFunction;
     if (p->PROGFlagEncountered) {
@@ -3209,6 +3227,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         SOFIOptions sofiOptions;
         sofiOptions.orders = orders;
         sofiOptions.wantCrossCumulant = wantCrossCumulant;
+        sofiOptions.allowablePixelCombinations = allowablePixelCombinations;
         sofiOptions.lagTimes = lagTimes;
         sofiOptions.nFramesToSkip = nFramesToSkip;
         sofiOptions.nFramesToInclude = nFramesToInclude;
@@ -3605,7 +3624,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /SAME[=number:allowOverlappingPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
