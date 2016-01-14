@@ -304,7 +304,7 @@ void PixelCombinationIterator_NoRepeats::_derivedNextPixelCombination(std::vecto
 }
 
 bool PixelCombinationIterator_NoRepeats::exhaustedAllCombinations() const {
-    return (_v > _lastPermutation);
+    return (_v >= _lastPermutation);
 }
 
 class PixelCombinationAccumulator {
@@ -402,31 +402,10 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::ve
         accumulators.push_back(PixelCombinationAccumulator(maxNCombinations, i / order, i % order));
     }
     
-    std::vector<PixelCoordinate> inputPixels;
-    for (int i = -neighborhoodSize / 2; i <= neighborhoodSize / 2; i++) {
-        for (int j = -neighborhoodSize / 2; j <= neighborhoodSize / 2; j++) {
-            inputPixels.push_back(PixelCoordinate(i, j, 0));
-        }
-    }
-    
+    PixelCombinationIterator_NoRepeats combinationIterator(order, timeLags);
     std::vector<PixelCoordinate> pixelCombination(order);
-    // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
-    unsigned int v = (1 << order) - 1; // starting permutation of bits
-    unsigned int lastPermutation = 1 << inputPixels.size();
-    for ( ; ; ) {
-        unsigned int t = (v | (v - 1)) + 1;
-        unsigned int w = t | ((((t & -t) / (v & -v)) >> 1) - 1);  // next permutation of bits
-        v = w;
-        if (w > lastPermutation)
-            break;
-        
-        int offset = 0;
-        for (size_t j = 0; j < inputPixels.size(); j++) {
-            if ((w >> j) & 1) {
-                pixelCombination.at(offset) = inputPixels.at(j);
-                offset++;
-            }
-        }
+    while (!combinationIterator.exhaustedAllCombinations()) {
+        combinationIterator.nextPixelCombination(pixelCombination);
         
         int outputDeltaX = 0, outputDeltaY = 0;
         for (size_t j = 0; j < pixelCombination.size(); j++) {
