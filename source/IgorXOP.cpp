@@ -3106,10 +3106,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         XOPNotice("Only one of the \"LAG\" or \"LAGW\" flags can be set\r");
         return PALM_ANALYSIS_XOP_ERROR;
     }
-    if ((p->LAGFlagEncountered || p->LAGWFlagEncountered) && (orders.size() > 1)) {
-        XOPNotice("Only a single order can be calculated when lag times are specified\r");
-        return PALM_ANALYSIS_XOP_ERROR;
-    }
     
     std::vector<int> lagTimes;
     if (p->LAGFlagEncountered) {
@@ -3125,10 +3121,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             lagTimes.push_back(lagTime);
             nLagTimesSpecified += 1;
         }
-        if (nLagTimesSpecified != orders.at(0) - 1) {
-            XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
-            return PALM_ANALYSIS_XOP_ERROR;
-        }
     }
     if (p->LAGWFlagEncountered) {
         // Parameter: p->lagTimesWave (test for NULL handle before using)
@@ -3139,10 +3131,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         if ((waveType == TEXT_WAVE_TYPE) || (waveType == WAVE_TYPE) || (waveType == DATAFOLDER_TYPE) || (waveType & NT_CMPLX))
             return NT_INCOMPATIBLE;
         int nLagTimesInWave = WavePoints(lagTimesWave);
-        if (nLagTimesInWave < orders.at(0) - 1) {
-            XOPNotice("SOFI calculation of order n requires specification of exactly (n - 1) lag times\r");
-            return PALM_ANALYSIS_XOP_ERROR;
-        }
         std::unique_ptr<double[]> doubleBuffer(new double[nLagTimesInWave]);
         lagTimes.resize(nLagTimesInWave);
         err = MDGetDPDataFromNumericWave(lagTimesWave, doubleBuffer.get());

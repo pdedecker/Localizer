@@ -82,20 +82,23 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     batchSOFIImages.resize(nOrders);
     std::vector<int> imagesIncludedInBatch;
     
+    int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
+    int lowestOrder = *std::min_element(orders.cbegin(), orders.cend());
+    if (!Within(largestOrder, 1, 6) || !Within(largestOrder, 1, 6)) {
+        throw std::runtime_error("orders must be between 1 and 6");
+    }
+    
     // note: calculation assumes that the first lag time is zero - this must be enforced here
     if (!lagTimes.empty()) {
         // have explicit lag times
-        if (nOrders > 1)
-            throw std::runtime_error("only a single order can be calculated if time lags are specified");
-        if (orders.at(0) <= 1)
+        if (lowestOrder == 1)
             throw std::runtime_error("lag times do not make sense for a first order calculation");
-        if (lagTimes.size() != (orders.at(0) - 1))
-            throw std::runtime_error("SOFI calculation of order n requires specification of exactly (n - 1) lag times");
+        if (lagTimes.size() < (largestOrder - 1))
+            throw std::runtime_error("SOFI calculation of order n requires specification of at least (n - 1) lag times");
         // prepend zero lag time
         lagTimes.insert(lagTimes.begin(), 0);
     } else {
         // take all zero lag times
-        int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
         lagTimes = std::vector<int>(largestOrder, 0);
     }
     int largestLagTime = *std::max_element(lagTimes.cbegin(), lagTimes.cend());
