@@ -568,10 +568,6 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
         const std::string keyword = GetMatlabString(prhs[i]);
         const mxArray* argument = prhs[i + 1];
         
-        if (!mxIsDouble(argument)) {
-            mexErrMsgTxt("all keyword arguments must be of type 'double'");
-        }
-        
         if (boost::iequals(keyword, "lagtimes")) {
             continue;   // not 1x1 in size
         }
