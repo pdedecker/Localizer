@@ -450,7 +450,7 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination(double pixelCombina
 std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, double pixelCombinationCutoff) {
     if (Clip(order, 1, 6) != order)
         throw std::logic_error("unsupported order");
-    if (timeLags.size() != order)
+    if (timeLags.size() < order)
         throw std::logic_error("too few or too many time lags");
     
     int maxNCombinations = 32;
@@ -506,7 +506,7 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::ve
 }
 
 std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order, const std::vector<int>& timeLags) {
-    if (timeLags.size() != order)
+    if (timeLags.size() < order)
         throw std::logic_error("too few or too many time lags");
     std::vector<SOFIVirtualPixel> result(1);
     SOFIVirtualPixel& pixel = result.at(0);
