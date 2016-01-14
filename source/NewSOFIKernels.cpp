@@ -228,6 +228,85 @@ std::string PrintSOFIVirtualPixels(const std::vector<SOFIVirtualPixel>& virtualP
     return ss.str();
 }
 
+class PixelCombinationIterator {
+public:
+    PixelCombinationIterator(const std::vector<int>& lagTimes) :
+        _lagTimes(lagTimes) {}
+    virtual ~PixelCombinationIterator() {;}
+    
+    void nextPixelCombination(std::vector<PixelCoordinate>& pixelCombination);
+    virtual bool exhaustedAllCombinations() const = 0;
+private:
+    virtual void _derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) = 0;
+    
+    std::vector<int> _lagTimes;
+};
+
+void PixelCombinationIterator::nextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) {
+    _derivedNextPixelCombination(pixelCombination);
+    if (_lagTimes.size() < pixelCombination.size())
+        throw std::logic_error("not enough lag times");
+    
+    for (size_t i = 0; i < pixelCombination.size(); ++i) {
+        pixelCombination[i].dt = _lagTimes[i];
+    }
+}
+
+class PixelCombinationIterator_NoRepeats : public PixelCombinationIterator {
+public:
+    PixelCombinationIterator_NoRepeats(const int order, const std::vector<int>&  lagTimes);
+    ~PixelCombinationIterator_NoRepeats() override {;}
+    
+    bool exhaustedAllCombinations() const override;
+private:
+    void _derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) override;
+    
+    int _order;
+    std::vector<PixelCoordinate> _inputPixels;
+    unsigned int _v;
+    unsigned int _lastPermutation;
+};
+
+PixelCombinationIterator_NoRepeats::PixelCombinationIterator_NoRepeats(const int order, const std::vector<int>&  lagTimes) :
+    PixelCombinationIterator(lagTimes),
+    _order(order),
+    _v(0),
+    _lastPermutation(0)
+{
+    if (!Within(order, 1, 6))
+        throw std::logic_error("unsupported order");
+    
+    int neighborhoodSize = 5;
+    for (int i = -neighborhoodSize / 2; i <= neighborhoodSize / 2; i++) {
+        for (int j = -neighborhoodSize / 2; j <= neighborhoodSize / 2; j++) {
+            _inputPixels.push_back(PixelCoordinate(i, j, 0));
+        }
+    }
+    
+    _v = (1 << order) - 1; // starting permutation of bits
+    _lastPermutation = 1 << _inputPixels.size();
+}
+
+void PixelCombinationIterator_NoRepeats::_derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) {
+    // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
+    
+    unsigned int t = (_v | (_v - 1)) + 1;
+    unsigned int w = t | ((((t & -t) / (_v & -_v)) >> 1) - 1);  // next permutation of bits
+    _v = w;
+    
+    int offset = 0;
+    for (size_t j = 0; j < _inputPixels.size(); j++) {
+        if ((w >> j) & 1) {
+            pixelCombination.at(offset) = _inputPixels.at(j);
+            offset++;
+        }
+    }
+}
+
+bool PixelCombinationIterator_NoRepeats::exhaustedAllCombinations() const {
+    return (_v > _lastPermutation);
+}
+
 class PixelCombinationAccumulator {
 public:
     PixelCombinationAccumulator(int maxNCombinations, int outputDeltaX, int outputDeltaY) :
