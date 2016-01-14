@@ -431,7 +431,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
                      these arguments can be followed by optional 'keyword', value params.\n\
                      supported keywords are 'nFramesToSkip', 'nFramesToInclude', 'pixelationCorrection'\n\
                      'alsoCorrectVariance', 'batchSize', 'pixelCombinationCutoff', 'jackknife', 'lagTimes',\n\
-					 and 'allowSamePixels'.\n\
+                     'allowSamePixels', 'pixelCombinationWeights'.\n\
                      This function returns a single cell containing the calculated SOFI images.\n\
                      If the jackknife option is set then two cells will be returned, the first\n\
                      containing the SOFI images, and the second containing the jackknife images.");
@@ -568,7 +568,7 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
         const std::string keyword = GetMatlabString(prhs[i]);
         const mxArray* argument = prhs[i + 1];
         
-        if (boost::iequals(keyword, "lagtimes")) {
+        if (boost::iequals(keyword, "lagtimes") || boost::iequals(keyword, "pixelCombinationWeights")) {
             continue;   // not 1x1 in size
         }
         
@@ -619,7 +619,16 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
 			} else {
 				sofiOptions.allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
 			}
-		} else {
+        } else if (boost::iequals(keyword, "pixelCombinationWeights")) {
+            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1)) {
+                mexErrMsgTxt("pixel combination weights must be provided as a row vector");
+            }
+            double* weightsPtr = mxGetPr(argument);
+            for (size_t i = 0; i < mxGetN(argument); ++i) {
+                sofiOptions.pixelCombinationWeights.push_back(*weightsPtr);
+                weightsPtr += 1;
+            }
+        } else {
 			mexPrintf("warning - ignored unknown keyword \"%s\"\n", keyword.c_str());
 		}
         
