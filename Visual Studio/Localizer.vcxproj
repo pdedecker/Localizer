@@ -211,15 +211,15 @@
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug-LocalizerDLL|x64'">.dll</TargetExt>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release-LocalizerDLL|x64'">.dll</TargetExt>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)64</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">$(ProjectName)Matlab</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|x64'">$(ProjectName)</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-LocalizerDLL|x64'">$(ProjectName)DLL64</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-LocalizerDLL|x64'">$(ProjectName)DLL64</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)64</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">$(ProjectName)Matlab</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">$(ProjectName)Matlab</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|x64'">$(ProjectName)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-Matlab|Win32'">$(ProjectName)</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-LocalizerDLL|Win32'">$(ProjectName)DLL32</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-LocalizerDLL|Win32'">$(ProjectName)DLL32</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">$(ProjectName)Matlab</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-Matlab|Win32'">$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -270,7 +270,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_c.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-sgd-1_59.lib;libboost_date_time-vc120-mt-sgd-1_59.lib;libboost_system-vc120-mt-sgd-1_59.lib;libboost_chrono-vc120-mt-sgd-1_59.lib;libtiff.lib;zlib.lib;tbb_debug.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw32</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win32;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\ia32;C:\Program Files\MATLAB\R2013a\extern\extern\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -388,7 +388,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>version.lib;libtiff64.lib;zlib64.lib;libfftw-3.3.lib;gsl.lib;tbb_debug.lib;cblas.lib;libboost_thread-vc100-mt-gd-1_53.lib;libboost_date_time-vc100-mt-gd-1_53.lib;libboost_system-vc100-mt-gd-1_53.lib;libboost_chrono-vc100-mt-gd-1_53.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw64</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;C:\Program Files\MATLAB\R2013a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -512,7 +512,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_c.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff.lib;zlib.lib;tbb.lib;libmx.lib;libmex.lib;libmat.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw32</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).mexw32</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win32;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\ia32;C:\Program Files\MATLAB\R2013a\extern\include\lib\win32\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -580,7 +580,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_ilp64.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff64.lib;zlib64.lib;tbb.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)Matlab.mexw64</OutputFile>
+      <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;C:\Program Files\MATLAB\R2013a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
