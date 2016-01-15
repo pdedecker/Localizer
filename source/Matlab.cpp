@@ -849,7 +849,33 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
 			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
 
-		plhs[0] = LoadImagesIntoArray(imageLoader, firstImageToRead, nImagesToRead);
+		if ((firstImageToRead < 0) || (firstImageToRead > imageLoader->getNImages() - 1))
+			throw std::runtime_error("invalid first image to read");
+		if (nImagesToRead < 0)
+			nImagesToRead = imageLoader->getNImages();
+		nImagesToRead = Clip(nImagesToRead, 0, imageLoader->getNImages() - firstImageToRead);
+
+		MatlabImageOutputWriter outputWriter(nImagesToRead, imageLoader->getStorageType());
+
+		std::shared_ptr<ProgressReporter> progressReporter;
+		if (nImagesToRead > 100) {
+			progressReporter = std::shared_ptr<ProgressReporter>(new ProgressReporter_MatlabWaitMex());
+		}
+		else {
+			progressReporter = std::shared_ptr<ProgressReporter>(new ProgressReporter_Silent());
+		}
+
+		progressReporter->CalculationStarted();
+		imageLoader->spoolTo(firstImageToRead);
+		for (int i = 0; i < nImagesToRead; ++i) {
+			if ((i % 20) == 0) {
+				progressReporter->UpdateCalculationProgress(i + 1, nImagesToRead);
+			}
+			outputWriter.write_image(imageLoader->readNextImage());
+		}
+
+		plhs[0] = outputWriter.getArray();
+		progressReporter->CalculationDone();
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
