@@ -441,10 +441,10 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	
 	// index 1 - must be a single number (order)
 	array = const_cast<mxArray*>(prhs[1]);
-	if ((mxGetM(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
+	if ((mxGetN(array) != 1) || (mxGetClassID(array) != mxDOUBLE_CLASS))
 		mexErrMsgTxt("2nd argument must be a double scalar or column vector (the orders to calculate)");
     std::vector<int> ordersToCalculate;
-    for (size_t i = 0; i < mxGetN(array); ++i) {
+    for (size_t i = 0; i < mxGetM(array); ++i) {
         ordersToCalculate.push_back(mxGetPr(array)[i]);
     }
 	
@@ -588,7 +588,7 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
             }
             sofiOptions.nFramesToSkip = *mxGetPr(argument);
         } else if (boost::iequals(keyword, "nFramesToInclude")) {
-            sofiOptions.nFramesToSkip = *mxGetPr(argument);
+            sofiOptions.nFramesToInclude = *mxGetPr(argument);
         } else if (boost::iequals(keyword, "pixelationCorrection")) {
             sofiOptions.doPixelationCorrection = (*mxGetPr(argument) != 0.0);
         } else if (boost::iequals(keyword, "alsoCorrectVariance")) {
@@ -599,17 +599,15 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
             }
             sofiOptions.batchSize = *mxGetPr(argument);
         } else if (boost::iequals(keyword, "pixelCombinationCutoff")) {
-            if (*mxGetPr(argument) <= 0.0) {
-                mexErrMsgTxt("'pixelCombinationCutoff' argument requires a postive non-zero value");
-            }
+			sofiOptions.pixelCombinationCutoff = *mxGetPr(argument);
         } else if (boost::iequals(keyword, "jackknife")) {
             sofiOptions.wantJackKnife = (*mxGetPr(argument) != 0.0);
 		} else if (boost::iequals(keyword, "lagtimes")) {
-			if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1)) {
+			if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetN(argument) != 1)) {
 				mexErrMsgTxt("lag times must be provided as a row vector");
 			}
 			double* lagPtr = mxGetPr(argument);
-			for (size_t i = 0; i < mxGetN(argument); ++i) {
+			for (size_t i = 0; i < mxGetM(argument); ++i) {
 				sofiOptions.lagTimes.push_back(*lagPtr);
 				lagPtr += 1;
 			}
@@ -620,11 +618,11 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
 				sofiOptions.allowablePixelCombinations = SOFIOptions::NonOverlappingPixels;
 			}
         } else if (boost::iequals(keyword, "pixelCombinationWeights")) {
-            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetM(argument) != 1)) {
+            if ((mxGetNumberOfDimensions(argument) > 2) || (mxGetN(argument) != 1)) {
                 mexErrMsgTxt("pixel combination weights must be provided as a row vector");
             }
             double* weightsPtr = mxGetPr(argument);
-            for (size_t i = 0; i < mxGetN(argument); ++i) {
+            for (size_t i = 0; i < mxGetM(argument); ++i) {
                 sofiOptions.pixelCombinationWeights.push_back(*weightsPtr);
                 weightsPtr += 1;
             }
