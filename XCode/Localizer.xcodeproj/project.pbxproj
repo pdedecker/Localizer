@@ -146,7 +146,7 @@
 		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
-		D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = LocalizerMatlab.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0C2582D1746C045001C2EB1 /* Localizer.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Localizer.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0CCD3381473C700005CD75A /* LocalizerDLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LocalizerDLL.h; path = ../source/LocalizerDLL.h; sourceTree = SOURCE_ROOT; };
@@ -325,7 +325,7 @@
 			children = (
 				D0A9C305135F4EED00D076AE /* Localizer.xop */,
 				D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */,
-				D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */,
+				D0C2582D1746C045001C2EB1 /* Localizer.mexmaci64 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -438,7 +438,7 @@
 			);
 			name = LocalizerMatlab;
 			productName = LocalizerMatlab;
-			productReference = D0C2582D1746C045001C2EB1 /* LocalizerMatlab.mexmaci64 */;
+			productReference = D0C2582D1746C045001C2EB1 /* Localizer.mexmaci64 */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		D0CCD3191473C5DD005CD75A /* LocalizerDLL */ = {
@@ -804,7 +804,7 @@
 					"-lmx",
 					"-lmat",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Localizer;
 			};
 			name = Debug;
 		};
@@ -852,7 +852,7 @@
 					"-lmx",
 					"-lmat",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Localizer;
 			};
 			name = Release;
 		};
