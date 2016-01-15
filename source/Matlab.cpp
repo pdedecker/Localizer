@@ -75,6 +75,8 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	}
 }
 
+void CheckKeywordAndArgumentTypes(const mxArray** prhs, const int nrhs, const int firstKeywordIndex);
+
 /**
  Function that will handle localization. The input arguments must be of the form
  0 - the string "localize"
@@ -543,25 +545,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
     int firstKeywordIndex = 3;
     
-    // check that we have an even number of arguments remaining
-    if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
-        char buf[128];
-        sprintf(buf, "all arguments after the first %d must be keyword-value pairs", firstKeywordIndex);
-        mexErrMsgTxt(buf);
-    }
-    
-    // check that all remaining arguments are string - value pairs
-    for (int i = firstKeywordIndex; i < nrhs; i += 2) {
-        const mxArray* array = prhs[i];
-        if ((mxGetClassID(array) != mxCHAR_CLASS) || (mxGetM(array) > 1)) {
-            char buf[128];
-            sprintf(buf, "all arguments after the first %d must be keyword (string) - value (double) pairs", firstKeywordIndex);
-            mexErrMsgTxt(buf);
-        }
-        if (!mxIsDouble(prhs[i + 1])) {
-            mexErrMsgTxt("all keyword arguments (not the keywords themselves) must be of numeric type double");
-        }
-    }
+	CheckKeywordAndArgumentTypes(prhs, nrhs, firstKeywordIndex);
     
     // most keyword arguments must be 1x1 matrices (scalars) of type double
     for (int i = firstKeywordIndex; i < nrhs; i += 2) {
@@ -773,25 +757,7 @@ void MatlabSOFIPixelCombinations(int nlhs, mxArray** plhs, int nrhs, const mxArr
 void ParseSOFIPixelCombinationsKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
 	int firstKeywordIndex = 2;
 
-	// check that we have an even number of arguments remaining
-	if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
-		char buf[128];
-		sprintf(buf, "all arguments after the first %d must be keyword-value pairs", firstKeywordIndex);
-		mexErrMsgTxt(buf);
-	}
-
-	// check that all remaining arguments are string - value pairs
-	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
-		const mxArray* array = prhs[i];
-		if ((mxGetClassID(array) != mxCHAR_CLASS) || (mxGetM(array) > 1)) {
-			char buf[128];
-			sprintf(buf, "all arguments after the first %d must be keyword (string) - value (double) pairs", firstKeywordIndex);
-			mexErrMsgTxt(buf);
-		}
-		if (!mxIsDouble(prhs[i + 1])) {
-			mexErrMsgTxt("all keyword arguments (not the keywords themselves) must be of numeric type double");
-		}
-	}
+	CheckKeywordAndArgumentTypes(prhs, nrhs, firstKeywordIndex);
 
 	// all keyword arguments must be 1x1 matrices
 	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
@@ -902,6 +868,8 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
     }
 }
 
+void ParseWriteCCDImagesKeywordArguments(const mxArray** prhs, int nrhs, bool& wantCompression);
+
 /**
  Function that will write images to disk as a TIFF file. The numerical precision will be preserved.
  Any existing file will be overwritten.
@@ -914,16 +882,18 @@ void MatlabReadCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prh
  */
 void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	// input validation
-	if (nrhs != 5)
-		mexErrMsgTxt("Must have exactly 5 input arguments for writeccdimages\n\
+	if (nrhs < 5)
+		mexErrMsgTxt("Must have at least 5 input arguments for writeccdimages\n\
 					 1. the string \"writeccdimages\"\n\
                      2. 2D or 3D matrix or string containing the full path to the file to read the data from.\n\
 					 3. the index of the first image to write (starting from 0)\n\
 					 4. the number of images to write (or -1 for all images)\n\
-					 5. path to the TIFF file to write. Existing files will be overwritten");
+					 5. path to the TIFF file to write. Existing files will be overwritten.\n\
+					 these arguments can be followed by optional 'keyword', value params.\n\
+                     supported keywords are 'compression'.");
 	
 	if (nlhs != 0)
-		mexErrMsgTxt("no return argument for writeccdimages");
+		mexErrMsgTxt("no left-hand-side argument supported for writeccdimages");
     
 	mxArray* array;
 	// the mxArray at index 0 will have been checked already by mexFunction
@@ -968,6 +938,10 @@ void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** pr
 	} else {
 		mexErrMsgTxt("5th argument must be a string: the path to the output TIFF file)");
 	}
+
+	// parse keyword-value arguments
+	bool wantCompression;
+	ParseWriteCCDImagesKeywordArguments(prhs, nrhs, wantCompression);
     
 	try {
 		std::shared_ptr<ImageLoader> imageLoader;
@@ -976,7 +950,7 @@ void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** pr
 		} else {
 			imageLoader = std::shared_ptr<ImageLoader>(new ImageLoaderMatlab(dataArray));
 		}
-        LocalizerTIFFImageOutputWriter imageWriter(outputFilePath, true, false, imageLoader->getStorageType());
+        LocalizerTIFFImageOutputWriter imageWriter(outputFilePath, true, wantCompression, imageLoader->getStorageType());
         Clip(firstImageToWrite, 0, imageLoader->getNImages() - 1);
         if (nImagesToWrite <= 0)
             nImagesToWrite = imageLoader->getNImages();
@@ -1001,6 +975,46 @@ void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** pr
     catch (...) {
         mexErrMsgTxt("Unknown error");
     }
+}
+
+void ParseWriteCCDImagesKeywordArguments(const mxArray** prhs, int nrhs, bool& wantCompression) {
+	int firstKeywordIndex = 5;
+
+	CheckKeywordAndArgumentTypes(prhs, nrhs, firstKeywordIndex);
+
+	// extract the values of the keyword arguments
+	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+		const std::string keyword = GetMatlabString(prhs[i]);
+		const mxArray* argument = prhs[i + 1];
+
+		if (boost::iequals(keyword, "compression")) {
+			wantCompression = (*mxGetPr(argument) == 1.0);
+		} else {
+			mexPrintf("warning: ignoring unknown keyword \"%s\"", keyword.c_str());
+		}
+	}
+}
+
+void CheckKeywordAndArgumentTypes(const mxArray** prhs, const int nrhs, const int firstKeywordIndex) {
+	// check that we have an even number of arguments remaining
+	if ((nrhs < firstKeywordIndex) || (((nrhs - firstKeywordIndex) % 2) != 0)) {
+		char buf[128];
+		sprintf(buf, "all arguments after the first %d must be keyword-value pairs", firstKeywordIndex);
+		mexErrMsgTxt(buf);
+	}
+
+	// check that all remaining arguments are string - value pairs
+	for (int i = firstKeywordIndex; i < nrhs; i += 2) {
+		const mxArray* array = prhs[i];
+		if ((mxGetClassID(array) != mxCHAR_CLASS) || (mxGetM(array) > 1)) {
+			char buf[128];
+			sprintf(buf, "all arguments after the first %d must be keyword (string) - value (double) pairs", firstKeywordIndex);
+			mexErrMsgTxt(buf);
+		}
+		if (!mxIsDouble(prhs[i + 1])) {
+			mexErrMsgTxt("all keyword arguments (not the keywords themselves) must be of numeric type double");
+		}
+	}
 }
 
 std::string GetMatlabString(const mxArray* array) {
