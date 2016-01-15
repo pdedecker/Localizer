@@ -955,10 +955,23 @@ void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** pr
         if (nImagesToWrite <= 0)
             nImagesToWrite = imageLoader->getNImages();
         Clip(nImagesToWrite, 1, imageLoader->getNImages() - firstImageToWrite);
+
+		std::shared_ptr<ProgressReporter> progressReporter;
+		if (nImagesToWrite > 100) {
+			progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_MatlabWaitMex());
+		} else {
+			progressReporter = std::shared_ptr<ProgressReporter>(new ProgressReporter_Silent());
+		}
+
+		progressReporter->CalculationStarted();
         imageLoader->spoolTo(firstImageToWrite);
         for (int i = 0; i < nImagesToWrite; ++i) {
+			if ((i % 20) == 0) {
+				progressReporter->UpdateCalculationProgress(i + 1, nImagesToWrite);
+			}
             imageWriter.write_image(imageLoader->readNextImage());
         }
+		progressReporter->CalculationDone();
 	}
 	catch (std::bad_alloc) {
         mexErrMsgTxt("Insufficient memory");
