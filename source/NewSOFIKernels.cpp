@@ -264,14 +264,14 @@ private:
     
     int _order;
     std::vector<PixelCoordinate> _inputPixels;
-    unsigned int _v;
+    unsigned int _nextPermutation;
     unsigned int _lastPermutation;
 };
 
 PixelCombinationIterator_NoRepeats::PixelCombinationIterator_NoRepeats(const int order, const std::vector<int>&  lagTimes) :
     PixelCombinationIterator(lagTimes),
     _order(order),
-    _v(0),
+    _nextPermutation(0),
     _lastPermutation(0)
 {
     if (!Within(order, 1, 6))
@@ -284,28 +284,27 @@ PixelCombinationIterator_NoRepeats::PixelCombinationIterator_NoRepeats(const int
         }
     }
     
-    _v = (1 << order) - 1; // starting permutation of bits
+    _nextPermutation = (1 << order) - 1; // starting permutation of bits
     _lastPermutation = 1 << _inputPixels.size();
 }
 
 void PixelCombinationIterator_NoRepeats::_derivedNextPixelCombination(std::vector<PixelCoordinate>& pixelCombination) {
-    // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
-    
-    unsigned int t = (_v | (_v - 1)) + 1;
-    unsigned int w = t | ((((t & -t) / (_v & -_v)) >> 1) - 1);  // next permutation of bits
-    _v = w;
-    
     int offset = 0;
     for (size_t j = 0; j < _inputPixels.size(); j++) {
-        if ((w >> j) & 1) {
+        if ((_nextPermutation >> j) & 1) {
             pixelCombination.at(offset) = _inputPixels.at(j);
             offset++;
         }
     }
+
+    // http://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
+    unsigned int t = (_nextPermutation | (_nextPermutation - 1)) + 1;
+    unsigned int w = t | ((((t & -t) / (_nextPermutation & -_nextPermutation)) >> 1) - 1);  // next permutation of bits
+    _nextPermutation = w;
 }
 
 bool PixelCombinationIterator_NoRepeats::exhaustedAllCombinations() const {
-    return (_v >= _lastPermutation);
+    return (_nextPermutation >= _lastPermutation);
 }
 
 class PixelCombinationIterator_Repeats : public PixelCombinationIterator {
@@ -477,8 +476,14 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::ve
     }
     
     std::vector<PixelCoordinate> pixelCombination(order);
+    std::vector<std::vector<PixelCoordinate>> allCombinations;
     while (!pixelCombinationIterator->exhaustedAllCombinations()) {
         pixelCombinationIterator->nextPixelCombination(pixelCombination);
+        
+        if (std::find(allCombinations.cbegin(), allCombinations.cend(), pixelCombination) != allCombinations.cend()) {
+            XOPNotice("have duplicate combination");
+        }
+        allCombinations.push_back(pixelCombination);
         
         int outputDeltaX = 0, outputDeltaY = 0;
         for (size_t j = 0; j < pixelCombination.size(); j++) {
