@@ -56,7 +56,7 @@ public:
         alsoCorrectVariance(true),
         wantAverageImage(false),
         wantJackKnife(false),
-        pixelCombinationCutoff(10.0),
+        pixelCombinationCutoff(1.0),
         wantDebugMessages(false)
     {
         orders.push_back(2);

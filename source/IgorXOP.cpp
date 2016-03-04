@@ -3010,7 +3010,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         orders.push_back(2);
     }
     
-    double pixelCombinationCutoff = 10.0;
+    double pixelCombinationCutoff = 1.0;
     if (p->COMBFlagEncountered) {
         // Parameter: p->combinationSelection
         if (p->combinationSelection < 1.0)
