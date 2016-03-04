@@ -476,14 +476,8 @@ std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::ve
     }
     
     std::vector<PixelCoordinate> pixelCombination(order);
-    std::vector<std::vector<PixelCoordinate>> allCombinations;
     while (!pixelCombinationIterator->exhaustedAllCombinations()) {
         pixelCombinationIterator->nextPixelCombination(pixelCombination);
-        
-        if (std::find(allCombinations.cbegin(), allCombinations.cend(), pixelCombination) != allCombinations.cend()) {
-            XOPNotice("have duplicate combination");
-        }
-        allCombinations.push_back(pixelCombination);
         
         int outputDeltaX = 0, outputDeltaY = 0;
         for (size_t j = 0; j < pixelCombination.size(); j++) {
