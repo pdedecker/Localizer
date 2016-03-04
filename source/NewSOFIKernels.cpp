@@ -404,6 +404,7 @@ void PixelCombinationAccumulator::addCombination(const std::vector<PixelCoordina
             score *= sqDistance;
         }
     }
+    score = std::sqrt(score);
     
     if (_pixelCombinations.size() < _maxNCombinations) {
         // still building up the vector
