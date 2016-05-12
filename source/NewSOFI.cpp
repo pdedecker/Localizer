@@ -84,7 +84,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
     int lowestOrder = *std::min_element(orders.cbegin(), orders.cend());
-    if (!Within(largestOrder, 1, 6) || !Within(largestOrder, 1, 6)) {
+    if (!Within(largestOrder, 1, 6) || !Within(lowestOrder, 1, 6)) {
         throw std::runtime_error("orders must be between 1 and 6");
     }
     
