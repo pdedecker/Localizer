@@ -413,7 +413,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
     }
 }
 
-void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions);
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions, bool& wantQuiet);
 
 /**
  Function that will handle SOFI calculations. The input arguments must be of the form
@@ -433,7 +433,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
                      these arguments can be followed by optional 'keyword', value params.\n\
                      supported keywords are 'nFramesToSkip', 'nFramesToInclude', 'pixelationCorrection'\n\
                      'alsoCorrectVariance', 'batchSize', 'pixelCombinationCutoff', 'jackknife', 'lagTimes',\n\
-                     'allowSamePixels', 'pixelCombinationWeights'.\n\
+                     'allowSamePixels', 'pixelCombinationWeights', 'quiet'.\n\
                      This function returns a single cell containing the calculated SOFI images.\n\
                      If the jackknife option is set then two cells will be returned, the first\n\
                      containing the SOFI images, and the second containing the jackknife images.");
@@ -466,7 +466,8 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     
     SOFIOptions sofiOptions;
     sofiOptions.orders = ordersToCalculate;
-    ParseSOFIKeywordArguments(prhs, nrhs, sofiOptions);
+    bool wantQuiet = false;
+    ParseSOFIKeywordArguments(prhs, nrhs, sofiOptions, wantQuiet);
     
     if (sofiOptions.wantJackKnife) {
         if (nlhs != 2)
@@ -510,7 +511,12 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
             }
         }
 		
-		std::shared_ptr<ProgressReporter> progressReporter(new ProgressReporter_MatlabWaitMex());
+        std::shared_ptr<ProgressReporter> progressReporter;
+        if (wantQuiet) {
+            progressReporter = std::shared_ptr<ProgressReporter>(new ProgressReporter_Silent());
+        } else {
+            progressReporter = std::shared_ptr<ProgressReporter>(new ProgressReporter_MatlabWaitMex());
+        }
 		
 		std::vector<ImagePtr> sofiOutputImages;
 		
@@ -542,7 +548,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     }
 }
 
-void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions) {
+void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofiOptions, bool& wantQuiet) {
     int firstKeywordIndex = 3;
     
 	CheckKeywordAndArgumentTypes(prhs, nrhs, firstKeywordIndex);
@@ -610,6 +616,8 @@ void ParseSOFIKeywordArguments(const mxArray** prhs, int nrhs, SOFIOptions& sofi
                 sofiOptions.pixelCombinationWeights.push_back(*weightsPtr);
                 weightsPtr += 1;
             }
+        } else if (boost::iequals(keyword, "quiet")) {
+            wantQuiet = (*mxGetPr(argument) != 0.0);
         } else {
 			mexPrintf("warning - ignored unknown keyword \"%s\"\n", keyword.c_str());
 		}
