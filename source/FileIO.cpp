@@ -1582,10 +1582,9 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 
 ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(const std::string& filePath) {
 	// assume that filePath consists of something such as the following
-	// /path/to/folder/XXXX123.YYY where X is character (but the last one is not a number)
+	// /path/to/folder/XXXX123.YYY where X is any character (but the last one is not a number)
 	// and Y is the extension. "/path/to/folder/XXXX" is the base file path, YYY is the
-	// extension, and the number of digits in between is assumed to be constant for every
-	// file in the sequence
+	// extension, and every file name in the sequence is assumed to have the same number of digits
 	
 	size_t stringLength = filePath.length();
 	size_t extensionStartIndex = filePath.rfind('.');
@@ -1673,7 +1672,7 @@ std::string ImageLoaderMultiFileTIFF::getFilePathForImageAtIndex(int index) {
 	std::unique_ptr<char[]> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
 	sprintf(formatString, "%%0%dd", nDigitsInNumber);
-	sprintf(imageIndexStr.get(), formatString, index);
+	sprintf(imageIndexStr.get(), formatString, index + firstImageIndex);
 	
 	std::string filePath = this->baseFilePath;
 	filePath += imageIndexStr.get();
