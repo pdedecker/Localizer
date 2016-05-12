@@ -1657,7 +1657,7 @@ ImagePtr ImageLoaderMultiFileTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	std::string filePath = getFilePathForImageAtIndex(this->nextImageToRead);
+	std::string filePath = getFilePathForImageAtIndex(this->nextImageToRead + firstImageIndex);
 	ImageLoaderTIFF imageLoaderTIFF(filePath);
 	int dummy;
 	ImagePtr image = imageLoaderTIFF.readNextImage(dummy);
@@ -1672,7 +1672,7 @@ std::string ImageLoaderMultiFileTIFF::getFilePathForImageAtIndex(int index) {
 	std::unique_ptr<char[]> imageIndexStr(new char[this->nDigitsInNumber + 1]);
 	char formatString[10];
 	sprintf(formatString, "%%0%dd", nDigitsInNumber);
-	sprintf(imageIndexStr.get(), formatString, index + firstImageIndex);
+	sprintf(imageIndexStr.get(), formatString, index);
 	
 	std::string filePath = this->baseFilePath;
 	filePath += imageIndexStr.get();
