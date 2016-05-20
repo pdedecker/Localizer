@@ -39,6 +39,11 @@
 #include <map>
 #include <utility>
 #include <cassert>
+#include <thread>
+
+#include "tbb/concurrent_queue.h"
+#include "tbb/spin_mutex.h"
+
 #include "Errors.h"
 #include "Storage.h"
 #include "Defines.h"
@@ -285,6 +290,38 @@ private:
     int _minX, _maxX;
     int _minY, _maxY;
     bool _haveCustomROI;
+};
+
+class BackgroundThreadImageLoaderWrapper : public ImageLoader {
+public:
+    BackgroundThreadImageLoaderWrapper(std::shared_ptr<ImageLoader> baseImageLoader, size_t maxNImagesInBuffer = 10);
+    ~BackgroundThreadImageLoaderWrapper();
+    
+    virtual int getNImages() const {return _baseImageLoader->getNImages();}
+    virtual int getXSize() const {return _baseImageLoader->getXSize();}
+    virtual int getYSize() const {return _baseImageLoader->getYSize();}
+    virtual LocalizerStorageType getStorageType() const {return _baseImageLoader->getStorageType();}
+    virtual int getFileType() const {return _baseImageLoader->getFileType();}
+    
+    virtual ImagePtr readNextImage(int &indexOfImageThatWasRead);
+    virtual void spoolTo(int index);
+    
+private:
+    void _startWorker(int firstImageIndexToLoad);
+    void _stopWorker();
+    void _workerLoop(int firstImageIndexToLoad);
+    
+    std::shared_ptr<ImageLoader> _baseImageLoader;
+    int _lastSpooledToIndex;
+    bool _returnedImageSinceLastSpool;
+    
+    std::thread _workerThread;
+    tbb::concurrent_bounded_queue<std::pair<int, ImagePtr>> _imageQueue;
+    bool _workerQuitFlag;
+    
+    tbb::spin_mutex _workerErrorMutex;
+    bool _workerErrorFlag;
+    std::string _workerErrorMessage;
 };
 
 class ImageLoaderSPE : public ImageLoader {

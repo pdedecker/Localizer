@@ -774,6 +774,125 @@ void ImageLoaderWrapper::setROI(int minX, int maxX, int minY, int maxY) {
     }
 }
 
+BackgroundThreadImageLoaderWrapper::BackgroundThreadImageLoaderWrapper(std::shared_ptr<ImageLoader> baseImageLoader, size_t maxNImagesInBuffer) :
+    _baseImageLoader(baseImageLoader),
+    _lastSpooledToIndex(-1),
+    _returnedImageSinceLastSpool(false),
+    _workerErrorFlag(false),
+    _workerQuitFlag(false)
+{
+    _imageQueue.set_capacity(maxNImagesInBuffer);
+    _baseImageLoader->spoolTo(0);
+    _startWorker(0);
+}
+
+BackgroundThreadImageLoaderWrapper::~BackgroundThreadImageLoaderWrapper() {
+    _stopWorker();
+}
+
+ImagePtr BackgroundThreadImageLoaderWrapper::readNextImage(int &indexOfImageThatWasRead) {
+    {
+        tbb::spin_mutex::scoped_lock lock(_workerErrorMutex);
+        if (_workerErrorFlag) {
+            if (!_workerErrorMessage.empty()) {
+                throw std::runtime_error(_workerErrorMessage);
+            } else {
+                throw std::runtime_error("unknown error reading images");
+            }
+        }
+    }
+    _returnedImageSinceLastSpool = true;
+    std::pair<int, ImagePtr> nextImage;
+    _imageQueue.pop(nextImage);
+    if (nextImage.second.get() == nullptr) {
+        // means we're out of images
+        throw std::logic_error("want threaded image but no more images in file");
+    }
+    indexOfImageThatWasRead = nextImage.first;
+    return nextImage.second;
+}
+
+void BackgroundThreadImageLoaderWrapper::spoolTo(int index) {
+    if ((index < 0) || (index >= this->getNImages())) {
+        throw std::logic_error("invalid start image in BackgroundThreadImageLoaderWrapper::spoolTo()");
+    }
+    if (!_returnedImageSinceLastSpool && (_lastSpooledToIndex == index)) {
+        return;
+    }
+    
+    _stopWorker();
+    
+    _baseImageLoader->spoolTo(index);
+    _lastSpooledToIndex = index;
+    _returnedImageSinceLastSpool = false;
+    
+    _startWorker(index);
+}
+
+void BackgroundThreadImageLoaderWrapper::_startWorker(int firstImageIndexToLoad) {
+    if ((firstImageIndexToLoad < 0) || (firstImageIndexToLoad >= this->getNImages())) {
+        throw std::logic_error("invalid start image in BackgroundThreadImageLoaderWrapper::_startWorker()");
+    }
+    
+    _stopWorker();
+    _imageQueue.clear();
+    _workerQuitFlag = false;
+    _workerErrorFlag = false;
+    _workerErrorMessage.clear();
+    
+    _workerThread = std::thread([=]() {
+        _workerLoop(firstImageIndexToLoad);
+    });
+}
+
+void BackgroundThreadImageLoaderWrapper::_stopWorker() {
+    if (_workerThread.joinable()) {
+        _workerQuitFlag = true;
+        
+        std::pair<int, ImagePtr> dummyImage;
+        _imageQueue.try_pop(dummyImage);   // allows worker to run if it was blocked on a full queue
+        
+        _workerThread.join();
+    }
+}
+
+void BackgroundThreadImageLoaderWrapper::_workerLoop(int firstImageIndexToLoad) {
+    int nextImageToRead = firstImageIndexToLoad;
+    for ( ; ; ) {
+        if (_workerQuitFlag) {
+            return;
+        }
+        if (nextImageToRead == this->getNImages()) {
+            _imageQueue.push(std::pair<int, ImagePtr>(-1, ImagePtr()));   // push nullptr image as signal
+            return;
+        }
+        
+        ImagePtr nextImage;
+        int index;
+        try {
+            nextImage = _baseImageLoader->readNextImage(index);
+            if (index != nextImageToRead) {
+                _workerErrorFlag = true;
+                _workerErrorMessage = "didn't read expected image";
+                return;
+            }
+        }
+        catch (std::runtime_error e) {
+            tbb::spin_mutex::scoped_lock lock(_workerErrorMutex);
+            _workerErrorMessage = e.what();
+            _workerErrorFlag = true;
+            return;
+        }
+        catch (...) {
+            _workerErrorFlag = true;
+            return;
+        }
+        
+        _imageQueue.push(std::pair<int, ImagePtr>(index,nextImage));
+        nextImageToRead += 1;
+    }
+}
+
 ImageLoaderSPE::ImageLoaderSPE(const std::string& filePath) :
     _filePath(filePath),
     _headerLength(4100)
