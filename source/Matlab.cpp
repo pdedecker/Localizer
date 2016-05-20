@@ -974,7 +974,7 @@ void MatlabWriteCCDImages(int nlhs, mxArray** plhs, int nrhs, const mxArray** pr
 	}
 
 	// parse keyword-value arguments
-	bool wantCompression;
+	bool wantCompression = false;
 	ParseWriteCCDImagesKeywordArguments(prhs, nrhs, wantCompression);
     
 	try {
