@@ -486,6 +486,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		}
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
         dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(sofiOptions.nFramesToSkip, sofiOptions.nFramesToInclude);
+        std::shared_ptr<ImageLoader> threadedImageLoaderWrapper(new BackgroundThreadImageLoaderWrapper(imageLoaderWrapper));
         
         // pre-allocate jackknife storage if we are to do this
         if (sofiOptions.wantJackKnife) {
@@ -494,7 +495,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
             plhs[1] = mxCreateCellArray(1, dims);
             for (size_t i = 0; i < sofiOptions.orders.size(); ++i) {
                 int nJackknifeRows, nJackknifeCols, nJackknifeImages;
-                bool canDoJackknife = RequiredJackknifeDimensions(sofiOptions.orders.at(i), imageLoaderWrapper, sofiOptions.lagTimes, nJackknifeRows, nJackknifeCols, nJackknifeImages);
+                bool canDoJackknife = RequiredJackknifeDimensions(sofiOptions.orders.at(i), threadedImageLoaderWrapper, sofiOptions.lagTimes, nJackknifeRows, nJackknifeCols, nJackknifeImages);
                 if (!canDoJackknife)
                     throw std::runtime_error("input dataset too small for the SOFI calculation");
                 size_t nPixelsRequired = static_cast<size_t>(nJackknifeRows) * static_cast<size_t>(nJackknifeCols) * static_cast<size_t>(nJackknifeImages);
@@ -520,7 +521,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		
 		std::vector<ImagePtr> sofiOutputImages;
 		
-        DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
+        DoNewSOFI(threadedImageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         
         mwSize dims[1] = {sofiOutputImages.size()};
         plhs[0] = mxCreateCellArray(1, dims);
