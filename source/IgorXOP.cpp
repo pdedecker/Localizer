@@ -3238,6 +3238,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(inputFilePath, cameraType);
         std::shared_ptr<ImageLoader> imageLoaderWrapper(new ImageLoaderWrapper(imageLoader));
         dynamic_cast<ImageLoaderWrapper*>(imageLoaderWrapper.get())->setImageRange(sofiOptions.nFramesToSkip, sofiOptions.nFramesToInclude);
+        std::shared_ptr<ImageLoader> threadedImageLoaderWrapper(new BackgroundThreadImageLoaderWrapper(imageLoaderWrapper));
 
         std::shared_ptr<ProgressReporter> progressReporter;
         if (quiet == 1) {
@@ -3254,7 +3255,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         if (sofiOptions.wantJackKnife) {
             for (size_t i = 0; i < orders.size(); ++i) {
                 int nJackknifeRows, nJackknifeCols, nJackknifeImages;
-                bool canDoJackknife = RequiredJackknifeDimensions(orders.at(i), imageLoaderWrapper, sofiOptions.lagTimes, nJackknifeRows, nJackknifeCols, nJackknifeImages);
+                bool canDoJackknife = RequiredJackknifeDimensions(orders.at(i), threadedImageLoaderWrapper, sofiOptions.lagTimes, nJackknifeRows, nJackknifeCols, nJackknifeImages);
                 if (!canDoJackknife)
                     throw std::runtime_error("input dataset too small for the SOFI calculation");
                 size_t nPixelsRequired = static_cast<size_t>(nJackknifeRows) * static_cast<size_t>(nJackknifeCols) * static_cast<size_t>(nJackknifeImages);
@@ -3288,7 +3289,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         
         // do the actual calculation
         std::vector<ImagePtr> sofiOutputImages;
-        DoNewSOFI(imageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
+        DoNewSOFI(threadedImageLoaderWrapper, sofiOptions, progressReporter, sofiOutputImages);
         for (size_t i = 0; i < orders.size(); ++i) {
             DataFolderAndName adjustedOutputParams = outputWaveParams;
             if (orders.size() > 1) {
