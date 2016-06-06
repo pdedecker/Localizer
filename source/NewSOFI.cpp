@@ -278,6 +278,8 @@ void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& 
     });
 }
 
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, double accumulationFactor = 1.0);
+
 int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
@@ -372,27 +374,10 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
             *averageImage += *currentImage;
         
         // do the actual calculation
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
+        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [&](std::pair<PixelCombination,ImagePtr> item) {
             const PixelCombination& currentCombination = item.first;
             ImagePtr matrix = item.second;
-            int nRowsToCalculate = matrix->rows();
-            int nColsToCalculate = matrix->cols();
-            for (int col = 2; col < nColsToCalculate; ++col) {
-                for (int row = 2; row < nRowsToCalculate; ++row) {
-                    double product = 1.0;
-                    if (haveNonZeroTimeLag) {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
-                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    } else {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    }
-                    (*matrix)(row - 2, col - 2) += product;
-                }
-            }
+            AccumulateCombination(currentCombination, matrix, imageBuffer, minTimeLag);
         });
     }
     imagesProcessedSoFar += lastImageToProcess - lastImageWithOutput;
@@ -434,6 +419,33 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     }
     
     return nImagesIncluded;
+}
+
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, double accumulationFactor) {
+    int nRowsToCalculate = matrix->rows();
+    int nColsToCalculate = matrix->cols();
+    int startCol = 2;
+    int startRow = 2;
+    double* sofiMatrixPtr = matrix->data();
+    double* imPtrs[10];
+    for (size_t i = 0; i < currentCombination.size(); ++i) {
+        const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
+        imPtrs[i] = imageAtTimeLag->data() + (startCol + currentCombination[i].dy) * imageAtTimeLag->rows() + currentCombination[i].dx;
+    }
+    for (int col = startCol; col < nColsToCalculate; ++col) {
+        for (int row = startRow; row < nRowsToCalculate; ++row) {
+            double product = 1.0;
+            for (size_t i = 0; i < currentCombination.size(); ++i) {
+                product *= *(imPtrs[i] + row);
+            }
+            sofiMatrixPtr[row - startRow] += accumulationFactor * product;
+        }
+        sofiMatrixPtr += matrix->rows();
+        for (size_t i = 0; i < currentCombination.size(); ++i) {
+            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
+            imPtrs[i] += imageAtTimeLag->rows();
+        }
+    }
 }
 
 ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<std::vector<double>>& usedCombinationWeights) {
