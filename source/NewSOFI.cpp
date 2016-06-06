@@ -375,9 +375,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         
         // do the actual calculation
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [&](std::pair<PixelCombination,ImagePtr> item) {
-            const PixelCombination& currentCombination = item.first;
-            ImagePtr matrix = item.second;
-            AccumulateCombination(currentCombination, matrix, imageBuffer, minTimeLag);
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag);
         });
     }
     imagesProcessedSoFar += lastImageToProcess - lastImageWithOutput;
@@ -661,30 +659,13 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         ImagePtr currentImage = imageLoader->readNextImage();
         imageBuffer.push_back(currentImage);
         
-        // subtract the contribution of the current image from the pixelMap and normalize
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
-            const PixelCombination& currentCombination = item.first;
-            ImagePtr matrix = item.second;
-            int nRowsToCalculate = matrix->rows();
-            int nColsToCalculate = matrix->cols();
-            for (int col = 2; col < nColsToCalculate; ++col) {
-                for (int row = 2; row < nRowsToCalculate; ++row) {
-                    double product = 1.0;
-                    if (haveNonZeroTimeLag) {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
-                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    } else {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    }
-                    (*matrix)(row - 2, col - 2) -= product;
-                }
-            }
             
+            // subtract the contribution of the current image from the pixelMap
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, -1.0);
+
             // normalize the pixelMap
+            ImagePtr matrix = item.second;
             (*matrix) /= static_cast<double>(nImagesToInclude - 1);
         });
         
@@ -692,33 +673,14 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         std::vector<std::vector<double>> usedCombinationWeights;
         ImagePtr partialSOFI = AssembleSOFIImage(nInputRows, nInputCols, order, isAuto, kernels, pixelMap, usedCombinationWeights);
         
-        // undo the normalization and add the contribution of the current image back in
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
-            const PixelCombination& currentCombination = item.first;
-            ImagePtr matrix = item.second;
             
             // undo normalization
+            ImagePtr matrix = item.second;
             (*matrix) *= static_cast<double>(nImagesToInclude - 1);
             
             // add the contribution of the current image back in
-            int nRowsToCalculate = matrix->rows();
-            int nColsToCalculate = matrix->cols();
-            for (int col = 2; col < nColsToCalculate; ++col) {
-                for (int row = 2; row < nRowsToCalculate; ++row) {
-                    double product = 1.0;
-                    if (haveNonZeroTimeLag) {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
-                            product *= (*imageAtTimeLag)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    } else {
-                        for (size_t i = 0; i < currentCombination.size(); ++i) {
-                            product *= (*currentImage)(row + currentCombination[i].dx, col + currentCombination[i].dy);
-                        }
-                    }
-                    (*matrix)(row - 2, col - 2) += product;
-                }
-            }
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, 1.0);
         });
         
         // store the partial SOFI image
