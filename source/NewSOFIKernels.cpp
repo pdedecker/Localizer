@@ -274,7 +274,7 @@ PixelCombinationIterator_NoRepeats::PixelCombinationIterator_NoRepeats(const int
     _nextPermutation(0),
     _lastPermutation(0)
 {
-    if (!Within(order, 1, 6))
+    if (!Within(order, kMinSofiOrder, kMaxSofiOrder))
         throw std::logic_error("unsupported order");
     
     int neighborhoodSize = 5;
@@ -329,7 +329,7 @@ PixelCombinationIterator_Repeats::PixelCombinationIterator_Repeats(const int ord
     _currentIndices(0),
     _lastIndices(0)
 {
-    if (!Within(order, 1, 6))
+    if (!Within(order, kMinSofiOrder, kMaxSofiOrder))
         throw std::logic_error("unsupported order");
     
     int neighborhoodSize = 5;
@@ -449,7 +449,7 @@ SOFIVirtualPixel PixelCombinationAccumulator::getCombination(double pixelCombina
 }
 
 std::vector<SOFIVirtualPixel> SOFIVirtualPixelsForOrder(int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, double pixelCombinationCutoff) {
-    if (Clip(order, 1, 6) != order)
+    if (Clip(order, kMinSofiOrder, kMaxSofiOrder) != order)
         throw std::logic_error("unsupported order");
     if (timeLags.size() < order)
         throw std::logic_error("too few or too many time lags");

@@ -84,7 +84,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     
     int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
     int lowestOrder = *std::min_element(orders.cbegin(), orders.cend());
-    if (!Within(largestOrder, 1, 6) || !Within(lowestOrder, 1, 6)) {
+    if (!Within(largestOrder, kMinSofiOrder, kMaxSofiOrder) || !Within(lowestOrder, kMinSofiOrder, kMaxSofiOrder)) {
         throw std::runtime_error("orders must be between 1 and 6");
     }
     
@@ -425,7 +425,7 @@ void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr 
     int startCol = 2;
     int startRow = 2;
     double* sofiMatrixPtr = matrix->data();
-    double* imPtrs[10];
+    double* imPtrs[kMaxSofiOrder];
     for (size_t i = 0; i < currentCombination.size(); ++i) {
         const ImagePtr& imageAtTimeLag = imageBuffer[-1 * minTimeLag + currentCombination[i].dt];
         imPtrs[i] = imageAtTimeLag->data() + (startCol + currentCombination[i].dy) * imageAtTimeLag->rows() + currentCombination[i].dx;

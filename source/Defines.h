@@ -44,6 +44,9 @@
 typedef Eigen::MatrixXd Image;
 typedef std::shared_ptr<Image> ImagePtr;
 
+const int kMinSofiOrder = 1;
+const int kMaxSofiOrder = 6;
+
 template<typename T>
 T square(T val) {
 	return val * val;

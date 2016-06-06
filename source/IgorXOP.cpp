@@ -3373,7 +3373,7 @@ static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
     if (p->orderEncountered) {
         // Parameter: p->order
         order = p->order + 0.5;
-        if (!Within(order, 2, 6))
+        if (!Within(order, kMinSofiOrder, kMaxSofiOrder))
             return EXPECT_POS_NUM;
     } else {
         return EXPECT_POS_NUM;

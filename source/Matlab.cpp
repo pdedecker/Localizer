@@ -658,8 +658,8 @@ void MatlabNewSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 		mexErrMsgTxt("at least one order should be specified");
 	for (int i = 0; i < nOrders; ++i) {
 		int thisOrder = static_cast<int>(*(mxGetPr(array) + i));
-		if ((thisOrder < 1) || (thisOrder > 6))
-			mexErrMsgTxt("all orders must be >=2 and <=6");
+		if ((thisOrder < kMinSofiOrder) || (thisOrder > kMaxSofiOrder))
+			mexErrMsgTxt("all orders must be >=1 and <=6");
 		orders.push_back(thisOrder);
 	}
 	
