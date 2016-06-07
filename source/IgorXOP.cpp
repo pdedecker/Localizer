@@ -3298,8 +3298,8 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
                 adjustedOutputParams.name[nameLength + 1] = '\0';
             }
             waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(i), adjustedOutputParams);
-            double offset = 2.0;
             double delta = (wantCrossCumulant) ? 1.0 / static_cast<double>(orders[i]) : 1.0;
+            double offset = (imageLoader->getXSize() - sofiOutputImages.at(i)->rows() * delta) / 2.0;
             MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
             MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
         }

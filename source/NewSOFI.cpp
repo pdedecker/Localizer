@@ -43,18 +43,18 @@
 
 #include "NewSOFIKernels.h"
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages);
 
-ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<std::vector<double>>& usedCombinationWeights);
+ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<std::vector<double>>& usedCombinationWeights);
 double Prefactor(int nPartitions);
-Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
-Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols);
+Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols);
+Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols);
 
 void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool alsoCorrectVariance, const int order);
 void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
 void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages);
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages);
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<ImagePtr>& jackKnifeImages);
 
 int NumberOfPixelCombinationsInKernels(const std::vector<SOFIKernel>& kernels);
 void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights);
@@ -138,6 +138,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     }
     
     std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
+    int boundaryMargin = 0;
     std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
     ImagePtr batchAverageImage;
     if (wantAverageImage) {
@@ -174,7 +175,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, lastImageForWhichDataCanBeCalculated);
         
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, boundaryMargin, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
         totalNumberOfImagesIncluded += nImagesIncluded;
         
         double batchWeight = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
@@ -278,25 +279,32 @@ void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& 
     });
 }
 
-void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, double accumulationFactor = 1.0);
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor = 1.0);
+int RequiredBorderMargin(const std::vector<SOFIKernel>& combinations);
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesIncluded = 0;
     sofiImages.clear();
     jackKnifeImages.clear();
     
-    // find min and max time lag
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.cend());
     
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
-    bool haveNonZeroTimeLag = ((minTimeLag != 0) || (maxTimeLag != 0));
-    
+
     // store all needed pixel combinations in the map
     // if the map is non-empty, we assume that it was already setup by a previous call to RawSOFIWorker, so we can prevent unnecessary work.
     if (pixelMap.empty()) {
+        // calculate the minimum needed boundary margin.
+        // we must use the same margin for all orders since the intermediate products can be shared between them.
+        boundaryMargin = 2; // margin is never less than 2 for backwards compatibility
+        for (size_t i = 0; i < orders.size(); i++) {
+            const std::vector<SOFIKernel>& kernels = orders[i].second;
+            boundaryMargin = std::max(RequiredBorderMargin(kernels), boundaryMargin);
+        }
+        // set up storage for all needed partial products.
         int allCombinations = 0;
         for (size_t i = 0; i < orders.size(); ++i) {
             const std::vector<SOFIKernel>& kernels = orders[i].second;
@@ -312,10 +320,10 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
                             allCombinations += 1;
                             int minRowDelta, maxRowDelta, minColDelta, maxColDelta;
                             MinMaxDeltas(*pixelCombinationIt, minRowDelta, maxRowDelta, minColDelta, maxColDelta);
-                            PixelCombination offsetCombination = OffsetPixelCombination(*pixelCombinationIt, -1 * (2 + minRowDelta), -1 * (2 + minColDelta));
+                            PixelCombination offsetCombination = OffsetPixelCombination(*pixelCombinationIt, -1 * (boundaryMargin + minRowDelta), -1 * (boundaryMargin + minColDelta));
                             if (!pixelMap.count(offsetCombination)) {
-                                maxRowDelta -= 2 + minRowDelta;
-                                maxColDelta -= 2 + minColDelta;
+                                maxRowDelta -= boundaryMargin + minRowDelta;
+                                maxColDelta -= boundaryMargin + minColDelta;
                                 int nRowsToCalculate = nRows - maxRowDelta;
                                 int nColsToCalculate = nCols - maxColDelta;
                                 ImagePtr matrix(new Image(nRowsToCalculate, nColsToCalculate));
@@ -375,7 +383,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         
         // do the actual calculation
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [&](std::pair<PixelCombination,ImagePtr> item) {
-            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag);
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin);
         });
     }
     imagesProcessedSoFar += lastImageToProcess - lastImageWithOutput;
@@ -396,7 +404,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         const std::pair<int, std::vector<SOFIKernel> >& calculation = orders[i];
         int order = calculation.first;
         const std::vector<SOFIKernel>& kernels = calculation.second;
-        ImagePtr sofiImage = AssembleSOFIImage(nRows, nCols, order, isAuto, kernels, pixelMap, combinationWeights);
+        ImagePtr sofiImage = AssembleSOFIImage(nRows, nCols, order, isAuto, kernels, pixelMap, boundaryMargin, combinationWeights);
         sofiImages[i] = sofiImage;
         if (wantDebugMessages) {
             PrintVirtualPixelInfo(kernels, combinationWeights);
@@ -411,7 +419,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
             int order = calculation.first;
             const std::vector<SOFIKernel>& kernels = calculation.second;
             std::vector<ImagePtr> jackKnifeImagesForThisOrder;
-            JackKnife(imageLoader, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, jackKnifeImagesForThisOrder);
+            JackKnife(imageLoader, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, boundaryMargin, jackKnifeImagesForThisOrder);
             jackKnifeImages[i] = jackKnifeImagesForThisOrder;
         }
     }
@@ -419,11 +427,24 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     return nImagesIncluded;
 }
 
-void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, double accumulationFactor) {
+int RequiredBorderMargin(const std::vector<SOFIKernel>& kernels) {
+    int minimalMargin = 0;
+    for (auto kernel : kernels) {
+        for (auto comb : kernel.pixelCombinations) {
+            for (auto coord : comb) {
+                minimalMargin = std::max(minimalMargin, std::abs(coord.dx));
+                minimalMargin = std::max(minimalMargin, std::abs(coord.dy));
+            }
+        }
+    }
+    return minimalMargin;
+}
+
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor) {
     int nRowsToCalculate = matrix->rows();
     int nColsToCalculate = matrix->cols();
-    int startCol = 2;
-    int startRow = 2;
+    int startCol = boundaryMargin;
+    int startRow = boundaryMargin;
     double* sofiMatrixPtr = matrix->data();
     double* imPtrs[kMaxSofiOrder];
     for (size_t i = 0; i < currentCombination.size(); ++i) {
@@ -446,16 +467,17 @@ void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr 
     }
 }
 
-ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<std::vector<double>>& usedCombinationWeights) {
+ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<std::vector<double>>& usedCombinationWeights) {
     int nVirtualPixelsPerPoint1D = (isAuto) ? 1 : order;
-    ImagePtr sofiImage(new Image(nVirtualPixelsPerPoint1D * (nInputRows - 4), nVirtualPixelsPerPoint1D * (nInputCols - 4)));
+    int nPixelsLostToBoundary1D = 2 * boundaryMargin;
+    ImagePtr sofiImage(new Image(nVirtualPixelsPerPoint1D * (nInputRows - nPixelsLostToBoundary1D), nVirtualPixelsPerPoint1D * (nInputCols - nPixelsLostToBoundary1D)));
     usedCombinationWeights.clear();
     usedCombinationWeights.resize(kernels.size());
     
     tbb::parallel_for(size_t(0), kernels.size(), [&](const size_t index) {
         const SOFIKernel& kernel = kernels.at(index);
         const std::vector<double>& explicitCombinationWeights = kernel.requestedCombinationWeights;
-        Eigen::MatrixXd evaluated(nInputRows - 4, nInputCols - 4);
+        Eigen::MatrixXd evaluated(nInputRows - nPixelsLostToBoundary1D, nInputCols - nPixelsLostToBoundary1D);
         evaluated.setConstant(0.0);
         double accumulatedWeights = 0.0;
         for (size_t combinationIndex = 0; combinationIndex < kernel.combinations.size(); ++combinationIndex) {
@@ -463,7 +485,7 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
                 usedCombinationWeights.at(index).push_back(0.0);
                 continue;
             }
-            Eigen::MatrixXd evaluatedPartitionsSet = EvaluatePartitionsSet(kernel.combinations.at(combinationIndex), pixelMap, nInputRows - 4, nInputCols - 4);
+            Eigen::MatrixXd evaluatedPartitionsSet = EvaluatePartitionsSet(kernel.combinations.at(combinationIndex), pixelMap, boundaryMargin, nInputRows - nPixelsLostToBoundary1D, nInputCols - nPixelsLostToBoundary1D);
             double weight;
             if (!explicitCombinationWeights.empty()) {
                 weight = explicitCombinationWeights.at(combinationIndex);
@@ -478,8 +500,8 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
             evaluated /= accumulatedWeights;
         }
         
-        for (int col = 0; col < nInputCols - 4; ++col) {
-            for (int row = 0; row < nInputRows - 4; ++row) {
+        for (int col = 0; col < nInputCols - nPixelsLostToBoundary1D; ++col) {
+            for (int row = 0; row < nInputRows - nPixelsLostToBoundary1D; ++row) {
                 int baseOutputRow = row * nVirtualPixelsPerPoint1D;
                 int baseOutputCol = col * nVirtualPixelsPerPoint1D;
                 (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
@@ -490,29 +512,29 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
     return sofiImage;
 }
 
-Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols) {
+Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
     Eigen::MatrixXd accumulated(nOutputRows, nOutputCols);
     accumulated.setConstant(0.0);
     for (auto it = groupOfPartitions.cbegin(); it != groupOfPartitions.cend(); ++it) {
         int nSetsInPartition = it->size();
-        accumulated += Prefactor(nSetsInPartition) * EvaluatePartition(*it, pixelMap, nOutputRows, nOutputCols);
+        accumulated += Prefactor(nSetsInPartition) * EvaluatePartition(*it, pixelMap, boundaryMargin, nOutputRows, nOutputCols);
     }
     
     return accumulated;
 }
 
-Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int nOutputRows, const int nOutputCols) {
+Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
     Eigen::MatrixXd result(nOutputRows, nOutputCols);
     result.setConstant(1.0);
     int minRowDelta, maxRowDelta, minColDelta, maxColDelta;
     for (size_t i = 0; i < partition.size(); ++i) {
         const PixelCombination& subset = partition[i];
         MinMaxDeltas(subset, minRowDelta, maxRowDelta, minColDelta, maxColDelta);
-        PixelCombination offsetCombination = OffsetPixelCombination(subset, -1 * (2 + minRowDelta), -1 * (2 + minColDelta));
+        PixelCombination offsetCombination = OffsetPixelCombination(subset, -1 * (boundaryMargin + minRowDelta), -1 * (boundaryMargin + minColDelta));
         const Image& productMatrix = *(pixelMap.at(offsetCombination));
         for (int col = 0; col < nOutputCols; ++col) {
             for (int row = 0; row < nOutputRows; ++row) {
-                result(row, col) *= productMatrix(row + minRowDelta + 2, col + minColDelta + 2);
+                result(row, col) *= productMatrix(row + minRowDelta + boundaryMargin, col + minColDelta + boundaryMargin);
             }
         }
     }
@@ -615,7 +637,7 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
     PerformPixelationCorrection(imageToCorrect->data(), imageToCorrect->rows(), imageToCorrect->cols(), alsoCorrectVariance, order);
 }
 
-void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, std::vector<ImagePtr>& jackKnifeImages) {
+void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<ImagePtr>& jackKnifeImages) {
     int nInputRows = imageLoader->getXSize();
     int nInputCols = imageLoader->getYSize();
     
@@ -625,7 +647,6 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     // find min and max time lag
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.end());
-    bool haveNonZeroTimeLag = ((minTimeLag != 0) || (maxTimeLag != 0));
     
     int nImagesToInclude = lastImageToInclude - firstImageToInclude + 1;
     jackKnifeImages.clear();
@@ -662,7 +683,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             
             // subtract the contribution of the current image from the pixelMap
-            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, -1.0);
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin, -1.0);
 
             // normalize the pixelMap
             ImagePtr matrix = item.second;
@@ -671,7 +692,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         
         // calculate a SOFI image without the current image's contribution
         std::vector<std::vector<double>> usedCombinationWeights;
-        ImagePtr partialSOFI = AssembleSOFIImage(nInputRows, nInputCols, order, isAuto, kernels, pixelMap, usedCombinationWeights);
+        ImagePtr partialSOFI = AssembleSOFIImage(nInputRows, nInputCols, order, isAuto, kernels, pixelMap, boundaryMargin, usedCombinationWeights);
         
         tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
             
@@ -680,7 +701,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
             (*matrix) *= static_cast<double>(nImagesToInclude - 1);
             
             // add the contribution of the current image back in
-            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, 1.0);
+            AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin, 1.0);
         });
         
         // store the partial SOFI image
