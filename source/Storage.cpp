@@ -75,6 +75,10 @@ double* ExternalImageBuffer::imageData(const int imageIndex) const {
     return _data + offset;
 }
 
+Eigen::Map<Eigen::MatrixXd> ExternalImageBuffer::mappedImage(const int imageIndex) const {
+    return Eigen::Map<Eigen::MatrixXd>(imageData(imageIndex), _nRows, _nCols);
+}
+
 bool ExternalImageBuffer::bufferIsFull() const {
     size_t usedPixels = _nImagesWritten * _nRows * _nCols;
     return (usedPixels == _nPixels);

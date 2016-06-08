@@ -63,6 +63,7 @@ public:
     int nCols() const;
     int nImages() const;
     double* imageData(const int imageIndex) const;
+    Eigen::Map<Eigen::MatrixXd> mappedImage(const int imageIndex) const;
     bool bufferIsFull() const;
     
 private:

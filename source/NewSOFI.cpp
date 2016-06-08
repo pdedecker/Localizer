@@ -43,7 +43,7 @@
 
 #include "NewSOFIKernels.h"
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int,int,int,double,double,int,int,bool)>& jackKnifeAllocator, bool wantDebugMessages);
 
 ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const bool isAuto, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<std::vector<double>>& usedCombinationWeights);
 double Prefactor(int nPartitions);
@@ -52,7 +52,7 @@ Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions
 
 void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool alsoCorrectVariance, const int order);
 void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVariance, const int order);
-void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages);
+void AssembleJackKnifeImages(const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages);
 
 void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const bool isAuto, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<ImagePtr>& jackKnifeImages);
 
@@ -173,9 +173,8 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     for (int n = 0; n < nBatches; ++n) {
         firstImageToProcessInBatch += batchSize;
         lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, lastImageForWhichDataCanBeCalculated);
-        
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, boundaryMargin, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeBatchSOFIImages.at(n), wantDebugMessages);
+        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, isAuto, pixelMap, boundaryMargin, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeOutputImages, options.jackKnifeAllocator, wantDebugMessages);
         totalNumberOfImagesIncluded += nImagesIncluded;
         
         double batchWeight = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
@@ -212,18 +211,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         *averageImage /= summedBatchWeights;
     
     if (wantJackKnife) {
-        // allocate storage for the jackknife data
-        for (int i = 0; i < nOrders; i++) {
-            int nRows, nCols, nImages = 0;
-            for (int nInBatch : imagesIncludedInBatch)
-                nImages += nInBatch;
-            std::vector<ImagePtr>& jackKnifeImagesInBatch = jackKnifeBatchSOFIImages.at(0).at(i);
-            nRows = jackKnifeImagesInBatch.at(0)->rows();
-            nCols = jackKnifeImagesInBatch.at(0)->cols();
-            double delta = (isAuto) ? 1.0 : 1.0 / static_cast<double>(orders[i]);
-            jackKnifeOutputImages.push_back(options.jackKnifeAllocator(nRows, nCols, nImages, boundaryMargin, delta, orders.at(i), i, nOrders > 1));
-        }
-        AssembleJackKnifeImages(jackKnifeBatchSOFIImages, imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
+        AssembleJackKnifeImages(imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
         if (options.doPixelationCorrection) {
             for (int orderIndex = 0; orderIndex < nOrders; ++orderIndex) {
                 ExternalImageBuffer& imagesForThisOrder = jackKnifeOutputImages.at(orderIndex);
@@ -265,40 +253,46 @@ PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination
     return offsetCombination;
 }
 
-void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages) {
+void AssembleJackKnifeImages(const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages) {
     int nBatches = imagesIncludedInBatch.size();
     int nOrders = batchSOFIImages.size();
-
+    
     tbb::parallel_for<int>(0, nOrders, [&](int orderIndex) {
-        for (int thisBatch = 0; thisBatch < nBatches; ++thisBatch) {
-            std::vector<ImagePtr>& jackKnifeImagesInBatch = jackKnifeBatchSOFIImages.at(thisBatch).at(orderIndex);
-            double contribution = static_cast<double>(imagesIncludedInBatch[thisBatch] - 1) / static_cast<double>(batchSize);
-            for (int thisImage = 0; thisImage < jackKnifeImagesInBatch.size(); ++ thisImage) {
-                *(jackKnifeImagesInBatch.at(thisImage)) *= contribution;
-                double summedContribution = contribution;
-                for (int otherBatch = 0; otherBatch < nBatches; ++otherBatch) {
-                    if (otherBatch == thisBatch)
-                        continue;
-                    double otherContribution = static_cast<double>(imagesIncludedInBatch[otherBatch]) / static_cast<double>(batchSize);
-                    *(jackKnifeImagesInBatch.at(thisImage)) += (*(batchSOFIImages.at(orderIndex).at(otherBatch))) * otherContribution;
-                    summedContribution += otherContribution;
+        int nJackknifeImages = jackKnifeOutputImages.at(orderIndex).nImages();
+        tbb::parallel_for<int>(0, nJackknifeImages, [&](int jkImageIndex) {
+            int thisBatch = nBatches - 1;   // determine batch this image is in
+            int summedBatches = 0;
+            for (int i = 0; i < nBatches; i += 1) {
+                summedBatches += imagesIncludedInBatch[i];
+                if (jkImageIndex < summedBatches) {
+                    thisBatch = i;
+                    break;
                 }
-                *(jackKnifeImagesInBatch.at(thisImage)) /= summedContribution;
-                jackKnifeOutputImages.at(orderIndex).addImage(jackKnifeImagesInBatch.at(thisImage));
             }
-        }
+            auto thisImage = jackKnifeOutputImages[orderIndex].mappedImage(jkImageIndex);
+            double contribution = static_cast<double>(imagesIncludedInBatch[thisBatch] - 1) / static_cast<double>(batchSize);
+            double summedContribution = contribution;
+            thisImage *= contribution;
+            for (int otherBatch = 0; otherBatch < nBatches; ++otherBatch) {
+                if (otherBatch == thisBatch)
+                    continue;
+                double otherContribution = static_cast<double>(imagesIncludedInBatch[otherBatch]) / static_cast<double>(batchSize);
+                thisImage += (*(batchSOFIImages.at(orderIndex).at(otherBatch))) * otherContribution;
+                summedContribution += otherContribution;
+            }
+            thisImage /= summedContribution;
+        });
     });
 }
 
 void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor = 1.0);
 int RequiredBorderMargin(const std::vector<SOFIKernel>& combinations);
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<std::vector<ImagePtr> >& jackKnifeImages, bool wantDebugMessages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int,int,int,double,double,int,int,bool)>& jackKnifeAllocator, bool wantDebugMessages) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesIncluded = 0;
     sofiImages.clear();
-    jackKnifeImages.clear();
     
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.cend());
@@ -422,14 +416,27 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     
     // make JackKnife images if needed
     if (wantJackKnife) {
-        jackKnifeImages.resize(orders.size());
+        if (jackKnifeImages.empty()) {
+            // allocate storage for the jackknife data if needed
+            for (size_t i = 0; i < orders.size(); i++) {
+                int nRows, nCols, nImages = 0;
+                nRows = sofiImages.at(i)->rows();
+                nCols = sofiImages.at(i)->cols();
+                nImages = totalNumberOfImagesToProcess;
+                double delta = (isAuto) ? 1.0 : 1.0 / static_cast<double>(orders[i].first);
+                jackKnifeImages.push_back(jackKnifeAllocator(nRows, nCols, nImages, boundaryMargin, delta, orders.at(i).first, i, orders.size() > 1));
+            }
+        }
+        // do the actual jackknife calculation
         for (size_t i = 0; i < orders.size(); ++i) {
             const std::pair<int, std::vector<SOFIKernel> >& calculation = orders[i];
             int order = calculation.first;
             const std::vector<SOFIKernel>& kernels = calculation.second;
             std::vector<ImagePtr> jackKnifeImagesForThisOrder;
             JackKnife(imageLoader, firstImageToProcess, lastImageToProcess, nImagesIncluded, order, timeLags, isAuto, kernels, pixelMap, boundaryMargin, jackKnifeImagesForThisOrder);
-            jackKnifeImages[i] = jackKnifeImagesForThisOrder;
+            for (auto jkImage : jackKnifeImagesForThisOrder) {
+                jackKnifeImages[i].addImage(jkImage);
+            }
         }
     }
     
