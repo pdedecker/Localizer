@@ -212,6 +212,17 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         *averageImage /= summedBatchWeights;
     
     if (wantJackKnife) {
+        // allocate storage for the jackknife data
+        for (int i = 0; i < nOrders; i++) {
+            int nRows, nCols, nImages = 0;
+            for (int nInBatch : imagesIncludedInBatch)
+                nImages += nInBatch;
+            std::vector<ImagePtr>& jackKnifeImagesInBatch = jackKnifeBatchSOFIImages.at(0).at(i);
+            nRows = jackKnifeImagesInBatch.at(0)->rows();
+            nCols = jackKnifeImagesInBatch.at(0)->cols();
+            double delta = (isAuto) ? 1.0 : 1.0 / static_cast<double>(orders[i]);
+            jackKnifeOutputImages.push_back(options.jackKnifeAllocator(nRows, nCols, nImages, boundaryMargin, delta, orders.at(i), i, nOrders > 1));
+        }
         AssembleJackKnifeImages(jackKnifeBatchSOFIImages, imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
         if (options.doPixelationCorrection) {
             for (int orderIndex = 0; orderIndex < nOrders; ++orderIndex) {
@@ -257,7 +268,7 @@ PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination
 void AssembleJackKnifeImages(std::vector<std::vector<std::vector<ImagePtr> > >& jackKnifeBatchSOFIImages, const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages) {
     int nBatches = imagesIncludedInBatch.size();
     int nOrders = batchSOFIImages.size();
-    
+
     tbb::parallel_for<int>(0, nOrders, [&](int orderIndex) {
         for (int thisBatch = 0; thisBatch < nBatches; ++thisBatch) {
             std::vector<ImagePtr>& jackKnifeImagesInBatch = jackKnifeBatchSOFIImages.at(thisBatch).at(orderIndex);
@@ -353,7 +364,6 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     }
     
     // initialize the buffer with the images.
-    int nImagesSkipped = 0;
     imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
     for (int i = firstImageToProcess - std::abs(minTimeLag); i <= lastImageToProcess; i++) {
@@ -364,9 +374,8 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     }
     
     // calculate all products over the images
-    int firstImageWithOutput = firstImageToProcess + nImagesSkipped;
+    int firstImageWithOutput = firstImageToProcess;
     int lastImageWithOutput = lastImageToProcess;
-    imagesProcessedSoFar += nImagesSkipped;
     for (int n = firstImageWithOutput; n <= lastImageWithOutput; ++n) {
         // update progress and check for abort
         int abortStatus = progressReporter->UpdateCalculationProgress(imagesProcessedSoFar, totalNumberOfImagesToProcess);
@@ -663,7 +672,6 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     int lastImageToProcess = lastImageToInclude;
     
     // initialize the buffer with the images.
-    int nImagesSkipped = 0;
     imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
     for (int i = firstImageToProcess - std::abs(minTimeLag); i <= lastImageToProcess; i++) {
@@ -674,7 +682,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
     }
     
     // calculate all products over the images
-    int firstImageWithOutput = firstImageToProcess + nImagesSkipped;
+    int firstImageWithOutput = firstImageToProcess;
     int lastImageWithOutput = lastImageToProcess;
     for (int i = firstImageWithOutput; i <= lastImageWithOutput; ++i) {
         ImagePtr currentImage = imageLoader->readNextImage();

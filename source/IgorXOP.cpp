@@ -3232,6 +3232,29 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
         sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
         sofiOptions.wantDebugMessages = wantDebugMessages;
+        sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double delta, int order, int orderIndex, bool multipleOrders) {
+            size_t nPixelsRequired = (size_t)nRows * (size_t)nCols * (size_t)nImages;
+            DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
+            strcat(jackKnifeOutputWaveParams.name, "_jack");
+            if (multipleOrders) {
+                int nameLength = strlen(jackKnifeOutputWaveParams.name);
+                jackKnifeOutputWaveParams.name[nameLength] = static_cast<char>(order + 48);
+                jackKnifeOutputWaveParams.name[nameLength + 1] = '\0';
+            }
+            waveHndl jackknifeWave;
+            CountInt dimensionSizes[MAX_DIMENSIONS + 1];
+            dimensionSizes[0] = nRows;
+            dimensionSizes[1] = nCols;
+            dimensionSizes[2] = nImages;
+            dimensionSizes[3] = 0;
+            int err = MDMakeWave(&jackknifeWave, jackKnifeOutputWaveParams.name, jackKnifeOutputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
+            if (err != 0)
+                throw err;
+            MDSetWaveScaling(jackknifeWave, ROWS, &delta, &offset);
+            MDSetWaveScaling(jackknifeWave, COLUMNS, &delta, &offset);
+            memset(WaveData(jackknifeWave), 0, nPixelsRequired * sizeof(double));
+            return ExternalImageBuffer(reinterpret_cast<double*>(WaveData(jackknifeWave)), nPixelsRequired);
+        };
         
         // access the data to load
         std::string inputFilePath = ConvertHandleToString(p->inputFilePath);
@@ -3248,42 +3271,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
                 progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorUserFunction(igorProgressReporterFunction));
             } else {
                 progressReporter = std::shared_ptr<ProgressReporter> (new ProgressReporter_IgorCommandLine);
-            }
-        }
-        
-        // pre-allocate jackknife storage if we are to do this
-        if (sofiOptions.wantJackKnife) {
-            for (size_t i = 0; i < orders.size(); ++i) {
-                int nJackknifeRows, nJackknifeCols, nJackknifeImages;
-                bool canDoJackknife = RequiredJackknifeDimensions(orders.at(i), threadedImageLoaderWrapper, sofiOptions.lagTimes, nJackknifeRows, nJackknifeCols, nJackknifeImages);
-                if (!canDoJackknife)
-                    throw std::runtime_error("input dataset too small for the SOFI calculation");
-                size_t nPixelsRequired = static_cast<size_t>(nJackknifeRows) * static_cast<size_t>(nJackknifeCols) * static_cast<size_t>(nJackknifeImages);
-                
-                // create the Igor wave that will hold the data
-                DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
-                strcat(jackKnifeOutputWaveParams.name, "_jack");
-                if (orders.size() > 1) {
-                    int nameLength = strlen(jackKnifeOutputWaveParams.name);
-                    jackKnifeOutputWaveParams.name[nameLength] = static_cast<char>(orders[i] + 48);
-                    jackKnifeOutputWaveParams.name[nameLength + 1] = '\0';
-                }
-                waveHndl jackknifeWave;
-                CountInt dimensionSizes[MAX_DIMENSIONS + 1];
-                dimensionSizes[0] = nJackknifeRows;
-                dimensionSizes[1] = nJackknifeCols;
-                dimensionSizes[2] = nJackknifeImages;
-                dimensionSizes[3] = 0;
-                err = MDMakeWave(&jackknifeWave, jackKnifeOutputWaveParams.name, jackKnifeOutputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
-                if (err != 0)
-                    throw err;
-                double offset = 2.0;
-                double delta = (wantCrossCumulant) ? 1.0 / static_cast<double>(orders[i]) : 1.0;
-                MDSetWaveScaling(jackknifeWave, ROWS, &delta, &offset);
-                MDSetWaveScaling(jackknifeWave, COLUMNS, &delta, &offset);
-                // initialize to zero
-                memset(WaveData(jackknifeWave), 0, nPixelsRequired * sizeof(double));
-                sofiOptions.jackKnifeImages.push_back(ExternalImageBuffer(reinterpret_cast<double*>(WaveData(jackknifeWave)), nPixelsRequired));
             }
         }
         
