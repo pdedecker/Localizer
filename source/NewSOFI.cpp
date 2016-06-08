@@ -779,21 +779,3 @@ Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOpt
     
     return combinations;
 }
-
-bool RequiredJackknifeDimensions(int order, std::shared_ptr<ImageLoader> imageLoader, const std::vector<int>& lagTimes, int& nRows, int& nCols, int& nImages) {
-    int minLagTime, maxLagTime;
-    if (lagTimes.empty()) {
-        minLagTime = 0;
-        maxLagTime = 0;
-    } else {
-        minLagTime = std::min(0, *std::min_element(lagTimes.begin(), lagTimes.end()));
-        maxLagTime = std::max(0, *std::max_element(lagTimes.begin(), lagTimes.end()));
-    }
-    
-    nRows = (imageLoader->getXSize() - 4) * order;
-    nCols = (imageLoader->getYSize() - 4) * order;
-    nImages = imageLoader->getNImages() - maxLagTime - std::abs(minLagTime);
-    
-    bool canDoCalculation = (nRows > 0) && (nCols > 0) && (nImages > 1);
-    return canDoCalculation;
-}

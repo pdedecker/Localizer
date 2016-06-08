@@ -86,6 +86,4 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
 
 Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff);
 
-bool RequiredJackknifeDimensions(int order, std::shared_ptr<ImageLoader> imageLoader, const std::vector<int>& lagTimes, int& nRows, int& nCols, int& nImages);
-
 #endif
