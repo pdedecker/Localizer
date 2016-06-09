@@ -75,7 +75,7 @@ public:
     bool wantAverageImage;
     ImagePtr averageImage;
     bool wantJackKnife;
-    std::function<ExternalImageBuffer(int,int,int,double,double,int,int,bool)> jackKnifeAllocator;
+    std::function<ExternalImageBuffer(int,int,int,double,double,double,int,int,bool)> jackKnifeAllocator;
     std::vector<ExternalImageBuffer> jackKnifeImages;
     double pixelCombinationCutoff;
     std::vector<double> pixelCombinationWeights;

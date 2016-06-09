@@ -481,7 +481,7 @@ void MatlabSOFI(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
         mwSize dims[3];
         dims[0] = sofiOptions.orders.size();
         plhs[1] = mxCreateCellArray(1, dims);
-        sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double delta, int order, int orderIndex, bool multipleOrders) {
+        sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double deltaX, double deltaY, int order, int orderIndex, bool multipleOrders) {
             size_t nPixelsRequired = static_cast<size_t>(nRows) * static_cast<size_t>(nCols) * static_cast<size_t>(nImages);
             dims[0] = nRows;
             dims[1] = nCols;

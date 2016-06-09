@@ -3249,7 +3249,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
         sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
         sofiOptions.wantDebugMessages = wantDebugMessages;
-        sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double delta, int order, int orderIndex, bool multipleOrders) {
+        sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double deltaX, double deltaY, int order, int orderIndex, bool multipleOrders) {
             size_t nPixelsRequired = (size_t)nRows * (size_t)nCols * (size_t)nImages;
             DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
             strcat(jackKnifeOutputWaveParams.name, "_jack");
@@ -3267,8 +3267,8 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
             int err = MDMakeWave(&jackknifeWave, jackKnifeOutputWaveParams.name, jackKnifeOutputWaveParams.dfH, dimensionSizes, NT_FP64, 1);
             if (err != 0)
                 throw err;
-            MDSetWaveScaling(jackknifeWave, ROWS, &delta, &offset);
-            MDSetWaveScaling(jackknifeWave, COLUMNS, &delta, &offset);
+            MDSetWaveScaling(jackknifeWave, ROWS, &deltaX, &offset);
+            MDSetWaveScaling(jackknifeWave, COLUMNS, &deltaY, &offset);
             memset(WaveData(jackknifeWave), 0, nPixelsRequired * sizeof(double));
             return ExternalImageBuffer(reinterpret_cast<double*>(WaveData(jackknifeWave)), nPixelsRequired);
         };
