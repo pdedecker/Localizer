@@ -62,10 +62,6 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
-    if (nImages <= 2)
-        throw std::runtime_error("too few input images");
-    if ((imageLoader->getXSize() < 5) || (imageLoader->getYSize() < 5))
-        throw std::runtime_error("images too small");
     
     const std::vector<int> orders = options.orders;
     const bool isAuto = !options.wantCrossCumulant;
@@ -109,13 +105,22 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     int largestLagTime = *std::max_element(lagTimes.cbegin(), lagTimes.cend());
     int smallestLagTime = *std::min_element(lagTimes.cbegin(), lagTimes.cend());
     
+    // only a single order for external pixel combinations
+    if (options.haveExternalPixelCombination && orders.size() > 1) {
+        throw std::runtime_error("only a single order is supported with external pixel combinations");
+    }
+    
     std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
-    for (int i = 0; i < nOrders; ++i) {
-        if (isAuto) {
-            kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], AutoKernelsForOrder(orders[i], lagTimes)));
-        } else {
-            kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel> >(orders[i], KernelsForOrder(orders[i], lagTimes, options.allowablePixelCombinations, options.pixelCombinationCutoff)));
+    if (!options.haveExternalPixelCombination) {
+        for (int i = 0; i < nOrders; ++i) {
+            if (isAuto) {
+                kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel>>(orders[i], AutoKernelsForOrder(orders[i], lagTimes)));
+            } else {
+                kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel>>(orders[i], KernelsForOrder(orders[i], lagTimes, options.allowablePixelCombinations, options.pixelCombinationCutoff)));
+            }
         }
+    } else {
+        kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel>>(orders[0], KernelsFromExternalDescription(options.externalPixelCombinations, lagTimes)));
     }
     
     // if weights are specified then we can only calculate a single order
@@ -313,6 +318,8 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
             const std::vector<SOFIKernel>& kernels = orders[i].second;
             boundaryMargin = std::max(RequiredBorderMargin(kernels), boundaryMargin);
         }
+        if ((2 * boundaryMargin >= imageLoader->getXSize()) || (2 * boundaryMargin >= imageLoader->getXSize()))
+            throw std::runtime_error("image size too small");
         // set up storage for all needed partial products.
         int allCombinations = 0;
         for (size_t i = 0; i < orders.size(); ++i) {

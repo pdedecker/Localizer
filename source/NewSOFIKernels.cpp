@@ -520,3 +520,63 @@ std::vector<SOFIVirtualPixel> SOFIAutoCumulantPixelsForOrder(int order, const st
     }
     return result;
 }
+
+std::vector<SOFIVirtualPixel> VirtualPixelsFromExternalDescription(const Eigen::MatrixXd& pixelDescription, const std::vector<int>& timeLags) {
+    int nCombinations = pixelDescription.rows();
+    int nCols = pixelDescription.cols();
+    int nPixelsInCombinations = nCols / 2 - 1;
+    if (nCols < (2 + 2 * kMaxSofiOrder)) {
+        throw std::runtime_error("pixel combinations specificiation must have more columns");
+    }
+    if (nCols > (2 + 2 * kMaxSofiOrder)) {
+        throw std::runtime_error("pixel combinations specificiation must have fewer columns");
+    }
+    if ((nCols % 2) != 0) {
+        throw std::runtime_error("pixel combinations specificiation must have an even number of columns");
+    }
+    if (nPixelsInCombinations != timeLags.size()) {
+        throw std::runtime_error("number of time lags must match number of combinations");
+    }
+    
+    // first two columns are the offsets for the virtual pixels. They must all be positive.
+    for (int i = 0; i < nCombinations; i++) {
+        if ((static_cast<int>(pixelDescription(i, 0)) < 0.0) || (static_cast<int>(pixelDescription(i, 1)) < 0)) {
+            throw std::runtime_error("virtual pixel offsets must be non-negative");
+        }
+    }
+    
+    std::vector<std::pair<int, int>> knownCombinations;
+    std::vector<SOFIVirtualPixel> virtualPixels;
+    std::vector<PixelCoordinate> thisCombination(nCombinations);
+    for (int i = 0; i < nCombinations; i++) {
+        for (int combIndex = 0; combIndex < nCombinations; combIndex++) {
+            thisCombination.at(combIndex) = PixelCoordinate(pixelDescription(i, 2 + 2 * combIndex), pixelDescription(i, 2 + 2 * combIndex + 1), timeLags.at(i));
+        }
+        std::pair<int, int> thisOffset(pixelDescription(i, 0), pixelDescription(i, 1));
+        auto findLoc = std::find(knownCombinations.cbegin(), knownCombinations.cend(), thisOffset);
+        if (findLoc != knownCombinations.cend()) {
+            // we have already seen this virtual pixel
+            int combIndex = findLoc - knownCombinations.cbegin();
+            SOFIVirtualPixel& thisPixel = virtualPixels.at(combIndex);
+            thisPixel.combinations.push_back(thisCombination);
+        } else {
+            // new virtual pixel
+            SOFIVirtualPixel thisPixel;
+            thisPixel.outputDeltaX = static_cast<int>(pixelDescription(i, 0));
+            thisPixel.outputDeltaY = static_cast<int>(pixelDescription(i, 1));
+            thisPixel.combinations.push_back(thisCombination);
+            knownCombinations.push_back(thisOffset);
+            virtualPixels.push_back(thisPixel);
+        }
+    }
+    
+    for (SOFIVirtualPixel& pixel : virtualPixels) {
+        pixel.scores.resize(pixel.combinations.size(), 1.0);
+    }
+    
+    return virtualPixels;
+}
+
+std::vector<SOFIKernel> KernelsFromExternalDescription(const Eigen::MatrixXd& kernelDescription, const std::vector<int>& timeLags) {
+    return (SOFIVirtualPixelsToKernels(VirtualPixelsFromExternalDescription(kernelDescription, timeLags)));
+}

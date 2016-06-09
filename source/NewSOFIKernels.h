@@ -51,22 +51,6 @@ public:
     int dt;
 };
 
-inline bool operator<(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
-    if (lhs.dx == rhs.dx) {
-        if (lhs.dy == rhs.dy) {
-            return (lhs.dt < rhs.dt);
-        } else {
-            return (lhs.dy < rhs.dy);
-        }
-    } else {
-        return (lhs.dx < rhs.dx);
-    }
-}
-
-inline bool operator==(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
-    return ((lhs.dx == rhs.dx) && (lhs.dy == rhs.dy) && (lhs.dt == rhs.dt));
-}
-
 class SOFIVirtualPixel {
 public:
     int outputDeltaX;
@@ -87,14 +71,31 @@ public:
 
 std::vector<SOFIKernel> KernelsForOrder(const int order, const std::vector<int>& timeLags, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff);
 std::vector<SOFIKernel> AutoKernelsForOrder(const int order, const std::vector<int>& timeLags);
+std::vector<SOFIKernel> KernelsFromExternalDescription(const Eigen::MatrixXd& kernelDescription, const std::vector<int>& timeLags);
+
+GroupOfPartitions AllPartitions(PixelCombination pixelCombination);
+std::string PrintPartition(const Partition& partition);
+std::string ParititionTest();
+
+inline bool operator<(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
+    if (lhs.dx == rhs.dx) {
+        if (lhs.dy == rhs.dy) {
+            return (lhs.dt < rhs.dt);
+        } else {
+            return (lhs.dy < rhs.dy);
+        }
+    } else {
+        return (lhs.dx < rhs.dx);
+    }
+}
+
+inline bool operator==(const PixelCoordinate& lhs, const PixelCoordinate& rhs) {
+    return ((lhs.dx == rhs.dx) && (lhs.dy == rhs.dy) && (lhs.dt == rhs.dt));
+}
 
 class ComparePixelCombinations {
 public:
     bool operator() (const PixelCombination& comb1, const PixelCombination& comb2) const;
 };
-
-GroupOfPartitions AllPartitions(PixelCombination pixelCombination);
-std::string PrintPartition(const Partition& partition);
-std::string ParititionTest();
 
 #endif

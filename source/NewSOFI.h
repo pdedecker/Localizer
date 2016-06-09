@@ -58,6 +58,7 @@ public:
         wantAverageImage(false),
         wantJackKnife(false),
         pixelCombinationCutoff(1.0),
+        haveExternalPixelCombination(false),
         wantDebugMessages(false)
     {
         orders.push_back(2);
@@ -78,6 +79,8 @@ public:
     std::function<ExternalImageBuffer(int,int,int,double,double,double,int,int,bool)> jackKnifeAllocator;
     std::vector<ExternalImageBuffer> jackKnifeImages;
     double pixelCombinationCutoff;
+    bool haveExternalPixelCombination;
+    Eigen::MatrixXd externalPixelCombinations;
     std::vector<double> pixelCombinationWeights;
     bool wantDebugMessages;
 };
