@@ -63,7 +63,11 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
     
-    const std::vector<int> orders = options.orders;
+    std::vector<int> orders = options.orders;
+    if (options.haveExternalPixelCombination) {
+        orders.resize(1);
+        orders[0] = options.externalPixelCombinations.cols() / 2 - 1;
+    }
     const bool isAuto = !options.wantCrossCumulant;
     std::vector<int> lagTimes = options.lagTimes;
     int nOrders = orders.size();

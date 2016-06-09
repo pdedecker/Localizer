@@ -525,7 +525,7 @@ std::vector<SOFIVirtualPixel> VirtualPixelsFromExternalDescription(const Eigen::
     int nCombinations = pixelDescription.rows();
     int nCols = pixelDescription.cols();
     int nPixelsInCombinations = nCols / 2 - 1;
-    if (nCols < (2 + 2 * kMaxSofiOrder)) {
+    if (nCols < (2 + 2 * kMinSofiOrder)) {
         throw std::runtime_error("pixel combinations specificiation must have more columns");
     }
     if (nCols > (2 + 2 * kMaxSofiOrder)) {
@@ -547,10 +547,10 @@ std::vector<SOFIVirtualPixel> VirtualPixelsFromExternalDescription(const Eigen::
     
     std::vector<std::pair<int, int>> knownCombinations;
     std::vector<SOFIVirtualPixel> virtualPixels;
-    std::vector<PixelCoordinate> thisCombination(nCombinations);
+    std::vector<PixelCoordinate> thisCombination(nPixelsInCombinations);
     for (int i = 0; i < nCombinations; i++) {
-        for (int combIndex = 0; combIndex < nCombinations; combIndex++) {
-            thisCombination.at(combIndex) = PixelCoordinate(pixelDescription(i, 2 + 2 * combIndex), pixelDescription(i, 2 + 2 * combIndex + 1), timeLags.at(i));
+        for (int combIndex = 0; combIndex < nPixelsInCombinations; combIndex++) {
+            thisCombination.at(combIndex) = PixelCoordinate(pixelDescription(i, 2 + 2 * combIndex), pixelDescription(i, 2 + 2 * combIndex + 1), timeLags.at(combIndex));
         }
         std::pair<int, int> thisOffset(pixelDescription(i, 0), pixelDescription(i, 1));
         auto findLoc = std::find(knownCombinations.cbegin(), knownCombinations.cend(), thisOffset);

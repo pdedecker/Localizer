@@ -704,6 +704,11 @@ struct NewSOFIRuntimeParams {
     double combinationSelection;
     int COMBFlagParamsSet[1];
     
+    // Parameters for /CWAV flag group.
+    int CWAVFlagEncountered;
+    waveHndl pixelCombinations;
+    int CWAVFlagParamsSet[1];
+    
     // Parameters for /WGHT flag group.
     int WGHTFlagEncountered;
     waveHndl pixelCombinationWeights;
@@ -3035,6 +3040,18 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         pixelCombinationCutoff = p->combinationSelection;
     }
     
+    bool haveExternalCombinationDescription = false;
+    ImagePtr externalCombinationDescription;
+    if (p->CWAVFlagEncountered) {
+        haveExternalCombinationDescription = true;
+        // Parameter: p->pixelCombinations (test for NULL handle before using)
+        if (p->pixelCombinations == nullptr)
+            return NOWAV;
+        externalCombinationDescription = CopyIgorDPWaveToMatrix(p->pixelCombinations);
+        orders.resize(1);
+        orders[0] = externalCombinationDescription->cols() / 2 - 1;
+    }
+    
     std::vector<double> pixelCombinationWeights;
     bool havePixelCombinationWeights = false;
     if (p->WGHTFlagEncountered) {
@@ -3246,6 +3263,10 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.alsoCorrectVariance = alsoCorrectVariance;
         sofiOptions.wantAverageImage = wantAverageImage;
         sofiOptions.wantJackKnife = wantJackKnife;
+        if (haveExternalCombinationDescription) {
+            sofiOptions.haveExternalPixelCombination = true;
+            sofiOptions.externalPixelCombinations = *externalCombinationDescription;
+        }
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
         sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
         sofiOptions.wantDebugMessages = wantDebugMessages;
@@ -3635,7 +3656,7 @@ static int RegisterNewSOFI(void) {
 	const char* runtimeStrVarList;
     
     // NOTE: If you change this template, you must change the NewSOFIRuntimeParams structure as well.
-    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /SAME[=number:allowOverlappingPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
+    cmdTemplate = "NewSOFI /Y=number:cameraType /ORDR={number:order, number[5]:extraOrders} /COMB=number:combinationSelection /CWAV=wave:pixelCombinations /WGHT=wave:pixelCombinationWeights /SUB={number:framesToSkip,number:nFramesToInclude} /NSAT[=number:noSaturatedPixels] /XC[=number:wantCrossCumulant] /AVG[=number:doAverage] /PXCR[=number:doPixelationCorrection] /BAT=number:batchSize /LAG={number[100]:lagTimes} /LAGW=wave:lagTimesWave /JACK[=number:doJackKnife] /DEBG[=number:printDebugInfo] /SAME[=number:allowOverlappingPixels] /PROG=structure:{progStruct, LocalizerProgStruct} /Q /DEST=DataFolderAndName:{dest,real} string:inputFilePath";
     runtimeNumVarList = "";
 	runtimeStrVarList = "";
 	return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(NewSOFIRuntimeParams), (void*)ExecuteNewSOFI, 0);
