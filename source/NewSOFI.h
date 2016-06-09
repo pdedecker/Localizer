@@ -83,6 +83,8 @@ public:
     Eigen::MatrixXd externalPixelCombinations;
     std::vector<double> pixelCombinationWeights;
     bool wantDebugMessages;
+    
+    int outputUsedBoundaryMargin;
 };
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages);

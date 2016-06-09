@@ -218,6 +218,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     });
     
     sofiOutputImages = mergedImages;
+    options.outputUsedBoundaryMargin = boundaryMargin;
     
     if (wantAverageImage)
         *averageImage /= summedBatchWeights;

@@ -3323,10 +3323,11 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
                 adjustedOutputParams.name[nameLength + 1] = '\0';
             }
             waveHndl outputWave = CopyMatrixToIgorDPWave(sofiOutputImages.at(i), adjustedOutputParams);
-            double delta = (wantCrossCumulant) ? 1.0 / static_cast<double>(orders[i]) : 1.0;
-            double offset = (imageLoader->getXSize() - sofiOutputImages.at(i)->rows() * delta) / 2.0;
-            MDSetWaveScaling(outputWave, ROWS, &delta, &offset);
-            MDSetWaveScaling(outputWave, COLUMNS, &delta, &offset);
+            double offset = sofiOptions.outputUsedBoundaryMargin;
+            double deltaX = (imageLoader->getXSize() - 2.0 * offset) / (double)sofiOutputImages.at(i)->rows();
+            double deltaY = (imageLoader->getYSize() - 2.0 * offset) / (double)sofiOutputImages.at(i)->cols();
+            MDSetWaveScaling(outputWave, ROWS, &deltaX, &offset);
+            MDSetWaveScaling(outputWave, COLUMNS, &deltaY, &offset);
         }
         if (wantAverageImage) {
             DataFolderAndName averageOutputWaveParams = outputWaveParams;
@@ -3341,7 +3342,6 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
                 }
             }
         }
-            
     }
     catch (int e) {
         return e;
