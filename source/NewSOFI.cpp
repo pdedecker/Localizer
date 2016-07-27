@@ -285,7 +285,7 @@ void AssembleJackKnifeImages(const std::vector<int>& imagesIncludedInBatch, cons
     });
 }
 
-void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor = 1.0);
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr>& imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor = 1.0);
 int RequiredBorderMargin(const std::vector<SOFIKernel>& combinations);
 
 int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, bool isAuto, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int,int,int,double,double,int,int,bool)>& jackKnifeAllocator, bool wantDebugMessages) {
@@ -456,7 +456,7 @@ int RequiredBorderMargin(const std::vector<SOFIKernel>& kernels) {
     return minimalMargin;
 }
 
-void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr> imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor) {
+void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr>& imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor) {
     int nRowsToCalculate = matrix->rows();
     int nColsToCalculate = matrix->cols();
     int startCol = boundaryMargin;
