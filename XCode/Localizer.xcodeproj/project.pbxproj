@@ -11,7 +11,7 @@
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D027E93A151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
-		D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02F86331BB58CF900CF5E68 /* Cocoa.framework */; settings = {ASSET_TAGS = (); }; };
+		D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02F86331BB58CF900CF5E68 /* Cocoa.framework */; };
 		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
 		D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */ = {isa = PBXBuildFile; fileRef = D056459E18AA1F72001A22D9 /* NewSOFI.h */; };
@@ -21,7 +21,7 @@
 		D06A631F18B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */; };
 		D06A632118B4CED200C940C5 /* SOFIFrameVerifiers.h in Headers */ = {isa = PBXBuildFile; fileRef = D06A631E18B4CED200C940C5 /* SOFIFrameVerifiers.h */; };
-		D08859561BD7AD7B00310040 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D08859551BD7AD7B00310040 /* AudioToolbox.framework */; settings = {ASSET_TAGS = (); }; };
+		D08859561BD7AD7B00310040 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D08859551BD7AD7B00310040 /* AudioToolbox.framework */; };
 		D090E533139685610099D837 /* SOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D090E532139685610099D837 /* SOFI.cpp */; };
 		D099CE661B8E4E7A00E23C07 /* libboost_date_time-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBA195C1DAB00D5987C /* libboost_date_time-mt.a */; };
 		D099CE671B8E4E8000E23C07 /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D8ABBB195C1DAB00D5987C /* libboost_system-mt.a */; };
@@ -143,6 +143,8 @@
 		D093BFB8106FE2CE0005ECA3 /* Localization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Localization.cpp; path = ../source/Localization.cpp; sourceTree = SOURCE_ROOT; };
 		D09576100D30171E00506A92 /* IgorXOP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IgorXOP.cpp; path = ../source/IgorXOP.cpp; sourceTree = SOURCE_ROOT; };
 		D09576110D30171E00506A92 /* IgorXOP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IgorXOP.h; path = ../source/IgorXOP.h; sourceTree = SOURCE_ROOT; };
+		D09733C41D48A6DB00FF8430 /* SOFICommandLine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SOFICommandLine.cpp; path = ../source/SOFICommandLine.cpp; sourceTree = "<group>"; };
+		D09733C51D48A6DB00FF8430 /* SOFICommandLine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SOFICommandLine.h; path = ../source/SOFICommandLine.h; sourceTree = "<group>"; };
 		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
 		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -371,6 +373,8 @@
 		D0F0E35210EBEC3500F9A855 /* Commandline */ = {
 			isa = PBXGroup;
 			children = (
+				D09733C51D48A6DB00FF8430 /* SOFICommandLine.h */,
+				D09733C41D48A6DB00FF8430 /* SOFICommandLine.cpp */,
 				D0F0E35510EBEC6200F9A855 /* CommandLine.h */,
 				D0F0E35610EBEC6200F9A855 /* CommandLine.cpp */,
 				D0F4244411B5A4EC001BCE24 /* CommandLineProcessing.h */,
