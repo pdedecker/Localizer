@@ -338,74 +338,79 @@ typedef struct AnalyzeCCDImagesRuntimeParams* AnalyzeCCDImagesRuntimeParamsPtr;
 // Runtime param structure for EmitterSegmentation operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct EmitterSegmentationRuntimeParams {
-	// Flag parameters.
-	
-	// Parameters for /M flag group.
-	int MFlagEncountered;
-	double method;
-	int MFlagParamsSet[1];
-	
-	// Parameters for /ABS flag group.
-	int ABSFlagEncountered;
-	double absoluteThreshold;
-	int ABSFlagParamsSet[1];
-	
-	// Parameters for /PFA flag group.
-	int PFAFlagEncountered;
-	double PFA;
-	int PFAFlagParamsSet[1];
-	
-	// Parameters for /SSG flag group.
-	int SSGFlagEncountered;
-	double smoothSigmaFactor;
-	int SSGFlagParamsSet[1];
-	
-	// Parameters for /WDTH flag group.
-	int WDTHFlagEncountered;
-	double PSFWidth;
-	int WDTHFlagParamsSet[1];
-	
-	// Parameters for /G flag group.
-	int GFlagEncountered;
-	double preprocessing;
-	double postprocessing;
-	int GFlagParamsSet[2];
-	
-	// Parameters for /F flag group.
-	int FFlagEncountered;
-	double particle_finder;
-	int FFlagParamsSet[1];
-	
-	// Parameters for /PVER flag group.
-	int PVERFlagEncountered;
-	double particleVerifiers[100];			// Optional parameter.
-	int PVERFlagParamsSet[100];
-	
-	// Parameters for /R flag group.
-	int RFlagEncountered;
-	double radiusBetweenParticles;
-	int RFlagParamsSet[1];
-	
-	// Parameters for /S flag group.
-	int SFlagEncountered;
-	double output_located_particles;
-	int SFlagParamsSet[1];
-	
-	// Main parameters.
-	
-	// Parameters for simple main group #0.
-	int CCD_FrameEncountered;
-	waveHndl CCD_Frame;
-	int CCD_FrameParamsSet[1];
-	
-	// These are postamble fields that Igor sets.
-	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    // Flag parameters.
+    
+    // Parameters for /M flag group.
+    int MFlagEncountered;
+    double method;
+    int MFlagParamsSet[1];
+    
+    // Parameters for /FM flag group.
+    int FMFlagEncountered;
+    double fittingMethod;
+    int FMFlagParamsSet[1];
+    
+    // Parameters for /ABS flag group.
+    int ABSFlagEncountered;
+    double absoluteThreshold;
+    int ABSFlagParamsSet[1];
+    
+    // Parameters for /PFA flag group.
+    int PFAFlagEncountered;
+    double PFA;
+    int PFAFlagParamsSet[1];
+    
+    // Parameters for /SSG flag group.
+    int SSGFlagEncountered;
+    double smoothSigmaFactor;
+    int SSGFlagParamsSet[1];
+    
+    // Parameters for /WDTH flag group.
+    int WDTHFlagEncountered;
+    double PSFWidth;
+    int WDTHFlagParamsSet[1];
+    
+    // Parameters for /G flag group.
+    int GFlagEncountered;
+    double preprocessing;
+    double postprocessing;
+    int GFlagParamsSet[2];
+    
+    // Parameters for /F flag group.
+    int FFlagEncountered;
+    double particle_finder;
+    int FFlagParamsSet[1];
+    
+    // Parameters for /PVER flag group.
+    int PVERFlagEncountered;
+    double particleVerifiers[100];			// Optional parameter.
+    int PVERFlagParamsSet[100];
+    
+    // Parameters for /R flag group.
+    int RFlagEncountered;
+    double radiusBetweenParticles;
+    int RFlagParamsSet[1];
+    
+    // Parameters for /S flag group.
+    int SFlagEncountered;
+    double output_located_particles;
+    int SFlagParamsSet[1];
+    
+    // Main parameters.
+    
+    // Parameters for simple main group #0.
+    int CCD_FrameEncountered;
+    waveHndl CCD_Frame;
+    int CCD_FrameParamsSet[1];
+    
+    // These are postamble fields that Igor sets.
+    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct EmitterSegmentationRuntimeParams EmitterSegmentationRuntimeParams;
 typedef struct EmitterSegmentationRuntimeParams* EmitterSegmentationRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()	// Reset structure alignment to default.
 
 // Runtime param structure for ConvolveImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -1029,7 +1034,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // Parameter: p->initial_width
         initial_width = p->initial_width;
     } else {
-        initial_width = 2;
+        initial_width = 2.0;
     }
 
     if (method != LOCALIZATION_METHOD_CENTROID)
@@ -1039,7 +1044,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
         // Parameter: p->sigma
         sigma = p->sigma;
     } else {
-        sigma = 1;
+        sigma = 1.0;
     }
 
     if (p->RNGFlagEncountered) {
@@ -1281,11 +1286,7 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
 		waveHndl positionsWave = CopyMatrixToIgorDPWave(localizedPositionsMatrix, outputWaveParams);
 		std::string waveNote = analysisOptionsStream.str();
 		if (!waveNote.empty()) {
-			Handle waveNoteHandle = NewHandle(waveNote.length());
-			if (waveNoteHandle == NULL)
-				throw std::bad_alloc();
-			PutCStringInHandle(waveNote.c_str(), waveNoteHandle);
-			SetWaveNote(positionsWave, waveNoteHandle);
+            SetWaveNote(positionsWave, waveNote);
 		}
     }
     catch (std::bad_alloc) {
@@ -1976,6 +1977,12 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
     } else {
         return TOO_FEW_PARAMETERS;
     }
+    
+    int particleFittingMethod = LOCALIZATION_METHOD_2DGAUSS;
+    if (p->FMFlagEncountered) {
+        // Parameter: p->fittingMethod
+        particleFittingMethod = p->fittingMethod;
+    }
 
     if (p->ABSFlagEncountered) {
         // Parameter: p->absoluteThreshold
@@ -2059,6 +2066,35 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
         if (particle_finding_method == PARTICLEFINDER_RADIUS) {
             return TOO_FEW_PARAMETERS;
         }
+    }
+    
+    std::shared_ptr<FitPositions> positions_fitter;
+    double sigma = 1.0;
+    switch (particleFittingMethod) {
+        case LOCALIZATION_METHOD_2DGAUSS:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_SymmetricGaussian(PSFWidth, sigma));
+            break;
+        case LOCALIZATION_METHOD_2DGAUSS_FIXEDWIDTH:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_FixedWidthGaussian(PSFWidth, sigma));
+            break;
+        case LOCALIZATION_METHOD_MULTIPLICATION:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositionsMultiplication(PSFWidth, sigma));
+            break;
+        case LOCALIZATION_METHOD_CENTROID:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositionsCentroid(PSFWidth));
+            break;
+        case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian_SymmetricPSF(PSFWidth, sigma));
+            break;
+        case LOCALIZATION_METHOD_2DGAUSS_ELLIPSOIDAL_ASTIGMATISM:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_EllipsoidalGaussian(PSFWidth, sigma));
+            break;
+        case LOCALIZATION_METHOD_MLEwG:
+            positions_fitter = std::shared_ptr<FitPositions>(new FitPositions_MLEwG(PSFWidth));
+            break;
+        default:
+            throw std::runtime_error("Unknown localization method");
+            break;
     }
 
     // Main parameters.
@@ -2225,32 +2261,13 @@ int ExecuteEmitterSegmentation(EmitterSegmentationRuntimeParamsPtr p) {
             for (std::vector<std::shared_ptr<ParticleVerifier> >::iterator it = particleVerifiers.begin(); it != particleVerifiers.end(); ++it) {
                 (*it)->VerifyParticles(CCD_Frame, located_particles);
             }
-
-            waveHndl outputWave;
-            size_t nParticles = (*located_particles).size();
-            dimensionSizes[0] = nParticles;
-            dimensionSizes[1] = 4;	// warning: magic number
-            dimensionSizes[2] = 0;
-
-            outputWave = MakeWaveUsingFullPath(std::string("M_LocatedParticles"), dimensionSizes, NT_FP64, 1);
-
-            offset = 0;
-            for (std::list<Particle>::iterator it = located_particles->begin(); it != located_particles->end(); ++it) {
-                indices[0] = offset;
-                indices[1] = 0;
-                value[0] = (*it).intensity;
-                MDSetNumericWavePointValue(outputWave, indices, value);
-                indices[1] = 1;
-                value[0] = (*it).x;
-                MDSetNumericWavePointValue(outputWave, indices, value);
-                indices[1] = 2;
-                value[0] = (*it).y;
-                MDSetNumericWavePointValue(outputWave, indices, value);
-                indices[1] = 3;
-                value[0] = (*it).background;
-                MDSetNumericWavePointValue(outputWave, indices, value);
-                ++offset;
-            }
+            
+            std::shared_ptr<LocalizedPositionsContainer> positions = positions_fitter->fit_positions(CCD_Frame, located_particles);
+            ImagePtr posMatrix = positions->getLocalizedPositionsAsMatrix();
+            waveHndl posWave = CopyMatrixToIgorDPWave(posMatrix, "M_LocatedParticles");
+            char buf[128];
+            sprintf(buf, "LOCALIZATION METHOD:%d;", particleFittingMethod);
+            SetWaveNote(posWave, buf);
         }
 
     }
@@ -3545,8 +3562,8 @@ static int RegisterEmitterSegmentation(void) {
     const char* runtimeStrVarList;
 
     // NOTE: If you change this template, you must change the EmitterSegmentationRuntimeParams structure as well.
-	cmdTemplate = "EmitterSegmentation /M=number:method /ABS=number:absoluteThreshold /PFA=number:PFA /SSG=number:smoothSigmaFactor /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
-	runtimeNumVarList = "";
+    cmdTemplate = "EmitterSegmentation /M=number:method /FM=number:fittingMethod /ABS=number:absoluteThreshold /PFA=number:PFA /SSG=number:smoothSigmaFactor /WDTH=number:PSFWidth /G={number:preprocessing, number:postprocessing} /F=number:particle_finder /PVER={number[100]:particleVerifiers} /R=number:radiusBetweenParticles /S=number:output_located_particles wave:CCD_Frame";
+    runtimeNumVarList = "";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(EmitterSegmentationRuntimeParams), (void*)ExecuteEmitterSegmentation, kOperationIsThreadSafe);
 }

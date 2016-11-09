@@ -639,6 +639,14 @@ waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName da
     return outputWriter.getWave();
 }
 
+void SetWaveNote(waveHndl wav, const std::string& note) {
+    Handle waveNoteHandle = NewHandle(note.length());   // will belong to Igor afterwards
+    if (waveNoteHandle == NULL)
+        throw std::bad_alloc();
+    PutCStringInHandle(note.c_str(), waveNoteHandle);
+    SetWaveNote(wav, waveNoteHandle);
+}
+
 void PrintToHistory(const std::string& str) {
     size_t offset = 0;
     while (offset < str.size()) {
