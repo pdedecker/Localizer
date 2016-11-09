@@ -653,7 +653,6 @@
 				LIBRARY_SEARCH_PATHS = ../lib/mac;
 				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.9;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -699,7 +698,6 @@
 				LLVM_LTO = YES;
 				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_REZFLAGS = "";
-				SDKROOT = macosx10.9;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
