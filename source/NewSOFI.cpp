@@ -412,7 +412,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         if (wantDebugMessages) {
             PrintVirtualPixelInfo(kernels, combinationWeights);
         }
-    });
+	});
     
     // make JackKnife images if needed
     if (wantJackKnife) {
@@ -509,7 +509,7 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
                 weight = evaluatedPartitionsSet.mean();
             }
             accumulatedWeights += std::abs(weight);
-            evaluated += evaluatedPartitionsSet * weight;
+            evaluated += evaluatedPartitionsSet * std::abs(weight);
             usedCombinationWeights.at(index).push_back(weight);
         }
         if (accumulatedWeights != 0.0) {
@@ -523,7 +523,7 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
                 (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
             }
         }
-    });
+	});
     
     return sofiImage;
 }
