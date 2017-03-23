@@ -43,7 +43,7 @@
 
 #include "NewSOFIKernels.h"
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int,int,int,double,double,double,int,int,bool)>& jackKnifeAllocator, bool wantDebugMessages);
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, std::map<PixelCombination, ImagePtr, ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int, int, int, double, double, double, int, int, bool)>& jackKnifeAllocator, bool wantDebugMessages, bool wantDebugPixelCombinationsWave);
 
 ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int order, const std::vector<SOFIKernel>& kernels, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<std::vector<double>>& usedCombinationWeights);
 double Prefactor(int nPartitions);
@@ -59,13 +59,15 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
 
 int NumberOfPixelCombinationsInKernels(const std::vector<SOFIKernel>& kernels);
 void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights);
+void SaveVirtualPixelInfoToWave(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights);
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages) {
     int nImages = imageLoader->getNImages();
-    
     std::vector<int> orders = options.orders;
     if (options.haveExternalPixelCombination) {
-        orders.resize(1);
+        if (orders.size() > 1) {
+            throw std::runtime_error("only a single order is supported with external pixel combinations");
+        }
         orders[0] = options.externalPixelCombinations.cols() / 2 - 1;
     }
     const bool isAuto = !options.wantCrossCumulant;
@@ -76,23 +78,24 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     ImagePtr& averageImage = options.averageImage;
     bool wantJackKnife = options.wantJackKnife;
     bool wantDebugMessages = options.wantDebugMessages;
+    bool wantDebugPixelCombinationsWave = options.wantDebugPixelCombinationsWave;
     std::vector<ExternalImageBuffer>& jackKnifeOutputImages = options.jackKnifeImages;
     const std::vector<double>& pixelCombinationWeights = options.pixelCombinationWeights;
     bool haveExplicitPixelCombinationWeights = !pixelCombinationWeights.empty();
     std::vector<std::vector<ImagePtr> > batchSOFIImages;    // SOFI image of each batch, 1 vector per order. Only used for jackknife.
     batchSOFIImages.resize(nOrders);
     std::vector<int> imagesIncludedInBatch;
-    
+
     int largestOrder = *std::max_element(orders.cbegin(), orders.cend());
     int lowestOrder = *std::min_element(orders.cbegin(), orders.cend());
     if (!Within(largestOrder, kMinSofiOrder, kMaxSofiOrder) || !Within(lowestOrder, kMinSofiOrder, kMaxSofiOrder)) {
         throw std::runtime_error("orders must be between 1 and 6");
     }
-    
+
     if ((options.pixelCombinationCutoff < 1.0) || std::isnan(options.pixelCombinationCutoff)) {
         throw std::runtime_error("pixel combination cutoff must be larger than 1.0");
     }
-    
+
     // note: calculation assumes that the first lag time is zero - this must be enforced here
     if (!lagTimes.empty()) {
         // have explicit lag times
@@ -108,12 +111,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     }
     int largestLagTime = *std::max_element(lagTimes.cbegin(), lagTimes.cend());
     int smallestLagTime = *std::min_element(lagTimes.cbegin(), lagTimes.cend());
-    
-    // only a single order for external pixel combinations
-    if (options.haveExternalPixelCombination && orders.size() > 1) {
-        throw std::runtime_error("only a single order is supported with external pixel combinations");
-    }
-    
+
     std::vector<std::pair<int, std::vector<SOFIKernel> > > kernelPairs;
     if (!options.haveExternalPixelCombination) {
         for (int i = 0; i < nOrders; ++i) {
@@ -126,7 +124,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     } else {
         kernelPairs.push_back(std::pair<int, std::vector<SOFIKernel>>(orders[0], KernelsFromExternalDescription(options.externalPixelCombinations, lagTimes)));
     }
-    
+
     // if weights are specified then we can only calculate a single order
     // and the number of points needs to match.
     if (haveExplicitPixelCombinationWeights) {
@@ -146,8 +144,8 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
             }
         }
     }
-    
-    std::map<PixelCombination,ImagePtr,ComparePixelCombinations> pixelMap;
+
+    std::map<PixelCombination, ImagePtr, ComparePixelCombinations> pixelMap;
     int boundaryMargin = 0;
     std::vector<std::vector<ImagePtr> > allSubImages(nOrders);
     ImagePtr batchAverageImage;
@@ -156,7 +154,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         averageImage->setConstant(0.0);
         batchAverageImage = ImagePtr(new Image(*averageImage));
     }
-    
+
     progressReporter->CalculationStarted();
     // determine how many batches to use
     int batchSize = (requestedBatchSize > 0) ? requestedBatchSize : 100;
@@ -166,9 +164,9 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
     } else {
         nBatches = nImages / batchSize + 1;
     }
-    
+
     std::vector<std::vector<std::vector<ImagePtr> > > jackKnifeBatchSOFIImages(nBatches);  // jackknife SOFI images. batch / order / images
-    
+
     int imagesProcessedSoFar = 0;                   // number of images that has been processed, for progress reporting
     int firstImageForWhichDataCanBeCalculated = std::abs(smallestLagTime);
     int lastImageForWhichDataCanBeCalculated = nImages - 1 - largestLagTime;
@@ -184,9 +182,10 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
         firstImageToProcessInBatch += batchSize;
         lastImageToProcessInBatch = std::min(firstImageToProcessInBatch + batchSize - 1, lastImageForWhichDataCanBeCalculated);
         std::vector<ImagePtr> subImages;
-        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, pixelMap, boundaryMargin, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeOutputImages, options.jackKnifeAllocator, wantDebugMessages);
+
+        int nImagesIncluded = RawSOFIWorker(imageLoader, firstImageToProcessInBatch, lastImageToProcessInBatch, imagesProcessedSoFar, totalNumberOfImagesToProcess, progressReporter, kernelPairs, lagTimes, pixelMap, boundaryMargin, subImages, wantAverageImage, batchAverageImage, wantJackKnife, jackKnifeOutputImages, options.jackKnifeAllocator, wantDebugMessages, wantDebugPixelCombinationsWave);
         totalNumberOfImagesIncluded += nImagesIncluded;
-        
+
         double batchWeight = static_cast<double>(nImagesIncluded) / static_cast<double>(batchSize);
         summedBatchWeights += batchWeight;
         for (int j = 0; j < nOrders; ++j) {
@@ -206,7 +205,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
             imagesIncludedInBatch.push_back(nImagesIncluded);
         }
     }
-    
+
     // create output images and perform pixelation correction
     tbb::parallel_for<int>(0, nOrders, [&](int orderIndex) {
         *mergedImages[orderIndex] /= summedBatchWeights;
@@ -216,13 +215,14 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
             PerformPixelationCorrection(mergedImages[orderIndex], options.alsoCorrectVariance, nVirtualPixels.first, nVirtualPixels.second);
         }
     });
-    
+
     sofiOutputImages = mergedImages;
+
     options.outputUsedBoundaryMargin = boundaryMargin;
     
     if (wantAverageImage)
         *averageImage /= summedBatchWeights;
-    
+
     if (wantJackKnife) {
         AssembleJackKnifeImages(imagesIncludedInBatch, batchSize, batchSOFIImages, jackKnifeOutputImages);
         if (options.doPixelationCorrection) {
@@ -235,7 +235,7 @@ void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, s
             }
         }
     }
-    
+
     progressReporter->CalculationDone();
 }
 
@@ -244,7 +244,7 @@ void MinMaxDeltas(const PixelCombination& pixelCombination, int& minRowDelta, in
     minColDelta = 1000;
     maxRowDelta = -1000;
     maxColDelta = -1000;
-    
+
     for (size_t i = 0; i < pixelCombination.size(); ++i) {
         const PixelCoordinate& pixel = pixelCombination[i];
         if (pixel.dx < minRowDelta)
@@ -270,7 +270,7 @@ PixelCombination OffsetPixelCombination(const PixelCombination& pixelCombination
 void AssembleJackKnifeImages(const std::vector<int>& imagesIncludedInBatch, const int batchSize, const std::vector<std::vector<ImagePtr> >& batchSOFIImages, std::vector<ExternalImageBuffer>& jackKnifeOutputImages) {
     int nBatches = imagesIncludedInBatch.size();
     int nOrders = batchSOFIImages.size();
-    
+
     tbb::parallel_for<int>(0, nOrders, [&](int orderIndex) {
         int nJackknifeImages = jackKnifeOutputImages.at(orderIndex).nImages();
         tbb::parallel_for<int>(0, nJackknifeImages, [&](int jkImageIndex) {
@@ -302,15 +302,15 @@ void AssembleJackKnifeImages(const std::vector<int>& imagesIncludedInBatch, cons
 void AccumulateCombination(const PixelCombination& currentCombination, ImagePtr matrix, const boost::circular_buffer<ImagePtr>& imageBuffer, const int minTimeLag, const int boundaryMargin, double accumulationFactor = 1.0);
 int RequiredBorderMargin(const std::vector<SOFIKernel>& combinations);
 
-int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int,int,int,double,double,double,int,int,bool)>& jackKnifeAllocator, bool wantDebugMessages) {
+int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToProcess, const int lastImageToProcess, int &imagesProcessedSoFar, const int& totalNumberOfImagesToProcess, std::shared_ptr<ProgressReporter> progressReporter, const std::vector<std::pair<int, std::vector<SOFIKernel> > >& orders, const std::vector<int>& timeLags, std::map<PixelCombination, ImagePtr, ComparePixelCombinations>& pixelMap, int& boundaryMargin, std::vector<ImagePtr>& sofiImages, bool wantAverageImage, ImagePtr& averageImage, bool wantJackKnife, std::vector<ExternalImageBuffer>& jackKnifeImages, std::function<ExternalImageBuffer(int, int, int, double, double, double, int, int, bool)>& jackKnifeAllocator, bool wantDebugMessages, bool wantDebugPixelCombinationsWave) {
     int nRows = imageLoader->getXSize();
     int nCols = imageLoader->getYSize();
     int nImagesIncluded = 0;
     sofiImages.clear();
-    
+
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.cend());
-    
+
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
 
     // store all needed pixel combinations in the map
@@ -359,20 +359,20 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         //ostream << "Map has total of " << pixelMap.size() << " entries (" << static_cast<int>(static_cast<double>(pixelMap.size()) / static_cast<double>(allCombinations) * 100.0) << "% retained)\r";
         //XOPNotice(ostream.str().c_str());
     }
-    
+
     // clear all accumulated pixel combinations
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
         matrix->setConstant(0.0);
     });
-    
+
     if (wantAverageImage) {
         if ((averageImage.get() == NULL) || (averageImage->rows() != nRows) || (averageImage->cols() != nCols)) {
             averageImage = ImagePtr(new Image(nRows, nCols));
         }
         averageImage->setConstant(0.0);
     }
-    
+
     // initialize the buffer with the images.
     imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
@@ -382,7 +382,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         }
         imageBuffer.push_back(imageLoader->readNextImage());
     }
-    
+
     // calculate all products over the images
     int firstImageWithOutput = firstImageToProcess;
     int lastImageWithOutput = lastImageToProcess;
@@ -391,22 +391,22 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         int abortStatus = progressReporter->UpdateCalculationProgress(imagesProcessedSoFar, totalNumberOfImagesToProcess);
         if (abortStatus)
             throw USER_ABORTED("user abort");
-        
+
         ImagePtr currentImage = imageLoader->readNextImage();
         imageBuffer.push_back(currentImage);
         imagesProcessedSoFar += 1;
-        
+
         nImagesIncluded += 1;
         if (wantAverageImage)
             *averageImage += *currentImage;
-        
+
         // do the actual calculation
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [&](std::pair<PixelCombination,ImagePtr> item) {
+        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [&](std::pair<PixelCombination, ImagePtr> item) {
             AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin);
         });
     }
     imagesProcessedSoFar += lastImageToProcess - lastImageWithOutput;
-    
+
     // normalize by number of images
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
@@ -415,7 +415,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
     if (wantAverageImage) {
         *averageImage /= static_cast<double>(nImagesIncluded);
     }
-    
+
     // and make the SOFI images
     sofiImages.resize(orders.size());
     tbb::parallel_for<int>(0, orders.size(), [&](int i) {
@@ -425,11 +425,15 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
         const std::vector<SOFIKernel>& kernels = calculation.second;
         ImagePtr sofiImage = AssembleSOFIImage(nRows, nCols, order, kernels, pixelMap, boundaryMargin, combinationWeights);
         sofiImages[i] = sofiImage;
-        if (wantDebugMessages) {
-            PrintVirtualPixelInfo(kernels, combinationWeights);
+        if (wantDebugMessages && (orders.size() == 1)) {
+            if (!wantDebugPixelCombinationsWave) {
+                PrintVirtualPixelInfo(kernels, combinationWeights);
+            } else {
+                SaveVirtualPixelInfoToWave(kernels, combinationWeights);
+            }
         }
-	});
-    
+    });
+
     // make JackKnife images if needed
     if (wantJackKnife) {
         if (jackKnifeImages.empty()) {
@@ -457,7 +461,7 @@ int RawSOFIWorker(std::shared_ptr<ImageLoader> imageLoader, const int firstImage
             }
         }
     }
-    
+
     return nImagesIncluded;
 }
 
@@ -520,7 +524,7 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
     sofiImage->setConstant(0.0);
     usedCombinationWeights.clear();
     usedCombinationWeights.resize(kernels.size());
-    
+
     tbb::parallel_for(size_t(0), kernels.size(), [&](const size_t index) {
         const SOFIKernel& kernel = kernels.at(index);
         const std::vector<double>& explicitCombinationWeights = kernel.requestedCombinationWeights;
@@ -546,7 +550,7 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
         if (accumulatedWeights != 0.0) {
             evaluated /= accumulatedWeights;
         }
-        
+
         for (int col = 0; col < nInputCols - nPixelsLostToBoundary1D; ++col) {
             for (int row = 0; row < nInputRows - nPixelsLostToBoundary1D; ++row) {
                 int baseOutputRow = row * nVirtualPixelsX;
@@ -554,23 +558,23 @@ ImagePtr AssembleSOFIImage(const int nInputRows, const int nInputCols, const int
                 (*sofiImage)(baseOutputRow + kernel.outputDeltaX, baseOutputCol + kernel.outputDeltaY) = evaluated(row, col);
             }
         }
-	});
-    
+    });
+
     return sofiImage;
 }
 
-Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
+Eigen::MatrixXd EvaluatePartitionsSet(const GroupOfPartitions& groupOfPartitions, const std::map<PixelCombination, ImagePtr, ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
     Eigen::MatrixXd accumulated(nOutputRows, nOutputCols);
     accumulated.setConstant(0.0);
     for (auto it = groupOfPartitions.cbegin(); it != groupOfPartitions.cend(); ++it) {
         int nSetsInPartition = it->size();
         accumulated += Prefactor(nSetsInPartition) * EvaluatePartition(*it, pixelMap, boundaryMargin, nOutputRows, nOutputCols);
     }
-    
+
     return accumulated;
 }
 
-Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
+Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<PixelCombination, ImagePtr, ComparePixelCombinations>& pixelMap, const int boundaryMargin, const int nOutputRows, const int nOutputCols) {
     Eigen::MatrixXd result(nOutputRows, nOutputCols);
     result.setConstant(1.0);
     int minRowDelta, maxRowDelta, minColDelta, maxColDelta;
@@ -585,7 +589,7 @@ Eigen::MatrixXd EvaluatePartition(const Partition& partition, const std::map<Pix
             }
         }
     }
-    
+
     return result;
 }
 
@@ -625,7 +629,7 @@ void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool a
     int nKernelRows = nVirtualPixelsX, nKernelCols = nVirtualPixelsY;
     int nPixelsOfEachKind = nRows * nCols / (nVirtualPixelsX * nVirtualPixelsY);
     int kindOfRow, kindOfCol;
-    
+
     // calculate averages
     Eigen::ArrayXXd pixelAverages(nVirtualPixelsX, nVirtualPixelsY);
     pixelAverages.setConstant(0.0);
@@ -651,7 +655,7 @@ void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool a
         }
         pixelVariances /= static_cast<double>(nPixelsOfEachKind - 1);
     }
-    
+
     // now determine correction factors, arbitrary to the first element
     for (int col = 0; col < nKernelCols; ++col) {
         for (int row = 0; row < nKernelRows; ++row) {
@@ -669,7 +673,7 @@ void PerformPixelationCorrection(double* imageData, int nRows, int nCols, bool a
             }
         }
     }
-    
+
     // perform the correction
     for (int col = 0; col < nCols; ++col) {
         for (int row = 0; row < nRows; ++row) {
@@ -687,28 +691,28 @@ void PerformPixelationCorrection(ImagePtr imageToCorrect, bool alsoCorrectVarian
 void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToInclude, const int lastImageToInclude, const int nImagesIncludedInSOFI, const int order, const std::vector<int>& timeLags, const std::vector<SOFIKernel>& kernels, std::map<PixelCombination,ImagePtr,ComparePixelCombinations>& pixelMap, const int boundaryMargin, std::vector<ImagePtr>& jackKnifeImages) {
     int nInputRows = imageLoader->getXSize();
     int nInputCols = imageLoader->getYSize();
-    
+
     // Mathematically pixelMap will not be changed by this function. However, its values will be manipulated and due to round-off
     // these will inevitably be different when this function returns.
-    
+
     // find min and max time lag
     int minTimeLag = *std::min_element(timeLags.cbegin(), timeLags.cend());
     int maxTimeLag = *std::max_element(timeLags.cbegin(), timeLags.end());
-    
+
     int nImagesToInclude = lastImageToInclude - firstImageToInclude + 1;
     jackKnifeImages.clear();
     jackKnifeImages.reserve(nImagesToInclude);
-    
+
     // pixelMap will have been normalized by the number of images
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
         (*matrix) *= static_cast<double>(nImagesIncludedInSOFI);
     });
-    
+
     int nImagesInBuffer = maxTimeLag - minTimeLag + 1;
     int firstImageToProcess = firstImageToInclude;
     int lastImageToProcess = lastImageToInclude;
-    
+
     // initialize the buffer with the images.
     imageLoader->spoolTo(firstImageToProcess - std::abs(minTimeLag));
     boost::circular_buffer<ImagePtr> imageBuffer(nImagesInBuffer);
@@ -718,16 +722,16 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
         }
         imageBuffer.push_back(imageLoader->readNextImage());
     }
-    
+
     // calculate all products over the images
     int firstImageWithOutput = firstImageToProcess;
     int lastImageWithOutput = lastImageToProcess;
     for (int i = firstImageWithOutput; i <= lastImageWithOutput; ++i) {
         ImagePtr currentImage = imageLoader->readNextImage();
         imageBuffer.push_back(currentImage);
-        
-        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination,ImagePtr> item) {
-            
+
+        tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
+
             // subtract the contribution of the current image from the pixelMap
             AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin, -1.0);
 
@@ -735,7 +739,7 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
             ImagePtr matrix = item.second;
             (*matrix) /= static_cast<double>(nImagesToInclude - 1);
         });
-        
+
         // calculate a SOFI image without the current image's contribution
         std::vector<std::vector<double>> usedCombinationWeights;
         ImagePtr partialSOFI = AssembleSOFIImage(nInputRows, nInputCols, order, kernels, pixelMap, boundaryMargin, usedCombinationWeights);
@@ -745,15 +749,15 @@ void JackKnife(std::shared_ptr<ImageLoader> imageLoader, const int firstImageToI
             // undo normalization
             ImagePtr matrix = item.second;
             (*matrix) *= static_cast<double>(nImagesToInclude - 1);
-            
+
             // add the contribution of the current image back in
             AccumulateCombination(item.first, item.second, imageBuffer, minTimeLag, boundaryMargin, 1.0);
         });
-        
+
         // store the partial SOFI image
         jackKnifeImages.push_back(partialSOFI);
     }
-    
+
     // re-normalize the pixel map
     tbb::parallel_do(pixelMap.begin(), pixelMap.end(), [=](std::pair<PixelCombination, ImagePtr> item) {
         ImagePtr matrix = item.second;
@@ -766,13 +770,13 @@ int NumberOfPixelCombinationsInKernels(const std::vector<SOFIKernel>& kernels) {
     for (auto it = kernels.cbegin(); it != kernels.cend(); it++) {
         nCombinations += it->pixelCombinations.size();
     }
-    
+
     return nCombinations;
 }
 
 void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights) {
     std::ostringstream ss;
-    
+
     for (size_t i = 0; i < kernels.size(); i++) {
         const SOFIKernel& singleKernel = kernels[i];
         ss << "(" << singleKernel.outputDeltaX << "," << singleKernel.outputDeltaY << ")\r";
@@ -785,10 +789,36 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
             ss << "}\r";
         }
     }
-    
+
 #ifdef WITH_IGOR
     PrintToHistory(ss.str());
 #endif
+}
+
+void SaveVirtualPixelInfoToWave(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights) {
+    int nRows = 0;
+    for (const SOFIKernel& kernel : kernels) {
+        nRows += kernel.pixelCombinations.size();
+    }
+    int nCols = 2 + 2 + (kernels.at(0).pixelCombinations.at(0).size() * 3);
+
+    Eigen::MatrixXd pixelInfo(nRows, nCols);
+    int offset = 0;
+    for (const SOFIKernel& kernel : kernels) {
+        for (int combinationIndex = 0; combinationIndex < kernel.pixelCombinations.size(); combinationIndex += 1) {
+        //for (const PixelCombination& combination : kernel.pixelCombinations) {
+            const PixelCombination& combination = kernel.pixelCombinations.at(combinationIndex);
+            pixelInfo.block(offset, 0, 1, 2) << kernel.outputDeltaX, kernel.outputDeltaY, kernel.scores, kernel.requestedCombinationWeights;
+            int delta = 4;
+            for (const PixelCoordinate& coord : combination) {
+                pixelInfo.block(offset, delta, 1, 3) << coord.dx, coord.dy, coord.dt;
+                delta += 3;
+            }
+            offset += 1;
+        }
+    }
+
+    CopyMatrixToIgorDPWave(pixelInfo, "M_PixelsDebugInfo");
 }
 
 Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff) {

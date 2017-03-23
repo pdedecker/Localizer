@@ -59,7 +59,8 @@ public:
         wantJackKnife(false),
         pixelCombinationCutoff(1.0),
         haveExternalPixelCombination(false),
-        wantDebugMessages(false)
+        wantDebugMessages(false),
+        wantDebugPixelCombinationsWave(false)
     {
         orders.push_back(2);
     }
@@ -82,9 +83,9 @@ public:
     bool haveExternalPixelCombination;
     Eigen::MatrixXd externalPixelCombinations;
     std::vector<double> pixelCombinationWeights;
-    bool wantDebugMessages;
-    
     int outputUsedBoundaryMargin;
+    bool wantDebugMessages;
+    bool wantDebugPixelCombinationsWave;
 };
 
 void DoNewSOFI(std::shared_ptr<ImageLoader> imageLoader, SOFIOptions& options, std::shared_ptr<ProgressReporter> progressReporter, std::vector<ImagePtr>& sofiOutputImages);

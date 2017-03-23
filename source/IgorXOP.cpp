@@ -3180,17 +3180,19 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
     bool wantJackKnife = false;
     if (p->JACKFlagEncountered) {
         wantJackKnife = true;
-		if (p->JACKFlagParamsSet[0]) {
+        if (p->JACKFlagParamsSet[0]) {
             wantJackKnife = (p->doJackKnife != 0.0);
 		}
 	}
     
     bool wantDebugMessages = false;
+	bool wantDebugPixelCombinationsWave = false;
     if (p->DEBGFlagEncountered) {
         wantDebugMessages = true;
         if (p->DEBGFlagParamsSet[0]) {
             // Optional parameter: p->printDebugInfo
             wantDebugMessages = (p->printDebugInfo != 0.0);
+            wantDebugPixelCombinationsWave = (p->printDebugInfo == 2.0);
         }
     }
     
@@ -3270,6 +3272,7 @@ static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
         sofiOptions.pixelCombinationCutoff = pixelCombinationCutoff;
         sofiOptions.pixelCombinationWeights = pixelCombinationWeights;
         sofiOptions.wantDebugMessages = wantDebugMessages;
+        sofiOptions.wantDebugPixelCombinationsWave = wantDebugPixelCombinationsWave;
         sofiOptions.jackKnifeAllocator = [&](int nRows, int nCols, int nImages, double offset, double deltaX, double deltaY, int order, int orderIndex, bool multipleOrders) {
             size_t nPixelsRequired = (size_t)nRows * (size_t)nCols * (size_t)nImages;
             DataFolderAndName jackKnifeOutputWaveParams = outputWaveParams;
