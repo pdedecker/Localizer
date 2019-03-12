@@ -1,5 +1,3 @@
-/* $Id: tif_win32.c,v 1.41 2015-08-23 20:12:44 bfriesen Exp $ */
-
 /*
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
@@ -360,6 +358,14 @@ _TIFFmalloc(tmsize_t s)
 	return (malloc((size_t) s));
 }
 
+void* _TIFFcalloc(tmsize_t nmemb, tmsize_t siz)
+{
+    if( nmemb == 0 || siz == 0 )
+        return ((void *) NULL);
+
+    return calloc((size_t) nmemb, (size_t)siz);
+}
+
 void
 _TIFFfree(void* p)
 {
@@ -399,60 +405,21 @@ _TIFFmemcmp(const void* p1, const void* p2, tmsize_t c)
 static void
 Win32WarningHandler(const char* module, const char* fmt, va_list ap)
 {
-#ifndef TIF_PLATFORM_CONSOLE
-	LPTSTR szTitle;
-	LPTSTR szTmp;
-	LPCTSTR szTitleText = "%s Warning";
-	LPCTSTR szDefaultModule = "LIBTIFF";
-	LPCTSTR szTmpModule = (module == NULL) ? szDefaultModule : module;
-        SIZE_T nBufSize = (strlen(szTmpModule) +
-                        strlen(szTitleText) + strlen(fmt) + 256)*sizeof(char);
-
-	if ((szTitle = (LPTSTR)LocalAlloc(LMEM_FIXED, nBufSize)) == NULL)
-		return;
-	sprintf(szTitle, szTitleText, szTmpModule);
-	szTmp = szTitle + (strlen(szTitle)+2)*sizeof(char);
-	vsnprintf(szTmp, nBufSize-(strlen(szTitle)+2)*sizeof(char), fmt, ap);
-	MessageBoxA(GetFocus(), szTmp, szTitle, MB_OK | MB_ICONINFORMATION);
-	LocalFree(szTitle);
-
-	return;
-#else
 	if (module != NULL)
 		fprintf(stderr, "%s: ", module);
 	fprintf(stderr, "Warning, ");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, ".\n");
-#endif        
 }
 TIFFErrorHandler _TIFFwarningHandler = Win32WarningHandler;
 
 static void
 Win32ErrorHandler(const char* module, const char* fmt, va_list ap)
 {
-#ifndef TIF_PLATFORM_CONSOLE
-	LPTSTR szTitle;
-	LPTSTR szTmp;
-	LPCTSTR szTitleText = "%s Error";
-	LPCTSTR szDefaultModule = "LIBTIFF";
-	LPCTSTR szTmpModule = (module == NULL) ? szDefaultModule : module;
-        SIZE_T nBufSize = (strlen(szTmpModule) +
-                        strlen(szTitleText) + strlen(fmt) + 256)*sizeof(char);
-
-	if ((szTitle = (LPTSTR)LocalAlloc(LMEM_FIXED, nBufSize)) == NULL)
-		return;
-	sprintf(szTitle, szTitleText, szTmpModule);
-	szTmp = szTitle + (strlen(szTitle)+2)*sizeof(char);
-	vsnprintf(szTmp, nBufSize-(strlen(szTitle)+2)*sizeof(char), fmt, ap);
-	MessageBoxA(GetFocus(), szTmp, szTitle, MB_OK | MB_ICONEXCLAMATION);
-	LocalFree(szTitle);
-	return;
-#else
 	if (module != NULL)
 		fprintf(stderr, "%s: ", module);
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, ".\n");
-#endif        
 }
 TIFFErrorHandler _TIFFerrorHandler = Win32ErrorHandler;
 

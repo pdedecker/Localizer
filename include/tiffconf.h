@@ -1,4 +1,3 @@
-/* libtiff/tiffconf.h.  Generated from tiffconf.h.in by configure.  */
 /*
   Configuration defines for installed libtiff.
   This file maintained for backward compatibility. Do not use definitions
@@ -8,46 +7,62 @@
 #ifndef _TIFFCONF_
 #define _TIFFCONF_
 
-#include <stdint.h>
-
-/* Signed 16-bit type */
-#define TIFF_INT16_T int16_t
-
-/* Signed 32-bit type */
-#define TIFF_INT32_T int32_t
-
-/* Signed 64-bit type */
-#define TIFF_INT64_T int64_t
+/* The size of a `int', as computed by sizeof. */
+#define SIZEOF_INT 4
 
 /* Signed 8-bit type */
-#define TIFF_INT8_T int8_t
-
-/* Unsigned 16-bit type */
-#define TIFF_UINT16_T uint16_t
-
-/* Unsigned 32-bit type */
-#define TIFF_UINT32_T uint32_t
-
-/* Unsigned 64-bit type */
-#define TIFF_UINT64_T uint64_t
+#define TIFF_INT8_T signed char
 
 /* Unsigned 8-bit type */
-#define TIFF_UINT8_T uint8_t
+#define TIFF_UINT8_T unsigned char
+
+/* Signed 16-bit type */
+#define TIFF_INT16_T signed short
+
+/* Unsigned 16-bit type */
+#define TIFF_UINT16_T unsigned short
+
+/* Signed 32-bit type formatter */
+#define TIFF_INT32_FORMAT "%d"
+
+/* Signed 32-bit type */
+#define TIFF_INT32_T signed int
+
+/* Unsigned 32-bit type formatter */
+#define TIFF_UINT32_FORMAT "%u"
+
+/* Unsigned 32-bit type */
+#define TIFF_UINT32_T unsigned int
+
+/* Signed 64-bit type formatter */
+#define TIFF_INT64_FORMAT "%I64d"
+
+/* Signed 64-bit type */
+#define TIFF_INT64_T signed __int64
+
+/* Unsigned 64-bit type formatter */
+#define TIFF_UINT64_FORMAT "%I64u"
+
+/* Unsigned 64-bit type */
+#define TIFF_UINT64_T unsigned __int64
+
+#if _WIN64
+/*
+  Windows 64-bit build
+*/
 
 /* Signed size type */
-#define TIFF_SSIZE_T signed long
+#  define TIFF_SSIZE_T TIFF_INT64_T
 
-/* Pointer difference type */
-#define TIFF_PTRDIFF_T ptrdiff_t
+#else
+/*
+  Windows 32-bit build
+*/
 
-/* Define to 1 if the system has the type `int16'. */
-/* #undef HAVE_INT16 */
+/* Signed size type */
+#  define TIFF_SSIZE_T signed int
 
-/* Define to 1 if the system has the type `int32'. */
-/* #undef HAVE_INT32 */
-
-/* Define to 1 if the system has the type `int8'. */
-/* #undef HAVE_INT8 */
+#endif
 
 /* Compatibility stuff. */
 
@@ -66,7 +81,7 @@
 #define CCITT_SUPPORT 1
 
 /* Support JPEG compression (requires IJG JPEG library) */
-#define JPEG_SUPPORT 1
+/* #undef JPEG_SUPPORT */
 
 /* Support JBIG compression (requires JBIG-KIT library) */
 /* #undef JBIG_SUPPORT */
@@ -82,19 +97,19 @@
 
 /* Support Old JPEG compresson (read contrib/ojpeg/README first! Compilation
    fails with unpatched IJG JPEG library) */
-#define OJPEG_SUPPORT 1
+/* #undef OJPEG_SUPPORT */
 
 /* Support Macintosh PackBits algorithm */
 #define PACKBITS_SUPPORT 1
 
 /* Support Pixar log-format algorithm (requires Zlib) */
-#define PIXARLOG_SUPPORT 1
+/* #undef PIXARLOG_SUPPORT */
 
 /* Support ThunderScan 4-bit RLE algorithm */
 #define THUNDER_SUPPORT 1
 
 /* Support Deflate compression */
-#define ZIP_SUPPORT 1
+/* #undef ZIP_SUPPORT */
 
 /* Support strip chopping (whether or not to convert single-strip uncompressed
    images to mutiple strips of ~8Kb to reduce memory usage) */
@@ -113,7 +128,7 @@
 #define CHECK_JPEG_YCBCR_SUBSAMPLING 1
 
 /* Support MS MDI magic number files as TIFF */
-#define MDI_SUPPORT 1
+/* #undef MDI_SUPPORT */
 
 /*
  * Feature support definitions.
@@ -128,3 +143,10 @@
 #define IPTC_SUPPORT
 
 #endif /* _TIFFCONF_ */
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 8
+ * fill-column: 78
+ * End:
+ */

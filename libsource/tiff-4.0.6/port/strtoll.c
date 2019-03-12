@@ -1,9 +1,9 @@
-/*
- * Copyright (c) 1989, 1993
- *	The Regents of the University of California.  All rights reserved.
- *
- * This code is derived from software contributed to Berkeley by
- * Roger L. Snyder.
+/* $NetBSD: strtol.c,v 1.18 2008/08/20 12:42:26 joerg Exp $ */
+
+/*-
+ * Copyright (c) 2005 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2003 Citrus Project,
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -13,14 +13,11 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -31,30 +28,17 @@
  */
 
 #if 0
-static char sccsid[] = "@(#)lsearch.c	8.1 (Berkeley) 6/4/93";
-__RCSID("$NetBSD: lsearch.c,v 1.2 2005/07/06 15:47:15 drochner Exp $");
+__RCSID("$NetBSD: strtol.c,v 1.18 2008/08/20 12:42:26 joerg Exp $");
 #endif
 
-#ifdef _WIN32_WCE
-# include <wce_types.h>
-#else
-# include <sys/types.h>
-#endif
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
 
-#ifndef NULL
-# define NULL 0
-#endif
+#define	_FUNCNAME	strtoll
+#define	__INT		long long
+#define	__INT_MIN	LLONG_MIN
+#define	__INT_MAX	LLONG_MAX
 
-void *
-lfind(const void *key, const void *base, size_t *nmemb, size_t size,
-      int(*compar)(const void *, const void *))
-{
-	char *element, *end;
-
-	end = (char *)base + *nmemb * size;
-	for (element = (char *)base; element < end; element += size)
-		if (!compar(element, key))		/* key found */
-			return element;
-
-	return NULL;
-}
+#include "_strtol.h"
