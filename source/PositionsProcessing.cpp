@@ -146,13 +146,13 @@ std::vector<double> VR_sp_pp2(const double *xCoordinates1, const double *yCoordi
         double accum = 0.0;
         for (size_t i = 0; i < result.size(); i++) {
             accum += result[i];
-            result[i] = sqrt(accum / (M_PI * nPoints1 * nPoints2)) * sqrtArea;
+            result[i] = sqrt(accum / (EIGEN_PI * nPoints1 * nPoints2)) * sqrtArea;
         }
     } else {    // pairwise correlation
         double probeDensity2 = (double)nPoints2 / (xSize * ySize);
         for (size_t i = 0; i < result.size(); i++) {
             double r = i * binWidth;
-            result[i] = result[i] / (M_PI * ((r + binWidth) * (r + binWidth) - (r * r)) * probeDensity2 * nPoints1);
+            result[i] = result[i] / (EIGEN_PI * ((r + binWidth) * (r + binWidth) - (r * r)) * probeDensity2 * nPoints1);
         }
     }
     
@@ -183,7 +183,7 @@ double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,
 						// is closer than the radius of the circle
 						// so some part of it is outside the region
 			if (r[i] == 0.0)
-				b += M_PI;
+				b += EIGEN_PI;
 			else {
 				c = acos(r[i] / pointDistance);
 				c1 = atan(r[i - 1] / r[i]);
@@ -193,6 +193,6 @@ double VR_edge(double x, double y, double pointDistance, double xu0, double xl0,
 			}
 		}
     if (b < 6.28)
-		return (1.0 / (2.0 - b / M_PI));
+		return (1.0 / (2.0 - b / EIGEN_PI));
     return (0.0);
 }

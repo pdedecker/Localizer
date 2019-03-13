@@ -39,10 +39,13 @@
 
 #include <boost/smart_ptr.hpp>
 #include <eigen3/Eigen/Eigen>
+#include <fftw3.h>
 
 // the typedef for an image
 typedef Eigen::MatrixXd Image;
 typedef std::shared_ptr<Image> ImagePtr;
+
+typedef double fftw_complex__;	// work around issues with fftw_complex seemingly not working with std::shared_ptr.
 
 const int kMinSofiOrder = 1;
 const int kMaxSofiOrder = 6;

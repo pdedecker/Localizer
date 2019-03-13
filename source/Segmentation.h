@@ -100,7 +100,7 @@ protected:
 	
 	size_t kernelXSize, kernelYSize;
 	ImagePtr smallGaussianKernel;
-	std::shared_ptr<fftw_complex> GaussianKernelFFT;
+	std::shared_ptr<fftw_complex__> GaussianKernelFFT;
 	
 	double sum_squared_Gaussian;
 	size_t windowSize;

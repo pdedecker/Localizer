@@ -44,7 +44,7 @@ public:
 	
 	ImagePtr ConvolveMatrixWithSmallKernel(ImagePtr image, ImagePtr kernel);
 	ImagePtr ConvolveMatricesWithFFT(ImagePtr image1, ImagePtr image2);
-	ImagePtr ConvolveMatrixWithGivenFFT(ImagePtr image, std::shared_ptr<fftw_complex> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2);
+	ImagePtr ConvolveMatrixWithGivenFFT(ImagePtr image, std::shared_ptr<fftw_complex__> array2_FFT, size_t FFT_xSize2, size_t FFT_ySize2);
 	
 	// http://www.leptonica.com/convolution.html
 	ImagePtr ConvolveMatrixWithFlatKernel(ImagePtr image, size_t kernelXSize, size_t kernelYSize);
@@ -53,12 +53,12 @@ public:
 	 * Get the FFT of a single image, possibly for later use in a convolution.
 	 * The x and y size of the transformed image will be returned by reference in FFT_xSize and FFT_ySize.
 	 */
-	std::shared_ptr<fftw_complex> DoForwardFFT(ImagePtr image);
+	std::shared_ptr<fftw_complex__> DoForwardFFT(ImagePtr image);
 	
 	/**
 	 * Calculate the reverse FFT
 	 */
-	ImagePtr DoReverseFFT(std::shared_ptr<fftw_complex> array_FFT, size_t xSize, size_t ySize);
+	ImagePtr DoReverseFFT(std::shared_ptr<fftw_complex__> array_FFT, size_t xSize, size_t ySize);
 protected:
 	static boost::mutex FFTWPlannerMutex;
 };
