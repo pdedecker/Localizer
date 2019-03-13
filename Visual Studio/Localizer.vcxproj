@@ -361,7 +361,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_ilp64.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-sgd-1_59.lib;libboost_date_time-vc120-mt-sgd-1_59.lib;libboost_system-vc120-mt-sgd-1_59.lib;libboost_chrono-vc120-mt-sgd-1_59.lib;libtiff64.lib;zlib64.lib;tbb_debug.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;libboost_thread-vc120-mt-sgd-1_59.lib;libboost_date_time-vc120-mt-sgd-1_59.lib;libboost_system-vc120-mt-sgd-1_59.lib;libboost_chrono-vc120-mt-sgd-1_59.lib;libtiff64.lib;zlib64.lib;tbb_debug.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -388,7 +388,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libtiff64.lib;zlib64.lib;mkl_intel_ilp64.lib;mkl_core.lib;mkl_tbb_thread.lib;gsl.lib;tbb_debug.lib;cblas.lib;libboost_thread-vc120-mt-sgd-1_59.lib;libboost_date_time-vc120-mt-sgd-1_59.lib;libboost_system-vc120-mt-sgd-1_59.lib;libboost_chrono-vc120-mt-sgd-1_59.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libtiff64.lib;zlib64.lib;gsl.lib;tbb_debug.lib;cblas.lib;libboost_thread-vc120-mt-sgd-1_59.lib;libboost_date_time-vc120-mt-sgd-1_59.lib;libboost_system-vc120-mt-sgd-1_59.lib;libboost_chrono-vc120-mt-sgd-1_59.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;C:\Program Files\MATLAB\R2013a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -547,7 +547,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_ilp64.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff64.lib;zlib64.lib;tbb.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff64.lib;zlib64.lib;tbb.lib;IGOR64.lib;XOPSupport64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName)64.xop</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;$(SolutionDir)\..\..\XOPSupport;$(SolutionDir)\..\..\XOPSupport\VC10;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -580,7 +580,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;mkl_intel_ilp64.lib;mkl_core.lib;mkl_tbb_thread.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff64.lib;zlib64.lib;tbb.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;libboost_thread-vc120-mt-s-1_59.lib;libboost_date_time-vc120-mt-s-1_59.lib;libboost_system-vc120-mt-s-1_59.lib;libboost_chrono-vc120-mt-s-1_59.lib;libtiff64.lib;zlib64.lib;tbb.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\mkl\lib\intel64;C:\Program Files\MATLAB\R2013a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
