@@ -37,7 +37,6 @@
 
 #include <algorithm>
 
-#include <boost/smart_ptr.hpp>
 #include <eigen3/Eigen/Eigen>
 #include <fftw3.h>
 

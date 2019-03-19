@@ -30,9 +30,9 @@
 #ifndef PALM_ANALYSIS_CONVOLVER_H
 #define PALM_ANALYSIS_CONVOLVER_H
 
+#include <mutex>
+
 #include <fftw3.h>
-#include "boost/thread/mutex.hpp"
-#include "boost/thread/shared_mutex.hpp"
 
 #include "Defines.h"
 #include "MatrixRecycler.h"
@@ -60,7 +60,7 @@ public:
 	 */
 	ImagePtr DoReverseFFT(std::shared_ptr<fftw_complex__> array_FFT, size_t xSize, size_t ySize);
 protected:
-	static boost::mutex FFTWPlannerMutex;
+	static std::mutex FFTWPlannerMutex;
 };
 
 #endif

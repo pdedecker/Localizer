@@ -73,6 +73,7 @@ PALMAnalysisController::PALMAnalysisController (std::shared_ptr<ThresholdImage> 
 		throw std::runtime_error("invalid range of frames to analyze specified");
 	
 	this->errorMessage.assign("");
+	this->shouldAbort = false;
 }
 
 std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnalysis(std::shared_ptr<ImageLoader> imageLoader_rhs) {
@@ -82,9 +83,8 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 	size_t numberOfThreads;
 	size_t firstFrame, lastFrame;
 	size_t nFramesToBeAnalyzed;
-	std::vector<std::shared_ptr<boost::thread> > threads;
-	std::shared_ptr<boost::thread> singleThreadPtr;
-	int firstThreadHasFinished, spinProcessStatus, progressStatus;
+	std::vector<std::future<void>> threads;
+	int spinProcessStatus, progressStatus;
 	size_t nFramesAnalyzed;
 	
 	this->localizedPositions = std::shared_ptr<LocalizedPositionsContainer>();
@@ -93,7 +93,7 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 		return this->localizedPositions;
 	}
 	
-	numberOfThreads = boost::thread::hardware_concurrency();
+	numberOfThreads = std::thread::hardware_concurrency();
 	if (numberOfThreads == 0) {
 		numberOfThreads = 1;
 	}
@@ -124,16 +124,15 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 	progressReporter->CalculationStarted();
 	
 	// start the thread pool
-	threads.clear();
+	this->shouldAbort = false;
 	for (size_t j = 0; j < numberOfThreads; ++j) {
-		singleThreadPtr = std::shared_ptr<boost::thread>(new boost::thread(boost::bind(ThreadPoolWorker, this)));
-		threads.push_back(singleThreadPtr);
+		threads.push_back(std::async(std::launch::async, [=]() {ThreadPoolWorker(this); }));
 	}
 	
 	// test if the threads have finished
 	for (;;) {
-		firstThreadHasFinished = threads.at(0)->timed_join(boost::posix_time::milliseconds(250));
-		if (firstThreadHasFinished == 0) {	// the thread is not done yet, we're just waiting
+		std::future_status firstThreadStatus = threads.at(0).wait_for(std::chrono::milliseconds(250));
+		if (firstThreadStatus != std::future_status::ready) {	// the thread is not done yet, we're just waiting
 			// while we wait we check for various things and give the interface the chance to update
 			
 			// did one of the threads run into an error?
@@ -141,12 +140,10 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 			if (this->errorMessage.length() != 0) {
 				errorReportingMutex.unlock();
 				// an error occured, time to abort this analysis
-				for (size_t j = 0; j < numberOfThreads; ++j) {
-					threads.at(j)->interrupt();
-				}
+				this->shouldAbort = true;
 				// wait until the threads have completed
 				for (size_t j = 0; j < numberOfThreads; ++j) {
-					threads.at(j)->join();
+					threads.at(j).get();
 				}
 				
 				throw ERROR_RUNNING_THREADED_ANALYSIS(this->errorMessage);
@@ -155,7 +152,7 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 			
 			// allow the reporter to update with new progress
 			{
-				boost::lock_guard<boost::mutex> locker(this->acquireFrameForProcessingMutex);
+				std::lock_guard<std::mutex> locker(this->acquireFrameForProcessingMutex);
 				nFramesAnalyzed = nFramesToBeAnalyzed - this->nFramesRemainingToBeProcessed;
 			}
 			progressStatus = progressReporter->UpdateCalculationProgress((double)nFramesAnalyzed, (double)nFramesToBeAnalyzed);
@@ -167,12 +164,10 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 			spinProcessStatus = 0;
 #endif	// WITH_IGOR
 			if ((spinProcessStatus != 0) || (progressStatus != 0)) {
-				for (size_t j = 0; j < numberOfThreads; ++j) {
-					threads.at(j)->interrupt();
-				}
+				this->shouldAbort = true;
 				// wait until the threads have completed
 				for (size_t j = 0; j < numberOfThreads; ++j) {
-					threads.at(j)->join();
+					threads.at(j).get();
 				}
 				progressReporter->CalculationAborted();
 				this->localizedPositions->sortPositionsByFrameNumber();
@@ -185,8 +180,8 @@ std::shared_ptr<LocalizedPositionsContainer> PALMAnalysisController::DoPALMAnaly
 		}
 	}
 	
-	for (size_t j = 1; j < numberOfThreads; ++j) {
-		threads.at(j)->join();
+	for (size_t j = 0; j < numberOfThreads; ++j) {
+		threads.at(j).get();
 	}
 	
 	// the processing itself is now done, but the results will not have been returned in the correct order
@@ -208,14 +203,14 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 	try {
 		for (;;) {	// loop continuously looking for more images until there are none left
 			// if the main thread wants us to interrupt, then give it an opportunity to do so
-			if (boost::this_thread::interruption_requested()) {
+			if (controller->shouldAbort) {
 				return;
 			}
 			
 			// start by a acquiring an image to process
 			// see if there are still frames to be processed
 			{
-				boost::lock_guard<boost::mutex> locker(controller->acquireFrameForProcessingMutex);
+				std::lock_guard<std::mutex> locker(controller->acquireFrameForProcessingMutex);
 				if (controller->nFramesRemainingToBeProcessed == 0) {
 					// no more frames to be processed
 					return;
@@ -244,7 +239,7 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 			
 			// pass the result to the output queue
 			{
-				boost::lock_guard<boost::mutex> locker(controller->addLocalizedPositionsMutex);
+				std::lock_guard<std::mutex> locker(controller->addLocalizedPositionsMutex);
 				// if this is the first time that positions are being returned then controller will contain a NULL pointer
 				// set it to the positions we are now returning
 				// this way ThreadPoolWorker does not need to know what the type of positions is
@@ -261,25 +256,21 @@ void ThreadPoolWorker(PALMAnalysisController* controller) {
 		// since there seems to be no easy way to communicate the exception to the
 		// main thread, set an error message in the analysis controller.
 		// The controller will periodically check this message and handle the error
-		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
+		std::lock_guard<std::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign(e.what());
 		
 		// no point in continuing this thread
 		return;
 	}
-	catch (boost::thread_interrupted) {
-		// the main thread wants us to stop
-		return;
-	}
 	catch (std::exception &e) {
-		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
+		std::lock_guard<std::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign(e.what());
 		
 		return;
 	}
 	catch (...) {
 		// catch any other exception not handled by the above block
-		boost::lock_guard<boost::mutex> locker(controller->errorReportingMutex);
+		std::lock_guard<std::mutex> locker(controller->errorReportingMutex);
 		controller->errorMessage.assign("Encountered an unspecified exception while doing the PALM analysis");
 		
 		// no point in continuing this thread

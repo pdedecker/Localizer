@@ -30,10 +30,10 @@
 #ifndef PALM_ANALYSIS_SEGMENTATION_H
 #define PALM_ANALYSIS_SEGMENTATION_H
 
+#include <mutex>
+#include <shared_mutex>
+
 #include <algorithm>
-#include "boost/smart_ptr.hpp"
-#include "boost/thread/mutex.hpp"
-#include "boost/thread/shared_mutex.hpp"
 #include <gsl/gsl_histogram.h>
 #include "Storage.h"
 #include "MatrixRecycler.h"
@@ -93,8 +93,8 @@ protected:
 	double PFA;
 	double gaussianWidth;
 	
-	boost::mutex kernelCalculationMutex;
-	boost::shared_mutex segmentationCalculationMutex;
+	std::mutex kernelCalculationMutex;
+	std::shared_mutex segmentationCalculationMutex;
 	
 	int useFFT;
 	
@@ -125,7 +125,7 @@ protected:
 	
 	ConvolveMatricesWithFFTClass matrixConvolver;
 	
-	boost::mutex _kernelCalculationMutex;
+	std::mutex _kernelCalculationMutex;
 };
 
 class ThresholdImage_Preprocessor {
@@ -168,7 +168,7 @@ protected:
 	void generate_Gaussian_kernel(size_t x_size, size_t y_size);
 	ConvolveMatricesWithFFTClass matrixConvolver;
 	
-	boost::mutex generateKernelMutex;
+	std::mutex generateKernelMutex;
 	
 	ImagePtr Gaussian_kernel;
 	double width;

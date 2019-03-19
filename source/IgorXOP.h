@@ -34,7 +34,7 @@
 #include <iostream>
 #include <cmath>
 #include <sstream>
-#include "boost/smart_ptr.hpp"
+
 #include <eigen3/Eigen/Eigen>
 #include "XOPStandardHeaders.h"
 #include "PALMAnalysis.h"

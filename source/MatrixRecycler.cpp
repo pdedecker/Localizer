@@ -43,7 +43,7 @@ MatrixRecycler::~MatrixRecycler() {
 }
 
 Image* MatrixRecycler::getMatrix(int nRows, int nCols) {
-	boost::lock_guard<boost::mutex> locker(this->recyclingMutex);
+	std::lock_guard<std::mutex> locker(this->recyclingMutex);
 	
 	// try to find an unused matrix that meets the requirements
 	
@@ -66,7 +66,7 @@ Image* MatrixRecycler::getMatrix(int nRows, int nCols) {
 }
 
 void MatrixRecycler::freeMatrix(Image *matrixToFree) {
-	boost::lock_guard<boost::mutex> locker(this->recyclingMutex);
+	std::lock_guard<std::mutex> locker(this->recyclingMutex);
 	
 	// matrixToFree is not required anymore for now
 	// remove it from the used list
@@ -94,7 +94,7 @@ void MatrixRecycler::freeMatrix(Image *matrixToFree) {
 }
 
 void MatrixRecycler::freeAllMatrices() {
-	boost::lock_guard<boost::mutex> locker(this->recyclingMutex);
+	std::lock_guard<std::mutex> locker(this->recyclingMutex);
 	
 	if (this->usedMatrixList.size() != 0) {
 		throw std::runtime_error("tried to free all matrices while some were still in use.");

@@ -34,8 +34,7 @@
 
 #include "PALMAnalysis.h"
 #include "Defines.h"
-#include "boost/smart_ptr.hpp"
-#include "boost/thread.hpp"
+
 #include "Storage.h"
 
 class PALMBitmapImageDeviationCalculator;

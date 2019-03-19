@@ -40,6 +40,8 @@
 #include <utility>
 #include <cassert>
 #include <thread>
+#include <cstdint>
+#include <mutex>
 
 #include "tbb/concurrent_queue.h"
 #include "tbb/spin_mutex.h"
@@ -48,8 +50,6 @@
 #include "Storage.h"
 #include "Defines.h"
 #include "tiffio.h"
-#include "boost/cstdint.hpp"
-#include "boost/thread.hpp"
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -70,14 +70,14 @@
 #define OFSTREAM_T std::ofstream
 #endif
 
-using boost::uint64_t;
-using boost::int64_t;
-using boost::uint32_t;
-using boost::int32_t;
-using boost::uint16_t;
-using boost::int16_t;
-using boost::uint8_t;
-using boost::int8_t;
+using std::uint64_t;
+using std::int64_t;
+using std::uint32_t;
+using std::int32_t;
+using std::uint16_t;
+using std::int16_t;
+using std::uint8_t;
+using std::int8_t;
 
 class ImageLoader;
 std::shared_ptr<ImageLoader> GetImageLoader(const std::string& data_file_path, int cameraType = -1);
@@ -259,7 +259,7 @@ protected:
 	LocalizerStorageType storage_type;
 	int nextImageToRead;
 	
-	boost::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
+	std::mutex loadImagesMutex;	// a mutex to ensure that we don't try to load two images at once
 };
 
 /**

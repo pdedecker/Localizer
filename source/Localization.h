@@ -33,7 +33,7 @@
 #define GSL_RANGE_CHECK_OFF	// this is not required since Eigen::MatrixXddoes range checks
 
 #include <list>
-#include "boost/smart_ptr.hpp"
+
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <stdexcept>

@@ -366,7 +366,7 @@ std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdIm
 		// no other thread can be performing a calculation
 		// while this thread modifies the kernels
 		{
-			boost::lock_guard<boost::shared_mutex> locker(this->segmentationCalculationMutex);
+			std::lock_guard<std::shared_mutex> locker(this->segmentationCalculationMutex);
 			this->MakeKernels(xSize, ySize);
 		}
 	}
@@ -468,7 +468,7 @@ std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdIm
 	
 	// do the required kernels exist?
 	{
-		boost::lock_guard<boost::mutex> lock(_kernelCalculationMutex);
+		std::lock_guard<std::mutex> lock(_kernelCalculationMutex);
 		if (_averageKernel.get() == NULL) {
 			assert(_smoothingKernel.get() == NULL);
 			int gaussKernelSize = ceil(_pdfStdDev * 3);
@@ -648,7 +648,7 @@ ImagePtr ThresholdImage_Preprocessor_GaussianSmoothing::do_preprocessing(ImagePt
 	
 	// do we already have a Gaussian kernel stored, or is this the first run?
 	{
-		boost::lock_guard<boost::mutex> locker(generateKernelMutex);
+		std::lock_guard<std::mutex> locker(generateKernelMutex);
 		if (Gaussian_kernel.get() == NULL) {	// we don't have a kernel, we need to generate it
 			
 			generate_Gaussian_kernel((int)x_size, (int)y_size);

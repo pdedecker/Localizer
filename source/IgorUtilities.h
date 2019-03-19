@@ -30,7 +30,6 @@
 #define PALM_ANALYSIS_IGORUTILITIES
 
 #include <string>
-#include "boost/smart_ptr.hpp"
 
 #include "XOPStandardHeaders.h"
 #include <eigen3/Eigen/Eigen>

@@ -31,7 +31,8 @@
 #define PALM_ANALYSIS_MATRIXRECYCLER
 
 #include <list>
-#include "boost/thread.hpp"
+#include <mutex>
+
 #include <eigen3/Eigen/Eigen>
 #include "Storage.h"
 
@@ -55,7 +56,7 @@ protected:
 	std::list<Image *> unusedMatrixList;
 	std::list<Image *> usedMatrixList;
 	
-	boost::mutex recyclingMutex;
+	std::mutex recyclingMutex;
 };
 
 // the functions below act as proxies for the functions in the MatrixRecycler class,

@@ -29,7 +29,7 @@
 
 #include "Convolver.h"
 
-boost::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
+std::mutex ConvolveMatricesWithFFTClass::FFTWPlannerMutex;
 
 ConvolveMatricesWithFFTClass::~ConvolveMatricesWithFFTClass() {
 }
@@ -215,7 +215,7 @@ std::shared_ptr<fftw_complex__> ConvolveMatricesWithFFTClass::DoForwardFFT(Image
 	}
 	
 	{
-		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		std::lock_guard<std::mutex> locker(FFTWPlannerMutex);
 		// pass the image dimensions in opposite order to account for column-major ordering
 		forwardPlan = fftw_plan_dft_r2c_2d((int)(ySize), (int)(xSize), image->data(), (fftw_complex*)(array_FFT.get()), FFTW_ESTIMATE);
 	}
@@ -223,7 +223,7 @@ std::shared_ptr<fftw_complex__> ConvolveMatricesWithFFTClass::DoForwardFFT(Image
 	fftw_execute(forwardPlan);
 	
 	{
-		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		std::lock_guard<std::mutex> locker(FFTWPlannerMutex);
 		fftw_destroy_plan(forwardPlan);
 	}
 	
@@ -238,7 +238,7 @@ ImagePtr ConvolveMatricesWithFFTClass::DoReverseFFT(std::shared_ptr<fftw_complex
 	fftw_plan reversePlan;
 	
 	{
-		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		std::lock_guard<std::mutex> locker(FFTWPlannerMutex);
 		// pass the image dimensions in opposite order to account for column-major ordering
 		reversePlan = fftw_plan_dft_c2r_2d((int)(ySize), (int)(xSize), (fftw_complex*)(array_FFT.get()), image->data(), FFTW_ESTIMATE);
 	}
@@ -246,7 +246,7 @@ ImagePtr ConvolveMatricesWithFFTClass::DoReverseFFT(std::shared_ptr<fftw_complex
 	fftw_execute(reversePlan);
 	
 	{
-		boost::lock_guard<boost::mutex> locker(FFTWPlannerMutex);
+		std::lock_guard<std::mutex> locker(FFTWPlannerMutex);
 		fftw_destroy_plan(reversePlan);
 	}
 	

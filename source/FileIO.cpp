@@ -972,7 +972,7 @@ ImagePtr ImageLoaderSPE::readNextImage(int &indexOfImageThatWasRead) {
     std::vector<char> imageBuffer(imageSize);
 	
 	{
-		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		std::lock_guard<std::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= this->nImages)
 			throw std::runtime_error("requested more images than there are in the file");
 		
@@ -1117,7 +1117,7 @@ ImagePtr ImageLoaderAndor::readNextImage(int &indexOfImageThatWasRead) {
     std::vector<char> imageBuffer(nBytesInImage);
 	
 	{
-		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		std::lock_guard<std::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
@@ -1280,7 +1280,7 @@ ImagePtr ImageLoaderHamamatsu::readNextImage(int &indexOfImageThatWasRead) {
     
     std::vector<char> imageBuffer(imageSize);
 	{
-		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		std::lock_guard<std::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
@@ -1366,7 +1366,7 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	
     std::vector<char> imageBuffer(imageSize);
 	{
-		boost::lock_guard<boost::mutex> locker(loadImagesMutex);
+		std::lock_guard<std::mutex> locker(loadImagesMutex);
 		if (this->nextImageToRead >= this->nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
@@ -1624,7 +1624,7 @@ template <typename T> void StoreTIFFScanLineInImage(T* scanLineBuffer, int colTo
 ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 	int result;
 	
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	std::lock_guard<std::mutex> lock(loadImagesMutex);
 	
 	std::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(_tiffFile)), _TIFFfree);
 	if (single_scanline_buffer.get() == NULL) {
@@ -1771,7 +1771,7 @@ ImageLoaderMultiFileTIFF::ImageLoaderMultiFileTIFF(const std::string& filePath) 
 }
 
 ImagePtr ImageLoaderMultiFileTIFF::readNextImage(int &indexOfImageThatWasRead) {
-	boost::lock_guard<boost::mutex> lock(loadImagesMutex);
+	std::lock_guard<std::mutex> lock(loadImagesMutex);
 	
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
@@ -1895,7 +1895,7 @@ ImageLoaderRawPointer::ImageLoaderRawPointer(char* dataPointer, LocalizerStorage
 
 ImagePtr ImageLoaderRawPointer::readNextImage(int &index) {
     {
-        boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		std::lock_guard<std::mutex> lock(this->loadImagesMutex);
         if (this->nextImageToRead >= nImages)
             throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
         
@@ -1931,7 +1931,7 @@ ImagePtr ImageLoaderIgor::readNextImage(int &index) {
 	char *startOfWaveData = ((char*)(*this->_dataWave) + waveDataOffset);
 	
 	{
-		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		std::lock_guard<std::mutex> lock(this->loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		
@@ -2002,7 +2002,7 @@ ImageLoaderMatlab::ImageLoaderMatlab(mxArray* matlabArray) {
 
 ImagePtr ImageLoaderMatlab::readNextImage(int &index) {
 	{
-		boost::lock_guard<boost::mutex> lock(this->loadImagesMutex);
+		std::lock_guard<std::mutex> lock(this->loadImagesMutex);
 		if (this->nextImageToRead >= nImages)
 			throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 		

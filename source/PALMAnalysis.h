@@ -30,15 +30,14 @@
 #ifndef PALM_ANALYSIS_H
 #define PALM_ANALYSIS_H
 
+#include <future>
 #include <vector>
 #include <algorithm>
-#include "boost/thread.hpp"
-#include "boost/bind.hpp"
+#include <mutex>
+#include <thread>
 #include "Defines.h"
 #include "Localization.h"
 #include "ProgressReporting.h"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 #ifdef WITH_IGOR
 #include "XOPStandardHeaders.h"
@@ -104,14 +103,15 @@ protected:
 	std::shared_ptr<FitPositions> fitPositions;
 	std::shared_ptr<ProgressReporter> progressReporter;
 	
-	boost::mutex acquireFrameForProcessingMutex;
-	boost::mutex addLocalizedPositionsMutex;
-	boost::mutex errorReportingMutex;
+	std::mutex acquireFrameForProcessingMutex;
+	std::mutex addLocalizedPositionsMutex;
+	std::mutex errorReportingMutex;
 	
 	std::string errorMessage;
 		// this string is an ugly hack to ensure that we can communicate errors encountered during the fitting back to the main thread
 		// if one of the threads encounters an exception then it will set this message to some not-nil string
 		// that is the sign for the main thread to kill the processing threads and throw an exception in the main thread
+	volatile bool shouldAbort;
 };
 
 /**
