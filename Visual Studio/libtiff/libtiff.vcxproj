@@ -18,6 +18,55 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_aux.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_close.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_codec.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_color.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_compress.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_dir.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_dirinfo.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_dirread.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_dirwrite.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_dumpmode.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_error.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_extension.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_fax3.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_fax3sm.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_flush.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_getimage.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_jbig.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_jpeg.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_jpeg_12.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_luv.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_lzma.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_lzw.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_next.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_ojpeg.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_open.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_packbits.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_pixarlog.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_predict.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_print.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_read.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_strip.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_swab.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_thunder.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_tile.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_unix.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_version.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_warning.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_webp.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_win32.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_write.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_zip.c" />
+    <ClCompile Include="..\..\libsource\tiff-4.0.10\libtiff\tif_zstd.c" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}</ProjectGuid>
     <RootNamespace>libtiff</RootNamespace>
@@ -136,67 +185,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\t4.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tiff.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tiffconf.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tiffio.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tiffiop.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tiffvers.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tif_config.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dir.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tif_fax3.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\tif_predict.h" />
-    <ClInclude Include="..\..\libsource\tiff-4.0.6\libtiff\uvcode.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_aux.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_close.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_codec.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_color.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_compress.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dir.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dirinfo.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dirread.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dirwrite.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_dumpmode.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_error.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_extension.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_fax3.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_fax3sm.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_flush.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_getimage.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_jbig.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_jpeg.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_jpeg_12.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_luv.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_lzma.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_lzw.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_next.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_ojpeg.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_open.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_packbits.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_pixarlog.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_predict.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_print.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_read.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_strip.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_swab.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_thunder.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_tile.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_unix.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_version.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_warning.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_win32.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_write.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\libtiff\tif_zip.c" />
-    <ClCompile Include="..\..\libsource\tiff-4.0.6\port\snprintf.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
