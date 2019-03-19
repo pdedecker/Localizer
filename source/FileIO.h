@@ -64,12 +64,6 @@
 #include "mex.h"
 #endif
 
-#ifdef _WIN32
-#define OFSTREAM_T WindowsFileStream
-#else
-#define OFSTREAM_T std::ofstream
-#endif
-
 using std::uint64_t;
 using std::int64_t;
 using std::uint32_t;
@@ -151,47 +145,7 @@ void CopyImageToBuffer(ImagePtr imagePtr, char* buffer, int treatAsRowMajor = 0)
 
 std::vector<char> Deflate(std::vector<char>& data);
 
-/**
- Provides a replacement for an fstream class, since the standard fstream classes
- in win32 do not handle file offsets larger than 2 GB.
- The replacement is not complete; in particular the arguments to open, seekg, and seekp
- are ignored. Also, there is no separate concept of a seek and put pointer, instead
- there is only a single one.
- */
-#ifdef _WIN32
-class WindowsFileStream {
-public:
-    WindowsFileStream() {fileRef = NULL;}
-    ~WindowsFileStream();
-    
-    void open(const char *path_rhs, std::ios_base::openmode mode);
-    
-    void close();
-	
-    int fail() {return ferror(fileRef);}
-	int good() {return !ferror(fileRef);}
-    
-    int is_open() {return (fileRef != NULL);}
-    
-    void get(char & c);
-    void read(char *buffer, size_t nBytes);
-    void getline(char *buffer, size_t nMax);
-    
-    void write(const char *buffer, size_t nBytes);
-    
-    uint64_t tellg();
-    uint64_t tellp();
-    void seekg(uint64_t pos, std::ios_base::seekdir dir = std::ios_base::beg);
-    void seekp(uint64_t pos, std::ios_base::seekdir dir = std::ios_base::beg);
-    
-    
-private:
-    FILE *fileRef;
-	std::string path;
-};
-#endif // _WIN32
-
-template <typename T> void WriteBinaryValue(OFSTREAM_T& file, T value) {
+template <typename T> void WriteBinaryValue(std::ofstream& file, T value) {
     char* valPtr = reinterpret_cast<char*>(&value);
     file.write(valPtr, sizeof(T));
 }
@@ -248,11 +202,7 @@ public:
 protected:
     void checkForReasonableValues() const;
     
-#ifdef _WIN32
-	WindowsFileStream file;
-#else
 	std::ifstream file;
-#endif
 	int nImages;
 	int xSize;
 	int ySize;
@@ -506,7 +456,7 @@ public:
 protected:
 	
 	std::string outputFilePath;
-	OFSTREAM_T file;
+	std::ofstream file;
 	
 	size_t nImagesWritten;
 };

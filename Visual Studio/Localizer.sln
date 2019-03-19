@@ -27,38 +27,38 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug|x64.ActiveCfg = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug|x64.Build.0 = Debug|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.ActiveCfg = Debug-LocalizerDLL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.Build.0 = Debug-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.ActiveCfg = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.Build.0 = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release|x64.ActiveCfg = Release|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release|x64.Build.0 = Release|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.ActiveCfg = Release-LocalizerDLL|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.Build.0 = Release-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.ActiveCfg = Release-Matlab|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.Build.0 = Release-Matlab|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug|x64.ActiveCfg = Debug|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug|x64.Build.0 = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|x64
+		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.Build.0 = Debug|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-Matlab|x64.ActiveCfg = Debug|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-Matlab|x64.Build.0 = Debug|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release|x64.ActiveCfg = Release|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release|x64.Build.0 = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.ActiveCfg = Release|x64
+		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.Build.0 = Release|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-Matlab|x64.ActiveCfg = Release|x64
 		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-Matlab|x64.Build.0 = Release|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug|x64.ActiveCfg = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug|x64.Build.0 = Debug|x64
-		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|x64
+		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-LocalizerDLL|x64.Build.0 = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-Matlab|x64.ActiveCfg = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-Matlab|x64.Build.0 = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release|x64.ActiveCfg = Release|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release|x64.Build.0 = Release|x64
-		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-LocalizerDLL|x64.ActiveCfg = Debug|Win32
-		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-LocalizerDLL|x64.Build.0 = Debug|Win32
+		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-LocalizerDLL|x64.ActiveCfg = Release|x64
+		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-LocalizerDLL|x64.Build.0 = Release|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-Matlab|x64.ActiveCfg = Release|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Release-Matlab|x64.Build.0 = Release|x64
 	EndGlobalSection
@@ -66,6 +66,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0DDCF7A0-7D8A-4176-ACFA-7E271C7AECD3}
+		SolutionGuid = {4C5C5ABE-A1CE-49EB-BE60-882AAE595522}
 	EndGlobalSection
 EndGlobal
