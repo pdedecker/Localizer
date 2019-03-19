@@ -30,7 +30,6 @@
 /*** routines that deal with processing localization results to produce some output ***/
 #include <vector>
 #include <cmath>
-#include "boost/smart_ptr.hpp"
 #include "Storage.h"
 #include "PALMAnalysis.h"
 #include "Defines.h"

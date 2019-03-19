@@ -38,7 +38,6 @@
 #include <list>
 #include <string>
 #include <algorithm>
-#include <boost/smart_ptr.hpp>
 
 #include "Defines.h"
 #include "Errors.h"

@@ -33,7 +33,6 @@
 #include <algorithm>
 #include "Storage.h"
 #include "Localization.h"
-#include "boost/smart_ptr.hpp"
 #include <list>
 
 /**

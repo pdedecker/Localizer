@@ -35,7 +35,6 @@
 #include <vector>
 
 #include <eigen3/Eigen/Eigen>
-#include "boost/smart_ptr.hpp"
 #include <gsl/gsl_min.h>
 
 #include "FileIO.h"
@@ -122,7 +121,7 @@ public:
     void getCoordinatesOfFirstUsableInputPixel(int order, int nRowsInput, int nColsInput, int &firstRow, int &firstCol) const;
     void getCoordinatesOfLastUsableInputPixel(int order, int nRowsInput, int nColsInput, int &lastRow, int &lastCol) const;
     void getSizeOfOutputImage(int order, int nRowsInput, int nColsInput, int &nRows, int &nCols) const;
-    boost::shared_array<std::vector<SOFIPixelCalculation> > getKernel(int order, int lagTime, int &nRows, int &nCols) const;
+    std::vector<std::vector<SOFIPixelCalculation>> getKernel(int order, int lagTime, int &nRows, int &nCols) const;
 };
 
 class SOFICorrector_Order2 {

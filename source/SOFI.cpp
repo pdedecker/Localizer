@@ -318,7 +318,7 @@ void SOFICalculator_CrossCorrelation::performCalculation(ImagePtr &calculatedSOF
     kernelProvider.getSizeOfOutputImage(_order, firstImage->rows(), firstImage->cols(), nRowsOutput, nColsOutput);
     kernelProvider.getCoordinatesOfFirstUsableInputPixel(_order, firstImage->rows(), firstImage->cols(), firstRow, firstCol);
     kernelProvider.getCoordinatesOfLastUsableInputPixel(_order, firstImage->rows(), firstImage->cols(), lastRow, lastCol);
-    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel = kernelProvider.getKernel(_order, 0, nKernelRows, nKernelCols);
+    std::vector<std::vector<SOFIPixelCalculation>> kernel = kernelProvider.getKernel(_order, 0, nKernelRows, nKernelCols);
     int nPixelsInKernel = nKernelRows * nKernelCols;
     
     // allocate the output image
@@ -500,8 +500,8 @@ void XCSOFIKernelProvider::getSizeOfOutputImage(int order, int nRowsInput, int n
     }
 }
 
-boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::getKernel(int order, int lagTime, int &nRows, int &nCols) const {
-    boost::shared_array<std::vector<SOFIPixelCalculation> > kernel;
+std::vector<std::vector<SOFIPixelCalculation>> XCSOFIKernelProvider::getKernel(int order, int lagTime, int &nRows, int &nCols) const {
+    std::vector<std::vector<SOFIPixelCalculation> > kernel;
     
     switch (order) {
         case 2:
@@ -509,7 +509,7 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             // kernel size is 2x2
             nRows = 2;
             nCols = 2;
-            kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[4]);
+			kernel.resize(4);
             SOFIPixelCalculation sofiPixelCalculation;
             // always two inputs for 2nd order
             sofiPixelCalculation.inputRowDeltas.resize(2);
@@ -572,8 +572,8 @@ boost::shared_array<std::vector<SOFIPixelCalculation> > XCSOFIKernelProvider::ge
             // kernel size is 3x3
             nRows = 3;
             nCols = 3;
-            kernel = boost::shared_array<std::vector<SOFIPixelCalculation> >(new std::vector<SOFIPixelCalculation>[9]);
-            SOFIPixelCalculation sofiPixelCalculation;
+			kernel.resize(9);
+			SOFIPixelCalculation sofiPixelCalculation;
             // always 3 inputs for 3rd order
             sofiPixelCalculation.inputRowDeltas.resize(3);
             sofiPixelCalculation.inputColDeltas.resize(3);

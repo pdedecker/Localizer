@@ -35,7 +35,6 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include "boost/smart_ptr.hpp"
 #include "Defines.h"
 #include "Errors.h"
 
