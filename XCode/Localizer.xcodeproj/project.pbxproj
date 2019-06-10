@@ -10,6 +10,7 @@
 		D01D290C136CE9710094B975 /* ProgressReporting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01D290B136CE9710094B975 /* ProgressReporting.cpp */; };
 		D01F3B0B13E0800D00A42472 /* Localizer.r in Rez */ = {isa = PBXBuildFile; fileRef = D01F3B0A13E0800D00A42472 /* Localizer.r */; };
 		D022E2651473F3BB004107A9 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
+		D025068521BEAC23000A2077 /* libXOPSupport64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D025068421BEAC23000A2077 /* libXOPSupport64.a */; };
 		D027E93A151311CF005B8664 /* Convolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D027E936151311CF005B8664 /* Convolver.cpp */; };
 		D02F86341BB58CF900CF5E68 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D02F86331BB58CF900CF5E68 /* Cocoa.framework */; };
 		D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D056459D18AA1F72001A22D9 /* NewSOFI.cpp */; };
@@ -33,7 +34,6 @@
 		D099CE6D1B8E4EA400E23C07 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
 		D099CE6E1B8E4EA700E23C07 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D099CE6F1B8E4EAE00E23C07 /* libtbb.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D0C7D190172E77CD0048356A /* libtbb.dylib */; };
-		D099CE701B8E4EB100E23C07 /* libXOPSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D01677061B8D97A5007685B9 /* libXOPSupport.a */; settings = {ATTRIBUTES = (Required, ); }; };
 		D099CE711B8E4EC300E23C07 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D0006D2B12CFD34D00539A8F /* Accelerate.framework */; };
 		D099CE721B8E4EC500E23C07 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08EA7FFBFE8413EDC02AAC07 /* Carbon.framework */; };
 		D0A9C2ED135F4EED00D076AE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
@@ -112,6 +112,7 @@
 		D01D290A136CE9710094B975 /* ProgressReporting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressReporting.h; path = ../source/ProgressReporting.h; sourceTree = SOURCE_ROOT; };
 		D01D290B136CE9710094B975 /* ProgressReporting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressReporting.cpp; path = ../source/ProgressReporting.cpp; sourceTree = SOURCE_ROOT; };
 		D01F3B0A13E0800D00A42472 /* Localizer.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = Localizer.r; path = ../resources/Localizer.r; sourceTree = SOURCE_ROOT; };
+		D025068421BEAC23000A2077 /* libXOPSupport64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libXOPSupport64.a; path = ../../XOPSupport/Xcode/libXOPSupport64.a; sourceTree = "<group>"; };
 		D027E935151311CF005B8664 /* Convolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Convolver.h; path = ../source/Convolver.h; sourceTree = SOURCE_ROOT; };
 		D027E936151311CF005B8664 /* Convolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Convolver.cpp; path = ../source/Convolver.cpp; sourceTree = SOURCE_ROOT; };
 		D02F86331BB58CF900CF5E68 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
@@ -147,7 +148,7 @@
 		D09733C51D48A6DB00FF8430 /* SOFICommandLine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SOFICommandLine.h; path = ../source/SOFICommandLine.h; sourceTree = "<group>"; };
 		D09810480D5B18B10074692A /* PALMAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PALMAnalysis.cpp; path = ../source/PALMAnalysis.cpp; sourceTree = SOURCE_ROOT; };
 		D09810AF0D5B6E850074692A /* Processing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Processing.h; path = ../source/Processing.h; sourceTree = SOURCE_ROOT; };
-		D0A9C305135F4EED00D076AE /* Localizer.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer.xop; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0A9C305135F4EED00D076AE /* Localizer64.xop */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Localizer64.xop; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C2582D1746C045001C2EB1 /* Localizer.mexmaci64 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = Localizer.mexmaci64; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0C7D190172E77CD0048356A /* libtbb.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.dylib; path = ../lib/mac/libtbb.dylib; sourceTree = SOURCE_ROOT; };
 		D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblocalizer.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -191,7 +192,7 @@
 				D099CE6D1B8E4EA400E23C07 /* liblzma.a in Frameworks */,
 				D099CE6E1B8E4EA700E23C07 /* libz.a in Frameworks */,
 				D099CE6F1B8E4EAE00E23C07 /* libtbb.dylib in Frameworks */,
-				D099CE701B8E4EB100E23C07 /* libXOPSupport.a in Frameworks */,
+				D025068521BEAC23000A2077 /* libXOPSupport64.a in Frameworks */,
 				D099CE711B8E4EC300E23C07 /* Accelerate.framework in Frameworks */,
 				D099CE721B8E4EC500E23C07 /* Carbon.framework in Frameworks */,
 			);
@@ -241,6 +242,7 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
+				D025068321BEAC23000A2077 /* Frameworks */,
 			);
 			name = "PALM analysis XOP";
 			sourceTree = "<group>";
@@ -325,7 +327,7 @@
 		19C28FB4FE9D528D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D0A9C305135F4EED00D076AE /* Localizer.xop */,
+				D0A9C305135F4EED00D076AE /* Localizer64.xop */,
 				D0CCD31A1473C5DD005CD75A /* liblocalizer.dylib */,
 				D0C2582D1746C045001C2EB1 /* Localizer.mexmaci64 */,
 			);
@@ -348,6 +350,14 @@
 			children = (
 			);
 			name = "Design documents";
+			sourceTree = "<group>";
+		};
+		D025068321BEAC23000A2077 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D025068421BEAC23000A2077 /* libXOPSupport64.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		D0CCD33A1473C704005CD75A /* LocalizerDLL */ = {
@@ -416,7 +426,6 @@
 				D0A9C2FF135F4EED00D076AE /* Rez */,
 				D0A9C301135F4EED00D076AE /* CopyFiles */,
 				D0118575172EA410001F165A /* ShellScript */,
-				D0095B231BDBFB16006A86E7 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -425,7 +434,7 @@
 			name = Localizer;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = "PALM analysis XOP";
-			productReference = D0A9C305135F4EED00D076AE /* Localizer.xop */;
+			productReference = D0A9C305135F4EED00D076AE /* Localizer64.xop */;
 			productType = "com.apple.product-type.bundle";
 		};
 		D0C2582C1746C045001C2EB1 /* LocalizerMatlab */ = {
@@ -514,20 +523,6 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		D0095B231BDBFB16006A86E7 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "cd \"$TARGET_BUILD_DIR/\"\n\nL32=\"$WRAPPER_NAME\"\nTARGET_NAME_64=\"${TARGET_NAME}64\"\nL64=\"${TARGET_NAME_64}${WRAPPER_SUFFIX}\"\n\nLIPO_OUTPUT=`lipo -info \"${L32}/Contents/MacOS/${TARGET_NAME}\"`\nGREP_OUTPUT=`echo \"${LIPO_OUTPUT}\" | grep \"Non-fat file\"`\nif [ \"${GREP_OUTPUT}\" ]; then\n    echo \"already non-universal binary\"\n    exit 0\nfi\n\necho \"creating thinned 32 and 64 bit versions\"\n\n# create 64-bit variant by copying\nrm -rf \"$L64\"\ncp -R \"$L32\" \"$L64\"\n\n# rename executable inside 64 bit version\nmv \"${L64}/Contents/MacOS/${TARGET_NAME}\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\n# rename executable inside the info.plist\ncat \"${L64}/Contents/Info.plist\" | sed \"s/\\<string\\>${TARGET_NAME}\\<\\/string\\>/\\<string\\>${TARGET_NAME_64}\\<\\/string\\>/\" > \"${L64}/Contents/Info2.plist\"\nrm \"${L64}/Contents/Info.plist\"\nmv \"${L64}/Contents/Info2.plist\" \"${L64}/Contents/Info.plist\"\n# rename resources file\nmv \"${L64}/Contents/Resources/Localizer.rsrc\" \"${L64}/Contents/Resources/Localizer64.rsrc\"\n\n# trim 64-bit code from 32 bit XOP\nlipo -thin i386 -output \"${L32}/Contents/MacOS/${TARGET_NAME}2\" \"${L32}/Contents/MacOS/${TARGET_NAME}\"\nrm \"${L32}/Contents/MacOS/${TARGET_NAME}\"\nmv \"${L32}/Contents/MacOS/${TARGET_NAME}2\" \"${L32}/Contents/MacOS/${TARGET_NAME}\"\n\n#trim 32-bit code from 64 bit XOP\nlipo -thin x86_64 -output \"${L64}/Contents/MacOS/${TARGET_NAME_64}2\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\nrm \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\nmv \"${L64}/Contents/MacOS/${TARGET_NAME_64}2\" \"${L64}/Contents/MacOS/${TARGET_NAME_64}\"\n\nexit 0";
-			showEnvVarsInLog = 0;
-		};
 		D0118575172EA410001F165A /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -539,7 +534,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$TARGET_BUILD_DIR/$WRAPPER_NAME/Contents\"\nrm -R -f Frameworks\t# remove the old folder if it exists\nmkdir Frameworks\t\t# create a new one\ncd Frameworks\ncp \"$PROJECT_DIR/../lib/mac/libtbb.dylib\" .\n#cp \"$PROJECT_DIR/../lib/mac/libtbbmalloc.dylib\" .\n# now the otool part:\ninstall_name_tool -change libtbb.dylib @loader_path/../Frameworks/libtbb.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n#install_name_tool -change libtbbmalloc.dylib @loader_path/../Frameworks/libtbbmalloc.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"";
+			shellScript = "cd \"$TARGET_BUILD_DIR/$WRAPPER_NAME/Contents\"\nrm -R -f Frameworks    # remove the old folder if it exists\nmkdir Frameworks        # create a new one\ncd Frameworks\ncp \"$PROJECT_DIR/../lib/mac/libtbb.dylib\" .\n#cp \"$PROJECT_DIR/../lib/mac/libtbbmalloc.dylib\" .\n# now the otool part:\ninstall_name_tool -change libtbb.dylib @loader_path/../Frameworks/libtbb.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n#install_name_tool -change libtbbmalloc.dylib @loader_path/../Frameworks/libtbbmalloc.dylib \"$BUILT_PRODUCTS_DIR/$EXECUTABLE_PATH\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -625,13 +620,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				GCC_AUTO_VECTORIZATION = YES;
 				GCC_FAST_MATH = NO;
-				GCC_MODEL_PPC64 = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"\"HAVE_INLINE\"",
 					"\"_DEBUG_\"",
@@ -640,10 +630,8 @@
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_EFFECTIVE_CPLUSPLUS_VIOLATIONS = NO;
 				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				GCC_WARN_UNUSED_PARAMETER = NO;
@@ -651,8 +639,8 @@
 				HEADER_SEARCH_PATHS = "\"../include\"";
 				INFOPLIST_FILE = "";
 				LIBRARY_SEARCH_PATHS = ../lib/mac;
-				OTHER_CPLUSPLUSFLAGS = "";
 				OTHER_REZFLAGS = "";
+				VALID_ARCHS = x86_64;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Debug;
@@ -661,17 +649,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				ENABLE_OPENMP_SUPPORT = NO;
 				EXECUTABLE_EXTENSION = "";
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_ENABLE_SUPPLEMENTAL_SSE3_INSTRUCTIONS = YES;
 				GCC_FAST_MATH = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_PPC64 = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					NDEBUG,
 					"\"HAVE_INLINE\"",
@@ -685,7 +666,6 @@
 				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
 				GCC_WARN_MISSING_PARENTHESES = YES;
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
-				GCC_WARN_PEDANTIC = NO;
 				GCC_WARN_SHADOW = NO;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -696,8 +676,8 @@
 				INFOPLIST_FILE = "";
 				LIBRARY_SEARCH_PATHS = ../lib/mac;
 				LLVM_LTO = YES;
-				OTHER_CPLUSPLUSFLAGS = "-msse2";
 				OTHER_REZFLAGS = "";
+				VALID_ARCHS = x86_64;
 				WRAPPER_EXTENSION = "";
 			};
 			name = Release;
@@ -705,7 +685,6 @@
 		D0A9C303135F4EED00D076AE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
@@ -727,7 +706,7 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
-				PRODUCT_NAME = Localizer;
+				PRODUCT_NAME = Localizer64;
 				WRAPPER_EXTENSION = xop;
 				ZERO_LINK = YES;
 			};
@@ -736,7 +715,6 @@
 		D0A9C304135F4EED00D076AE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -754,9 +732,8 @@
 					../../XOPSupport/Xcode,
 				);
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_CPLUSPLUSFLAGS = $inherited;
 				OTHER_REZFLAGS = "-i \"($SRCROOT)/../XOPSupport\"";
-				PRODUCT_NAME = Localizer;
+				PRODUCT_NAME = Localizer64;
 				WRAPPER_EXTENSION = xop;
 			};
 			name = Release;

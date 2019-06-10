@@ -72,8 +72,10 @@ typedef TIFF_UINT16_T uint16;
 typedef TIFF_INT32_T  int32;
 typedef TIFF_UINT32_T uint32;
 
+#ifndef __APPLE__
 typedef TIFF_INT64_T  int64;
 typedef TIFF_UINT64_T uint64;
+#endif
 
 /*
  * Some types as promoted in a variable argument list

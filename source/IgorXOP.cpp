@@ -148,7 +148,7 @@ typedef struct LocalizationAnalysisRuntimeParams* LocalizationAnalysisRuntimePar
 #pragma pack()	// All structures passed to Igor are two-byte aligned.
 
 // Runtime param structure for ReadCCDImages operation.
-#pragma pack(2)	// All structures passed to Igor are two-byte aligned.
+#pragma pack(2)    // All structures passed to Igor are two-byte aligned.
 struct ReadCCDImagesRuntimeParams {
     // Flag parameters.
     
@@ -197,17 +197,17 @@ struct ReadCCDImagesRuntimeParams {
     
     // Parameters for simple main group #0.
     int filePathEncountered;
-    Handle filePath;						// Optional parameter.
+    Handle filePath;                        // Optional parameter.
     int filePathParamsSet[1];
     
     // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+    int calledFromFunction;                    // 1 if called from a user function, 0 otherwise.
+    int calledFromMacro;                    // 1 if called from a macro, 0 otherwise.
+    UserFunctionThreadInfoPtr tp;            // If not null, we are running from a ThreadSafe function.
 };
 typedef struct ReadCCDImagesRuntimeParams ReadCCDImagesRuntimeParams;
 typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()    // Reset structure alignment to default.
 
 // Runtime param structure for ProcessCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -1331,6 +1331,22 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     std::string dataFilePath;
     int header_only = 0;
     DataFolderAndName dataFolderAndName;
+    
+    char out[256];
+    sprintf(out, "have filepath: %d\r", p->filePathEncountered);
+    XOPNotice(out);
+    if (p->filePathEncountered) {
+        XOPNotice(ConvertHandleToString(p->filePath).c_str());
+        XOPNotice("\r");
+    }
+    
+    int offsetOfPROGFlagEncountered = offsetof(ReadCCDImagesRuntimeParams, PROGFlagEncountered);
+    
+    int offsetOfQFlagEncountered = offsetof(ReadCCDImagesRuntimeParams, QFlagEncountered);
+    
+    int dif = offsetOfQFlagEncountered - offsetOfPROGFlagEncountered;
+    if (dif != 16)
+        XOPNotice("Alignment is messed up" CR_STR);
 
     std::shared_ptr<ImageLoader> image_loader;
 
@@ -1419,7 +1435,7 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     // Main parameters.
     int useDialog = 0;
     char filePathFromDialog[MAX_PATH_LEN + 1];
-    strcpy(filePathFromDialog, "");
+    filePathFromDialog[0] = 0;
     if (p->filePathEncountered) {
         if (p->filePathParamsSet[0]) {
             // Parameter: p->filePath (test for NULL handle before using)
@@ -3754,7 +3770,7 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle) {
 
     XOPInit(ioRecHandle);							// Do standard XOP initialization.
     SetXOPEntry(XOPEntry);							// Set entry point for future calls.
-    if (igorVersion < 620) {
+    if (igorVersion < 800) {
         SetXOPResult(IGOR_OBSOLETE);
         return EXIT_FAILURE;
     }

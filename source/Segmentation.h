@@ -94,7 +94,6 @@ protected:
 	double gaussianWidth;
 	
 	std::mutex kernelCalculationMutex;
-	std::shared_mutex segmentationCalculationMutex;
 	
 	int useFFT;
 	

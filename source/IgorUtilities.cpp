@@ -410,7 +410,7 @@ std::string ConvertHandleToString(Handle handle) {
     int err;
     std::string convertedString;
 
-    size_t stringLength = GetHandleSize(handle);
+    size_t stringLength = WMGetHandleSize(handle);
     std::unique_ptr<char[]> cString(new char[stringLength + 1]);
 
     err = GetCStringFromHandle(handle, cString.get(), stringLength);
@@ -640,7 +640,7 @@ waveHndl CopyStackToIgorDPWave(std::vector<ImagePtr> stack, DataFolderAndName da
 }
 
 void SetWaveNote(waveHndl wav, const std::string& note) {
-    Handle waveNoteHandle = NewHandle(note.length());   // will belong to Igor afterwards
+    Handle waveNoteHandle = WMNewHandle(note.length());   // will belong to Igor afterwards
     if (waveNoteHandle == NULL)
         throw std::bad_alloc();
     PutCStringInHandle(note.c_str(), waveNoteHandle);

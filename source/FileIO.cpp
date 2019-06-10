@@ -2578,11 +2578,7 @@ void IgorImageOutputWriter::write_image(ImagePtr imageToWrite) {
 		throw std::runtime_error("Writing too many images to the IgorImageOutputWriter");
 	
 	// the strategy for writing the data depends on the storage type
-	size_t waveDataOffset;
-	result = MDAccessNumericWaveData(this->outputWave, kMDWaveAccessMode0, (BCInt*)&waveDataOffset);
-	if (result != 0)
-		throw result;
-	char* waveDataPtr = (char *)((char*)(*this->outputWave) + waveDataOffset);
+    char* waveDataPtr = (char *)WaveData(this->outputWave);//((char*)(*this->outputWave) + waveDataOffset);
     
     size_t nBytesInImage = NBytesInImage(xSize, ySize, this->storageType);
     ImageToBufferWithFormat(imageToWrite, this->storageType, waveDataPtr + nBytesInImage * nImagesWritten);

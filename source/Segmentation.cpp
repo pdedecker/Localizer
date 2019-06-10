@@ -356,24 +356,21 @@ std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdIm
 		}
 		image = reducedImage;	// modify the smart_ptr
 	}
-	
-	image_squared = ImagePtr(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
-	// do we have kernels of the appropriate size?
-	this->kernelCalculationMutex.lock();	// make sure that the kernel cannot be modified simultaneously by another thread
-	if ((this->GaussianKernelFFT.get() == NULL) || (this->kernelXSize != xSize) || (this->kernelYSize != ySize)) {
-		// the kernels need to be created or updated
-		// no other thread can be performing a calculation
-		// while this thread modifies the kernels
-		{
-			std::lock_guard<std::shared_mutex> locker(this->segmentationCalculationMutex);
-			this->MakeKernels(xSize, ySize);
-		}
-	}
-	
-	// many threads can run a calculation, but only one can modify
-	this->segmentationCalculationMutex.lock_shared();
-	this->kernelCalculationMutex.unlock();
+    
+    image_squared = ImagePtr(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+    
+    // do we have kernels of the appropriate size?
+    {
+        std::lock_guard<std::mutex> locker(this->kernelCalculationMutex);
+        if ((this->GaussianKernelFFT.get() == NULL)) {
+            // the kernels need to be created
+            // no other thread can be performing a calculation
+            // while this thread modifies the kernels
+            this->MakeKernels(xSize, ySize);
+        } else if ((this->kernelXSize != xSize) || (this->kernelYSize != ySize)) {
+            throw std::runtime_error("changing image dimensions for GLRT");
+        }
+    }
 	
 	// calculate the square of the pixel values
 	// we'll use this later
@@ -403,12 +400,11 @@ std::shared_ptr<Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> > ThresholdIm
 	
 	// now we need to again convolve this Gaussian_window ('gc') with the original image. 
 	// dependingo on the image or kernel size choose either direct or FFT-based convolution
-	if (this->useFFT == 1)
+    if (this->useFFT == 1) {
 		image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithGivenFFT(image, this->GaussianKernelFFT, this->kernelXSize, this->kernelYSize);
-	else
+    } else {
 		image_Gaussian_convolved = matrixConvolver.ConvolveMatrixWithSmallKernel(image, this->smallGaussianKernel);
-	
-	this->segmentationCalculationMutex.unlock_shared();
+    }
 	
 	// now normalize this convolved image so that it becomes equal to 'alpha' in the original matlab code
 	(*image_Gaussian_convolved) /= this->sum_squared_Gaussian;
