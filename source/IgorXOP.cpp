@@ -1331,22 +1331,6 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     std::string dataFilePath;
     int header_only = 0;
     DataFolderAndName dataFolderAndName;
-    
-    char out[256];
-    sprintf(out, "have filepath: %d\r", p->filePathEncountered);
-    XOPNotice(out);
-    if (p->filePathEncountered) {
-        XOPNotice(ConvertHandleToString(p->filePath).c_str());
-        XOPNotice("\r");
-    }
-    
-    int offsetOfPROGFlagEncountered = offsetof(ReadCCDImagesRuntimeParams, PROGFlagEncountered);
-    
-    int offsetOfQFlagEncountered = offsetof(ReadCCDImagesRuntimeParams, QFlagEncountered);
-    
-    int dif = offsetOfQFlagEncountered - offsetOfPROGFlagEncountered;
-    if (dif != 16)
-        XOPNotice("Alignment is messed up" CR_STR);
 
     std::shared_ptr<ImageLoader> image_loader;
 
