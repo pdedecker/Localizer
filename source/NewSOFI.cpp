@@ -796,6 +796,7 @@ void PrintVirtualPixelInfo(const std::vector<SOFIKernel>& kernels, const std::ve
 }
 
 void SaveVirtualPixelInfoToWave(const std::vector<SOFIKernel>& kernels, const std::vector<std::vector<double>>& combinationWeights) {
+#ifdef WITH_IGOR
     int nRows = 0;
     for (const SOFIKernel& kernel : kernels) {
         nRows += kernel.pixelCombinations.size();
@@ -819,6 +820,7 @@ void SaveVirtualPixelInfoToWave(const std::vector<SOFIKernel>& kernels, const st
     }
 
     CopyMatrixToIgorDPWave(pixelInfo, "M_PixelsDebugInfo");
+#endif
 }
 
 Eigen::MatrixXd PixelCombinationsForOrderAsMatrix(const int order, const SOFIOptions::AllowablePixelCombinations allowablePixelCombinations, const double pixelCombinationCutoff) {

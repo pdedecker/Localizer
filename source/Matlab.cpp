@@ -331,7 +331,7 @@ void MatlabTestSegmentation(int nlhs, mxArray** plhs, int nrhs, const mxArray** 
 		mexErrMsgTxt("5th argument must be a 2D matrix (the image to segment)");
 	
 	try {
-		boost::scoped_ptr<ImageLoader> imageLoader(new ImageLoaderMatlab(const_cast<mxArray*>(array)));
+		std::shared_ptr<ImageLoader> imageLoader(new ImageLoaderMatlab(const_cast<mxArray*>(array)));
 		ImagePtr imageToSegment = imageLoader->readImage(0);
 		
 		std::shared_ptr<ThresholdImage> thresholder;
