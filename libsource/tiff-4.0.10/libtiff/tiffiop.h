@@ -130,8 +130,8 @@ struct tiff {
 	uint64               tif_diroff;       /* file offset of current directory */
 	uint64               tif_nextdiroff;   /* file offset of following directory */
 	uint64*              tif_dirlist;      /* list of offsets to already seen directories to prevent IFD looping */
-	uint16               tif_dirlistsize;  /* number of entries in offset list */
-	uint16               tif_dirnumber;    /* number of already seen directories */
+	uint32               tif_dirlistsize;  /* number of entries in offset list */
+	uint32               tif_dirnumber;    /* number of already seen directories */
 	TIFFDirectory        tif_dir;          /* internal rep of current directory */
 	TIFFDirectory        tif_customdir;    /* custom IFDs are separated from the main ones */
 	union {
@@ -141,7 +141,7 @@ struct tiff {
 	} tif_header;
 	uint16               tif_header_size;  /* file's header block and its length */
 	uint32               tif_row;          /* current scanline */
-	uint16               tif_curdir;       /* current directory (index) */
+	uint32               tif_curdir;       /* current directory (index) */
 	uint32               tif_curstrip;     /* current strip for read/write */
 	uint64               tif_curoff;       /* current offset for read/write */
 	uint64               tif_dataoff;      /* current offset for writing dir */

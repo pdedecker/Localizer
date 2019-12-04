@@ -47,12 +47,12 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
 	
 	if (nrhs < 1)
 		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\",\n\
-					 					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
+					 					  \"localize\", \"testsegmentation\", \"sofi\", or \"sofipixelcombinations\")");
 	
 	const mxArray* inputArray = prhs[0];
 	if ((mxGetClassID(inputArray) != mxCHAR_CLASS) || (mxGetM(inputArray) > 1))
 		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\",\n\
-					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
+					  \"localize\", \"testsegmentation\", \"sofi\", or \"sofipixelcombinations\")");
 
 	std::string selector = GetMatlabString(inputArray);
 	if (boost::iequals(selector, "localize")) {
@@ -71,7 +71,7 @@ void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
         MatlabWriteCCDImages(nlhs, plhs, nrhs, prhs);
 	} else {
 		mexErrMsgTxt("Unknown selector (should be one of \"readccdimages\", \"writeccdimages\",\n\
-					  \"localize\", \"testsegmentation\", \"sofi\", \"newsofi\" (not recommended), or \"sofipixelcombinations\")");
+					  \"localize\", \"testsegmentation\", \"sofi\", or \"sofipixelcombinations\")");
 	}
 }
 

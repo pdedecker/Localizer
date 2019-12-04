@@ -3543,7 +3543,7 @@ TIFFReadDirectory(TIFF* tif)
 {
 	static const char module[] = "TIFFReadDirectory";
 	TIFFDirEntry* dir;
-	uint16 dircount;
+	uint32 dircount;
 	TIFFDirEntry* dp;
 	uint16 di;
 	const TIFFField* fip;
@@ -4584,13 +4584,13 @@ MissingRequired(TIFF* tif, const char* tagname)
 static int
 TIFFCheckDirOffset(TIFF* tif, uint64 diroff)
 {
-	uint16 n;
+	uint32 n;
 
 	if (diroff == 0)			/* no more directories */
 		return 0;
-	if (tif->tif_dirnumber == 65535) {
+	if (tif->tif_dirnumber == 4294967295) {
 	    TIFFErrorExt(tif->tif_clientdata, "TIFFCheckDirOffset",
-			 "Cannot handle more than 65535 TIFF directories");
+			 "Cannot handle more than 4294967295 TIFF directories");
 	    return 0;
 	}
 

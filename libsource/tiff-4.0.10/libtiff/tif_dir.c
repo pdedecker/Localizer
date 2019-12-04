@@ -1564,12 +1564,12 @@ TIFFAdvanceDirectory(TIFF* tif, uint64* nextdir, uint64* off)
 /*
  * Count the number of directories in a file.
  */
-uint16
+uint32
 TIFFNumberOfDirectories(TIFF* tif)
 {
 	static const char module[] = "TIFFNumberOfDirectories";
 	uint64 nextdir;
-	uint16 n;
+	uint32 n;
 	if (!(tif->tif_flags&TIFF_BIGTIFF))
 		nextdir = tif->tif_header.classic.tiff_diroff;
 	else
@@ -1577,15 +1577,15 @@ TIFFNumberOfDirectories(TIFF* tif)
 	n = 0;
 	while (nextdir != 0 && TIFFAdvanceDirectory(tif, &nextdir, NULL))
         {
-                if (n != 65535) {
+                if (n != 4294967295) {
                         ++n;
                 }
 		else
                 {
                         TIFFErrorExt(tif->tif_clientdata, module,
-                                     "Directory count exceeded 65535 limit,"
+                                     "Directory count exceeded 4294967295 limit,"
                                      " giving up on counting.");
-                        return (65535);
+                        return (4294967295);
                 }
         }
 	return (n);
@@ -1596,10 +1596,10 @@ TIFFNumberOfDirectories(TIFF* tif)
  * NB: Directories are numbered starting at 0.
  */
 int
-TIFFSetDirectory(TIFF* tif, uint16 dirn)
+TIFFSetDirectory(TIFF* tif, uint32 dirn)
 {
 	uint64 nextdir;
-	uint16 n;
+	uint32 n;
 
 	if (!(tif->tif_flags&TIFF_BIGTIFF))
 		nextdir = tif->tif_header.classic.tiff_diroff;
@@ -1664,12 +1664,12 @@ TIFFLastDirectory(TIFF* tif)
  * Unlink the specified directory from the directory chain.
  */
 int
-TIFFUnlinkDirectory(TIFF* tif, uint16 dirn)
+TIFFUnlinkDirectory(TIFF* tif, uint32 dirn)
 {
 	static const char module[] = "TIFFUnlinkDirectory";
 	uint64 nextdir;
 	uint64 off;
-	uint16 n;
+	uint32 n;
 
 	if (tif->tif_mode == O_RDONLY) {
 		TIFFErrorExt(tif->tif_clientdata, module,
