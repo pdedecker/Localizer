@@ -212,75 +212,85 @@ typedef struct ReadCCDImagesRuntimeParams* ReadCCDImagesRuntimeParamsPtr;
 // Runtime param structure for ProcessCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
 struct ProcessCCDImagesRuntimeParams {
-    // Flag parameters.
+	// Flag parameters.
 
-    // Parameters for /Y flag group.
-    int YFlagEncountered;
-    double camera_type;
-    int YFlagParamsSet[1];
+	// Parameters for /Y flag group.
+	int YFlagEncountered;
+	double camera_type;
+	int YFlagParamsSet[1];
 
-    // Parameters for /M flag group.
-    int MFlagEncountered;
-    double method;
-    int MFlagParamsSet[1];
+	// Parameters for /M flag group.
+	int MFlagEncountered;
+	double method;
+	int MFlagParamsSet[1];
 
-    // Parameters for /CAL flag group.
-    int CALFlagEncountered;
-    double offset;
-    double multiplicationFactor;
-    int CALFlagParamsSet[2];
+	// Parameters for /C flag group.
+	int CFlagEncountered;
+	double nImagesToRead;
+	int CFlagParamsSet[1];
 
-    // Parameters for /ROI flag group.
-    int ROIFlagEncountered;
-    double startX;
-    double endX;
-    double startY;
-    double endY;
-    int ROIFlagParamsSet[4];
+	// Parameters for /S flag group.
+	int SFlagEncountered;
+	double nImagesToSkip;
+	int SFlagParamsSet[1];
 
-    // Parameters for /AVG flag group.
-    int AVGFlagEncountered;
-    double framesAveraging;
-    int AVGFlagParamsSet[1];
+	// Parameters for /CAL flag group.
+	int CALFlagEncountered;
+	double offset;
+	double multiplicationFactor;
+	int CALFlagParamsSet[2];
 
-    // Parameters for /OUT flag group.
-    int OUTFlagEncountered;
-    double outputType;
-    int OUTFlagParamsSet[1];
+	// Parameters for /ROI flag group.
+	int ROIFlagEncountered;
+	double startX;
+	double endX;
+	double startY;
+	double endY;
+	int ROIFlagParamsSet[4];
 
-    // Parameters for /O flag group.
-    int OFlagEncountered;
-    // There are no fields for this group because it has no parameters.
+	// Parameters for /AVG flag group.
+	int AVGFlagEncountered;
+	double framesAveraging;
+	int AVGFlagParamsSet[1];
 
-    // Parameters for /PROG flag group.
-    int PROGFlagEncountered;
-    LocalizerProgStruct* progStruct;
-    int PROGFlagParamsSet[1];
+	// Parameters for /OUT flag group.
+	int OUTFlagEncountered;
+	double outputType;
+	int OUTFlagParamsSet[1];
 
-    // Parameters for /Q flag group.
-    int QFlagEncountered;
-    // There are no fields for this group because it has no parameters.
+	// Parameters for /O flag group.
+	int OFlagEncountered;
+	// There are no fields for this group because it has no parameters.
 
-    // Main parameters.
+	// Parameters for /PROG flag group.
+	int PROGFlagEncountered;
+	LocalizerProgStruct* progStruct;
+	int PROGFlagParamsSet[1];
 
-    // Parameters for simple main group #0.
-    int input_fileEncountered;
-    Handle input_file;
-    int input_fileParamsSet[1];
+	// Parameters for /Q flag group.
+	int QFlagEncountered;
+	// There are no fields for this group because it has no parameters.
 
-    // Parameters for simple main group #1.
-    int output_fileEncountered;
-    Handle output_file;
-    int output_fileParamsSet[1];
+	// Main parameters.
 
-    // These are postamble fields that Igor sets.
-    int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
-    int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
-    UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
+	// Parameters for simple main group #0.
+	int input_fileEncountered;
+	Handle input_file;
+	int input_fileParamsSet[1];
+
+	// Parameters for simple main group #1.
+	int output_fileEncountered;
+	Handle output_file;
+	int output_fileParamsSet[1];
+
+	// These are postamble fields that Igor sets.
+	int calledFromFunction;					// 1 if called from a user function, 0 otherwise.
+	int calledFromMacro;					// 1 if called from a macro, 0 otherwise.
+	UserFunctionThreadInfoPtr tp;			// If not null, we are running from a ThreadSafe function.
 };
 typedef struct ProcessCCDImagesRuntimeParams ProcessCCDImagesRuntimeParams;
 typedef struct ProcessCCDImagesRuntimeParams* ProcessCCDImagesRuntimeParamsPtr;
-#pragma pack()	// All structures passed to Igor are two-byte aligned.
+#pragma pack()	// Reset structure alignment to default.
 
 // Runtime param structure for AnalyzeCCDImages operation.
 #pragma pack(2)	// All structures passed to Igor are two-byte aligned.
@@ -1567,6 +1577,23 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
         return TOO_FEW_PARAMETERS;
     }
 
+	int nImagesToRead = -1;
+	if (p->CFlagEncountered) {
+		nImagesToRead = p->nImagesToRead;
+		if (nImagesToRead < 1) {
+			return EXPECT_POS_NUM;
+		}
+	}
+
+	int nImagesToSkip = 0;
+	if (p->SFlagEncountered) {
+		// Parameter: p->nImagesToSkip
+		nImagesToSkip = p->nImagesToSkip;
+		if (nImagesToSkip < 0) {
+			return EXPECT_POS_NUM;
+		}
+	}
+
     if (p->CALFlagEncountered) {
         // Parameter: p->offset
         // Parameter: p->multiplicationFactor
@@ -1666,7 +1693,9 @@ int ExecuteProcessCCDImages(ProcessCCDImagesRuntimeParamsPtr p) {
     try {
         input_file_path = ConvertHandleToString(p->input_file);
         image_loader = GetImageLoader(input_file_path, camera_type);
-
+		std::shared_ptr<ImageLoaderWrapper> wrapper(new ImageLoaderWrapper(image_loader));
+		wrapper->setImageRange(nImagesToSkip, nImagesToRead);
+		image_loader = wrapper;
         output_file_path = ConvertHandleToString(p->output_file);
         if (outputType != IMAGE_OUTPUT_TYPE_IGOR)
             output_file_path = ConvertPathToNativePath(output_file_path);
@@ -3561,9 +3590,9 @@ static int RegisterProcessCCDImages(void) {
     const char* runtimeNumVarList;
     const char* runtimeStrVarList;
 
-    // NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
-    cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q string:input_file, string:output_file";
-    runtimeNumVarList = "V_flag";
+	// NOTE: If you change this template, you must change the ProcessCCDImagesRuntimeParams structure as well.
+	cmdTemplate = "ProcessCCDImages /Y=number:camera_type /M=number:method /C=number:nImagesToRead /S=number:nImagesToSkip /CAL={number:offset, number:multiplicationFactor} /ROI={number:startX, number:endX, number:startY, number:endY} /AVG=number:framesAveraging /OUT=number:outputType /O /PROG=structure:{progStruct, LocalizerProgStruct} /Q string:input_file, string:output_file";
+	runtimeNumVarList = "V_flag";
     runtimeStrVarList = "";
     return RegisterOperation(cmdTemplate, runtimeNumVarList, runtimeStrVarList, sizeof(ProcessCCDImagesRuntimeParams), (void*)ExecuteProcessCCDImages, kOperationIsThreadSafe);
 }
@@ -3760,7 +3789,6 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle) {
     }
     
     gsl_set_error_handler_off();	// we will handle GSL errors ourselves
-    TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
 
     if ((result = RegisterOperations())) {
         SetXOPResult(result);
