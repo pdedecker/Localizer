@@ -49,7 +49,7 @@
 #include "Errors.h"
 #include "Storage.h"
 #include "Defines.h"
-#include "tiffio.h"
+#include "TIFFFile.h"
 
 #ifdef _WIN32
 #include <stdio.h>
@@ -349,27 +349,19 @@ private:
 
 class ImageLoaderTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
 public:
-    class ImageOffsets {
-    public:
-		std::vector<uint64_t> offsets;
-		int64_t modificationTime;
-    };
-    
 	ImageLoaderTIFF(const std::string& filePath);
 	~ImageLoaderTIFF();
-	
+
 	ImagePtr readNextImage(int &indexOfImageThatWasRead);
-	
-	int getFileType() const {return CAMERA_TYPE_TIFF;}
-	
+
+	int getFileType() const { return CAMERA_TYPE_TIFF; }
+
 private:
-	void parse_header_information();
-    void _extractSampleFormat();
-	
-	TIFF* _tiffFile;
-    std::string _filePath;
-    static std::map<std::string, ImageLoaderTIFF::ImageOffsets> _offsetsMap;
-	std::vector<uint64_t> _directoryOffsets;
+	void _extractSampleFormat();
+
+	TIFFFile _tiffFile;
+	std::string _filePath;
+	std::vector<std::uint8_t> _singleImageBuffer;
 };
 
 class ImageLoaderMultiFileTIFF : public ImageLoader {	// loads data from TIFF files using the libtiff library
@@ -487,19 +479,6 @@ struct PDEFormatHeader {
 typedef struct PDEFormatHeader PDEFormatHeader;
 
 void TIFFSampleFormatAndBitsPerSampleForFormat(const LocalizerStorageType dataFormat, int& sampleFormat, int& bitsPerSample);
-
-class TIFFImageOutputWriter : public ImageOutputWriter {
-public:
-	TIFFImageOutputWriter(const std::string &rhs, int overwrite, int compression_rhs, LocalizerStorageType storageType);
-	~TIFFImageOutputWriter();
-	
-	void write_image(ImagePtr imageToWrite);
-protected:
-	int compression;	// if 1 then don't compress the data, otherwise compress
-	LocalizerStorageType storageType;
-	
-	TIFF *tiff_file;
-};
 
 class MultiFileTIFFImageOutputWriter : public ImageOutputWriter {
 public:

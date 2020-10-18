@@ -4,14 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Localizer", "Localizer.vcxproj", "{DF78B16E-519A-4D74-A7F5-18A36F5402E4}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914} = {D9109CA5-AA78-422D-A3B7-DC1AFA13B914}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtiff", "libtiff\libtiff.vcxproj", "{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}"
-	ProjectSection(ProjectDependencies) = postProject
-		{037A64E0-8264-4CC0-9AE3-0322540CFAAC} = {037A64E0-8264-4CC0-9AE3-0322540CFAAC}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{037A64E0-8264-4CC0-9AE3-0322540CFAAC}"
 EndProject
@@ -37,18 +29,6 @@ Global
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.Build.0 = Release-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.ActiveCfg = Release-Matlab|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-Matlab|x64.Build.0 = Release-Matlab|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug|x64.ActiveCfg = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug|x64.Build.0 = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-LocalizerDLL|x64.Build.0 = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-Matlab|x64.ActiveCfg = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Debug-Matlab|x64.Build.0 = Debug|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release|x64.ActiveCfg = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release|x64.Build.0 = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.ActiveCfg = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-LocalizerDLL|x64.Build.0 = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-Matlab|x64.ActiveCfg = Release|x64
-		{D9109CA5-AA78-422D-A3B7-DC1AFA13B914}.Release-Matlab|x64.Build.0 = Release|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug|x64.ActiveCfg = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug|x64.Build.0 = Debug|x64
 		{037A64E0-8264-4CC0-9AE3-0322540CFAAC}.Debug-LocalizerDLL|x64.ActiveCfg = Debug|x64

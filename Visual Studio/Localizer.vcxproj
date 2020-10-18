@@ -123,8 +123,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;GSL_DLL;_DEBUG;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\libsource\LNBTIFF\;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;GSL_DLL;_DEBUG;LNBTIFF_CACHEIFDOFFSETS;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -238,8 +238,8 @@
       <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;GSL_DLL;NDEBUG;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\include;$(SolutionDir)\..\libsource\LNBTIFF\;$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;GSL_DLL;LNBTIFF_CACHEIFDOFFSETS;NDEBUG;_WINDOWS;_USRDLL;LOCALIZER_EXPORTS;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WITH_IGOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -301,6 +301,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\libsource\LNBTIFF\TIFFCompression.cpp" />
+    <ClCompile Include="..\libsource\LNBTIFF\TIFFFile.cpp" />
+    <ClCompile Include="..\libsource\LNBTIFF\TIFFIFD.cpp" />
+    <ClCompile Include="..\libsource\LNBTIFF\TIFFTag.cpp" />
+    <ClCompile Include="..\libsource\LNBTIFF\TIFFUtils.cpp" />
     <ClCompile Include="..\source\LocalizerDLL.cpp" />
     <ClCompile Include="..\source\NewSOFI.cpp" />
     <ClCompile Include="..\source\NewSOFIKernels.cpp" />
@@ -344,6 +349,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFCompression.h" />
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFDefs.h" />
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFFile.h" />
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFIFD.h" />
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFTag.h" />
+    <ClInclude Include="..\libsource\LNBTIFF\TIFFUtils.h" />
     <ClInclude Include="..\source\LocalizerDLL.h" />
     <ClInclude Include="..\source\NewSOFI.h" />
     <ClInclude Include="..\source\NewSOFIKernels.h" />

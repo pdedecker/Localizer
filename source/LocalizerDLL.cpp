@@ -41,7 +41,6 @@ int LocalizerFileInfo(char* filePath,            // in: path to the file on disk
                       int* nCols,                // out: number of cols
                       int* storageType) {        // out: pixel storage type
     gsl_set_error_handler_off();	// we will handle GSL errors ourselves
-    TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
     try {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
         *nImagesInFile = imageLoader->getNImages();
@@ -61,7 +60,6 @@ int LocalizerLoadImages(char* filePath,          // in: path to the file on disk
                                int nImagesToLoad,       // in: number of images to load -- -1 to load up to end
                                double* imageData) {     // in: pointer to allocate buffer -- must contain at least (nRows * nCols * nImages) doubles
     gsl_set_error_handler_off();	// we will handle GSL errors ourselves
-    TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
     try {
         std::shared_ptr<ImageLoader> imageLoader = GetImageLoader(std::string(filePath));
         ImageLoaderWrapper imageLoaderWrapper(imageLoader);

@@ -1030,19 +1030,19 @@ ImageLoaderHamamatsu::~ImageLoaderHamamatsu() {
 
 class ImageLoaderHamamatsu_HeaderStructure {
 public:
-	uint16 magic;
-	uint16 commentLength;
-	uint16 xSize;
-	uint16 ySize;
-	uint16 xBinning;	// uncertain
-	uint16 yBinning;	// uncertain
-	uint16 storageFormat;
-	uint32 nImages;
-	uint16 nChannels;
-	uint16 channel;		// uncertain
+	std::uint16_t magic;
+	std::uint16_t commentLength;
+	std::uint16_t xSize;
+	std::uint16_t ySize;
+	std::uint16_t xBinning;	// uncertain
+	std::uint16_t yBinning;	// uncertain
+	std::uint16_t storageFormat;
+	std::uint32_t nImages;
+	std::uint16_t nChannels;
+	std::uint16_t channel;		// uncertain
 	double timeStamp;
-	uint32 marker;
-	uint32 misc;		// function unknown
+	std::uint32_t marker;
+	std::uint32_t misc;		// function unknown
 };
 
 void ImageLoaderHamamatsu::parse_header_information() {
@@ -1256,306 +1256,127 @@ ImagePtr ImageLoaderPDE::readNextImage(int &indexOfImageThatWasRead) {
 	return image;
 }
 
-std::map<std::string, ImageLoaderTIFF::ImageOffsets> ImageLoaderTIFF::_offsetsMap;
+bool TIFFIFDReadingProgressFunction(std::uint64_t nIFDsSeen) {
+#ifdef WITH_IGOR
+	if ((nIFDsSeen % 100) == 0) {
+		int abort = SpinProcess();
+		return (abort != 0);
+	}
+	return false;
+#endif
+
+}
 
 ImageLoaderTIFF::ImageLoaderTIFF(const std::string& filePath) :
-    _filePath(filePath),
-    _tiffFile(NULL)
+	_filePath(filePath),
+	_tiffFile(filePath, TIFFIFDReadingProgressFunction)
 {
-	TIFFSetWarningHandler(NULL);
-	
-	_tiffFile = TIFFOpen(_filePath.c_str(), "rm");
-	if (_tiffFile == NULL) {
-		std::string error ("Unable to open the file at ");
-		error += _filePath;
-		throw CANNOT_OPEN_FILE(error);
-	}
-	
-	parse_header_information();
+	this->nImages = _tiffFile.nImages();
+	_extractSampleFormat();
+
+	this->checkForReasonableValues();
 }
 
 
 ImageLoaderTIFF::~ImageLoaderTIFF() {
-	
-	if (_tiffFile != NULL) {
-		TIFFClose(_tiffFile);
-	}
-	
-}
-
-
-void ImageLoaderTIFF::parse_header_information() {
-	int result;
-	uint32_t result_uint32;
-    
-    result = TIFFSetDirectory(_tiffFile, 0);
-    if (result != 1)
-        throw std::runtime_error("Error reading from the file");
-    
-    _extractSampleFormat();
-    
-    // do we already have information on the offsets of the images for this file?
-	if (_offsetsMap.count(_filePath) != 0) {
-		// we have information, now check if the timestamp is still okay
-		if (GetLastModificationTime(_filePath) != _offsetsMap[_filePath].modificationTime) {
-			// looks like the file was modified
-			// delete the offset information, it will be recreated below
-			_offsetsMap.erase(_filePath);
-		} else {
-            // we still have valid offsets
-            _directoryOffsets = _offsetsMap[_filePath].offsets;
-        }
-	}
-    
-    // now create the offsets map if needed (if it did not exist or was deleted above)
-	if (_offsetsMap.count(_filePath) == 0) {
-		ImageLoaderTIFF::ImageOffsets imageOffsets;
-        
-        // how many images are there in the file?
-        // because there is a possibility of a file with different
-        // subfile types (e.g. Zeiss LSM files), we need to go over all of them
-        // and look at which subfiles are the ones we're interested in
-        imageOffsets.modificationTime = GetLastModificationTime(_filePath);
-        int nImagesChecked = 0;
-        do {
-            result = TIFFGetField(_tiffFile, TIFFTAG_SUBFILETYPE, &result_uint32);
-
-            if (((result_uint32 == FILETYPE_REDUCEDIMAGE) || (result_uint32 == FILETYPE_MASK)) && (result == 1)) {
-                // this is one of the subtypes that we don't support
-                // do nothing with it
-            } else {
-                // if we're here then the image is appropriate, store the offset to its IFD
-                int64_t ifdOffset = TIFFCurrentDirOffset(_tiffFile);
-                _directoryOffsets.push_back(ifdOffset);
-            }
-            
-            nImagesChecked += 1;
-            #ifdef WITH_IGOR
-			if ((nImagesChecked % 20) == 0) {
-				int abort = SpinProcess();
-				if (abort)
-					throw USER_ABORTED("user abort");
-			}
-            #endif
-            
-        } while (TIFFReadDirectory(_tiffFile) == 1);
-        
-        imageOffsets.offsets = _directoryOffsets;
-        
-        _offsetsMap[_filePath] = imageOffsets;
-    }
-	
-	this->nImages = _directoryOffsets.size();
-    
-	this->checkForReasonableValues();
 }
 
 void ImageLoaderTIFF::_extractSampleFormat() {
-    int result;
-    uint16_t result_uint16;
-	uint32_t result_uint32;
-	size_t bitsPerPixel;
-    
-    // is the image in grayscale format?
-    result = TIFFGetField(_tiffFile, TIFFTAG_PHOTOMETRIC, &result_uint16);
-    if (result != 1) {
-        std::string error;
-        error = "The image at\"";
-        error += _filePath;
-        error += "\" is not a grayscale image";
-        throw ERROR_READING_FILE_DATA(error);
-    }
-    if ((result_uint16 != 0) && (result_uint16 != 1)) {	// not a grayscale image
-        std::string error;
-        error = "The image at\"";
-        error += _filePath;
-        error += "\" is not a grayscale image";
-        throw ERROR_READING_FILE_DATA(error);
-    }
-    
-    // is it a binary image?
-    result = TIFFGetField(_tiffFile, TIFFTAG_BITSPERSAMPLE, &result_uint16);
-    if (result != 1) {
-        std::string error;
-        error = "The image at\"";
-        error += _filePath;
-        error += "\" is not a grayscale image";
-        throw ERROR_READING_FILE_DATA(error);
-    }
-    if (result_uint16 < 4) {	// 4 is the minimum number of bits allowed for grayscale images in the tiff specification, so this is a bilevel image
-        std::string error;
-        error = "The image at\"";
-        error += _filePath;
-        error += "\" is not a grayscale image";
-        throw ERROR_READING_FILE_DATA(error);
-    }
-    bitsPerPixel = (unsigned int)result_uint16;
-	
-	// is the data in unsigned integer or floating point format?
-    bool isInt = false;
-    bool isUInt = false;
-    bool isFP = false;
-	result = TIFFGetField(_tiffFile, TIFFTAG_SAMPLEFORMAT, &result_uint16);
-	if (result != 1) {	// if the field does not exist then we assume that it is integer format
-		result_uint16 = 1;
-	}
-	switch (result_uint16) {
-		case 1:
-			isUInt = true;
-			break;
-        case 2:
-            isInt = true;
-		case 3:
-			isFP = true;
-			break;
-		default:
-			std::string error;
-			error = "The SampleFormat of the image at\"";
-			error += _filePath;
-			error += "\" is unknown";
-			throw ERROR_READING_FILE_DATA(error);
-			break;
-	}
-	
-	if (isInt || isUInt) {
-		switch (bitsPerPixel) {
-			case 8:
-				storage_type = (isUInt) ? kUInt8 : kInt8;
-				break;
-			case 16:
-				storage_type = (isUInt) ? kUInt16 : kInt16;
-				break;
-			case 32:
-				storage_type = (isUInt) ? kUInt32 : kInt32;
-				break;
-            case 64:
-                storage_type = (isUInt) ? kUInt64 : kInt32;
-			default:
-				std::string error;
-				error = "The SampleFormat of the image at\"";
-				error += _filePath;
-				error += "\" is unknown";
-				throw ERROR_READING_FILE_DATA(error);
-				break;
-		}
-	} else if (isFP) {	// the image is not in integer format but is a floating point
-		switch (bitsPerPixel) {
-			case 32:
-				storage_type = kFP32;
-				break;
-			case 64:
-				storage_type = kFP64;
-				break;
-			default:
-				std::string error;
-				error = "The SampleFormat of the image at\"";
-				error += _filePath;
-				error += "\" is unknown";
-				throw ERROR_READING_FILE_DATA(error);
-				break;
-		}
-	}
-	
-	// what is the x size?
-	result = TIFFGetField(_tiffFile, TIFFTAG_IMAGEWIDTH, &result_uint32);
-	if (result != 1) {
-		std::string error;
-		error = "The image at\"";
-		error += _filePath;
-		error += "\" does not specify a width";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	xSize = (size_t)(result_uint32);
-	
-	// what is the y size?
-	result = TIFFGetField(_tiffFile, TIFFTAG_IMAGELENGTH, &result_uint32);
-	if (result != 1) {
-		std::string error;
-		error = "The image at\"";
-		error += _filePath;
-		error += "\" does not specify a height";
-		throw ERROR_READING_FILE_DATA(error);
-	}
-	ySize = (size_t)(result_uint32);
-}
+	std::uint64_t imageWidth = 0, imageLength = 0, nBytesInImage = 0;
+	TagType pixelType;
+	_tiffFile.getImageDimensions(0, imageLength, imageWidth, pixelType, nBytesInImage);
 
-template <typename T> void StoreTIFFScanLineInImage(T* scanLineBuffer, int colToFill, ImagePtr image) {
-    int nRows = image->rows();
-    for (int i = 0; i < nRows; ++i) {
-        (*image)(i, colToFill) = *scanLineBuffer;
-        ++scanLineBuffer;
-    }
+	xSize = imageWidth;
+	ySize = imageLength;
+
+	switch (pixelType) {
+	case TIFF_BYTE:
+		storage_type = kUInt8;
+		break;
+	case TIFF_SHORT:
+		storage_type = kUInt16;
+		break;
+	case TIFF_LONG:
+		storage_type = kUInt32;
+		break;
+	case TIFF_SBYTE:
+		storage_type = kInt8;
+		break;
+	case TIFF_SSHORT:
+		storage_type = kInt16;
+		break;
+	case TIFF_SLONG:
+		storage_type = kInt32;
+		break;
+	case TIFF_FLOAT:
+		storage_type = kFP32;
+		break;
+	case TIFF_DOUBLE:
+		storage_type = kFP64;
+		break;
+	case TIFF_LONG8:
+		storage_type = kUInt64;
+		break;
+	case TIFF_SLONG8:
+		storage_type = kInt64;
+		break;
+	default:
+		throw std::runtime_error("unknown TIFF data type");
+		break;
+	}
 }
 
 ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
-	int result;
-	
-	std::lock_guard<std::mutex> lock(loadImagesMutex);
-	
-	std::shared_ptr<void> single_scanline_buffer (_TIFFmalloc(TIFFScanlineSize(_tiffFile)), _TIFFfree);
-	if (single_scanline_buffer.get() == NULL) {
-		throw std::bad_alloc();
-	}
-    char* scanLineBuffer = static_cast<char*>(single_scanline_buffer.get());
-	
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
 	
-	// advance the active TIFF directory to that needed to read the next image
-    result = TIFFSetSubDirectory(_tiffFile, _directoryOffsets.at(this->nextImageToRead));
-    if (result != 1) {
-        std::string error;
-        error = "Unable to set the directory for the image at\"";
-        error += _filePath;
-        error += "\"";
-        throw ERROR_READING_FILE_DATA(error);
-    }
+	std::uint64_t imageWidth = 0, imageLength = 0, nBytesInImage = 0;
+	TagType pixelType;
+	_tiffFile.getImageDimensions(this->nextImageToRead, imageLength, imageWidth, pixelType, nBytesInImage);
+	if (_singleImageBuffer.size() < nBytesInImage) {
+		_singleImageBuffer.resize(nBytesInImage);
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(loadImagesMutex);
+		_tiffFile.loadImageData(this->nextImageToRead, _singleImageBuffer.data(), nBytesInImage);
+	}
 	
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
-	
-	for (int j = 0; j < ySize; ++j) {
-		result = TIFFReadScanline(_tiffFile, single_scanline_buffer.get(), j, 0);	// sample is ignored
-		if (result != 1) {
-			std::string error;
-			error = "Unable to read a scanline from the image at\"";
-			error += _filePath;
-			error += "\"";
-			throw ERROR_READING_FILE_DATA(error);
-		}
-		
-		switch (storage_type) {	// handle the different possibilities (floating, integer) and variable sizes
-			case kUInt8:
-                StoreTIFFScanLineInImage(reinterpret_cast<uint8_t*>(scanLineBuffer), j, image);
-                break;
-			case kUInt16:
-                StoreTIFFScanLineInImage(reinterpret_cast<uint16_t*>(scanLineBuffer), j, image);
-                break;
-			case kUInt32:
-                StoreTIFFScanLineInImage(reinterpret_cast<uint32_t*>(scanLineBuffer), j, image);
-                break;
-            case kInt8:
-                StoreTIFFScanLineInImage(reinterpret_cast<int8_t*>(scanLineBuffer), j, image);
-                break;
-			case kInt16:
-                StoreTIFFScanLineInImage(reinterpret_cast<int16_t*>(scanLineBuffer), j, image);
-                break;
-			case kInt32:
-                StoreTIFFScanLineInImage(reinterpret_cast<int32_t*>(scanLineBuffer), j, image);
-                break;
-			case kFP32:
-                StoreTIFFScanLineInImage(reinterpret_cast<float*>(scanLineBuffer), j, image);
-                break;
-			case kFP64:
-                StoreTIFFScanLineInImage(reinterpret_cast<double*>(scanLineBuffer), j, image);
-                break;
-			default:
-				std::string error;
-				error = "Invalid floating point data size for the image at\"";
-				error += _filePath;
-				error += "\"";
-				throw ERROR_READING_FILE_DATA(error);
-				break;
-		}
+	switch (pixelType) {
+	case TIFF_BYTE:
+		CopyBufferToImage<std::uint8_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_SHORT:
+		CopyBufferToImage<std::uint16_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_LONG:
+		CopyBufferToImage<std::uint32_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_SBYTE:
+		CopyBufferToImage<std::int8_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_SSHORT:
+		CopyBufferToImage<std::int16_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_SLONG:
+		CopyBufferToImage<std::int32_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_FLOAT:
+		CopyBufferToImage<float>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_DOUBLE:
+		CopyBufferToImage<double>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_LONG8:
+		CopyBufferToImage<std::uint64_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	case TIFF_SLONG8:
+		CopyBufferToImage<std::int64_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
+		break;
+	default:
+		throw std::runtime_error("unknown TIFF data type");
+		break;
 	}
 	
 	indexOfImageThatWasRead = this->nextImageToRead;
@@ -2025,208 +1846,6 @@ void TIFFSampleFormatAndBitsPerSampleForFormat(const LocalizerStorageType dataFo
 			throw std::runtime_error("Unknown storage type requested for TIFF output");
 			break;
 	}
-}
-
-TIFFImageOutputWriter::TIFFImageOutputWriter(const std::string &rhs,int overwrite, int compression_rhs, LocalizerStorageType storageType_rhs) {
-	// if overwrite is non-zero then we overwrite any file that exists at the output path
-	// if it is set to zero then we throw an error and abort instead of overwriting
-	
-	TIFFSetWarningHandler(NULL);
-	this->outputFilePath = rhs;
-	this->compression = compression_rhs;
-	this->storageType = storageType_rhs;
-	
-	if (overwrite == 0) {
-		std::ifstream input_test;
-		input_test.open(outputFilePath.c_str(), std::ios::in | std::ios::binary);
-		if (input_test.good() == 1) {
-			std::string error("The output file at ");
-			error += this->outputFilePath;
-			error += " already exists.";
-			throw OUTPUT_FILE_ALREADY_EXISTS(error);	// escape without overwriting
-		}
-		input_test.close();
-	}
-	
-	tiff_file = TIFFOpen(outputFilePath.c_str(), "w");
-	if (tiff_file == NULL) {
-		std::string error("Cannot create an output file at ");
-		error += this->outputFilePath;
-		throw CANNOT_OPEN_OUTPUT_FILE(error);
-	}
-	
-	nImagesWritten = 0;
-}
-
-
-TIFFImageOutputWriter::~TIFFImageOutputWriter() {
-	if (tiff_file != NULL) {
-		TIFFClose(tiff_file);
-		tiff_file = NULL;
-	}
-}
-
-template <typename T> void StoreImageRowInScanLine(ImagePtr image, int colToStore, T* scanLineBuffer) {
-    int nRows = image->rows();
-    for (int i = 0; i < nRows; ++i) {
-        *scanLineBuffer = (*image)(i, colToStore);
-        ++scanLineBuffer;
-    }
-}
-
-void TIFFImageOutputWriter::write_image(ImagePtr imageToWrite) {
-	
-	size_t xSize = imageToWrite->rows();
-	size_t ySize = imageToWrite->cols();
-	
-	int result, sampleFormat, bitsPerSample;
-	uint16_t current_uint16;
-	uint32_t current_uint32;
-	
-	// determine the output storage type
-    TIFFSampleFormatAndBitsPerSampleForFormat(this->storageType, sampleFormat, bitsPerSample);
-	
-	// make a scoped_array that will act as a single scanline buffer
-	// make it a buffer of chars equal to the total number of bytes required
-	std::unique_ptr<char[]> scanLine(new char[xSize * bitsPerSample / 8]);
-	
-	// make sure that all the image tags have the correct values
-	result = TIFFSetField(tiff_file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the photometric type for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	current_uint32 = xSize;
-	result = TIFFSetField(tiff_file, TIFFTAG_IMAGEWIDTH, current_uint32);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the image width for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	current_uint32 = ySize;
-	result = TIFFSetField(tiff_file, TIFFTAG_IMAGELENGTH, current_uint32);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the image height for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	result = TIFFSetField(tiff_file, TIFFTAG_SAMPLEFORMAT, sampleFormat);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the SampleFormat for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	result = TIFFSetField(tiff_file, TIFFTAG_BITSPERSAMPLE, bitsPerSample);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the BitsPerSample for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	result = TIFFSetField(tiff_file, TIFFTAG_SUBFILETYPE, FILETYPE_PAGE);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the SubFileType for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	current_uint16 = (uint16_t)nImagesWritten;
-	result = TIFFSetField(tiff_file, TIFFTAG_PAGENUMBER, current_uint16);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the PageNumber for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	result = TIFFSetField(tiff_file, TIFFTAG_COMPRESSION, compression);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to set the compression method for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	size_t offset = 0;
-	for (size_t j = 0; j < ySize; j++) {
-		offset = 0;
-		
-		switch (this->storageType) {
-			case kInt8:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int8_t*>(scanLine.get()));
-				break;
-			case kUInt8:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint8_t*>(scanLine.get()));
-				break;
-			case kInt16:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int16_t*>(scanLine.get()));
-				break;
-			case kUInt16:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint16_t*>(scanLine.get()));
-				break;
-			case kInt32:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int32_t*>(scanLine.get()));
-				break;
-			case kUInt32:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint32_t*>(scanLine.get()));
-				break;
-			case kInt64:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<int64_t*>(scanLine.get()));
-				break;
-			case kUInt64:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<uint64_t*>(scanLine.get()));
-				break;
-			case kFP32:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<float*>(scanLine.get()));
-				break;
-			case kFP64:
-                StoreImageRowInScanLine(imageToWrite, j, reinterpret_cast<double*>(scanLine.get()));
-				break;
-            default:
-                throw std::runtime_error("unsupport TIFF storage type");
-                break;
-		}
-		
-		result = TIFFWriteScanline(tiff_file, (char *)scanLine.get(), j);
-		if (result != 1) {
-			std::string error;
-			error = "There was an error writing a scanline for the image at\"";
-			error += outputFilePath;
-			error += "\"";
-			throw ERROR_WRITING_FILE_DATA(error);
-		}
-		
-	}
-	
-	result = TIFFWriteDirectory(tiff_file);
-	if (result != 1) {
-		std::string error;
-		error = "Unable to write a directory for the image at\"";
-		error += outputFilePath;
-		error += "\"";
-		throw ERROR_WRITING_FILE_DATA(error);
-	}
-	
-	++this->nImagesWritten;
 }
 
 MultiFileTIFFImageOutputWriter::MultiFileTIFFImageOutputWriter(const std::string &baseOutputFilePath_rhs, int overwrite_rhs, bool compress, LocalizerStorageType storageType_rhs) :
