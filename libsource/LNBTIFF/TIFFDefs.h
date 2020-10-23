@@ -20,6 +20,11 @@ enum TagType {
 };
 
 /*
+* LNB Private TIFF Tag
+*/
+#define LNB_TIFFTAG_IFDOFFSETS 65337
+
+/*
 * TIFF Tag Definitions.
 */
 #define	TIFFTAG_SUBFILETYPE		254	/* subfile data descriptor */

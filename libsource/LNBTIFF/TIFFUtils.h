@@ -14,35 +14,23 @@ T ReadAndSwapIfNeeded(std::ifstream& f, T& val, bool needsSwap) {
 }
 
 template <typename T>
-T SwapBinTagIfNeeded(T& tag, bool needsSwap) {
-	tag.tagCode = MaybeEndianSwap(tag.tagCode, needsSwap);
-	tag.dataType = MaybeEndianSwap(tag.dataType, needsSwap);
-	tag.nValues = MaybeEndianSwap(tag.nValues, needsSwap);
-	tag.tagData = MaybeEndianSwap(tag.tagData, needsSwap);
-	return tag;
-}
-
-template <typename T>
-std::vector<std::uint64_t> ExtractNumericValues(const std::vector<std::uint8_t>& rawValues, bool shouldEndianSwap) {
+std::vector<std::uint64_t> ExtractNumericValues(const std::vector<std::uint8_t>& rawValues) {
 	const T* vPtr = reinterpret_cast<const T*>(rawValues.data());
 	size_t nValues = rawValues.size() / sizeof(T);
 	std::vector<std::uint64_t> values(nValues);
 	for (size_t i = 0; i < nValues; i += 1) {
 		values[i] = vPtr[i];
-		if (shouldEndianSwap) {
-			values[i] = EndianSwap(values[i]);
-		}
 	}
 	return values;
 }
 
 template <typename T>
-std::vector<std::uint64_t> ExtractRationalValues(const std::vector<std::uint8_t>& rawValues, bool shouldEndianSwap) {
+std::vector<std::uint64_t> ExtractRationalValues(const std::vector<std::uint8_t>& rawValues) {
 	const T* vPtr = reinterpret_cast<const T*>(rawValues.data());
 	size_t nValues = rawValues.size() / (2 * sizeof(T));
 	std::vector<std::uint64_t> values(nValues);
 	for (size_t i = 0; i < nValues; i += 1) {
-		values[i] = (double)MaybeEndianSwap(vPtr[2 * i], shouldEndianSwap) / (double)MaybeEndianSwap(vPtr[2 * i + 1], shouldEndianSwap);
+		values[i] = (double)vPtr[2 * i] / (double)vPtr[2 * i + 1];
 	}
 	return values;
 }
@@ -77,5 +65,15 @@ T MaybeEndianSwap(T u, bool doIt) {
 		return u;
 	}
 }
+
+template <typename T>
+void EndianSwapArray(T* arrayPtr, size_t nBytesInArray) {
+	for (size_t i = 0; i < nBytesInArray; i += sizeof(T)) {
+		*arrayPtr = EndianSwap(*arrayPtr);
+		arrayPtr++;
+	}
+}
+
+void EndianSwapTIFFArray(std::uint8_t* arrayPtr, TagType dataType, size_t nBytesInArray);
 
 #endif

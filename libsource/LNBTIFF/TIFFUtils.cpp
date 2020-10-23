@@ -32,6 +32,27 @@ size_t NBytesPerValue(TagType tagType) {
 	return bytesPerValue;
 }
 
+void EndianSwapTIFFArray(std::uint8_t* arrayPtr, TagType dataType, size_t nBytesInArray) {
+	size_t nBytesPerValue = NBytesPerValue(dataType);
+	if ((dataType == TIFF_RATIONAL) || (dataType == TIFF_SRATIONAL)) {
+		nBytesPerValue = 4;
+	}
+	switch (nBytesPerValue) {
+	case 2:
+		EndianSwapArray(reinterpret_cast<std::uint16_t*>(arrayPtr), nBytesInArray);
+		break;
+	case 4:
+		EndianSwapArray(reinterpret_cast<std::uint32_t*>(arrayPtr), nBytesInArray);
+		break;
+	case 8:
+		EndianSwapArray(reinterpret_cast<std::uint64_t*>(arrayPtr), nBytesInArray);
+		break;
+	default:
+		throw std::runtime_error("no match for bytes per value in tag swap");
+		break;
+	}
+}
+
 /*std::int64_t GetLastModificationTime(const std::string& path) {
 	std::int64_t modTime = 1;
 

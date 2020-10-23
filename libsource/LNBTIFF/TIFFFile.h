@@ -47,6 +47,7 @@ private:
 	// and calls f.seekg() with offset to first IFD.
 	void _readTIFFHeader(std::ifstream& f);
 	std::vector<std::uint64_t> _findIFDOffsets(std::ifstream& f, const std::string& filePath, std::function<bool(std::uint64_t)> ifdSearchProgressFunc) const;
+	std::vector<std::uint64_t> _readIFDOffsetsFromLNBTag(std::ifstream& f) const;
 	TIFFIFD& _readIFDAtIndex(const std::uint64_t index);
 
 	//std::vector<TIFFIFD> _readIFDs(std::ifstream& f);

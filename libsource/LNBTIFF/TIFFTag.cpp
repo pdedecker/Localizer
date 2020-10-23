@@ -32,6 +32,15 @@ BinTag LittleBinTagToBinTag(const LittleBinTag& littleTag) {
 	return tag;
 }
 
+template <typename T>
+T SwapBinTagMetaDataIfNeeded(T& tag, bool needsSwap) {
+	// don't swap the tagData field.
+	tag.tagCode = MaybeEndianSwap(tag.tagCode, needsSwap);
+	tag.dataType = MaybeEndianSwap(tag.dataType, needsSwap);
+	tag.nValues = MaybeEndianSwap(tag.nValues, needsSwap);
+	return tag;
+}
+
 TIFFTag::TIFFTag(std::ifstream & f, bool isBigTiff, bool shouldEndianSwap) :
 	_isBigTiff(isBigTiff),
 	_shouldEndianSwap(shouldEndianSwap) {
@@ -39,10 +48,10 @@ TIFFTag::TIFFTag(std::ifstream & f, bool isBigTiff, bool shouldEndianSwap) :
 	LittleBinTag littleBinTag;
 	if (isBigTiff) {
 		f.read(reinterpret_cast<char*>(&binTag), sizeof(binTag));
-		SwapBinTagIfNeeded(binTag, _shouldEndianSwap);
+		SwapBinTagMetaDataIfNeeded(binTag, _shouldEndianSwap);
 	} else {
 		f.read(reinterpret_cast<char*>(&littleBinTag), sizeof(littleBinTag));
-		SwapBinTagIfNeeded(littleBinTag, _shouldEndianSwap);
+		SwapBinTagMetaDataIfNeeded(littleBinTag, _shouldEndianSwap);
 		binTag = LittleBinTagToBinTag(littleBinTag);
 	}
 	std::streampos nextTagPos = f.tellg();
@@ -51,11 +60,24 @@ TIFFTag::TIFFTag(std::ifstream & f, bool isBigTiff, bool shouldEndianSwap) :
 	size_t nBytesRequired = nBytesPerValue * binTag.nValues;
 	_tagData.resize(nBytesRequired);
 	if ((_isBigTiff && (nBytesRequired <= 8)) || (!_isBigTiff && (nBytesRequired <= 4))) {
-		memcpy(_tagData.data(), &(binTag.tagData), nBytesRequired);
+		if (_isBigTiff) {
+			memcpy(_tagData.data(), &(binTag.tagData), nBytesRequired);
+		} else {
+			memcpy(_tagData.data(), &(littleBinTag.tagData), nBytesRequired);
+		}
 	} else {
-		std::uint64_t dataOffset = binTag.tagData;
+		std::uint64_t dataOffset = 0;
+		if (_isBigTiff) {
+			dataOffset = MaybeEndianSwap(binTag.tagData, shouldEndianSwap);
+		} else {
+			dataOffset = MaybeEndianSwap(littleBinTag.tagData, shouldEndianSwap);
+		}
 		f.seekg(dataOffset);
 		f.read(reinterpret_cast<char*>(_tagData.data()), nBytesRequired);
+	}
+
+	if (_shouldEndianSwap && (nBytesPerValue > 1)) {
+		EndianSwapTIFFArray(_tagData.data(), (TagType)binTag.dataType, _tagData.size());
 	}
 
 	f.seekg(nextTagPos);
@@ -67,49 +89,49 @@ TIFFTag::TIFFTag(std::ifstream & f, bool isBigTiff, bool shouldEndianSwap) :
 std::vector<std::uint64_t> TIFFTag::getNumericValues() const {
 	switch (_tagType) {
 	case TIFF_BYTE:
-		return ExtractNumericValues<std::uint8_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint8_t>(_tagData);
 		break;
 	case TIFF_ASCII:
 		throw std::runtime_error("Numeric access on ascii tag");
 		break;
 	case TIFF_SHORT:
-		return ExtractNumericValues<std::uint16_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint16_t>(_tagData);
 		break;
 	case TIFF_LONG:
-		return ExtractNumericValues<std::uint32_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint32_t>(_tagData);
 		break;
 	case TIFF_RATIONAL:
-		return ExtractRationalValues<std::uint32_t>(_tagData, _shouldEndianSwap);
+		return ExtractRationalValues<std::uint32_t>(_tagData);
 		break;
 	case TIFF_SBYTE:
-		return ExtractNumericValues<std::int8_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::int8_t>(_tagData);
 		break;
 	case TIFF_UNDEFINED:
-		return ExtractNumericValues<std::uint8_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint8_t>(_tagData);
 		break;
 	case TIFF_SSHORT:
-		return ExtractNumericValues<std::int16_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::int16_t>(_tagData);
 		break;
 	case TIFF_SLONG:
-		return ExtractNumericValues<std::int32_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::int32_t>(_tagData);
 		break;
 	case TIFF_SRATIONAL:
-		return ExtractRationalValues<std::int32_t>(_tagData, _shouldEndianSwap);
+		return ExtractRationalValues<std::int32_t>(_tagData);
 		break;
 	case TIFF_FLOAT:
-		return ExtractNumericValues<float>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<float>(_tagData);
 		break;
 	case TIFF_DOUBLE:
-		return ExtractNumericValues<double>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<double>(_tagData);
 		break;
 	case TIFF_LONG8:
-		return ExtractNumericValues<std::uint64_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint64_t>(_tagData);
 		break;
 	case TIFF_SLONG8:
-		return ExtractNumericValues<std::int64_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::int64_t>(_tagData);
 		break;
 	case TIFF_IFD8:
-		return ExtractNumericValues<std::uint64_t>(_tagData, _shouldEndianSwap);
+		return ExtractNumericValues<std::uint64_t>(_tagData);
 		break;
 	default:
 		throw std::runtime_error("unknown TIFF data type while reading numeric tag");

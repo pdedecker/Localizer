@@ -166,23 +166,13 @@ void TIFFIFD::loadImageData(std::ifstream & f, std::uint8_t * data, std::uint64_
 		}
 		dataOffsetPtr += nBytesStoredFromStrip;
 		nBytesStoredThusFar += nBytesStoredFromStrip;
-
-		if (_shouldEndianSwap && (bytesPerPixel > 1)) {
-			size_t nPixelsToSwap = (nBytesStoredFromStrip / bytesPerPixel);
-			std::uint8_t* bytesToSwapPtr = dataOffsetPtr - nBytesStoredFromStrip;
-			char buf[8];
-			for (size_t pxIdx = 0; pxIdx < nPixelsToSwap; pxIdx += 1) {
-				memcpy(buf, bytesToSwapPtr, bytesPerPixel);
-				for (size_t i = (bytesPerPixel - 1); i >= 0; i -= 1) {
-					*dataOffsetPtr = buf[i];
-					dataOffsetPtr += 1;
-				}
-				bytesToSwapPtr += bytesPerPixel;
-			}
-		}
 	}
 	if (nBytesStoredThusFar != nBytesInImage) {
 		throw std::runtime_error("not enough data to fill complete image");
+	}
+
+	if (_shouldEndianSwap && (bytesPerPixel > 1)) {
+		EndianSwapTIFFArray(data, pixelType, nBytesInImage);
 	}
 }
 

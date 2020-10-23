@@ -1327,22 +1327,21 @@ void ImageLoaderTIFF::_extractSampleFormat() {
 }
 
 ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
+	std::lock_guard<std::mutex> lock(loadImagesMutex);
+
 	if (this->nextImageToRead >= this->nImages)
 		throw IMAGE_INDEX_BEYOND_N_IMAGES(std::string("Requested more images than there are in the file"));
-	
+
 	std::uint64_t imageWidth = 0, imageLength = 0, nBytesInImage = 0;
 	TagType pixelType;
+
 	_tiffFile.getImageDimensions(this->nextImageToRead, imageLength, imageWidth, pixelType, nBytesInImage);
 	if (_singleImageBuffer.size() < nBytesInImage) {
 		_singleImageBuffer.resize(nBytesInImage);
 	}
-
-	{
-		std::lock_guard<std::mutex> lock(loadImagesMutex);
-		_tiffFile.loadImageData(this->nextImageToRead, _singleImageBuffer.data(), nBytesInImage);
-	}
-	
+	_tiffFile.loadImageData(this->nextImageToRead, _singleImageBuffer.data(), nBytesInImage);
 	ImagePtr image(GetRecycledMatrix((int)xSize, (int)ySize), FreeRecycledMatrix);
+
 	switch (pixelType) {
 	case TIFF_BYTE:
 		CopyBufferToImage<std::uint8_t>(reinterpret_cast<char*>(_singleImageBuffer.data()), image);
@@ -1378,10 +1377,10 @@ ImagePtr ImageLoaderTIFF::readNextImage(int &indexOfImageThatWasRead) {
 		throw std::runtime_error("unknown TIFF data type");
 		break;
 	}
-	
+
 	indexOfImageThatWasRead = this->nextImageToRead;
 	this->nextImageToRead += 1;
-	
+
 	return image;
 }
 

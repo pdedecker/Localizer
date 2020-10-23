@@ -127,9 +127,19 @@ std::vector<std::uint64_t> TIFFFile::_findIFDOffsets(std::ifstream& f, const std
 #endif
 
 	// if we are still here then we didn't have valid offsets stored.
+#ifdef LNBTIFF_READIFDOFFSETSFROMTAG
+	// try to read the offset from the first IFD tag?
+	std::vector<std::uint64_t> tagIFDOffsets = _readIFDOffsetsFromLNBTag(f);
+	if (!tagIFDOffsets.empty()) {
+#ifdef LNBTIFF_CACHEIFDOFFSETS
+		_gIFDOffsetsMap.insert({ filePath, IFDOffsets(tagIFDOffsets, lastModificationTime) });
+#endif
+		return tagIFDOffsets;
+	}
+#endif
 
-	// assumes f.tellg() is at the first IFD offset, and also adds this offset to the list.
 	std::vector<std::uint64_t> offsets;
+	// assumes f.tellg() is at the first IFD offset, and also adds this offset to the list.
 	std::unordered_set<std::uint64_t> ifdOffsetsSeenSet;
 	offsets.push_back(f.tellg());
 	ifdOffsetsSeenSet.insert(f.tellg());
@@ -157,6 +167,35 @@ std::vector<std::uint64_t> TIFFFile::_findIFDOffsets(std::ifstream& f, const std
 	_gIFDOffsetsMap.insert({ filePath, IFDOffsets(offsets, lastModificationTime) });
 #endif
 
+	return offsets;
+}
+
+std::vector<std::uint64_t> TIFFFile::_readIFDOffsetsFromLNBTag(std::ifstream & f) const {
+	std::uint64_t firstIFDOffset = f.tellg();
+	TIFFIFD ifd(f, _isBigTIFF, _shouldEndianSwap);
+	f.seekg(firstIFDOffset);
+
+	if (!ifd.haveTag(LNB_TIFFTAG_IFDOFFSETS)) {
+		return std::vector<std::uint64_t>();
+	}
+	std::vector<std::uint64_t> offsets = ifd.getNumericTagValues(LNB_TIFFTAG_IFDOFFSETS);
+	if (offsets.size() < 2) {
+		return std::vector<std::uint64_t>();
+	}
+	std::uint64_t magic = 310117011014;
+	if ((offsets.at(0) != magic) || (offsets.at(1) != firstIFDOffset)) {
+		return std::vector<std::uint64_t>();
+	}
+	offsets.erase(offsets.cbegin());
+
+	std::unordered_set<std::uint64_t> ifdOffsetsSet;
+	for (auto o : offsets) {
+		if (ifdOffsetsSet.count(o) == 1) {
+			throw std::runtime_error("circular IFD in offsets tag");
+		}
+		ifdOffsetsSet.insert(o);
+	}
+	
 	return offsets;
 }
 
