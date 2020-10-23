@@ -46,10 +46,10 @@ public:
 	Image *getMatrix(int nRows, int nCols);
 	void freeMatrix(Image *matrixToFree);
 	
-	// free all matrices allocated by this matrix
+	// free all matrices allocated by this object.
 	// if this function is called while some memory
 	// allocated by this class is still in use then
-	// an error will be thrown
+	// an error will be thrown.
 	void freeAllMatrices();
 	
 protected:
@@ -76,5 +76,11 @@ void FreeRecycledMatrix(Image* matrixToFree);
  * Request that all reserved memory held in the recycler be freed
  */
 void FreeAllRecycledMatrices();
+
+class RecycledMatrixCleaner {
+public:
+	RecycledMatrixCleaner() { ; }
+	~RecycledMatrixCleaner() { FreeAllRecycledMatrices(); }
+};
 
 #endif

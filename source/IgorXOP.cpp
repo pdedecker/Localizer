@@ -29,6 +29,7 @@
 #include "IgorXOP.h"
 
 #include "NewSOFI.h"
+#include "MatrixRecycler.h"
 
 #pragma pack(2)
 struct LocalizerProgStruct {
@@ -928,6 +929,8 @@ int ExecuteLocalizationAnalysis(LocalizationAnalysisRuntimeParamsPtr p) {
     std::shared_ptr<LocalizedPositionsContainer> localizedPositions;
     std::shared_ptr<ProgressReporter> progressReporter;
 
+	RecycledMatrixCleaner recycledMatrixCleaner;
+
     // Flag parameters.
 
     if (p->MFlagEncountered) {
@@ -1343,6 +1346,8 @@ int ExecuteReadCCDImages(ReadCCDImagesRuntimeParamsPtr p) {
     DataFolderAndName dataFolderAndName;
 
     std::shared_ptr<ImageLoader> image_loader;
+
+	RecycledMatrixCleaner recycledMatrixCleaner;
 
     // Flag parameters.
 
@@ -1825,6 +1830,8 @@ int ExecuteAnalyzeCCDImages(AnalyzeCCDImagesRuntimeParamsPtr p) {
     std::string input_file_path;
 
     std::shared_ptr<ImageLoader> image_loader;
+
+	RecycledMatrixCleaner recycledMatrixCleaner;
 
     // Flag parameters.
 
@@ -2758,6 +2765,8 @@ static int ExecutePairwiseCorrelationClustering(PairwiseCorrelationClusteringRun
 int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
     int err = 0;
 
+	RecycledMatrixCleaner recycledMatrixCleaner;
+
     // Flag parameters.
 	
     int cameraType;
@@ -3029,6 +3038,8 @@ int ExecuteSOFIAnalysis(SOFIAnalysisRuntimeParamsPtr p) {
 
 static int ExecuteNewSOFI(NewSOFIRuntimeParamsPtr p) {
 	int err = 0;
+
+	RecycledMatrixCleaner recycledMatrixCleaner;
     
     int cameraType = -1;
     if (p->YFlagEncountered) {
@@ -3443,6 +3454,8 @@ static int ExecuteSOFIPixelCombinations(SOFIPixelCombinationsRuntimeParamsPtr p)
 
 static int ExecuteWriteCCDImages(WriteCCDImagesRuntimeParamsPtr p) {
 	int err = 0;
+
+	RecycledMatrixCleaner recycledMatrixCleaner;
     
 	// Flag parameters.
     
