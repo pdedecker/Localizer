@@ -43,7 +43,7 @@
 */
 void mexFunction(int nlhs, mxArray** plhs, int nrhs, const mxArray** prhs) {
     gsl_set_error_handler_off();	// we will handle GSL errors ourselves
-    TIFFSetErrorHandler(NULL);      // we will handle libtiff errors ourselves
+	RecycledMatrixCleaner cleaner();
 	
 	if (nrhs < 1)
 		mexErrMsgTxt("First argument must be a string describing the operation to perform (\"readccdimages\", \"writeccdimages\",\n\

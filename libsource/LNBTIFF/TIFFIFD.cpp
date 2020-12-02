@@ -124,7 +124,10 @@ void TIFFIFD::loadImageData(std::ifstream & f, std::uint8_t * data, std::uint64_
 		throw std::runtime_error("size in bytes doesn't match");
 	}
 
-	std::uint64_t compression = tagNumericValueOrError(TIFFTAG_COMPRESSION);
+	std::uint64_t compression = COMPRESSION_NONE;
+	if (haveTag(TIFFTAG_COMPRESSION)) {
+		compression = tagNumericValueOrError(TIFFTAG_COMPRESSION);
+	}
 	if ((compression != COMPRESSION_NONE) && (compression != COMPRESSION_ADOBE_DEFLATE) && (compression != COMPRESSION_DEFLATE)) {
 		throw std::runtime_error("unsupported compression method");
 	}

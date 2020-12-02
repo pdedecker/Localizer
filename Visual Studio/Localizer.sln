@@ -21,8 +21,8 @@ Global
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug|x64.Build.0 = Debug|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.ActiveCfg = Debug-LocalizerDLL|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-LocalizerDLL|x64.Build.0 = Debug-LocalizerDLL|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.ActiveCfg = Debug|x64
-		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.Build.0 = Debug|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.ActiveCfg = Debug-Matlab|x64
+		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Debug-Matlab|x64.Build.0 = Debug-Matlab|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release|x64.ActiveCfg = Release|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release|x64.Build.0 = Release|x64
 		{DF78B16E-519A-4D74-A7F5-18A36F5402E4}.Release-LocalizerDLL|x64.ActiveCfg = Release-LocalizerDLL|x64

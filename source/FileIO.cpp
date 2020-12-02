@@ -1262,9 +1262,8 @@ bool TIFFIFDReadingProgressFunction(std::uint64_t nIFDsSeen) {
 		int abort = SpinProcess();
 		return (abort != 0);
 	}
-	return false;
 #endif
-
+	return false;
 }
 
 ImageLoaderTIFF::ImageLoaderTIFF(const std::string& filePath) :
