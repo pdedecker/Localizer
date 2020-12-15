@@ -165,7 +165,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;libfftw3-3.lib;libtiff64.lib;zlib64.lib;gsl.lib;tbb_debug.lib;cblas.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;libfftw3-3.lib;zlib64.lib;gsl.lib;tbb_debug.lib;cblas.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2018a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -288,7 +288,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)\..\..\XOPSupport;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;libfftw3-3.lib;libtiff64.lib;zlib64.lib;tbb.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>version.lib;gsl.lib;cblas.lib;libfftw3-3.lib;zlib64.lib;tbb.lib;libmex.lib;libmat.lib;libmx.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mexw64</OutputFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\zlib\Products;$(SolutionDir)\libtiff\Products;$(SolutionDir)\..\lib\win64;C:\Program Files\MATLAB\R2018a\extern\lib\win64\microsoft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
