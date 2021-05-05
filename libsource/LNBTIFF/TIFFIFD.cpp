@@ -242,7 +242,7 @@ TagType TIFFIFD::_decodeTagType(int bitsPerPixel, int sampleFormat) const {
 		case 32:
 			return TIFF_FLOAT;
 			break;
-		case 16:
+		case 64:
 			return TIFF_DOUBLE;
 			break;
 		default:
