@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <cmath>
 
 #include "TIFFTag.h"
 
