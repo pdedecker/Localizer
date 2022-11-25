@@ -86,6 +86,33 @@
 		D0FB9905193344E00024B6A7 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29D170C54680012ED0E /* libz.a */; };
 		D0FB9906193344E50024B6A7 /* liblzma.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29B170C54680012ED0E /* liblzma.a */; };
 		D0FB9907193344E70024B6A7 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0EAE29A170C54680012ED0E /* libjpeg.a */; };
+		F44AFE8F27A829290091EEF7 /* TIFFIFD.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8427A829290091EEF7 /* TIFFIFD.h */; };
+		F44AFE9027A829290091EEF7 /* TIFFIFD.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8427A829290091EEF7 /* TIFFIFD.h */; };
+		F44AFE9127A829290091EEF7 /* TIFFTag.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8527A829290091EEF7 /* TIFFTag.h */; };
+		F44AFE9227A829290091EEF7 /* TIFFTag.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8527A829290091EEF7 /* TIFFTag.h */; };
+		F44AFE9327A829290091EEF7 /* TIFFCompression.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8627A829290091EEF7 /* TIFFCompression.h */; };
+		F44AFE9427A829290091EEF7 /* TIFFCompression.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8627A829290091EEF7 /* TIFFCompression.h */; };
+		F44AFE9527A829290091EEF7 /* TIFFCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8727A829290091EEF7 /* TIFFCompression.cpp */; };
+		F44AFE9627A829290091EEF7 /* TIFFCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8727A829290091EEF7 /* TIFFCompression.cpp */; };
+		F44AFE9727A829290091EEF7 /* TIFFCompression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8727A829290091EEF7 /* TIFFCompression.cpp */; };
+		F44AFE9827A829290091EEF7 /* TIFFFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8827A829290091EEF7 /* TIFFFile.cpp */; };
+		F44AFE9927A829290091EEF7 /* TIFFFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8827A829290091EEF7 /* TIFFFile.cpp */; };
+		F44AFE9A27A829290091EEF7 /* TIFFFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8827A829290091EEF7 /* TIFFFile.cpp */; };
+		F44AFE9B27A829290091EEF7 /* TIFFDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8927A829290091EEF7 /* TIFFDefs.h */; };
+		F44AFE9C27A829290091EEF7 /* TIFFDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8927A829290091EEF7 /* TIFFDefs.h */; };
+		F44AFE9D27A829290091EEF7 /* TIFFTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8A27A829290091EEF7 /* TIFFTag.cpp */; };
+		F44AFE9E27A829290091EEF7 /* TIFFTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8A27A829290091EEF7 /* TIFFTag.cpp */; };
+		F44AFE9F27A829290091EEF7 /* TIFFTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8A27A829290091EEF7 /* TIFFTag.cpp */; };
+		F44AFEA027A829290091EEF7 /* TIFFIFD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8B27A829290091EEF7 /* TIFFIFD.cpp */; };
+		F44AFEA127A829290091EEF7 /* TIFFIFD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8B27A829290091EEF7 /* TIFFIFD.cpp */; };
+		F44AFEA227A829290091EEF7 /* TIFFIFD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8B27A829290091EEF7 /* TIFFIFD.cpp */; };
+		F44AFEA327A829290091EEF7 /* TIFFUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8C27A829290091EEF7 /* TIFFUtils.cpp */; };
+		F44AFEA427A829290091EEF7 /* TIFFUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8C27A829290091EEF7 /* TIFFUtils.cpp */; };
+		F44AFEA527A829290091EEF7 /* TIFFUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44AFE8C27A829290091EEF7 /* TIFFUtils.cpp */; };
+		F44AFEA627A829290091EEF7 /* TIFFFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8D27A829290091EEF7 /* TIFFFile.h */; };
+		F44AFEA727A829290091EEF7 /* TIFFFile.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8D27A829290091EEF7 /* TIFFFile.h */; };
+		F44AFEA827A829290091EEF7 /* TIFFUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8E27A829290091EEF7 /* TIFFUtils.h */; };
+		F44AFEA927A829290091EEF7 /* TIFFUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = F44AFE8E27A829290091EEF7 /* TIFFUtils.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -173,6 +200,17 @@
 		D0F4244511B5A4EC001BCE24 /* CommandLineProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CommandLineProcessing.cpp; path = ../source/CommandLineProcessing.cpp; sourceTree = "<group>"; };
 		D0FD27B010F4F41F00C99B9B /* PositionsProcessing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PositionsProcessing.h; path = ../source/PositionsProcessing.h; sourceTree = SOURCE_ROOT; };
 		D0FD27B110F4F41F00C99B9B /* PositionsProcessing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PositionsProcessing.cpp; path = ../source/PositionsProcessing.cpp; sourceTree = SOURCE_ROOT; };
+		F44AFE8427A829290091EEF7 /* TIFFIFD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFIFD.h; path = ../libsource/LNBTIFF/TIFFIFD.h; sourceTree = "<group>"; };
+		F44AFE8527A829290091EEF7 /* TIFFTag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFTag.h; path = ../libsource/LNBTIFF/TIFFTag.h; sourceTree = "<group>"; };
+		F44AFE8627A829290091EEF7 /* TIFFCompression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFCompression.h; path = ../libsource/LNBTIFF/TIFFCompression.h; sourceTree = "<group>"; };
+		F44AFE8727A829290091EEF7 /* TIFFCompression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TIFFCompression.cpp; path = ../libsource/LNBTIFF/TIFFCompression.cpp; sourceTree = "<group>"; };
+		F44AFE8827A829290091EEF7 /* TIFFFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TIFFFile.cpp; path = ../libsource/LNBTIFF/TIFFFile.cpp; sourceTree = "<group>"; };
+		F44AFE8927A829290091EEF7 /* TIFFDefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFDefs.h; path = ../libsource/LNBTIFF/TIFFDefs.h; sourceTree = "<group>"; };
+		F44AFE8A27A829290091EEF7 /* TIFFTag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TIFFTag.cpp; path = ../libsource/LNBTIFF/TIFFTag.cpp; sourceTree = "<group>"; };
+		F44AFE8B27A829290091EEF7 /* TIFFIFD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TIFFIFD.cpp; path = ../libsource/LNBTIFF/TIFFIFD.cpp; sourceTree = "<group>"; };
+		F44AFE8C27A829290091EEF7 /* TIFFUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TIFFUtils.cpp; path = ../libsource/LNBTIFF/TIFFUtils.cpp; sourceTree = "<group>"; };
+		F44AFE8D27A829290091EEF7 /* TIFFFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFFile.h; path = ../libsource/LNBTIFF/TIFFFile.h; sourceTree = "<group>"; };
+		F44AFE8E27A829290091EEF7 /* TIFFUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TIFFUtils.h; path = ../libsource/LNBTIFF/TIFFUtils.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -316,6 +354,17 @@
 				D06A631D18B4CED200C940C5 /* SOFIFrameVerifiers.cpp */,
 				D08BAEBD0F80C8B900D08A6C /* Storage.h */,
 				D0069E0C117B764200112C90 /* Storage.cpp */,
+				F44AFE8727A829290091EEF7 /* TIFFCompression.cpp */,
+				F44AFE8627A829290091EEF7 /* TIFFCompression.h */,
+				F44AFE8927A829290091EEF7 /* TIFFDefs.h */,
+				F44AFE8827A829290091EEF7 /* TIFFFile.cpp */,
+				F44AFE8D27A829290091EEF7 /* TIFFFile.h */,
+				F44AFE8B27A829290091EEF7 /* TIFFIFD.cpp */,
+				F44AFE8427A829290091EEF7 /* TIFFIFD.h */,
+				F44AFE8A27A829290091EEF7 /* TIFFTag.cpp */,
+				F44AFE8527A829290091EEF7 /* TIFFTag.h */,
+				F44AFE8C27A829290091EEF7 /* TIFFUtils.cpp */,
+				F44AFE8E27A829290091EEF7 /* TIFFUtils.h */,
 				D0E6FD0F131C546400356DBB /* MatrixRecycler.h */,
 				D0E6FD10131C546400356DBB /* MatrixRecycler.cpp */,
 				D084B0630F7F7236004E7AE3 /* Defines.h */,
@@ -401,8 +450,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				D05645A118AA1F72001A22D9 /* NewSOFI.h in Headers */,
+				F44AFEA727A829290091EEF7 /* TIFFFile.h in Headers */,
+				F44AFE9227A829290091EEF7 /* TIFFTag.h in Headers */,
 				D05645A618AA211F001A22D9 /* NewSOFIKernels.h in Headers */,
 				D06A632118B4CED200C940C5 /* SOFIFrameVerifiers.h in Headers */,
+				F44AFE9427A829290091EEF7 /* TIFFCompression.h in Headers */,
+				F44AFE9027A829290091EEF7 /* TIFFIFD.h in Headers */,
+				F44AFEA927A829290091EEF7 /* TIFFUtils.h in Headers */,
+				F44AFE9C27A829290091EEF7 /* TIFFDefs.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +465,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F44AFE9127A829290091EEF7 /* TIFFTag.h in Headers */,
+				F44AFEA827A829290091EEF7 /* TIFFUtils.h in Headers */,
+				F44AFE9327A829290091EEF7 /* TIFFCompression.h in Headers */,
+				F44AFE8F27A829290091EEF7 /* TIFFIFD.h in Headers */,
+				F44AFEA627A829290091EEF7 /* TIFFFile.h in Headers */,
+				F44AFE9B27A829290091EEF7 /* TIFFDefs.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -546,6 +607,7 @@
 			files = (
 				D0A9C2EF135F4EED00D076AE /* IgorXOP.cpp in Sources */,
 				D0A9C2F0135F4EED00D076AE /* PALMAnalysis.cpp in Sources */,
+				F44AFE9827A829290091EEF7 /* TIFFFile.cpp in Sources */,
 				D0A9C2F1135F4EED00D076AE /* Processing.cpp in Sources */,
 				D0A9C2F2135F4EED00D076AE /* FileIO.cpp in Sources */,
 				D0A9C2F3135F4EED00D076AE /* Segmentation.cpp in Sources */,
@@ -558,9 +620,13 @@
 				D0A9C2FA135F4EED00D076AE /* MatrixRecycler.cpp in Sources */,
 				D01D290C136CE9710094B975 /* ProgressReporting.cpp in Sources */,
 				D090E533139685610099D837 /* SOFI.cpp in Sources */,
+				F44AFE9527A829290091EEF7 /* TIFFCompression.cpp in Sources */,
 				D06A631F18B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */,
 				D027E93A151311CF005B8664 /* Convolver.cpp in Sources */,
+				F44AFEA327A829290091EEF7 /* TIFFUtils.cpp in Sources */,
+				F44AFEA027A829290091EEF7 /* TIFFIFD.cpp in Sources */,
 				D056459F18AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
+				F44AFE9D27A829290091EEF7 /* TIFFTag.cpp in Sources */,
 				D05645A418AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -571,6 +637,7 @@
 			files = (
 				D0C2584C1746C1AF001C2EB1 /* Matlab.cpp in Sources */,
 				D0C2584E1746C1AF001C2EB1 /* WaitMex.cpp in Sources */,
+				F44AFE9A27A829290091EEF7 /* TIFFFile.cpp in Sources */,
 				D0C258321746C19A001C2EB1 /* PALMAnalysis.cpp in Sources */,
 				D0C2585A1746C57D001C2EB1 /* ProgressReporting.cpp in Sources */,
 				D0C258341746C1A2001C2EB1 /* Processing.cpp in Sources */,
@@ -583,9 +650,13 @@
 				D0C258421746C1A2001C2EB1 /* PositionsProcessing.cpp in Sources */,
 				D0C258441746C1A2001C2EB1 /* SOFI.cpp in Sources */,
 				D0C258461746C1A2001C2EB1 /* Storage.cpp in Sources */,
+				F44AFE9727A829290091EEF7 /* TIFFCompression.cpp in Sources */,
 				D06A632018B4CED200C940C5 /* SOFIFrameVerifiers.cpp in Sources */,
 				D0C258481746C1A2001C2EB1 /* MatrixRecycler.cpp in Sources */,
+				F44AFEA527A829290091EEF7 /* TIFFUtils.cpp in Sources */,
+				F44AFEA227A829290091EEF7 /* TIFFIFD.cpp in Sources */,
 				D05645A018AA1F72001A22D9 /* NewSOFI.cpp in Sources */,
+				F44AFE9F27A829290091EEF7 /* TIFFTag.cpp in Sources */,
 				D05645A518AA211F001A22D9 /* NewSOFIKernels.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -594,9 +665,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F44AFEA127A829290091EEF7 /* TIFFIFD.cpp in Sources */,
 				D0CCD33C1473C7E0005CD75A /* LocalizerDLL.cpp in Sources */,
 				D0CCD3251473C6B6005CD75A /* FileIO.cpp in Sources */,
+				F44AFEA427A829290091EEF7 /* TIFFUtils.cpp in Sources */,
+				F44AFE9927A829290091EEF7 /* TIFFFile.cpp in Sources */,
+				F44AFE9627A829290091EEF7 /* TIFFCompression.cpp in Sources */,
 				D0CCD3331473C6B6005CD75A /* Storage.cpp in Sources */,
+				F44AFE9E27A829290091EEF7 /* TIFFTag.cpp in Sources */,
 				D0CCD3351473C6B6005CD75A /* MatrixRecycler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -743,7 +819,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
@@ -792,7 +869,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
