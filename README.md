@@ -11,7 +11,7 @@ At present there are binaries for [Igor Pro](http://www.wavemetrics.com) and for
 
 If you are unfamiliar with programming the Igor Pro plugin will be the best option, since it comes with a complete graphical interface to use for analyzing your PALM/STORM or SOFI data, including visualization, clustering analysis, drift correction, etc. Igor Pro is commercial software, but [a free 30-day trial version is available for direct download](http://www.wavemetrics.com/support/demos.htm). Localizer will function without restrictions during the trial period. After the trial period Localizer will continue to function normally, but you will be unable to save the data or figures it generates.
 
-Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document, while for the Matlab plugin you can examine the example ".m" files.
+Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document.
 
 Example data to play around with can be found [here for SOFI](http://sushi.chem.kuleuven.be/SOFI.tif.zip) (or [here](http://134.58.38.13/SOFI.tif.zip)) and [here for localization microscopy](http://sushi.chem.kuleuven.be/PALM.tif.zip) (or [here](http://134.58.38.13/PALM.tif.zip)). The SOFI data shows a Hek cell transfected using Lyn-Dronpa, while the localization data shows a fixed HeLa cell that expressed Lyn-Dendra2.
 
