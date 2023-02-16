@@ -3,15 +3,15 @@ README
 
 Welcome to the source code for Localizer, which implements various kinds of analyses related to superresolution microscopy. The routines were lovingly hand-crafted by Peter Dedecker (<peter.dedecker@chem.kuleuven.be>), who currently resides at the [Department of Chemistry](http://www.chem.kuleuven.be/department/department_en.html) at the [University of Leuven](http://www.kuleuven.be). This repository is available at at [https://bitbucket.org/pdedecker/localizer](https://bitbucket.org/pdedecker/localizer).
 
-A paper on Localizer is now available from the [Journal of Biomedical Optics](http://spie.org/x866.xml). [Download the paper here](http://sushi.chem.kuleuven.be/LocalizerJBO.pdf) after checking that you have access to the journal. Please cite this paper if Localizer turns out to be useful for your research.
+A paper on Localizer is now available from the [Journal of Biomedical Optics](http://spie.org/x866.xml). [Download the paper here](https://bitbucket.org/dedeckerlab/localizersupportfiles/src/master/LocalizerJBO/) after checking that you have access to the journal. Please cite this paper if Localizer turns out to be useful for your research.
 
-*The fastest way to get started with Localizer is to [download the ready-made binaries appropriate for your platform](http://sushi.chem.kuleuven.be/LocalizerForIgor.zip). This is all that you need to use the software*. If you have trouble accessing that link then try [this one](http://134.58.38.13/LocalizerForIgor.zip).
+*The fastest way to get started with Localizer is to [download the ready-made binaries appropriate for your platform](https://bitbucket.org/dedeckerlab/localizersupportfiles/src/master/LocalizerForIgor/). This is all that you need to use the software*.
 
-At present there are binaries for [Igor Pro](http://www.wavemetrics.com) and for [Matlab](http://www.themathworks.com). The Matlab files can be downloaded [here](http://sushi.chem.kuleuven.be/svn/Localizer).
+At present there are binaries for [Igor Pro](http://www.wavemetrics.com) and for [Matlab](http://www.themathworks.com). The Matlab files can be downloaded [here](https://bitbucket.org/dedeckerlab/localizersupportfiles/src/master/svnLocalizer/).
 
 If you are unfamiliar with programming the Igor Pro plugin will be the best option, since it comes with a complete graphical interface to use for analyzing your PALM/STORM or SOFI data, including visualization, clustering analysis, drift correction, etc. Igor Pro is commercial software, but [a free 30-day trial version is available for direct download](http://www.wavemetrics.com/support/demos.htm). Localizer will function without restrictions during the trial period. After the trial period Localizer will continue to function normally, but you will be unable to save the data or figures it generates.
 
-Instructions are provided on the [same website](http://sushi.chem.kuleuven.be/svn/Localizer). For the Igor plugin, take a look at the "Getting Started" document.
+Instructions are provided on the [same website](https://bitbucket.org/dedeckerlab/localizersupportfiles/src/master/svnLocalizer/). For the Igor plugin, take a look at the "Getting Started" document.
 
 Example data to play around with can be found [here for SOFI](http://sushi.chem.kuleuven.be/SOFI.tif.zip) (or [here](http://134.58.38.13/SOFI.tif.zip)) and [here for localization microscopy](http://sushi.chem.kuleuven.be/PALM.tif.zip) (or [here](http://134.58.38.13/PALM.tif.zip)). The SOFI data shows a Hek cell transfected using Lyn-Dronpa, while the localization data shows a fixed HeLa cell that expressed Lyn-Dendra2.
 
